@@ -1,0 +1,14 @@
+Cf. http://www.di.unipi.it/~scordino/pai/pai.html
+Glue module: syllogistic/restricted English to Predicate Calculus
+
+linking statements
+SOME __ IS-A __
+ALL __ IS-A __
+SOME __ IS-NOT-A __
+ALL __ IS-NOT-A __
+
+SOME __ HAS-PROPERTY __
+ALL __ HAS-PROPERTY __
+SOME __ DOESN'T-HAVE-PROPERTY __
+ALL __ DOESN'T-HAVE-PROPERTY __
+

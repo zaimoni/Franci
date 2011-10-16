@@ -1,0 +1,144 @@
+UML notes
+ [3.2]
+* connection types
+** Connection (line)
+** Containment 
+** Visual attachment
+
+* graphical constructs
+** Icons
+** 2-Symbols
+** Paths
+** strings
+
+Stereotypes are always of type Class
+
+These features never inherit
+** isRoot, isLeaf, isAbstract (by definition)
+** name [must be unique]
+
+Dependency relationship
+* Abstraction [2.5.2.1]: relates two elements or sets of
+elements that represent the same concept at different levels of abstraction or from
+different viewpoints.  Supplier is high-level, client is low-level
+** Attribute: MappingExpression
+** Stereotypes
+*** Derivation: Client is computable from the supplier
+*** Realization: Client implements specification of supplier
+*** Refinement: Client is a more detailed view of the supplier
+*** Trace: data representations in supplier and client models are actually for the same concept
+
+*Binding: supplier is template, client is instantiation
+** Association:
+*** argument: ordered list of TemplateArgument
+
+
+Classifier relationship
+* Artifact [2.5.2.2]: An Artifact represents a physical piece of information that is used or produced by a
+software development process. Examples of Artifacts include models, source files,
+scripts, and binary executable files. An Artifact may constitute the implementation of a
+deployable component.
+** Association: implementation Location: The deployable Component(s) that are implemented by this Artifact.
+** Stereotypes
+*** file: physical file
+**** document:
+**** executable
+**** library
+**** source
+*** table: database table
+
+Association: defines a semantic relationship between classifiers; set of unique tuples
+* Attribute: name (must be unique)
+* Association: connection [AssociationEnd is a fancy name for tuple coordinate constraint; 
+Classifiers involved are related by the participant rolename association.] 
+* Stereotype: implicit (not formalized)
+* Standard constraints: xor
+* Tagged values: persistence := transitory | persistent
+* Inherited Features: Association is a GeneralizableElement.  Inherited traits
+** connection: same arity, each coordinate's participant class must be a descendant of the participant class in the parent
+
+AssociationClass: both an Association and a Class.
+
+AssociationEnd: defines target end (Classifier) properties of a relationship between an Association and the Classifier
+* Attributes of target class with respect to source
+** aggregation := none
+				 | aggregate [source is part of the target, so none; source can be part of multiple targets]
+				 | composite [source is part of the target, so none; source must be part of only this target]
+** changeability :=	changeable [no restrictions on creation/destruction of links]
+				|	frozen [no links destroyable, no links createable after initialization]
+				|	addOnly [no links destroyable; links creatable anytime]
+** ordering :=	unordered
+			|	ordered
+** isNavigable :=	true | false [can target be reached from source]
+** multiplicity :=	number of times a target instance can be associated with a source instance
+** name
+** targetScope :=	instance
+				|	classifier
+** visiblity :=	public
+			|	protected
+			|	private
+			|	package
+* Assocations
+** qualifier: optional list of Qualifier attributes
+** specification: 0+ Classifiers that specify the Operations that may be applied to an Instance across the AssocationEnd; minimum required interface.
+** participant: designates the Classifier participating in the Association
+** (unnamed): designates the owning Association
+* Stereotypes
+** association [default]
+** global: global value
+** local: local variable
+** parameter: operation/method/procedure parameter
+** self: reference to object that owns operation/action
+
+Attribute: named slot within a Classifier
+* Attributes
+** initialValue: expression stating value of attribute on initialization
+* Associations
+** AssociationEnd: if defined, the AssociationEnd that owns this Attribute (Qualifier, rather than Feature)
+
+BehaviorialFeature: specifies dynamic behavior of a Classifier
+* Attributes
+** IsQuery :=	true | false; true indicates no side effects, false indicates side effects
+** name: unique within Classifier
+* Association
+** parameter := list of parameters for Operation
+* Stereotypes: create/destroy instance of Classifier
+
+Class: Classifier that describes set of Objects sharing a collection of Features, and may realize 0+ Interfaces.
+	All Objects of a Class share BehaviorialFeatures and class-scope attributes.
+* Attributes:
+** isActive := true | false [parallel execution with instantiating thread, or not]
+* Stereotypes
+** auxilliary: supports another Class, often by providing secondary logic or control flow
+** focus: define core logic/control flow
+** implementation: specifies implementation where no object may be of more than one class.  May conform to more than one type.
+** type: does not contain methods, maintain own thread of control, and is not nested.  May have attributes and associations
+* Inheritance
+** isActive: child may be active when parent is passive, but not vice versa
+
+Classifier: describes behaviorial and structural features; GeneralizableElement and Namespace.  Nesting classifiers is neither aggregation nor 
+composition.
+* Associations
+** feature: ordered list of Features owned by the Classifier
+** association: source of AssociationEnd
+** powertypeRange: 0+ Generalizations for which the Classifier is a powertype
+** specifiedend: inciates AssociationEnd for which the Classifier specifies operations that may be applied to instances by traversing the assocation from the other end.
+* Stereotypes
+** metaclass: instances are classes
+** powertype: not only a metaclass, by the instances are siblings marked by the same discriminator.
+** process: represents a heavyweight flow of control
+** thread: represents a lightweight flow of control
+** utility: no instances; a named collection of non-member attributes and operations, all of which are class-scoped
+* Tagged Values
+** persistence: transitory | persistent
+** semantics: specifies meaning
+* Inherited Features
+** AssociationEnd
+** constraint
+** feature
+** generalization/specialization: defines inheritance
+** ownedElement: namespace of parent is available to child, except for private access
+* Uninherited features
+** parameter, powertyperange
+
+[Restart: 2.5.2.11 Comment]

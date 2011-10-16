@@ -1,0 +1,88 @@
+; memmove.azm
+; improvements to the C library functions
+
+; core entry code:
+; push ebp
+; mov ebp, esp
+; push ebx
+
+; core exit code:
+; pop ebx
+; pop ebp
+
+; NOTE: we *cannot* naively optimize out ebp even if there is no stack:
+; Win__ Blue Screen Of Death
+
+; Kenneth Boyd, 4/12/2000
+; _memmove, _memcpy
+; memmove and memcpy have the same specification, except that memmove guarantees not
+; to corrupt the image when the source and destination blocks overlap.
+; On a 75Mhz pentium, it turns out the speed difference is not measurable...so
+; define the two to be the same.
+
+; The base code dates from Franci V0.1
+
+; NOTE: the only register changed by calling this function is eax.
+
+section _TEXT USE32 class=code
+global _memcpy
+global _memmove
+
+%define dest DWORD [ebp+8]
+%define src DWORD [ebp+12]
+%define count DWORD [ebp+16]
+
+_memcpy:
+_memmove:
+   ;	
+   ; void* memmove(void* dest, const void* src, size_t count)
+   ; void* memcpy(void* dest, const void* src, size_t count)
+   ;	
+; core entry code
+	push ebp
+	mov  ebp,esp
+	pushf
+	push esi
+	push edi
+
+; body
+
+	mov esi, src	; esi:=src
+	mov edi, dest	; edi:=dest
+	cmp esi, edi
+	je Exit
+	push ecx
+
+	mov ecx, count	; ecx:=count
+
+	jl Backwards
+
+	cld
+	jmp SHORT Cleanup
+
+Backwards:
+	std
+	add esi, ecx
+	add edi, ecx
+	dec esi
+	dec edi
+
+Cleanup:
+	rep movsb 
+	pop ecx
+Exit:
+	pop edi
+	pop esi
+	popf
+	mov	eax, dest	; eax=:retval:=dest
+; core exit code
+	pop ebp
+	ret 
+
+; NOTE: end memmove(,,), memcpy(,,)
+
+%undef count
+%undef src
+%undef dest
+
+

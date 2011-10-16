@@ -1,0 +1,7 @@
+VFT structs:
+*Clause2: bypassed (inessential, breaks Codewarrior)
+*ClauseN: OK
+*Phrase1: OK
+*PhraseN: OK
+*MetaConnective: Breaks Codewarrior, critical [fixed]
+*Phrase2: Breaks CodeWarrior, inessential: bypass

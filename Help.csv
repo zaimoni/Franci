@@ -1,0 +1,94 @@
+HelpEntry	DataID	Datum	
+clean logfile	Usage	clean logfile
+	Arity	0
+	Description	Franci removes unused reasoning from the logfile at Franci.htm.
+Constraint	Usage	constraint: [statement]
+	Arity	1
+	Description	Franci adds the statement to the current situation.\n'Constraint: [statement]' causes terse logging.
+end logfile	Usage	end logfile
+	Arity	0
+	Description	Franci closes the logfile at Franci.htm.
+evaluate	Usage	evaluate [expression]
+		what is [expression]
+	Arity	1
+	Description	Franci evaluates the specified expression.
+		'Evaluate [expression]' and 'What is [expression]' cause terse logging.
+evaluate situation	Usage	evaluate situation
+	Arity	0
+	Description	Franci evaluates the current situation.
+		'Evaluate situation' causes terse logging.
+new situation	Usage	new situation
+	Arity	0
+	Description	Franci starts a new situation.  The prior one is forgotten.
+new variable	Usage	new variable: [quantified variables]
+	Arity	1
+	Description	Declare variables with specified domain and quantification.
+no more variables	Usage	no more variables
+	Arity	0
+	Description	Franci disables further explicit and implicit declaration of variables in the current situation.
+start logfile	Usage	start logfile
+	Arity	1
+	Description	Franci starts a logfile at Franci.htm.  She truncates any previous logfile.
+use script	Usage	use script [filename]
+	Arity	1
+	Description	Franci reads in and executes the commands in the file referenced by filename.
+what if	Usage	what if [expression]
+	Arity	1
+	Description	Franci considers how the situation would evaluate if she assumes [expression].  She also checks for proof-by-contradictions.
+		'what if TRUE' will elicit checking for proof-by-contradictions on the current situation	 after evaluating it.
+		'What if [expression]' causes terse logging.
+what is	AliasFor	evaluate
+auxilliary connectives	Usage	A IMPLIES B
+		A NIMPLIES B
+	Arity	2
+	Description	Franci automatically rewrites these reserved words to their definitions.
+		A IMPLIES B is defined as NOT A OR B
+		A NIMPLIES B is defined as A AND NOT B
+NOT	Usage	NOT A
+	Arity	1
+	Description	Reserved word denoting logical negation.
+		NOT TRUE is FALSE
+		NOT FALSE is TRUE
+		NOT UNKNOWN is UNKNOWN
+		NOT CONTRADICTION is CONTRADICTION
+IMPLIES	AliasFor	auxilliary connectives
+NIMPLIES	AliasFor	auxilliary connectives
+infix connectives	Usage	A AND B
+		A OR B
+		A IFF B
+		A XOR B
+		A NXOR B
+		A NIFF B
+		A NOR B
+		A NAND B
+	Arity	2
+	Description	AND, OR, and IFF are defined as usual.
+		A XOR B is defined as A IFF NOT B
+		The A N___ B forms are defined as NOT (A __ B)
+prefix connectives	Usage	AND(A,B,...)
+		OR(A,B,...)
+		IFF(A,B,...)
+		XOR(A,B,...)
+		NXOR(A,B,...)
+		NIFF(A,B,...)
+		NOR(A,B,...)
+		NAND(A,B,...)
+	Arity	2 or more
+	Description	AND, OR, IFF are defined as usual.
+		XOR ("exclusive or") is defined as usual for arity 3 or higher.
+		XOR(A,B) is defined as IFF(A,NOT B)
+		The N___(A,B,...) forms are defined as NOT ___(A,B,...)
+equality predicates	Usage	ALLEQUAL(A,B,...)
+		ALLDISTINCT(A,B,...)
+		A DISTINCTFROMALLOF B,C,...
+		A EQUALTOONEOF B,C,...
+		NOTALLDISTINCT(A,B,...)
+		NOTALLEQUAL(A,B,...)
+	Arity	2 or more
+	Description	ALLEQUAL: all arguments are equal
+		ALLDISTINCT: all arguments are distinct (pairwise not equal)
+		DISTINCTFROMALLOF: A is distinct from all of the other arguments
+		EQUALTOONEOF: A is equal to at least one of the other arguments
+		NOTALLDISTINCT: at least one pair of arguments is equal
+		NOTALLEQUAL: at least one pair of arguments is distinct
+

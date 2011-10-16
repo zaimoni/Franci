@@ -1,0 +1,52 @@
+// Regression testing
+start logfile
+
+// logic parsing (had some problems here)
+evaluate ALLDISTINCT(1,2,X)
+evaluate 1 EQUALTOONEOF 2,X
+evaluate 1 DISTINCTFROMALLOF 2,X
+evaluate NOTALLDISTINCT(1,2,X)
+evaluate IFF(TRUE,X,Y)
+evaluate IFF(FALSE,X,Y)
+evaluate XOR(TRUE,X,Y)
+evaluate XOR(FALSE,X,Y)
+evaluate NIFF(TRUE,X,Y)
+evaluate NIFF(FALSE,X,Y)
+evaluate NXOR(TRUE,X,Y)
+evaluate NXOR(FALSE,X,Y)
+
+// exercise StdMultiplication
+evaluate 0&middot;X
+
+// exercise Phrase2.cxx
+// arithmetic parsing
+evaluate 1+1&middot;2
+evaluate 1+(1&middot;2)
+evaluate 1+1&middot;2<sup>-1</sup>
+evaluate 1+(1&middot;2<sup>-1</sup>)
+
+// Perm/Comb parsing
+evaluate PERM(10,2)
+evaluate Perm(10,2)
+evaluate COMB(10,2)
+evaluate Comb(10,2)
+
+// Exercise Phrase1.cxx
+evaluate FACTORIAL(5)
+
+// Exercise Clause2.cxx
+evaluate X IMPLIES Y
+evaluate X NIMPLIES Y
+evaluate X AND Y
+evaluate X OR Y
+evaluate X IFF Y
+evaluate X XOR Y
+evaluate X NXOR Y
+evaluate X NIFF Y
+evaluate X NOR Y
+evaluate X NAND Y
+evaluate X IFF Y IFF Z
+evaluate (X IFF Y) IFF Z
+evaluate X IFF (Y IFF Z)
+
+end logfile

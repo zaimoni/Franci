@@ -1,0 +1,18 @@
+Simple sentences representation
+
+CLAUSE(Subject,Verb)
+CLAUSE(Subject,Verb,DirectObject)
+CLAUSE(Subject,Verb,DirectObject,IndirectObject)
+
+N-ary (2-4)
+Verb controls arity
+
+Need to declare vocabulary....
+* NOUN(..., language)
+* INTRANSVERB(..., language)
+* DIRECTOBJECTVERB(..., language)
+* INDIRECTOBJECTVERB(...,...,language)
+
+Ok...consider proper classes NOUN, INTRANSVERB, DIRECTOBJECTVERB, INDIRECTOBJECTVERB
+
+Will also need SoundEx algorithm to crunch misspellings....

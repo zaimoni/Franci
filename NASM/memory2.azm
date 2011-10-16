@@ -1,0 +1,71 @@
+; memory2.azm
+; improvements to the memory manager functions
+
+; core entry code:
+; push ebp
+; mov ebp, esp
+; push ebx
+
+; core exit code:
+; pop ebx
+; pop ebp
+
+; NOTE: we *cannot* naively optimize out ebp even if there is no stack:
+; Win__ Blue Screen Of Death
+
+; Kenneth Boyd, 4/13/2000
+; _strcpy
+
+section _TEXT USE32 class=code
+
+global @OnePassInsertSort$qpcui
+
+%define OffsetIntoPtrIndex DWORD [ebp+8]
+%define CurrIdx DWORD [ebp+12]
+
+@OnePassInsertSort$qpcui:
+	;
+	; void OnePassInsertSort(char* OffsetIntoPtrIndex, size_t CurrIdx)
+	;
+; core entry code
+	push ebp
+	mov  ebp,esp
+
+	mov ecx, CurrIdx
+; 171  : 	while(	2<=CurrIdx
+; 172  : 		  && reinterpret_cast<size_t*>(OffsetIntoPtrIndex)[0]
+; 173  : 			>reinterpret_cast<size_t*>(OffsetIntoPtrIndex-VRPtrManagerRecordSize)[0])
+	cmp ecx, 2
+	jb Exit
+	push ebx
+
+	dec ecx		; change origin: now CurrIdx-1, and we can use <=1 iff <0 to justify LOOP
+	mov ebx, DWORD OffsetIntoPtrIndex
+Restart:
+	mov eax, DWORD [ebx-8]
+	cmp DWORD [ebx], eax
+	jbe Exit2
+;	this sets eax to ebx, and resets ebx to ebx-8 i.e. OffsetIntoPtrIndex-VRPtrManagerRecordSize
+	mov eax, ebx
+	sub ebx, 8
+;	ebx, eax point to 8-byte blocks
+	xchg esi, [eax]
+	xchg edx, [eax+4]
+	xchg esi, [ebx]
+	xchg edx, [ebx+4]
+	xchg esi, [eax]
+	xchg edx, [eax+4]
+	loop Restart
+
+Exit2
+	pop ebx
+Exit:		
+; core exit code
+	pop ebp
+	ret 
+
+%undef OffsetIntoPtrIndex
+%undef CurrIdx
+
+; NOTE: void OnePassInsertSort(char* OffsetIntoPtrIndex, size_t CurrIdx)
+

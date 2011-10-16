@@ -1,0 +1,222 @@
+[Franci: want a "token" that extends UnparsedText by handling file/line data]
+[Franci: shlex roughly corresponds to FlatFile]
+
+5.20.2 shlex Objects 
+A shlex instance has the following methods: 
+
+get_token( ) 
+Return a token. If tokens have been stacked using push_token(), pop a token off the stack. Otherwise, read one from 
+the input stream. If reading encounters an immediate end-of-file, self.eof is returned (the empty string ('') 
+in non-POSIX mode, and None in POSIX mode). 
+
+push_token( str) 
+Push the argument onto the token stack. 
+
+read_token( ) 
+Read a raw token. Ignore the pushback stack, and do not interpret source requests. (This is not ordinarily a useful 
+entry point, and is documented here only for the sake of completeness.) 
+
+sourcehook( filename) 
+When shlex detects a source request (see source below) this method is given the following token as argument, and 
+expected to return a tuple consisting of a filename and an open file-like object. 
+Normally, this method first strips any quotes off the argument. If the result is an absolute pathname, or there was 
+no previous source request in effect, or the previous source was a stream (e.g. sys.stdin), the result is left alone. 
+Otherwise, if the result is a relative pathname, the directory part of the name of the file immediately before it on 
+the source inclusion stack is prepended (this behavior is like the way the C preprocessor handles #include "file.h"). 
+
+The result of the manipulations is treated as a filename, and returned as the first component of the tuple, with open() 
+called on it to yield the second component. (Note: this is the reverse of the order of arguments in instance 
+initialization!) 
+
+This hook is exposed so that you can use it to implement directory search paths, addition of file extensions, and 
+other namespace hacks. There is no corresponding `close' hook, but a shlex instance will call the close() method of 
+the sourced input stream when it returns EOF. 
+
+For more explicit control of source stacking, use the push_source() and pop_source() methods. 
+
+push_source( stream[, filename]) 
+Push an input source stream onto the input stack. If the filename argument is specified it will later be available 
+for use in error messages. This is the same method used internally by the sourcehook method. New in version 2.1. 
+
+pop_source( ) 
+Pop the last-pushed input source from the input stack. This is the same method used internally when the lexer 
+reaches EOF on a stacked input stream. New in version 2.1. 
+
+error_leader( [file[, line]]) 
+This method generates an error message leader in the format of a Unix C compiler error label; the format 
+is '"%s", line %d: ', where the "%s" is replaced with the name of the current source file and the "%d" with 
+the current input line number (the optional arguments can be used to override these). 
+
+This convenience is provided to encourage shlex users to generate error messages in the standard, parseable format 
+understood by Emacs and other Unix tools. 
+
+Instances of shlex subclasses have some public instance variables which either control lexical analysis or can be used 
+for debugging: 
+
+
+commenters 
+The string of characters that are recognized as comment beginners. All characters from the comment beginner to end 
+of line are ignored. Includes just "#" by default. 
+
+wordchars 
+The string of characters that will accumulate into multi-character tokens. By default, includes all ASCII alphanumerics 
+and underscore. 
+
+whitespace 
+Characters that will be considered whitespace and skipped. Whitespace bounds tokens. By default, includes space, tab, 
+linefeed and carriage-return. 
+
+escape 
+Characters that will be considered as escape. This will be only used in POSIX mode, and includes just "\" by default. 
+New in version 2.3. 
+
+quotes 
+Characters that will be considered string quotes. The token accumulates until the same quote is encountered again (thus, 
+different quote types protect each other as in the shell.) By default, includes ASCII single and double quotes. 
+
+escapedquotes 
+Characters in quotes that will interpret escape characters defined in escape. This is only used in POSIX mode, and 
+includes just """ by default. New in version 2.3. 
+
+whitespace_split 
+If True, tokens will only be split in whitespaces. This is useful, for example, for parsing command lines with shlex, 
+getting tokens in a similar way to shell arguments. New in version 2.3. 
+
+infile 
+The name of the current input file, as initially set at class instantiation time or stacked by later source requests. 
+It may be useful to examine this when constructing error messages. 
+
+instream 
+The input stream from which this shlex instance is reading characters. 
+
+source 
+This member is None by default. If you assign a string to it, that string will be recognized as a lexical-level inclusion 
+request similar to the "source" keyword in various shells. That is, the immediately following token will opened as 
+a filename and input taken from that stream until EOF, at which point the close() method of that stream will be called 
+and the input source will again become the original input stream. Source requests may be stacked any number of levels deep. 
+
+debug 
+If this member is numeric and 1 or more, a shlex instance will print verbose progress output on its behavior. If you need 
+to use this, you can read the module source code to learn the details. 
+
+lineno 
+Source line number (count of newlines seen so far plus one). 
+
+token 
+The token buffer. It may be useful to examine this when catching exceptions. 
+
+eof 
+Token used to determine end of file. This will be set to the empty string (''), in non-POSIX mode, and to None 
+in POSIX mode. New in version 2.3. 
+
+=======
+
+5.19.1 Cmd Objects 
+A Cmd instance has the following methods: 
+
+
+cmdloop( [intro]) 
+
+Repeatedly issue a prompt, accept input, parse an initial prefix off the received input, and dispatch to action methods, 
+passing them the remainder of the line as argument. 
+
+The optional argument is a banner or intro string to be issued before the first prompt (this overrides the intro class 
+member). 
+
+If the readline module is loaded, input will automatically inherit bash-like history-list editing (e.g. Control-P scrolls 
+back to the last command, Control-N forward to the next one, Control-F moves the cursor to the right non-destructively, Control-B moves the cursor to the left non-destructively, etc.). 
+
+An end-of-file on input is passed back as the string 'EOF'. 
+
+An interpreter instance will recognize a command name "foo" if and only if it has a method do_foo(). As a special case, 
+a line beginning with the character "?" is dispatched to the method do_help(). As another special case, a line beginning 
+with the character "!" is dispatched to the method do_shell() (if such a method is defined). 
+
+If completion is enabled, completing commands will be done automatically, and completing of commands args is done by 
+calling complete_foo() with arguments text, line, begidx, and endidx. text is the string prefix we are attempting to 
+match: all returned matches must begin with it. line is the current input line with leading whitespace removed, begidx 
+and endidx are the beginning and ending indexes of the prefix text, which could be used to provide different completion 
+depending upon which position the argument is in. 
+
+All subclasses of Cmd inherit a predefined do_help(). This method, called with an argument 'bar', invokes the 
+corresponding method help_bar(). With no argument, do_help() lists all available help topics (that is, all commands 
+with corresponding help_*() methods), and also lists any undocumented commands. 
+
+
+onecmd( str) 
+
+Interpret the argument as though it had been typed in response to the prompt. This may be overridden, but should not 
+normally need to be; see the precmd() and postcmd() methods for useful execution hooks. The return value is a flag 
+indicating whether interpretation of commands by the interpreter should stop. 
+
+emptyline( ) 
+
+Method called when an empty line is entered in response to the prompt. If this method is not overridden, it repeats 
+the last nonempty command entered. 
+
+default( line) 
+
+Method called on an input line when the command prefix is not recognized. If this method is not overridden, it prints 
+an error message and returns. 
+
+completedefault( text, line, begidx, endidx) 
+
+Method called to complete an input line when no command-specific complete_*() method is available. By default, it 
+returns an empty list. 
+
+precmd( line) 
+
+Hook method executed just before the command line line is interpreted, but after the input prompt is generated and 
+issued. This method is a stub in Cmd; it exists to be overridden by subclasses. The return value is used as the command 
+which will be executed by the onecmd() method; the precmd() implementation may re-write the command or simply return line 
+unchanged. 
+
+postcmd( stop, line) 
+Hook method executed just after a command dispatch is finished. This method is a stub in Cmd; it exists to be overridden 
+by subclasses. line is the command line which was executed, and stop is a flag which indicates whether execution will be 
+terminated after the call to postcmd(); this will be the return value of the onecmd() method. The return value of this 
+method will be used as the new value for the internal flag which corresponds to stop; returning false will cause 
+interpretation to continue. 
+
+preloop( ) 
+Hook method executed once when cmdloop() is called. This method is a stub in Cmd; it exists to be overridden by 
+subclasses. 
+
+postloop( ) 
+Hook method executed once when cmdloop() is about to return. This method is a stub in Cmd; it exists to be overridden 
+by subclasses. 
+
+Instances of Cmd subclasses have some public instance variables: 
+
+prompt 
+The prompt issued to solicit input. 
+
+identchars 
+The string of characters accepted for the command prefix. 
+
+lastcmd 
+The last nonempty command prefix seen. 
+
+intro 
+A string to issue as an intro or banner. May be overridden by giving the cmdloop() method an argument. 
+
+doc_header 
+The header to issue if the help output has a section for documented commands. 
+
+misc_header 
+The header to issue if the help output has a section for miscellaneous help topics (that is, there are help_*() 
+methods without corresponding do_*() methods). 
+
+undoc_header 
+The header to issue if the help output has a section for undocumented commands (that is, there are do_*() methods 
+without corresponding help_*() methods). 
+
+ruler 
+The character used to draw separator lines under the help-message headers. If empty, no ruler line is drawn. It 
+defaults to "=". 
+
+use_rawinput 
+A flag, defaulting to true. If true, cmdloop() uses raw_input() to display a prompt and read the next command; 
+if false, sys.stdout.write() and sys.stdin.readline() are used. (This means that by importing readline, on systems 
+that support it, the interpreter will automatically support Emacs-like line editing and command-history keystrokes.) 
+

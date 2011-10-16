@@ -1,0 +1,59 @@
+; strlen.azm
+; improvements to the C library functions
+
+; core entry code:
+; push ebp
+; mov ebp, esp
+; push ebx
+
+; core exit code:
+; pop ebx
+; pop ebp
+
+; NOTE: we *cannot* naively optimize out ebp even if there is no stack:
+; Win__ Blue Screen Of Death
+
+; Kenneth Boyd, 4/12/2000
+; _strlen
+
+; NOTE: the only register changed by calling this function is eax.
+section _TEXT USE32 class=code
+
+global _strlen
+
+%define s DWORD [ebp+8]
+
+_strlen:
+	;
+	; size_t strlen(const char* s);
+	;
+; core entry code
+	push ebp
+	mov  ebp,esp
+	pushf
+; body
+	push edi
+	push ecx
+
+	mov edi, s
+	mov ecx, -1
+	xor al,al
+	cld
+
+	repne scasb
+
+	mov eax, edi
+	sub eax, s
+	dec eax
+
+	pop ecx
+	pop edi
+; core exit code
+	popf
+	pop ebp
+	ret 
+
+%undef s
+
+; NOTE: end strlen(,,)
+

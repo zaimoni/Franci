@@ -1,0 +1,59 @@
+; memset.azm
+; improvements to the C library functions
+
+; core entry code:
+; push ebp
+; mov ebp, esp
+; push ebx
+
+; core exit code:
+; pop ebx
+; pop ebp
+
+; NOTE: we *cannot* naively optimize out ebp even if there is no stack:
+; Win__ Blue Screen Of Death
+
+; Kenneth Boyd, 4/12/2000
+; _memset
+
+; NOTE: the only register changed by calling this function is eax.
+section _TEXT USE32 class=code
+
+global _memset
+
+%define s DWORD [ebp+8]
+%define c DWORD [ebp+12]
+%define n DWORD [ebp+16]
+
+_memset:
+	;
+	; void* memset(void* s, int c, size_t n);
+	;
+; core entry code
+	push ebp
+	mov  ebp,esp
+; body
+	pushf
+	push edi
+	push ecx
+
+	mov edi, s
+	mov eax, c
+	mov ecx, n
+
+	rep stosb
+
+	pop ecx
+	pop edi
+	popf
+; core exit code
+	mov eax, s
+	pop ebp
+	ret 
+
+%undef n
+%undef c
+%undef s
+
+; NOTE: end memset(,,)
+
