@@ -1,0 +1,554 @@
+// Zaimoni.STL/bits/limits
+// internal stuff that would otherwise clutter the main file
+// do *not* include this directly
+// include from namespace zaimoni
+
+#ifndef ZAIMONI_STL_BITS_LIMITS
+#define ZAIMONI_STL_BITS_LIMITS 1
+
+namespace detail {
+
+// low-level type to remove type-punning
+union ldouble_ushort
+{
+	long double _fp;
+	unsigned short _ushort_array[sizeof(long double)/sizeof(unsigned short)];
+};
+
+// cross-sign modulo arithmetic
+template<typename T>
+typename boost::enable_if<boost::is_same<unsigned long,T>, unsigned long>::type
+crosssign_modulo(typename qualitative_computation<T>::signed_type a,T m)
+{
+	T Tmp;
+	if (0>a)
+		{
+		if (m<=LONG_MAX)
+			{
+			Tmp = a%(signed long)(m);
+			}
+		else{
+			Tmp = m-(T)(-a);
+			};
+		}
+	else{
+		Tmp = (T)a%m;
+		};
+	return Tmp;
+}
+
+
+// low-level diagnostics
+
+// GCC has useful extensions here for directly counting trailing zeros
+// behavior at 32-bit
+// __builtin_ctz(unsigned int): direct to assembly
+// __builtin_ctz(unsigned long): direct to assembly
+// __builtin_ctz(unsigned long long): function call
+template<typename T>
+#ifdef __GNUC__
+inline
+#endif
+typename boost::enable_if<boost::is_same<long double,T>, unsigned int>::type
+trailing_zero_bits(const T& x)
+{
+	//! \todo: start little-endian/big-endian preprocessing; current code is little-endian
+#ifdef __GNUC__
+	// OK even in 32-bit code (consider inlining)
+	 return __extension__ __builtin_ctzll(reinterpret_cast<const unsigned long long*>(&x)[0]);
+#else
+	unsigned int TrailingBits = 0;
+	const unsigned char* Test = reinterpret_cast<const unsigned char*>(&x);
+	size_t Idx = 0;
+	while('\x00'==Test[Idx])
+		{
+		TrailingBits += CHAR_BIT;
+		if (8<=++Idx) return 8*CHAR_BIT;
+		};
+	unsigned char Tmp = Test[Idx];
+	while(!(Tmp & '\x01'))
+		{
+		++TrailingBits;
+		Tmp>>=1;
+		};
+	return TrailingBits;
+#endif
+}
+
+template<typename T>
+typename boost::enable_if<boost::is_same<long double,T>, unsigned int>::type
+trailing_zero_bits(const T& x, bool& SecondBitIsOne)
+{
+	//! \todo: start little-endian/big-endian preprocessing; current code is little-endian
+#ifdef __GNUC__
+	// OK even in 32-bit code
+	 __extension__ const unsigned long long* Test = reinterpret_cast<const unsigned long long*>(&x);
+	unsigned int TrailingBits = __builtin_ctzll(Test[0]);
+	if (64>TrailingBits) SecondBitIsOne = (Test[0] & (2<<(TrailingBits)));
+	return TrailingBits;
+#else
+	unsigned int TrailingBits = 0;
+	const unsigned char* Test = reinterpret_cast<const unsigned char*>(&x);
+	SecondBitIsOne = false;
+	size_t Idx = 0;
+	while('\x00'==Test[Idx])
+		{
+		TrailingBits += CHAR_BIT;
+		if (8<=++Idx) return 8*CHAR_BIT;
+		};
+	unsigned char Tmp = Test[Idx];
+	while(!(Tmp & '\x01'))
+		{
+		++TrailingBits;
+		Tmp>>=1;
+		};
+	SecondBitIsOne = Tmp & '\x02';
+	return TrailingBits;
+#endif
+}
+
+template<typename T>
+typename boost::enable_if<boost::is_same<long double,T>, unsigned int>::type
+this_product_will_not_overflow(const T& x, const T& y)
+{	//! \return the maximum exponent that the product can accept without overflowing
+	if (0.0l==x) return UINT_MAX;
+	if (0.0l==y) return UINT_MAX;
+	signed int x_exponent = _exponent_of(x);
+	signed int y_exponent = _exponent_of(y);
+	signed int correction = (2.0l>force_exponent(x,0)*force_exponent(y,0)) ? 0 : 1;
+	signed int expected_exponent = x_exponent+y_exponent+correction;
+	if (std::numeric_limits<long double>::max_exponent>expected_exponent)
+		return std::numeric_limits<long double>::max_exponent-expected_exponent;
+	return 0;
+}
+
+template<typename T>
+typename boost::enable_if<boost::is_same<long double,T>, unsigned int>::type
+this_product_will_not_underflow(const T& x, const T& y)
+{	//! \return the maximum exponent that the product can accept without underflowing
+	if (0.0l==x) return UINT_MAX;
+	if (0.0l==y) return UINT_MAX;
+	signed int x_exponent = _exponent_of(x);
+	signed int y_exponent = _exponent_of(y);
+	signed int correction = (2.0l>force_exponent(x,0)*force_exponent(y,0)) ? 0 : 1;
+	signed int expected_exponent = x_exponent+y_exponent+correction;
+	if (std::numeric_limits<long double>::min_exponent-2<expected_exponent)
+		return expected_exponent-(std::numeric_limits<long double>::min_exponent-2);
+	return 0;
+}
+
+template<typename T>
+typename boost::enable_if<boost::is_same<long double,T>, bool>::type
+safe_product(const T& x, const T& y)
+{	//! \return true iff the product neither overflows nor underflows
+	if (   this_product_will_not_overflow(x,y)
+		&& this_product_will_not_underflow(x,y))
+		return true;
+	return false;
+}
+
+template<typename T>
+typename boost::enable_if<boost::is_same<long double,T>, unsigned int>::type
+this_product_overflows(const T& x, const T& y)
+{	//! \return how much the exponent overflows
+	if (0.0l==x) return 0;
+	if (0.0l==y) return 0;
+	signed int x_exponent = _exponent_of(x);
+	signed int y_exponent = _exponent_of(y);
+	signed int correction = (2.0l>force_exponent(x,0)*force_exponent(y,0)) ? 0 : 1;
+	signed int expected_exponent = x_exponent+y_exponent+correction;
+	if (std::numeric_limits<long double>::max_exponent<=expected_exponent)
+		return (expected_exponent-std::numeric_limits<long double>::max_exponent)+1;
+	return 0;
+}
+
+template<typename T>
+typename boost::enable_if<boost::is_same<long double,T>, unsigned int>::type
+this_product_underflows(const T& x, const T& y)
+{	//! \return how much the exponent underflows
+	if (0.0l==x) return 0;
+	if (0.0l==y) return 0;
+	signed int x_exponent = _exponent_of(x);
+	signed int y_exponent = _exponent_of(y);
+	signed int correction = (2.0l>force_exponent(x,0)*force_exponent(y,0)) ? 0 : 1;
+	signed int expected_exponent = x_exponent+y_exponent+correction;
+	if (std::numeric_limits<long double>::min_exponent-2>=expected_exponent)
+		return (std::numeric_limits<long double>::min_exponent-1)-expected_exponent;
+	return 0;
+}
+
+// don't want to drag in Arithmetic.hpp here for std::abs
+template<typename T>
+typename boost::enable_if<boost::is_same<long double,T>, unsigned long>::type
+this_power_will_not_overflow(T x)
+{
+	signed int x_exponent = _exponent_of(x);
+	if (0>x_exponent || 1.0l==x || -1.0l==x) return ULONG_MAX;
+	return (std::numeric_limits<long double>::max_exponent)/(x_exponent+1);
+}
+
+template<typename T>
+typename boost::enable_if<boost::is_same<long double,T>, unsigned long>::type
+this_power_will_overflow(T x)
+{
+	signed int x_exponent = _exponent_of(x);
+	if (0>x_exponent || 1.0l==x || -1.0l==x) return 0;
+	return std::numeric_limits<long double>::max_exponent/x_exponent+1;
+}
+
+template<typename T>
+typename boost::enable_if<boost::is_same<long double,T>, unsigned long>::type
+this_power_will_not_underflow(T x)
+{
+	signed int x_exponent = _exponent_of(x);
+	if (0<=x_exponent) return ULONG_MAX;
+	return (std::numeric_limits<long double>::min_exponent-2)/(x_exponent-1);
+}
+
+template<typename T>
+typename boost::enable_if<boost::is_same<long double,T>, unsigned long>::type
+this_power_will_underflow(T x)
+{
+	signed int x_exponent = _exponent_of(x);
+	if (0<=x_exponent) return 0;
+	return (std::numeric_limits<long double>::min_exponent-2)/x_exponent+1;
+}
+
+template<typename T>
+typename boost::enable_if<boost::is_same<long double,T>, bool>::type
+opp_sign_addition_subtractive_cancels(const T& x, const T& y)
+{
+	const signed int x_exponent = _exponent_of(x);
+	const signed int y_exponent = _exponent_of(y);
+	if (x_exponent==y_exponent)
+		return true;
+	const signed int sum_exponent = _exponent_of(x+y);
+	return sum_exponent<min(x_exponent,y_exponent);
+}
+
+// same-sign addition between two numbers with the same exponent is safe if
+// ends in same last bit, and sum exponent is one higher
+// ends in same last bit, and the net sum on the second-to-last bit is 0: 10 10, 00 00, 11 01, or 01 11
+// trailing bits:
+// * zero,1+: take epsilon
+// * zero, zero: need result exponent 1 higher, or 11 01 or 01 11
+// * 1,1: safe
+// * 1,2+: need result exponent 1 higher
+// * 2+,2+: safe
+template<typename T>
+typename boost::enable_if<boost::is_same<long double,T>, bool>::type
+same_sign_addition_has_epsilon(const T& x, const T& y)
+{
+	signed int x_exponent = _exponent_of(x);
+	signed int y_exponent = _exponent_of(y);
+	bool x_second_bit = false;
+	bool y_second_bit = false;
+	signed int x_trailing_zeros = trailing_zero_bits(x,x_second_bit);
+	signed int y_trailing_zeros = trailing_zero_bits(y,y_second_bit);
+	signed int max_exponent = 0;
+	if 		(x_exponent>y_exponent)
+		{
+		y_trailing_zeros -= (x_exponent-y_exponent);
+		if (0>y_trailing_zeros)
+			return true;
+		max_exponent = x_exponent;
+		}
+	else if (x_exponent<y_exponent)
+		{
+		x_trailing_zeros -= (y_exponent-x_exponent);
+		if (0>x_trailing_zeros)
+			return true;
+		max_exponent = y_exponent;
+		}
+	else if (std::numeric_limits<long double>::min_exponent-2==x_exponent)
+		{	// two denormals are always safe
+		return false;
+		}
+	if (0==x_trailing_zeros && 0<y_trailing_zeros) return true;
+	if (0<x_trailing_zeros && 0==y_trailing_zeros) return true;
+	if (1==x_trailing_zeros && 1==y_trailing_zeros) return false;
+	if (2<=x_trailing_zeros && 2<=y_trailing_zeros) return false;
+	long double Tmp = x+y;
+	if (_exponent_of(Tmp)==max_exponent+1) return false;
+	if (1==x_trailing_zeros || 1==y_trailing_zeros) return true;
+
+	// last case: ?1, ?1, exponent increased by 2; 11 01 and 01 11 OK
+	return x_second_bit!=y_second_bit;
+}
+
+template<typename T>
+typename boost::enable_if<boost::is_same<long double,T>, bool>::type
+addition_has_epsilon(const T& x, const T& y)
+{
+	if (0.0l==x || 0.0l==y)
+		return false;
+	if (is_negative(x)!=is_negative(y))
+		return false;
+	return same_sign_addition_has_epsilon(x,y);
+}
+
+template<typename T>
+typename boost::enable_if<boost::is_same<long double,T>, bool>::type
+addition_subtractive_cancels(const T& x, const T& y)
+{
+	if (0.0l==x || 0.0l==y)
+		return false;
+	if (is_negative(x)==is_negative(y))
+		return false;
+	return opp_sign_addition_subtractive_cancels(x,y);
+}
+
+// this version has x preprocessed
+template<typename T>
+typename boost::enable_if<boost::is_same<T,long double>, bool>::type
+_same_sign_addition_has_epsilon(T x, T y, signed int x_exponent, bool x_second_bit, signed int x_trailing_zeros)
+{
+	signed int y_exponent = _exponent_of(y);
+	bool y_second_bit = false;
+	signed int y_trailing_zeros = trailing_zero_bits(y,y_second_bit);
+	signed int max_exponent = 0;
+	if 		(x_exponent>y_exponent)
+		{
+		y_trailing_zeros -= (x_exponent-y_exponent);
+		if (0>y_trailing_zeros)
+			return true;
+		max_exponent = x_exponent;
+		}
+	else if (x_exponent<y_exponent)
+		{
+		x_trailing_zeros -= (y_exponent-x_exponent);
+		if (0>x_trailing_zeros)
+			return true;
+		max_exponent = y_exponent;
+		}
+	else if (alt_numeric_limits<T>::min_exponent==x_exponent)
+		{	// two denormals are always safe
+		return false;
+		}
+	if (0==x_trailing_zeros && 0<y_trailing_zeros) return true;
+	if (0<x_trailing_zeros && 0==y_trailing_zeros) return true;
+	if (1==x_trailing_zeros && 1==y_trailing_zeros) return false;
+	if (2<=x_trailing_zeros && 2<=y_trailing_zeros) return false;
+	T Tmp = x+y;
+	if (_exponent_of(Tmp)==max_exponent+1) return false;
+	if (1==x_trailing_zeros || 1==y_trailing_zeros) return true;
+
+	// last case: ?1, ?1, exponent increased by 2; 11 01 and 01 11 OK
+	return x_second_bit!=y_second_bit;
+}
+
+// safe operation detection
+template<typename T>
+typename boost::enable_if<boost::type_traits::ice_and<boost::is_integral<T>::value, std::numeric_limits<T>::is_signed>, bool>::type
+safe_sum(T x, T y)
+{	//! \return true iff the sum doesn't overflow or underflow
+	if (0<=x) return (y<=qualitative_computation<T>::max-x);
+	if (0<=y) return (x<=qualitative_computation<T>::max-y);
+	return (y>=qualitative_computation<T>::min-x);
+}
+
+template<typename T>
+inline typename boost::enable_if<boost::type_traits::ice_and<boost::is_integral<T>::value, !std::numeric_limits<T>::is_signed>, bool>::type
+safe_sum(T x, T y)
+{	//! \return true iff the sum doesn't overflow or underflow
+	return (y<=qualitative_computation<T>::max-x);
+}
+
+template<typename T>
+typename boost::enable_if<boost::type_traits::ice_and<boost::is_integral<T>::value, std::numeric_limits<T>::is_signed>, bool>::type
+safe_product(T x, T y)
+{	//! \return true iff the sum doesn't overflow or underflow
+	if (0==x) return true;
+	if (0==y) return true;
+	if (0<x)
+		{
+		if (0<y)
+			return (x<=qualitative_computation<T>::max/y);
+		else	// 0<y
+			return (x<=qualitative_computation<T>::min/y);	
+		}
+	else{	// 0>x
+		if (0<y)
+			return (x>=qualitative_computation<T>::min/y);
+		else	// 0<y
+			return (x>=qualitative_computation<T>::max/y);	
+		}
+}
+
+template<typename T>
+inline typename boost::enable_if<boost::type_traits::ice_and<boost::is_integral<T>::value, !std::numeric_limits<T>::is_signed>, bool>::type
+safe_product(T x, T y)
+{	//! \return true iff the sum doesn't overflow or underflow
+	if (0==x) return true;
+	if (0==y) return true;
+	return (x<=qualitative_computation<T>::max/y);
+}
+
+// definitely not for users
+template<typename T>
+typename boost::enable_if<boost::is_floating_point<T>, unsigned int>::type
+mantissa_risky_digits_precomputed(unsigned int LHS_digits,unsigned int RHS_digits)
+{
+	if (   1==LHS_digits
+		|| 1==RHS_digits
+		|| (unsigned int)std::numeric_limits<T>::digits>LHS_digits+RHS_digits)
+		return 0;
+	return (LHS_digits+RHS_digits)-((unsigned int)std::numeric_limits<T>::digits-1);
+}
+
+
+// not for users
+template<typename T>
+inline typename boost::enable_if<boost::is_floating_point<T>, unsigned int>::type
+mantissa_risky_digits(const T& x, const T& y)
+{	return mantissa_risky_digits_precomputed<T>(mantissa_digits(x),mantissa_digits(y));
+}
+
+// not for users
+template<typename T>
+typename boost::enable_if<boost::is_floating_point<T>, bool>::type
+mantissa_safe_product(const T& x, const T& y)
+{	//! \return true iff will not incur epsilon
+	return 0==mantissa_risky_digits(x,y);
+}
+
+// MingW32: calling mantissa_safe_product backfires on object file size
+template<typename T>
+typename boost::enable_if<boost::is_same<long double,T>, bool>::type
+completely_safe_product(const T& x, const T& y)
+{	//! \return true iff the product neither overflows nor underflows, and will not incur epsilon
+	if (   this_product_will_not_overflow(x,y)
+		&& this_product_will_not_underflow(x,y))
+		{
+		unsigned int LHS_digits = mantissa_digits(x);
+		unsigned int RHS_digits = mantissa_digits(y);
+		if (   1==LHS_digits
+			|| 1==RHS_digits
+			|| (unsigned int)std::numeric_limits<long double>::digits>LHS_digits+RHS_digits)
+			return true;
+		}
+	return false;
+}
+
+// normalization adapters
+template<typename T>
+typename boost::enable_if<boost::is_same<long double,T>, long double>::type
+normalize(const T x)
+{
+	if (	_is_infinite_or_NAN(x)
+		||	0==x)
+		return x;
+	return _copysign(1.0l,x);
+}
+
+template<typename T>
+typename boost::enable_if<boost::is_same<T,long double>, long double>::type
+_scalb(T x,const signed long exp)
+{
+	if (0==exp) return x;
+	if (0.0l==x) return x;
+	if (_is_infinite_or_NAN(x)) return x;
+
+	signed short x_exponent = _exponent_of(x);
+
+	if (std::numeric_limits<long double>::max_exponent-x_exponent<=exp)
+		return _copysign(std::numeric_limits<long double>::infinity(),x);
+
+	ldouble_ushort Tmp;
+	Tmp._fp = x;
+
+	if (std::numeric_limits<long double>::min_exponent-2-x_exponent>=exp)
+		{
+		const signed long underflow_exp = exp-(std::numeric_limits<long double>::min_exponent-2-x_exponent);
+		if (-64>=underflow_exp)
+#if 0
+			return _copysign(0.0l,x);	// total loss of significance
+#else	// MingW32 prefers this
+			return (0.0l<x) ? 0.0l : -0.0l;	// total loss of significance
+#endif
+		Tmp._ushort_array[alt_numeric_limits<long double>::exponent_offset_as_short] &= 0x8000;
+		return x*_scalb(1.0l,underflow_exp);	// underflow
+		}
+
+	x_exponent += exp;
+	Tmp._ushort_array[alt_numeric_limits<long double>::exponent_offset_as_short] = ((Tmp._ushort_array[alt_numeric_limits<long double>::exponent_offset_as_short] & 0x8000) | ((x_exponent-(signed short)(std::numeric_limits<long double>::min_exponent-2)) & 0x7FFF));
+	return Tmp._fp;
+}
+
+template<typename T>
+typename boost::enable_if<boost::is_same<T,long double>, long double>::type
+force_exponent(T x,const signed long exp)
+{
+	if (0.0l==x) return x;
+	if (_is_infinite_or_NAN(x)) return x;
+
+	if (std::numeric_limits<long double>::max_exponent<=exp)
+		return _copysign(std::numeric_limits<long double>::infinity(),x);
+
+	ldouble_ushort Tmp;
+	Tmp._fp = x;
+
+	if (std::numeric_limits<long double>::min_exponent-2>=exp)
+		{
+		const signed long underflow_exp = exp-(std::numeric_limits<long double>::min_exponent-2);
+		if (-64>=underflow_exp)
+#if 0
+			return _copysign(0.0l,x);	// total loss of significance
+#else	// MingW32 prefers this
+			return (0.0l<x) ? 0.0l : -0.0l;	// total loss of significance
+#endif
+		Tmp._ushort_array[alt_numeric_limits<long double>::exponent_offset_as_short] &= 0x8000;
+		return x*_scalb(1.0l,underflow_exp);	// underflow
+		}
+
+	Tmp._ushort_array[alt_numeric_limits<long double>::exponent_offset_as_short] = ((Tmp._ushort_array[alt_numeric_limits<long double>::exponent_offset_as_short] & 0x8000) | ((exp-(signed short)(std::numeric_limits<long double>::min_exponent-2)) & 0x7FFF));
+	return Tmp._fp;
+}
+
+template<typename T>
+typename boost::enable_if<boost::is_same<T,long double>, long double>::type
+scaled_product(const T& x, const T& y, signed int scaling_factor)
+{
+	if (0==scaling_factor) return x*y;
+	if (_is_infinite_or_NAN(x)) return x*y;
+	if (_is_infinite_or_NAN(y)) return x*y;
+
+	signed int safe_scale_x = 0;
+	const signed int x_exponent = _exponent_of(x);
+	if (0<scaling_factor)
+		{
+		if (std::numeric_limits<long double>::max_exponent>x_exponent+scaling_factor)
+			return _scalb(x,scaling_factor)*y;
+		safe_scale_x = (std::numeric_limits<long double>::max_exponent-x_exponent)-1;
+		}
+	else{
+		if (std::numeric_limits<long double>::min_exponent-2<x_exponent+scaling_factor)
+			return _scalb(x,scaling_factor)*y;
+		safe_scale_x = (std::numeric_limits<long double>::min_exponent-1-x_exponent);
+		}
+	scaling_factor -= safe_scale_x;
+	return ((0==safe_scale_x) ? x : _scalb(x,safe_scale_x))*_scalb(y,scaling_factor);
+}
+
+template<typename T>
+typename boost::enable_if<boost::is_same<T,long double>, long double>::type
+infinite_geometric_series(T a, T r)
+{
+	if (1.0l<=r) return _copysign(std::numeric_limits<long double>::infinity(),a);
+	if (-1.0l>=r) return std::numeric_limits<long double>::quiet_NaN();
+	return a/(1.0l-r);
+}
+
+template<typename T>
+typename boost::enable_if<boost::is_same<T,long double>, long double>::type
+infinite_geometric_seriesV2(T a, T one_minus_r)
+{
+	if (0.0l>=one_minus_r) return _copysign(std::numeric_limits<long double>::infinity(),a);
+	if (2.0l<=one_minus_r) return std::numeric_limits<long double>::quiet_NaN();
+	return a/one_minus_r;
+}
+
+}
+
+#endif
+

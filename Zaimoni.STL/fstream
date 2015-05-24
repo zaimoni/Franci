@@ -1,0 +1,68 @@
+// fstream
+// header for file convenience functions
+
+#ifndef ZAIMONI_FSTREAM
+#define ZAIMONI_FSTREAM 1 
+
+#include "Logging.h"
+#include <fstream>
+
+template<class T> 
+void CloseAndNULL(T*& TargetFile)
+{	//! \pre TargetFile is a single object with a close() member function
+	assert(NULL!=TargetFile);
+	TargetFile->close();
+	delete TargetFile;
+	TargetFile = NULL;
+}
+
+template<typename T>
+inline void
+_FileOpen(const char* const Filename,const char* const ErrorMessage,T*& TargetFile,std::ios_base::openmode Flags)
+{
+	assert(NULL!=Filename);
+	assert(NULL==TargetFile);
+	TargetFile = new(std::nothrow) T(Filename,Flags);
+	if (NULL!=TargetFile && !TargetFile->is_open())
+		{
+		delete TargetFile;
+		TargetFile = NULL;
+		};
+	if (NULL==TargetFile)
+		{
+		INFORM(Filename);
+		INFORM(ErrorMessage);
+		}
+}
+
+inline std::ifstream* 
+ReadOnlyInfileBinary(const char* const Filename,const char* const ErrorMessage)
+{	// FORMALLY CORRECT: Kenneth Boyd, 11/10/2004
+	assert(NULL!=Filename);
+	std::ifstream* TargetFile = NULL;
+	_FileOpen(Filename,ErrorMessage,TargetFile,std::ios::in | std::ios::binary);
+	return TargetFile;
+}
+
+inline std::ofstream* 
+OutfileBinary(const char* const Filename,const char* const ErrorMessage)
+{	// FORMALLY CORRECT: Kenneth Boyd, 11/10/2004
+	assert(NULL!=Filename);
+	std::ofstream* TargetFile = NULL;
+	_FileOpen(Filename,ErrorMessage,TargetFile,std::ios::binary | std::ios::out);
+	return TargetFile;
+}
+
+inline std::ofstream* 
+OutfileText(const char* const Filename,const char* const ErrorMessage)
+{	// FORMALLY CORRECT: Kenneth Boyd, 11/10/2004
+	assert(NULL!=Filename);
+	std::ofstream* TargetFile = NULL;
+	_FileOpen(Filename,ErrorMessage,TargetFile,std::ios::out);
+	return TargetFile;
+}
+
+#endif
+
+//! \todo: test drivers for ConvertBinaryModeToTextMode
+

@@ -1,0 +1,514 @@
+// Zaimoni.STL/limits
+// some augmentations to STL limits
+
+#ifndef ZAIMONI_STL_LIMITS
+#define ZAIMONI_STL_LIMITS 1
+
+#include <limits>
+#include "Logging.h"
+#include "boost_core.hpp"
+#include "lite_alg.hpp"
+#include "pure.C/native.h"
+
+// key structures defined here:
+// * alt_numeric_limits
+// * qualitative_computation
+// utility functions using the above, or std::numeric_limits, should be put here
+
+// Dealing with IEEE:
+// note weirdness: as max exponent and min exponent are required to be +1 compared to correct values by C99 and C++98, we have to live with the definition error relative
+// to IEEE.  max_exponent actually refers to the exponent of infinity; min_exponent is 2 above denormalized.
+
+// mantissa bits: use numeric_limits<T>::digits
+
+// float: sign bit, 8-bit exponent, 23-bit mantissa [4 bytes]; bias 127
+// double: sign bit, 11-bit exponent, 23-bit mantissa [8 bytes]; bias 1023
+// long double: sign bit, 15-bit exponent, 64-bit mantissa [10 bytes]; bias 16383
+// Intel is little-endian
+
+namespace zaimoni {
+
+// is-negative support
+template<typename T>
+inline typename boost::enable_if<boost::type_traits::ice_and<std::numeric_limits<T>::is_specialized, std::numeric_limits<T>::is_signed>, bool>::type
+is_negative(const T& x) {return 0>x;}
+
+template<typename T>
+inline typename boost::enable_if<boost::type_traits::ice_and<std::numeric_limits<T>::is_specialized, !std::numeric_limits<T>::is_signed>, bool>::type
+is_negative(const T& x) {return false;}
+
+// multiplicative order support
+template<typename T>
+inline typename boost::enable_if<boost::type_traits::ice_and<std::numeric_limits<T>::is_specialized, std::numeric_limits<T>::is_signed>, size_t>::type
+mult_order(const T& x) {return (1==x) ? 1 : (-1==x) ? 2 : 0;}
+
+template<typename T>
+inline typename boost::enable_if<boost::type_traits::ice_and<std::numeric_limits<T>::is_specialized, !std::numeric_limits<T>::is_signed>, size_t>::type
+mult_order(const T& x) {return (1==x) ? 1 : 0;}
+
+template<typename T>
+inline typename boost::enable_if<boost::type_traits::ice_and<std::numeric_limits<T>::is_specialized, !std::numeric_limits<T>::is_integer>, bool>::type
+_is_zero_or_denormalized(const T& x) {return std::numeric_limits<T>::min_exponent-2==_exponent_of(x);}
+
+template<typename T>
+inline typename boost::enable_if<boost::type_traits::ice_and<std::numeric_limits<T>::is_specialized, !std::numeric_limits<T>::is_integer>, bool>::type
+_is_infinite_or_NAN(const T& x) {return std::numeric_limits<T>::max_exponent==_exponent_of(x);}
+
+template<typename T>
+struct alt_numeric_limits
+{
+	enum {	exponent_digits = 0,
+			size_as_chararray = sizeof(T),
+#ifdef ZAIMONI_LITTLE_ENDIAN
+			exponent_offset_as_char = size_as_chararray-1,
+			exponent_offset_as_short = size_as_chararray/2-1
+#elif defined(ZAIMONI_BIG_ENDIAN)
+			exponent_offset_as_char = 0,
+			exponent_offset_as_short = 0
+#endif
+		 };
+};
+
+template<>
+struct alt_numeric_limits<float>
+{
+	enum {	exponent_digits = ULONG_LOG2((unsigned long)(std::numeric_limits<float>::max_exponent))+1,
+			size_as_chararray = (1+exponent_digits+std::numeric_limits<float>::digits)/CHAR_BIT,
+#ifdef ZAIMONI_LITTLE_ENDIAN
+			exponent_offset_as_char = size_as_chararray-1,
+			exponent_offset_as_short = size_as_chararray/2-1
+#elif defined(ZAIMONI_BIG_ENDIAN)
+			exponent_offset_as_char = 0,
+			exponent_offset_as_short = 0
+#endif
+		 };
+	BOOST_STATIC_ASSERT(sizeof(float)>=size_as_chararray);
+};
+
+template<>
+struct alt_numeric_limits<double>
+{
+	enum {	exponent_digits = ULONG_LOG2((unsigned long)(std::numeric_limits<double>::max_exponent))+1,
+			size_as_chararray = (1+exponent_digits+std::numeric_limits<double>::digits)/CHAR_BIT,
+#ifdef ZAIMONI_LITTLE_ENDIAN
+			exponent_offset_as_char = size_as_chararray-1,
+			exponent_offset_as_short = size_as_chararray/2-1
+#elif defined(ZAIMONI_BIG_ENDIAN)
+			exponent_offset_as_char = 0,
+			exponent_offset_as_short = 0
+#endif
+		 };
+	BOOST_STATIC_ASSERT(sizeof(double)>=size_as_chararray);
+};
+
+// This is for Intel hardware long double
+// we do check for long double==double, but other than that it's probably not portable
+template<>
+struct alt_numeric_limits<long double>
+{
+	enum {	exponent_digits = ULONG_LOG2((unsigned long)(std::numeric_limits<long double>::max_exponent))+1,
+			size_as_chararray = (1+exponent_digits+std::numeric_limits<long double>::digits)/CHAR_BIT,
+#ifdef ZAIMONI_LITTLE_ENDIAN
+			exponent_offset_as_char = size_as_chararray-1,
+			exponent_offset_as_short = size_as_chararray/2-1
+#elif defined(ZAIMONI_BIG_ENDIAN)
+			exponent_offset_as_char = 0,
+			exponent_offset_as_short = 0
+#endif
+		 };
+	BOOST_STATIC_ASSERT(sizeof(long double)>=size_as_chararray);
+};
+
+// low-level diagnostics
+template<typename T>
+typename boost::enable_if<boost::is_floating_point<T>, signed int>::type
+_exponent_of(const T& x)
+{
+	BOOST_STATIC_ASSERT(15>=alt_numeric_limits<T>::exponent_digits);
+	volatile signed short raw_exponent = reinterpret_cast<const unsigned short*>(&x)[alt_numeric_limits<T>::exponent_offset_as_short] & SHRT_MAX;
+	raw_exponent >>= 15-alt_numeric_limits<T>::exponent_digits;
+	return raw_exponent + std::numeric_limits<T>::min_exponent-2;
+}
+
+// Highest resolution type for (short/long) (signed/unsigned) int/short/long, float, double, long double: long double
+// qualitative computation
+template<typename T>
+struct qualitative_computation
+{
+	typedef T high_res_type;						// highest-resolution type in series
+	typedef T product_type;							// most reasonable type for representing product of two of these
+	typedef T square_type;							// most reasonable type for representing square of this
+	typedef T unsigned_type;						// most reasonable type for representing known-positive difference
+	typedef T signed_type;							// analog type that can handle negative numbers
+	enum { 	high_res_product_can_overflow = false,	// also handles whether something can underflow
+			self_multiply_commutative = true};		// true for all built-in types
+};
+
+template<>
+struct qualitative_computation<signed char>
+{
+	typedef long double high_res_type;
+	typedef signed short product_type;
+	typedef unsigned short square_type;
+	typedef unsigned char unsigned_type;
+	typedef signed char signed_type;
+	enum { 	high_res_product_can_overflow = false,
+			self_multiply_commutative = true};
+	static const signed long min = SCHAR_MIN;
+	static const signed long max = SCHAR_MAX;
+};
+
+template<>
+struct qualitative_computation<unsigned char>
+{
+	typedef long double high_res_type;
+	typedef unsigned short product_type;
+	typedef unsigned short square_type;
+	typedef unsigned char unsigned_type;
+	typedef signed char signed_type;
+	enum { 	high_res_product_can_overflow = false,
+			self_multiply_commutative = true};
+	static const unsigned long min = 0;
+	static const unsigned long max = UCHAR_MAX;
+};
+
+template<>
+struct qualitative_computation<signed short>
+{
+	typedef long double high_res_type;
+	typedef signed long product_type;
+	typedef unsigned long square_type;
+	typedef unsigned short unsigned_type;
+	typedef signed short signed_type;
+	enum { 	high_res_product_can_overflow = false,
+			self_multiply_commutative = true};
+	static const signed long min = SHRT_MIN;
+	static const signed long max = SHRT_MAX;
+};
+
+template<>
+struct qualitative_computation<unsigned short>
+{
+	typedef long double high_res_type;
+	typedef unsigned long product_type;
+	typedef unsigned long square_type;
+	typedef unsigned short unsigned_type;
+	typedef signed short signed_type;
+	enum { 	high_res_product_can_overflow = false,
+			self_multiply_commutative = true};
+	static const unsigned long min = 0;
+	static const unsigned long max = USHRT_MAX;
+};
+
+// currently doesn't react to GNU C++ (should be using (unsigned) long long for that)
+// until then, force compiler errors
+template<>
+struct qualitative_computation<signed long>
+{
+	typedef long double high_res_type;
+	typedef void product_type;
+	typedef void square_type;
+	typedef unsigned long unsigned_type;
+	typedef signed long signed_type;
+	enum { 	high_res_product_can_overflow = false,
+			self_multiply_commutative = true};
+	static const signed long min = LONG_MIN;
+	static const signed long max = LONG_MAX;
+};
+
+template<>
+struct qualitative_computation<unsigned long>
+{
+	typedef long double high_res_type;
+	typedef void product_type;
+	typedef void square_type;
+	typedef unsigned long unsigned_type;
+	typedef signed long signed_type;
+	enum { 	high_res_product_can_overflow = false,
+			self_multiply_commutative = true};
+	static const unsigned long min = 0;
+	static const unsigned long max = ULONG_MAX;
+};
+
+template<>
+struct qualitative_computation<float>
+{
+	typedef long double high_res_type;
+	typedef double product_type;
+	typedef double square_type;
+	typedef float unsigned_type;
+	typedef float signed_type;
+	enum { 	high_res_product_can_overflow = sizeof(long double)==sizeof(float),
+			self_multiply_commutative = true};
+};
+
+template<>
+struct qualitative_computation<double>
+{
+	typedef long double high_res_type;
+	typedef long double product_type;
+	typedef long double square_type;
+	typedef double unsigned_type;
+	typedef double signed_type;
+	enum { 	high_res_product_can_overflow = sizeof(long double)==sizeof(double),
+			self_multiply_commutative = true};
+};
+
+template<>
+struct qualitative_computation<long double>
+{
+	typedef long double high_res_type;
+	typedef long double product_type;
+	typedef long double square_type;
+	typedef long double unsigned_type;
+	typedef long double signed_type;
+	enum { 	high_res_product_can_overflow = true,
+			self_multiply_commutative = true};
+};
+
+// absolute value
+template<typename T>
+typename boost::enable_if<boost::type_traits::ice_and<std::numeric_limits<T>::is_specialized, std::numeric_limits<T>::is_signed>, typename qualitative_computation<T>::unsigned_type>::type
+abs(T x)
+{	return	(0<=x) ? x : -x;}
+
+template<typename T>
+typename boost::enable_if<boost::type_traits::ice_and<std::numeric_limits<T>::is_specialized, !std::numeric_limits<T>::is_signed>, T>::type
+abs(T x)
+{	return	x;}
+
+#include "bits/limits"
+
+// cross-sign modulo arithmetic
+inline unsigned long
+crosssign_modulo(signed long a,unsigned long m)
+{	return zaimoni::detail::crosssign_modulo(a,m);}
+
+// low-level diagnostics
+inline unsigned int
+trailing_zero_bits(const long double& x)
+{	return zaimoni::detail::trailing_zero_bits(x);}
+
+inline unsigned int
+trailing_zero_bits(const long double& x, bool& SecondBitIsOne)
+{	return zaimoni::detail::trailing_zero_bits(x,SecondBitIsOne);}
+
+inline unsigned int
+mantissa_digits(const long double& x) {return std::numeric_limits<long double>::digits-trailing_zero_bits(x);}
+
+inline unsigned int		//! \return the maximum exponent that the product can accept without overflowing
+this_product_will_not_overflow(const long double& x, const long double& y)
+{	return zaimoni::detail::this_product_will_not_overflow(x,y);}
+
+inline unsigned int		//! \return the maximum exponent that the product can accept without underflowing
+this_product_will_not_underflow(const long double& x, const long double& y)
+{	return zaimoni::detail::this_product_will_not_underflow(x,y);}
+
+// following returns "margin of danger" (how much of an adjustment _scalb must apply across both arguments to prevent)
+inline unsigned int	//! \return how much the exponent overflows
+this_product_overflows(const long double& x, const long double& y)
+{	return zaimoni::detail::this_product_overflows(x,y);}
+
+inline unsigned int	 //! \return how much the exponent underflows
+this_product_underflows(const long double& x, const long double& y)
+{	return zaimoni::detail::this_product_underflows(x,y);}
+
+// in case the specified condition cannot be realized:
+// will not returns ULONG_MAX
+// will returns 0
+// negative powers should be handled by taking multiplicative inverse of X
+inline unsigned long
+this_power_will_not_overflow(long double x)
+{	return zaimoni::detail::this_power_will_not_overflow(x);}
+
+inline unsigned long
+this_power_will_overflow(long double x)
+{	return zaimoni::detail::this_power_will_overflow(x);}
+
+inline unsigned long
+this_power_will_not_underflow(long double x)
+{	return zaimoni::detail::this_power_will_not_underflow(x);}
+
+inline unsigned long
+this_power_will_underflow(long double x)
+{	return zaimoni::detail::this_power_will_underflow(x);}
+
+inline bool
+opp_sign_addition_subtractive_cancels(const long double& x, const long double& y)
+{	return zaimoni::detail::opp_sign_addition_subtractive_cancels(x,y); }
+
+// same-sign addition between two numbers with the same exponent is safe if
+// ends in same last bit, and sum exponent is one higher
+// ends in same last bit, and the net sum on the second-to-last bit is 0: 10 10, 00 00, 11 01, or 01 11
+// trailing bits:
+// * zero,1+: take epsilon
+// * zero, zero: need result exponent 1 higher, or 11 01 or 01 11
+// * 1,1: safe
+// * 1,2+: need result exponent 1 higher
+// * 2+,2+: safe
+inline bool
+same_sign_addition_has_epsilon(const long double& x, const long double& y)
+{ 	return zaimoni::detail::same_sign_addition_has_epsilon(x,y);}
+
+inline bool
+addition_has_epsilon(const long double& x, const long double& y)
+{	return zaimoni::detail::addition_has_epsilon(x,y);}
+
+inline bool
+addition_subtractive_cancels(const long double& x, const long double& y)
+{	return zaimoni::detail::addition_subtractive_cancels(x,y);}
+
+// high-res converter
+template<typename T>
+inline typename qualitative_computation<T>::high_res_type
+high_res(const T x) {return x;}
+
+// safe operation detection
+inline bool
+safe_sum(signed long x,signed long y)
+{return zaimoni::detail::safe_sum(x,y);}
+
+inline bool
+safe_sum(unsigned long x,unsigned long y)
+{return zaimoni::detail::safe_sum(x,y);}
+
+inline bool
+safe_product(const long double& x, const long double& y)
+{return zaimoni::detail::safe_product(x,y);}
+
+inline bool
+safe_product(signed long x,signed long y)
+{return zaimoni::detail::safe_product(x,y);}
+
+inline bool
+safe_product(unsigned long x,unsigned long y)
+{return zaimoni::detail::safe_product(x,y);}
+
+inline bool	//! \return true iff the product neither overflows nor underflows, and will not incur epsilon
+completely_safe_product(const long double& x, const long double& y)
+{	return zaimoni::detail::completely_safe_product(x,y);}
+
+// low-level support
+inline long double
+_copysign(long double x, const long double y)
+{
+	if (is_negative(y))
+		reinterpret_cast<unsigned char*>(&x)[alt_numeric_limits<long double>::exponent_offset_as_char] |= '\x80';
+	else
+		reinterpret_cast<unsigned char*>(&x)[alt_numeric_limits<long double>::exponent_offset_as_char] &= '\x7F';
+	return x;
+}
+
+// 
+inline long double
+normalize(const long double x)
+{ return zaimoni::detail::normalize(x); }
+
+// directly adjust exponent of long double
+inline long double
+_scalb(long double x,signed long exp)
+{	return zaimoni::detail::_scalb(x,exp);	}
+
+inline long double
+force_exponent(long double x,signed long exp)
+{	return zaimoni::detail::force_exponent(x,exp);}
+
+inline long double
+scaled_product(const long double& x, const long double& y, signed int scaling_factor)
+{	return zaimoni::detail::scaled_product(x,y,scaling_factor);}
+
+// infinite geometric series support
+inline long double
+infinite_geometric_series(long double a, long double r)
+{	return zaimoni::detail::infinite_geometric_series(a,r);}
+
+inline long double
+infinite_geometric_seriesV2(long double a, long double one_minus_r)
+{	return zaimoni::detail::infinite_geometric_seriesV2(a,one_minus_r);}
+
+// epsilon
+template<typename T>
+typename boost::enable_if<boost::is_floating_point<T>, T>::type
+_epsilon(T x)
+{	return _scalb((T)1.0,_exponent_of(x)-(std::numeric_limits<T>::digits+1));	}
+
+// absolute value of difference
+template<typename T>
+typename boost::enable_if<boost::is_same<typename qualitative_computation<T>::unsigned_type,T>, T>::type
+abs_diff(const T LHS, const T RHS)
+{
+	if (LHS<=RHS)
+		return RHS-LHS;
+	else
+		return LHS-RHS;
+}
+
+template<typename T>
+typename boost::disable_if<boost::is_same<typename qualitative_computation<T>::unsigned_type,T>, typename qualitative_computation<T>::unsigned_type>::type
+abs_diff(const T LHS, const T RHS)
+{
+	if (LHS<=RHS)
+		{
+		if (0<=LHS || 0>=RHS)
+			return (typename qualitative_computation<T>::unsigned_type)(RHS-LHS);
+		else
+			return (typename qualitative_computation<T>::unsigned_type)(-LHS)+(typename qualitative_computation<T>::unsigned_type)(RHS);
+		}
+	else{
+		if (0<=RHS || 0>=LHS)
+			return (typename qualitative_computation<T>::unsigned_type)(LHS-RHS);
+		else
+			return (typename qualitative_computation<T>::unsigned_type)(-RHS)+(typename qualitative_computation<T>::unsigned_type)(LHS);
+		}
+}
+
+#ifndef NDEBUG
+
+namespace limits_test {
+
+inline void
+test(void)
+{
+	INFORM("Starting Zaimoni.STL/limits tests");
+
+	// _mantissa_digits sanity check: Intel long double 1.0l should have 1 digit
+	if (1!=mantissa_digits(1.0l)) {INFORM("1.0l requires more than one mantissa bit to represent");};
+
+	// _exponent_of sanity check: 1 should be to the 0th power
+	if (0!=_exponent_of(1.0f)) (INFORM("ERROR: _exponent_of(float) has nonzero exponent for 1"),INFORM(_exponent_of(1.0f)));
+	if (0!=_exponent_of(1.0)) (INFORM("ERROR: _exponent_of(double) has nonzero exponent for 1"),INFORM(_exponent_of(1.0)));
+	if (0!=_exponent_of(1.0l)) (INFORM("ERROR: _exponent_of(long double) has nonzero exponent for 1"),INFORM(_exponent_of(1.0l)));
+
+	// _is_zero_or_denormalized sanity check: 0 should be this
+	if (!_is_zero_or_denormalized(0.0f)) INFORM("ERROR: 0.0f does not test as zero or denormalized");
+	if (!_is_zero_or_denormalized(0.0)) INFORM("ERROR: 0.0 does not test as zero or denormalized");
+	if (!_is_zero_or_denormalized(0.0l)) INFORM("ERROR: 0.0l does not test as zero or denormalized");
+
+	// _is_infinite_or_NAN sanity check: infinity should be this
+	if (!_is_infinite_or_NAN(std::numeric_limits<float>::infinity())) INFORM("ERROR:numeric_limits<float>::infinity() does not test as infinite or NAN");
+	if (!_is_infinite_or_NAN(std::numeric_limits<double>::infinity())) INFORM("ERROR:numeric_limits<double>::infinity() does not test as infinite or NAN");
+	if (!_is_infinite_or_NAN(std::numeric_limits<long double>::infinity())) INFORM("ERROR:numeric_limits<long double>::infinity() does not test as infinite or NAN");
+
+	// _is_infinite_or_NAN sanity check: quiet NAN should be this
+	if (!_is_infinite_or_NAN(std::numeric_limits<float>::quiet_NaN())) INFORM("ERROR:numeric_limits<float>::infinity() does not test as infinite or NAN");
+	if (!_is_infinite_or_NAN(std::numeric_limits<double>::quiet_NaN())) INFORM("ERROR:numeric_limits<double>::infinity() does not test as infinite or NAN");
+	if (!_is_infinite_or_NAN(std::numeric_limits<long double>::quiet_NaN())) INFORM("ERROR:numeric_limits<long double>::infinity() does not test as infinite or NAN");
+
+	// _is_infinite_or_NAN sanity check: signaling NAN should be this
+	if (!_is_infinite_or_NAN(std::numeric_limits<float>::signaling_NaN())) INFORM("ERROR:numeric_limits<float>::infinity() does not test as infinite or NAN");
+	if (!_is_infinite_or_NAN(std::numeric_limits<double>::signaling_NaN())) INFORM("ERROR:numeric_limits<double>::infinity() does not test as infinite or NAN");
+	if (!_is_infinite_or_NAN(std::numeric_limits<long double>::signaling_NaN())) INFORM("ERROR:numeric_limits<long double>::infinity() does not test as infinite or NAN");
+
+	// _scalb sanity check
+	if (1.0l!=_scalb(16.0l,-4)) INFORM("_scalb(16.0l,-4) should be 1.0l");
+
+	INFORM("Ending Zaimoni.STL/limits tests");
+}
+
+}
+
+#endif
+
+}
+
+#endif

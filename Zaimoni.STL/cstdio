@@ -1,0 +1,113 @@
+// cstdio
+// header for file convenience functions
+// (C)2009 Kenneth Boyd, license: MIT.txt
+
+#ifndef ZAIMONI_CSTDIO
+#define ZAIMONI_CSTDIO 1
+
+#include "Logging.h"
+#include "MetaRAM.hpp"
+#include "Pure.C/stdio_c.h"
+
+namespace zaimoni {
+
+template<class T>
+inline typename boost::enable_if<boost::has_trivial_assign<T>, void>::type
+#ifndef ZAIMONI_FORCE_ISO
+ConvertBinaryModeToTextMode(T*& buf)
+#else
+ConvertBinaryModeToTextMode(T*& buf, size_t& buf_len)
+#endif
+{
+	if (buf)
+		{
+#ifndef ZAIMONI_FORCE_ISO 
+		const size_t buf_len = ArraySize(buf);
+#else
+		assert(0<buf_len);
+#endif
+		size_t Displace = 0;
+		size_t i = 0;
+		do	if ('\r'==buf[i])
+				{	// oops.  We're either Windows ['\r\n'] or wrong-platform ['\r': UNIX on Mac, or Mac on Unix; '\n\r': Windows on UNIX]
+				const bool WindowsOnMac = (1<=i && '\n'==buf[i-1]);
+				const bool Windows = buf_len>i+1 && '\n'==buf[i+1];
+				const bool WrongPlatform = !WindowsOnMac && !Windows;	// no problem if both
+				if (WrongPlatform)
+					buf[i]='\n';
+				else{
+					if (buf_len>(i+1)) memmove(&buf[i],&buf[i+1],buf_len-(i+1));
+					++Displace;
+					--i;
+					}
+				}
+		while(buf_len-Displace> ++i);
+		if (0<Displace)
+#ifndef ZAIMONI_FORCE_ISO
+			buf = REALLOC(buf,_msize(buf)-Displace);
+#else
+			buf = REALLOC(buf,(buf_len -= Displace));
+#endif
+		}
+}
+
+template<class T>
+inline typename boost::enable_if<boost::has_trivial_assign<T>, bool>::type
+#ifndef ZAIMONI_FORCE_ISO
+GetBinaryFileImage(const char* const Filename,T*& Buffer)
+#else
+GetBinaryFileImage(const char* const Filename,T*& Buffer,size_t& Buffer_size)
+#endif
+{	// FORMALLY CORRECT: Kenneth Boyd, 11/10/2004
+	assert(NULL!=Filename);
+	assert(NULL==Buffer);
+#ifdef ZAIMONI_FORCE_ISO
+	assert(0==Buffer_size);
+#endif
+
+	FILE* TargetFile = fopen(Filename, "rb");
+	if (NULL==TargetFile) return false;
+
+	// Want to know the file length *BEFORE* inhaling it
+	long ScriptLength = get_filelength(TargetFile);
+	if (-1==ScriptLength)
+		{
+		fclose(TargetFile);
+		return false;
+		}
+
+	assert(0==ScriptLength%sizeof(T));
+	size_t ActuallyRead = 0;
+	if (0<ScriptLength)
+	{
+		Buffer = REALLOC(Buffer,ScriptLength);
+#ifdef ZAIMONI_FORCE_ISO
+		Buffer_size = ScriptLength;
+#endif
+		ActuallyRead = fread(Buffer,sizeof(T),ScriptLength/sizeof(T),TargetFile);
+	}
+
+	fclose(TargetFile);
+	return ActuallyRead==ScriptLength/sizeof(T);
+}
+
+template<class T>
+inline typename boost::enable_if<boost::has_trivial_assign<T>, bool>::type
+SaveBinaryFileImage(const char* const Filename,const T* const Buffer,size_t BufferLength)
+{	// FORMALLY CORRECT: Kenneth Boyd, 1/14/2007
+	assert(NULL!=Filename);
+	assert(NULL!=Buffer);
+	assert(0!=BufferLength);
+
+	FILE* TargetFile = fopen(Filename, "wb");
+	if (NULL==TargetFile) return false;
+	size_t ActualWrite = fwrite(Buffer,sizeof(T),BufferLength,TargetFile);
+	fclose(TargetFile);
+	return ActualWrite==BufferLength;
+}
+
+}	// end namespace zaimoni
+
+#include "bits/cstdio_autoptr.hpp"
+
+#endif

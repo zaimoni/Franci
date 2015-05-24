@@ -1,0 +1,75 @@
+// algorithm
+// wrapper for STL algorithm
+// (C)2009 Kenneth Boyd, license: MIT.txt
+
+#ifndef ZAIMONI_STL_ALGORITHM
+#define ZAIMONI_STL_ALGORITHM 1
+
+#include <algorithm>
+#include <boost/concept_check.hpp>
+
+namespace zaimoni {
+
+// pull these into namespace zaimoni to keep Koenig lookup happy (GCC implementations OK)
+using std::swap;
+using std::max;
+using std::min;
+
+// modeled on std::copy
+template<class I_Iterator,class O_Iterator>
+void dest_copy(I_Iterator first_in, O_Iterator first_out, O_Iterator last_out)
+{
+	while(first_out!=last_out)
+		*(first_out++) = *(first_in++);
+}
+
+// modeled on std::copy_backwards
+template<class I_Iterator,class O_Iterator>
+void dest_copy_backward(I_Iterator last_in, O_Iterator first_out, O_Iterator last_out)
+{
+	do	*--last_out = *--last_in;
+	while(first_out!=last_out);
+}
+
+// modeled on std::swap
+template<class IO_Iterator,class IO_Iterator2,typename void_binary_op>
+void vector_container_op(IO_Iterator left_first,IO_Iterator left_last,IO_Iterator2 right_first,IO_Iterator2 right_last,void_binary_op op)
+{
+	boost::function_requires<boost::InputIteratorConcept<IO_Iterator> >();
+//	boost::function_requires<boost::InputIteratorConcept<IO_Iterator> >();
+	boost::function_requires<boost::InputIteratorConcept<IO_Iterator2> >();
+//	boost::function_requires<boost::InputIteratorConcept<IO_Iterator2> >();
+	while(left_first!=left_last && right_first!=right_last)
+		op(*left_first++,*right_first++);
+}
+
+// modeled on std::copy
+// want this to handle oddball iterators
+template<class OutIterator,class InIterator>
+void iterator_copy(OutIterator dest,InIterator src,size_t N)
+{
+	boost::function_requires<boost::InputIteratorConcept<InIterator> >();
+//	boost::function_requires<boost::OutputIteratorConcept<OutIterator> >();
+
+	while(0<N)
+		{
+		*dest++ = *src++;
+		--N;
+		};
+}
+
+// modeled on std::copy
+// original use is slurping a std::set or std::multiset into an autovalarray_ptr to eliminate the pointer overhead
+template<class O_Iterator,class CopyAndDestroy>
+void copy_into_range_and_destroy(O_Iterator begin,CopyAndDestroy& X)
+{
+	while(!X.empty())
+		{
+		*begin++ = *X.begin();
+		X.erase(X.begin());
+		}
+}
+
+}
+
+#endif
