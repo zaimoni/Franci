@@ -18,20 +18,6 @@ clean:
 	cd OS; $(MAKE) clean
 	cd OS; cd Win32; $(MAKE) clean
 
-install:
-	cd pure.C; $(MAKE) install; cd stdio.log; $(MAKE) install
-	cd core.RAM; $(MAKE) install
-	cd LexParse; $(MAKE) install
-	cd OS; $(MAKE) install
-	cd OS; cd Win32; $(MAKE) install
-
-uninstall:
-	cd pure.C; $(MAKE) uninstall; cd stdio.log; $(MAKE) uninstall
-	cd core.RAM; $(MAKE) uninstall
-	cd LexParse; $(MAKE) uninstall
-	cd OS; $(MAKE) uninstall
-	cd OS; cd Win32; $(MAKE) uninstall
-
 # use this to avoid polluting host compiler with our libraries
 host_install:
 	cd pure.C; $(MAKE) host_install; cd stdio.log; $(MAKE) host_install

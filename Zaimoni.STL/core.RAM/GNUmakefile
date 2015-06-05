@@ -17,12 +17,7 @@ all: $(LIBS)
 clean:
 	rm -f *.a *.o
 
-install: $(addprefix $(libdir)/, $(LIBS))
 host_install: $(addprefix ../../$(host_libdir)/, $(LIBS))
-
-uninstall:
-	rm -f $(libdir)/libz_memory.a
-	rm -f $(libdir)/libz_memory_c.a
 
 # rules
 memory.o: memory.cpp ../z_memory.h ../OS/AIMutex.hpp
@@ -36,12 +31,6 @@ libz_memory.a: memory.o
 
 libz_memory_c.a: memory_c.o
 	$(AR) -ru libz_memory_c.a memory_c.o
-
-$(libdir)/libz_memory.a: libz_memory.a
-	cp libz_memory.a $(libdir)/libz_memory.a
-
-$(libdir)/libz_memory_c.a: libz_memory_c.a
-	cp libz_memory_c.a $(libdir)/libz_memory_c.a
 
 ../../$(host_libdir)/libz_memory.a: libz_memory.a
 	cp libz_memory.a ../../$(host_libdir)/libz_memory.a

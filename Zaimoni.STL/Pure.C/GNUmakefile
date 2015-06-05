@@ -16,12 +16,7 @@ all: auto_int.h comptest.h $(LIBS)
 clean:
 	rm -f *.a *.o auto_int.h comptest.h
 
-install: $(addprefix $(libdir)/, $(LIBS))
 host_install: auto_int.h comptest.h $(addprefix ../../$(host_libdir)/, $(LIBS))
-
-uninstall:
-	rm -f $(libdir)/libz_format_util.a
-	rm -f $(libdir)/libz_stdio_c.a
 
 # rules
 format_util.o: format_util.c format_util.h
@@ -51,15 +46,6 @@ libz_logging.a: logging.o
 
 libz_stdio_c.a: stdio_c.o
 	$(AR) -ru libz_stdio_c.a stdio_c.o
-
-$(libdir)/libz_format_util.a: libz_format_util.a
-	cp libz_format_util.a $(libdir)/libz_format_util.a
-
-$(libdir)/libz_logging.a: libz_logging.a
-	cp libz_logging.a $(libdir)/libz_logging.a
-		
-$(libdir)/libz_stdio_c.a: libz_stdio_c.a
-	cp libz_stdio_c.a $(libdir)/libz_stdio_c.a
 
 ../../$(host_libdir)/libz_format_util.a: libz_format_util.a
 	cp libz_format_util.a ../../$(host_libdir)/libz_format_util.a

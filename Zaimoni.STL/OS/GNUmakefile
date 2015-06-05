@@ -18,11 +18,7 @@ all: $(LIBS)
 clean:
 	rm -f *.a *.o
 
-install: $(addprefix $(libdir)/, $(LIBS))
 host_install: $(addprefix ../../$(host_libdir)/, $(LIBS))
-
-uninstall:
-	rm -f $(addprefix $(libdir)/, $(LIBS))
 
 # rules
 log_adapter_inform.o: log_adapter_inform.cpp ../pure.C/format_util.c
@@ -37,12 +33,6 @@ libz_log_adapter.a: log_adapter_inc_inform.o log_adapter_inform.o log_adapter_lo
 
 libz_console.a: console.o
 	$(AR) -ru libz_console.a console.o
-
-$(libdir)/libz_log_adapter.a: libz_log_adapter.a
-	cp libz_log_adapter.a $(libdir)/libz_log_adapter.a
-
-$(libdir)/libz_console.a: libz_console.a
-	cp libz_console.a $(libdir)/libz_console.a
 
 ../../$(host_libdir)/libz_log_adapter.a: libz_log_adapter.a
 	cp libz_log_adapter.a ../../$(host_libdir)/libz_log_adapter.a

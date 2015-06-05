@@ -18,11 +18,7 @@ all: $(LIBS)
 clean:
 	rm -f *.a *.o
 
-install: $(addprefix $(libdir)/, $(LIBS))
 host_install: $(addprefix ../../$(host_libdir)/, $(LIBS))
-
-uninstall:
-	rm -f $(addprefix $(libdir)/, $(LIBS))
 
 # rules
 LangConf.o: LangConf.cpp $(LangConf_hpp) $(addprefix ../, $(POD_hpp))
@@ -47,15 +43,6 @@ libz_langconf_iso.a: LangConf_iso.o
 
 libz_csvtable.a: CSVTable.o
 	$(AR) -ru libz_csvtable.a CSVTable.o
-
-$(libdir)/libz_langconf.a: libz_langconf.a
-	cp libz_langconf.a $(libdir)/libz_langconf.a
-
-$(libdir)/libz_langconf_iso.a: libz_langconf_iso.a
-	cp libz_langconf_iso.a $(libdir)/libz_langconf_iso.a
-
-$(libdir)/libz_csvtable.a: libz_csvtable.a
-	cp libz_csvtable.a $(libdir)/libz_csvtable.a
 
 ../../$(host_libdir)/libz_langconf.a: libz_langconf.a
 	cp libz_langconf.a ../../$(host_libdir)/libz_langconf.a
