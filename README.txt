@@ -13,4 +13,9 @@ LenName.cxx/UNNAMED_CLASS, etc.
 =====
 There appears to be no significant performance penalty for Franci's internal 
 datatypes to have ACID assignment operators.  Keep.for now.
-
+=====
+GCC 4.3.3 won't work:
+Equal.cxx: In member function 'bool EqualRelation::UseStdMultiplicationALLDISTIN
+CT() const':
+Equal.cxx:1876: internal compiler error: in initialize_flags_in_bb, at tree-into
+-ssa.c:437
