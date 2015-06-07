@@ -6,7 +6,7 @@
 
 #include <stddef.h>
 #include "Zaimoni.STL/Compiler.h"
-#include "Zaimoni.STL/algorithm"
+#include "Zaimoni.STL/Repair.STL/algorithm"
 #include <boost/static_assert.hpp>
 
 class _IntegerNumeral {

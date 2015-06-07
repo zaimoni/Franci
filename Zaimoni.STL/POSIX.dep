@@ -24,7 +24,7 @@ cstdio = cstdio $(MetaRAM_hpp) $(Logging_h)
 MetaRAM2_hpp = MetaRAM2.hpp $(MetaRAM_hpp) $(Logging_h) z_memory.h
 
 # metatype/c_array.hpp
-c_array_hpp = c_array.hpp $(addprefix ../, $(Logging_h)) ../boost_core.hpp $(addprefix ../, $(MetaRAM_hpp)) ../algorithm ../logic_lt.hpp operator.hpp
+c_array_hpp = c_array.hpp $(addprefix ../, $(Logging_h)) ../boost_core.hpp $(addprefix ../, $(MetaRAM_hpp)) ../Repair.STL/algorithm ../logic_lt.hpp operator.hpp
 
 # expand this
 # POD_autoarray.hpp
