@@ -1,12 +1,12 @@
 // lite_alg.hpp
-// (C)2009 Kenneth Boyd, license: MIT.txt
+// (C)2009,2015 Kenneth Boyd, license: MIT.txt
 
 #ifndef ZAIMONI_LITE_ALG_HPP
 #define ZAIMONI_LITE_ALG_HPP 1
 
 #include "Logging.h"
 #include "boost_core.hpp"
-#include "algorithm"
+#include "repair.STL/algorithm"
 
 namespace zaimoni {
 

@@ -12,9 +12,18 @@
 #include "../Logging.h"
 #include "../boost_core.hpp"
 #include "../MetaRAM.hpp"
-#include "../algorithm"
+#include "../repair.STL/algorithm"
 #include "../logic_lt.hpp"
 #include "operator.hpp"
+
+namespace zaimoni {
+
+// pull these into namespace zaimoni to keep Koenig lookup happy (GCC implementations OK)
+using std::swap;
+using std::max;
+using std::min;
+
+}	// namespace zaimoni
 
 // this macro goes in the class body
 // turns out the STL type definition glue doesn't inherit properly (in GCC)
@@ -116,9 +125,9 @@ struct static_c_array : public c_array_CRTP<static_c_array<T,N>, T>
 	// default-initialize to given value
 	explicit static_c_array(typename boost::call_traits<T>::param_type src) {this->assign(src);};
 	// default-initialize from another static_c_array
-	template<class U> explicit static_c_array(const static_c_array<U,N>& src) {iterator_copy(x_i,src.data(),N);}
+	template<class U> explicit static_c_array(const static_c_array<U,N>& src) {std::copy_n(src.data(),N,x_i);}
 	// default-initialize from iterator
-	template<class OutIterator> explicit static_c_array(OutIterator src) {iterator_copy(x_i,src,N);}
+	template<class OutIterator> explicit static_c_array(OutIterator src) {std::copy_n(src,N,x_i);}
 
 	// assignment with type conversion
 	template<class T2>
@@ -129,7 +138,7 @@ struct static_c_array : public c_array_CRTP<static_c_array<T,N>, T>
 	template<class OutIterator> static_c_array<T,N>& operator=(OutIterator src)
 		{	// T* is classic, but weirder forward iterators will have weirder semantics
 			// copy rather than const reference because we use it
-			iterator_copy(x_i,src,N);
+			std::copy_n(src,N,x_i);
 			return *this;
 		}
 
