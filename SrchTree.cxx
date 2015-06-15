@@ -160,54 +160,34 @@ SearchTree::getBranchedArgArray(SearchTree* const Target, MetaConcept**& NewArra
 					LowBound = i;
 					};
 
-			MetaConcept** TmpArray = _new_buffer<MetaConcept*>(CountBranches+1);
-			if (TmpArray)
+			zaimoni::autovalarray_ptr<MetaConcept*> tmp(CountBranches+1);
+			if (!tmp.empty())
 				{
 				size_t j = HighBound+1;
 				do	if (CanUseBranchingOperation(*LocalRoot,*BranchingOperationSources[--j]))
 						{
-						MetaConcept** SimpleArgArray = _new_buffer<MetaConcept*>(1);
-						if (!SimpleArgArray)
-							{
-							BLOCKDELETEARRAY(TmpArray);
-							return true;
-							};
+						zaimoni::autovalarray_ptr<MetaConcept*> tmp_unary(1);
+						if (tmp_unary.empty()) return true;
 						try	{
-							LocalRoot->CopyInto(SimpleArgArray[0]);
-							BranchingOperation(SimpleArgArray[0],*BranchingOperationSources[j]);
-							if (*LocalRoot==*SimpleArgArray[0])
+							LocalRoot->CopyInto(tmp_unary[0]);
+							BranchingOperation(tmp_unary[0],*BranchingOperationSources[j]);
+							SUCCEED_OR_DIE(*LocalRoot!=*tmp_unary[0]);
+							if (__UniqueLeaves && FindLeafLikeThis(*tmp_unary[0]))
 								{
-								LOG(*LocalRoot);
-								LOG(*SimpleArgArray[0]);
-								FATAL(AlphaRetValAssumption);
-								}
-							if (__UniqueLeaves && FindLeafLikeThis(*SimpleArgArray[0]))
-								{
-								BLOCKDELETEARRAY(SimpleArgArray);
-								if (CountBranches+1<ArraySize(TmpArray))
-									memmove(&TmpArray[CountBranches],&TmpArray[CountBranches+1],sizeof(MetaConcept*)*(ArraySize(TmpArray)-(CountBranches+1)));
-
-								if (2==ArraySize(TmpArray))
-									{
-									DELETEARRAY(TmpArray);
-									return false;
-									};
-								TmpArray = REALLOC(TmpArray,_msize(TmpArray)-sizeof(MetaConcept*));
-								CountBranches--;
+								if (2==tmp.size()) return false;
+								tmp.FastDeleteIdx(CountBranches--);
 								}
 							else
-								TmpArray[CountBranches--] = new SearchTree(Target,SimpleArgArray);
+								tmp[CountBranches--] = new SearchTree(Target,tmp_unary);
 							}
 						catch(const bad_alloc&)
 							{
-							BLOCKDELETEARRAY(SimpleArgArray);
-							BLOCKDELETEARRAY(TmpArray);
 							return true;
 							}
 						}
 				while(LowBound<j);
-				TmpArray[0] = LocalRoot;
-				NewArray = TmpArray;
+				tmp[0] = LocalRoot;
+				NewArray = tmp.release();
 				}
 			return true;
 			}
