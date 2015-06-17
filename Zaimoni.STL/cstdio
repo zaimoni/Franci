@@ -12,7 +12,7 @@
 namespace zaimoni {
 
 template<class T>
-inline typename boost::enable_if<boost::has_trivial_assign<T>, void>::type
+inline typename std::enable_if<boost::has_trivial_assign<T>::value, void>::type
 #ifndef ZAIMONI_FORCE_ISO
 ConvertBinaryModeToTextMode(T*& buf)
 #else
@@ -52,21 +52,21 @@ ConvertBinaryModeToTextMode(T*& buf, size_t& buf_len)
 }
 
 template<class T>
-inline typename boost::enable_if<boost::has_trivial_assign<T>, bool>::type
+inline typename std::enable_if<boost::has_trivial_assign<T>::value, bool>::type
 #ifndef ZAIMONI_FORCE_ISO
 GetBinaryFileImage(const char* const Filename,T*& Buffer)
 #else
 GetBinaryFileImage(const char* const Filename,T*& Buffer,size_t& Buffer_size)
 #endif
 {	// FORMALLY CORRECT: Kenneth Boyd, 11/10/2004
-	assert(NULL!=Filename);
-	assert(NULL==Buffer);
+	assert(Filename);
+	assert(!Buffer);
 #ifdef ZAIMONI_FORCE_ISO
 	assert(0==Buffer_size);
 #endif
 
 	FILE* TargetFile = fopen(Filename, "rb");
-	if (NULL==TargetFile) return false;
+	if (!TargetFile) return false;
 
 	// Want to know the file length *BEFORE* inhaling it
 	long ScriptLength = get_filelength(TargetFile);
@@ -92,15 +92,15 @@ GetBinaryFileImage(const char* const Filename,T*& Buffer,size_t& Buffer_size)
 }
 
 template<class T>
-inline typename boost::enable_if<boost::has_trivial_assign<T>, bool>::type
+inline typename std::enable_if<boost::has_trivial_assign<T>::value, bool>::type
 SaveBinaryFileImage(const char* const Filename,const T* const Buffer,size_t BufferLength)
 {	// FORMALLY CORRECT: Kenneth Boyd, 1/14/2007
-	assert(NULL!=Filename);
-	assert(NULL!=Buffer);
+	assert(Filename);
+	assert(Buffer);
 	assert(0!=BufferLength);
 
 	FILE* TargetFile = fopen(Filename, "wb");
-	if (NULL==TargetFile) return false;
+	if (!TargetFile) return false;
 	size_t ActualWrite = fwrite(Buffer,sizeof(T),BufferLength,TargetFile);
 	fclose(TargetFile);
 	return ActualWrite==BufferLength;

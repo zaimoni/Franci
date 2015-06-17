@@ -1,12 +1,12 @@
 // bits/lite_alg.hpp
 // do not include directly
 // do ensure included from namespace zaimoni
-// (C)2009 Kenneth Boyd, license: MIT.txt
+// (C)2009,2015 Kenneth Boyd, license: MIT.txt
 
 namespace detail {
 
 template<class T>
-typename boost::enable_if<boost::is_same<unsigned long,T>, unsigned int>::type
+typename std::enable_if<std::is_same<unsigned long,T>::value, unsigned int>::type
 nonstrictly_bounded_above_by_this_power_of_n(T x,T n)
 {
 	unsigned int power_bound = 0;
@@ -19,7 +19,7 @@ nonstrictly_bounded_above_by_this_power_of_n(T x,T n)
 }
 
 template<class T>
-typename boost::enable_if<boost::is_same<unsigned long,T>, unsigned long>::type
+typename std::enable_if<std::is_same<unsigned long,T>::value, unsigned long>::type
 fast_mod_sum(T a,T b,T m)
 {
 	const T threshold = m-a;
@@ -28,7 +28,7 @@ fast_mod_sum(T a,T b,T m)
 }
 
 template<class T>
-typename boost::enable_if<boost::is_same<unsigned long,T>, unsigned long>::type
+typename std::enable_if<std::is_same<unsigned long,T>::value, unsigned long>::type
 fast_mod_subtract(T a,T b,T m)
 {
 	if (a>=b) return a-b;

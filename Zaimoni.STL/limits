@@ -9,6 +9,7 @@
 #include "boost_core.hpp"
 #include "lite_alg.hpp"
 #include "pure.C/native.h"
+#include "repair.STL/type_traits"
 
 // key structures defined here:
 // * alt_numeric_limits
@@ -30,28 +31,28 @@ namespace zaimoni {
 
 // is-negative support
 template<typename T>
-inline typename boost::enable_if<boost::type_traits::ice_and<std::numeric_limits<T>::is_specialized, std::numeric_limits<T>::is_signed>, bool>::type
+inline typename std::enable_if<boost::type_traits::ice_and<std::numeric_limits<T>::is_specialized, std::numeric_limits<T>::is_signed>::value, bool>::type
 is_negative(const T& x) {return 0>x;}
 
 template<typename T>
-inline typename boost::enable_if<boost::type_traits::ice_and<std::numeric_limits<T>::is_specialized, !std::numeric_limits<T>::is_signed>, bool>::type
+inline typename std::enable_if<boost::type_traits::ice_and<std::numeric_limits<T>::is_specialized, !std::numeric_limits<T>::is_signed>::value, bool>::type
 is_negative(const T& x) {return false;}
 
 // multiplicative order support
 template<typename T>
-inline typename boost::enable_if<boost::type_traits::ice_and<std::numeric_limits<T>::is_specialized, std::numeric_limits<T>::is_signed>, size_t>::type
+inline typename std::enable_if<boost::type_traits::ice_and<std::numeric_limits<T>::is_specialized, std::numeric_limits<T>::is_signed>::value, size_t>::type
 mult_order(const T& x) {return (1==x) ? 1 : (-1==x) ? 2 : 0;}
 
 template<typename T>
-inline typename boost::enable_if<boost::type_traits::ice_and<std::numeric_limits<T>::is_specialized, !std::numeric_limits<T>::is_signed>, size_t>::type
+inline typename std::enable_if<boost::type_traits::ice_and<std::numeric_limits<T>::is_specialized, !std::numeric_limits<T>::is_signed>::value, size_t>::type
 mult_order(const T& x) {return (1==x) ? 1 : 0;}
 
 template<typename T>
-inline typename boost::enable_if<boost::type_traits::ice_and<std::numeric_limits<T>::is_specialized, !std::numeric_limits<T>::is_integer>, bool>::type
+inline typename std::enable_if<boost::type_traits::ice_and<std::numeric_limits<T>::is_specialized, !std::numeric_limits<T>::is_integer>::value, bool>::type
 _is_zero_or_denormalized(const T& x) {return std::numeric_limits<T>::min_exponent-2==_exponent_of(x);}
 
 template<typename T>
-inline typename boost::enable_if<boost::type_traits::ice_and<std::numeric_limits<T>::is_specialized, !std::numeric_limits<T>::is_integer>, bool>::type
+inline typename std::enable_if<boost::type_traits::ice_and<std::numeric_limits<T>::is_specialized, !std::numeric_limits<T>::is_integer>::value, bool>::type
 _is_infinite_or_NAN(const T& x) {return std::numeric_limits<T>::max_exponent==_exponent_of(x);}
 
 template<typename T>
@@ -121,7 +122,7 @@ struct alt_numeric_limits<long double>
 
 // low-level diagnostics
 template<typename T>
-typename boost::enable_if<boost::is_floating_point<T>, signed int>::type
+typename std::enable_if<std::is_floating_point<T>::value, signed int>::type
 _exponent_of(const T& x)
 {
 	BOOST_STATIC_ASSERT(15>=alt_numeric_limits<T>::exponent_digits);
@@ -268,12 +269,12 @@ struct qualitative_computation<long double>
 
 // absolute value
 template<typename T>
-typename boost::enable_if<boost::type_traits::ice_and<std::numeric_limits<T>::is_specialized, std::numeric_limits<T>::is_signed>, typename qualitative_computation<T>::unsigned_type>::type
+typename std::enable_if<boost::type_traits::ice_and<std::numeric_limits<T>::is_specialized, std::numeric_limits<T>::is_signed>::value, typename qualitative_computation<T>::unsigned_type>::type
 abs(T x)
 {	return	(0<=x) ? x : -x;}
 
 template<typename T>
-typename boost::enable_if<boost::type_traits::ice_and<std::numeric_limits<T>::is_specialized, !std::numeric_limits<T>::is_signed>, T>::type
+typename std::enable_if<boost::type_traits::ice_and<std::numeric_limits<T>::is_specialized, !std::numeric_limits<T>::is_signed>::value, T>::type
 abs(T x)
 {	return	x;}
 
@@ -428,13 +429,13 @@ infinite_geometric_seriesV2(long double a, long double one_minus_r)
 
 // epsilon
 template<typename T>
-typename boost::enable_if<boost::is_floating_point<T>, T>::type
+typename std::enable_if<std::is_floating_point<T>::value, T>::type
 _epsilon(T x)
 {	return _scalb((T)1.0,_exponent_of(x)-(std::numeric_limits<T>::digits+1));	}
 
 // absolute value of difference
 template<typename T>
-typename boost::enable_if<boost::is_same<typename qualitative_computation<T>::unsigned_type,T>, T>::type
+typename std::enable_if<std::is_same<typename qualitative_computation<T>::unsigned_type,T>::value, T>::type
 abs_diff(const T LHS, const T RHS)
 {
 	if (LHS<=RHS)
@@ -444,7 +445,7 @@ abs_diff(const T LHS, const T RHS)
 }
 
 template<typename T>
-typename boost::disable_if<boost::is_same<typename qualitative_computation<T>::unsigned_type,T>, typename qualitative_computation<T>::unsigned_type>::type
+typename std::enable_if<!std::is_same<typename qualitative_computation<T>::unsigned_type,T>::value, typename qualitative_computation<T>::unsigned_type>::type
 abs_diff(const T LHS, const T RHS)
 {
 	if (LHS<=RHS)

@@ -1,12 +1,11 @@
 // boost_core.hpp
-// (C)2009 Kenneth Boyd, license: MIT.txt
+// (C)2009,2015 Kenneth Boyd, license: MIT.txt
 
 #ifndef ZAIMONI_BOOST_CORE_HPP
 #define ZAIMONI_BOOST_CORE_HPP 1
 
-// critical: type_traits, enable_if, static_assert, call_traits
+// critical: type_traits, static_assert, call_traits
 #include <boost/type_traits.hpp>
-#include <boost/utility/enable_if.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/call_traits.hpp>
 

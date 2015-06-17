@@ -5,6 +5,7 @@
 #ifndef ZAIMONI_STL_POD_HPP
 #define ZAIMONI_STL_POD_HPP 1
 
+#include "repair.STL/type_traits"
 #include "boost_core.hpp"
 #include <string.h>
 
@@ -15,17 +16,17 @@ namespace zaimoni
 // zero-initialize anything with trivial assignment
 //! \todo use boost:;type_traits_ice_... to specialize this for sizeof(char),sizeof(short), etc.; then test to see if GCC benefits
 template<typename T>
-inline typename boost::enable_if<boost::has_trivial_assign<T>, void>::type
+inline typename std::enable_if<boost::has_trivial_assign<T>::value, void>::type
 clear(T& x)
 {	memset(&x,0,sizeof(T));}
 
 template<typename T>
-typename boost::enable_if<boost::has_trivial_assign<T>, void>::type
+typename std::enable_if<boost::has_trivial_assign<T>::value, void>::type
 clear(T* x,size_t n)
 {	if (x) memset(x,0,n*sizeof(T));}
 
 template<size_t n, typename T>
-typename boost::enable_if<boost::has_trivial_assign<T>, void>::type
+typename std::enable_if<boost::has_trivial_assign<T>::value, void>::type
 clear(T* x)
 {	if (x) memset(x,0,n*sizeof(T));}
 

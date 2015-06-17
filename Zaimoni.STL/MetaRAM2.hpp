@@ -1,7 +1,7 @@
 // MetaRAM2.hpp
 // more C++ memory interface functions
 // these require the Iskandria memory manager
-// (C)2009,2010 Kenneth Boyd, license: MIT.txt
+// (C)2009,2010,2015 Kenneth Boyd, license: MIT.txt
 
 #ifndef ZAIMONI_METARAM2_HPP
 #define ZAIMONI_METARAM2_HPP 1
@@ -78,7 +78,7 @@ void FlushNULLFromArray(T**& _ptr, size_t StartIdx)
 	const size_t Limit = ArraySize(_ptr);
 	while(StartIdx<Limit)
 		{
-		if (NULL==_ptr[StartIdx++])
+		if (!_ptr[StartIdx++])
 			{
 			size_t Offset = 1;
 			StartIdx--;
@@ -136,7 +136,7 @@ inline void _safe_weak_delete_idx(T*& __ptr, size_t& _ptr_size, size_t i)
 // _new_buffer_nonNULL and _flush have to be synchronized for ISO C++
 // _new_buffer and _new_buffer_nonNULL_throws are in MetaRAM.hpp (they don't depend on Logging.h)
 template<typename T>
-typename boost::disable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>, T*>::type
+typename std::enable_if<!boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>::value, T*>::type
 _new_buffer_nonNULL(size_t i)
 {
 	T* tmp = new(std::nothrow) T[i];
@@ -145,7 +145,7 @@ _new_buffer_nonNULL(size_t i)
 }
 
 template<typename T>
-inline typename boost::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>, T*>::type
+inline typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>::value, T*>::type
 _new_buffer_nonNULL(size_t i)
 {
 	T* tmp = reinterpret_cast<T*>(calloc(i,sizeof(T)));
@@ -154,15 +154,15 @@ _new_buffer_nonNULL(size_t i)
 }
 
 template<typename T>
-inline typename boost::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>, T*>::type
+inline typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>::value, T*>::type
 _new_buffer_uninitialized(size_t i)
 {
-	if (((size_t)(-1))/sizeof(T)<i) return NULL; // CERT C MEM07
+	if (((size_t)(-1))/sizeof(T)<i) return 0; // CERT C MEM07
 	return reinterpret_cast<T*>(malloc(i*sizeof(T)));
 }
 
 template<typename T>
-inline typename boost::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>, T*>::type
+inline typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>::value, T*>::type
 _new_buffer_uninitialized_nonNULL(size_t i)
 {
 	if (((size_t)(-1))/sizeof(T)<i) // CERT C MEM07
@@ -173,7 +173,7 @@ _new_buffer_uninitialized_nonNULL(size_t i)
 }
 
 template<typename T>
-inline typename boost::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>, T*>::type
+inline typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>::value, T*>::type
 _new_buffer_uninitialized_nonNULL_throws(size_t i)
 {
 	if (((size_t)(-1))/sizeof(T)<i) throw std::bad_alloc(); // CERT C MEM07
@@ -183,14 +183,14 @@ _new_buffer_uninitialized_nonNULL_throws(size_t i)
 }
 
 template<typename T>
-inline typename boost::disable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>, void>::type
+inline typename std::enable_if<!boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>::value, void>::type
 _flush(T* _ptr)
 {
 	delete [] _ptr;
 }
 
 template<typename T>
-inline typename boost::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>, void>::type
+inline typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>::value, void>::type
 _flush(T* _ptr)
 {
 	free(_ptr);
@@ -200,7 +200,7 @@ template<typename T>
 #ifndef ZAIMONI_FORCE_ISO
 void _flush(T** _ptr)
 {
-	if (NULL!=_ptr)
+	if (_ptr)
 		{
 		size_t i = ArraySize(_ptr);
 #else
@@ -226,7 +226,7 @@ void CopyDataFromPtrToPtr(T*& dest, const T* src, size_t src_size)
 	if (!_resize(dest,src_size))
 		{
 		_flush(dest);
-		dest = NULL;
+		dest = 0;
 		return;
 		};
 	_value_copy_buffer(dest,src,src_size*sizeof(T));
@@ -237,13 +237,13 @@ void CopyDataFromPtrToPtr(T*& dest, const T* src, size_t src_size)
 // NOTE: boost::is_pod actually refers to is_pod-struct -- it implies trivial constructor when the standard doesn't.
 template<typename T>
 #ifndef ZAIMONI_FORCE_ISO
-inline typename boost::disable_if<boost::type_traits::ice_and<boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >, bool>::type
+inline typename std::enable_if<!boost::type_traits::ice_and<boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >::value, bool>::type
 __resize2(T*& _ptr, size_t n)
 {
 	return n==ArraySize(_ptr);
 }
 #else
-inline typename boost::disable_if<boost::type_traits::ice_and<boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >, bool>::type
+inline typename std::enable_if<!boost::type_traits::ice_and<boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >::value, bool>::type
 __resize2(size_t _ptr_size, size_t n)
 {
 	return n==_ptr_size;
@@ -251,7 +251,7 @@ __resize2(size_t _ptr_size, size_t n)
 #endif
 
 template<typename T>
-typename boost::enable_if<boost::type_traits::ice_and<boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >, bool>::type
+typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >::value, bool>::type
 __resize2(T*& _ptr, size_t n)
 {
 	if (n<=ArraySize(_ptr)) return _ptr = REALLOC(_ptr,n*sizeof(T)),true;
@@ -260,11 +260,11 @@ __resize2(T*& _ptr, size_t n)
 
 template<typename T>
 #ifndef ZAIMONI_FORCE_ISO
-typename boost::disable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >, bool>::type
+typename std::enable_if<!boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >::value, bool>::type
 _resize(T*& _ptr, size_t n)
 {
 #else
-typename boost::disable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >, bool>::type
+typename std::enable_if<!boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >::value, bool>::type
 _resize(T*& _ptr, size_t& _ptr_size, size_t n)
 {
 	assert(_ptr ? 0<_ptr_size : 0==_ptr_size);
@@ -272,7 +272,7 @@ _resize(T*& _ptr, size_t& _ptr_size, size_t n)
 	if (0>=n)
 		{
 		_flush(_ptr);
-		_ptr = NULL;
+		_ptr = 0;
 #ifdef ZAIMONI_FORCE_ISO
 		_ptr_size = 0;
 #endif
@@ -282,7 +282,7 @@ _resize(T*& _ptr, size_t& _ptr_size, size_t n)
 		{
 		_ptr = _new_buffer<T>(n);
 #ifndef ZAIMONI_FORCE_ISO
-		return NULL!=_ptr;
+		return 0!=_ptr;
 #else
 		if (!_ptr) return false;
 		_ptr_size = n;
@@ -314,11 +314,11 @@ _resize(T*& _ptr, size_t& _ptr_size, size_t n)
 
 template<typename T>
 #ifndef ZAIMONI_FORCE_ISO
-typename boost::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >, bool>::type
+typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >::value, bool>::type
 _resize(T*& _ptr, size_t n)
 {
 #else
-typename boost::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >, bool>::type
+typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >::value, bool>::type
 _resize(T*& _ptr, size_t& _ptr_size, size_t n)
 {
 	assert(_ptr ? 0<_ptr_size : 0==_ptr_size);
@@ -326,7 +326,7 @@ _resize(T*& _ptr, size_t& _ptr_size, size_t n)
 	if (0>=n)
 		{
 		_flush(_ptr);
-		_ptr = NULL;
+		_ptr = 0;
 #ifdef ZAIMONI_FORCE_ISO
 		_ptr_size = 0;
 #endif
@@ -358,7 +358,7 @@ _resize(T**& _ptr, size_t& _ptr_size, size_t n)
 	if (0>=n)
 		{
 		_flush(_ptr);
-		_ptr = NULL;
+		_ptr = 0;
 #ifdef ZAIMONI_FORCE_ISO
 		_ptr_size = 0;
 #endif
@@ -368,9 +368,9 @@ _resize(T**& _ptr, size_t& _ptr_size, size_t n)
 		{
 		_ptr = reinterpret_cast<T**>(calloc(n,sizeof(T*)));
 #ifndef ZAIMONI_FORCE_ISO
-		return NULL!=_ptr;
+		return 0!=_ptr;
 #else
-		if (NULL==_ptr) return false;
+		if (!_ptr) return false;
 		_ptr_size = n;
 		return true;
 #endif
@@ -402,13 +402,13 @@ _resize(T**& _ptr, size_t& _ptr_size, size_t n)
 
 template<typename T>
 #ifndef ZAIMONI_FORCE_ISO
-inline typename boost::disable_if<boost::type_traits::ice_and<boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >, void>::type
+inline typename std::enable_if<!boost::type_traits::ice_and<boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >::value, void>::type
 _shrink(T*& _ptr, size_t n)
 {
 	_resize(_ptr,n);
 }
 #else
-inline typename boost::disable_if<boost::type_traits::ice_and<boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >, void>::type
+inline typename std::enable_if<!boost::type_traits::ice_and<boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >::value, void>::type
 _shrink(T*& _ptr, size_t& _ptr_size, size_t n)
 {
 	_resize(_ptr,_ptr_size,n);
@@ -417,13 +417,13 @@ _shrink(T*& _ptr, size_t& _ptr_size, size_t n)
 
 template<typename T>
 #ifndef ZAIMONI_FORCE_ISO
-inline typename boost::enable_if<boost::type_traits::ice_and<boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >, void>::type
+inline typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >::value, void>::type
 _shrink(T*& _ptr, size_t n)
 {	//! \pre NULL!=_ptr, n<ArraySize(__ptr)
 	assert(_ptr);
 	assert(n<ArraySize(_ptr));
 #else
-inline typename boost::enable_if<boost::type_traits::ice_and<boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >, void>::type
+inline typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >::value, void>::type
 _shrink(T*& _ptr, size_t& _ptr_size, size_t n)
 {	//! \pre NULL!=_ptr, n<ArraySize(__ptr)
 	assert(_ptr);
@@ -444,7 +444,7 @@ void _shrink(T**& _ptr,size_t n)
 	if (0>=n)
 		{
 		_flush(_ptr);
-		_ptr = NULL;
+		_ptr = 0;
 		return;
 		}
 	size_t i = ArraySize(_ptr);
@@ -454,7 +454,7 @@ void _shrink(T**& _ptr,size_t n)
 }
 
 template<typename T>
-typename boost::disable_if<boost::type_traits::ice_and<boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >, void>::type
+typename std::enable_if<!boost::type_traits::ice_and<boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >::value, void>::type
 #ifndef ZAIMONI_FORCE_ISO
 _delete_idx(T*& _ptr, size_t i)
 {
@@ -468,7 +468,7 @@ _delete_idx(T*& _ptr, size_t& _ptr_size, size_t i)
 	if (1==_ptr_size)
 		{
 		_flush(_ptr);
-		_ptr = NULL;
+		_ptr = 0;
 #ifdef ZAIMONI_FORCE_ISO
 		_ptr_size = 0;
 #endif
@@ -487,7 +487,7 @@ _delete_idx(T*& _ptr, size_t& _ptr_size, size_t i)
 }
 
 template<typename T>
-typename boost::enable_if<boost::type_traits::ice_and<boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >, void>::type
+typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >::value, void>::type
 #ifndef ZAIMONI_FORCE_ISO
 _delete_idx(T*& _ptr, size_t i)
 {
@@ -504,7 +504,7 @@ _delete_idx(T*& _ptr, size_t& _ptr_size, size_t i)
 	if (1==_ptr_size)
 		{
 		_flush(_ptr);
-		_ptr = NULL;
+		_ptr = 0;
 #ifdef ZAIMONI_FORCE_ISO
 		_ptr_size = 0;
 #endif
@@ -535,7 +535,7 @@ _weak_resize(T**& _ptr, size_t& _ptr_size, size_t n)
 	if (0>=n)
 		{
 		_weak_flush(_ptr);
-		_ptr = NULL;
+		_ptr = 0;
 #ifdef ZAIMONI_FORCE_ISO
 		_ptr_size = 0;
 #endif
@@ -545,9 +545,9 @@ _weak_resize(T**& _ptr, size_t& _ptr_size, size_t n)
 		{
 		_ptr = reinterpret_cast<T**>(calloc(n,sizeof(T*)));
 #ifndef ZAIMONI_FORCE_ISO
-		return NULL!=_ptr;
+		return 0!=_ptr;
 #else
-		if (NULL==_ptr) return false;
+		if (!_ptr) return false;
 		_ptr_size = n;
 		return true;
 #endif
@@ -572,7 +572,7 @@ _weak_resize(T**& _ptr, size_t& _ptr_size, size_t n)
 }
 
 template<typename T,typename U>
-typename boost::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_assign<T>::value >, bool>::type
+typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_assign<T>::value >::value, bool>::type
 #ifndef ZAIMONI_FORCE_ISO
 _insert_slot_at(T*& _ptr,size_t i,U _default)
 {
@@ -622,13 +622,13 @@ bool _insert_slot_at(T**& _ptr, size_t& _ptr_size, size_t i, U* _default)
 
 template<typename T>
 #ifndef ZAIMONI_FORCE_ISO
-typename boost::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_assign<T>::value >, bool>::type
+typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_assign<T>::value >::value, bool>::type
 _insert_n_slots_at(T*& _ptr, size_t n, size_t i)
 {
 	const size_t _ptr_size_old = SafeArraySize(_ptr);
 	if (_resize(_ptr,_ptr_size_old+n))
 #else
-typename boost::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_assign<T>::value >, bool>::type
+typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_assign<T>::value >::value, bool>::type
 _insert_n_slots_at(T*& _ptr, size_t& _ptr_size, size_t n, size_t i)
 {
 	assert(_ptr ? 0<_ptr_size : 0==_ptr_size);
@@ -689,7 +689,7 @@ void _weak_delete_idx(T**& _ptr, size_t& _ptr_size, size_t i)
 	if (1==_ptr_size)
 		{
 		_weak_flush(_ptr);
-		_ptr = NULL;
+		_ptr = 0;
 #ifdef ZAIMONI_FORCE_ISO
 		_ptr_size = 0;
 #endif
@@ -704,7 +704,7 @@ void _weak_delete_idx(T**& _ptr, size_t& _ptr_size, size_t i)
 }
 
 template<typename T>
-typename boost::enable_if<boost::type_traits::ice_and<boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >, void>::type
+typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >::value, void>::type
 #ifndef ZAIMONI_FORCE_ISO
 _delete_n_slots_at(T*& _ptr, size_t n, size_t i)
 {
@@ -720,7 +720,7 @@ _delete_n_slots_at(T*& _ptr, size_t& _ptr_size, size_t n, size_t i)
 	if (0==i && _ptr_size<=n)
 		{
 		_flush(_ptr);
-		_ptr = NULL;
+		_ptr = 0;
 #ifdef ZAIMONI_FORCE_ISO
 		_ptr_size = 0;
 #endif
@@ -738,7 +738,7 @@ _delete_n_slots_at(T*& _ptr, size_t& _ptr_size, size_t n, size_t i)
 		}
 	else{
 		_flush(_ptr);
-		_ptr = NULL;
+		_ptr = 0;
 #ifdef ZAIMONI_FORCE_ISO
 		_ptr_size = 0;
 #endif
@@ -761,7 +761,7 @@ void _delete_n_slots_at(T**& _ptr, size_t& _ptr_size, size_t n, size_t i)
 	if (0==i && _ptr_size<=n)
 		{
 		_flush(_ptr);
-		_ptr = NULL;
+		_ptr = 0;
 #ifdef ZAIMONI_FORCE_ISO
 		_ptr_size = 0;
 #endif
@@ -772,7 +772,7 @@ void _delete_n_slots_at(T**& _ptr, size_t& _ptr_size, size_t n, size_t i)
 	size_t NImage = n;
 	do	{
 		_single_flush(_offset_ptr[--NImage]);
-		_offset_ptr[NImage] = NULL;
+		_offset_ptr[NImage] = 0;
 		}
 	while(0<NImage);
 	}
@@ -787,7 +787,7 @@ void _delete_n_slots_at(T**& _ptr, size_t& _ptr_size, size_t n, size_t i)
 		}
 	else{
 		free(_ptr);
-		_ptr = NULL;
+		_ptr = 0;
 #ifdef ZAIMONI_FORCE_ISO
 		_ptr_size = 0;
 #endif
@@ -795,7 +795,7 @@ void _delete_n_slots_at(T**& _ptr, size_t& _ptr_size, size_t n, size_t i)
 }
 
 template<typename T>
-typename boost::enable_if<boost::type_traits::ice_and<boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >, void>::type
+typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >::value, void>::type
 #ifndef ZAIMONI_FORCE_ISO
 _delete_n_slots(T*& _ptr, size_t* _indexes, size_t n)
 {
@@ -814,7 +814,7 @@ _delete_n_slots(T*& _ptr, size_t& _ptr_size, size_t* _indexes, size_t n)
 	if (_ptr_size<=n)
 		{
 		_flush(_ptr);
-		_ptr = NULL;
+		_ptr = 0;
 #ifdef ZAIMONI_FORCE_ISO
 		_ptr_size = 0;
 #endif
@@ -855,7 +855,7 @@ void _delete_n_slots(T**& _ptr, size_t& _ptr_size, size_t* _indexes, size_t n)
 	if (_ptr_size<=n)
 		{
 		_flush(_ptr);
-		_ptr = NULL;
+		_ptr = 0;
 #ifdef ZAIMONI_FORCE_ISO
 		_ptr_size = 0;
 #endif
@@ -893,7 +893,7 @@ void _weak_delete_n_slots_at(T**& _ptr, size_t& _ptr_size, size_t n, size_t i)
 	if (0==i && _ptr_size<=n)
 		{
 		_weak_flush(_ptr);
-		_ptr = NULL;
+		_ptr = 0;
 #ifdef ZAIMONI_FORCE_ISO
 		_ptr_size = 0;
 #endif
@@ -911,7 +911,7 @@ void _weak_delete_n_slots_at(T**& _ptr, size_t& _ptr_size, size_t n, size_t i)
 		}
 	else{
 		free(_ptr);
-		_ptr = NULL;
+		_ptr = 0;
 #ifdef ZAIMONI_FORCE_ISO
 		_ptr_size = 0;
 #endif

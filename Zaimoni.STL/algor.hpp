@@ -32,9 +32,9 @@ template<typename T, typename U,typename W,typename O1,typename O2>
 void
 _vector_op(T* LHS, const U* RHS, const W* RHS2, size_t Idx, O1 op, O2 op2)
 {
-	assert(NULL!=LHS);
-	assert(NULL!=RHS);
-	assert(NULL!=RHS2);
+	assert(LHS);
+	assert(RHS);
+	assert(RHS2);
 	assert(0<Idx);
 	do	{
 		--Idx;
@@ -47,9 +47,9 @@ template<typename T, typename U,typename W,typename O1,typename O2>
 void
 _vector_op(T* LHS, const U& RHS, const W* RHS2, size_t Idx, O1 op, O2 op2)
 {
-	assert(NULL!=LHS);
-	assert(NULL!=RHS);
-	assert(NULL!=RHS2);
+	assert(LHS);
+	assert(RHS);
+	assert(RHS2);
 	assert(0<Idx);
 	do	{
 		--Idx;
@@ -63,7 +63,7 @@ template<typename T,typename V>
 void
 _elementwise_op(T* LHS, size_t Idx, V op)
 {
-	assert(NULL!=LHS);
+	assert(LHS);
 	assert(0<Idx);
 	do	op(LHS[--Idx]);
 	while(0<Idx);
@@ -75,7 +75,7 @@ T _max(const T* const TargetArray, size_t Idx)
 {
 	boost::function_requires<boost::LessThanComparableConcept<T> >();
 	assert(0<Idx);
-	assert(NULL!=TargetArray);
+	assert(TargetArray);
 	T Tmp = TargetArray[--Idx];
 	while(0<Idx)
 		if (Tmp<TargetArray[--Idx])
@@ -88,7 +88,7 @@ V _max(const T* const TargetArray, size_t Idx, V (&transform)(U))
 {
 	boost::function_requires<boost::LessThanComparableConcept<V> >();
 	assert(0<Idx);
-	assert(NULL!=TargetArray);
+	assert(TargetArray);
 	V Tmp = transform(TargetArray[--Idx]);
 	while(0<Idx)
 		{
@@ -104,8 +104,8 @@ V _max(const T* const TargetArray, const X* const TargetArray2, size_t Idx, V (&
 {
 	boost::function_requires<boost::LessThanComparableConcept<V> >();
 	assert(0<Idx);
-	assert(NULL!=TargetArray);
-	assert(NULL!=TargetArray2);
+	assert(TargetArray);
+	assert(TargetArray2);
 	--Idx;
 	V Tmp = transform(TargetArray[Idx],TargetArray2[Idx]);
 	while(0<Idx)
@@ -123,7 +123,7 @@ T _min(const T* const TargetArray, size_t Idx)
 {
 	boost::function_requires<boost::LessThanComparableConcept<T> >();
 	assert(0<Idx);
-	assert(NULL!=TargetArray);
+	assert(TargetArray);
 	T Tmp = TargetArray[--Idx];
 	while(0<Idx)
 		if (TargetArray[--Idx]<Tmp)
@@ -136,7 +136,7 @@ V _min(const T* const TargetArray, size_t Idx, V (&transform)(U))
 {
 	boost::function_requires<boost::LessThanComparableConcept<V> >();
 	assert(0<Idx);
-	assert(NULL!=TargetArray);
+	assert(TargetArray);
 	V Tmp = transform(TargetArray[--Idx]);
 	while(0<Idx)
 		{
@@ -152,8 +152,8 @@ V _min(const T* const TargetArray, const X* const TargetArray2, size_t Idx, V (&
 {
 	boost::function_requires<boost::LessThanComparableConcept<V> >();
 	assert(0<Idx);
-	assert(NULL!=TargetArray);
-	assert(NULL!=TargetArray2);
+	assert(TargetArray);
+	assert(TargetArray2);
 	--Idx;
 	V Tmp = transform(TargetArray[Idx],TargetArray2[Idx]);
 	while(0<Idx)
@@ -187,7 +187,7 @@ sort_net_2(T* TargetArray, V (&transform)(U))
 }
 
 template<typename T, typename U>
-typename boost::enable_if<boost::is_convertible<T, U>, void>::type
+typename std::enable_if<boost::is_convertible<T, U>::value, void>::type
 sort_net_2(T* TargetArray, bool (&less_than)(U,U))
 {
 	if (less_than(TargetArray[1],TargetArray[0]))
@@ -214,7 +214,7 @@ sort_net_2(T** TargetArray, V (&transform)(U))
 }
 
 template<typename T, typename U>
-typename boost::enable_if<boost::is_convertible<T, U>, void>::type
+typename std::enable_if<boost::is_convertible<T, U>::value, void>::type
 sort_net_2(T** TargetArray, bool (&less_than)(U,U))
 {
 	if (less_than(*TargetArray[1],*TargetArray[0]))
@@ -231,9 +231,7 @@ void
 heapsort(T* const TargetArray, size_t N)
 {
 	boost::function_requires<boost::LessThanComparableConcept<T> >();
-	if (   NULL==TargetArray
-		|| 1==N)
-		return;
+	if (!TargetArray || 1==N) return;
 	if (2==N)
 		{
 		sort_net_2(TargetArray);
@@ -258,9 +256,7 @@ void
 heapsort(T* const TargetArray, size_t N, V (&transform)(U))
 {
 	boost::function_requires<boost::LessThanComparableConcept<V> >();
-	if (   NULL==TargetArray
-		|| 1==N)
-		return;
+	if (!TargetArray || 1==N) return;
 	if (2==N)
 		{
 		sort_net_2(TargetArray,transform);
@@ -281,12 +277,10 @@ heapsort(T* const TargetArray, size_t N, V (&transform)(U))
 }
 
 template<typename T, typename U>
-typename boost::enable_if<boost::is_convertible<T, U>, void>::type
+typename std::enable_if<boost::is_convertible<T, U>::value, void>::type
 heapsort(T* const TargetArray, size_t N, bool (&less_than)(U,U))
 {
-	if (   NULL==TargetArray
-		|| 1==N)
-		return;
+	if (!TargetArray || 1==N) return;
 	if (2==N)
 		{
 		sort_net_2(TargetArray,less_than);
@@ -311,7 +305,7 @@ void
 heapsort(T* const TargetArray)
 {
 	boost::function_requires<boost::LessThanComparableConcept<T> >();
-	if (NULL==TargetArray) return;
+	if (!TargetArray) return;
 	heapsort(TargetArray,ArraySize(TargetArray));
 }
 
@@ -319,15 +313,15 @@ template<typename T, typename U, typename V>
 void
 heapsort(T* const TargetArray, V (&transform)(U))
 {
-	if (NULL==TargetArray) return;
+	if (!TargetArray) return;
 	heapsort(TargetArray,ArraySize(TargetArray),transform);
 }
 
 template<typename T, typename U>
-typename boost::enable_if<boost::is_convertible<T, U>, void>::type
+typename std::enable_if<boost::is_convertible<T, U>::value, void>::type
 heapsort(T* const TargetArray, bool (&less_than)(U,U))
 {
-	if (NULL==TargetArray) return;
+	if (!TargetArray) return;
 	heapsort(TargetArray,ArraySize(TargetArray),less_than);
 }
 
@@ -337,9 +331,7 @@ void
 heapsort(T** const TargetArray, size_t N)
 {
 	boost::function_requires<boost::LessThanComparableConcept<T> >();
-	if (   NULL==TargetArray
-		|| 1==N)
-		return;
+	if (!TargetArray || 1==N) return;
 	if (2==N)
 		{
 		sort_net_2(TargetArray);
@@ -364,9 +356,7 @@ void
 heapsort(T** const TargetArray, size_t N, V (&transform)(U))
 {
 	boost::function_requires<boost::LessThanComparableConcept<V> >();
-	if (   NULL==TargetArray
-		|| 1==N)
-		return;
+	if (!TargetArray || 1==N) return;
 	if (2==N)
 		{
 		sort_net_2(TargetArray,transform);
@@ -387,12 +377,10 @@ heapsort(T** const TargetArray, size_t N, V (&transform)(U))
 }
 
 template<typename T, typename U>
-typename boost::enable_if<boost::is_convertible<T, U>, void>::type
+typename std::enable_if<boost::is_convertible<T, U>::value, void>::type
 heapsort(T** const TargetArray, size_t N, bool (&less_than)(U,U))
 {
-	if (   NULL==TargetArray
-		|| 1==N)
-		return;
+	if (!TargetArray || 1==N) return;
 	if (2==N)
 		{
 		sort_net_2(TargetArray,less_than);
@@ -417,7 +405,7 @@ void
 heapsort(T** const TargetArray)
 {
 	boost::function_requires<boost::LessThanComparableConcept<T> >();
-	if (NULL==TargetArray) return;
+	if (!TargetArray) return;
 	heapsort(TargetArray,ArraySize(TargetArray));
 }
 
@@ -425,15 +413,15 @@ template<typename T, typename U, typename V>
 void
 heapsort(T** const TargetArray, V (&transform)(U))
 {
-	if (NULL==TargetArray) return;
+	if (!TargetArray) return;
 	heapsort(TargetArray,ArraySize(TargetArray),transform);
 }
 
 template<typename T, typename U>
-typename boost::enable_if<boost::is_convertible<T, U>, void>::type
+typename std::enable_if<boost::is_convertible<T, U>::value, void>::type
 heapsort(T** const TargetArray, bool (&less_than)(U,U))
 {
-	if (NULL==TargetArray) return;
+	if (!TargetArray) return;
 	heapsort(TargetArray,ArraySize(TargetArray),less_than);
 }
 
@@ -443,7 +431,7 @@ void
 bubble_up(T* const TargetArray, size_t Idx, size_t N)
 {
 	boost::function_requires<boost::LessThanComparableConcept<T> >();
-	if (NULL==TargetArray) return;
+	if (!TargetArray) return;
 	while(++Idx<N && TargetArray[Idx]<TargetArray[Idx-1])
 		swap(TargetArray[Idx-1],TargetArray[Idx]);
 }
@@ -453,7 +441,7 @@ void
 bubble_up(T* const TargetArray, size_t Idx, size_t N, V (&transform)(U))
 {
 	boost::function_requires<boost::LessThanComparableConcept<V> >();
-	if (NULL==TargetArray) return;
+	if (!TargetArray) return;
 	const V Tmp = transform(TargetArray[Idx]);
 	while(++Idx<N && transform(TargetArray[Idx])<Tmp)
 		swap(TargetArray[Idx-1],TargetArray[Idx]);
@@ -463,7 +451,7 @@ template<typename T, typename U>
 void
 bubble_up(T* const TargetArray, size_t Idx, size_t N, bool (&less_than)(U,U))
 {
-	if (NULL==TargetArray) return;
+	if (!TargetArray) return;
 	while(++Idx<N && less_than(TargetArray[Idx],TargetArray[Idx-1]))
 		swap(TargetArray[Idx-1],TargetArray[Idx]);
 }
@@ -473,7 +461,7 @@ void
 bubble_down(T* const TargetArray, size_t Idx)
 {
 	boost::function_requires<boost::LessThanComparableConcept<T> >();
-	if (NULL==TargetArray) return;
+	if (!TargetArray) return;
 	while(0<Idx && TargetArray[Idx]<TargetArray[Idx-1])
 		{
 		swap(TargetArray[Idx-1],TargetArray[Idx]);
@@ -486,7 +474,7 @@ void
 bubble_down(T* const TargetArray, size_t Idx, V (&transform)(U))
 {
 	boost::function_requires<boost::LessThanComparableConcept<V> >();
-	if (NULL==TargetArray) return;
+	if (!TargetArray) return;
 	const V Tmp = transform(TargetArray[Idx]);
 	while(0<Idx && Tmp<transform(TargetArray[Idx-1]))
 		{
@@ -499,7 +487,7 @@ template<typename T, typename U>
 void
 bubble_down(T* const TargetArray, size_t Idx, bool (&less_than)(U,U))
 {
-	if (NULL==TargetArray) return;
+	if (!TargetArray) return;
 	while(0<Idx && less_than(TargetArray[Idx],TargetArray[Idx-1]))
 		{
 		swap(TargetArray[Idx-1],TargetArray[Idx]);
@@ -513,7 +501,7 @@ signed long
 supremum_search_sorted(const T* TargetArray, size_t StrictUB, typename boost::call_traits<T>::param_type supremum)
 {
 	boost::function_requires<boost::LessThanComparableConcept<T> >();
-	if (NULL==TargetArray) return -1;
+	if (!TargetArray) return -1;
 	if (supremum<TargetArray[0]) return -1;
 	
 	size_t LowIdx = 0;
@@ -537,7 +525,7 @@ signed long
 supremum_search_sorted(const T* TargetArray, size_t StrictUB, typename boost::call_traits<V>::param_type supremum, V (&transform)(U))
 {
 	boost::function_requires<boost::LessThanComparableConcept<V> >();
-	if (NULL==TargetArray) return -1;
+	if (!TargetArray) return -1;
 	if (supremum<transform(TargetArray[0])) return -1;
 	
 	size_t LowIdx = 0;
@@ -560,7 +548,7 @@ template<typename T, typename U, typename V, typename W>
 signed long
 supremum_search_sorted(const T* TargetArray, size_t StrictUB, const U& supremum,bool (&less_than)(V,W))
 {
-	if (NULL==TargetArray) return -1;
+	if (!TargetArray) return -1;
 	if (less_than(supremum,TargetArray[0])) return -1;
 	
 	size_t LowIdx = 0;
@@ -584,7 +572,7 @@ signed long
 strict_supremum_search_sorted(const T* TargetArray, size_t StrictUB, typename boost::call_traits<T>::param_type supremum)
 {
 	boost::function_requires<boost::LessThanComparableConcept<T> >();
-	if (NULL==TargetArray) return -1;
+	if (!TargetArray) return -1;
 	if (supremum<TargetArray[0]) return -1;
 	
 	size_t LowIdx = 0;
@@ -608,7 +596,7 @@ signed long
 strict_supremum_search_sorted(const T* TargetArray, size_t StrictUB, typename boost::call_traits<V>::param_type supremum, V (&transform)(U))
 {
 	boost::function_requires<boost::LessThanComparableConcept<V> >();
-	if (NULL==TargetArray) return -1;
+	if (!TargetArray) return -1;
 	if (supremum<transform(TargetArray[0])) return -1;
 	
 	size_t LowIdx = 0;
@@ -632,7 +620,7 @@ template<typename T, typename U, typename V>
 signed long
 strict_supremum_search_sorted(const T* TargetArray, size_t StrictUB, const U& supremum, bool (&less_than)(V,V))
 {
-	if (NULL==TargetArray) return -1;
+	if (!TargetArray) return -1;
 	if (less_than(supremum,TargetArray[0])) return -1;
 	
 	size_t LowIdx = 0;
@@ -679,7 +667,7 @@ bool
 boolean_search(const T* TargetArray, const size_t StrictUB, V (&transform)(U), size_t& Idx1)
 {
 	assert(0<StrictUB);
-	assert(NULL!=TargetArray);
+	assert(TargetArray);
 	size_t HighIdx = StrictUB;
 	do	if (transform(TargetArray[--HighIdx]))
 			{
@@ -696,7 +684,7 @@ bool
 symmetric_boolean_search(const T* TargetArray, const size_t StrictUB, bool (&less_than)(U,U), size_t& Idx1, size_t& Idx2)
 {
 	assert(1<StrictUB);
-	assert(NULL!=TargetArray);
+	assert(TargetArray);
 	size_t HighIdx = StrictUB;
 	do	{
 		size_t LowIdx = --HighIdx;
@@ -717,7 +705,7 @@ bool
 symmetric_boolean_search(const T* TargetArray, const size_t StrictUB, bool (&less_than)(U,U), W (&RHStransform)(V), size_t& Idx1, size_t& Idx2)
 {
 	assert(1<StrictUB);
-	assert(NULL!=TargetArray);
+	assert(TargetArray);
 	size_t HighIdx = StrictUB;
 	do	if (RHStransform(TargetArray[--HighIdx]))
 			{
@@ -739,7 +727,7 @@ bool
 boolean_search(const T* TargetArray, const size_t StrictUB, bool (&less_than)(U,U), size_t& Idx1, size_t& Idx2)
 {
 	assert(0<StrictUB);
-	assert(NULL!=TargetArray);
+	assert(TargetArray);
 	size_t HighIdx = StrictUB;
 	do	{
 		--HighIdx;
@@ -762,7 +750,7 @@ bool
 boolean_search(const T* TargetArray, const size_t StrictUB, bool (&less_than)(U,U), W (&RHStransform)(V), size_t& Idx1, size_t& Idx2)
 {
 	assert(1<StrictUB);
-	assert(NULL!=TargetArray);
+	assert(TargetArray);
 	size_t HighIdx = StrictUB;
 	do	if (RHStransform(TargetArray[--HighIdx]))
 			{

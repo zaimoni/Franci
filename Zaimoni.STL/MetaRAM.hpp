@@ -1,7 +1,7 @@
 /* MetaRAM.hpp */
 /* C++ interface to C++/C memory management libraries */
 /* limited functionality in C */
-/* (C)2009 Kenneth Boyd, license: MIT.txt */
+/* (C)2009,2015 Kenneth Boyd, license: MIT.txt */
 
 #ifndef ZAIMONI_METARAM_HPP
 #define ZAIMONI_METARAM_HPP 1
@@ -24,7 +24,7 @@
 namespace zaimoni	{
 //! for suppressing typecast on realloc
 template<typename T> inline
-typename boost::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >, T*>::type
+typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >::value, T*>::type
 REALLOC(T* Target, size_t newsize)
 {
 	return reinterpret_cast<T*>(realloc(Target,newsize));
@@ -48,7 +48,7 @@ DELETEARRAY(T* Target)
 
 // has trivial destructor is required to free rather than delete
 template<typename T>
-inline typename boost::enable_if<boost::has_trivial_destructor<T>, void>::type
+inline typename std::enable_if<boost::has_trivial_destructor<T>::value, void>::type
 FREE(T* Target)
 {
 	ZAIMONI_PROTECT_NONANSI_NONNULL_CHECKING_DEALLOCATORS(Target) free(Target);
@@ -60,7 +60,7 @@ DELETE_AND_NULL(T*& Target)
 	ZAIMONI_PROTECT_NONANSI_NONNULL_CHECKING_DEALLOCATORS(Target)
 	{
 	delete Target;
-	Target = NULL;
+	Target = 0;
 	}
 }
 
@@ -70,26 +70,26 @@ DELETEARRAY_AND_NULL(T*& Target)
 	ZAIMONI_PROTECT_NONANSI_NONNULL_CHECKING_DEALLOCATORS(Target)
 	{
 	delete [] Target;
-	Target = NULL;
+	Target = 0;
 	}
 }
 
 // has trivial destructor is required to free rather than delete
 template<typename T>
-inline typename boost::enable_if<boost::has_trivial_destructor<T>, void>::type
+inline typename std::enable_if<boost::has_trivial_destructor<T>::value, void>::type
 FREE_AND_NULL(T*& Target)
 {
 	ZAIMONI_PROTECT_NONANSI_NONNULL_CHECKING_DEALLOCATORS(Target)
 	{
 	free(Target);
-	Target = NULL;
+	Target = 0;
 	}
 }
 
 // indirection glue
 // _copy_buffer competes with STL std::copy
 template<typename T,typename U>
-typename boost::disable_if<is_polymorphic_base<U>, void>::type
+typename std::enable_if<!is_polymorphic_base<U>::value, void>::type
 _copy_buffer(U* dest, const T* src, size_t Idx)
 {
 	do	{
@@ -100,7 +100,7 @@ _copy_buffer(U* dest, const T* src, size_t Idx)
 }
 
 template<typename T>
-typename boost::disable_if<boost::has_trivial_assign<T>, void>::type
+typename std::enable_if<!boost::has_trivial_assign<T>::value, void>::type
 _copy_buffer(T* dest, const T* src, size_t Idx)
 {
 	do	{
@@ -111,7 +111,7 @@ _copy_buffer(T* dest, const T* src, size_t Idx)
 }
 
 template<typename T>
-inline typename boost::enable_if<boost::has_trivial_assign<T>, void>::type
+inline typename std::enable_if<boost::has_trivial_assign<T>::value, void>::type
 _copy_buffer(T* dest, const T* src, size_t Idx)
 {
 	memmove(dest,src,Idx*sizeof(T));
@@ -119,7 +119,7 @@ _copy_buffer(T* dest, const T* src, size_t Idx)
 
 // for resize
 template<typename T>
-typename boost::enable_if<has_MoveInto<T>, void>::type
+typename std::enable_if<has_MoveInto<T>::value, void>::type
 _copy_expendable_buffer(T* dest, T* src, size_t Idx)
 {
 	do	{
@@ -130,7 +130,7 @@ _copy_expendable_buffer(T* dest, T* src, size_t Idx)
 }
 
 template<typename T>
-inline typename boost::disable_if<has_MoveInto<T>, void>::type
+inline typename std::enable_if<!has_MoveInto<T>::value, void>::type
 _copy_expendable_buffer(T* dest, const T* src, size_t Idx)
 {	_copy_buffer(dest,src,Idx);	}
 
@@ -140,49 +140,46 @@ _copy_expendable_buffer(T** dest, const T** src, size_t Idx)
 {	_copy_buffer(dest,src,Idx);	}
 
 template<typename T>
-inline typename boost::disable_if<boost::type_traits::ice_or<boost::is_pointer<T>::value, boost::is_member_pointer<T>::value>, void>::type
+inline typename std::enable_if<!boost::type_traits::ice_or<boost::is_pointer<T>::value, boost::is_member_pointer<T>::value>::value, void>::type
 _value_copy_buffer(T* dest,const T* src, size_t Idx) {_copy_buffer(dest,src,Idx);}
 
 template<typename T,typename U>
-typename boost::enable_if<is_polymorphic<T>, void>::type
+typename std::enable_if<is_polymorphic<T>::value, void>::type
 _value_copy_buffer(U** dest,const T* const * src, size_t Idx)
 {	// T had better support the virtual member function CopyInto
 	do	{
-		if (NULL!=src[--Idx])
-			src[Idx]->CopyInto(dest[Idx]);
+		if (src[--Idx]) src[Idx]->CopyInto(dest[Idx]);
 		else{
 			_flush(dest[Idx]);
-			dest[Idx] = NULL;
+			dest[Idx] = 0;
 			}
 		}
 	while(0<Idx);
 }
 
 template<typename T>
-typename boost::enable_if<is_polymorphic<T>, void>::type
+typename std::enable_if<is_polymorphic<T>::value, void>::type
 _value_copy_buffer(T** dest,const T* const * src, size_t Idx)
 {	// T had better support the virtual member function CopyInto
 	do	{
-		if (NULL!=src[--Idx])
-			src[Idx]->CopyInto(dest[Idx]);
+		if (src[--Idx]) src[Idx]->CopyInto(dest[Idx]);
 		else{
 			_flush(dest[Idx]);
-			dest[Idx] = NULL;
+			dest[Idx] = 0;
 			}
 		}
 	while(0<Idx);
 }
 
 template<typename T>
-typename boost::disable_if<is_polymorphic<T>, void>::type
+typename std::enable_if<!is_polymorphic<T>::value, void>::type
 _value_copy_buffer(T** dest,const T* const * src, size_t Idx)
 {
 	do	{
-		if (NULL!=src[--Idx])
-			CopyInto(*src[Idx],dest[Idx]);
+		if (src[--Idx]) CopyInto(*src[Idx],dest[Idx]);
 		else{
 			_flush(dest[Idx]);
-			dest[Idx] = NULL;
+			dest[Idx] = 0;
 			}
 		}
 	while(0<Idx);
@@ -191,29 +188,23 @@ _value_copy_buffer(T** dest,const T* const * src, size_t Idx)
 // _vector_assign competes with std::fill_n
 // should be preferred to the _elementwise_op approach in algor.hpp
 template<typename T,typename U>
-typename boost::enable_if<is_polymorphic_base<U>, void>::type
+typename std::enable_if<is_polymorphic_base<U>::value, void>::type
 _vector_assign(U* dest, const T& src, size_t Idx)
 {
-	do	{
-		--Idx;
-		dest[Idx] = src;
-		}
+	do	dest[--Idx] = src;
 	while(0<Idx);
 }
 
 template<typename T>
-typename boost::disable_if<boost::type_traits::ice_and<boost::has_trivial_copy<T>::value,1==sizeof(T)>, void>::type
+typename std::enable_if<!boost::type_traits::ice_and<boost::has_trivial_copy<T>::value,1==sizeof(T)>::value, void>::type
 _vector_assign(T* dest,typename boost::call_traits<T>::param_type src, size_t Idx)
 {
-	do	{
-		--Idx;
-		dest[Idx] = src;
-		}
+	do	dest[--Idx] = src;
 	while(0<Idx);
 }
 
 template<typename T>
-inline typename boost::enable_if<boost::type_traits::ice_and<boost::has_trivial_copy<T>::value,1==sizeof(T)>, void>::type
+inline typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_copy<T>::value,1==sizeof(T)>::value, void>::type
 _vector_assign(T* dest,typename boost::call_traits<T>::param_type src, size_t Idx)
 {
 	memset(dest,src,Idx);
@@ -221,28 +212,28 @@ _vector_assign(T* dest,typename boost::call_traits<T>::param_type src, size_t Id
 
 template<typename T>
 inline bool
-_value_equal(const T& LHS, const T& RHS)
+_value_equal(const T& lhs, const T& rhs)
 {
-	return LHS==RHS;
+	return lhs==rhs;
 }
 
 template<typename T>
 bool
-_value_equal(const T* LHS, const T* RHS)
+_value_equal(const T* lhs, const T* rhs)
 {
-	if (NULL==LHS) return NULL==RHS;
-	if (NULL==RHS) return false;
-	return _value_equal(*LHS,*RHS);
+	if (!lhs) return !rhs;
+	if (!lhs) return false;
+	return _value_equal(*lhs,*rhs);
 }
 
 template<typename T>
 bool
-_value_vector_equal(const T& LHS, const T& RHS, size_t Idx)
+_value_vector_equal(const T& lhs, const T& rhs, size_t Idx)
 {
 	while(0<Idx)
 		{
 		--Idx;
-		if (!_value_equal(LHS[Idx],RHS[Idx])) return false;
+		if (!_value_equal(lhs[Idx],rhs[Idx])) return false;
 		};
 	return true;
 }
@@ -250,19 +241,19 @@ _value_vector_equal(const T& LHS, const T& RHS, size_t Idx)
 // _vector_equal competes with std::equal
 template<typename T,typename U>
 bool
-_vector_equal(const T& LHS, const U& RHS, size_t Idx)
+_vector_equal(const T& lhs, const U& rhs, size_t Idx)
 {
 	while(0<Idx)
 		{
 		--Idx;
-		if (LHS[Idx]!=RHS[Idx]) return false;
+		if (lhs[Idx]!=rhs[Idx]) return false;
 		};
 	return true;
 }
 
 // objects
 template<typename T>
-inline typename boost::disable_if<boost::has_trivial_destructor<T>, void>::type
+inline typename std::enable_if<!boost::has_trivial_destructor<T>::value, void>::type
 _single_flush(T* _ptr)
 {
 	delete _ptr;
@@ -278,7 +269,7 @@ _single_flush(T** _ptr)
 }
 
 template<typename T>
-inline typename boost::enable_if<boost::has_trivial_destructor<T>, void>::type
+inline typename std::enable_if<boost::has_trivial_destructor<T>::value, void>::type
 _single_flush(T* _ptr)
 {
 	free(_ptr);
@@ -294,32 +285,32 @@ _weak_flush(T** _ptr)
 // _new_buffer/_new_buffer_nonNULL_throws and _flush [MetaRAM2.hpp] have to be synchronized for ISO C++
 // _new_buffer_nonNULL is in MetaRAM2.hpp, as it depends on Logging.h
 template<typename T>
-inline typename boost::disable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>, T*>::type
+inline typename std::enable_if<!boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>::value, T*>::type
 _new_buffer(size_t Idx)
 {
 	return new(std::nothrow) T[Idx];
 }
 
 template<typename T>
-inline typename boost::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>, T*>::type
+inline typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>::value, T*>::type
 _new_buffer(size_t Idx)
 {
 	return reinterpret_cast<T*>(calloc(Idx,sizeof(T)));
 }
 
 template<typename T>
-inline typename boost::disable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>, T*>::type
+inline typename std::enable_if<!boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>::value, T*>::type
 _new_buffer_nonNULL_throws(size_t Idx)
 {
 	return new T[Idx];
 }
 
 template<typename T>
-inline typename boost::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>, T*>::type
+inline typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>::value, T*>::type
 _new_buffer_nonNULL_throws(size_t Idx)
 {
 	T* tmp = reinterpret_cast<T*>(calloc(Idx,sizeof(T)));
-	if (NULL==tmp) throw std::bad_alloc();
+	if (!tmp) throw std::bad_alloc();
 	return tmp;
 }
 
@@ -349,7 +340,7 @@ copy_c_string(char*& dest, const char* src)
 		FREE_AND_NULL(dest);
 	else{
 		char* Tmp2 = REALLOC(dest,strlen(src)+1);
-		if (NULL!=Tmp2)
+		if (Tmp2)
 			{
 			strcpy(Tmp2,src);
 			dest = Tmp2;

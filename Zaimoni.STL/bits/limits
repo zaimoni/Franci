@@ -17,7 +17,7 @@ union ldouble_ushort
 
 // cross-sign modulo arithmetic
 template<typename T>
-typename boost::enable_if<boost::is_same<unsigned long,T>, unsigned long>::type
+typename std::enable_if<std::is_same<unsigned long,T>::value, unsigned long>::type
 crosssign_modulo(typename qualitative_computation<T>::signed_type a,T m)
 {
 	T Tmp;
@@ -49,7 +49,7 @@ template<typename T>
 #ifdef __GNUC__
 inline
 #endif
-typename boost::enable_if<boost::is_same<long double,T>, unsigned int>::type
+typename std::enable_if<std::is_same<long double,T>::value, unsigned int>::type
 trailing_zero_bits(const T& x)
 {
 	//! \todo: start little-endian/big-endian preprocessing; current code is little-endian
@@ -76,7 +76,7 @@ trailing_zero_bits(const T& x)
 }
 
 template<typename T>
-typename boost::enable_if<boost::is_same<long double,T>, unsigned int>::type
+typename std::enable_if<std::is_same<long double,T>::value, unsigned int>::type
 trailing_zero_bits(const T& x, bool& SecondBitIsOne)
 {
 	//! \todo: start little-endian/big-endian preprocessing; current code is little-endian
@@ -108,7 +108,7 @@ trailing_zero_bits(const T& x, bool& SecondBitIsOne)
 }
 
 template<typename T>
-typename boost::enable_if<boost::is_same<long double,T>, unsigned int>::type
+typename std::enable_if<std::is_same<long double,T>::value, unsigned int>::type
 this_product_will_not_overflow(const T& x, const T& y)
 {	//! \return the maximum exponent that the product can accept without overflowing
 	if (0.0l==x) return UINT_MAX;
@@ -123,7 +123,7 @@ this_product_will_not_overflow(const T& x, const T& y)
 }
 
 template<typename T>
-typename boost::enable_if<boost::is_same<long double,T>, unsigned int>::type
+typename std::enable_if<std::is_same<long double,T>::value, unsigned int>::type
 this_product_will_not_underflow(const T& x, const T& y)
 {	//! \return the maximum exponent that the product can accept without underflowing
 	if (0.0l==x) return UINT_MAX;
@@ -138,7 +138,7 @@ this_product_will_not_underflow(const T& x, const T& y)
 }
 
 template<typename T>
-typename boost::enable_if<boost::is_same<long double,T>, bool>::type
+typename std::enable_if<std::is_same<long double,T>::value, bool>::type
 safe_product(const T& x, const T& y)
 {	//! \return true iff the product neither overflows nor underflows
 	if (   this_product_will_not_overflow(x,y)
@@ -148,7 +148,7 @@ safe_product(const T& x, const T& y)
 }
 
 template<typename T>
-typename boost::enable_if<boost::is_same<long double,T>, unsigned int>::type
+typename std::enable_if<std::is_same<long double,T>::value, unsigned int>::type
 this_product_overflows(const T& x, const T& y)
 {	//! \return how much the exponent overflows
 	if (0.0l==x) return 0;
@@ -163,7 +163,7 @@ this_product_overflows(const T& x, const T& y)
 }
 
 template<typename T>
-typename boost::enable_if<boost::is_same<long double,T>, unsigned int>::type
+typename std::enable_if<std::is_same<long double,T>::value, unsigned int>::type
 this_product_underflows(const T& x, const T& y)
 {	//! \return how much the exponent underflows
 	if (0.0l==x) return 0;
@@ -179,7 +179,7 @@ this_product_underflows(const T& x, const T& y)
 
 // don't want to drag in Arithmetic.hpp here for std::abs
 template<typename T>
-typename boost::enable_if<boost::is_same<long double,T>, unsigned long>::type
+typename std::enable_if<std::is_same<long double,T>::value, unsigned long>::type
 this_power_will_not_overflow(T x)
 {
 	signed int x_exponent = _exponent_of(x);
@@ -188,7 +188,7 @@ this_power_will_not_overflow(T x)
 }
 
 template<typename T>
-typename boost::enable_if<boost::is_same<long double,T>, unsigned long>::type
+typename std::enable_if<std::is_same<long double,T>::value, unsigned long>::type
 this_power_will_overflow(T x)
 {
 	signed int x_exponent = _exponent_of(x);
@@ -197,7 +197,7 @@ this_power_will_overflow(T x)
 }
 
 template<typename T>
-typename boost::enable_if<boost::is_same<long double,T>, unsigned long>::type
+typename std::enable_if<std::is_same<long double,T>::value, unsigned long>::type
 this_power_will_not_underflow(T x)
 {
 	signed int x_exponent = _exponent_of(x);
@@ -206,7 +206,7 @@ this_power_will_not_underflow(T x)
 }
 
 template<typename T>
-typename boost::enable_if<boost::is_same<long double,T>, unsigned long>::type
+typename std::enable_if<std::is_same<long double,T>::value, unsigned long>::type
 this_power_will_underflow(T x)
 {
 	signed int x_exponent = _exponent_of(x);
@@ -215,7 +215,7 @@ this_power_will_underflow(T x)
 }
 
 template<typename T>
-typename boost::enable_if<boost::is_same<long double,T>, bool>::type
+typename std::enable_if<std::is_same<long double,T>::value, bool>::type
 opp_sign_addition_subtractive_cancels(const T& x, const T& y)
 {
 	const signed int x_exponent = _exponent_of(x);
@@ -236,7 +236,7 @@ opp_sign_addition_subtractive_cancels(const T& x, const T& y)
 // * 1,2+: need result exponent 1 higher
 // * 2+,2+: safe
 template<typename T>
-typename boost::enable_if<boost::is_same<long double,T>, bool>::type
+typename std::enable_if<std::is_same<long double,T>::value, bool>::type
 same_sign_addition_has_epsilon(const T& x, const T& y)
 {
 	signed int x_exponent = _exponent_of(x);
@@ -277,7 +277,7 @@ same_sign_addition_has_epsilon(const T& x, const T& y)
 }
 
 template<typename T>
-typename boost::enable_if<boost::is_same<long double,T>, bool>::type
+typename std::enable_if<std::is_same<long double,T>::value, bool>::type
 addition_has_epsilon(const T& x, const T& y)
 {
 	if (0.0l==x || 0.0l==y)
@@ -288,7 +288,7 @@ addition_has_epsilon(const T& x, const T& y)
 }
 
 template<typename T>
-typename boost::enable_if<boost::is_same<long double,T>, bool>::type
+typename std::enable_if<std::is_same<long double,T>::value, bool>::type
 addition_subtractive_cancels(const T& x, const T& y)
 {
 	if (0.0l==x || 0.0l==y)
@@ -300,7 +300,7 @@ addition_subtractive_cancels(const T& x, const T& y)
 
 // this version has x preprocessed
 template<typename T>
-typename boost::enable_if<boost::is_same<T,long double>, bool>::type
+typename std::enable_if<std::is_same<T,long double>::value, bool>::type
 _same_sign_addition_has_epsilon(T x, T y, signed int x_exponent, bool x_second_bit, signed int x_trailing_zeros)
 {
 	signed int y_exponent = _exponent_of(y);
@@ -339,7 +339,7 @@ _same_sign_addition_has_epsilon(T x, T y, signed int x_exponent, bool x_second_b
 
 // safe operation detection
 template<typename T>
-typename boost::enable_if<boost::type_traits::ice_and<boost::is_integral<T>::value, std::numeric_limits<T>::is_signed>, bool>::type
+typename std::enable_if<boost::type_traits::ice_and<boost::is_integral<T>::value, std::numeric_limits<T>::is_signed>::value, bool>::type
 safe_sum(T x, T y)
 {	//! \return true iff the sum doesn't overflow or underflow
 	if (0<=x) return (y<=qualitative_computation<T>::max-x);
@@ -348,14 +348,14 @@ safe_sum(T x, T y)
 }
 
 template<typename T>
-inline typename boost::enable_if<boost::type_traits::ice_and<boost::is_integral<T>::value, !std::numeric_limits<T>::is_signed>, bool>::type
+inline typename std::enable_if<boost::type_traits::ice_and<boost::is_integral<T>::value, !std::numeric_limits<T>::is_signed>::value, bool>::type
 safe_sum(T x, T y)
 {	//! \return true iff the sum doesn't overflow or underflow
 	return (y<=qualitative_computation<T>::max-x);
 }
 
 template<typename T>
-typename boost::enable_if<boost::type_traits::ice_and<boost::is_integral<T>::value, std::numeric_limits<T>::is_signed>, bool>::type
+typename std::enable_if<boost::type_traits::ice_and<boost::is_integral<T>::value, std::numeric_limits<T>::is_signed>::value, bool>::type
 safe_product(T x, T y)
 {	//! \return true iff the sum doesn't overflow or underflow
 	if (0==x) return true;
@@ -376,7 +376,7 @@ safe_product(T x, T y)
 }
 
 template<typename T>
-inline typename boost::enable_if<boost::type_traits::ice_and<boost::is_integral<T>::value, !std::numeric_limits<T>::is_signed>, bool>::type
+inline typename std::enable_if<boost::type_traits::ice_and<boost::is_integral<T>::value, !std::numeric_limits<T>::is_signed>::value, bool>::type
 safe_product(T x, T y)
 {	//! \return true iff the sum doesn't overflow or underflow
 	if (0==x) return true;
@@ -386,7 +386,7 @@ safe_product(T x, T y)
 
 // definitely not for users
 template<typename T>
-typename boost::enable_if<boost::is_floating_point<T>, unsigned int>::type
+typename std::enable_if<std::is_floating_point<T>::value, unsigned int>::type
 mantissa_risky_digits_precomputed(unsigned int LHS_digits,unsigned int RHS_digits)
 {
 	if (   1==LHS_digits
@@ -399,14 +399,14 @@ mantissa_risky_digits_precomputed(unsigned int LHS_digits,unsigned int RHS_digit
 
 // not for users
 template<typename T>
-inline typename boost::enable_if<boost::is_floating_point<T>, unsigned int>::type
+inline typename std::enable_if<std::is_floating_point<T>::value, unsigned int>::type
 mantissa_risky_digits(const T& x, const T& y)
 {	return mantissa_risky_digits_precomputed<T>(mantissa_digits(x),mantissa_digits(y));
 }
 
 // not for users
 template<typename T>
-typename boost::enable_if<boost::is_floating_point<T>, bool>::type
+typename std::enable_if<std::is_floating_point<T>::value, bool>::type
 mantissa_safe_product(const T& x, const T& y)
 {	//! \return true iff will not incur epsilon
 	return 0==mantissa_risky_digits(x,y);
@@ -414,7 +414,7 @@ mantissa_safe_product(const T& x, const T& y)
 
 // MingW32: calling mantissa_safe_product backfires on object file size
 template<typename T>
-typename boost::enable_if<boost::is_same<long double,T>, bool>::type
+typename std::enable_if<std::is_same<long double,T>::value, bool>::type
 completely_safe_product(const T& x, const T& y)
 {	//! \return true iff the product neither overflows nor underflows, and will not incur epsilon
 	if (   this_product_will_not_overflow(x,y)
@@ -432,7 +432,7 @@ completely_safe_product(const T& x, const T& y)
 
 // normalization adapters
 template<typename T>
-typename boost::enable_if<boost::is_same<long double,T>, long double>::type
+typename std::enable_if<std::is_same<long double,T>::value, long double>::type
 normalize(const T x)
 {
 	if (	_is_infinite_or_NAN(x)
@@ -442,7 +442,7 @@ normalize(const T x)
 }
 
 template<typename T>
-typename boost::enable_if<boost::is_same<T,long double>, long double>::type
+typename std::enable_if<std::is_same<T,long double>::value, long double>::type
 _scalb(T x,const signed long exp)
 {
 	if (0==exp) return x;
@@ -476,7 +476,7 @@ _scalb(T x,const signed long exp)
 }
 
 template<typename T>
-typename boost::enable_if<boost::is_same<T,long double>, long double>::type
+typename std::enable_if<std::is_same<T,long double>::value, long double>::type
 force_exponent(T x,const signed long exp)
 {
 	if (0.0l==x) return x;
@@ -506,7 +506,7 @@ force_exponent(T x,const signed long exp)
 }
 
 template<typename T>
-typename boost::enable_if<boost::is_same<T,long double>, long double>::type
+typename std::enable_if<std::is_same<T,long double>::value, long double>::type
 scaled_product(const T& x, const T& y, signed int scaling_factor)
 {
 	if (0==scaling_factor) return x*y;
@@ -531,7 +531,7 @@ scaled_product(const T& x, const T& y, signed int scaling_factor)
 }
 
 template<typename T>
-typename boost::enable_if<boost::is_same<T,long double>, long double>::type
+typename std::enable_if<std::is_same<T,long double>::value, long double>::type
 infinite_geometric_series(T a, T r)
 {
 	if (1.0l<=r) return _copysign(std::numeric_limits<long double>::infinity(),a);
@@ -540,7 +540,7 @@ infinite_geometric_series(T a, T r)
 }
 
 template<typename T>
-typename boost::enable_if<boost::is_same<T,long double>, long double>::type
+typename std::enable_if<std::is_same<T,long double>::value, long double>::type
 infinite_geometric_seriesV2(T a, T one_minus_r)
 {
 	if (0.0l>=one_minus_r) return _copysign(std::numeric_limits<long double>::infinity(),a);

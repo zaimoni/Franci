@@ -37,7 +37,7 @@ downheap(T* const TargetArray,size_t v,size_t N, V (&transform)(U))
 }
 
 template<typename T, typename U>
-typename boost::enable_if<boost::is_convertible<T, U>, void>::type
+typename std::enable_if<boost::is_convertible<T, U>::value, void>::type
 downheap(T* const TargetArray,size_t v,size_t N, bool (&less_than)(U,U))
 {
 	size_t w = 2*v+1;
@@ -85,7 +85,7 @@ downheap(T** const TargetArray,size_t v,size_t N, V (&transform)(U))
 }
 
 template<typename T, typename U>
-typename boost::enable_if<boost::is_convertible<T, U>, void>::type
+typename std::enable_if<boost::is_convertible<T, U>::value, void>::type
 downheap(T** const TargetArray,size_t v,size_t N, bool (&less_than)(U,U))
 {
 	size_t w = 2*v+1;
