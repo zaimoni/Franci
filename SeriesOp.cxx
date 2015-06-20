@@ -303,8 +303,7 @@ bool SeriesOperation::EqualAux2(const MetaConcept& rhs) const
 				{	// Not really that much recovery at this level
 				UnconditionalRAMFailure();
 				}
-			if (!VRExpression->ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(*VR_rhs.ArgArray[INDEXVAR_IDX],*ArgArray[INDEXVAR_IDX],SetLHSToRHS,AreSyntacticallyEqual))
-				FATAL(AlphaRetValAssumption);	// This stage of the test should be completely safe
+			SUCCEED_OR_DIE(VRExpression->ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(*VR_rhs.ArgArray[INDEXVAR_IDX],*ArgArray[INDEXVAR_IDX],SetLHSToRHS,AreSyntacticallyEqual));
 			return *ArgArray[EXPRESSION_IDX]==*VRExpression;
 			}
 		}

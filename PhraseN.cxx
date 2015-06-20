@@ -209,8 +209,8 @@ PhraseNArg::CanConstruct(const MetaConcept* const * src, size_t KeywordIdx)
 		ExactType_MC Tmp = CanConstructNonPostfix(src,KeywordIdx);
 		if (Unknown_MC!=Tmp) return Tmp;
 		Tmp = CanConstructPostfix(src,KeywordIdx);
-		if (Unknown_MC!=Tmp) return Tmp;
-		FATAL(AlphaRetValAssumption);
+		SUCCEED_OR_DIE(Unknown_MC!=Tmp);
+		return Tmp;
 		}
 	catch(const syntax_error&)
 		{
