@@ -93,6 +93,27 @@ ENUMERATE_TYPE_TRAIT(is_floating_point,float);
 ENUMERATE_TYPE_TRAIT(is_floating_point,double);
 ENUMERATE_TYPE_TRAIT(is_floating_point,long double);
 
+// C++11 would also have to account for std::nullptr
+template<class T>
+struct is_fundamental : public integral_constant<bool,is_integral<T>::value || is_floating_point<T>::value || is_void<T>::value>
+{
+};
+
+template<class T>
+struct is_arithmetic : public integral_constant<bool,is_integral<T>::value || is_floating_point<T>::value>
+{
+};
+
+template<class T>
+struct is_signed : public integral_constant<bool,is_arithmetic<T>::value && (T(0)>T(-1))>
+{
+};
+
+template<class T>
+struct is_unsigned : public integral_constant<bool,is_arithmetic<T>::value && (T(0)<T(-1))>
+{
+};
+
 template<class T>
 struct is_array : public false_type
 {
@@ -126,6 +147,8 @@ template<class T>
 struct is_lvalue_reference<T&> : public true_type
 {
 };
+
+// rvalue references don't work in C++98 so don't fill them in
 
 // we should be able to do is_arithmetic and is_fundamental
 
