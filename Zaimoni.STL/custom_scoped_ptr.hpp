@@ -14,7 +14,7 @@ public:
 	typedef void cleanfunc(T*&);
 
 	custom_scoped_ptr(cleanfunc& cleanup) : _ptr(0),_cleanup(cleanup) {};
-	~custom_scoped_ptr() {if (!_ptr) _cleanup(_ptr);};
+	~custom_scoped_ptr() {if (_ptr) _cleanup(_ptr);};
 
 	void operator=(T* src)
 	{
