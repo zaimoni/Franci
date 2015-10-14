@@ -9,13 +9,14 @@
 //  1st line of top half, or title bar: Franci
 
 // headers
-using namespace std;
 #include <memory.h>
 #include <fstream>
 #include "keyword1.hxx"
 #include "OS.hxx"
 #include "CmdShell.hxx"
 #include "VConsole.hxx"
+
+using namespace std;
 
 // NOTE: Scriptfile will mess with input buffer
 // NOTE: logfile requires tapping RET_handler, MetaSay
