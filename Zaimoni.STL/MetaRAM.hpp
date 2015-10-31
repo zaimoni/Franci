@@ -6,8 +6,8 @@
 #ifndef ZAIMONI_METARAM_HPP
 #define ZAIMONI_METARAM_HPP 1
 
-#include <string.h>
 #include "flat_alg.h"
+#include <string.h>
 #include <stdlib.h>
 
 /* ZAIMONI_PROTECT_NONANSI_NONNULL_CHECKING_DEALLOCATORS : code fragment suitable as a guard clause for non-ansi free/delete that can't handle NULL */
