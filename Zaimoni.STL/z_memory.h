@@ -1,6 +1,6 @@
 /* z_memory.h */
 /* external header for Zaimoni.com memory manager */
-/* (C)2009 Kenneth Boyd, license: MIT.txt */
+/* (C)2009,2015 Kenneth Boyd, license: MIT.txt */
 
 #ifndef ZAIMONI_STL_Z_MEMORY_H
 #define ZAIMONI_STL_Z_MEMORY_H 1
@@ -44,6 +44,36 @@ inline size_t _cdecl _msize(const void* memblock)
 	return ((const size_t*)((const char*)(memblock)-sizeof(size_t)))[0];
 #endif
 }
+
+#ifdef __cplusplus
+namespace zaimoni {
+template <class T> inline size_t
+ArraySize(T* memblock)
+{	/* FORMALLY CORRECT: Kenneth Boyd, 12/08/2004 */
+	return _msize(memblock)/sizeof(T);
+}
+
+template <class T> inline size_t
+SafeArraySize(T* memblock)
+{	/* FORMALLY CORRECT: Kenneth Boyd, 11/2/2005 */
+	return (memblock) ? _msize(memblock)/sizeof(T) : 0;
+}
+
+template <class T> inline size_t
+ArraySize(const T* memblock)
+{	/* FORMALLY CORRECT: Kenneth Boyd, 12/08/2004 */
+	return _msize(const_cast<T*>(memblock))/sizeof(T);
+}
+
+template <class T> inline size_t
+SafeArraySize(const T* memblock)
+{	/* FORMALLY CORRECT: Kenneth Boyd, 11/2/2005 */
+	return (memblock) ? _msize(const_cast<T*>(memblock))/sizeof(T) : 0;
+}
+
+}	/* namespace zaimoni */
+#endif
+
 
 /*!
  * checks that memory block in question is not only dynamically allocated, but is safe to free/realloc

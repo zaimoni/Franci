@@ -14,35 +14,6 @@
 
 namespace zaimoni	{
 
-// following doesn't belong in z_memory.h at all
-#ifndef ZAIMONI_FORCE_ISO
-template <class T> inline size_t
-ArraySize(T* memblock)
-{	// FORMALLY CORRECT: Kenneth Boyd, 12/08/2004
-	assert(memblock);
-	return _msize(memblock)/sizeof(T);
-}
-
-template <class T> inline size_t
-SafeArraySize(T* memblock)
-{	// FORMALLY CORRECT: Kenneth Boyd, 11/2/2005
-	return (memblock) ? _msize(memblock)/sizeof(T) : 0;
-}
-
-template <class T> inline size_t
-ArraySize(const T* memblock)
-{	// FORMALLY CORRECT: Kenneth Boyd, 12/08/2004
-	assert(memblock);
-	return _msize(const_cast<T*>(memblock))/sizeof(T);
-}
-
-template <class T> inline size_t
-SafeArraySize(const T* memblock)
-{	// FORMALLY CORRECT: Kenneth Boyd, 11/2/2005
-	return (memblock) ? _msize(const_cast<T*>(memblock))/sizeof(T) : 0;
-}
-#endif
-
 template <class T> void
 BLOCKDELETEARRAY(T**& Target)
 {
