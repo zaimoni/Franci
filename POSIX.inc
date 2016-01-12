@@ -16,8 +16,9 @@ OBJEXT = o
 CFLAGS = -fargument-alias -finline -O3 -Wall -Wno-long-long --pedantic -fgcse-sm -fgcse-las -fsched-spec-load -fsee -fipa-pta -ftree-loop-im -fivopts -ftree-vectorize -falign-functions=1 -falign-jumps=1  -falign-loops=1 -falign-labels=1 -Wdisabled-optimization -Winline --param max-inline-insns-single=500 -DNDEBUG
 CXXFLAGS =
 ARCH_FLAGS = -mwindows -mno-cygwin -march=pentium -mtune=pentium3
-LINK_FLAGS = 
+ARCH2_FLAGS = -mconsole -mno-cygwin -march=pentium -mtune=pentium3
+LINK_FLAGS = -Llib/host.franci
 
-OTHER_INCLUDEDIR = -I /MingWin.aux/Headers.lib
+OTHER_INCLUDEDIR =
 C_MACROS = 
 CXX_MACROS = -D__STDC_LIMIT_MACROS

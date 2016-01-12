@@ -6,7 +6,7 @@
 include POSIX.inc
 
 # GNU targets we know about
-all: Franci.exe
+all: Franci.exe Franci_console.exe
 
 clean:
 	rm -f *.o *.exe lib/host.zcc/*.a
@@ -22,6 +22,10 @@ Franci.exe : make_Zaimoni_STL $(OBJECTS_FRANCI_LINK_PRIORITY)
 	g++ -oFranci.exe $(LINK_FLAGS) $(ARCH_FLAGS) $(OBJECTS_FRANCI) -lz_console -lz_csvtable -lz_langconf -lz_logging -lz_log_adapter -lz_format_util -lz_stdio_c -lz_memory
 	strip --preserve-dates --strip-unneeded Franci.exe
 
+Franci_console.exe : make_Zaimoni_STL $(OBJECTS_FRANCI_CONSOLE_LINK_PRIORITY)
+	g++ -oFranci_console.exe $(LINK_FLAGS) $(ARCH2_FLAGS) $(OBJECTS_FRANCI_CONSOLE) -lz_console -lz_csvtable -lz_langconf -lz_logging -lz_log_adapter -lz_format_util -lz_stdio_c -lz_memory
+	strip --preserve-dates --strip-unneeded Franci_console.exe
+
 # inference rules
 # defines
 # processing details
@@ -30,3 +34,5 @@ Franci.exe : make_Zaimoni_STL $(OBJECTS_FRANCI_LINK_PRIORITY)
 	 -DNDEBUG \
 	 -o $*.o -c -xc++ -pipe $<
 	strip --preserve-dates --strip-unneeded $*.o
+
+include POSIX2.inc
