@@ -1108,35 +1108,6 @@ void Console::SaysError(const char* Message)		// red text; consider sound effect
 	MetaSay(Message,strlen(Message),Text_Red);
 } 
 
-void
-Console::SaysCompilerError(const char* const Filename, unsigned long LineNumber ,const char* Message)
-{	// FORMALLY CORRECT, Kenneth Boyd 11/24/2008
-	char Buffer[10];
-	z_umaxtoa(LineNumber,Buffer,10);
-	char* Message2 = _new_buffer<char>(ZAIMONI_LEN_WITH_NULL(strlen(Filename)+strlen(Buffer)+strlen(Message)+9));
-	if (Message2)
-		{
-		size_t Offset = 0;
-		strcpy(Message2,Filename);
-		Offset += strlen(Filename);
-		strcpy(Message2+Offset,", line ");
-		Offset += 7;
-		strcpy(Message2+Offset,Buffer);
-		Offset += strlen(Buffer);
-		Message2[Offset] = ':';
-		Message2[Offset+1] = ' ';
-		Offset += 2;
-		strcpy(Message2+Offset,Message);
-		MetaSay(Message2,strlen(Message),Text_Red);
-		free(Message2);
-		}
-	else{
-		MetaSay(Filename,strlen(Filename),Text_Red);
-		MetaSay(Buffer,strlen(Buffer),Text_Red);
-		MetaSay(Message,strlen(Message),Text_Red);
-		}
-}
-
 // #1: parse how many lines are required
 static int ParseMessageIntoLines(const char* x, size_t x_len, size_t* const LineBreakTable, const size_t width)
 {	// Message is assumed not to contain formatting characters.

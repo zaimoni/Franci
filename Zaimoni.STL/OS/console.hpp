@@ -45,7 +45,6 @@ public:
 	static void SaysNormal(const char* x) {SaysNormal(x,strlen(x));};	// white text
 	static void SaysWarning(const char* Message);	// yellow text; consider sound effects
 	static void SaysError(const char* Message);	// red text; consider sound effects
-	static void SaysCompilerError(const char* const Filename, unsigned long LineNumber, const char* Message);
 
 	static void ResumeLogFile();
 
