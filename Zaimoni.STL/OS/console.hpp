@@ -32,7 +32,7 @@ class Console
 {
 public:
 	Console();
-	virtual ~Console();
+	virtual ~Console();	// use this as out-of-line anchor method for vtable
 
 	void UseScript(const char* ScriptName);
 	void CleanLogFile();
@@ -40,8 +40,6 @@ public:
 
 	static void EndLogFile();
 	static int LookAtConsoleInput();
-	static void DrawUserBar();
-	static void PutCursorAtUserHome();
 	static void ScrollUserScreenOneLine();
 	static void SaysNormal(const char* x,size_t x_len);					// white text
 	static void SaysNormal(const char* x) {SaysNormal(x,strlen(x));};	// white text
@@ -57,14 +55,13 @@ public:
 	static void LogUserInput(const char* x) {LogUserInput(x,strlen(x));};
 protected:
 	// next three must be implemented by derived classes
-	virtual void LinkInScripting();
-	virtual bool ScanForStartLogFileBlock();
-	virtual void ShrinkBlock(unsigned long StartBlock, unsigned long EndBlock, unsigned long& ReviewedPoint,size_t LogLength);
+	virtual void LinkInScripting() {};
+	virtual bool ScanForStartLogFileBlock() {return false;};
+	virtual void ShrinkBlock(unsigned long StartBlock, unsigned long EndBlock, unsigned long& ReviewedPoint,size_t LogLength) {};
 
 	void CopyBlock(unsigned long StartBlock, unsigned long EndBlock, unsigned long& ReviewedPoint);
 
 	static void MetaSay(const char* x, size_t x_len, int ColorCode);
-	static void ResetInput(size_t StartLine);
 
 	// data members
 	zaimoni::custom_scoped_ptr<std::ifstream> CleanLog;			// infile for log cleaning

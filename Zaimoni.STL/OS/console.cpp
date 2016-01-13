@@ -182,6 +182,46 @@ BOOL WINAPI KillConsole(DWORD dwCtrlType)
 //! These would do intra-sentence concatenation of ' ' using Perl-like join/PHP-like implode string processing
 //! to create a temporary string for the normal messaging functions
 
+static void ResetInput(size_t StartLine)
+{
+#ifdef _WIN32
+	LogicalOrigin.X = 0;
+	LogicalOrigin.Y = StartLine;
+	LogicalEnd = LogicalOrigin;
+#endif
+}
+
+static void PutCursorAtUserHome()
+{	// FORMALLY CORRECT: 4/22/1999
+#ifdef _WIN32
+	LogicalOrigin.X = 0;
+	LogicalOrigin.Y = UserBarY()+1;
+	LogicalEnd = LogicalOrigin;
+	SetConsoleCursorPosition(StdOutputHandle,LogicalOrigin);
+	GetConsoleScreenBufferInfo(StdOutputHandle,&ScreenBufferState);
+	GetConsoleCursorInfo(StdOutputHandle,&CursorState);
+#endif
+}
+
+static void DrawUserBar()
+{	// FORMALLY CORRECT: Kenneth Boyd, 10/16/1999
+#ifdef _WIN32
+	COORD StartLine = {0, 0};
+	unsigned long ActualCharCount;
+	// User bar
+	do	{
+		FillConsoleOutputAttribute(	StdOutputHandle,
+									((size_t)(StartLine.Y)==UserBarY()) ? BACKGROUND_RED | BACKGROUND_BLUE | BACKGROUND_GREEN :  Text_White,
+									LowerRightCornerConsole.X+1,
+									StartLine,
+									&ActualCharCount);
+		}
+	while(++StartLine.Y<=LowerRightCornerConsole.Y);
+	GetConsoleScreenBufferInfo(StdOutputHandle,&ScreenBufferState);
+	GetConsoleCursorInfo(StdOutputHandle,&CursorState);
+#endif
+}
+
 Console::Console()
 :	CleanLog(CloseAndNULL<std::ifstream>),
 	ImageCleanLog(CloseAndNULL<std::ofstream>),
@@ -829,37 +869,6 @@ int Console::LookAtConsoleInput()
 #endif
 }
 
-void Console::DrawUserBar()
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/16/1999
-#ifdef _WIN32
-	COORD StartLine = {0, 0};
-	unsigned long ActualCharCount;
-	// User bar
-	do	{
-		FillConsoleOutputAttribute(	StdOutputHandle,
-									((size_t)(StartLine.Y)==UserBarY()) ? BACKGROUND_RED | BACKGROUND_BLUE | BACKGROUND_GREEN :  Text_White,
-									LowerRightCornerConsole.X+1,
-									StartLine,
-									&ActualCharCount);
-		}
-	while(++StartLine.Y<=LowerRightCornerConsole.Y);
-	GetConsoleScreenBufferInfo(StdOutputHandle,&ScreenBufferState);
-	GetConsoleCursorInfo(StdOutputHandle,&CursorState);
-#endif
-}
-
-void Console::PutCursorAtUserHome()
-{	// FORMALLY CORRECT: 4/22/1999
-#ifdef _WIN32
-	LogicalOrigin.X = 0;
-	LogicalOrigin.Y = UserBarY()+1;
-	LogicalEnd = LogicalOrigin;
-	SetConsoleCursorPosition(StdOutputHandle,LogicalOrigin);
-	GetConsoleScreenBufferInfo(StdOutputHandle,&ScreenBufferState);
-	GetConsoleCursorInfo(StdOutputHandle,&CursorState);
-#endif
-}
-
 void Console::ScrollUserScreenOneLine()
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/16/1999
 #ifdef _WIN32
@@ -940,21 +949,6 @@ void Console::UseScript(const char* ScriptName)
 // XXX prevent globals from being used below here
 #define ScriptFile
 #define ScriptLength
-
-// next three are protected virtual functions
-void Console::LinkInScripting()
-{	// default implementation does nothing
-}
-
-bool Console::ScanForStartLogFileBlock()
-{	// placeholder
-	return false;
-}
-
-void
-Console::ShrinkBlock(unsigned long StartBlock, unsigned long EndBlock, unsigned long& ReviewedPoint, size_t LogLength)
-{	// placeholder; this safely does nothing
-}
 
 void Console::StartLogFile()
 {	// FORMALLY CORRECT: Kenneth Boyd, 11/10/2004
@@ -1144,9 +1138,8 @@ Console::SaysCompilerError(const char* const Filename, unsigned long LineNumber 
 }
 
 // #1: parse how many lines are required
-static int ParseMessageIntoLines(const char* x, size_t x_len, size_t* const LineBreakTable)
-{	//! \todo IMPLEMENT
-	// Message is assumed not to contain formatting characters.
+static int ParseMessageIntoLines(const char* x, size_t x_len, size_t* const LineBreakTable, const size_t width)
+{	// Message is assumed not to contain formatting characters.
 	memset(LineBreakTable,0,13*sizeof(size_t));
 	size_t LineCount = 0;		
 	// #1: prune off trailing whitespace
@@ -1157,7 +1150,7 @@ Restart:
 		{
 		memmove(LineBreakTable,LineBreakTable+1,sizeof(size_t)*12);
 		++LineCount;
-		const size_t ub = (x_len<=(size_t)(ScreenBufferState.dwSize.X)) ? x_len : (size_t)(ScreenBufferState.dwSize.X);
+		const size_t ub = (x_len<=width) ? x_len : width;
 		const char* newline = strchr(x,'\n');
 		if (NULL==newline)
 			{
@@ -1237,7 +1230,7 @@ void Console::MetaSay(const char* x,size_t x_len, int ColorCode)
 	Log(x,x_len);	// log the message
 	size_t LineBreakTable[UserBarY()];
 	// #1: parse how many lines are required
-	const size_t LineCount = ParseMessageIntoLines(x,x_len,LineBreakTable);
+	const size_t LineCount = ParseMessageIntoLines(x,x_len,LineBreakTable,ScreenBufferState.dwSize.X);
 	if (0>=LineCount) return;
 
 	// #2: scroll to make space; colorize new space now
@@ -1251,15 +1244,6 @@ void Console::MetaSay(const char* x,size_t x_len, int ColorCode)
 	size_t i = 1;
 	do	line_out(x,i,LineBreakTable);
 	while(UserBarY()> ++i);
-}
-
-void Console::ResetInput(size_t StartLine)
-{
-#ifdef _WIN32
-	LogicalOrigin.X = 0;
-	LogicalOrigin.Y = StartLine;
-	LogicalEnd = LogicalOrigin;
-#endif
 }
 
 // Logging.h hooks
