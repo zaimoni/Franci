@@ -482,6 +482,8 @@ static int __CommitNextIndexPage(void)
 
 static void FlushMemoryManager(void)
 {
+// work around GCC 4.2.x issues
+#if __GNUC__!=4 || __GNUC_MINOR__!=2
 #ifdef __cplusplus
 	RAMBlock.Lock();
 #endif
@@ -497,6 +499,7 @@ static void FlushMemoryManager(void)
 		};
 #ifdef __cplusplus
 	RAMBlock.UnLock();
+#endif
 #endif
 }
 
