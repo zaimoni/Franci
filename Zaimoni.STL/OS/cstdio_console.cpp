@@ -341,6 +341,7 @@ void GetLineFromKeyboardHook(char*& InputBuffer)
 		if (char* const tmp2 = REALLOC(InputBuffer,++inchar)) InputBuffer = tmp2;
 		else FATAL("RAM failure when getting line for parsing");
 		InputBuffer[inchar-1] = (char)tmp;
+		tmp = fgetc(stdin);
 		}
 }
 
