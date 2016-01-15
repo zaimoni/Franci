@@ -10,7 +10,7 @@ include ../POSIX.dep
 CFLAGS := -Os -Wall -Wextra -finline -Winline -Wdisabled-optimization --param max-inline-insns-single=500 -c -pipe -DNDEBUG
 CXXFLAGS := $(CFLAGS)
 
-LIBS := libz_log_adapter.a libz_console.a
+LIBS := libz_log_adapter.a libz_console.a libz_cstdio_console.a
 
 # GNU targets we know about
 all: $(LIBS)
@@ -34,9 +34,15 @@ libz_log_adapter.a: log_adapter_inc_inform.o log_adapter_inform.o log_adapter_lo
 libz_console.a: console.o
 	$(AR) -ru libz_console.a console.o
 
+libz_cstdio_console.a: cstdio_console.o
+	$(AR) -ru libz_cstdio_console.a cstdio_console.o
+
 ../../$(host_libdir)/libz_log_adapter.a: libz_log_adapter.a
 	cp libz_log_adapter.a ../../$(host_libdir)/libz_log_adapter.a
 
 ../../$(host_libdir)/libz_console.a: libz_console.a
 	cp libz_console.a ../../$(host_libdir)/libz_console.a
+
+../../$(host_libdir)/libz_cstdio_console.a: libz_cstdio_console.a
+	cp libz_cstdio_console.a ../../$(host_libdir)/libz_cstdio_console.a
 
