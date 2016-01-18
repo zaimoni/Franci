@@ -60,8 +60,6 @@ protected:
 
 	void CopyBlock(unsigned long StartBlock, unsigned long EndBlock, unsigned long& ReviewedPoint);
 
-	static void MetaSay(const char* x, size_t x_len, int ColorCode);
-
 	// data members
 	zaimoni::custom_scoped_ptr<std::ifstream> CleanLog;			// infile for log cleaning
 	zaimoni::custom_scoped_ptr<std::ofstream> ImageCleanLog;	// outfile for log cleaning

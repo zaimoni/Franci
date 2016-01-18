@@ -47,26 +47,6 @@ int CAPSLOCK_on = 0;
 
 #define UserBarY() 13
 
-// KB: color codes
-#ifdef _WIN32
-// look these up
-#define FOREGROUND_RED 1
-#define FOREGROUND_BLUE 2
-#define FOREGROUND_GREEN 4
-#define FOREGROUND_INTENSITY 8
-
-enum TextColors
-	{
-	Text_White = FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN,
-	Text_Violet	= FOREGROUND_RED | FOREGROUND_BLUE,
-	Text_Yellow = FOREGROUND_RED | FOREGROUND_GREEN,
-	Text_Cyan = FOREGROUND_BLUE | FOREGROUND_GREEN,
-	Text_Red = FOREGROUND_RED | FOREGROUND_INTENSITY,	// unreadable otherwise
-	Text_Blue = FOREGROUND_BLUE,
-	Text_Green = FOREGROUND_GREEN
-	};
-#endif
-
 // messages; not owned by Console
 // initialized by subclasses, this just NULLs them
 const char* Console::LogClosed = NULL;
@@ -567,21 +547,6 @@ void Console::LogUserInput(const char* x,size_t x_len)
 	add_log_substring(x,x_len);
 }
 
-void Console::SaysNormal(const char* x,size_t x_len)		// white text
-{	// FORMALLY CORRECT: Kenneth Boyd, 3/22/1999
-	MetaSay(x,x_len,Text_White);
-}
-
-void Console::SaysWarning(const char* Message)	// yellow text; consider sound effects
-{	// FORMALLY CORRECT: Kenneth Boyd, 3/22/1999
-	MetaSay(Message,strlen(Message),Text_Yellow);
-}
-
-void Console::SaysError(const char* Message)		// red text; consider sound effects
-{	// FORMALLY CORRECT: Kenneth Boyd, 3/22/1999
-	MetaSay(Message,strlen(Message),Text_Red);
-} 
-
 // #1: parse how many lines are required
 static int ParseMessageIntoLines(const char* x, size_t x_len, size_t* const LineBreakTable, const size_t width)
 {	// Message is assumed not to contain formatting characters.
@@ -640,10 +605,10 @@ static void line_out(const char* const x, size_t i, size_t* const LineBreakTable
 		};
 }
 
-void Console::MetaSay(const char* x,size_t x_len, int ColorCode)
+static void MetaSay(const char* x,size_t x_len)
 {	// FORMALLY CORRECT: Kenneth Boyd, 4/21/1999
-	if (NULL==x || '\0'== *x || 0==x_len) return;
-	Log(x,x_len);	// log the message
+	if (!x || '\0'== *x || 0==x_len) return;
+	Console::Log(x,x_len);	// log the message
 	size_t LineBreakTable[UserBarY()];
 	// #1: parse how many lines are required
 	const size_t LineCount = ParseMessageIntoLines(x,x_len,LineBreakTable,80);
@@ -660,6 +625,21 @@ void Console::MetaSay(const char* x,size_t x_len, int ColorCode)
 	do	line_out(x,i,LineBreakTable);
 	while(UserBarY()> ++i);
 }
+
+void Console::SaysNormal(const char* x,size_t x_len)		// white text
+{	// FORMALLY CORRECT: Kenneth Boyd, 3/22/1999
+	MetaSay(x,x_len);
+}
+
+void Console::SaysWarning(const char* Message)	// yellow text; consider sound effects
+{	// FORMALLY CORRECT: Kenneth Boyd, 3/22/1999
+	MetaSay(Message,strlen(Message));
+}
+
+void Console::SaysError(const char* Message)		// red text; consider sound effects
+{	// FORMALLY CORRECT: Kenneth Boyd, 3/22/1999
+	MetaSay(Message,strlen(Message));
+} 
 
 // Logging.h hooks
 EXTERN_C void _fatal(const char* const B)
