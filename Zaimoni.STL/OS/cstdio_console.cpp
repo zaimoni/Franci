@@ -436,8 +436,8 @@ void Console::StartLogFile()
 		Log(LogfileAppname);
 		Log(AppName);
 		Log(OS_ID);
-		const time_t LogStartTime = time(NULL);
-		Log(asctime(localtime(&LogStartTime)));
+//		const time_t LogStartTime = time(NULL);	// this plays havoc with automated testing
+//		Log(asctime(localtime(&LogStartTime)));
 		SaysNormal(LogOpened);
 		LastMessage = false;
 		}
@@ -634,6 +634,8 @@ static void line_out(const char* const x, size_t i, size_t* const LineBreakTable
 			{
 			const size_t span = LineBreakTable[i]-LineBreakTable[i-1];
 			if (span!=fwrite(x+LineBreakTable[i-1],sizeof(*x),span,stdout)) exit(EXIT_FAILURE);
+			if (EOF==fputc('\r',stdout)) exit(EXIT_FAILURE);
+			if (EOF==fputc('\n',stdout)) exit(EXIT_FAILURE);
 			}
 		};
 }
@@ -657,6 +659,35 @@ void Console::MetaSay(const char* x,size_t x_len, int ColorCode)
 	size_t i = 1;
 	do	line_out(x,i,LineBreakTable);
 	while(UserBarY()> ++i);
+}
+
+// Logging.h hooks
+EXTERN_C void _fatal(const char* const B)
+{
+	Console::SaysError(B);
+	Console::EndLogFile();
+//	MessageBox(NULL,B,"Console",MB_ICONSTOP | MB_OK | MB_SYSTEMMODAL);
+//	while(!Console::LookAtConsoleInput());
+	exit(EXIT_FAILURE);
+}
+
+EXTERN_C void _fatal_code(const char* const B,int exit_code)
+{
+	Console::SaysError(B);
+	Console::EndLogFile();
+//	MessageBox(NULL,B,"Console",MB_ICONSTOP | MB_OK | MB_SYSTEMMODAL);
+//	while(!Console::LookAtConsoleInput());
+	exit(exit_code);
+}
+
+EXTERN_C void _inform(const char* const B, size_t len)
+{
+	Console::SaysNormal(B,len);
+}
+
+EXTERN_C void _log(const char* const B,size_t len)
+{
+	Console::Log(B,len);
 }
 
 void SEVERE_WARNING(const char* const B)
