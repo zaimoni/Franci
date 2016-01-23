@@ -1,8 +1,6 @@
 // global.cxx
 // global overrides, etc.
 
-#define CXX_GLOBAL
-
 #include "global.hxx"
 #include "Zaimoni.STL/MetaRAM2.hpp"
 
@@ -18,12 +16,11 @@ const char* const RAMFailure = "FATAL ERROR: irrecoverable RAM failure in comput
 
 //! \todo OPTIMIZE: STATIC MULTITHREADED: ReportTime is a target for a statically allocated buffer,
 //! with AIMutex to block it....
-void
-ReportTime(clock_t Clock0, clock_t Clock1)
+void ReportTime(clock_t Clock0, clock_t Clock1)
 {	// FORMALLY CORRECT: Kenneth Boyd, 11/18/1999
 	char Buffer[] = "# 0.01 sec.:            ";
 	_ltoa(((Clock1-Clock0)*100)/CLOCKS_PER_SEC,Buffer+13,10);
-	INFORM(Buffer);
+	Console::Whisper(Buffer);
 }
 
 // this doesn't need to be moved to LangConf: it's generic

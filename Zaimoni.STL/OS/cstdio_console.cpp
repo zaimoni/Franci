@@ -605,6 +605,32 @@ static void line_out(const char* const x, size_t i, size_t* const LineBreakTable
 		};
 }
 
+static void _whisper(const char* x,size_t x_len)
+{	// FORMALLY CORRECT: Kenneth Boyd, 4/21/1999
+	if (!x || '\0'== *x || 0==x_len) return;
+	size_t LineBreakTable[UserBarY()];
+	// #1: parse how many lines are required
+	const size_t LineCount = ParseMessageIntoLines(x,x_len,LineBreakTable,80);
+	if (0>=LineCount) return;
+
+	// #2: scroll to make space; colorize new space now
+	if (UserBarY()<LineCount)
+		// LONG MESSAGE
+		line_out("...",3);
+	else	// SHORT MESSAGE
+		line_out(x,LineBreakTable[0]);
+
+	size_t i = 1;
+	do	line_out(x,i,LineBreakTable);
+	while(UserBarY()> ++i);
+}
+
+// we are used for automated testing
+void Console::Whisper(const char* x)
+{
+	_whisper(x,strlen(x));
+}
+
 static void MetaSay(const char* x,size_t x_len)
 {	// FORMALLY CORRECT: Kenneth Boyd, 4/21/1999
 	if (!x || '\0'== *x || 0==x_len) return;

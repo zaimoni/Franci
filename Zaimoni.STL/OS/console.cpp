@@ -1202,6 +1202,11 @@ static void MetaSay(const char* x,size_t x_len, int ColorCode)
 	while(UserBarY()> ++i);
 }
 
+// Win32 console is not used for automated testing
+void Console::Whisper(const char* Message)
+{	// FORMALLY CORRECT: Kenneth Boyd, 3/22/1999
+	MetaSay(Message,strlen(Message),Text_White);
+}
 
 void Console::SaysNormal(const char* x,size_t x_len)		// white text
 {	// FORMALLY CORRECT: Kenneth Boyd, 3/22/1999
