@@ -621,6 +621,7 @@ bool MetaConceptWithArgArray::SelfEvalRuleEvaluateArgOneStage()
 	return false;
 }
 
+#define DEBUG_FUNC 1
 bool MetaConceptWithArgArray::SelfEvalStrictlyModify()
 {	// FORMALLY CORRECT: Kenneth Boyd, 1/24/2002
 	assert(size()>InferenceParameter1);
@@ -631,9 +632,22 @@ bool MetaConceptWithArgArray::SelfEvalStrictlyModify()
 	LOG("to modify");
 	LOG(*ArgArray[InferenceParameter2]);
 	LOG("to:");
+
+#ifdef DEBUG_FUNC
+	MetaConcept* old = NULL;
+	ArgArray[InferenceParameter2]->CopyInto(old);
+#endif
+	
 	ArgArray[InferenceParameter1]->StrictlyModifies(ArgArray[InferenceParameter2]);
 	ArgArray[InferenceParameter2]->ForceStdForm();
 	LOG(*ArgArray[InferenceParameter2]);	
+
+#ifdef DEBUG_FUNC
+	SUCCEED_OR_DIE(*old != *ArgArray[InferenceParameter2]);
+	delete old;
+	old = NULL;
+#endif
+
 	if 		(ArgArray[InferenceParameter2]->StrictlyImplies(*ArgArray[InferenceParameter1]))
 		{
 		if (2==fast_size())
@@ -679,7 +693,9 @@ bool MetaConceptWithArgArray::SelfEvalStrictlyModify()
 		return true;
 		}
 }
+#undef DEBUG_FUNC
 
+#define DEBUG_FUNC 1
 bool MetaConceptWithArgArray::VirtualStrictlyModify()
 {
 	assert(!InferenceParameterMC.empty());
@@ -689,12 +705,23 @@ bool MetaConceptWithArgArray::VirtualStrictlyModify()
 	LOG("to modify this");
 	LOG(*ArgArray[InferenceParameter1]);
 	LOG("to this:");
+
+#ifdef DEBUG_FUNC
+	MetaConcept* old = NULL;
+	ArgArray[InferenceParameter1]->CopyInto(old);
+#endif
 	
 	InferenceParameterMC->StrictlyModifies(ArgArray[InferenceParameter1]);
 	ArgArray[InferenceParameter1]->ForceStdForm();
 	InferenceParameterMC.reset();
 
 	LOG(*ArgArray[InferenceParameter1]);	
+
+#ifdef DEBUG_FUNC
+	SUCCEED_OR_DIE(*old != *ArgArray[InferenceParameter1]);
+	delete old;
+	old = NULL;
+#endif
 
 	if (!ArgArray[InferenceParameter1]->CanEvaluate())
 		{
@@ -707,6 +734,8 @@ bool MetaConceptWithArgArray::VirtualStrictlyModify()
 		return true;
 		}
 }
+#undef DEBUG_FUNC
+
 
 bool MetaConceptWithArgArray::SelfEvalRuleEvaluateArgs()
 {	// FORMALLY CORRECT: Kenneth Boyd, 1/24/2002
