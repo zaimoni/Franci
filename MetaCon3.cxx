@@ -1465,7 +1465,7 @@ void MetaConnective::UseThisAsMakeImplyNAryOR(const MetaConcept& Target)
 			bool DidDeletion = false;
 			size_t j = fast_size();
 			do	if (   i!= --j
-					&& Target.MakesLHSImplyRHS(*ArgArray[i],*ArgArray[i]))
+					&& Target.MakesLHSImplyRHS(*ArgArray[i],*ArgArray[j]))
 					{
 					FastDeleteIdx(i);
 					if (j<i) --i;
