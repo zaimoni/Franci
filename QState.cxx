@@ -558,7 +558,8 @@ RetryAugmentation:
 								if (StrictlyImpliesLogicalNOTOf(*ExperimentalArg0,*PromoteCandidate0))
 									// overaugmented!  recover from IFF Arg0 and retry
 									DELETE_AND_NULL(PromoteCandidate0);
-								else if (2<=TempIFF->size() && static_cast<MetaConnective*>(TempIFF)->FindArgRelatedToLHS(*PromoteCandidate0,AreSyntacticallyEqual))
+								else if (   2<=TempIFF->size() && static_cast<MetaConnective*>(TempIFF)->FindArgRelatedToLHS(*PromoteCandidate0,AreSyntacticallyEqual)
+										 && 0<static_cast<MetaConnective*>(TempIFF)->ImageInferenceParameter1())	// ScreenVarList_IFFClean fails if this is 0
 									{	// Augmentation process has constructed an IFF
 									delete PromoteCandidate0;
 									delete PromoteCandidate1;
@@ -582,7 +583,7 @@ RetryAugmentation:
 									IdxCurrentSelfEvalRule = None_SER;
 									return true;
 									}
-								else if (PromoteCandidate0->IsExactType(Variable_MC) || PromoteCandidate0->IsExactType(LogicalIFF_MC))
+								else if ((PromoteCandidate0->IsExactType(Variable_MC) || PromoteCandidate0->IsExactType(LogicalIFF_MC)) && *PromotedHypothesis != *PromoteCandidate0)
 									{
 									DELETE_AND_NULL(PromoteCandidate1);
 									LOG("Using the following:");
@@ -632,7 +633,7 @@ RetryAugmentation:
 								while(++Idx5<=Idx4 && !CouldAugmentHypothesisArgs[Idx5]->CanAugmentHypothesis(*PromotedHypothesis));
 								}
 							}
-						if (NULL!=PromoteCandidate1)
+						if (NULL!=PromoteCandidate1 && *PromotedHypothesis != *PromoteCandidate1)
 							{
 							LOG("Using the following:");
 							LOG(*CouldAugmentHypothesisArgs[PromoteCandidate1Idx]);
