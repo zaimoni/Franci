@@ -500,7 +500,7 @@ void MetaConnective::ScreenVarList_IFFClean(void)
 // #define FREE_WILL 1
 
 bool QuantifiedStatement::ScreenVarList(const clock_t EvalTime0, bool DoNotExplain, MetaConcept**& VarList, const char* const FailureMessage, MetaConnective*& ExperimentalArg0)
-{	// FORMALLY CORRECT: Kenneth Boyd, 1/25/2002
+{	// FORMALLY CORRECT: Kenneth Boyd, 1/29/2016
 	// ASSUMPTION: VarList!=NULL
 	//! \todo use symmetries when applicable
 	MetaConcept* TestVarStatement = NULL;
