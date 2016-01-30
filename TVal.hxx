@@ -2,6 +2,8 @@
 #ifndef TVAL_HXX
 #define TVAL_HXX
 
+#include <stddef.h>
+
 class TVal
 {
 private:
@@ -35,6 +37,9 @@ public:
 
 	size_t array_index() const {return _x;}
 	size_t array_index(const TVal& rhs) const {return 4*_x+rhs._x;};
+
+	void SelfLogicalNOT();
+	bool isAntiIdempotentTo(const TVal& rhs) const;
 };
 
 #endif

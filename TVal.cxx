@@ -3,6 +3,12 @@
 #include "TVal.hxx"
 #include "Keyword1.hxx"
 
+#include <string.h>
+
+// from Zaimoni.STL/Compiler.h
+/* size of a static array */
+#define STATIC_SIZE(A) (sizeof(A)/sizeof(*A))
+
 static const char NegatedTVal[4] =	{(char)(TVal::Contradiction),
 									 (char)(TVal::False),
 									 (char)(TVal::True),
@@ -22,5 +28,5 @@ bool TVal::read(const char* src)
 }
 
 void TVal::SelfLogicalNOT() {_x = NegatedTVal[_x];}
-bool TVal::isAntiIdempotentTo(const TVal& rhs) const { return _x==NegatedTVal[_x]; }
+bool TVal::isAntiIdempotentTo(const TVal& rhs) const { return _x==NegatedTVal[rhs._x]; }
 

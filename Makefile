@@ -23,7 +23,7 @@ Franci.exe : make_Zaimoni_STL $(OBJECTS_FRANCI_LINK_PRIORITY)
 	strip --preserve-dates --strip-unneeded Franci.exe
 
 Franci_console.exe : make_Zaimoni_STL $(OBJECTS_FRANCI_CONSOLE_LINK_PRIORITY)
-	g++ -oFranci_console.exe $(LINK_FLAGS) $(ARCH2_FLAGS) $(OBJECTS_FRANCI_CONSOLE) -lz_cstdio_console -lz_csvtable -lz_langconf -lz_logging -lz_log_adapter -lz_format_util -lz_stdio_c -lz_memory
+	g++ -oFranci_console.exe $(LINK_FLAGS) $(ARCH_FLAGS) $(OBJECTS_FRANCI_CONSOLE) -lz_cstdio_console -lz_csvtable -lz_langconf -lz_logging -lz_log_adapter -lz_format_util -lz_stdio_c -lz_memory
 	strip --preserve-dates --strip-unneeded Franci_console.exe
 
 # inference rules
