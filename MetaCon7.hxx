@@ -11,18 +11,18 @@ struct MetaConcept_lookup
 {	// 
 	// exact_type: _MC value
 	// AbstractClass* ultimate_type(): 
+	// bool syntax_ok(const T& x);
 };
 
 // we'd like to replace most derivations from MetaConceptZeroAry (MetaCon6.hxx/cxx) with this
 template<class T>
 class MetaConceptExternal : public MetaConcept
 {
-private:
-	T _x;
-
 protected:
 	virtual ~MetaConceptExternal() {};	// as a template doesn't go in Destruct.cxx
 public:
+	T _x;	// we would provide full accessors anyway so may as well be public
+
 	MetaConceptExternal(const T& src) : MetaConcept(MetaConcept_lookup<T>::exact_type),_x(src) {};
 	MetaConceptExternal(const MetaConceptExternal& src)
 		: MetaConcept(src),_x(src._x) {};
@@ -51,7 +51,7 @@ public:
 //  Evaluation functions
 	virtual bool CanEvaluate() const {return false;};
 	virtual bool CanEvaluateToSameType() const {return false;};
-	virtual bool SyntaxOK() const {return true;};	// actually should do a syntax check on its arg
+	virtual bool SyntaxOK() const {return MetaConcept_lookup<T>::syntax_ok(_x);};	// actually should do a syntax check on its arg
 	virtual bool Evaluate(MetaConcept*& dest) {return false;};		// same, or different type
 	virtual bool DestructiveEvaluateToSameType() {return false;};	// overwrites itself iff returns true
 // Formal manipulation functions
