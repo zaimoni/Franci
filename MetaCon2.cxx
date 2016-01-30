@@ -399,7 +399,7 @@ bool MetaConceptWithArgArray::AddArgAtEndAndForceCorrectForm(autoval_ptr<MetaCon
 bool MetaConceptWithArgArray::_AddArgAtEndAndForceCorrectForm(MetaConcept* src)
 {	// FORMALLY CORRECT: Kenneth Boyd, Jan 29 2016
 	assert(src);
-	if (!InsertSlotAt(0,src)) return false;
+	if (!InsertSlotAt(fast_size(),src)) return false;
 
 	IdxCurrentEvalRule = None_ER;
 	IdxCurrentSelfEvalRule = None_SER;
