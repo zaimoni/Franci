@@ -12,7 +12,7 @@ class StdMultiplication;
 namespace zaimoni {
 
 template<>
-struct is_polymorphic_final<StdMultiplication> : public boost::true_type {};
+struct is_polymorphic_final<StdMultiplication> : public std::true_type {};
 
 }
 

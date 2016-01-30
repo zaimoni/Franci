@@ -30,7 +30,7 @@ class IntegerNumeral;
 namespace zaimoni {
 
 template<>
-struct is_polymorphic_final<IntegerNumeral> : public boost::true_type {};
+struct is_polymorphic_final<IntegerNumeral> : public std::true_type {};
 
 }
 

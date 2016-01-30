@@ -11,7 +11,7 @@ class UnparsedText;
 namespace zaimoni {
 
 template<>
-struct is_polymorphic_final<UnparsedText> : public boost::true_type {};
+struct is_polymorphic_final<UnparsedText> : public std::true_type {};
 
 }
 

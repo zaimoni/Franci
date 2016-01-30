@@ -12,7 +12,7 @@ class StdAddition;
 namespace zaimoni {
 
 template<>
-struct is_polymorphic_final<StdAddition> : public boost::true_type {};
+struct is_polymorphic_final<StdAddition> : public std::true_type {};
 
 }
 

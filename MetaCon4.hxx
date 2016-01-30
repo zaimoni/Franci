@@ -103,7 +103,7 @@ private:
 namespace zaimoni {
 
 template<>
-struct is_polymorphic_base<MetaConceptWith2Args> : public boost::true_type {};
+struct is_polymorphic_base<MetaConceptWith2Args> : public std::true_type {};
 
 }
 

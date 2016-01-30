@@ -24,7 +24,7 @@ class MetaConnective;
 namespace zaimoni {
 
 template<>
-struct is_polymorphic_final<MetaConnective> : public boost::true_type {};
+struct is_polymorphic_final<MetaConnective> : public std::true_type {};
 
 }
 

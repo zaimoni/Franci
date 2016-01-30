@@ -10,7 +10,7 @@ class QuantifiedStatement;
 namespace zaimoni {
 
 template<>
-struct is_polymorphic_final<QuantifiedStatement> : public boost::true_type {};
+struct is_polymorphic_final<QuantifiedStatement> : public std::true_type {};
 
 }
 
@@ -65,7 +65,7 @@ namespace zaimoni
 {
 
 template<>
-struct has_invalid_assignment_but_copyconstructable<QuantifiedStatement> : public boost::true_type {};
+struct has_invalid_assignment_but_copyconstructable<QuantifiedStatement> : public std::true_type {};
 
 }
 

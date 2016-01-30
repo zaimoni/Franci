@@ -22,7 +22,7 @@ class MetaQuantifier;
 namespace zaimoni {
 
 template<>
-struct is_polymorphic_final<MetaQuantifier> : public boost::true_type {};
+struct is_polymorphic_final<MetaQuantifier> : public std::true_type {};
 
 }
 

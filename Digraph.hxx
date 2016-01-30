@@ -11,7 +11,7 @@ class Digraph;
 namespace zaimoni {
 
 template<>
-struct is_polymorphic_final<Digraph> : public boost::true_type {};
+struct is_polymorphic_final<Digraph> : public std::true_type {};
 
 }
 

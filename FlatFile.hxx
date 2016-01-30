@@ -10,7 +10,7 @@ class FlatFile;
 namespace zaimoni {
 
 template<>
-struct is_polymorphic_final<FlatFile> : public boost::true_type {};
+struct is_polymorphic_final<FlatFile> : public std::true_type {};
 
 }
 
@@ -56,7 +56,7 @@ namespace zaimoni
 {
 
 template<>
-struct has_invalid_assignment_but_copyconstructable<FlatFile> : public boost::true_type {};
+struct has_invalid_assignment_but_copyconstructable<FlatFile> : public std::true_type {};
 
 }
 

@@ -16,7 +16,7 @@ class ExternalFunction;
 namespace zaimoni {
 
 template<>
-struct is_polymorphic_final<ExternalFunction> : public boost::true_type {};
+struct is_polymorphic_final<ExternalFunction> : public std::true_type {};
 
 }
 

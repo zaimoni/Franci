@@ -11,7 +11,7 @@ class GCF;
 namespace zaimoni {
 
 template<>
-struct is_polymorphic_final<GCF> : public boost::true_type {};
+struct is_polymorphic_final<GCF> : public std::true_type {};
 
 }
 

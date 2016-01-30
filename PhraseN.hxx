@@ -10,7 +10,7 @@ class PhraseNArg;
 namespace zaimoni {
 
 template<>
-struct is_polymorphic_final<PhraseNArg> : public boost::true_type {};
+struct is_polymorphic_final<PhraseNArg> : public std::true_type {};
 
 }
 

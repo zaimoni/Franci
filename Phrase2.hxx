@@ -10,7 +10,7 @@ class Phrase2Arg;
 namespace zaimoni {
 
 template<>
-struct is_polymorphic_final<Phrase2Arg> : public boost::true_type {};
+struct is_polymorphic_final<Phrase2Arg> : public std::true_type {};
 
 }
 

@@ -14,7 +14,7 @@ class SearchTree;
 namespace zaimoni {
 
 template<>
-struct is_polymorphic_final<SearchTree> : public boost::true_type {};
+struct is_polymorphic_final<SearchTree> : public std::true_type {};
 
 }
 

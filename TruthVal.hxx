@@ -10,7 +10,7 @@ class TruthValue;
 namespace zaimoni {
 
 template<>
-struct is_polymorphic_final<TruthValue> : public boost::true_type {};
+struct is_polymorphic_final<TruthValue> : public std::true_type {};
 
 }
 

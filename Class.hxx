@@ -10,7 +10,7 @@ class AbstractClass;
 namespace zaimoni {
 
 template<>
-struct is_polymorphic_final<AbstractClass> : public boost::true_type {};
+struct is_polymorphic_final<AbstractClass> : public std::true_type {};
 
 }
 

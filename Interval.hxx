@@ -21,7 +21,7 @@ class LinearInterval;
 namespace zaimoni {
 
 template<>
-struct is_polymorphic_final<LinearInterval> : public boost::true_type {};
+struct is_polymorphic_final<LinearInterval> : public std::true_type {};
 
 }
 

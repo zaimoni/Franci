@@ -68,7 +68,7 @@ protected:
 namespace zaimoni {
 
 template<class T>
-struct is_polymorphic_final<MetaConceptExternal<T> > : public boost::true_type {};
+struct is_polymorphic_final<MetaConceptExternal<T> > : public std::true_type {};
 
 }
 

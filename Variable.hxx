@@ -11,7 +11,7 @@ class Variable;
 namespace zaimoni {
 
 template<>
-struct is_polymorphic_final<Variable> : public boost::true_type {};
+struct is_polymorphic_final<Variable> : public std::true_type {};
 
 }
 

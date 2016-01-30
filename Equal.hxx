@@ -22,7 +22,7 @@ class EqualRelation;
 namespace zaimoni {
 
 template<>
-struct is_polymorphic_final<EqualRelation> : public boost::true_type{};
+struct is_polymorphic_final<EqualRelation> : public std::true_type{};
 
 }
 

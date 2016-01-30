@@ -58,7 +58,7 @@ protected:
 namespace zaimoni {
 
 template<>
-struct is_polymorphic_base<MetaConceptWith1Arg> : public boost::true_type {};
+struct is_polymorphic_base<MetaConceptWith1Arg> : public std::true_type {};
 
 }
 

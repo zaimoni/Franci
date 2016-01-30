@@ -447,7 +447,7 @@ void CopyOrThrow(MetaConcept*& dest, MetaConcept*& src);	// throws bad_alloc on 
 namespace zaimoni {
 
 template<>
-struct is_polymorphic_base<MetaConcept> : public boost::true_type {};
+struct is_polymorphic_base<MetaConcept> : public std::true_type {};
 
 }
 
