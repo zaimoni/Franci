@@ -527,7 +527,7 @@ bool QuantifiedStatement::ScreenVarList(const clock_t EvalTime0, bool DoNotExpla
 		MetaConcept* PromotedHypothesis = NULL;	// initialized within try block before used
 		try	{
 			ExperimentalArg0->CopyInto(TestVarStatement);
-			MetaConcept* TempIFF = new MetaConnective(IFF_MCM);
+			MetaConnective* TempIFF = new MetaConnective(IFF_MCM);
 			VarList[i]->CopyInto(PromotedHypothesis);
 			// Augment VarList[i] right before using it
 			if (NULL!=CouldAugmentHypothesisArgs)
@@ -541,7 +541,7 @@ RetryAugmentation:
 						// base version
 						MetaConcept* NewIFFArg = NULL;
 						PromotedHypothesis->CopyInto(NewIFFArg);
-						if (!static_cast<MetaConnective*>(TempIFF)->InsertSlotAt(0,NewIFFArg))
+						if (!TempIFF->InsertSlotAt(0,NewIFFArg))
 							UnconditionalRAMFailure();
 							
 						//! \todo IMPLEMENT: want a pseudorandom algorithm here; log the fact a pseudorandom algorithm was invoked
@@ -558,8 +558,8 @@ RetryAugmentation:
 								if (StrictlyImpliesLogicalNOTOf(*ExperimentalArg0,*PromoteCandidate0))
 									// overaugmented!  recover from IFF Arg0 and retry
 									DELETE_AND_NULL(PromoteCandidate0);
-								else if (   2<=TempIFF->size() && static_cast<MetaConnective*>(TempIFF)->FindArgRelatedToLHS(*PromoteCandidate0,AreSyntacticallyEqual)
-										 && 0<static_cast<MetaConnective*>(TempIFF)->ImageInferenceParameter1())	// ScreenVarList_IFFClean fails if this is 0
+								else if (   2<=TempIFF->size() && TempIFF->FindArgRelatedToLHS(*PromoteCandidate0,AreSyntacticallyEqual)
+										 && 0<TempIFF->ImageInferenceParameter1())	// ScreenVarList_IFFClean fails if this is 0
 									{	// Augmentation process has constructed an IFF
 									delete PromoteCandidate0;
 									delete PromoteCandidate1;
@@ -573,10 +573,10 @@ RetryAugmentation:
 									// If matched arg is not at fast_size()-1, truncate args above there to match
 									// NOTE: InfererenceParameter1 is one less than necessary to correctly invoke SelfEvalRuleCleanTrailingArg
 									// use ScreenVarList_IFFClean()
-									static_cast<MetaConnective*>(TempIFF)->ScreenVarList_IFFClean();
+									TempIFF->ScreenVarList_IFFClean();
 									INFORM("IFF statement constructed while attempting to boost hypotheses:");
 									INFORM(*TempIFF);
-									static_cast<MetaConnective*>(TempIFF)->ForceCheckForEvaluation();
+									TempIFF->ForceCheckForEvaluation();
 									if (!static_cast<MetaConnective*>(ArgArray[0])->AddArgAtEndAndForceCorrectForm(TempIFF))
 										UnconditionalRAMFailure();
 									IdxCurrentEvalRule = None_ER;

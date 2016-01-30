@@ -155,7 +155,14 @@ public:
 		}
 	// this one copies all args, except the one pointed to by InferenceParameter1.
 	void CopyAllArgsButOneIntoArgList(MetaConcept** const dest); // can throw bad_alloc
-	bool AddArgAtEndAndForceCorrectForm(MetaConcept*& src);
+	bool AddArgAtEndAndForceCorrectForm(autoval_ptr<MetaConcept>& src);
+ 	template<class T> bool AddArgAtEndAndForceCorrectForm(T*& src)
+ 	{
+ 		assert(src);
+ 		bool ret = _AddArgAtEndAndForceCorrectForm(src);
+ 		src = 0;
+ 		return ret;
+ 	}
 	bool AddArgAtStartAndForceCorrectForm(MetaConcept*& src);
 	// Next four routines need symmetric, transitivity
 	bool OrderIndependentPairwiseRelation(const MetaConceptWithArgArray& rhs, LowLevelBinaryRelation& TargetRelation) const;
@@ -298,6 +305,7 @@ protected:
 	bool CheckForTrailingCleanArg(LowLevelBinaryRelation& TargetRelation, SelfEvalRuleIdx_SER ChangeToRule, size_t ForceArity) const;
 	void UseArg0ForPropagateAddMultInv(MetaConcept*& dest);	// leaves ArgArray[0] NULL
 private:
+	bool _AddArgAtEndAndForceCorrectForm(MetaConcept* src);
 	void LogicalANDORCondenseORANDArgHyperCubeAuxDim1(size_t i, size_t i2);
 	void LogicalORXORCompactANDArgHyperCubeAuxDim1(size_t Idx, size_t Idx2);
 	void HypercubeArgRelationProcessor(VertexPairSelfProcess CleanupAction);

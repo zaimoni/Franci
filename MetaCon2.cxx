@@ -388,12 +388,19 @@ void MetaConceptWithArgArray::CopyAllArgsButOneIntoArgList(MetaConcept** const d
 	while(0<i);
 }
 
-bool MetaConceptWithArgArray::AddArgAtEndAndForceCorrectForm(MetaConcept*& src)
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/26/2005
-	assert(src);
-	if (!InsertSlotAt(fast_size(),src)) return false;
+bool MetaConceptWithArgArray::AddArgAtEndAndForceCorrectForm(autoval_ptr<MetaConcept>& src)
+{
+ 	assert(!src.empty());
+ 	bool ret = _AddArgAtEndAndForceCorrectForm(src);
+ 	src.NULLPtr();
+ 	return ret;
+}
 
-	src = NULL;
+bool MetaConceptWithArgArray::_AddArgAtEndAndForceCorrectForm(MetaConcept* src)
+{	// FORMALLY CORRECT: Kenneth Boyd, Jan 29 2016
+	assert(src);
+	if (!InsertSlotAt(0,src)) return false;
+
 	IdxCurrentEvalRule = None_ER;
 	IdxCurrentSelfEvalRule = None_SER;
 	_forceStdForm();
