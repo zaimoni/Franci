@@ -29,8 +29,6 @@ using namespace zaimoni;
 static bool LastMessage = false;
 
 // public static data initialization
-char* InputBuffer = NULL;		// Franci's input buffer.
-size_t InputBufferLength = 0;	// Length of Franci's input buffer
 // NOTE: Scriptfile will mess with input buffer
 // NOTE: logfile requires tapping RET_handler, MetaSay
 // defined in LexParse.cxx; used by RET_handler, VConsole::UseScript
@@ -39,11 +37,6 @@ size_t InputBufferLength = 0;	// Length of Franci's input buffer
 // the class header VConsole.hxx from the OS
 // Keyboard/mouse model
 KeyMouseResponse* LastHandlerUsed = NULL;
-int CTRL_on = 0;
-int SHIFT_on = 0;
-int ALT_on = 0;
-int NUMLOCK_on = 1;	// KB: the keyboard automatically compensates for most of this.
-int CAPSLOCK_on = 0;
 
 #define UserBarY() 13
 
@@ -80,235 +73,6 @@ Console::~Console()
 {
 }
 
-int PrintCharAt(char Target)
-{	// enforce insert-and-displace mode
-	if (EOF==fputc(Target,stdout)) exit(EXIT_FAILURE);
-	return 1;
-}
-
-int Kronecker1()
-{
-	return 1;
-}
-
-// Screen-maneuvering handler mockups
-#define HOME_handler Kronecker1
-#define END_handler Kronecker1
-#define LARROW_handler Kronecker1
-#define RARROW_handler Kronecker1
-#define UARROW_handler Kronecker1
-#define DARROW_handler Kronecker1
-#define META_DEL Kronecker1 
-#define BACKSPACE_handler Kronecker1 
-#define DEL_handler Kronecker1 
-
-// This family of functions prints ascii characters in Console
-// Identifier-competent characters
-
-#define DECLARE_ASCII(X,SHIFT_KEY,NONSHIFT_KEY)	\
-int	ASCII##X()	\
-{	\
-	return PrintCharAt(((SHIFT_on) ? !CAPSLOCK_on : CAPSLOCK_on) ? SHIFT_KEY : NONSHIFT_KEY);	\
-}
-
-DECLARE_ASCII(A,'A','a')
-DECLARE_ASCII(B,'B','b')
-DECLARE_ASCII(C,'C','c')
-DECLARE_ASCII(D,'D','d')
-DECLARE_ASCII(E,'E','e')
-DECLARE_ASCII(F,'F','f')
-DECLARE_ASCII(G,'G','g')
-DECLARE_ASCII(H,'H','h')
-DECLARE_ASCII(I,'I','i')
-DECLARE_ASCII(J,'J','j')
-DECLARE_ASCII(K,'K','k')
-DECLARE_ASCII(L,'L','l')
-DECLARE_ASCII(M,'M','m')
-DECLARE_ASCII(N,'N','n')
-DECLARE_ASCII(O,'O','o')
-DECLARE_ASCII(P,'P','p')
-DECLARE_ASCII(Q,'Q','q')
-DECLARE_ASCII(R,'R','r')
-DECLARE_ASCII(S,'S','s')
-DECLARE_ASCII(T,'T','t')
-DECLARE_ASCII(U,'U','u')
-DECLARE_ASCII(V,'V','v')
-DECLARE_ASCII(W,'W','w')
-DECLARE_ASCII(X,'X','x')
-DECLARE_ASCII(Y,'Y','y')
-DECLARE_ASCII(Z,'Z','z')
-
-#undef DECLARE_ASCII
-
-#define DECLARE_ASCII(X,SHIFT_KEY,NONSHIFT_KEY)	\
-int	ASCII##X()	\
-{	\
-	return  PrintCharAt((SHIFT_on) ? SHIFT_KEY : NONSHIFT_KEY);	\
-}
-
-int ASCII0()
-{
-	if (SHIFT_on)
-		return PrintCharAt('(') && PrintCharAt(')');
-	else
-		return PrintCharAt('0');
-}
-
-DECLARE_ASCII(1,'!','1')
-DECLARE_ASCII(2,'@','2')
-DECLARE_ASCII(3,'#','3')
-DECLARE_ASCII(4,'$','4')
-DECLARE_ASCII(5,'%','5')
-DECLARE_ASCII(6,'^','6')
-DECLARE_ASCII(7,'&','7')
-DECLARE_ASCII(8,'*','8')
-
-int ASCII9()
-{
-	if (SHIFT_on)
-		return PrintCharAt('(') && PrintCharAt(')') && LARROW_handler();
-	else
-		return PrintCharAt('9');
-}
-
-DECLARE_ASCII(SemiColon,':',';')
-DECLARE_ASCII(Equals,'+','=')
-DECLARE_ASCII(Virgule,'|','\\')
-DECLARE_ASCII(ReverseQuote,'~','`')
-
-int ASCIILeftBracket()
-{
-	if (SHIFT_on)
-		return PrintCharAt('{') && PrintCharAt('}') && LARROW_handler();
-	else
-		return PrintCharAt('[') && PrintCharAt(']') && LARROW_handler();
-}
-
-int ASCIIRightBracket()
-{
-	if (SHIFT_on)
-		return PrintCharAt('{') && PrintCharAt('}');
-	else
-		return PrintCharAt('[') && PrintCharAt(']');
-}
-
-DECLARE_ASCII(Apostrophe,'"','\'')
-DECLARE_ASCII(Comma,'<',',')
-DECLARE_ASCII(Period,'>','.')
-DECLARE_ASCII(Underscore,'_','-')
-
-//! \todo this keycode [slash/questionmark] also comes from the keypad; keypad version must not react to SHIFT
-DECLARE_ASCII(Slash,'?','/')
-
-#undef DECLARE_ASCII
-
-#define DECLARE_KEYPAD(X)	\
-int	KEYPAD##X()	\
-{	\
-	return PrintCharAt(NUMLOCK_KEY);	\
-}
-
-//! \todo insert shifted keypad 0 handler
-#define NUMLOCK_KEY '0'
-DECLARE_KEYPAD(0)
-#undef NUMLOCK_KEY
-
-//! \todo End shifted keypad 1 handler
-#define NUMLOCK_KEY '1'
-DECLARE_KEYPAD(1)
-#undef NUMLOCK_KEY
-
-#define NUMLOCK_KEY '2'
-DECLARE_KEYPAD(2)
-#undef NUMLOCK_KEY
-
-//! \todo Page Down shifted keypad 3 handler
-#define NUMLOCK_KEY '3'
-DECLARE_KEYPAD(3)
-#undef NUMLOCK_KEY
-
-#define NUMLOCK_KEY '4'
-DECLARE_KEYPAD(4)
-#undef NUMLOCK_KEY
-
-// TODO: ??? handler
-#define NUMLOCK_KEY '5'
-DECLARE_KEYPAD(5)
-#undef NUMLOCK_KEY
-
-#define NUMLOCK_KEY '6'
-DECLARE_KEYPAD(6)
-#undef NUMLOCK_KEY
-
-//! \todo Home shifted keypad 7 handler
-#define NUMLOCK_KEY '7'
-DECLARE_KEYPAD(7)
-#undef NUMLOCK_KEY
-
-#define NUMLOCK_KEY '8'
-DECLARE_KEYPAD(8)
-#undef NUMLOCK_KEY
-
-//! \todo Page Up shifted keypad 9 handler
-#define NUMLOCK_KEY '9'
-DECLARE_KEYPAD(9)
-#undef NUMLOCK_KEY
-
-#undef DECLARE_KEYPAD
-// shifted numeric keys
-int ASCIISpace()
-{
-	return PrintCharAt(' ');
-}
-
-int ASCIIAsterisk()
-{
-	return PrintCharAt('*');
-}
-
-int ASCIIPlus()
-{
-	return PrintCharAt('+');
-}
-
-int ASCIIMinus()
-{
-	return PrintCharAt('-');
-}
-
-// Interpreter functions
-
-// Strange keys
-int CTRL_on_handler()
-{
-	CTRL_on = 1;
-	return 1;
-}
-
-int CTRL_off_handler()
-{
-	CTRL_on = 0;
-	return 1;
-}
-
-int SHIFT_on_handler()
-{
-	SHIFT_on = 1;
-	return 1;
-}
-
-int SHIFT_off_handler()
-{
-	SHIFT_on = 0;
-	return 1;
-}
-
-int ALT_toggle_handler()
-{
-	ALT_on = 1-ALT_on;
-	return 1;
-}
-
 //! This is the default getline handler for the CmdShell object in LexParse's InitializeFranciInterpreter
 void GetLineFromKeyboardHook(char*& InputBuffer)
 {
@@ -331,24 +95,8 @@ void RET_handler_core()
 }
 
 int Console::LookAtConsoleInput()
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/17/2004 [Windows]
-#if 1
-	return ReturnHandler();
-#else
-restart:
-	int tmp = fgetc(stdin);
-	if (EOF==tmp)
-		{
-		return false; 	// let higher loop deal with this
-		}
-	if ('\n'==tmp) return ReturnHandler();
-	// extend local InputBuffer by 1
-#endif
-}
-
-void Console::ScrollUserScreenOneLine()
 {
-	if (EOF==fputc('\n',stdout)) exit(EXIT_FAILURE);
+	return ReturnHandler();
 }
 
 static custom_scoped_ptr<ifstream> ScriptFile(CloseAndNULL<ifstream>);

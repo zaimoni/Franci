@@ -40,7 +40,6 @@ public:
 
 	static void EndLogFile();
 	static int LookAtConsoleInput();
-	static void ScrollUserScreenOneLine();
 
 	// this does not log the text for automated testing
 	static void Whisper(const char* x);

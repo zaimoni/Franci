@@ -273,11 +273,38 @@ Console::~Console()
 #endif
 }
 
+static void ScrollUserScreenOneLine()
+{	// FORMALLY CORRECT: Kenneth Boyd, 10/16/1999
+#ifdef _WIN32
+	SMALL_RECT OriginalRectangle;
+	const COORD NewOrigin = {0, UserBarY()+1};
+	CHAR_INFO FillCharColor;
+	OriginalRectangle.Left = 0;
+	OriginalRectangle.Right = ScreenBufferState.dwSize.X;
+	OriginalRectangle.Top = NewOrigin.Y+1;
+	OriginalRectangle.Bottom = ScreenBufferState.dwSize.Y;
+	FillCharColor.Char.AsciiChar = ' ';
+	FillCharColor.Attributes = Text_White;
+
+	if (LogicalOrigin.Y>NewOrigin.Y)
+		LogicalOrigin.Y--;
+	else	// we need to buffer the line about to be scrolled away.
+			// Presumably, the user wants it as-is [he has had 11 lines of opportunity to edit....
+		ExtendInputBuffer(ScreenBufferState.dwSize.X,NewOrigin);
+
+	LogicalEnd.Y--;
+	ScrollConsoleScreenBuffer(StdOutputHandle,&OriginalRectangle,NULL,NewOrigin,&FillCharColor);
+	ScreenBufferState.dwCursorPosition.Y--;
+	SetConsoleCursorPosition(StdOutputHandle,ScreenBufferState.dwCursorPosition);
+	GetConsoleScreenBufferInfo(StdOutputHandle,&ScreenBufferState);
+	GetConsoleCursorInfo(StdOutputHandle,&CursorState);	
+#endif
+}
+
 int PrintCharAt(char Target)
 {	// enforce insert-and-displace mode
 #ifdef _WIN32
-	if (LogicalEnd == LowerRightCornerConsole)
-		Console::ScrollUserScreenOneLine();
+	if (LogicalEnd == LowerRightCornerConsole) ScrollUserScreenOneLine();
 	// The actual print
 	if (ScreenBufferState.dwCursorPosition<LogicalEnd)
 		{	// #0: push all chars at or beyond insertion point 1 char forward
@@ -660,8 +687,7 @@ void GetLineFromKeyboardHook(char*& InputBuffer)
 void RET_handler_core()
 {	// FORMALLY CORRECT: Kenneth Boyd, 3/3/2005
 	LogicalOrigin.X = 0;
-	while(LowerRightCornerConsole.Y<=LogicalEnd.Y+1)
-		Console::ScrollUserScreenOneLine();		
+	while(LowerRightCornerConsole.Y<=LogicalEnd.Y+1) ScrollUserScreenOneLine();
 	LogicalOrigin.Y = LogicalEnd.Y+2;
 	LogicalEnd = LogicalOrigin;
 	SetConsoleCursorPosition(StdOutputHandle,LogicalOrigin);
@@ -866,34 +892,6 @@ int Console::LookAtConsoleInput()
 		}
 		};
 	return 0;	// false
-#endif
-}
-
-void Console::ScrollUserScreenOneLine()
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/16/1999
-#ifdef _WIN32
-	SMALL_RECT OriginalRectangle;
-	const COORD NewOrigin = {0, UserBarY()+1};
-	CHAR_INFO FillCharColor;
-	OriginalRectangle.Left = 0;
-	OriginalRectangle.Right = ScreenBufferState.dwSize.X;
-	OriginalRectangle.Top = NewOrigin.Y+1;
-	OriginalRectangle.Bottom = ScreenBufferState.dwSize.Y;
-	FillCharColor.Char.AsciiChar = ' ';
-	FillCharColor.Attributes = Text_White;
-
-	if (LogicalOrigin.Y>NewOrigin.Y)
-		LogicalOrigin.Y--;
-	else	// we need to buffer the line about to be scrolled away.
-			// Presumably, the user wants it as-is [he has had 11 lines of opportunity to edit....
-		ExtendInputBuffer(ScreenBufferState.dwSize.X,NewOrigin);
-
-	LogicalEnd.Y--;
-	ScrollConsoleScreenBuffer(StdOutputHandle,&OriginalRectangle,NULL,NewOrigin,&FillCharColor);
-	ScreenBufferState.dwCursorPosition.Y--;
-	SetConsoleCursorPosition(StdOutputHandle,ScreenBufferState.dwCursorPosition);
-	GetConsoleScreenBufferInfo(StdOutputHandle,&ScreenBufferState);
-	GetConsoleCursorInfo(StdOutputHandle,&CursorState);	
 #endif
 }
 
