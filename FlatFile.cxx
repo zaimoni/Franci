@@ -90,11 +90,6 @@ void FlatFile::DiagnoseInferenceRules() const
 
 bool FlatFile::InvokeEqualArgRule() const {return false;}
 
-bool FlatFile::AppendBlankLine()
-{
-	return InsertSlotAt(ArgArray.size(),(MetaConcept*)NULL);
-}
-
 //! \todo Relocate/Rename to MetaConceptWithArgArray
 void FlatFile::RemoveLineBlock(size_t NonStrictLB, size_t NonStrictUB)
 {	// FORMALLY CORRECT: Kenneth Boyd, 9/8/2002

@@ -35,7 +35,7 @@ public:
 // text I/O functions
 	virtual size_t LengthOfSelfName(void) const;
 	// type-specific functions
-	bool AppendBlankLine();
+	bool AppendBlankLine() {return InsertSlotAt(ArgArray.size(),NULL);};
 	void RemoveLineBlock(size_t NonStrictLB, size_t NonStrictUB);
 	bool ReadASCIIFile(const char* const Filename);	// reads entire ASCII file into object
 	void unshift(char*& Line,size_t& LineNumber, const char*& SourceFileName);	// named after Perl unshift
