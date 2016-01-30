@@ -129,29 +129,32 @@ bool MetaConceptWith2Args::CanEvaluateToSameType() const
 	return IdxCurrentSelfEvalRule;
 }
 
-// #define FRANCI_WARY 1
-
 bool MetaConceptWith2Args::Evaluate(MetaConcept*& dest)
-{	// FORMALLY CORRECT: Kenneth Boyd, 9/11/1999
+{	// FORMALLY CORRECT: Kenneth Boyd, Jan. 29 2016
 	// NOTE: there is exactly one call to Evaluate in Franci.  This call is preceded by
 	// a call to CanEvaluate()...so the rules have been initialized, and are guaranteed
 	// to be appropriate.  The SelfEvaluate rules have been already done, so this is not
 	// required either.
 	// There is no need to diagnose the inference rules.
-#ifdef FRANCI_WARY
-	LOG("Entering MetaConceptWith2Args::Evaluate");
+	DEBUG_LOG("Entering MetaConceptWith2Args::Evaluate");
 	char Buffer[10];
-	LOG(_ltoa(IdxCurrentSelfEvalRule,Buffer,10));
-	LOG(_ltoa(IdxCurrentEvalRule,Buffer,10));
-#endif
-	if (MaxEvalRuleIdx_ER>=IdxCurrentEvalRule) return (this->*EvaluateRuleLookup[IdxCurrentEvalRule-1])(dest);
-	return DelegateEvaluate(dest);
+	DEBUG_LOG(_ltoa(IdxCurrentSelfEvalRule,Buffer,10));
+	DEBUG_LOG(_ltoa(IdxCurrentEvalRule,Buffer,10));
+	try {
+		bool RetVal = (MaxEvalRuleIdx_ER>=IdxCurrentEvalRule) ? (this->*EvaluateRuleLookup[IdxCurrentEvalRule-1])(dest)
+					: DelegateEvaluate(dest);
+		DEBUG_LOG(*dest);
+		return RetVal;
+		}
+	catch(const std::bad_alloc&)
+		{
+		DEBUG_LOG("MetaConceptWith2Args::Evaluate failed: std::bad_alloc()");
+		return false;
+		}
 }
 
-#undef FRANCI_WARY
-
 bool MetaConceptWith2Args::DestructiveEvaluateToSameType()
-{	// FORMALLY CORRECT: Kenneth Boyd, 9/11/1999
+{	// FORMALLY CORRECT: Kenneth Boyd, Jan. 29 2016
 	DEBUG_LOG(__PRETTY_FUNCTION__);
 	DiagnoseInferenceRules();
 	DEBUG_LOG("DiagnoseInferenceRules OK");
@@ -159,11 +162,21 @@ bool MetaConceptWith2Args::DestructiveEvaluateToSameType()
 	DEBUG_LOG(IdxCurrentSelfEvalRule);
 	if (IdxCurrentSelfEvalRule)
 		{
-		const bool Tmp = (this->*SelfEvaluateRuleLookup[IdxCurrentSelfEvalRule-1])();	// FORMALLY CORRECT: Kenneth Boyd, 5/16/1999
-		if (!SyntaxOK())
-			FATAL((INFORM(*this),AlphaBadSyntaxGenerated));
-		// it evaluates to something of the same type
-		return Tmp;	
+		try	{
+			const bool Tmp = (this->*SelfEvaluateRuleLookup[IdxCurrentSelfEvalRule-1])();
+			DEBUG_LOG("selfeval worked");
+
+			if (!SyntaxOK())
+				FATAL((INFORM(*this),AlphaBadSyntaxGenerated));
+
+			DEBUG_LOG(*this);
+			return Tmp;
+			}
+		catch(const std::bad_alloc&)
+			{
+			DEBUG_LOG("MetaConceptWith2Args::DestructiveEvaluateToSameType failed: std::bad_alloc()");
+			return false;	
+			}
 		}
 	return false;
 }
