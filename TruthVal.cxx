@@ -1,8 +1,9 @@
 // TruthVal.cxx
 // implementation of TruthValue
 
-#include "Class.hxx"
 #include "TruthVal.hxx"
+
+#include "Class.hxx"
 #include "Keyword1.hxx"
 
 #include <boost/functional.hpp>
