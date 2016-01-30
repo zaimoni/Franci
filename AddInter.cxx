@@ -52,7 +52,7 @@ bool LinearInterval::TranslateInterval(MetaConcept*& rhs)
 		rhs->CopyInto(RHSClone);
 		if (LHSAlreadyStdAddition)
 			{
-			if (!static_cast<StdAddition*>((MetaConcept*)LHS_Arg1)->FastInsertSlotAt(LHS_Arg1->size(),NULL))
+			if (!static_cast<StdAddition*>((MetaConcept*)LHS_Arg1)->InsertSlotAt(LHS_Arg1->size(),NULL))
 				throw bad_alloc();
 			}
 		else
@@ -60,7 +60,7 @@ bool LinearInterval::TranslateInterval(MetaConcept*& rhs)
 
 		if (RHSAlreadyStdAddition)
 			{
-			if (!static_cast<StdAddition*>((MetaConcept*)RHS_Arg2)->FastInsertSlotAt(RHS_Arg2->size(),NULL))
+			if (!static_cast<StdAddition*>((MetaConcept*)RHS_Arg2)->InsertSlotAt(RHS_Arg2->size(),NULL))
 				throw bad_alloc();
 			}
 		else

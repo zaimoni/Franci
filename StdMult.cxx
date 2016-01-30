@@ -69,7 +69,7 @@ bool StdMultiplication::ForceUltimateType(const AbstractClass* const rhs)
 		MetaConcept* Tmp = NULL;
 		if (rhs->CreateIdentityForOperation(Tmp,StdMultiplication_MC))
 			{
-			if (!FastInsertSlotAt(0,Tmp))
+			if (!InsertSlotAt(0,Tmp))
 				{
 				delete Tmp;
 				return false;

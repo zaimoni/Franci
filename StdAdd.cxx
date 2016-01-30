@@ -69,7 +69,7 @@ bool StdAddition::ForceUltimateType(const AbstractClass* const rhs)
 		MetaConcept* Tmp = NULL;
 		if (rhs->CreateIdentityForOperation(Tmp,StdAddition_MC))
 			{
-			if (!FastInsertSlotAt(0,Tmp))
+			if (!InsertSlotAt(0,Tmp))
 				{
 				delete Tmp;
 				return false;

@@ -344,12 +344,6 @@ bool MetaConceptWithArgArray::InsertNSlotsAtV2(size_t n, size_t i)
 	return ArgArray.InsertNSlotsAt(n,i);
 }
 
-bool MetaConceptWithArgArray::InsertSlotAt(size_t i,MetaConcept* __default)
-{
-	assert(size()>=i);
-	return ArgArray.InsertSlotAt(i,__default);
-}
-
 void MetaConceptWithArgArray::TransferOutAndNULL(size_t i, MetaConcept*& dest)
 {	// FORMALLY CORRECT: Kenneth Boyd, 11/15/1999
 	assert(size()>i);
@@ -397,7 +391,7 @@ void MetaConceptWithArgArray::CopyAllArgsButOneIntoArgList(MetaConcept** const d
 bool MetaConceptWithArgArray::AddArgAtEndAndForceCorrectForm(MetaConcept*& src)
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/26/2005
 	assert(src);
-	if (!FastInsertSlotAt(fast_size(),src)) return false;
+	if (!InsertSlotAt(fast_size(),src)) return false;
 
 	src = NULL;
 	IdxCurrentEvalRule = None_ER;
@@ -409,7 +403,7 @@ bool MetaConceptWithArgArray::AddArgAtEndAndForceCorrectForm(MetaConcept*& src)
 bool MetaConceptWithArgArray::AddArgAtStartAndForceCorrectForm(MetaConcept*& src)
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/26/2005
 	assert(src);
-	if (!FastInsertSlotAt(0,src)) return false;
+	if (!InsertSlotAt(0,src)) return false;
 
 	src = NULL;
 	IdxCurrentEvalRule = None_ER;

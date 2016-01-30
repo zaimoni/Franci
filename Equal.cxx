@@ -2231,7 +2231,7 @@ bool EqualRelation::DISTINCTFROMALLOFExtractALLDISTINCT()
 		return false;
 		};
 
-	if (!FastInsertSlotAt(fast_size(),NewArg))
+	if (!InsertSlotAt(fast_size(),NewArg))
 		{
 		delete NewArg;
 		return false;

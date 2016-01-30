@@ -139,8 +139,12 @@ public:
 	void DeleteNSlotsAt(size_t n, size_t i);
 	void insertNSlotsAt(size_t n, size_t i);
 	bool InsertNSlotsAtV2(size_t n, size_t i);
-	inline bool FastInsertSlotAt(size_t i,MetaConcept* __default) {return ArgArray.InsertSlotAt(i,__default);};
-	bool InsertSlotAt(size_t i,MetaConcept* __default);
+	bool InsertSlotAt(size_t i,MetaConcept* __default)
+	{
+		assert(size()>=i);
+		return ArgArray.InsertSlotAt(i,__default);
+	}
+
 	void TransferOutAndNULL(size_t i, MetaConcept*& dest);		// NOTE: dest is simply overwritten
 	void CleanTransferOutAndNULL(size_t i, MetaConcept*& dest);
 	void TransferInAndOverwriteRaw(size_t i, MetaConcept* src);

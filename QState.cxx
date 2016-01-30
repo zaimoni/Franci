@@ -541,7 +541,7 @@ RetryAugmentation:
 						// base version
 						MetaConcept* NewIFFArg = NULL;
 						PromotedHypothesis->CopyInto(NewIFFArg);
-						if (!static_cast<MetaConnective*>(TempIFF)->FastInsertSlotAt(0,NewIFFArg))
+						if (!static_cast<MetaConnective*>(TempIFF)->InsertSlotAt(0,NewIFFArg))
 							UnconditionalRAMFailure();
 							
 						//! \todo IMPLEMENT: want a pseudorandom algorithm here; log the fact a pseudorandom algorithm was invoked

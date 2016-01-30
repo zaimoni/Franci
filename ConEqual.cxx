@@ -87,7 +87,7 @@ bool EqualRelation::NAryEqRewriteZeroEq2ArySum(MetaConcept*& dest)
 			{
 			MetaConcept* tmp = NULL;
 			static_cast<MetaConceptWithArgArray*>(ArgArray[InferenceParameter1])->Init2AryEqualForZeroEq2ArySum(tmp);
-			if (!NewAND->FastInsertSlotAt(0,tmp))
+			if (!NewAND->InsertSlotAt(0,tmp))
 				{
 				delete tmp;
 				goto SuccessExit;

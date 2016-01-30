@@ -655,7 +655,7 @@ bool Digraph::AddVertex(const MetaConcept& Vertex)
 		{
 		return false;
 		}
-	if (!FastInsertSlotAt(fast_size(),NewVertex))
+	if (!InsertSlotAt(fast_size(),NewVertex))
 		{
 		delete NewVertex;
 		return false;		
@@ -668,7 +668,7 @@ bool Digraph::AddVertex(MetaConcept*& Vertex)
 	size_t Idx3;
 	if (IdxFromVertex(*Vertex,Idx3)) return true;
 	if (!_OwnVertices) return false;
-	if (!FastInsertSlotAt(fast_size(),Vertex)) return false;
+	if (!InsertSlotAt(fast_size(),Vertex)) return false;
 	Vertex = NULL;
 	return AddVertexCore();
 }

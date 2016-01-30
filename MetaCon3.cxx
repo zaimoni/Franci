@@ -4045,7 +4045,7 @@ bool MetaConnective::Ary2IFFToORV3()
 		}
 		}
 	else{	// cannot recycle InferenceParameter2 argarray.
-		if (!static_cast<MetaConnective*>(ArgArray[InferenceParameter1])->FastInsertSlotAt(0,NULL))
+		if (!static_cast<MetaConnective*>(ArgArray[InferenceParameter1])->InsertSlotAt(0,NULL))
 			return false;
 
 		size_t i = static_cast<MetaConnective*>(ArgArray[InferenceParameter1])->fast_size();
@@ -4218,7 +4218,7 @@ bool MetaConnective::LogicalANDSpawnClauseForDetailedRule()
 	assert(IsExactType(LogicalAND_MC));
 	assert(ArgArray.size()>InferenceParameter1);
 	assert(!InferenceParameterMC.empty());
-	if (!FastInsertSlotAt(fast_size(),InferenceParameterMC)) return false;
+	if (!InsertSlotAt(fast_size(),InferenceParameterMC)) return false;
 
 	InferenceParameterMC.NULLPtr();
 	SUCCEED_OR_DIE(ArgArray[fast_size()-1]->LogicalANDFindDetailedRule(*ArgArray[InferenceParameter1],fast_size()-1,InferenceParameter1,InferenceParameter1,InferenceParameter2,IdxCurrentSelfEvalRule,IdxCurrentEvalRule));

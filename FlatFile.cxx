@@ -92,7 +92,7 @@ bool FlatFile::InvokeEqualArgRule() const {return false;}
 
 bool FlatFile::AppendBlankLine()
 {
-	return FastInsertSlotAt(ArgArray.size(),(MetaConcept*)NULL);
+	return InsertSlotAt(ArgArray.size(),(MetaConcept*)NULL);
 }
 
 //! \todo Relocate/Rename to MetaConceptWithArgArray
