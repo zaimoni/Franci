@@ -22,16 +22,16 @@ public:
 		_x = (src ? True : False);
 		return *this;
 		};
-	const TVal& operator=(Flag src)
+	const TVal& operator=(Flags src)
 		{
 		_x = src;
 		return *this;
 		};
 	bool read(const char* src);
 
-	bool is(Flag x) const {return _x==x;};
-	bool could_be(Flag x) const {return _x & x;};
-	void force(Flag x) {return _x &= x;};
+	bool is(Flags x) const {return _x==x;};
+	bool could_be(Flags x) const {return _x & x;};
+	void force(Flags x) {_x &= x;};
 
 	size_t array_index() const {return _x;}
 	size_t array_index(const TVal& rhs) const {return 4*_x+rhs._x;};
