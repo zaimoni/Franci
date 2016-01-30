@@ -1181,8 +1181,7 @@ static void line_out(const char* const x, size_t i, size_t* const LineBreakTable
 }
 
 static void MetaSay(const char* x,size_t x_len, int ColorCode)
-{	// FORMALLY CORRECT: Kenneth Boyd, 4/21/1999
-	if (!x || '\0'== *x || 0==x_len) return;
+{
 	Console::Log(x,x_len);	// log the message
 	size_t LineBreakTable[UserBarY()];
 	// #1: parse how many lines are required
@@ -1203,24 +1202,28 @@ static void MetaSay(const char* x,size_t x_len, int ColorCode)
 }
 
 // Win32 console is not used for automated testing
-void Console::Whisper(const char* Message)
-{	// FORMALLY CORRECT: Kenneth Boyd, 3/22/1999
-	MetaSay(Message,strlen(Message),Text_White);
+void Console::Whisper(const char* x)
+{
+	if (!x || !*x) return;
+	MetaSay(x,strlen(x),Text_White);
 }
 
-void Console::SaysNormal(const char* x,size_t x_len)		// white text
-{	// FORMALLY CORRECT: Kenneth Boyd, 3/22/1999
-	MetaSay(x,x_len,Text_White);
+void Console::SaysNormal(const char* x)		// white text
+{
+	if (!x || !*x) return;
+	MetaSay(x,strlen(x),Text_White);
 }
 
-void Console::SaysWarning(const char* Message)	// yellow text; consider sound effects
-{	// FORMALLY CORRECT: Kenneth Boyd, 3/22/1999
-	MetaSay(Message,strlen(Message),Text_Yellow);
+void Console::SaysWarning(const char* x)	// yellow text; consider sound effects
+{
+	if (!x || !*x) return;
+	MetaSay(x,strlen(x),Text_Yellow);
 }
 
-void Console::SaysError(const char* Message)		// red text; consider sound effects
-{	// FORMALLY CORRECT: Kenneth Boyd, 3/22/1999
-	MetaSay(Message,strlen(Message),Text_Red);
+void Console::SaysError(const char* x)		// red text; consider sound effects
+{
+	if (!x || !*x) return;
+	MetaSay(x,strlen(x),Text_Red);
 } 
 
 // Logging.h hooks
@@ -1244,7 +1247,8 @@ EXTERN_C void _fatal_code(const char* const B,int exit_code)
 
 EXTERN_C void _inform(const char* const B, size_t len)
 {
-	Console::SaysNormal(B,len);
+	if (!B || !*B || 0>=len) return;
+	MetaSay(B,len,Text_White);
 }
 
 #if 0

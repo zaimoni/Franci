@@ -46,10 +46,9 @@ public:
 	static void Whisper(const char* x);
 
 	// these four log the text
-	static void SaysNormal(const char* x,size_t x_len);					// white text
-	static void SaysNormal(const char* x) {SaysNormal(x,strlen(x));};	// white text
-	static void SaysWarning(const char* Message);	// yellow text; consider sound effects
-	static void SaysError(const char* Message);	// red text; consider sound effects
+	static void SaysNormal(const char* x);	// white text
+	static void SaysWarning(const char* x);	// yellow text; consider sound effects
+	static void SaysError(const char* x);	// red text; consider sound effects
 
 	static void ResumeLogFile();
 

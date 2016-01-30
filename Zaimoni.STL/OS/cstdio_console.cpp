@@ -606,8 +606,7 @@ static void line_out(const char* const x, size_t i, size_t* const LineBreakTable
 }
 
 static void _whisper(const char* x,size_t x_len)
-{	// FORMALLY CORRECT: Kenneth Boyd, 4/21/1999
-	if (!x || '\0'== *x || 0==x_len) return;
+{
 	size_t LineBreakTable[UserBarY()];
 	// #1: parse how many lines are required
 	const size_t LineCount = ParseMessageIntoLines(x,x_len,LineBreakTable,80);
@@ -628,12 +627,12 @@ static void _whisper(const char* x,size_t x_len)
 // we are used for automated testing
 void Console::Whisper(const char* x)
 {
+	if (!x || !*x) return;
 	_whisper(x,strlen(x));
 }
 
 static void MetaSay(const char* x,size_t x_len)
-{	// FORMALLY CORRECT: Kenneth Boyd, 4/21/1999
-	if (!x || '\0'== *x || 0==x_len) return;
+{
 	Console::Log(x,x_len);	// log the message
 	size_t LineBreakTable[UserBarY()];
 	// #1: parse how many lines are required
@@ -652,20 +651,23 @@ static void MetaSay(const char* x,size_t x_len)
 	while(UserBarY()> ++i);
 }
 
-void Console::SaysNormal(const char* x,size_t x_len)		// white text
-{	// FORMALLY CORRECT: Kenneth Boyd, 3/22/1999
-	MetaSay(x,x_len);
+void Console::SaysNormal(const char* x)		// white text
+{
+	if (!x || !*x) return;
+	MetaSay(x,strlen(x));
 }
 
-void Console::SaysWarning(const char* Message)	// yellow text; consider sound effects
-{	// FORMALLY CORRECT: Kenneth Boyd, 3/22/1999
-	MetaSay(Message,strlen(Message));
+void Console::SaysWarning(const char* x)	// yellow text; consider sound effects
+{
+	if (!x || !*x) return;
+	MetaSay(x,strlen(x));
 }
 
-void Console::SaysError(const char* Message)		// red text; consider sound effects
-{	// FORMALLY CORRECT: Kenneth Boyd, 3/22/1999
-	MetaSay(Message,strlen(Message));
-} 
+void Console::SaysError(const char* x)		// red text; consider sound effects
+{
+	if (!x || !*x) return;
+	MetaSay(x,strlen(x));
+}
 
 // Logging.h hooks
 EXTERN_C void _fatal(const char* const B)
@@ -688,7 +690,8 @@ EXTERN_C void _fatal_code(const char* const B,int exit_code)
 
 EXTERN_C void _inform(const char* const B, size_t len)
 {
-	Console::SaysNormal(B,len);
+	if (!B || !*B || 0>=len) return;
+	MetaSay(B,len);
 }
 
 EXTERN_C void _log(const char* const B,size_t len)
