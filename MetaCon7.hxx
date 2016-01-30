@@ -14,6 +14,15 @@ struct MetaConcept_lookup
 	// bool syntax_ok(const T& x);
 };
 
+template<class T> class MetaConceptExternal;
+
+namespace zaimoni {
+
+template<class T>
+struct is_polymorphic_final<MetaConceptExternal<T> > : public std::true_type {};
+
+}
+
 // we'd like to replace most derivations from MetaConceptZeroAry (MetaCon6.hxx/cxx) with this
 template<class T>
 class MetaConceptExternal : public MetaConcept
@@ -33,9 +42,6 @@ public:
 	void operator=(const T& src) {
 		_x = src;	// presumably this is ACID
 	};
-
-	const T& c_datum() const {return _x;};
-	T& datum() {return _x;};
 
 	virtual void CopyInto(MetaConcept*& dest) {zaimoni::CopyInto(*this,dest);};	// can throw memory failure
 	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
@@ -64,12 +70,5 @@ protected:
 	virtual void _forceStdForm() {};
 	virtual bool _IsExplicitConstant() const {return true;};
 };
-
-namespace zaimoni {
-
-template<class T>
-struct is_polymorphic_final<MetaConceptExternal<T> > : public std::true_type {};
-
-}
 
 #endif

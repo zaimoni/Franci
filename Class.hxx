@@ -5,6 +5,7 @@
 #define ABSTRACTCLASS_DEF
 
 #include "MetaCon5.hxx"
+#include "TruthVal.hxx"
 
 class AbstractClass;
 namespace zaimoni {
@@ -13,8 +14,6 @@ template<>
 struct is_polymorphic_final<AbstractClass> : public std::true_type {};
 
 }
-
-class TruthValue;
 
 class AbstractClass : public MetaConceptWith1Arg
 {
