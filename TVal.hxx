@@ -32,7 +32,6 @@ public:
 		_x = src;
 		return *this;
 		};
-	bool read(const char* src);
 
 	bool is(Flags x) const {return _x==x;};
 	bool could_be(Flags x) const {return _x & x;};
@@ -46,6 +45,10 @@ public:
 
 	void SelfLogicalNOT();
 	bool isAntiIdempotentTo(const TVal& rhs) const;
+
+	// to help parsing
+	bool read(const char* src);
+	static bool is_legal(const char* Text);
 };
 
 

@@ -1275,7 +1275,7 @@ Restart:
 static bool SymmetricFindTwoAntiIdempotentArgs(const MetaConcept* const * const ArgArray, size_t& InferenceParameter1,
 								   size_t& InferenceParameter2, const size_t strict_ub)
 {	// FORMALLY CORRECT: Kenneth Boyd, 6/9/2000	
-	assert(!ArgArray.empty());
+	assert(ArgArray);
 	assert(2<=strict_ub);
 	size_t i = 1;
 	do	{

@@ -36,9 +36,11 @@ IntegerNumeral::~IntegerNumeral()
 {	// FORMALLY CORRECT: 7/12/2007, Kenneth Boyd
 }
 
+#ifndef ALPHA_TRUTHVAL
 TruthValue::~TruthValue()
 {	// FORMALLY CORRECT: Kenneth Boyd, 4/6/1998
 }
+#endif
 
 Variable::~Variable()
 {	// FORMALLY CORRECT: Kenneth Boyd, 4/22/2006

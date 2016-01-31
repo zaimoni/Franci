@@ -113,8 +113,8 @@ bool QuantifiedStatement::SyntaxOK() const
 
 bool QuantifiedStatement::DelegateSelfEvaluate()
 {
-	assert(MetaConceptWithArgArray::MaxSelfEvalRuleIdx_SER<IdxSelfCurrentEvalRule);
-	assert(MaxEvalRuleIdx_ER+MetaConceptWithArgArray::MaxSelfEvalRuleIdx_SER>=IdxCurrentSelfEvalRule);
+	assert(MetaConceptWithArgArray::MaxSelfEvalRuleIdx_SER<IdxCurrentSelfEvalRule);
+	assert(MaxSelfEvalRuleIdx_SER+MetaConceptWithArgArray::MaxSelfEvalRuleIdx_SER>=IdxCurrentSelfEvalRule);
 	return (this->*SelfEvaluateRuleLookup[IdxCurrentSelfEvalRule-(MetaConceptWithArgArray::MaxSelfEvalRuleIdx_SER+1)])();
 }
 

@@ -27,11 +27,9 @@ Franci_console.exe : make_Zaimoni_STL $(OBJECTS_FRANCI_CONSOLE_LINK_PRIORITY)
 	strip --preserve-dates --strip-unneeded Franci_console.exe
 
 # inference rules
-# defines
 # processing details
 .cxx.o:
 	$(CXX) $(CFLAGS) $(CXXFLAGS) $(ARCH_FLAGS) $(OTHER_INCLUDEDIR) $(C_MACROS) $(CXX_MACROS) \
-	 -DNDEBUG \
 	 -o $*.o -c -xc++ -pipe $<
 	strip --preserve-dates --strip-unneeded $*.o
 

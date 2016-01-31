@@ -18,7 +18,7 @@
 #	define ZAIMONI_PASSTHROUGH_ASSERT(A)	A
 #else
 /* Interoperate with Microsoft: return code 3 */
-#	define assert(A)	((A) ? (void)0 : FATAL_CODE(#A,3))
+#	define assert(A)	((A) ? (void)0 : FATAL_CODE(__FILE__ "," DEEP_STRINGIZE(__LINE__) ": " #A,3))
 #	define ZAIMONI_PASSTHROUGH_ASSERT(A)	((A) ? (void)0 : FATAL_CODE(#A,3))
 #endif
 
@@ -134,7 +134,7 @@ inline void INC_INFORM(unsigned char B) {return INC_INFORM((uintmax_t)(B));}
 #endif
 
 /* this should look like an assert even in NDEBUG mode */
-#define SUCCEED_OR_DIE(A) ((A) ? (void)0 : FATAL_CODE(#A,3))
+#define SUCCEED_OR_DIE(A) ((A) ? (void)0 : FATAL_CODE(__FILE__ "," DEEP_STRINGIZE(__LINE__) ": " #A,3))
 
 /* match assert.h C standard header, which uses NDEBUG */
 #ifndef NDEBUG	/* self-aware version */
@@ -149,7 +149,7 @@ inline void INC_INFORM(unsigned char B) {return INC_INFORM((uintmax_t)(B));}
 #	else	/* if no extensions, assume C99 */		
 #		define FATAL(B) FATAL((LOG(__func__),LOG_STRING_LITERAL(__FILE__ ":" DEEP_STRINGIZE(__LINE__)),B));
 #		define FATAL_CODE(B,CODE) FATAL_CODE((LOG(__func__),LOG_STRING_LITERAL(__FILE__ ":" DEEP_STRINGIZE(__LINE__)),B),CODE);
-#endif
+#	endif
 #endif
 
 #define ARG_TRACE_PARAMS , const char* const _file, long _line

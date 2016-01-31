@@ -682,7 +682,7 @@ void EqualRelation::StrictlyModifiesALLDISTINCT(MetaConcept*& rhs) const
 				// continue vector delete
 				SwapArgs(i,--VR_rhs.InferenceParameter1);
 		// this is caught by StrictlyImpliesLogicalNOTOf, ALLDISTINCT version
-		assert(!(1==VR_RHS.InferenceParameter1 && SelfEvalRuleAry2CorrectedCleanTrailingArg_SER==VR_RHS.IdxCurrentSelfEvalRule));
+		assert(!(1==VR_rhs.InferenceParameter1 && SelfEvalRuleAry2CorrectedCleanTrailingArg_SER==VR_rhs.IdxCurrentSelfEvalRule));
 		LOG("Using this ALLDISTINCT clause to clean this arg of EQUALTOONEOF clause:");
 		LOG(*this);
 		LOG(*VR_rhs.ArgArray[VR_rhs.InferenceParameter1]);
@@ -691,7 +691,7 @@ void EqualRelation::StrictlyModifiesALLDISTINCT(MetaConcept*& rhs) const
 			{
 			VR_rhs.SelfEvalRuleAry2CorrectedCleanTrailingArg();
 			return;
-			};
+			}
 		assert(SelfEvalRuleAry2CorrectedCleanArg_SER==VR_rhs.IdxCurrentSelfEvalRule);
 		VR_rhs.SelfEvalRuleAry2CorrectedCleanArg();
 		return;
@@ -2188,8 +2188,8 @@ bool EqualRelation::DelegateEvaluate(MetaConcept*& dest)
 
 bool EqualRelation::DelegateSelfEvaluate()
 {
-	assert(MetaConceptWithArgArray::MaxSelfEvalRuleIdx_SER<IdxSelfCurrentEvalRule);
-	assert(MaxEvalRuleIdx_ER+MetaConceptWithArgArray::MaxSelfEvalRuleIdx_SER>=IdxCurrentSelfEvalRule);
+	assert(MetaConceptWithArgArray::MaxSelfEvalRuleIdx_SER<IdxCurrentSelfEvalRule);
+	assert(MaxSelfEvalRuleIdx_SER+MetaConceptWithArgArray::MaxSelfEvalRuleIdx_SER>=IdxCurrentSelfEvalRule);
 	return (this->*SelfEvaluateRuleLookup[IdxCurrentSelfEvalRule-(MetaConceptWithArgArray::MaxSelfEvalRuleIdx_SER+1)])();
 }
 
@@ -2255,7 +2255,7 @@ bool EqualRelation::Ary2EqRewriteZeroEq2ArySum()
 {	// FORMALLY CORRECT: 10/17/2004
 	// Arg1 is a stable 2-ary sum (to be disposed of)
 	assert(ArgArray[0]->IsZero());
-	assert(ArgArray[1]->IsUltimateType(StdAddition_MC));
+	assert(ArgArray[1]->IsExactType(StdAddition_MC));
 	MetaConcept** tmp = NULL;
 	static_cast<MetaConceptWithArgArray*>(ArgArray[1])->OverwriteAndNULL(tmp);
 	ArgArray = tmp;

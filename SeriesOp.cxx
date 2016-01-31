@@ -278,7 +278,7 @@ but requires cancellations to work...Proceed.
 			}
 		}
 
-	assert(NULLSet!=*_desiredType);
+	assert(NULLSet!=*DesiredType);
 	return true;
 }
 

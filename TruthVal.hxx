@@ -22,6 +22,7 @@ struct MetaConcept_lookup<TVal>
 	static size_t length_of_self_name(const TVal& x) {return x.LengthOfSelfName();};
 	static void construct_self_name_aux(char* dest,const TVal& x) {x.ConstructSelfNameAux(dest);};
 	static bool lt_aux(const TVal& lhs, const TVal& rhs) {return lhs<rhs;};
+	static bool read(TVal& dest, const char* src) {return dest.read(src);}
 };
 
 typedef MetaConceptExternal<TVal> TruthValue;

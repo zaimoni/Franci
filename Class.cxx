@@ -258,21 +258,33 @@ bool AbstractClass::ProperSubclass(const AbstractClass& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/26/2002
 	TruthValue RetVal;
 	ProperSubclass(rhs,RetVal);
+#ifdef ALPHA_TRUTHVAL
+	return RetVal._x.is(TVal::True);
+#else
 	return RetVal.IsTrue();
+#endif
 }
 
 bool AbstractClass::Subclass(const AbstractClass& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/26/2002
 	TruthValue RetVal;
 	Subclass(rhs,RetVal);
+#ifdef ALPHA_TRUTHVAL
+	return RetVal._x.is(TVal::True);
+#else
 	return RetVal.IsTrue();
+#endif
 }
 
 void AbstractClass::ProperSubclass(const AbstractClass& rhs, TruthValue& RetVal) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/26/2002
 	if (*this==rhs || NULLSet==rhs || TruthValues==rhs)
 		{
+#ifdef ALPHA_TRUTHVAL
+		RetVal._x = TVal::False;
+#else
 		RetVal.SetFalse();
+#endif
 		return;
 		};
 	Subclass_core(rhs,RetVal);
@@ -284,7 +296,11 @@ AbstractClass::Subclass(const AbstractClass& rhs, TruthValue& RetVal) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/26/2002
 	if (*this==rhs)				// no further analysis
 		{
+#ifdef ALPHA_TRUTHVAL
+		RetVal._x = TVal::True;
+#else
 		RetVal.SetTrue();
+#endif
 		return;
 		}
 	Subclass_core(rhs,RetVal);
@@ -295,22 +311,38 @@ void AbstractClass::Subclass_core(const AbstractClass& rhs, TruthValue& RetVal) 
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/26/2002
 	if (ClassAllSets==rhs)	// no further analysis
 		{
+#ifdef ALPHA_TRUTHVAL
+		RetVal._x = TVal::True;
+#else
 		RetVal.SetTrue();
+#endif
 		return;
 		}
 	else if (ClassAdditionDefined==rhs)
 		{
+#ifdef ALPHA_TRUTHVAL
+		RetVal._x = SupportsThisOperation(StdAddition_MC);
+#else
 		RetVal = SupportsThisOperation(StdAddition_MC);
+#endif
 		return;
 		}
 	else if (ClassMultiplicationDefined==rhs)
 		{
+#ifdef ALPHA_TRUTHVAL
+		RetVal._x = SupportsThisOperation(StdMultiplication_MC);
+#else
 		RetVal = SupportsThisOperation(StdMultiplication_MC);
+#endif
 		return;
 		}
 	else if (ClassAdditionMultiplicationDefined==rhs)
 		{
+#ifdef ALPHA_TRUTHVAL
+		RetVal._x = SupportsThisOperation(StdMultiplication_MC) && SupportsThisOperation(StdAddition_MC);
+#else
 		RetVal = SupportsThisOperation(StdMultiplication_MC) && SupportsThisOperation(StdAddition_MC);
+#endif
 		return;
 		}
 	else if (!Arg1.empty())
@@ -320,14 +352,22 @@ void AbstractClass::Subclass_core(const AbstractClass& rhs, TruthValue& RetVal) 
 			if (rhs.Arg1.empty())
 				{	// RHS is symbolic domain
 				if (IsUltimateType(NULL))
+#ifdef ALPHA_TRUTHVAL
+					RetVal._x = TVal::False;
+#else
 					RetVal.SetFalse();
+#endif
 				else
 					UltimateType()->Subclass(rhs,RetVal);
 				return;
 				}
 			else if (rhs.Arg1->IsExplicitConstant())
 				{	// RHS is singleton: fail
+#ifdef ALPHA_TRUTHVAL
+				RetVal._x = TVal::False;
+#else
 				RetVal.SetFalse();
+#endif
 				return;
 				}
 			else if (rhs.Arg1->IsExactType(LinearInterval_MC))
@@ -348,7 +388,11 @@ void AbstractClass::Subclass_core(const AbstractClass& rhs, TruthValue& RetVal) 
 			if (   rhs.Arg1->IsExactType(LinearInterval_MC)
 				|| rhs.Arg1->IsExplicitConstant())
 				{
+#ifdef ALPHA_TRUTHVAL
+				RetVal._x = TVal::False;
+#else
 				RetVal.SetFalse();
+#endif
 				return;
 				}
 			}
@@ -356,42 +400,86 @@ void AbstractClass::Subclass_core(const AbstractClass& rhs, TruthValue& RetVal) 
 			if (Integer==*this)
 				{
 				if (Rational==rhs || Real==rhs || Complex==rhs)
+#ifdef ALPHA_TRUTHVAL
+					RetVal._x = TVal::True;
+#else
 					RetVal.SetTrue();
+#endif
 				else
+#ifdef ALPHA_TRUTHVAL
+					RetVal._x = TVal::Unknown;
+#else
 					RetVal.SetUnknown();
+#endif
 				return;
 				}
 			else if (Rational==*this)
 				{
 				if		(Real==rhs || Complex==rhs)
+#ifdef ALPHA_TRUTHVAL
+					RetVal._x = TVal::True;
+#else
 					RetVal.SetTrue();
+#endif
 				else if (Integer==rhs)
+#ifdef ALPHA_TRUTHVAL
+					RetVal._x = TVal::False;
+#else
 					RetVal.SetFalse();
+#endif
 				else
+#ifdef ALPHA_TRUTHVAL
+					RetVal._x = TVal::Unknown;
+#else
 					RetVal.SetUnknown();
+#endif
 				return;
 				}
 			else if (Real==*this)
 				{
 				if		(Complex==rhs)
+#ifdef ALPHA_TRUTHVAL
+					RetVal._x = TVal::True;
+#else
 					RetVal.SetTrue();
+#endif
 				else if (Integer==rhs || Rational==rhs)
+#ifdef ALPHA_TRUTHVAL
+					RetVal._x = TVal::False;
+#else
 					RetVal.SetFalse();
+#endif
 				else
+#ifdef ALPHA_TRUTHVAL
+					RetVal._x = TVal::Unknown;
+#else
 					RetVal.SetUnknown();
+#endif
 				return;
 				}
 			else if (Complex==*this)
 				{
 				if (Integer==rhs || Rational==rhs || Real==rhs)
+#ifdef ALPHA_TRUTHVAL
+					RetVal._x = TVal::False;
+#else
 					RetVal.SetFalse();
+#endif
 				else
+#ifdef ALPHA_TRUTHVAL
+					RetVal._x = TVal::Unknown;
+#else
 					RetVal.SetUnknown();
+#endif
 				return;
 				}
 			}
 		}
+#ifdef ALPHA_TRUTHVAL
+	RetVal._x = TVal::Unknown;
+#else
 	RetVal.SetUnknown();
+#endif
 }
 
 // The HasAsElement relation (easier to program than IsElementOf, which would be an Interface function)
@@ -402,17 +490,23 @@ bool AbstractClass::HasAsElement(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 6/12/2002
 	TruthValue RetVal;
 	HasAsElement(rhs,RetVal);
+#ifdef ALPHA_TRUTHVAL
+	return RetVal._x.is(TVal::True);
+#else
 	return RetVal.IsTrue();
+#endif
 }
 
 bool AbstractClass::DoesNotHaveAsElement(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 6/12/2002
 	TruthValue RetVal;
 	HasAsElement(rhs,RetVal);
+#ifdef ALPHA_TRUTHVAL
+	return RetVal._x.is(TVal::False);
+#else
 	return RetVal.IsFalse();
+#endif
 }
-
-// #define FRANCI_WARY 1
 
 void
 AbstractClass::HasAsElement(const MetaConcept& rhs, TruthValue& RetVal) const
@@ -422,14 +516,19 @@ AbstractClass::HasAsElement(const MetaConcept& rhs, TruthValue& RetVal) const
 	// Also, an abstractclass returns itself as its UltimateType.
 	// However...Franci isn't quite that knowledgeable--yet.
 	// Consider making this susceptible to array lookup.
-#ifdef FRANCI_WARY
-	LOG("Entering HasAsElement");
-#endif
+#ifdef ALPHA_TRUTHVAL
+	RetVal._x = TVal::False;
+#else
 	RetVal.SetFalse();
+#endif
 	if (*this==NULLSet) return;
 	if		(rhs.IsExactType(TruthValue_MC))
 		{
+#ifdef ALPHA_TRUTHVAL
+		if (*this==TruthValues) RetVal._x = TVal::True;
+#else
 		if (*this==TruthValues) RetVal.SetTrue();
+#endif
 		return;
 		}
 	else if (rhs.IsExactType(AbstractClass_MC))
@@ -437,7 +536,11 @@ AbstractClass::HasAsElement(const MetaConcept& rhs, TruthValue& RetVal) const
 		if (static_cast<const AbstractClass&>(rhs).IsProperClass())
 			return;
 		if (*this==ClassAllSets && !rhs.IsUltimateType(NULL) && Superclass(*rhs.UltimateType()))
+#ifdef ALPHA_TRUTHVAL
+			RetVal._x = TVal::True;
+#else
 			RetVal.SetTrue();
+#endif
 		return;
 		}
 	else if (rhs.IsExactType(Variable_MC))
@@ -460,7 +563,11 @@ AbstractClass::HasAsElement(const MetaConcept& rhs, TruthValue& RetVal) const
 	else if (rhs.IsExactType(LinearInfinity_MC))
 		{	//! \todo: smarter test...really should be relying on natural total ordering, etc.
 			//! <br> current implementation breaks on C<sup>#</sup>
+#ifdef ALPHA_TRUTHVAL
+		if (HasInfinity()) RetVal._x = TVal::True;
+#else
 		if (HasInfinity()) RetVal.SetTrue();
+#endif
 		return;
 		}
 
@@ -468,18 +575,16 @@ AbstractClass::HasAsElement(const MetaConcept& rhs, TruthValue& RetVal) const
 		{
 		if 		(Arg1->IsExactType(LinearInterval_MC))
 			{
-#ifdef FRANCI_WARY
-			LOG("Attempting LinearInterval handling of HasAsElement");
-#endif
 			static_cast<LinearInterval*>((MetaConcept*)Arg1)->HasAsElement(rhs,RetVal);
-#ifdef FRANCI_WARY
-			LOG("LinearInterval handling of HasAsElement OK");
-#endif
 			return;
 			}
 		else if (Arg1->IsExplicitConstant())
 			{
+#ifdef ALPHA_TRUTHVAL
+			RetVal._x = (*Arg1==rhs);
+#else
 			RetVal = (*Arg1==rhs);
+#endif
 			return;
 			}
 		}
@@ -499,7 +604,11 @@ AbstractClass::HasAsElement(const MetaConcept& rhs, TruthValue& RetVal) const
 		else if (*this==ClassAdditionMultiplicationDefined)
 			{
 			rhs.UltimateType()->SupportsThisOperation(StdAddition_MC,RetVal);
+#ifdef ALPHA_TRUTHVAL
+			if (!RetVal._x.is(TVal::Unknown)) return;
+#else
 			if (!RetVal.IsUnknown()) return;
+#endif
 			rhs.UltimateType()->SupportsThisOperation(StdMultiplication_MC,RetVal);
 			return;
 			}
@@ -507,10 +616,12 @@ AbstractClass::HasAsElement(const MetaConcept& rhs, TruthValue& RetVal) const
 			return;
 		}
 
+#ifdef ALPHA_TRUTHVAL
+	RetVal._x = TVal::Unknown;
+#else
 	RetVal.SetUnknown();
+#endif
 }
-
-#undef FRANCI_WARY
 
 bool AbstractClass::IntersectWith(const AbstractClass& rhs)
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/29/2002
@@ -527,13 +638,23 @@ AbstractClass::SetToIntersection(const AbstractClass& lhs, const AbstractClass& 
 
 	TruthValue RetVal;
 	lhs.Subclass(rhs,RetVal);
+#ifdef ALPHA_TRUTHVAL
+	if 		(RetVal._x.is(TVal::True)) return SetToThis(lhs);
+	else if (RetVal._x.is(TVal::False) && !lhs.Arg1.empty() && lhs.Arg1->IsExplicitConstant())
+#else
 	if 		(RetVal.IsTrue()) return SetToThis(lhs);
 	else if (RetVal.IsFalse() && !lhs.Arg1.empty() && lhs.Arg1->IsExplicitConstant())
+#endif
 		return SetToThis(NULLSet);
 
 	rhs.Subclass(lhs,RetVal);
+#ifdef ALPHA_TRUTHVAL
+	if 		(RetVal._x.is(TVal::True)) return SetToThis(rhs);
+	else if (RetVal._x.is(TVal::False) && !rhs.Arg1.empty() && rhs.Arg1->IsExplicitConstant())
+#else
 	if 		(RetVal.IsTrue()) return SetToThis(rhs);
 	else if (RetVal.IsFalse() && !rhs.Arg1.empty() && rhs.Arg1->IsExplicitConstant())
+#endif
 		return SetToThis(NULLSet);
 
 	// TruthValues, and Subclass tests didn't go off: NULLSet
@@ -606,13 +727,23 @@ bool AbstractClass::IntersectionWithIsNULLSet(const AbstractClass& rhs) const
 
 	TruthValue RetVal;
 	Subclass(rhs,RetVal);
+#ifdef ALPHA_TRUTHVAL
+	if 		(RetVal._x.is(TVal::True)) return false;
+	else if (RetVal._x.is(TVal::False) && !Arg1.empty() && Arg1->IsExplicitConstant())
+#else
 	if 		(RetVal.IsTrue()) return false;
 	else if (RetVal.IsFalse() && !Arg1.empty() && Arg1->IsExplicitConstant())
+#endif
 		return true;
 
 	rhs.Subclass(*this,RetVal);
+#ifdef ALPHA_TRUTHVAL
+	if 		(RetVal._x.is(TVal::True)) return false;
+	else if (RetVal._x.is(TVal::False) && !rhs.Arg1.empty() && rhs.Arg1->IsExplicitConstant())
+#else
 	if 		(RetVal.IsTrue()) return false;
 	else if (RetVal.IsFalse() && !rhs.Arg1.empty() && rhs.Arg1->IsExplicitConstant())
+#endif
 		return true;
 
 	if (TruthValues==*this || TruthValues==rhs) return true;
@@ -650,20 +781,32 @@ bool AbstractClass::SupportsThisOperation(ExactType_MC Operation) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/26/2002
 	TruthValue RetVal;
 	SupportsThisOperation(Operation,RetVal);
+#ifdef ALPHA_TRUTHVAL
+	return RetVal._x.is(TVal::True);
+#else
 	return RetVal.IsTrue();
+#endif
 }
 
 bool AbstractClass::CompletelyFailsToSupportThisOperation(ExactType_MC Operation) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/26/2002
 	TruthValue RetVal;
 	SupportsThisOperation(Operation,RetVal);
+#ifdef ALPHA_TRUTHVAL
+	return RetVal._x.is(TVal::False);
+#else
 	return RetVal.IsFalse();
+#endif
 }
 
 void AbstractClass::SupportsThisOperation(ExactType_MC Operation, TruthValue& RetVal) const
 {	// MUTABLE
 	// IMPLEMENTATION PARADIGM UNSTABLE
+#ifdef ALPHA_TRUTHVAL
+	RetVal._x = TVal::Unknown;
+#else
 	RetVal.SetUnknown();
+#endif
 	if (*this!=TruthValues && *this!=NULLSet)
 		{
 		if (!Arg1.empty() && !Arg1->IsUltimateType(NULL))
@@ -682,7 +825,11 @@ void AbstractClass::SupportsThisOperation(ExactType_MC Operation, TruthValue& Re
 					|| *this==ClassAdditionMultiplicationDefined	// algebraic: omnizero
 					|| Superclass(Integer))		// integer 0 ok
 					{
+#ifdef ALPHA_TRUTHVAL
+					RetVal._x = TVal::True;
+#else
 					RetVal.SetTrue();
+#endif
 					return;
 					}
 				};
@@ -694,14 +841,22 @@ void AbstractClass::SupportsThisOperation(ExactType_MC Operation, TruthValue& Re
 					|| *this==ClassAdditionMultiplicationDefined	// algebraic: omnione
 					|| Superclass(Integer))		// integer 1 ok
 					{
+#ifdef ALPHA_TRUTHVAL
+					RetVal._x = TVal::True;
+#else
 					RetVal.SetTrue();
+#endif
 					return;
 					}
 				}
 			}
 		}
 	else{
+#ifdef ALPHA_TRUTHVAL
+		RetVal._x = TVal::False;
+#else
 		RetVal.SetFalse();
+#endif
 		return;
 		}
 }

@@ -1203,7 +1203,11 @@ void
 Init_Unparsed_Eval(void)
 {
 	UnparsedText::InstallEvalRule(&IntegerNumeral::IsLegalIntegerString,&IntegerNumeral::ConvertToIntegerNumeral);
+#ifdef ALPHA_TRUTHVAL
+	UnparsedText::InstallEvalRule(&TVal::is_legal,&TruthValue::read);
+#else
 	UnparsedText::InstallEvalRule(&TruthValue::IsLegalTValString,&TruthValue::ConvertToTruthValue);
+#endif
 	UnparsedText::InstallEvalRule(&AbstractClass::IsReservedSetClassName,&AbstractClass::ConvertToReservedAbstractClass);
 }
 

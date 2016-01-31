@@ -32,3 +32,20 @@ size_t TVal::LengthOfSelfName() const { return strlen(TruthValueNames[_x]); }
 void TVal::SelfLogicalNOT() {_x = NegatedTVal[_x];}
 bool TVal::isAntiIdempotentTo(const TVal& rhs) const { return _x==NegatedTVal[rhs._x]; }
 
+bool TVal::is_legal(const char* Text)
+{	// FORMALLY CORRECT: 9/4/2006
+	TVal tmp;
+	return tmp.read(Text);
+}
+
+#if 0
+// only called from UnparsedText::Evaluate(...); guard clause is IsLegalTValString
+bool TruthValue::ConvertToTruthValue(MetaConcept*& dest,const char* Text)
+{	// FORMALLY CORRECT: Kenneth Boyd, 9/4/2006
+	assert(!dest);
+	TVal tmp;
+	SUCCEED_OR_DIE(tmp.read(Text));
+	dest = new(nothrow) TruthValue(tmp);
+	return dest;
+}
+#endif

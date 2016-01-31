@@ -1595,7 +1595,11 @@ void MetaConnective::DiagnoseInferenceRules() const
 Ary2Finish:
 		if (ArgArray[0]->IsExactType(TruthValue_MC))
 			{
+#ifdef ALPHA_TRUTHVAL
+			(this->*DiagnoseRulesTVal2AryAux[static_cast<TruthValue*>(ArgArray[0])->_x.array_index()])();
+#else
 			(this->*DiagnoseRulesTVal2AryAux[static_cast<TruthValue*>(ArgArray[0])->CreateLinearArrayIndex()])();
+#endif
 			return;
 			};
 		// antiidempotent scanner
@@ -1623,7 +1627,11 @@ Ary2Finish:
 		}
 	else if (ArgArray[0]->IsExactType(TruthValue_MC))
 		{
+#ifdef ALPHA_TRUTHVAL
+		if ((this->*DiagnoseRulesTValNAryAux[static_cast<TruthValue*>(ArgArray[0])->_x.array_index()])())
+#else
 		if ((this->*DiagnoseRulesTValNAryAux[static_cast<TruthValue*>(ArgArray[0])->CreateLinearArrayIndex()])())
+#endif
 			return;
 		if (2==fast_size()) goto Ary2Finish;
 		};
@@ -1754,12 +1762,20 @@ bool MetaConnective::DiagnoseInferenceRulesTrueNAry() const
 		{
 		if (ArgArray[1]->IsExactType(TruthValue_MC))
 			{
+#ifdef ALPHA_TRUTHVAL
+			if 		(static_cast<TruthValue*>(ArgArray[1])->_x.is(TVal::True))
+#else
 			if 		(static_cast<TruthValue*>(ArgArray[1])->IsTrue())
+#endif
 				{
 				size_t i = 1;
 				while(   fast_size()-1>i
 					  && ArgArray[i+1]->IsExactType(TruthValue_MC)
+#ifdef ALPHA_TRUTHVAL
+					  && static_cast<TruthValue*>(ArgArray[i+1])->_x.is(TVal::True)) ++i;
+#else
 					  && static_cast<TruthValue*>(ArgArray[i+1])->IsTrue()) ++i;
+#endif
 				if (fast_size()-2<=i)
 					{	// all but the last arg is TRUE; the last one is unspecified.
 					InvokeEvalForceArg(fast_size()-1);
@@ -1767,7 +1783,11 @@ bool MetaConnective::DiagnoseInferenceRulesTrueNAry() const
 					};
 
 				if (   ArgArray[i+1]->IsExactType(TruthValue_MC)
+#ifdef ALPHA_TRUTHVAL
+					&& static_cast<TruthValue*>(ArgArray[i+1])->_x.is(TVal::False))
+#else
 					&& static_cast<TruthValue*>(ArgArray[i+1])->IsFalse())
+#endif
 					{	// FALSE: trip off set-to-FALSE rule
 					InvokeEvalForceArg(i+1);
 					return true;
@@ -1778,7 +1798,11 @@ bool MetaConnective::DiagnoseInferenceRulesTrueNAry() const
 				const_cast<MetaConnective*>(this)->SelfEvalRuleCleanLeadingArg();
 				return false;
 				}
+#ifdef ALPHA_TRUTHVAL
+			else if (static_cast<TruthValue*>(ArgArray[1])->_x.is(TVal::False))
+#else
 			else if (static_cast<TruthValue*>(ArgArray[1])->IsFalse())
+#endif
 				{	// FALSE: trip off set-to-FALSE rule
 				InvokeEvalForceArg(1);
 				return true;
@@ -1799,24 +1823,40 @@ bool MetaConnective::DiagnoseInferenceRulesTrueNAry() const
 		{
 		if (ArgArray[1]->IsExactType(TruthValue_MC))
 			{
+#ifdef ALPHA_TRUTHVAL
+			if		(static_cast<TruthValue*>(ArgArray[1])->_x.is(TVal::True))
+#else
 			if		(static_cast<TruthValue*>(ArgArray[1])->IsTrue())
+#endif
 				{	// XOR(TRUE,TRUE,...) |-> FALSE
 				IdxCurrentSelfEvalRule = None_SER;
 				InferenceParameter1 = 0;
 				IdxCurrentEvalRule=EvalForceNotArg_ER;
 				return true;			
 				}
+#ifdef ALPHA_TRUTHVAL
+			else if (static_cast<TruthValue*>(ArgArray[1])->_x.is(TVal::False))
+#else
 			else if (static_cast<TruthValue*>(ArgArray[1])->IsFalse())
+#endif
 				{
 				if 		(ArgArray[fast_size()-1]->IsExactType(TruthValue_MC))
 					{
 					IdxCurrentSelfEvalRule = None_SER;
+#ifdef ALPHA_TRUTHVAL
+					InvokeEvalForceArg(static_cast<TruthValue*>(ArgArray[fast_size()-1])->_x.is(TVal::False) ? 0 : fast_size()-1);
+#else
 					InvokeEvalForceArg(static_cast<TruthValue*>(ArgArray[fast_size()-1])->IsFalse() ? 0 : fast_size()-1);
+#endif
 					return true;
 					}
 				else if (ArgArray[fast_size()-2]->IsExactType(TruthValue_MC))
 					{
+#ifdef ALPHA_TRUTHVAL
+					if (static_cast<TruthValue*>(ArgArray[fast_size()-2])->_x.is(TVal::False))
+#else
 					if (static_cast<TruthValue*>(ArgArray[fast_size()-2])->IsFalse())
+#endif
 						{
 						IdxCurrentSelfEvalRule = None_SER;
 						IdxCurrentEvalRule = EvalForceNotArg_ER;
@@ -3701,8 +3741,8 @@ bool MetaConnective::DelegateEvaluate(MetaConcept*& dest)
 
 bool MetaConnective::DelegateSelfEvaluate()
 {
-	assert(MetaConceptWithArgArray::MaxSelfEvalRuleIdx_SER<IdxSelfCurrentEvalRule);
-	assert(MaxEvalRuleIdx_ER+MetaConceptWithArgArray::MaxSelfEvalRuleIdx_SER>=IdxCurrentSelfEvalRule);
+	assert(MetaConceptWithArgArray::MaxSelfEvalRuleIdx_SER<IdxCurrentSelfEvalRule);
+	assert(MaxSelfEvalRuleIdx_SER+MetaConceptWithArgArray::MaxSelfEvalRuleIdx_SER>=IdxCurrentSelfEvalRule);
 	return (this->*SelfEvaluateRuleLookup[IdxCurrentSelfEvalRule-(MetaConceptWithArgArray::MaxSelfEvalRuleIdx_SER+1)])();
 }
 
@@ -4280,7 +4320,7 @@ bool MetaConnective::LogicalANDStrictlyModify()
 	assert(IsExactType(LogicalAND_MC));
 	assert(size()>InferenceParameter1);
 	assert(size()>InferenceParameter2);
-	assert(InferenceParamemter1!=InferenceParamemter2);
+	assert(InferenceParameter1!=InferenceParameter2);
 	LOG("(altering statements manipulated by this)");
 	LOG(*ArgArray[InferenceParameter1]);
 	SUCCEED_OR_DIE(ArgArray[InferenceParameter2]->ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(*ArgArray[InferenceParameter1],*ArgArray[InferenceParameter1],StrictlyModify,::CanStrictlyModify));

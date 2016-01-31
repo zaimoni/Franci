@@ -5,6 +5,7 @@
 #define METACONCEPT_EXTERNAL
 
 #include "MetaCon1.hxx"
+#include "Zaimoni.STL/Logging.h"
 
 template<class T>
 struct MetaConcept_lookup
@@ -15,6 +16,7 @@ struct MetaConcept_lookup
 	// static size_t length_of_self_name(const T& x)
 	// static void construct_self_name_aux(char* dest,const T& x)
 	// static void lt_aux(const T& lhs, const T& rhs)
+	// static bool read(T& dest, const char* src)
 };
 
 template<class T> class MetaConceptExternal;
@@ -66,6 +68,14 @@ public:
 	virtual bool DestructiveEvaluateToSameType() {return false;};	// overwrites itself iff returns true
 // text I/O functions
 	virtual size_t LengthOfSelfName() const {return MetaConcept_lookup<T>::length_of_self_name(_x);};
+	static bool read(MetaConcept*& dest,const char* Text)
+	{
+		assert(!dest);
+		T tmp;
+		SUCCEED_OR_DIE(MetaConcept_lookup<T>::read(tmp,Text));
+		dest = new(nothrow) MetaConceptExternal(tmp);
+		return dest;
+	}
 // Formal manipulation functions
 	virtual void ConvertVariableToCurrentQuantification(MetaQuantifier& src) {};
 	virtual bool HasArgRelatedToThisConceptBy(const MetaConcept& Target, LowLevelBinaryRelation* TargetRelation) const {return false;};
