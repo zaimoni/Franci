@@ -6236,46 +6236,44 @@ MetaConnective::LogicalANDBoostORWithIFF(MetaConnective*& SpeculativeTarget, siz
 	while(--Idx4>HighORIdx)
 		if (static_cast<MetaConnective*>(ArgArray[Idx4])->FindTwoRelatedArgs(*SpeculativeTarget,AreSyntacticallyEqual))
 			{
-			MetaConcept* Target = NULL;
-			MetaConcept* TmpTruthValue = NULL;
 			try	{
+				autoval_ptr<TruthValue> TmpTruthValue;
 #ifdef ALPHA_TRUTHVAL
 				TmpTruthValue = new TruthValue(TVal::True);
 #else
 				TmpTruthValue = new TruthValue(TruthValue::True);
 #endif
-				ArgArray[Idx4]->CopyInto(Target);
-				static_cast<MetaConnective*>(Target)->TransferInAndOverwriteRaw(static_cast<MetaConnective*>(Target)->InferenceParameter1,TmpTruthValue);
-				static_cast<MetaConnective*>(Target)->SetExactTypeV2(LogicalAND_MC);
+				MetaConnective* Target = NULL;
+				static_cast<MetaConnective*>(ArgArray[Idx4])->CopyInto(Target);
+				Target->TransferInAndOverwriteRaw(Target->InferenceParameter1,TmpTruthValue.release());
+				Target->SetExactTypeV2(LogicalAND_MC);
 				SpeculativeTarget->TransferInAndOverwriteRaw(SpeculativeTarget->InferenceParameter1,Target);
 				Tweaked = true;
 				}
 			catch(const bad_alloc&)
 				{
-				DELETE(TmpTruthValue);
 				WARNING(msz_NotDefinitive);
 				continue;
 				}
 			}
 		else if (static_cast<MetaConnective*>(ArgArray[Idx4])->FindTwoRelatedArgs(*SpeculativeTarget,IsAntiIdempotentTo))
 			{
-			MetaConcept* Target = NULL;
-			MetaConcept* TmpTruthValue = NULL;
 			try	{
+				autoval_ptr<TruthValue> TmpTruthValue;
 #ifdef ALPHA_TRUTHVAL
 				TmpTruthValue = new TruthValue(TVal::False);
 #else
 				TmpTruthValue = new TruthValue(TruthValue::False);
 #endif
-				ArgArray[Idx4]->CopyInto(Target);
-				static_cast<MetaConnective*>(Target)->TransferInAndOverwriteRaw(static_cast<MetaConnective*>(Target)->InferenceParameter1,TmpTruthValue);
-				static_cast<MetaConnective*>(Target)->SetNANDNOR(LogicalNOR_MC);
+				MetaConnective* Target = NULL;
+				static_cast<MetaConnective*>(ArgArray[Idx4])->CopyInto(Target);
+				Target->TransferInAndOverwriteRaw(Target->InferenceParameter1,TmpTruthValue.release());
+				Target->SetNANDNOR(LogicalNOR_MC);
 				SpeculativeTarget->TransferInAndOverwriteRaw(SpeculativeTarget->InferenceParameter1,Target);
 				Tweaked = true;
 				}
 			catch(const bad_alloc&)
 				{
-				DELETE(TmpTruthValue);
 				WARNING(msz_NotDefinitive);
 				continue;
 				}
