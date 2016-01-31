@@ -7,16 +7,29 @@
 #include "MetaCon1.hxx"
 #include "Zaimoni.STL/Logging.h"
 
+// master for these is Class.hxx
+class AbstractClass;
+extern const AbstractClass TruthValues;
+
 template<class T>
 struct MetaConcept_lookup
 {	// 
+	// enum {
+	// 	return_code = ...;
+	//  return_code = 1	// &TruthValues
+	// }
+
+	// always need these five
 	// static ExactType_MC exact_type();
-	// static AbstractClass* ultimate_type(): 
 	// static bool syntax_ok(const T& x);
 	// static size_t length_of_self_name(const T& x)
 	// static void construct_self_name_aux(char* dest,const T& x)
 	// static void lt_aux(const T& lhs, const T& rhs)
 	// static bool read(T& dest, const char* src)
+
+	// these two needed for ultimate type &TruthValues
+	// static void SelfLogicalNOT(T& x);
+	// static bool isAntiIdempotentTo(const T& lhs,const T& rhs);
 };
 
 template<class T> class MetaConceptExternal;
@@ -53,7 +66,7 @@ public:
 	void MoveInto(MetaConceptExternal*& dest) {zaimoni::CopyInto(*this,dest);};
 
 //  Type ID functions
-	virtual const AbstractClass* UltimateType() const {return MetaConcept_lookup<T>::ultimate_type();};	// specialize or else
+	virtual typename std::enable_if<MetaConcept_lookup<T>::return_code==1,const AbstractClass*>::type UltimateType() const {return &TruthValues;};	// specialize or else
 //	Arity functions
 	virtual size_t size() const {return 0;};
 	virtual const MetaConcept* ArgN(size_t n) const {return NULL;};
@@ -77,6 +90,7 @@ public:
 		return dest;
 	}
 // Formal manipulation functions
+	virtual typename std::enable_if<MetaConcept_lookup<T>::return_code==1,void>::type SelfLogicalNOT() {MetaConcept_lookup<T>::SelfLogicalNOT(this->_x);};
 	virtual void ConvertVariableToCurrentQuantification(MetaQuantifier& src) {};
 	virtual bool HasArgRelatedToThisConceptBy(const MetaConcept& Target, LowLevelBinaryRelation* TargetRelation) const {return false;};
 	virtual bool UsesQuantifierAux(const MetaQuantifier& x) const {return false;};
@@ -87,6 +101,8 @@ protected:
 	virtual void ConstructSelfNameAux(char* Name) const {return MetaConcept_lookup<T>::construct_self_name_aux(Name,_x);};		// overwrites what is already there
 	virtual void _forceStdForm() {};
 	virtual bool _IsExplicitConstant() const {return true;};
+private:
+	virtual typename std::enable_if<MetaConcept_lookup<T>::return_code==1,bool>::type isAntiIdempotentTo(const MetaConcept& rhs) const {return MetaConcept_lookup<T>::isAntiIdempotentTo(this->_x,static_cast<const MetaConceptExternal&>(rhs)._x);};
 };
 
 #endif
