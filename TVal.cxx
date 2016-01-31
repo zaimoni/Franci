@@ -27,6 +27,8 @@ bool TVal::read(const char* src)
 	return false;
 }
 
+void TVal::ConstructSelfNameAux(char* Name) const { strcpy(Name,TruthValueNames[_x]); }
+size_t TVal::LengthOfSelfName() const { return strlen(TruthValueNames[_x]); }
 void TVal::SelfLogicalNOT() {_x = NegatedTVal[_x];}
 bool TVal::isAntiIdempotentTo(const TVal& rhs) const { return _x==NegatedTVal[rhs._x]; }
 

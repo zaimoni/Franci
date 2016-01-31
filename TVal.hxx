@@ -9,6 +9,9 @@ class TVal
 private:
 	unsigned char _x;
 public:
+	friend bool operator==(const TVal& lhs, const TVal& rhs) {return lhs._x==rhs._x;}
+	friend bool operator<(const TVal& lhs, const TVal& rhs) {return lhs._x<rhs._x;}
+
 	enum Flags	{
 			Contradiction	= 0,
 			True,
@@ -38,8 +41,12 @@ public:
 	size_t array_index() const {return _x;}
 	size_t array_index(const TVal& rhs) const {return 4*_x+rhs._x;};
 
+	size_t LengthOfSelfName() const;
+	void ConstructSelfNameAux(char* Name) const;
+
 	void SelfLogicalNOT();
 	bool isAntiIdempotentTo(const TVal& rhs) const;
 };
+
 
 #endif
