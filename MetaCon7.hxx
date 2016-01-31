@@ -9,7 +9,7 @@
 template<class T>
 struct MetaConcept_lookup
 {	// 
-	// exact_type: _MC value
+	// static ExactType_MC exact_type();
 	// static AbstractClass* ultimate_type(): 
 	// static bool syntax_ok(const T& x);
 	// static size_t length_of_self_name(const T& x)
@@ -33,7 +33,7 @@ class MetaConceptExternal : public MetaConcept
 public:
 	T _x;	// we would provide full accessors anyway so may as well be public
 
-	MetaConceptExternal(const T& src) : MetaConcept(MetaConcept_lookup<T>::exact_type),_x(src) {};
+	MetaConceptExternal(const T& src) : MetaConcept(MetaConcept_lookup<T>::exact_type()),_x(src) {};
 	MetaConceptExternal(const MetaConceptExternal& src)
 		: MetaConcept(src),_x(src._x) {};
 	virtual ~MetaConceptExternal() {};	// as a template doesn't go in Destruct.cxx
