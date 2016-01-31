@@ -1845,7 +1845,11 @@ bool MetaConnective::DiagnoseInferenceRulesFalseNAry() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 5/3/2000
 	//! \pre Arg0 is FALSE or CONTRADICTION (latter is recursion)
 	assert(ArgArray[0]->IsExactType(TruthValue_MC));
+#ifdef ALPHA_TRUTHVAL
+	assert(static_cast<TruthValue*>(ArgArray[0])->_x.is(TVal::False));
+#else
 	assert(static_cast<TruthValue*>(ArgArray[0])->IsFalse());
+#endif
 	if 		(IsExactType(LogicalAND_MC))
 		{
 		InferenceParameter1 = 2;
@@ -1856,12 +1860,20 @@ bool MetaConnective::DiagnoseInferenceRulesFalseNAry() const
 	else if (IsExactType(LogicalOR_MC))
 		{
 		if (   ArgArray[1]->IsExactType(TruthValue_MC)
+#ifdef ALPHA_TRUTHVAL
+			&& static_cast<TruthValue*>(ArgArray[1])->_x.is(TVal::False))
+#else
 			&& static_cast<TruthValue*>(ArgArray[1])->IsFalse())
+#endif
 			{
 			size_t i = 1;
 			while(   fast_size()-1>i
 				  && ArgArray[i+1]->IsExactType(TruthValue_MC)
+#ifdef ALPHA_TRUTHVAL
+				  && static_cast<TruthValue*>(ArgArray[i+1])->_x.is(TVal::False)) ++i;
+#else
 				  && static_cast<TruthValue*>(ArgArray[i+1])->IsFalse()) ++i;
+#endif
 			if (fast_size()-2<=i)
 				{	// all but the last arg is FALSE; the last one is unspecified.
 				InvokeEvalForceArg(fast_size()-1);
@@ -4440,7 +4452,11 @@ bool MetaConnective::VirtualDeepLogicallyImplies()
 	LOG(*InferenceParameterMC);
 	LOG("in");
 	LOG(*ArgArray[InferenceParameter1]);
+#ifdef ALPHA_TRUTHVAL
+	TruthValue Tmp(TVal::True);
+#else
 	TruthValue Tmp(TruthValue::True);
+#endif
 
 	// NOTE: for efficiency reasons, would be interested in something that didn't populate
 	// with a lot of temporary TRUE/FALSE constants (effectively StrictlyModifies)
@@ -4559,25 +4575,22 @@ AND(L1,
 bool MetaConnective::ExtractTrueArgFromXOR()
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/17/2004
 	// InferenceParameter1: target
-	MetaConcept* ReplaceParam1 = NULL;
-	MetaConcept** NewArgArray = _new_buffer<MetaConcept*>(2);
-	if (!NewArgArray) return false;
+	autovalarray_ptr_throws<MetaConcept*> NewArgArray(2);
+	autoval_ptr<MetaConcept> ReplaceParam1;
 
-	try	{
-		ReplaceParam1 = new TruthValue(TruthValue::True);
-		MoveInto(NewArgArray[1]);
-		}
-	catch(const bad_alloc&)
-		{
-		delete ReplaceParam1;
-		free(NewArgArray);
-		return false;
-		}
-	
-	static_cast<MetaConnective*>(NewArgArray[1])->TransferOutAndNULL(InferenceParameter1,NewArgArray[0]);
-	static_cast<MetaConnective*>(NewArgArray[1])->TransferInAndOverwriteRaw(InferenceParameter1,ReplaceParam1);
-	static_cast<MetaConnective*>(NewArgArray[1])->ForceCheckForEvaluation();
-	ArgArray = NewArgArray;
+#ifdef ALPHA_TRUTHVAL
+	ReplaceParam1 = new TruthValue(TVal::True);
+#else
+	ReplaceParam1 = new TruthValue(TruthValue::True);
+#endif
+	// no more throwing operations	
+	{
+	MetaConnective* const VR_arg1 = static_cast<MetaConnective*>(NewArgArray[1]);
+	VR_arg1->TransferOutAndNULL(InferenceParameter1,NewArgArray[0]);
+	VR_arg1->TransferInAndOverwriteRaw(InferenceParameter1,ReplaceParam1);
+	VR_arg1->ForceCheckForEvaluation();
+	}
+	NewArgArray.MoveInto(ArgArray);
 	SetExactTypeV2(LogicalAND_MC);
 	assert(SyntaxOK());
 	return true;
@@ -4591,7 +4604,11 @@ bool MetaConnective::LogicalANDReplaceThisArgWithTRUE()
 	LOG(*ArgArray[InferenceParameter1]);
 	LOG("starting with");
 	LOG(*ArgArray[InferenceParameter2]);
+#ifdef ALPHA_TRUTHVAL
+	TruthValue Tmp(TVal::True);
+#else
 	TruthValue Tmp(TruthValue::True);
+#endif
 
 	// NOTE: for efficiency reasons, would be interested in something that didn't populate
 	// with a lot of temporary TRUE/FALSE constants (effectively StrictlyModifies)
@@ -4940,7 +4957,11 @@ bool MetaConnective::TargetVariableFalse()
 	DeleteIdx(InferenceParameter1);
 	if (2==fast_size()) ArgArray[1]->SelfLogicalNOT();
 	{
+#ifdef ALPHA_TRUTHVAL
+	TruthValue Tmp(TVal::True);
+#else
 	TruthValue Tmp(TruthValue::True);
+#endif
 	if (   !ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(*TmpXOR->ArgArray[0],Tmp,SetLHSToRHS,::NonStrictlyImplies)
 		|| !ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(*TmpXOR->ArgArray[0],Tmp,SetLHSToLogicalNOTOfRHS,::NonStrictlyImpliesLogicalNOTOf))
 		return false;
@@ -4970,7 +4991,11 @@ bool MetaConnective::TargetVariableTrue()
 	DeleteIdx(InferenceParameter1);
 	// TmpNXOR arglist: A,NULL
 	{
+#ifdef ALPHA_TRUTHVAL
+	TruthValue Tmp(TVal::False);
+#else
 	TruthValue Tmp(TruthValue::False);
+#endif
 	if (   !ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(*TmpNXOR->ArgArray[0],Tmp,SetLHSToRHS,::NonStrictlyImplies)
 		|| !ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(*TmpNXOR->ArgArray[0],Tmp,SetLHSToLogicalNOTOfRHS,::NonStrictlyImpliesLogicalNOTOf))
 		return false;
