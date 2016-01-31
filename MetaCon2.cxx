@@ -286,28 +286,44 @@ bool MetaConceptWithArgArray::EvalForceNotArg(MetaConcept*& dest)
 bool MetaConceptWithArgArray::EvalForceTrue(MetaConcept*& dest)
 {	// FORMALLY CORRECT: Kenneth Boyd, 3/2/2006
 	assert(!dest);
+#ifdef ALPHA_TRUTHVAL
+	dest = new TruthValue(TVal::True);
+#else
 	dest = new TruthValue(TruthValue::True);
+#endif
 	return true;
 }
 
 bool MetaConceptWithArgArray::EvalForceFalse(MetaConcept*& dest)
 {	// FORMALLY CORRECT: Kenneth Boyd, 3/2/2006
 	assert(!dest);
+#ifdef ALPHA_TRUTHVAL
+	dest = new TruthValue(TVal::False);
+#else
 	dest = new TruthValue(TruthValue::False);
+#endif
 	return true;
 }
 
 bool MetaConceptWithArgArray::EvalForceContradiction(MetaConcept*& dest)
 {	// FORMALLY CORRECT: Kenneth Boyd, 3/2/2006
 	assert(!dest);
+#ifdef ALPHA_TRUTHVAL
+	dest = new TruthValue(TVal::Contradiction);
+#else
 	dest = new TruthValue(TruthValue::Contradiction);
+#endif
 	return true;
 }
 
 bool MetaConceptWithArgArray::EvalForceUnknown(MetaConcept*& dest)
 {	// FORMALLY CORRECT: Kenneth Boyd, 3/2/2006
 	assert(!dest);
+#ifdef ALPHA_TRUTHVAL
+	dest = new TruthValue(TVal::Unknown);
+#else
 	dest = new TruthValue(TruthValue::Unknown);
+#endif
 	return true;
 }
 
@@ -1440,7 +1456,11 @@ bool MetaConceptWithArgArray::ArgListHasInjectionIntoRHSArgListRelatedThisWay(co
 	    && !rhs.ArgArray.empty()
 		&& fast_size()<=rhs.fast_size())
 		{
+#ifdef ALPHA_TRUTHVAL
+		TruthValue TmpArg(TVal::True);
+#else
 		TruthValue TmpArg(TruthValue::True);
+#endif
 		size_t LHSArgIdx = 0;
 		do	{
 			// 1: matching LHS-arg to a candidate RHS-arg.

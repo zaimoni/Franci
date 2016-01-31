@@ -721,7 +721,11 @@ RetryAugmentation:
 		// simple analysis section
 		if (TestVarStatement->IsExactType(TruthValue_MC))
 			{
+#ifdef ALPHA_TRUTHVAL
+			if (!static_cast<TruthValue*>(TestVarStatement)->_x.could_be(TVal::True))
+#else
 			if (!static_cast<TruthValue*>(TestVarStatement)->CouldBeTrue())
+#endif
 				{	// stalled at False or Contradiction.  Proof-by-contradiction
 					// asserts ~A.
 				free(CouldAugmentHypothesisArgs);

@@ -1,9 +1,32 @@
 // TruthVal.hxx
 // TruthValue header
 
-#if !defined(TRUTHVALUE_DEF)
-#define TRUTHVALUE_DEF
+#ifndef TRUTHVAL_HXX
+#define TRUTHVAL_HXX 1
 
+//#define ALPHA_TRUTHVAL 1
+
+#ifdef ALPHA_TRUTHVAL
+#include "MetaCon7.hxx"
+#include "TVal.hxx"
+
+class AbstractClass;
+extern const AbstractClass TruthValues;
+
+template<>
+struct MetaConcept_lookup<TVal>
+{	
+	static ExactType_MC exact_type() {return TruthValue_MC;}
+	static const AbstractClass* ultimate_type() {return &TruthValues;};
+	static bool syntax_ok(const TVal& x) {return true;};
+	static size_t length_of_self_name(const TVal& x) {return x.LengthOfSelfName();};
+	static void construct_self_name_aux(char* dest,const TVal& x) {x.ConstructSelfNameAux(dest);};
+	static bool lt_aux(const TVal& lhs, const TVal& rhs) {return lhs<rhs;};
+};
+
+typedef MetaConceptExternal<TVal> TruthValue;
+
+#else // ALPHA_TRUTHVAL
 #include "MetaCon6.hxx"
 
 class TruthValue;
@@ -87,5 +110,6 @@ protected:
 private:
 	virtual bool isAntiIdempotentTo(const MetaConcept& rhs) const;
 };
+#endif // ALPHA TRUTHVAL
 
 #endif

@@ -3,6 +3,8 @@
 
 #include "TruthVal.hxx"
 
+#ifdef ALPHA_TRUTHVAL
+#else // ALPHA_TRUTHVAL
 #include "Class.hxx"
 #include "Keyword1.hxx"
 
@@ -140,3 +142,5 @@ SystemTest_TruthValue(void)	// low-level test of TruthValue
 	}
 }
 #endif
+
+#endif // ALPHA_TRUTHVAL

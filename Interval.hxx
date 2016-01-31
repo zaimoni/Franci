@@ -17,6 +17,8 @@
 
 #include "MetaCon4.hxx"
 
+#include "TruthVal.hxx"
+
 class LinearInterval;
 namespace zaimoni {
 
@@ -24,8 +26,6 @@ template<>
 struct is_polymorphic_final<LinearInterval> : public std::true_type {};
 
 }
-
-class TruthValue;
 
 // Interpretation for IntersectionUnionStatus
 enum IntersectionUnion_LI

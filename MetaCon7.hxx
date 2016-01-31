@@ -33,6 +33,7 @@ class MetaConceptExternal : public MetaConcept
 public:
 	T _x;	// we would provide full accessors anyway so may as well be public
 
+	MetaConceptExternal() : MetaConcept(MetaConcept_lookup<T>::exact_type()) {};
 	MetaConceptExternal(const T& src) : MetaConcept(MetaConcept_lookup<T>::exact_type()),_x(src) {};
 	MetaConceptExternal(const MetaConceptExternal& src)
 		: MetaConcept(src),_x(src._x) {};

@@ -6239,7 +6239,11 @@ MetaConnective::LogicalANDBoostORWithIFF(MetaConnective*& SpeculativeTarget, siz
 			MetaConcept* Target = NULL;
 			MetaConcept* TmpTruthValue = NULL;
 			try	{
+#ifdef ALPHA_TRUTHVAL
+				TmpTruthValue = new TruthValue(TVal::True);
+#else
 				TmpTruthValue = new TruthValue(TruthValue::True);
+#endif
 				ArgArray[Idx4]->CopyInto(Target);
 				static_cast<MetaConnective*>(Target)->TransferInAndOverwriteRaw(static_cast<MetaConnective*>(Target)->InferenceParameter1,TmpTruthValue);
 				static_cast<MetaConnective*>(Target)->SetExactTypeV2(LogicalAND_MC);
@@ -6258,7 +6262,11 @@ MetaConnective::LogicalANDBoostORWithIFF(MetaConnective*& SpeculativeTarget, siz
 			MetaConcept* Target = NULL;
 			MetaConcept* TmpTruthValue = NULL;
 			try	{
+#ifdef ALPHA_TRUTHVAL
+				TmpTruthValue = new TruthValue(TVal::False);
+#else
 				TmpTruthValue = new TruthValue(TruthValue::False);
+#endif
 				ArgArray[Idx4]->CopyInto(Target);
 				static_cast<MetaConnective*>(Target)->TransferInAndOverwriteRaw(static_cast<MetaConnective*>(Target)->InferenceParameter1,TmpTruthValue);
 				static_cast<MetaConnective*>(Target)->SetNANDNOR(LogicalNOR_MC);
@@ -7009,14 +7017,22 @@ MetaConnective::ThisIsAnnihilatorKey(size_t& ArgIdx, signed short& SelfEvalRule,
 		TruthValue& Target = *static_cast<TruthValue*>(ArgArray[ArgIdx]);
 		if (IsExactType(LogicalAND_MC))
 			{
+#ifdef ALPHA_TRUTHVAL
+			if (!Target._x.could_be(TVal::True))
+#else
 			if (!Target.CouldBeTrue())
+#endif
 				{
 				SelfEvalRule = None_SER;
 				EvalRule = EvalForceArg_ER;
 				return true;
 				}
 			}
+#ifdef ALPHA_TRUTHVAL
+		else if (Target._x.is(TVal::True))
+#else
 		else if (Target.IsTrue())
+#endif
 			{
 			SelfEvalRule = None_SER;
 			EvalRule = EvalForceArg_ER;
