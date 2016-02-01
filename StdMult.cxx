@@ -64,10 +64,12 @@ bool StdMultiplication::ForceUltimateType(const AbstractClass* const rhs)
 	if (   !rhs->SupportsThisOperation(StdMultiplication_MC)
 		&& !rhs->SupportsThisOperation(StdAddition_MC))	// module action escape
 		return false;
-	if (ArgArray.empty())	// omnione; type is already compatible, this is a request to add information content.
-		{
+	if (ArgArray.empty() && rhs->CanCreateIdentityForOperation(StdMultiplication_MC))
+		{	// omnione; type is already compatible, this is a request to add information content.
 		MetaConcept* Tmp = NULL;
-		if (rhs->CreateIdentityForOperation(Tmp,StdMultiplication_MC))
+		if (!rhs->CreateIdentityForOperation(Tmp,StdMultiplication_MC))
+			return false;
+		if (Tmp)	// only adjust if something other than an omnione is indicated
 			{
 			if (!InsertSlotAt(0,Tmp))
 				{
@@ -75,10 +77,7 @@ bool StdMultiplication::ForceUltimateType(const AbstractClass* const rhs)
 				return false;
 				}
 			InvokeEvalForceArg(0);
-			return true;
-			};
-		if (rhs->CanCreateIdentityForOperation(StdMultiplication_MC))
-			return false;
+			}
 		}
 
 	if (_DesiredType.empty())

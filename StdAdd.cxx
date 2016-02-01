@@ -64,10 +64,12 @@ bool StdAddition::ForceUltimateType(const AbstractClass* const rhs)
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/26/2005
 	if (MetaConcept::ForceUltimateType(rhs)) return true;
 	if (!rhs->SupportsThisOperation(StdAddition_MC)) return false;
-	if (ArgArray.empty())	// omnizero; type is already compatible, this is a request to add information content.
-		{
+	if (ArgArray.empty() && rhs->CanCreateIdentityForOperation(StdAddition_MC))
+		{	// omnizero; type is already compatible, this is a request to add information content.
 		MetaConcept* Tmp = NULL;
-		if (rhs->CreateIdentityForOperation(Tmp,StdAddition_MC))
+		if (!rhs->CreateIdentityForOperation(Tmp,StdAddition_MC))
+			return false;
+		if (Tmp)	// only adjust if something other than an omnizero is indicated
 			{
 			if (!InsertSlotAt(0,Tmp))
 				{
@@ -75,10 +77,7 @@ bool StdAddition::ForceUltimateType(const AbstractClass* const rhs)
 				return false;
 				}
 			InvokeEvalForceArg(0);
-			return true;
-			};
-		if (rhs->CanCreateIdentityForOperation(StdAddition_MC))
-			return false;
+			}
 		}
 
 	if (DesiredType.empty())
