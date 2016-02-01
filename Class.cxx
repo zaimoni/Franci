@@ -251,19 +251,6 @@ AbstractClass::ConvertToReservedAbstractClass(MetaConcept*& Target, const char* 
 }
 
 // The subclass relation
-// First two functions only return true if they are *certain*.
-// Second two use TruthValue to handle UNKNOWN (which means "needs detailed analysis")
-// These may want function pointers
-bool AbstractClass::ProperSubclass(const AbstractClass& rhs) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 12/26/2002
-	return _properSubclass(rhs).is(true);;
-}
-
-bool AbstractClass::Subclass(const AbstractClass& rhs) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 12/26/2002
-	return _subclass(rhs).is(true);;
-}
-
 TVal AbstractClass::_properSubclass(const AbstractClass& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/26/2002
 	if (*this==rhs || NULLSet==rhs || TruthValues==rhs)
@@ -322,54 +309,18 @@ TVal AbstractClass::_subclass_core(const AbstractClass& rhs) const
 			}
 		else{	// symbolic RHS here
 			if (Integer==*this)
-				{
-				if (Rational==rhs || Real==rhs || Complex==rhs)
-					return true;
-				else
-					return TVal();
-				}
+				return TVal((Rational==rhs || Real==rhs || Complex==rhs) ? TVal::True : TVal::Unknown);
 			else if (Rational==*this)
-				{
-				if		(Real==rhs || Complex==rhs)
-					return true;
-				else if (Integer==rhs)
-					return false;
-				else
-					return TVal();
-				}
+				return TVal( (Real==rhs || Complex==rhs) ? TVal::True :
+							((Integer==rhs) ? TVal::False : TVal::Unknown));
 			else if (Real==*this)
-				{
-				if		(Complex==rhs)
-					return true;
-				else if (Integer==rhs || Rational==rhs)
-					return false;
-				else
-					return TVal();
-				}
+				return TVal( (Complex==rhs) ? TVal::True :
+							((Integer==rhs || Rational==rhs) ? TVal::False : TVal::Unknown));
 			else if (Complex==*this)
-				{
-				if (Integer==rhs || Rational==rhs || Real==rhs)
-					return false;
-				else
-					return TVal();
-				}
+				return TVal((Integer==rhs || Rational==rhs || Real==rhs) ? TVal::False: TVal::Unknown);
 			}
 		}
 	return TVal();
-}
-
-// The HasAsElement relation (easier to program than IsElementOf, which would be an Interface function)
-// First returns true if it is *certain*
-// Second uses TruthValue to handle UNKNOWN (which means "needs detailed analysis"); it should
-// be needed only for proper classes, or partial domain intersections.
-bool AbstractClass::HasAsElement(const MetaConcept& rhs) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 6/12/2002
-	return _hasAsElement(rhs).is(true);
-}
-
-bool AbstractClass::DoesNotHaveAsElement(const MetaConcept& rhs) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 6/12/2002
-	return _hasAsElement(rhs).is(false);
 }
 
 TVal AbstractClass::_hasAsElement(const MetaConcept& rhs) const
@@ -422,11 +373,7 @@ TVal AbstractClass::_hasAsElement(const MetaConcept& rhs) const
 		else if (*this==ClassMultiplicationDefined)
 			return rhs.UltimateType()->_supportsThisOperation(StdMultiplication_MC);
 		else if (*this==ClassAdditionMultiplicationDefined)
-			{
-			TVal tmp = rhs.UltimateType()->_supportsThisOperation(StdAddition_MC);
-			if (!tmp.is(TVal::Unknown)) return tmp;
-			return rhs.UltimateType()->_supportsThisOperation(StdMultiplication_MC);
-			}
+			return UltimateType()->_supportsThisOperation(StdAddition_MC) && rhs.UltimateType()->_supportsThisOperation(StdMultiplication_MC);
 		else if (rhs.UltimateType()->IntersectionWithIsNULLSet(*UltimateType()))
 			return false;
 		}
@@ -563,16 +510,6 @@ bool AbstractClass::DirectCreateBasisClauseIdx(size_t Idx, MetaConcept*& dest) c
 	assert(*this!=TruthValues);	// handle this elsewhere
 	FATAL_CODE(AlphaMiscallVFunction,3);
 	return false;	
-}
-
-bool AbstractClass::SupportsThisOperation(ExactType_MC Operation) const
-{
-	return _supportsThisOperation(Operation).is(true);
-}
-
-bool AbstractClass::CompletelyFailsToSupportThisOperation(ExactType_MC Operation) const
-{
-	return _supportsThisOperation(Operation).is(false);
 }
 
 TVal AbstractClass::_supportsThisOperation(ExactType_MC Operation) const

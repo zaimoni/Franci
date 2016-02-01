@@ -11,6 +11,7 @@ private:
 public:
 	friend bool operator==(const TVal& lhs, const TVal& rhs) {return lhs._x==rhs._x;}
 	friend bool operator<(const TVal& lhs, const TVal& rhs) {return lhs._x<rhs._x;}
+	friend TVal operator&&(const TVal& lhs, const TVal& rhs);
 
 	enum Flags	{
 			Contradiction	= 0,
@@ -55,6 +56,5 @@ public:
 	bool read(const char* src);
 	static bool is_legal(const char* Text);
 };
-
 
 #endif

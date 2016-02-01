@@ -118,8 +118,8 @@ public:
 	bool DestructiveMergeWith(LinearInterval& rhs);	// true: success, should discard RHS
 	bool NonDestructiveMergeWith(LinearInterval& rhs);
 	bool DestructiveIntersectWith(LinearInterval& rhs);	// true: success, should discard RHS
-	bool ClearlyExtendedBy(const MetaConcept& rhs) const;
-	bool ClearlyNotExtendedBy(const MetaConcept& rhs) const;
+	bool ClearlyExtendedBy(const MetaConcept& rhs) const { return _clearlyExtendedBy(rhs).is(true); };
+	bool ClearlyNotExtendedBy(const MetaConcept& rhs) const { return _clearlyExtendedBy(rhs).is(false); };
 	bool DestructiveExtendBy(MetaConcept*& rhs);	// true: success; RHS is null
 	// next one implemented in AddInter.cxx
 	bool TranslateInterval(MetaConcept*& rhs);

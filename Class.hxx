@@ -75,14 +75,14 @@ public:
 	static bool IsReservedSetClassName(const char* Name);
 	static bool ConvertToReservedAbstractClass(MetaConcept*& Target, const char* Text);
 // The subclass relation
-	bool ProperSubclass(const AbstractClass& rhs) const;
-	bool Subclass(const AbstractClass& rhs) const;
+	bool ProperSubclass(const AbstractClass& rhs) const { return _properSubclass(rhs).is(true); };
+	bool Subclass(const AbstractClass& rhs) const { return _subclass(rhs).is(true); };
 	inline bool ProperSuperclass(const AbstractClass& rhs) const {return rhs.ProperSubclass(*this);};
 	inline bool Superclass(const AbstractClass& rhs) const {return rhs.Subclass(*this);};
 // The HasAsElement relation (easier to program than IsElementOf, which would be an Interface function)
 // First returns true if it is *certain*
-	bool HasAsElement(const MetaConcept& rhs) const;
-	bool DoesNotHaveAsElement(const MetaConcept& rhs) const;
+	bool HasAsElement(const MetaConcept& rhs) const { return _hasAsElement(rhs).is(true); };
+	bool DoesNotHaveAsElement(const MetaConcept& rhs) const { return _hasAsElement(rhs).is(false); };
 // Set union, intersection
 	bool IntersectWith(const AbstractClass& lhs);
 	bool SetToIntersection(const AbstractClass& lhs, const AbstractClass& rhs);
@@ -95,8 +95,9 @@ public:
 	virtual bool DirectCreateBasisClauseIdx(size_t Idx, MetaConcept*& dest) const;
 
 //	Operation support routines
-	bool SupportsThisOperation(ExactType_MC Operation) const;
-	bool CompletelyFailsToSupportThisOperation(ExactType_MC Operation) const;
+	bool SupportsThisOperation(ExactType_MC Operation) const { return _supportsThisOperation(Operation).is(true); };
+	bool CompletelyFailsToSupportThisOperation(ExactType_MC Operation) const { return _supportsThisOperation(Operation).is(false); }
+;
 	// NOTE: returns true iff identity is created properly.
 	// StdAddition: omnizero sets Tmp to NULL [correct default for within the StdAdd. Inverse clean rule]
 	bool CanCreateIdentityForOperation(ExactType_MC Operation) const;

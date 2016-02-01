@@ -38,14 +38,10 @@ bool TVal::is_legal(const char* Text)
 	return tmp.read(Text);
 }
 
-#if 0
-// only called from UnparsedText::Evaluate(...); guard clause is IsLegalTValString
-bool TruthValue::ConvertToTruthValue(MetaConcept*& dest,const char* Text)
-{	// FORMALLY CORRECT: Kenneth Boyd, 9/4/2006
-	assert(!dest);
-	TVal tmp;
-	SUCCEED_OR_DIE(tmp.read(Text));
-	dest = new(nothrow) TruthValue(tmp);
-	return dest;
+TVal operator&&(const TVal& lhs, const TVal& rhs)
+{
+	return 	 (TVal::Contradiction==lhs._x || TVal::Contradiction==rhs._x) ? TVal::Contradiction : 
+			((TVal::False==lhs._x || TVal::False==rhs._x) ? TVal::False : 
+			 ((TVal::Unknown==lhs._x || TVal::Unknown==rhs._x) ? TVal::Unknown : TVal::True));
 }
-#endif
+

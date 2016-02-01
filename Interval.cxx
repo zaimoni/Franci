@@ -357,16 +357,6 @@ TVal LinearInterval::_clearlyMergeable(const LinearInterval& rhs) const
 	return TVal();	// unknown
 }
 
-bool LinearInterval::ClearlyExtendedBy(const MetaConcept& rhs) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/4/2002
-	return _clearlyExtendedBy(rhs).is(true);
-}
-
-bool LinearInterval::ClearlyNotExtendedBy(const MetaConcept& rhs) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/4/2002
-	return _clearlyExtendedBy(rhs).is(false);
-}
-
 TVal LinearInterval::_clearlyExtendedBy(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/6/2002
 	if (   (LeftPointOpen  && rhs==*LHS_Arg1)
