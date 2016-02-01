@@ -20,6 +20,7 @@ public:
 			};
 	TVal() : _x(Unknown) {};
 	TVal(Flags src) : _x(src) {};
+	TVal(bool src) : _x(src ? True : False) {};
 	// final class, so default destructor OK
 	// likewise default assignment and copy constructors OK
 	const TVal& operator=(bool src)
@@ -36,6 +37,10 @@ public:
 	bool is(Flags x) const {return _x==x;};
 	bool could_be(Flags x) const {return _x & x;};
 	void force(Flags x) {_x &= x;};
+
+	bool is(bool x) const {return _x==(x ? True : False);};
+	bool could_be(bool x) const {return _x & (x ? True : False);};
+	void force(bool x) {_x &= (x ? True : False);};
 
 	size_t array_index() const {return _x;}
 	size_t array_index(const TVal& rhs) const {return 4*_x+rhs._x;};
