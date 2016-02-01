@@ -106,9 +106,10 @@ public:
 	bool ExpandArgsHere(MetaConcept** VR_ArgArray) const;
 
 	bool HasAsElement(const MetaConcept& rhs) const;
-	void HasAsElement(const MetaConcept& rhs, TruthValue& RetVal) const;	// AbstractClass needs access to this one
+	TVal _hasAsElement(const MetaConcept& rhs) const;	// AbstractClass needs access to this one
 	bool DoesNotHaveAsElement(const MetaConcept& rhs) const;
 	bool Subclass(const LinearInterval& rhs) const;
+	TVal _subclass(const LinearInterval& rhs) const;
 	bool NotSubclass(const LinearInterval& rhs) const;
 	bool ClearlyOverlapping(const LinearInterval& rhs) const;
 	bool ClearlyNotOverlapping(const LinearInterval& rhs) const;
@@ -136,7 +137,6 @@ protected:
 	virtual void DiagnoseInferenceRules();	// This is *not* the Interface!
 	virtual bool InvokeEqualArgRule();
 private:
-	TVal _subclass(const LinearInterval& rhs) const;
 	TVal _clearlyOverlapping(const LinearInterval& rhs) const;
 	TVal _clearlyMergeable(const LinearInterval& rhs) const;
 	TVal _clearlyExtendedBy(const MetaConcept& rhs) const;

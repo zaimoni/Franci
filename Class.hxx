@@ -75,15 +75,12 @@ public:
 	static bool IsReservedSetClassName(const char* Name);
 	static bool ConvertToReservedAbstractClass(MetaConcept*& Target, const char* Text);
 // The subclass relation
-// First four functions only return true if they are *certain*.
-// Second four use TruthValue to handle UNKNOWN (which means "needs detailed analysis")
 	bool ProperSubclass(const AbstractClass& rhs) const;
 	bool Subclass(const AbstractClass& rhs) const;
 	inline bool ProperSuperclass(const AbstractClass& rhs) const {return rhs.ProperSubclass(*this);};
 	inline bool Superclass(const AbstractClass& rhs) const {return rhs.Subclass(*this);};
 // The HasAsElement relation (easier to program than IsElementOf, which would be an Interface function)
 // First returns true if it is *certain*
-// Second uses TruthValue to handle UNKNOWN (which means "needs detailed analysis")
 	bool HasAsElement(const MetaConcept& rhs) const;
 	bool DoesNotHaveAsElement(const MetaConcept& rhs) const;
 // Set union, intersection
@@ -127,13 +124,13 @@ private:
 //	Operation support routines
 	TVal _supportsThisOperation(ExactType_MC Operation) const;
 // The subclass relation
-	void ProperSubclass(const AbstractClass& rhs, TruthValue& RetVal) const;
-	void Subclass(const AbstractClass& rhs, TruthValue& RetVal) const;
-	inline void ProperSuperclass(const AbstractClass& rhs, TruthValue& RetVal) const {rhs.ProperSubclass(*this,RetVal);};
-	inline void Superclass(const AbstractClass& rhs, TruthValue& RetVal) const {rhs.Subclass(*this,RetVal);};
-	void Subclass_core(const AbstractClass& rhs, TruthValue& RetVal) const;
+	TVal _properSubclass(const AbstractClass& rhs) const;
+	TVal _subclass(const AbstractClass& rhs) const;
+	TVal _properSuperclass(const AbstractClass& rhs) const {return rhs._properSubclass(*this);};
+	TVal _superclass(const AbstractClass& rhs) const {return rhs._subclass(*this);};
+	TVal _subclass_core(const AbstractClass& rhs) const;
 // The HasAsElement relation (easier to program than IsElementOf, which would be an Interface function)
-	void HasAsElement(const MetaConcept& rhs, TruthValue& RetVal) const;
+	TVal _hasAsElement(const MetaConcept& rhs) const;
 };
 
 bool ForceVarUltimateType(MetaConcept*& Target,const AbstractClass* TargetType);

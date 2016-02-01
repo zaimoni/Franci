@@ -273,55 +273,30 @@ bool LinearInterval::ExpandArgsHere(MetaConcept** VR_ArgArray) const
 
 bool LinearInterval::HasAsElement(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 6/10/2002
-	TruthValue RetVal;
-	HasAsElement(rhs,RetVal);
-	return RetVal._x.is(true);
+	return _hasAsElement(rhs).is(true);
 }
 
 bool LinearInterval::DoesNotHaveAsElement(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 6/10/2002
-	TruthValue RetVal;
-	HasAsElement(rhs,RetVal);
-	return RetVal._x.is(false);
+	return _hasAsElement(rhs).is(false);
 }
 
-void
-LinearInterval::HasAsElement(const MetaConcept& rhs, TruthValue& RetVal) const
+TVal LinearInterval::_hasAsElement(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 11/2/2005
-	if (*LHS_Arg1==rhs)
-		{
-		RetVal._x = !LeftPointOpen;
-		return;
-		}
-	if (*RHS_Arg2==rhs)
-		{
-		RetVal._x = !RightPointOpen;
-		return;
-		}
-
-	if (UltimateType()->DoesNotHaveAsElement(rhs))
-		{
-		RetVal._x = false;;
-		return;
-		}
+	if (*LHS_Arg1==rhs) return !LeftPointOpen;
+	if (*RHS_Arg2==rhs) return !RightPointOpen;
+	if (UltimateType()->DoesNotHaveAsElement(rhs)) return false;
 
 	if (LHS_Arg1->SyntacticalStandardLT(*RHS_Arg2))
 		{
 		if 		(   rhs.SyntacticalStandardLT(*LHS_Arg1)
 				 || RHS_Arg2->SyntacticalStandardLT(rhs))
-			{
-			RetVal._x = false;
-			return;
-			}
+			return false;
 		else if (   LHS_Arg1->SyntacticalStandardLT(rhs)
 				 && rhs.SyntacticalStandardLT(*RHS_Arg2))
-			{
-			RetVal._x = true;
-			return;
-			}
+			return true;
 		}
-
-	RetVal._x = TVal::Unknown;
+	return TVal();
 }
 
 bool LinearInterval::Subclass(const LinearInterval& rhs) const

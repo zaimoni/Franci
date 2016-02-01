@@ -256,62 +256,40 @@ AbstractClass::ConvertToReservedAbstractClass(MetaConcept*& Target, const char* 
 // These may want function pointers
 bool AbstractClass::ProperSubclass(const AbstractClass& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/26/2002
-	TruthValue RetVal;
-	ProperSubclass(rhs,RetVal);
-	return RetVal._x.is(true);
+	return _properSubclass(rhs).is(true);;
 }
 
 bool AbstractClass::Subclass(const AbstractClass& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/26/2002
-	TruthValue RetVal;
-	Subclass(rhs,RetVal);
-	return RetVal._x.is(true);
+	return _subclass(rhs).is(true);;
 }
 
-void AbstractClass::ProperSubclass(const AbstractClass& rhs, TruthValue& RetVal) const
+TVal AbstractClass::_properSubclass(const AbstractClass& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/26/2002
 	if (*this==rhs || NULLSet==rhs || TruthValues==rhs)
-		{
-		RetVal._x = false;
-		return;
-		};
-	Subclass_core(rhs,RetVal);
+		return false;
+	return _subclass_core(rhs);
 }
 
 // redundant exit code.
-void
-AbstractClass::Subclass(const AbstractClass& rhs, TruthValue& RetVal) const
+TVal AbstractClass::_subclass(const AbstractClass& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/26/2002
-	if (*this==rhs)				// no further analysis
-		{
-		RetVal._x = true;
-		return;
-		}
-	Subclass_core(rhs,RetVal);
+	if (*this==rhs) return true;// no further analysis
+	return _subclass_core(rhs);
 }
 
 //! \todo FIX: partially reprogram the following these as abstract binary relations....or redefine them to use handlers
-void AbstractClass::Subclass_core(const AbstractClass& rhs, TruthValue& RetVal) const
+TVal AbstractClass::_subclass_core(const AbstractClass& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/26/2002
-	if (ClassAllSets==rhs)	// no further analysis
-		{
-		RetVal._x = true;
-		return;
-		}
+	if (ClassAllSets==rhs) return true;	// no further analysis
 	else if (ClassAdditionDefined==rhs)
-		{
-		RetVal._x = SupportsThisOperation(StdAddition_MC);
-		return;
-		}
+		return _supportsThisOperation(StdAddition_MC);
 	else if (ClassMultiplicationDefined==rhs)
-		{
-		RetVal._x = SupportsThisOperation(StdMultiplication_MC);
-		return;
-		}
+		return _supportsThisOperation(StdMultiplication_MC);
 	else if (ClassAdditionMultiplicationDefined==rhs)
 		{
-		RetVal._x = SupportsThisOperation(StdMultiplication_MC) && SupportsThisOperation(StdAddition_MC);
-		return;
+		if (!_supportsThisOperation(StdMultiplication_MC).could_be(true)) return false;
+		return _supportsThisOperation(StdAddition_MC);
 		}
 	else if (!Arg1.empty())
 		{
@@ -320,26 +298,19 @@ void AbstractClass::Subclass_core(const AbstractClass& rhs, TruthValue& RetVal) 
 			if (rhs.Arg1.empty())
 				{	// RHS is symbolic domain
 				if (IsUltimateType(NULL))
-					RetVal._x = false;
+					return false;
 				else
-					UltimateType()->Subclass(rhs,RetVal);
-				return;
+					return UltimateType()->_subclass(rhs);
 				}
 			else if (rhs.Arg1->IsExplicitConstant())
-				{	// RHS is singleton: fail
-				RetVal._x = false;
-				return;
-				}
+				return false;	// RHS is singleton: fail
 			else if (rhs.Arg1->IsExactType(LinearInterval_MC))
 				{	// RHS is LinearInterval: delegate to LinearInterval code
-				static_cast<LinearInterval*>((MetaConcept*)Arg1)->Subclass(*static_cast<LinearInterval*>((MetaConcept*)rhs.Arg1));
+				return static_cast<LinearInterval*>((MetaConcept*)Arg1)->_subclass(*static_cast<LinearInterval*>((MetaConcept*)rhs.Arg1));
 				}
 			}
 		else if (Arg1->IsExplicitConstant())
-			{	// singleton
-			rhs.HasAsElement(*Arg1,RetVal);
-			return;
-			}
+			return rhs._hasAsElement(*Arg1);
 		}
 	else{	// Symbolic LHS here
 		// META: This is a hardcoded binary relation.  We should be able to improve this later.
@@ -347,51 +318,44 @@ void AbstractClass::Subclass_core(const AbstractClass& rhs, TruthValue& RetVal) 
 			{	// detailed RHS
 			if (   rhs.Arg1->IsExactType(LinearInterval_MC)
 				|| rhs.Arg1->IsExplicitConstant())
-				{
-				RetVal._x = false;
-				return;
-				}
+				return false;
 			}
 		else{	// symbolic RHS here
 			if (Integer==*this)
 				{
 				if (Rational==rhs || Real==rhs || Complex==rhs)
-					RetVal._x = TVal::True;
+					return true;
 				else
-					RetVal._x = TVal::Unknown;
-				return;
+					return TVal();
 				}
 			else if (Rational==*this)
 				{
 				if		(Real==rhs || Complex==rhs)
-					RetVal._x = TVal::True;
+					return true;
 				else if (Integer==rhs)
-					RetVal._x = TVal::False;
+					return false;
 				else
-					RetVal._x = TVal::Unknown;
-				return;
+					return TVal();
 				}
 			else if (Real==*this)
 				{
 				if		(Complex==rhs)
-					RetVal._x = TVal::True;
+					return true;
 				else if (Integer==rhs || Rational==rhs)
-					RetVal._x = TVal::False;
+					return false;
 				else
-					RetVal._x = TVal::Unknown;
-				return;
+					return TVal();
 				}
 			else if (Complex==*this)
 				{
 				if (Integer==rhs || Rational==rhs || Real==rhs)
-					RetVal._x = TVal::False;
+					return false;
 				else
-					RetVal._x = TVal::Unknown;
-				return;
+					return TVal();
 				}
 			}
 		}
-	RetVal._x = TVal::Unknown;
+	return TVal();
 }
 
 // The HasAsElement relation (easier to program than IsElementOf, which would be an Interface function)
@@ -400,103 +364,73 @@ void AbstractClass::Subclass_core(const AbstractClass& rhs, TruthValue& RetVal) 
 // be needed only for proper classes, or partial domain intersections.
 bool AbstractClass::HasAsElement(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 6/12/2002
-	TruthValue RetVal;
-	HasAsElement(rhs,RetVal);
-	return RetVal._x.is(true);
+	return _hasAsElement(rhs).is(true);
 }
 
 bool AbstractClass::DoesNotHaveAsElement(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 6/12/2002
-	TruthValue RetVal;
-	HasAsElement(rhs,RetVal);
-	return RetVal._x.is(false);
+	return _hasAsElement(rhs).is(false);
 }
 
-void
-AbstractClass::HasAsElement(const MetaConcept& rhs, TruthValue& RetVal) const
+TVal AbstractClass::_hasAsElement(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/26/2002
 	// actually, this can get quite interesting, since Bernays mentions that it is an axiom
 	// that a set cannot have itself as an element.
 	// Also, an abstractclass returns itself as its UltimateType.
 	// However...Franci isn't quite that knowledgeable--yet.
 	// Consider making this susceptible to array lookup.
-	RetVal._x = false;
-	if (*this==NULLSet) return;
+	if (*this==NULLSet) return false;
 	if		(rhs.IsExactType(TruthValue_MC))
-		{
-		if (*this==TruthValues) RetVal._x = true;
-		return;
-		}
+		return *this==TruthValues;
 	else if (rhs.IsExactType(AbstractClass_MC))
 		{
 		if (static_cast<const AbstractClass&>(rhs).IsProperClass())
-			return;
+			return false;
 		if (*this==ClassAllSets && !rhs.IsUltimateType(NULL) && Superclass(*rhs.UltimateType()))
-			RetVal._x = true;
-		return;
+			return true;
+		return false;
 		}
 	else if (rhs.IsExactType(Variable_MC))
 		{	// META: this assumes all top-level 1-ary constraints on the variable are shifted into the domain spec
 		if (NULL!=rhs.UltimateType())
-			Superclass(*rhs.UltimateType(),RetVal);
-		return;
+			return _superclass(*rhs.UltimateType());
+		return false;
 		}
 	else if (rhs.IsExactType(IntegerNumeral_MC))
-		{
-		Superclass(Integer,RetVal);
-		return;
-		}
+		return _superclass(Integer);
 	else if (rhs.IsExactType(LinearInterval_MC))
-		{
 		//! \todo smarter test.  This won't work once sets have internal structure.
-		Superclass(*rhs.UltimateType(),RetVal);
-		return;
-		}
+		return _superclass(*rhs.UltimateType());
 	else if (rhs.IsExactType(LinearInfinity_MC))
 		{	//! \todo: smarter test...really should be relying on natural total ordering, etc.
 			//! <br> current implementation breaks on C<sup>#</sup>
-		if (HasInfinity()) RetVal._x = true;
-		return;
+		return HasInfinity();
 		}
 
 	if (!Arg1.empty())
 		{
 		if 		(Arg1->IsExactType(LinearInterval_MC))
-			{
-			static_cast<LinearInterval*>((MetaConcept*)Arg1)->HasAsElement(rhs,RetVal);
-			return;
-			}
+			return static_cast<LinearInterval*>((MetaConcept*)Arg1)->_hasAsElement(rhs);
 		else if (Arg1->IsExplicitConstant())
-			{
-			RetVal._x = (*Arg1==rhs);
-			return;
-			}
+			return (*Arg1==rhs);
 		}
 
 	if (!rhs.IsUltimateType(NULL))
 		{
 		if (*this==ClassAdditionDefined)
-			{
-			RetVal._x = rhs.UltimateType()->SupportsThisOperation(StdAddition_MC);
-			return;
-			}
+			return rhs.UltimateType()->_supportsThisOperation(StdAddition_MC);
 		else if (*this==ClassMultiplicationDefined)
-			{
-			RetVal._x = rhs.UltimateType()->SupportsThisOperation(StdMultiplication_MC);
-			return;
-			}
+			return rhs.UltimateType()->_supportsThisOperation(StdMultiplication_MC);
 		else if (*this==ClassAdditionMultiplicationDefined)
 			{
-			RetVal._x = rhs.UltimateType()->SupportsThisOperation(StdAddition_MC);
-			if (!RetVal._x.is(TVal::Unknown)) return;
-			RetVal._x = rhs.UltimateType()->SupportsThisOperation(StdMultiplication_MC);
-			return;
+			TVal tmp = rhs.UltimateType()->_supportsThisOperation(StdAddition_MC);
+			if (!tmp.is(TVal::Unknown)) return tmp;
+			return rhs.UltimateType()->_supportsThisOperation(StdMultiplication_MC);
 			}
 		else if (rhs.UltimateType()->IntersectionWithIsNULLSet(*UltimateType()))
-			return;
+			return false;
 		}
-
-	RetVal._x = TVal::Unknown;
+	return TVal();
 }
 
 bool AbstractClass::IntersectWith(const AbstractClass& rhs)
@@ -512,15 +446,14 @@ AbstractClass::SetToIntersection(const AbstractClass& lhs, const AbstractClass& 
 {	// FORMALLY CORRECT: Kenneth Boyd, 2/8/2005 
 	if (NULLSet==lhs || NULLSet==rhs) return SetToThis(NULLSet);
 
-	TruthValue RetVal;
-	lhs.Subclass(rhs,RetVal);
-	if 		(RetVal._x.is(true)) return SetToThis(lhs);
-	else if (RetVal._x.is(false) && !lhs.Arg1.empty() && lhs.Arg1->IsExplicitConstant())
+	TVal tmp = lhs._subclass(rhs);
+	if 		(tmp.is(true)) return SetToThis(lhs);
+	else if (tmp.is(false) && !lhs.Arg1.empty() && lhs.Arg1->IsExplicitConstant())
 		return SetToThis(NULLSet);
 
-	rhs.Subclass(lhs,RetVal);
-	if 		(RetVal._x.is(true)) return SetToThis(rhs);
-	else if (RetVal._x.is(false) && !rhs.Arg1.empty() && rhs.Arg1->IsExplicitConstant())
+	tmp = rhs._subclass(lhs);
+	if 		(tmp.is(true)) return SetToThis(rhs);
+	else if (tmp.is(false) && !rhs.Arg1.empty() && rhs.Arg1->IsExplicitConstant())
 		return SetToThis(NULLSet);
 
 	// TruthValues, and Subclass tests didn't go off: NULLSet
@@ -591,15 +524,14 @@ bool AbstractClass::IntersectionWithIsNULLSet(const AbstractClass& rhs) const
 	// generic code
 	if (NULLSet==*this || NULLSet==rhs) return true;
 
-	TruthValue RetVal;
-	Subclass(rhs,RetVal);
-	if 		(RetVal._x.is(true)) return false;
-	else if (RetVal._x.is(false) && !Arg1.empty() && Arg1->IsExplicitConstant())
+	TVal tmp = _subclass(rhs);
+	if 		(tmp.is(true)) return false;
+	else if (tmp.is(false) && !Arg1.empty() && Arg1->IsExplicitConstant())
 		return true;
 
-	rhs.Subclass(*this,RetVal);
-	if 		(RetVal._x.is(true)) return false;
-	else if (RetVal._x.is(false) && !rhs.Arg1.empty() && rhs.Arg1->IsExplicitConstant())
+	tmp = rhs._subclass(*this);
+	if 		(tmp.is(true)) return false;
+	else if (tmp.is(false) && !rhs.Arg1.empty() && rhs.Arg1->IsExplicitConstant())
 		return true;
 
 	if (TruthValues==*this || TruthValues==rhs) return true;
