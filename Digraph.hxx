@@ -99,10 +99,6 @@ public:
 	bool ExplicitAmbiguousEdge(size_t From, const MetaConcept& To) const;
 	bool ExplicitAmbiguousEdge(const MetaConcept& From, size_t To) const;
 	bool ExplicitAmbiguousEdge(size_t From, size_t To) const;
-	void EdgeTruthValue(const MetaConcept& From, const MetaConcept& To, TruthValue& dest);
-	void EdgeTruthValue(size_t From, const MetaConcept& To, TruthValue& dest);
-	void EdgeTruthValue(const MetaConcept& From, size_t To, TruthValue& dest);
-	void EdgeTruthValue(size_t From, size_t To, TruthValue& dest);
 	size_t VertexFromEdgeCount(const MetaConcept& From);
 	size_t VertexFromEdgeCount(size_t From);
 	size_t VertexToEdgeCount(const MetaConcept& To);
@@ -151,6 +147,10 @@ protected:
 	virtual void DiagnoseInferenceRules() const;
 	virtual bool InvokeEqualArgRule() const;
 private:
+	void EdgeTruthValue(const MetaConcept& From, const MetaConcept& To, TruthValue& dest);
+	void EdgeTruthValue(size_t From, const MetaConcept& To, TruthValue& dest);
+	void EdgeTruthValue(const MetaConcept& From, size_t To, TruthValue& dest);
+	void EdgeTruthValue(size_t From, size_t To, TruthValue& dest);
 	void EdgeTruthValueCore(size_t From, size_t To, TruthValue& dest);
 	size_t VertexFromEdgeCountCore(size_t From);
 	size_t VertexToEdgeCountCore(size_t From);
