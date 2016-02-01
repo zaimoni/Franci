@@ -17,7 +17,7 @@
 
 #include "MetaCon4.hxx"
 
-#include "TruthVal.hxx"
+#include "TVal.hxx"
 
 class LinearInterval;
 namespace zaimoni {

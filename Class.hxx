@@ -5,7 +5,7 @@
 #define ABSTRACTCLASS_DEF
 
 #include "MetaCon5.hxx"
-#include "TruthVal.hxx"
+#include "TVal.hxx"
 
 class AbstractClass;
 namespace zaimoni {
