@@ -105,7 +105,6 @@ public:
 //	Operation support routines
 	bool SupportsThisOperation(ExactType_MC Operation) const;
 	bool CompletelyFailsToSupportThisOperation(ExactType_MC Operation) const;
-	void SupportsThisOperation(ExactType_MC Operation, TruthValue& RetVal) const;
 	// NOTE: returns true iff identity is created properly.
 	// StdAddition: omnizero sets Tmp to NULL [correct default for within the StdAdd. Inverse clean rule]
 	bool CanCreateIdentityForOperation(ExactType_MC Operation) const;
@@ -130,6 +129,7 @@ protected:
 	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
 	virtual bool _IsExplicitConstant() const;
 private:
+	TVal _supportsThisOperation(ExactType_MC Operation) const;
 	void Subclass_core(const AbstractClass& rhs, TruthValue& RetVal) const;
 };
 

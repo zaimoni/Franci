@@ -477,19 +477,19 @@ AbstractClass::HasAsElement(const MetaConcept& rhs, TruthValue& RetVal) const
 		{
 		if (*this==ClassAdditionDefined)
 			{
-			rhs.UltimateType()->SupportsThisOperation(StdAddition_MC,RetVal);
+			RetVal._x = rhs.UltimateType()->SupportsThisOperation(StdAddition_MC);
 			return;
 			}
 		else if (*this==ClassMultiplicationDefined)
 			{
-			rhs.UltimateType()->SupportsThisOperation(StdMultiplication_MC,RetVal);
+			RetVal._x = rhs.UltimateType()->SupportsThisOperation(StdMultiplication_MC);
 			return;
 			}
 		else if (*this==ClassAdditionMultiplicationDefined)
 			{
-			rhs.UltimateType()->SupportsThisOperation(StdAddition_MC,RetVal);
+			RetVal._x = rhs.UltimateType()->SupportsThisOperation(StdAddition_MC);
 			if (!RetVal._x.is(TVal::Unknown)) return;
-			rhs.UltimateType()->SupportsThisOperation(StdMultiplication_MC,RetVal);
+			RetVal._x = rhs.UltimateType()->SupportsThisOperation(StdMultiplication_MC);
 			return;
 			}
 		else if (rhs.UltimateType()->IntersectionWithIsNULLSet(*UltimateType()))
@@ -634,30 +634,24 @@ bool AbstractClass::DirectCreateBasisClauseIdx(size_t Idx, MetaConcept*& dest) c
 }
 
 bool AbstractClass::SupportsThisOperation(ExactType_MC Operation) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 12/26/2002
-	TruthValue RetVal;
-	SupportsThisOperation(Operation,RetVal);
-	return RetVal._x.is(TVal::True);
+{
+	return _supportsThisOperation(Operation).is(TVal::True);
 }
 
 bool AbstractClass::CompletelyFailsToSupportThisOperation(ExactType_MC Operation) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 12/26/2002
-	TruthValue RetVal;
-	SupportsThisOperation(Operation,RetVal);
-	return RetVal._x.is(TVal::False);
+{
+	return _supportsThisOperation(Operation).is(TVal::False);
 }
 
-void AbstractClass::SupportsThisOperation(ExactType_MC Operation, TruthValue& RetVal) const
-{	// MUTABLE
-	// IMPLEMENTATION PARADIGM UNSTABLE
-	RetVal._x = TVal::Unknown;
+TVal AbstractClass::_supportsThisOperation(ExactType_MC Operation) const
+{
 	if (*this!=TruthValues && *this!=NULLSet)
 		{
 		if (!Arg1.empty() && !Arg1->IsUltimateType(NULL))
 			{
 			if (   Arg1->IsExplicitConstant()
 				|| Arg1->IsExactType(LinearInterval_MC))
-				return Arg1->UltimateType()->SupportsThisOperation(Operation,RetVal);
+				return Arg1->UltimateType()->_supportsThisOperation(Operation);
 			};
 
 		if (*this!=ClassAllSets)
@@ -668,10 +662,7 @@ void AbstractClass::SupportsThisOperation(ExactType_MC Operation, TruthValue& Re
 				if (   *this==ClassAdditionDefined					// algebraic: omnizero
 					|| *this==ClassAdditionMultiplicationDefined	// algebraic: omnizero
 					|| Superclass(Integer))		// integer 0 ok
-					{
-					RetVal._x = TVal::True;
-					return;
-					}
+					return TVal(TVal::True);
 				};
 
 			// Subclass(ClassMultiplicationDefined) recurses here, so cannot use that
@@ -680,17 +671,12 @@ void AbstractClass::SupportsThisOperation(ExactType_MC Operation, TruthValue& Re
 				if (   *this==ClassMultiplicationDefined			// algebraic: omnione
 					|| *this==ClassAdditionMultiplicationDefined	// algebraic: omnione
 					|| Superclass(Integer))		// integer 1 ok
-					{
-					RetVal._x = TVal::True;
-					return;
-					}
+					return TVal(TVal::True);
 				}
 			}
-		}
-	else{
-		RetVal._x = TVal::False;
-		return;
-		}
+		return TVal();	// unknown
+		};
+	return TVal(TVal::False);
 }
 
 bool
