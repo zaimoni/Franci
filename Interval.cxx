@@ -275,14 +275,14 @@ bool LinearInterval::HasAsElement(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 6/10/2002
 	TruthValue RetVal;
 	HasAsElement(rhs,RetVal);
-	return RetVal._x.is(TVal::True);
+	return RetVal._x.is(true);
 }
 
 bool LinearInterval::DoesNotHaveAsElement(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 6/10/2002
 	TruthValue RetVal;
 	HasAsElement(rhs,RetVal);
-	return RetVal._x.is(TVal::False);
+	return RetVal._x.is(false);
 }
 
 void
@@ -301,7 +301,7 @@ LinearInterval::HasAsElement(const MetaConcept& rhs, TruthValue& RetVal) const
 
 	if (UltimateType()->DoesNotHaveAsElement(rhs))
 		{
-		RetVal._x = TVal::False;
+		RetVal._x = false;;
 		return;
 		}
 
@@ -310,13 +310,13 @@ LinearInterval::HasAsElement(const MetaConcept& rhs, TruthValue& RetVal) const
 		if 		(   rhs.SyntacticalStandardLT(*LHS_Arg1)
 				 || RHS_Arg2->SyntacticalStandardLT(rhs))
 			{
-			RetVal._x = TVal::False;
+			RetVal._x = false;
 			return;
 			}
 		else if (   LHS_Arg1->SyntacticalStandardLT(rhs)
 				 && rhs.SyntacticalStandardLT(*RHS_Arg2))
 			{
-			RetVal._x = TVal::True;
+			RetVal._x = true;
 			return;
 			}
 		}
@@ -413,14 +413,14 @@ bool LinearInterval::ClearlyExtendedBy(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/4/2002
 	TruthValue RetVal;
 	ClearlyExtendedBy(rhs,RetVal);
-	return RetVal._x.is(TVal::True);
+	return RetVal._x.is(true);
 }
 
 bool LinearInterval::ClearlyNotExtendedBy(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/4/2002
 	TruthValue RetVal;
 	ClearlyExtendedBy(rhs,RetVal);
-	return RetVal._x.is(TVal::False);
+	return RetVal._x.is(false);
 }
 
 void
@@ -429,14 +429,14 @@ LinearInterval::ClearlyExtendedBy(const MetaConcept& rhs, TruthValue& RetVal) co
 	if (   (LeftPointOpen  && rhs==*LHS_Arg1)
 		|| (RightPointOpen && rhs==*RHS_Arg2))
 		{	// the missing endpoint of an open interval closes it
-		RetVal._x = TVal::True;
+		RetVal._x = true;
 		return;
 		};
 	
 	if (   (LeftPointOpen && RightPointOpen)				// other tests require a closed endpoint
 		||  UltimateType()->IsDenseUnderStandardTopology())	// stereotypical test for dense topological spaces
 		{
-		RetVal._x = TVal::False;
+		RetVal._x = false;
 		return;
 		}
 
@@ -445,7 +445,7 @@ LinearInterval::ClearlyExtendedBy(const MetaConcept& rhs, TruthValue& RetVal) co
 	if (   (!RightPointOpen && UltimateType()->Arg1IsAfterEndpointAlongVectorAB(rhs,*LHS_Arg1,*RHS_Arg2))
 		|| (!LeftPointOpen  && UltimateType()->Arg1IsAfterEndpointAlongVectorAB(rhs,*RHS_Arg2,*LHS_Arg1)))
 		{
-		RetVal._x = TVal::True;
+		RetVal._x = true;
 		return;
 		};
 	// if the interval is in a well-defined standard form, this is definitely false
@@ -455,7 +455,7 @@ LinearInterval::ClearlyExtendedBy(const MetaConcept& rhs, TruthValue& RetVal) co
 		&& LHS_Arg1->IsExactType(IntegerNumeral_MC)
 		&& RHS_Arg2->IsExactType(IntegerNumeral_MC))
 		{
-		RetVal._x = TVal::False;
+		RetVal._x = false;
 		return;			
 		}
 	RetVal._x = TVal::Unknown;

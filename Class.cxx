@@ -258,21 +258,21 @@ bool AbstractClass::ProperSubclass(const AbstractClass& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/26/2002
 	TruthValue RetVal;
 	ProperSubclass(rhs,RetVal);
-	return RetVal._x.is(TVal::True);
+	return RetVal._x.is(true);
 }
 
 bool AbstractClass::Subclass(const AbstractClass& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/26/2002
 	TruthValue RetVal;
 	Subclass(rhs,RetVal);
-	return RetVal._x.is(TVal::True);
+	return RetVal._x.is(true);
 }
 
 void AbstractClass::ProperSubclass(const AbstractClass& rhs, TruthValue& RetVal) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/26/2002
 	if (*this==rhs || NULLSet==rhs || TruthValues==rhs)
 		{
-		RetVal._x = TVal::False;
+		RetVal._x = false;
 		return;
 		};
 	Subclass_core(rhs,RetVal);
@@ -284,7 +284,7 @@ AbstractClass::Subclass(const AbstractClass& rhs, TruthValue& RetVal) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/26/2002
 	if (*this==rhs)				// no further analysis
 		{
-		RetVal._x = TVal::True;
+		RetVal._x = true;
 		return;
 		}
 	Subclass_core(rhs,RetVal);
@@ -295,7 +295,7 @@ void AbstractClass::Subclass_core(const AbstractClass& rhs, TruthValue& RetVal) 
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/26/2002
 	if (ClassAllSets==rhs)	// no further analysis
 		{
-		RetVal._x = TVal::True;
+		RetVal._x = true;
 		return;
 		}
 	else if (ClassAdditionDefined==rhs)
@@ -320,14 +320,14 @@ void AbstractClass::Subclass_core(const AbstractClass& rhs, TruthValue& RetVal) 
 			if (rhs.Arg1.empty())
 				{	// RHS is symbolic domain
 				if (IsUltimateType(NULL))
-					RetVal._x = TVal::False;
+					RetVal._x = false;
 				else
 					UltimateType()->Subclass(rhs,RetVal);
 				return;
 				}
 			else if (rhs.Arg1->IsExplicitConstant())
 				{	// RHS is singleton: fail
-				RetVal._x = TVal::False;
+				RetVal._x = false;
 				return;
 				}
 			else if (rhs.Arg1->IsExactType(LinearInterval_MC))
@@ -348,7 +348,7 @@ void AbstractClass::Subclass_core(const AbstractClass& rhs, TruthValue& RetVal) 
 			if (   rhs.Arg1->IsExactType(LinearInterval_MC)
 				|| rhs.Arg1->IsExplicitConstant())
 				{
-				RetVal._x = TVal::False;
+				RetVal._x = false;
 				return;
 				}
 			}
@@ -402,14 +402,14 @@ bool AbstractClass::HasAsElement(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 6/12/2002
 	TruthValue RetVal;
 	HasAsElement(rhs,RetVal);
-	return RetVal._x.is(TVal::True);
+	return RetVal._x.is(true);
 }
 
 bool AbstractClass::DoesNotHaveAsElement(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 6/12/2002
 	TruthValue RetVal;
 	HasAsElement(rhs,RetVal);
-	return RetVal._x.is(TVal::False);
+	return RetVal._x.is(false);
 }
 
 void
@@ -420,11 +420,11 @@ AbstractClass::HasAsElement(const MetaConcept& rhs, TruthValue& RetVal) const
 	// Also, an abstractclass returns itself as its UltimateType.
 	// However...Franci isn't quite that knowledgeable--yet.
 	// Consider making this susceptible to array lookup.
-	RetVal._x = TVal::False;
+	RetVal._x = false;
 	if (*this==NULLSet) return;
 	if		(rhs.IsExactType(TruthValue_MC))
 		{
-		if (*this==TruthValues) RetVal._x = TVal::True;
+		if (*this==TruthValues) RetVal._x = true;
 		return;
 		}
 	else if (rhs.IsExactType(AbstractClass_MC))
@@ -432,7 +432,7 @@ AbstractClass::HasAsElement(const MetaConcept& rhs, TruthValue& RetVal) const
 		if (static_cast<const AbstractClass&>(rhs).IsProperClass())
 			return;
 		if (*this==ClassAllSets && !rhs.IsUltimateType(NULL) && Superclass(*rhs.UltimateType()))
-			RetVal._x = TVal::True;
+			RetVal._x = true;
 		return;
 		}
 	else if (rhs.IsExactType(Variable_MC))
@@ -455,7 +455,7 @@ AbstractClass::HasAsElement(const MetaConcept& rhs, TruthValue& RetVal) const
 	else if (rhs.IsExactType(LinearInfinity_MC))
 		{	//! \todo: smarter test...really should be relying on natural total ordering, etc.
 			//! <br> current implementation breaks on C<sup>#</sup>
-		if (HasInfinity()) RetVal._x = TVal::True;
+		if (HasInfinity()) RetVal._x = true;
 		return;
 		}
 
@@ -514,13 +514,13 @@ AbstractClass::SetToIntersection(const AbstractClass& lhs, const AbstractClass& 
 
 	TruthValue RetVal;
 	lhs.Subclass(rhs,RetVal);
-	if 		(RetVal._x.is(TVal::True)) return SetToThis(lhs);
-	else if (RetVal._x.is(TVal::False) && !lhs.Arg1.empty() && lhs.Arg1->IsExplicitConstant())
+	if 		(RetVal._x.is(true)) return SetToThis(lhs);
+	else if (RetVal._x.is(false) && !lhs.Arg1.empty() && lhs.Arg1->IsExplicitConstant())
 		return SetToThis(NULLSet);
 
 	rhs.Subclass(lhs,RetVal);
-	if 		(RetVal._x.is(TVal::True)) return SetToThis(rhs);
-	else if (RetVal._x.is(TVal::False) && !rhs.Arg1.empty() && rhs.Arg1->IsExplicitConstant())
+	if 		(RetVal._x.is(true)) return SetToThis(rhs);
+	else if (RetVal._x.is(false) && !rhs.Arg1.empty() && rhs.Arg1->IsExplicitConstant())
 		return SetToThis(NULLSet);
 
 	// TruthValues, and Subclass tests didn't go off: NULLSet
@@ -593,13 +593,13 @@ bool AbstractClass::IntersectionWithIsNULLSet(const AbstractClass& rhs) const
 
 	TruthValue RetVal;
 	Subclass(rhs,RetVal);
-	if 		(RetVal._x.is(TVal::True)) return false;
-	else if (RetVal._x.is(TVal::False) && !Arg1.empty() && Arg1->IsExplicitConstant())
+	if 		(RetVal._x.is(true)) return false;
+	else if (RetVal._x.is(false) && !Arg1.empty() && Arg1->IsExplicitConstant())
 		return true;
 
 	rhs.Subclass(*this,RetVal);
-	if 		(RetVal._x.is(TVal::True)) return false;
-	else if (RetVal._x.is(TVal::False) && !rhs.Arg1.empty() && rhs.Arg1->IsExplicitConstant())
+	if 		(RetVal._x.is(true)) return false;
+	else if (RetVal._x.is(false) && !rhs.Arg1.empty() && rhs.Arg1->IsExplicitConstant())
 		return true;
 
 	if (TruthValues==*this || TruthValues==rhs) return true;
@@ -635,12 +635,12 @@ bool AbstractClass::DirectCreateBasisClauseIdx(size_t Idx, MetaConcept*& dest) c
 
 bool AbstractClass::SupportsThisOperation(ExactType_MC Operation) const
 {
-	return _supportsThisOperation(Operation).is(TVal::True);
+	return _supportsThisOperation(Operation).is(true);
 }
 
 bool AbstractClass::CompletelyFailsToSupportThisOperation(ExactType_MC Operation) const
 {
-	return _supportsThisOperation(Operation).is(TVal::False);
+	return _supportsThisOperation(Operation).is(false);
 }
 
 TVal AbstractClass::_supportsThisOperation(ExactType_MC Operation) const
@@ -662,7 +662,7 @@ TVal AbstractClass::_supportsThisOperation(ExactType_MC Operation) const
 				if (   *this==ClassAdditionDefined					// algebraic: omnizero
 					|| *this==ClassAdditionMultiplicationDefined	// algebraic: omnizero
 					|| Superclass(Integer))		// integer 0 ok
-					return TVal(TVal::True);
+					return true;
 				};
 
 			// Subclass(ClassMultiplicationDefined) recurses here, so cannot use that
@@ -671,12 +671,12 @@ TVal AbstractClass::_supportsThisOperation(ExactType_MC Operation) const
 				if (   *this==ClassMultiplicationDefined			// algebraic: omnione
 					|| *this==ClassAdditionMultiplicationDefined	// algebraic: omnione
 					|| Superclass(Integer))		// integer 1 ok
-					return TVal(TVal::True);
+					return true;
 				}
 			}
 		return TVal();	// unknown
 		};
-	return TVal(TVal::False);
+	return false;
 }
 
 bool

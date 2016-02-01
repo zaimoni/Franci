@@ -721,7 +721,7 @@ RetryAugmentation:
 		// simple analysis section
 		if (TestVarStatement->IsExactType(TruthValue_MC))
 			{
-			if (!static_cast<TruthValue*>(TestVarStatement)->_x.could_be(TVal::True))
+			if (!static_cast<TruthValue*>(TestVarStatement)->_x.could_be(true))
 				{	// stalled at False or Contradiction.  Proof-by-contradiction
 					// asserts ~A.
 				free(CouldAugmentHypothesisArgs);
@@ -752,7 +752,7 @@ RetryAugmentation:
 			//! \todo if Franci ever stops at TRUE, she should know to extract the variable
 			//! as an OR-atomic clause.  However, she should first know how to explore an OR-statement.
 #if 0
-			if (static_cast<TruthValue*>(TestVarStatement)->_x.is(TVal::True))
+			if (static_cast<TruthValue*>(TestVarStatement)->_x.is(true))
 				{
 				free(CouldAugmentHypothesisArgs);
 				delete TestVarStatement;

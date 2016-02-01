@@ -408,12 +408,12 @@ void Digraph::EdgeTruthValueCore(size_t From, size_t To, TruthValue& dest)
 {	// FORMALLY CORRECT: Kenneth Boyd, 2/17/2005
 	if 		(ExplicitEdge(From,To))
 		{
-		dest._x = TVal::True;
+		dest._x = true;
 		return;
 		}
 	else if (ExplicitNoEdge(From,To))
 		{
-		dest._x = TVal::False;
+		dest._x = false;
 		return;
 		}
 	SUCCEED_OR_DIE(ExplicitAmbiguousEdge(From,To));
@@ -425,12 +425,12 @@ void Digraph::EdgeTruthValueCore(size_t From, size_t To, TruthValue& dest)
 	if (_RelationDefinition(*ArgArray[From],*ArgArray[To]))
 		{	// NOTE: this is a target for properties of relations (symmetric, antisymmetric, etc)
 		SetEdge(From,To);
-		dest._x = TVal::True;
+		dest._x = true;
 		return;	
 		}
 	else{
 		ResetEdge(From,To);
-		dest._x = TVal::False;
+		dest._x = false;
 		return;	
 		}
 }
