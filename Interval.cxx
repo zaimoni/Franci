@@ -275,22 +275,14 @@ bool LinearInterval::HasAsElement(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 6/10/2002
 	TruthValue RetVal;
 	HasAsElement(rhs,RetVal);
-#ifdef ALPHA_TRUTHVAL
 	return RetVal._x.is(TVal::True);
-#else
-	return RetVal.IsTrue();
-#endif
 }
 
 bool LinearInterval::DoesNotHaveAsElement(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 6/10/2002
 	TruthValue RetVal;
 	HasAsElement(rhs,RetVal);
-#ifdef ALPHA_TRUTHVAL
 	return RetVal._x.is(TVal::False);
-#else
-	return RetVal.IsFalse();
-#endif
 }
 
 void
@@ -298,30 +290,18 @@ LinearInterval::HasAsElement(const MetaConcept& rhs, TruthValue& RetVal) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 11/2/2005
 	if (*LHS_Arg1==rhs)
 		{
-#ifdef ALPHA_TRUTHVAL
 		RetVal._x = !LeftPointOpen;
-#else
-		RetVal = !LeftPointOpen;
-#endif
 		return;
 		}
 	if (*RHS_Arg2==rhs)
 		{
-#ifdef ALPHA_TRUTHVAL
 		RetVal._x = !RightPointOpen;
-#else
-		RetVal = !RightPointOpen;
-#endif
 		return;
 		}
 
 	if (UltimateType()->DoesNotHaveAsElement(rhs))
 		{
-#ifdef ALPHA_TRUTHVAL
 		RetVal._x = TVal::False;
-#else
-		RetVal.SetFalse();
-#endif
 		return;
 		}
 
@@ -330,30 +310,18 @@ LinearInterval::HasAsElement(const MetaConcept& rhs, TruthValue& RetVal) const
 		if 		(   rhs.SyntacticalStandardLT(*LHS_Arg1)
 				 || RHS_Arg2->SyntacticalStandardLT(rhs))
 			{
-#ifdef ALPHA_TRUTHVAL
 			RetVal._x = TVal::False;
-#else
-			RetVal.SetFalse();
-#endif
 			return;
 			}
 		else if (   LHS_Arg1->SyntacticalStandardLT(rhs)
 				 && rhs.SyntacticalStandardLT(*RHS_Arg2))
 			{
-#ifdef ALPHA_TRUTHVAL
 			RetVal._x = TVal::True;
-#else
-			RetVal.SetTrue();
-#endif
 			return;
 			}
 		}
 
-#ifdef ALPHA_TRUTHVAL
 	RetVal._x = TVal::Unknown;
-#else
-	RetVal.SetUnknown();
-#endif
 }
 
 bool LinearInterval::Subclass(const LinearInterval& rhs) const
@@ -385,18 +353,10 @@ LinearInterval::Subclass(const LinearInterval& rhs, TruthValue& RetVal) const
 	unsigned long Result = IntersectionUnionStatus(rhs);
 	if (Result)
 		{
-#ifdef ALPHA_TRUTHVAL
 		RetVal._x = (Subclass_LI & Result);
-#else
-		RetVal = (Subclass_LI & Result);
-#endif
 		return;
 		};
-#ifdef ALPHA_TRUTHVAL
 	RetVal._x = TVal::Unknown;
-#else
-	RetVal.SetUnknown();
-#endif
 }
 
 bool
@@ -418,18 +378,10 @@ LinearInterval::ClearlyOverlapping(const LinearInterval& rhs, TruthValue& RetVal
 	unsigned long Result = IntersectionUnionStatus(rhs);
 	if (Result)
 		{
-#ifdef ALPHA_TRUTHVAL
 		RetVal._x = (Overlap_LI & Result);
-#else
-		RetVal = (Overlap_LI & Result);
-#endif
 		return;
 		};
-#ifdef ALPHA_TRUTHVAL
 	RetVal._x = TVal::Unknown;
-#else
-	RetVal.SetUnknown();
-#endif
 }
 
 bool
@@ -451,40 +403,24 @@ LinearInterval::ClearlyMergeable(const LinearInterval& rhs, TruthValue& RetVal) 
 	unsigned long Result = IntersectionUnionStatus(rhs);
 	if (Result)
 		{
-#ifdef ALPHA_TRUTHVAL
 		RetVal._x = (Mergeable_LI & Result);
-#else
-		RetVal = (Mergeable_LI & Result);
-#endif
 		return;
 		};
-#ifdef ALPHA_TRUTHVAL
 	RetVal._x = TVal::Unknown;
-#else
-	RetVal.SetUnknown();
-#endif
 }
 
 bool LinearInterval::ClearlyExtendedBy(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/4/2002
 	TruthValue RetVal;
 	ClearlyExtendedBy(rhs,RetVal);
-#ifdef ALPHA_TRUTHVAL
 	return RetVal._x.is(TVal::True);
-#else
-	return RetVal.IsTrue();
-#endif
 }
 
 bool LinearInterval::ClearlyNotExtendedBy(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/4/2002
 	TruthValue RetVal;
 	ClearlyExtendedBy(rhs,RetVal);
-#ifdef ALPHA_TRUTHVAL
 	return RetVal._x.is(TVal::False);
-#else
-	return RetVal.IsFalse();
-#endif
 }
 
 void
@@ -493,22 +429,14 @@ LinearInterval::ClearlyExtendedBy(const MetaConcept& rhs, TruthValue& RetVal) co
 	if (   (LeftPointOpen  && rhs==*LHS_Arg1)
 		|| (RightPointOpen && rhs==*RHS_Arg2))
 		{	// the missing endpoint of an open interval closes it
-#ifdef ALPHA_TRUTHVAL
 		RetVal._x = TVal::True;
-#else
-		RetVal.SetTrue();
-#endif
 		return;
 		};
 	
 	if (   (LeftPointOpen && RightPointOpen)				// other tests require a closed endpoint
 		||  UltimateType()->IsDenseUnderStandardTopology())	// stereotypical test for dense topological spaces
 		{
-#ifdef ALPHA_TRUTHVAL
 		RetVal._x = TVal::False;
-#else
-		RetVal.SetFalse();
-#endif
 		return;
 		}
 
@@ -517,11 +445,7 @@ LinearInterval::ClearlyExtendedBy(const MetaConcept& rhs, TruthValue& RetVal) co
 	if (   (!RightPointOpen && UltimateType()->Arg1IsAfterEndpointAlongVectorAB(rhs,*LHS_Arg1,*RHS_Arg2))
 		|| (!LeftPointOpen  && UltimateType()->Arg1IsAfterEndpointAlongVectorAB(rhs,*RHS_Arg2,*LHS_Arg1)))
 		{
-#ifdef ALPHA_TRUTHVAL
 		RetVal._x = TVal::True;
-#else
-		RetVal.SetTrue();
-#endif
 		return;
 		};
 	// if the interval is in a well-defined standard form, this is definitely false
@@ -531,18 +455,10 @@ LinearInterval::ClearlyExtendedBy(const MetaConcept& rhs, TruthValue& RetVal) co
 		&& LHS_Arg1->IsExactType(IntegerNumeral_MC)
 		&& RHS_Arg2->IsExactType(IntegerNumeral_MC))
 		{
-#ifdef ALPHA_TRUTHVAL
 		RetVal._x = TVal::False;
-#else
-		RetVal.SetFalse();
-#endif
 		return;			
 		}
-#ifdef ALPHA_TRUTHVAL
 	RetVal._x = TVal::Unknown;
-#else
-	RetVal.SetUnknown();
-#endif
 }
 
 bool LinearInterval::DestructiveExtendBy(MetaConcept*& rhs)

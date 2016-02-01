@@ -1595,11 +1595,7 @@ void MetaConnective::DiagnoseInferenceRules() const
 Ary2Finish:
 		if (ArgArray[0]->IsExactType(TruthValue_MC))
 			{
-#ifdef ALPHA_TRUTHVAL
 			(this->*DiagnoseRulesTVal2AryAux[static_cast<TruthValue*>(ArgArray[0])->_x.array_index()])();
-#else
-			(this->*DiagnoseRulesTVal2AryAux[static_cast<TruthValue*>(ArgArray[0])->CreateLinearArrayIndex()])();
-#endif
 			return;
 			};
 		// antiidempotent scanner
@@ -1627,11 +1623,7 @@ Ary2Finish:
 		}
 	else if (ArgArray[0]->IsExactType(TruthValue_MC))
 		{
-#ifdef ALPHA_TRUTHVAL
 		if ((this->*DiagnoseRulesTValNAryAux[static_cast<TruthValue*>(ArgArray[0])->_x.array_index()])())
-#else
-		if ((this->*DiagnoseRulesTValNAryAux[static_cast<TruthValue*>(ArgArray[0])->CreateLinearArrayIndex()])())
-#endif
 			return;
 		if (2==fast_size()) goto Ary2Finish;
 		};
@@ -1762,20 +1754,12 @@ bool MetaConnective::DiagnoseInferenceRulesTrueNAry() const
 		{
 		if (ArgArray[1]->IsExactType(TruthValue_MC))
 			{
-#ifdef ALPHA_TRUTHVAL
 			if 		(static_cast<TruthValue*>(ArgArray[1])->_x.is(TVal::True))
-#else
-			if 		(static_cast<TruthValue*>(ArgArray[1])->IsTrue())
-#endif
 				{
 				size_t i = 1;
 				while(   fast_size()-1>i
 					  && ArgArray[i+1]->IsExactType(TruthValue_MC)
-#ifdef ALPHA_TRUTHVAL
 					  && static_cast<TruthValue*>(ArgArray[i+1])->_x.is(TVal::True)) ++i;
-#else
-					  && static_cast<TruthValue*>(ArgArray[i+1])->IsTrue()) ++i;
-#endif
 				if (fast_size()-2<=i)
 					{	// all but the last arg is TRUE; the last one is unspecified.
 					InvokeEvalForceArg(fast_size()-1);
@@ -1783,11 +1767,7 @@ bool MetaConnective::DiagnoseInferenceRulesTrueNAry() const
 					};
 
 				if (   ArgArray[i+1]->IsExactType(TruthValue_MC)
-#ifdef ALPHA_TRUTHVAL
 					&& static_cast<TruthValue*>(ArgArray[i+1])->_x.is(TVal::False))
-#else
-					&& static_cast<TruthValue*>(ArgArray[i+1])->IsFalse())
-#endif
 					{	// FALSE: trip off set-to-FALSE rule
 					InvokeEvalForceArg(i+1);
 					return true;
@@ -1798,11 +1778,7 @@ bool MetaConnective::DiagnoseInferenceRulesTrueNAry() const
 				const_cast<MetaConnective*>(this)->SelfEvalRuleCleanLeadingArg();
 				return false;
 				}
-#ifdef ALPHA_TRUTHVAL
 			else if (static_cast<TruthValue*>(ArgArray[1])->_x.is(TVal::False))
-#else
-			else if (static_cast<TruthValue*>(ArgArray[1])->IsFalse())
-#endif
 				{	// FALSE: trip off set-to-FALSE rule
 				InvokeEvalForceArg(1);
 				return true;
@@ -1823,40 +1799,24 @@ bool MetaConnective::DiagnoseInferenceRulesTrueNAry() const
 		{
 		if (ArgArray[1]->IsExactType(TruthValue_MC))
 			{
-#ifdef ALPHA_TRUTHVAL
 			if		(static_cast<TruthValue*>(ArgArray[1])->_x.is(TVal::True))
-#else
-			if		(static_cast<TruthValue*>(ArgArray[1])->IsTrue())
-#endif
 				{	// XOR(TRUE,TRUE,...) |-> FALSE
 				IdxCurrentSelfEvalRule = None_SER;
 				InferenceParameter1 = 0;
 				IdxCurrentEvalRule=EvalForceNotArg_ER;
 				return true;			
 				}
-#ifdef ALPHA_TRUTHVAL
 			else if (static_cast<TruthValue*>(ArgArray[1])->_x.is(TVal::False))
-#else
-			else if (static_cast<TruthValue*>(ArgArray[1])->IsFalse())
-#endif
 				{
 				if 		(ArgArray[fast_size()-1]->IsExactType(TruthValue_MC))
 					{
 					IdxCurrentSelfEvalRule = None_SER;
-#ifdef ALPHA_TRUTHVAL
 					InvokeEvalForceArg(static_cast<TruthValue*>(ArgArray[fast_size()-1])->_x.is(TVal::False) ? 0 : fast_size()-1);
-#else
-					InvokeEvalForceArg(static_cast<TruthValue*>(ArgArray[fast_size()-1])->IsFalse() ? 0 : fast_size()-1);
-#endif
 					return true;
 					}
 				else if (ArgArray[fast_size()-2]->IsExactType(TruthValue_MC))
 					{
-#ifdef ALPHA_TRUTHVAL
 					if (static_cast<TruthValue*>(ArgArray[fast_size()-2])->_x.is(TVal::False))
-#else
-					if (static_cast<TruthValue*>(ArgArray[fast_size()-2])->IsFalse())
-#endif
 						{
 						IdxCurrentSelfEvalRule = None_SER;
 						IdxCurrentEvalRule = EvalForceNotArg_ER;
@@ -1885,11 +1845,7 @@ bool MetaConnective::DiagnoseInferenceRulesFalseNAry() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 5/3/2000
 	//! \pre Arg0 is FALSE or CONTRADICTION (latter is recursion)
 	assert(ArgArray[0]->IsExactType(TruthValue_MC));
-#ifdef ALPHA_TRUTHVAL
 	assert(static_cast<TruthValue*>(ArgArray[0])->_x.is(TVal::False));
-#else
-	assert(static_cast<TruthValue*>(ArgArray[0])->IsFalse());
-#endif
 	if 		(IsExactType(LogicalAND_MC))
 		{
 		InferenceParameter1 = 2;
@@ -1900,20 +1856,12 @@ bool MetaConnective::DiagnoseInferenceRulesFalseNAry() const
 	else if (IsExactType(LogicalOR_MC))
 		{
 		if (   ArgArray[1]->IsExactType(TruthValue_MC)
-#ifdef ALPHA_TRUTHVAL
 			&& static_cast<TruthValue*>(ArgArray[1])->_x.is(TVal::False))
-#else
-			&& static_cast<TruthValue*>(ArgArray[1])->IsFalse())
-#endif
 			{
 			size_t i = 1;
 			while(   fast_size()-1>i
 				  && ArgArray[i+1]->IsExactType(TruthValue_MC)
-#ifdef ALPHA_TRUTHVAL
 				  && static_cast<TruthValue*>(ArgArray[i+1])->_x.is(TVal::False)) ++i;
-#else
-				  && static_cast<TruthValue*>(ArgArray[i+1])->IsFalse()) ++i;
-#endif
 			if (fast_size()-2<=i)
 				{	// all but the last arg is FALSE; the last one is unspecified.
 				InvokeEvalForceArg(fast_size()-1);
@@ -4492,11 +4440,7 @@ bool MetaConnective::VirtualDeepLogicallyImplies()
 	LOG(*InferenceParameterMC);
 	LOG("in");
 	LOG(*ArgArray[InferenceParameter1]);
-#ifdef ALPHA_TRUTHVAL
 	TruthValue Tmp(TVal::True);
-#else
-	TruthValue Tmp(TruthValue::True);
-#endif
 
 	// NOTE: for efficiency reasons, would be interested in something that didn't populate
 	// with a lot of temporary TRUE/FALSE constants (effectively StrictlyModifies)
@@ -4618,11 +4562,7 @@ bool MetaConnective::ExtractTrueArgFromXOR()
 	autovalarray_ptr_throws<MetaConcept*> NewArgArray(2);
 	autoval_ptr<MetaConcept> ReplaceParam1;
 
-#ifdef ALPHA_TRUTHVAL
 	ReplaceParam1 = new TruthValue(TVal::True);
-#else
-	ReplaceParam1 = new TruthValue(TruthValue::True);
-#endif
 	// no more throwing operations	
 	{
 	MetaConnective* const VR_arg1 = static_cast<MetaConnective*>(NewArgArray[1]);
@@ -4644,11 +4584,7 @@ bool MetaConnective::LogicalANDReplaceThisArgWithTRUE()
 	LOG(*ArgArray[InferenceParameter1]);
 	LOG("starting with");
 	LOG(*ArgArray[InferenceParameter2]);
-#ifdef ALPHA_TRUTHVAL
 	TruthValue Tmp(TVal::True);
-#else
-	TruthValue Tmp(TruthValue::True);
-#endif
 
 	// NOTE: for efficiency reasons, would be interested in something that didn't populate
 	// with a lot of temporary TRUE/FALSE constants (effectively StrictlyModifies)
@@ -4997,11 +4933,7 @@ bool MetaConnective::TargetVariableFalse()
 	DeleteIdx(InferenceParameter1);
 	if (2==fast_size()) ArgArray[1]->SelfLogicalNOT();
 	{
-#ifdef ALPHA_TRUTHVAL
 	TruthValue Tmp(TVal::True);
-#else
-	TruthValue Tmp(TruthValue::True);
-#endif
 	if (   !ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(*TmpXOR->ArgArray[0],Tmp,SetLHSToRHS,::NonStrictlyImplies)
 		|| !ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(*TmpXOR->ArgArray[0],Tmp,SetLHSToLogicalNOTOfRHS,::NonStrictlyImpliesLogicalNOTOf))
 		return false;
@@ -5031,11 +4963,7 @@ bool MetaConnective::TargetVariableTrue()
 	DeleteIdx(InferenceParameter1);
 	// TmpNXOR arglist: A,NULL
 	{
-#ifdef ALPHA_TRUTHVAL
 	TruthValue Tmp(TVal::False);
-#else
-	TruthValue Tmp(TruthValue::False);
-#endif
 	if (   !ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(*TmpNXOR->ArgArray[0],Tmp,SetLHSToRHS,::NonStrictlyImplies)
 		|| !ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(*TmpNXOR->ArgArray[0],Tmp,SetLHSToLogicalNOTOfRHS,::NonStrictlyImpliesLogicalNOTOf))
 		return false;
@@ -6235,8 +6163,7 @@ TriedToStartBuffers:
 						if (0==StrictIdxUB)
 							break;
 						size_t StrictIdx2UB = ArgArray[LogicalOrigin+Idx2]->RadixSortIdxSourceListByRHSCompatible(ImpliesSources[Idx]);
-						if (0==StrictIdx2UB)
-							break;
+						if (0==StrictIdx2UB) break;
 						// scan!
 						size_t Idx3 = StrictIdxUB;
 						do	{
@@ -6303,11 +6230,7 @@ MetaConnective::LogicalANDBoostORWithIFF(MetaConnective*& SpeculativeTarget, siz
 			{
 			try	{
 				autoval_ptr<TruthValue> TmpTruthValue;
-#ifdef ALPHA_TRUTHVAL
 				TmpTruthValue = new TruthValue(TVal::True);
-#else
-				TmpTruthValue = new TruthValue(TruthValue::True);
-#endif
 				MetaConnective* Target = NULL;
 				static_cast<MetaConnective*>(ArgArray[Idx4])->CopyInto(Target);
 				Target->TransferInAndOverwriteRaw(Target->InferenceParameter1,TmpTruthValue.release());
@@ -6325,11 +6248,7 @@ MetaConnective::LogicalANDBoostORWithIFF(MetaConnective*& SpeculativeTarget, siz
 			{
 			try	{
 				autoval_ptr<TruthValue> TmpTruthValue;
-#ifdef ALPHA_TRUTHVAL
 				TmpTruthValue = new TruthValue(TVal::False);
-#else
-				TmpTruthValue = new TruthValue(TruthValue::False);
-#endif
 				MetaConnective* Target = NULL;
 				static_cast<MetaConnective*>(ArgArray[Idx4])->CopyInto(Target);
 				Target->TransferInAndOverwriteRaw(Target->InferenceParameter1,TmpTruthValue.release());
@@ -6358,8 +6277,7 @@ MetaConnective::ExploreImprovisedUsesSpeculativeORAux(MetaConnective*& Speculati
 		};
 RestartSpeculativeOR:
 	// If it's already drifted from OR, return false:
-	if (!SpeculativeTarget->IsExactType(LogicalOR_MC))
-		return false;
+	if (!SpeculativeTarget->IsExactType(LogicalOR_MC)) return false;
 
 	if (SpeculativeTarget->ForceStdForm(),SpeculativeTarget->CanEvaluate())
 		return false;
@@ -7080,22 +6998,14 @@ MetaConnective::ThisIsAnnihilatorKey(size_t& ArgIdx, signed short& SelfEvalRule,
 		TruthValue& Target = *static_cast<TruthValue*>(ArgArray[ArgIdx]);
 		if (IsExactType(LogicalAND_MC))
 			{
-#ifdef ALPHA_TRUTHVAL
 			if (!Target._x.could_be(TVal::True))
-#else
-			if (!Target.CouldBeTrue())
-#endif
 				{
 				SelfEvalRule = None_SER;
 				EvalRule = EvalForceArg_ER;
 				return true;
 				}
 			}
-#ifdef ALPHA_TRUTHVAL
 		else if (Target._x.is(TVal::True))
-#else
-		else if (Target.IsTrue())
-#endif
 			{
 			SelfEvalRule = None_SER;
 			EvalRule = EvalForceArg_ER;

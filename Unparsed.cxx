@@ -1170,8 +1170,7 @@ UnparsedText::ScanThroughQuote(size_t& i, bool break_token_on_newline, char esca
 		}
 }
 
-void
-UnparsedText::ScanThroughNewline(size_t& Offset)
+void UnparsedText::ScanThroughNewline(size_t& Offset)
 {
 	while('\n'==Text[Offset])
 		{
@@ -1180,8 +1179,7 @@ UnparsedText::ScanThroughNewline(size_t& Offset)
 		}
 }
 
-bool
-UnparsedText::ScanToChar(size_t& i,char Target) const
+bool UnparsedText::ScanToChar(size_t& i,char Target) const
 {	//! \return returns true if stops on end-of-line
 	//! \return returns false if stops at string termination
 	while(Target!=Text[++i])
@@ -1199,15 +1197,10 @@ UnparsedText::InstallEvalRule(Recognize* new_recognizer,Parse* new_parser)
 }
 
 // for main.cxx
-void
-Init_Unparsed_Eval(void)
+void Init_Unparsed_Eval()
 {
 	UnparsedText::InstallEvalRule(&IntegerNumeral::IsLegalIntegerString,&IntegerNumeral::ConvertToIntegerNumeral);
-#ifdef ALPHA_TRUTHVAL
 	UnparsedText::InstallEvalRule(&TVal::is_legal,&TruthValue::read);
-#else
-	UnparsedText::InstallEvalRule(&TruthValue::IsLegalTValString,&TruthValue::ConvertToTruthValue);
-#endif
 	UnparsedText::InstallEvalRule(&AbstractClass::IsReservedSetClassName,&AbstractClass::ConvertToReservedAbstractClass);
 }
 
@@ -1239,8 +1232,7 @@ static const signed short InfixSymbolHighIndex[INFIX_SYMBOL_MAXSIZE]
 	4
 	};
 
-size_t
-Detect_InfixSymbol(const char* Target)
+size_t Detect_InfixSymbol(const char* Target)
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/16/2004
 	// match to InfixSymbol_UT
 	const size_t TextLength = strlen(Target);

@@ -629,11 +629,7 @@ static bool NewVarsForSituation_handler(char*& InputBuffer)
 				{
 				Tmp2 = new QuantifiedStatement();
 				Tmp2->insertNSlotsAt(i+1,0);
-#ifdef ALPHA_TRUTHVAL
 				Tmp2->TransferInAndOverwriteRaw(0,(NULL==Situation) ? new TruthValue(TVal::True) : Situation);
-#else
-				Tmp2->TransferInAndOverwriteRaw(0,(NULL==Situation) ? new TruthValue(TruthValue::True) : Situation);
-#endif
 				}
 			else	// need to add vars to QuantifiedStatement.
 				Tmp2->insertNSlotsAt(i,OriginalArity);

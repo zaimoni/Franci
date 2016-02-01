@@ -785,13 +785,6 @@ void StdMultiplication::ConstructSelfNameAux(char* Name) const
 		};
 }
 
-#ifndef ALPHA_TRUTHVAL
-void TruthValue::ConstructSelfNameAux(char* Name) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 8/29/1999
-	strcpy(Name,TruthValueNames[TVal]);
-}
-#endif
-
 void UnparsedText::ConstructSelfNameAux(char* Name) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/29/2000
 	size_t TextLength = Text.empty() ? 0 : strlen(Text);
@@ -1119,13 +1112,6 @@ size_t StdMultiplication::LengthOfSelfName() const
 		};
 	return Length;
 }
-
-#ifndef ALPHA_TRUTHVAL
-size_t TruthValue::LengthOfSelfName() const
-{	// FORMALLY CORRECT: Kenneth Boyd, 5/17/2006
-	return strlen(TruthValueNames[TVal]);
-}
-#endif
 
 size_t UnparsedText::LengthOfSelfName() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/29/2000
