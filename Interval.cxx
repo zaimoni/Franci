@@ -326,37 +326,20 @@ LinearInterval::HasAsElement(const MetaConcept& rhs, TruthValue& RetVal) const
 
 bool LinearInterval::Subclass(const LinearInterval& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 7/12/2002
-#if 1
 	return Subclass_LI & IntersectionUnionStatus(rhs);
-#else	// generic code
-	TruthValue RetVal;
-	Subclass(rhs,RetVal);
-	return RetVal.IsTrue();
-#endif
 }
 
 bool LinearInterval::NotSubclass(const LinearInterval& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 7/12/2002
-#if 1
 	unsigned long Result = IntersectionUnionStatus(rhs);
 	return Result && !(Subclass_LI & Result);
-#else	// generic code
-	TruthValue RetVal;
-	Subclass(rhs,RetVal);
-	return RetVal.IsFalse();
-#endif
 }
 
-void
-LinearInterval::Subclass(const LinearInterval& rhs, TruthValue& RetVal) const
+TVal LinearInterval::_subclass(const LinearInterval& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 7/12/2002
 	unsigned long Result = IntersectionUnionStatus(rhs);
-	if (Result)
-		{
-		RetVal._x = (Subclass_LI & Result);
-		return;
-		};
-	RetVal._x = TVal::Unknown;
+	if (Result) return (Subclass_LI & Result);
+	return TVal();	// unknown
 }
 
 bool
@@ -372,16 +355,11 @@ LinearInterval::ClearlyNotOverlapping(const LinearInterval& rhs) const
 	return Result && !(Overlap_LI & Result);
 }
 
-void
-LinearInterval::ClearlyOverlapping(const LinearInterval& rhs, TruthValue& RetVal) const
+TVal LinearInterval::_clearlyOverlapping(const LinearInterval& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 7/12/2002
 	unsigned long Result = IntersectionUnionStatus(rhs);
-	if (Result)
-		{
-		RetVal._x = (Overlap_LI & Result);
-		return;
-		};
-	RetVal._x = TVal::Unknown;
+	if (Result) return (Overlap_LI & Result);
+	return TVal();
 }
 
 bool
@@ -397,68 +375,46 @@ LinearInterval::ClearlyNotMergeable(const LinearInterval& rhs) const
 	return Result && !(Mergeable_LI & Result);
 }
 
-void
-LinearInterval::ClearlyMergeable(const LinearInterval& rhs, TruthValue& RetVal) const
+TVal LinearInterval::_clearlyMergeable(const LinearInterval& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 7/12/2002
 	unsigned long Result = IntersectionUnionStatus(rhs);
-	if (Result)
-		{
-		RetVal._x = (Mergeable_LI & Result);
-		return;
-		};
-	RetVal._x = TVal::Unknown;
+	if (Result) return(Mergeable_LI & Result);
+	return TVal();	// unknown
 }
 
 bool LinearInterval::ClearlyExtendedBy(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/4/2002
-	TruthValue RetVal;
-	ClearlyExtendedBy(rhs,RetVal);
-	return RetVal._x.is(true);
+	return _clearlyExtendedBy(rhs).is(true);
 }
 
 bool LinearInterval::ClearlyNotExtendedBy(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/4/2002
-	TruthValue RetVal;
-	ClearlyExtendedBy(rhs,RetVal);
-	return RetVal._x.is(false);
+	return _clearlyExtendedBy(rhs).is(false);
 }
 
-void
-LinearInterval::ClearlyExtendedBy(const MetaConcept& rhs, TruthValue& RetVal) const
+TVal LinearInterval::_clearlyExtendedBy(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/6/2002
 	if (   (LeftPointOpen  && rhs==*LHS_Arg1)
 		|| (RightPointOpen && rhs==*RHS_Arg2))
-		{	// the missing endpoint of an open interval closes it
-		RetVal._x = true;
-		return;
-		};
+		return true;	// the missing endpoint of an open interval closes it
 	
 	if (   (LeftPointOpen && RightPointOpen)				// other tests require a closed endpoint
 		||  UltimateType()->IsDenseUnderStandardTopology())	// stereotypical test for dense topological spaces
-		{
-		RetVal._x = false;
-		return;
-		}
+		return false;
 
 	// let the UltimateType worry about discreteness (or lack thereof), etc.
 	// NOTE: will need a 'obviously correct form check' on this
 	if (   (!RightPointOpen && UltimateType()->Arg1IsAfterEndpointAlongVectorAB(rhs,*LHS_Arg1,*RHS_Arg2))
 		|| (!LeftPointOpen  && UltimateType()->Arg1IsAfterEndpointAlongVectorAB(rhs,*RHS_Arg2,*LHS_Arg1)))
-		{
-		RetVal._x = true;
-		return;
-		};
+		return true;
 	// if the interval is in a well-defined standard form, this is definitely false
 	// ultimately depends on a decent partial-ordering type, and a knowledge of how powerful 
 	// the logic engine is
 	if (   IsUltimateType(&Integer)
 		&& LHS_Arg1->IsExactType(IntegerNumeral_MC)
 		&& RHS_Arg2->IsExactType(IntegerNumeral_MC))
-		{
-		RetVal._x = false;
-		return;			
-		}
-	RetVal._x = TVal::Unknown;
+		return false;
+	return TVal();	// unknown
 }
 
 bool LinearInterval::DestructiveExtendBy(MetaConcept*& rhs)

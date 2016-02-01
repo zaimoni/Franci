@@ -136,10 +136,10 @@ protected:
 	virtual void DiagnoseInferenceRules();	// This is *not* the Interface!
 	virtual bool InvokeEqualArgRule();
 private:
-	void Subclass(const LinearInterval& rhs, TruthValue& RetVal) const;
-	void ClearlyOverlapping(const LinearInterval& rhs, TruthValue& RetVal) const;
-	void ClearlyMergeable(const LinearInterval& rhs, TruthValue& RetVal) const;
-	void ClearlyExtendedBy(const MetaConcept& rhs, TruthValue& RetVal) const;
+	TVal _subclass(const LinearInterval& rhs) const;
+	TVal _clearlyOverlapping(const LinearInterval& rhs) const;
+	TVal _clearlyMergeable(const LinearInterval& rhs) const;
+	TVal _clearlyExtendedBy(const MetaConcept& rhs) const;
 };
 
 #endif
