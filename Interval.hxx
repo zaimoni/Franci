@@ -106,23 +106,19 @@ public:
 	bool ExpandArgsHere(MetaConcept** VR_ArgArray) const;
 
 	bool HasAsElement(const MetaConcept& rhs) const;
+	void HasAsElement(const MetaConcept& rhs, TruthValue& RetVal) const;	// AbstractClass needs access to this one
 	bool DoesNotHaveAsElement(const MetaConcept& rhs) const;
-	void HasAsElement(const MetaConcept& rhs, TruthValue& RetVal) const;
 	bool Subclass(const LinearInterval& rhs) const;
 	bool NotSubclass(const LinearInterval& rhs) const;
-	void Subclass(const LinearInterval& rhs, TruthValue& RetVal) const;
 	bool ClearlyOverlapping(const LinearInterval& rhs) const;
 	bool ClearlyNotOverlapping(const LinearInterval& rhs) const;
-	void ClearlyOverlapping(const LinearInterval& rhs, TruthValue& RetVal) const;
 	bool ClearlyMergeable(const LinearInterval& rhs) const;
 	bool ClearlyNotMergeable(const LinearInterval& rhs) const;
-	void ClearlyMergeable(const LinearInterval& rhs, TruthValue& RetVal) const;
 	bool DestructiveMergeWith(LinearInterval& rhs);	// true: success, should discard RHS
 	bool NonDestructiveMergeWith(LinearInterval& rhs);
 	bool DestructiveIntersectWith(LinearInterval& rhs);	// true: success, should discard RHS
 	bool ClearlyExtendedBy(const MetaConcept& rhs) const;
 	bool ClearlyNotExtendedBy(const MetaConcept& rhs) const;
-	void ClearlyExtendedBy(const MetaConcept& rhs, TruthValue& RetVal) const;
 	bool DestructiveExtendBy(MetaConcept*& rhs);	// true: success; RHS is null
 	// next one implemented in AddInter.cxx
 	bool TranslateInterval(MetaConcept*& rhs);
@@ -139,6 +135,11 @@ protected:
 
 	virtual void DiagnoseInferenceRules();	// This is *not* the Interface!
 	virtual bool InvokeEqualArgRule();
+private:
+	void Subclass(const LinearInterval& rhs, TruthValue& RetVal) const;
+	void ClearlyOverlapping(const LinearInterval& rhs, TruthValue& RetVal) const;
+	void ClearlyMergeable(const LinearInterval& rhs, TruthValue& RetVal) const;
+	void ClearlyExtendedBy(const MetaConcept& rhs, TruthValue& RetVal) const;
 };
 
 #endif
