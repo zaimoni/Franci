@@ -1,6 +1,6 @@
 /* Logging.h */
 /* Unified error logging */
-/* (C)2009 Kenneth Boyd, license: MIT.txt */
+/* (C)2009,2016 Kenneth Boyd, license: MIT.txt */
 
 #ifndef ZAIMONI_LOGGING_H
 #define ZAIMONI_LOGGING_H
@@ -18,7 +18,7 @@
 #	define ZAIMONI_PASSTHROUGH_ASSERT(A)	A
 #else
 /* Interoperate with Microsoft: return code 3 */
-#	define assert(A)	((A) ? (void)0 : FATAL_CODE(__FILE__ "," DEEP_STRINGIZE(__LINE__) ": " #A,3))
+#	define assert(A)	((A) ? (void)0 : _fatal_code(__FILE__ ":" DEEP_STRINGIZE(__LINE__) ": " #A,3))
 #	define ZAIMONI_PASSTHROUGH_ASSERT(A)	((A) ? (void)0 : FATAL_CODE(#A,3))
 #endif
 
@@ -134,7 +134,7 @@ inline void INC_INFORM(unsigned char B) {return INC_INFORM((uintmax_t)(B));}
 #endif
 
 /* this should look like an assert even in NDEBUG mode */
-#define SUCCEED_OR_DIE(A) ((A) ? (void)0 : FATAL_CODE(__FILE__ "," DEEP_STRINGIZE(__LINE__) ": " #A,3))
+#define SUCCEED_OR_DIE(A) ((A) ? (void)0 : _fatal_code(__FILE__ ":" DEEP_STRINGIZE(__LINE__) ": " #A,3))
 
 /* match assert.h C standard header, which uses NDEBUG */
 #ifndef NDEBUG	/* self-aware version */
