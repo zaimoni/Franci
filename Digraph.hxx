@@ -7,7 +7,7 @@
 
 #include "MetaCon2.hxx"
 
-#include "TruthVal.hxx"
+#include "TVal.hxx"
 
 class Digraph;
 namespace zaimoni {
@@ -147,11 +147,11 @@ protected:
 	virtual void DiagnoseInferenceRules() const;
 	virtual bool InvokeEqualArgRule() const;
 private:
-	void EdgeTruthValue(const MetaConcept& From, const MetaConcept& To, TruthValue& dest);
-	void EdgeTruthValue(size_t From, const MetaConcept& To, TruthValue& dest);
-	void EdgeTruthValue(const MetaConcept& From, size_t To, TruthValue& dest);
-	void EdgeTruthValue(size_t From, size_t To, TruthValue& dest);
-	void EdgeTruthValueCore(size_t From, size_t To, TruthValue& dest);
+	TVal EdgeTruthValue(const MetaConcept& From, const MetaConcept& To);
+	TVal EdgeTruthValue(size_t From, const MetaConcept& To);
+	TVal EdgeTruthValue(const MetaConcept& From, size_t To);
+	TVal EdgeTruthValue(size_t From, size_t To);
+	TVal EdgeTruthValueCore(size_t From, size_t To);
 	size_t VertexFromEdgeCountCore(size_t From);
 	size_t VertexToEdgeCountCore(size_t From);
 	size_t VertexUndirectedEdgeCountCore(size_t To, size_t lb, size_t strict_ub);

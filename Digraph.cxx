@@ -184,9 +184,9 @@ Digraph::EvaluateFunction(MetaConcept** const& ArgValList, unsigned long*& ArgLi
 	try	{
 		TruthValue* Temp = new TruthValue();
 		if (0==ArgList[0])
-			EdgeTruthValue(Arg0Idx,Arg1Idx,*Temp);	// 0, 1
+			Temp->_x = EdgeTruthValue(Arg0Idx,Arg1Idx);	// 0, 1
 		else	
-			EdgeTruthValue(Arg1Idx,Arg0Idx,*Temp);	// 1, 0
+			Temp->_x = EdgeTruthValue(Arg1Idx,Arg0Idx);	// 1, 0
 		delete Result;
 		Result = Temp;
 		return true;	
@@ -358,38 +358,35 @@ DECLARE_EXPLICIT_EDGE_MEMBERS(AmbiguousEdge,FORGET)
 
 #undef DECLARE_EXPLICIT_EDGE_MEMBERS
 
-void
-Digraph::EdgeTruthValue(const MetaConcept& From, const MetaConcept& To, TruthValue& dest)
+TVal Digraph::EdgeTruthValue(const MetaConcept& From, const MetaConcept& To)
 {	// FORMALLY CORRECT: Kenneth Boyd, 9/6/2001
 	size_t From2,To2;
 	SUCCEED_OR_DIE(IdxFromVertex(From,From2));
 	SUCCEED_OR_DIE(IdxFromVertex(To,To2));
-	EdgeTruthValueCore(From2,To2,dest);
+	return EdgeTruthValueCore(From2,To2);
 }
 
-void
-Digraph::EdgeTruthValue(size_t From, const MetaConcept& To, TruthValue& dest)
+TVal Digraph::EdgeTruthValue(size_t From, const MetaConcept& To)
 {	// FORMALLY CORRECT: Kenneth Boyd, 9/6/2001
 	size_t To2;
 	assert(size()>From);
 	SUCCEED_OR_DIE(IdxFromVertex(To,To2));
-	EdgeTruthValueCore(From,To2,dest);
+	return EdgeTruthValueCore(From,To2);
 }
 
-void
-Digraph::EdgeTruthValue(const MetaConcept& From, size_t To, TruthValue& dest)
+TVal Digraph::EdgeTruthValue(const MetaConcept& From, size_t To)
 {	// FORMALLY CORRECT: Kenneth Boyd, 9/6/2001
 	size_t From2;
 	assert(size()>To);
 	SUCCEED_OR_DIE(IdxFromVertex(From,From2));
-	EdgeTruthValueCore(From2,To,dest);
+	return EdgeTruthValueCore(From2,To);
 }
 
-void Digraph::EdgeTruthValue(size_t From, size_t To, TruthValue& dest)
+TVal Digraph::EdgeTruthValue(size_t From, size_t To)
 {	// FORMALLY CORRECT: Kenneth Boyd, 9/6/2001
 	assert(size()>From);
 	assert(size()>To);
-	EdgeTruthValueCore(From,To,dest);
+	return EdgeTruthValueCore(From,To);
 }
 
 // Efficiency problems
@@ -404,34 +401,20 @@ void Digraph::EdgeTruthValue(size_t From, size_t To, TruthValue& dest)
 #define ForgetEdge(A,B) DigraphFromToList[A][B]=DIGRAPH_FORGET_EDGE
 #endif
 
-void Digraph::EdgeTruthValueCore(size_t From, size_t To, TruthValue& dest)
+TVal Digraph::EdgeTruthValueCore(size_t From, size_t To)
 {	// FORMALLY CORRECT: Kenneth Boyd, 2/17/2005
-	if 		(ExplicitEdge(From,To))
-		{
-		dest._x = true;
-		return;
-		}
-	else if (ExplicitNoEdge(From,To))
-		{
-		dest._x = false;
-		return;
-		}
+	if 		(ExplicitEdge(From,To)) return true;
+	else if (ExplicitNoEdge(From,To)) return false;
 	SUCCEED_OR_DIE(ExplicitAmbiguousEdge(From,To));
-	if (!_RelationDefinition)
-		{
-		dest._x = TVal::Unknown;
-		return;
-		}
+	if (!_RelationDefinition) return TVal();
 	if (_RelationDefinition(*ArgArray[From],*ArgArray[To]))
 		{	// NOTE: this is a target for properties of relations (symmetric, antisymmetric, etc)
 		SetEdge(From,To);
-		dest._x = true;
-		return;	
+		return true;
 		}
 	else{
 		ResetEdge(From,To);
-		dest._x = false;
-		return;	
+		return false;
 		}
 }
 
