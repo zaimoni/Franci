@@ -4,7 +4,6 @@
 // following defined in LenName.cxx
 extern const char* const MetaConnectiveNames[8];
 extern const char* const QuantificationNames[5];
-extern const char* const TruthValueNames[4];
 
 // following defined in Keyword1.cxx
 extern const char* const LogicKeyword_NXOR;

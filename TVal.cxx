@@ -9,6 +9,11 @@
 /* size of a static array */
 #define STATIC_SIZE(A) (sizeof(A)/sizeof(*A))
 
+static const char* const TruthValueNames[4] =	{	TruthValue_Contradiction,
+													TruthValue_True,
+													TruthValue_False,
+													TruthValue_Unknown	};
+
 static const char NegatedTVal[4] =	{(char)(TVal::Contradiction),
 									 (char)(TVal::False),
 									 (char)(TVal::True),

@@ -61,12 +61,6 @@ const char* const QuantificationNames[5] =	{
 
 BOOST_STATIC_ASSERT(sizeof(const char*)*(ThereIsNot_MC-ForAll_MC+1)==sizeof(QuantificationNames));
 
-// TruthValue
-const char* const TruthValueNames[4] =	{	TruthValue_Contradiction,
-											TruthValue_True,
-											TruthValue_False,
-											TruthValue_Unknown	};
-
 // Actual implementations of ConstructSelfLengthNameAux()
 // NOTE: Name, in the next two routines, relies on implicit null termination.
 void SnipText2(char*& Name, size_t nonstrict_lb, size_t strict_ub)
