@@ -6,6 +6,7 @@
 #define ZAIMONI_STL_CONSOLE_HPP 1
 
 #include <iosfwd>
+#include <string.h>
 #include "../custom_scoped_ptr.hpp"
 
 // returns C-true iff successful
