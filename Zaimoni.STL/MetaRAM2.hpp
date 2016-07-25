@@ -166,6 +166,53 @@ void _flush(T** _ptr, size_t& _ptr_size)
 }
 
 template<typename T>
+inline typename std::enable_if<!boost::type_traits::ice_or<boost::is_pointer<T>::value, boost::is_member_pointer<T>::value>::value, void>::type
+_value_copy_buffer(T* dest,const T* src, size_t Idx) {_copy_buffer(dest,src,Idx);}
+
+template<typename T,typename U>
+typename std::enable_if<is_polymorphic<T>::value, void>::type
+_value_copy_buffer(U** dest,const T* const * src, size_t Idx)
+{	// T had better support the virtual member function CopyInto
+	do	{
+		if (src[--Idx]) src[Idx]->CopyInto(dest[Idx]);
+		else{
+			_flush(dest[Idx]);
+			dest[Idx] = 0;
+			}
+		}
+	while(0<Idx);
+}
+
+template<typename T>
+typename std::enable_if<is_polymorphic<T>::value, void>::type
+_value_copy_buffer(T** dest,const T* const * src, size_t Idx)
+{	// T had better support the virtual member function CopyInto
+	do	{
+		if (src[--Idx]) src[Idx]->CopyInto(dest[Idx]);
+		else{
+			_flush(dest[Idx]);
+			dest[Idx] = 0;
+			}
+		}
+	while(0<Idx);
+}
+
+template<typename T>
+typename std::enable_if<!is_polymorphic<T>::value, void>::type
+_value_copy_buffer(T** dest,const T* const * src, size_t Idx)
+{
+	do	{
+		if (src[--Idx]) CopyInto(*src[Idx],dest[Idx]);
+		else{
+			_flush(dest[Idx]);
+			dest[Idx] = 0;
+			}
+		}
+	while(0<Idx);
+}
+
+
+template<typename T>
 typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >::value, void>::type
 #ifndef ZAIMONI_FORCE_ISO
 _delete_idx(T*& _ptr, size_t i)
