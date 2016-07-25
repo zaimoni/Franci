@@ -60,7 +60,7 @@ public:
 //	~autodel_ptr();	// default OK
 
 	const autodel_ptr& operator=(T* src) {_meta_auto_ptr<T>::operator=(src); return *this;};
-	const autodel_ptr& operator=(autodel_ptr& src) {reset(src._ptr); return *this;};
+	const autodel_ptr& operator=(autodel_ptr& src) {this->reset(src._ptr); return *this;};
 
 	friend void zaimoni::swap(autodel_ptr& lhs, autodel_ptr& rhs) {std::swap(lhs._ptr,rhs._ptr);};
 };
@@ -154,7 +154,7 @@ public:
 #ifndef ZAIMONI_FORCE_ISO
 	const weakautoarray_ptr& operator=(T* src) {_meta_weakautoarray_ptr<T>::operator=(src); return *this;};
 #endif
-	const weakautoarray_ptr& operator=(weakautoarray_ptr& src) {reset(src._ptr); return *this;};
+	const weakautoarray_ptr& operator=(weakautoarray_ptr& src) {this->reset(src._ptr); return *this;};
 
 	friend void zaimoni::swap(weakautoarray_ptr& lhs, weakautoarray_ptr& rhs) {lhs.swap(rhs);};
 };
@@ -195,7 +195,7 @@ public:
 #ifndef ZAIMONI_FORCE_ISO
 	const weakautovalarray_ptr& operator=(T* src) {_meta_weakautoarray_ptr<T>::operator=(src); return *this;};
 #endif
-	const weakautovalarray_ptr& operator=(weakautovalarray_ptr& src) {reset(src._ptr); return *this;};
+	const weakautovalarray_ptr& operator=(weakautovalarray_ptr& src) {this->reset(src._ptr); return *this;};
 
 	friend void zaimoni::swap(weakautovalarray_ptr& lhs, weakautovalarray_ptr& rhs) {lhs.swap(rhs);};
 };
@@ -278,7 +278,7 @@ public:
 //	~autoarray_ptr();	// default OK
 
 	const autoarray_ptr& operator=(T* src) {_meta_autoarray_ptr<T>::operator=(src); return *this;};
-	const autoarray_ptr& operator=(autoarray_ptr& src) {reset(src._ptr); return *this;};
+	const autoarray_ptr& operator=(autoarray_ptr& src) {this->reset(src._ptr); return *this;};
 
 	// swaps
 	friend void zaimoni::swap(autoarray_ptr<T>& lhs, autoarray_ptr<T>& rhs) {lhs.swap(rhs);};

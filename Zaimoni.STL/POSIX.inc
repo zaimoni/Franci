@@ -16,7 +16,7 @@ CXX = g++
 EXEEXT = exe
 OBJEXT = o
 
-ARCH_FLAGS = -mno-cygwin
+ARCH_FLAGS =
 
 # other control points
 # FORCE_ISO: ZAIMONI_FORCE_ISO disables the custom memory manager

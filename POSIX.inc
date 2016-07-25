@@ -15,8 +15,8 @@ OBJEXT = o
 
 CFLAGS = -fargument-alias -finline -O3 -Wall -Wno-long-long --pedantic -fgcse-sm -fgcse-las -fsched-spec-load -fsee -fipa-pta -ftree-loop-im -fivopts -ftree-vectorize -falign-functions=1 -falign-jumps=1  -falign-loops=1 -falign-labels=1 -Wdisabled-optimization -Winline --param max-inline-insns-single=500
 CXXFLAGS =
-ARCH_FLAGS = -mwindows -mno-cygwin -march=pentium -mtune=pentium3
-ARCH2_FLAGS = -mconsole -mno-cygwin -march=pentium -mtune=pentium3
+ARCH_FLAGS = -mwindows -march=pentium -mtune=pentium3
+ARCH2_FLAGS = -mconsole -march=pentium -mtune=pentium3
 LINK_FLAGS = -Llib/host.franci
 
 OTHER_INCLUDEDIR =

@@ -74,36 +74,6 @@ inline bool ExtendByN(T*& _ptr, size_t N)
 
 // indirection glue
 
-template<typename T>
-#ifndef ZAIMONI_FORCE_ISO
-inline void _safe_delete_idx(T*& _ptr, size_t i)
-{
-	if (_ptr && i<ArraySize(_ptr)) _delete_idx(_ptr,i);
-}
-#else
-inline void _safe_delete_idx(T*& _ptr, size_t& _ptr_size, size_t i)
-{
-	if (_ptr && i<_ptr_size) _delete_idx(_ptr,_ptr_size,i);
-}
-#endif
-
-#ifndef ZAIMONI_FORCE_ISO
-template<typename T>
-inline void _safe_weak_delete_idx(T*& __ptr, size_t i)
-{
-	if (__ptr && i<ArraySize(__ptr)) _weak_delete_idx(__ptr,i);
-}
-#else
-template<typename T>
-inline void _safe_weak_delete_idx(T*& __ptr, size_t& _ptr_size, size_t i)
-{
-	if (__ptr && i<_ptr_size) _weak_delete_idx(__ptr,_ptr_size,i);
-}
-#endif
-
-// How to tell difference between T* (single) and T* (array) in resize/shrink?
-// we don't, assume single
-
 // _new_buffer_nonNULL and _flush have to be synchronized for ISO C++
 // _new_buffer and _new_buffer_nonNULL_throws are in MetaRAM.hpp (they don't depend on Logging.h)
 template<typename T>
@@ -125,32 +95,36 @@ _new_buffer_nonNULL(size_t i)
 }
 
 template<typename T>
-inline typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>::value, T*>::type
-_new_buffer_uninitialized(size_t i)
+typename std::enable_if<!boost::type_traits::ice_and<boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >::value, void>::type
+#ifndef ZAIMONI_FORCE_ISO
+_delete_idx(T*& _ptr, size_t i)
 {
-	if (((size_t)(-1))/sizeof(T)<i) return 0; // CERT C MEM07
-	return reinterpret_cast<T*>(malloc(i*sizeof(T)));
-}
-
-template<typename T>
-inline typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>::value, T*>::type
-_new_buffer_uninitialized_nonNULL(size_t i)
+	assert(_ptr);
+	const size_t _ptr_size = ArraySize(_ptr);
+#else
+_delete_idx(T*& _ptr, size_t& _ptr_size, size_t i)
 {
-	if (((size_t)(-1))/sizeof(T)<i) // CERT C MEM07
-		_fatal("requested memory exceeds SIZE_T_MAX");
-	T* tmp = reinterpret_cast<T*>(malloc(i*sizeof(T)));
-	if (!tmp) _fatal("Irrecoverable failure to allocate memory");
-	return tmp;
-}
-
-template<typename T>
-inline typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>::value, T*>::type
-_new_buffer_uninitialized_nonNULL_throws(size_t i)
-{
-	if (((size_t)(-1))/sizeof(T)<i) throw std::bad_alloc(); // CERT C MEM07
-	T* tmp = reinterpret_cast<T*>(malloc(i*sizeof(T)));
-	if (!tmp) throw std::bad_alloc();
-	return tmp;
+	assert(_ptr && 0<_ptr_size);
+#endif
+	if (1==_ptr_size)
+		{
+		_flush(_ptr);
+		_ptr = 0;
+#ifdef ZAIMONI_FORCE_ISO
+		_ptr_size = 0;
+#endif
+		return;
+		}
+	T* Tmp = _new_buffer_nonNULL<T>(_ptr_size-1);
+	if (i+1<_ptr_size)
+		_copy_expendable_buffer(Tmp+i,_ptr+i+1,_ptr_size-(i+1));
+	if (0<i)
+		_copy_expendable_buffer(Tmp,_ptr,i);
+	_flush(_ptr);
+	_ptr = Tmp;		
+#ifdef ZAIMONI_FORCE_ISO
+	--_ptr_size;
+#endif
 }
 
 template<typename T>
@@ -189,6 +163,127 @@ void _flush(T** _ptr, size_t& _ptr_size)
 		_ptr_size = 0;
 #endif
 		}
+}
+
+template<typename T>
+typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >::value, void>::type
+#ifndef ZAIMONI_FORCE_ISO
+_delete_idx(T*& _ptr, size_t i)
+{
+	assert(_ptr);
+	const size_t _ptr_size = ArraySize(_ptr);
+	assert(i<_ptr_size);
+#else
+_delete_idx(T*& _ptr, size_t& _ptr_size, size_t i)
+{
+	assert(_ptr);
+	assert(i<_ptr_size);
+	assert(0<_ptr_size);
+#endif
+	if (1==_ptr_size)
+		{
+		_flush(_ptr);
+		_ptr = 0;
+#ifdef ZAIMONI_FORCE_ISO
+		_ptr_size = 0;
+#endif
+		return;
+		}
+	if (2<=_ptr_size-i)
+		memmove(_ptr+i,_ptr+i+1,sizeof(*_ptr)*(_ptr_size-i-1));
+#ifndef ZAIMONI_FORCE_ISO
+	_ptr=REALLOC(_ptr,sizeof(*_ptr)*(_ptr_size-1));
+#else
+	_ptr=REALLOC(_ptr,sizeof(*_ptr)* --_ptr_size);
+#endif
+}
+
+template<typename T>
+#ifndef ZAIMONI_FORCE_ISO
+inline void _safe_delete_idx(T*& _ptr, size_t i)
+{
+	if (_ptr && i<ArraySize(_ptr)) _delete_idx(_ptr,i);
+}
+#else
+inline void _safe_delete_idx(T*& _ptr, size_t& _ptr_size, size_t i)
+{
+	if (_ptr && i<_ptr_size) _delete_idx(_ptr,_ptr_size,i);
+}
+#endif
+
+template<typename T>
+#ifndef ZAIMONI_FORCE_ISO
+void _weak_delete_idx(T**& _ptr, size_t i)
+{
+	assert(_ptr);
+	const size_t _ptr_size = ArraySize(_ptr);
+#else
+void _weak_delete_idx(T**& _ptr, size_t& _ptr_size, size_t i)
+{
+	assert(_ptr);
+#endif
+	assert(i<_ptr_size);
+	if (1==_ptr_size)
+		{
+		_weak_flush(_ptr);
+		_ptr = 0;
+#ifdef ZAIMONI_FORCE_ISO
+		_ptr_size = 0;
+#endif
+		return;
+		}
+	if (2<=_ptr_size-i)
+		memmove(_ptr+i,_ptr+i+1,sizeof(T*)*(_ptr_size-i-1));
+	_ptr=REALLOC(_ptr,sizeof(T*)*(_ptr_size-1));
+#ifdef ZAIMONI_FORCE_ISO
+	--_ptr_size;
+#endif
+}
+
+#ifndef ZAIMONI_FORCE_ISO
+template<typename T>
+inline void _safe_weak_delete_idx(T*& __ptr, size_t i)
+{
+	if (__ptr && i<ArraySize(__ptr)) _weak_delete_idx(__ptr,i);
+}
+#else
+template<typename T>
+inline void _safe_weak_delete_idx(T*& __ptr, size_t& _ptr_size, size_t i)
+{
+	if (__ptr && i<_ptr_size) _weak_delete_idx(__ptr,_ptr_size,i);
+}
+#endif
+
+// How to tell difference between T* (single) and T* (array) in resize/shrink?
+// we don't, assume single
+
+template<typename T>
+inline typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>::value, T*>::type
+_new_buffer_uninitialized(size_t i)
+{
+	if (((size_t)(-1))/sizeof(T)<i) return 0; // CERT C MEM07
+	return reinterpret_cast<T*>(malloc(i*sizeof(T)));
+}
+
+template<typename T>
+inline typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>::value, T*>::type
+_new_buffer_uninitialized_nonNULL(size_t i)
+{
+	if (((size_t)(-1))/sizeof(T)<i) // CERT C MEM07
+		_fatal("requested memory exceeds SIZE_T_MAX");
+	T* tmp = reinterpret_cast<T*>(malloc(i*sizeof(T)));
+	if (!tmp) _fatal("Irrecoverable failure to allocate memory");
+	return tmp;
+}
+
+template<typename T>
+inline typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>::value, T*>::type
+_new_buffer_uninitialized_nonNULL_throws(size_t i)
+{
+	if (((size_t)(-1))/sizeof(T)<i) throw std::bad_alloc(); // CERT C MEM07
+	T* tmp = reinterpret_cast<T*>(malloc(i*sizeof(T)));
+	if (!tmp) throw std::bad_alloc();
+	return tmp;
 }
 
 template<typename T>
@@ -271,7 +366,7 @@ _resize(T*& _ptr, size_t& _ptr_size, size_t n)
 	if (!Tmp) return false;
 
 #ifndef ZAIMONI_FORCE_ISO
-	_copy_expendable_buffer(Tmp,_ptr,min(ArraySize(_ptr),n));
+	_copy_expendable_buffer(Tmp,_ptr,std::min(ArraySize(_ptr),n));
 #else
 	_copy_expendable_buffer(Tmp,_ptr,std::min(_ptr_size,n));
 #endif
@@ -422,72 +517,6 @@ void _shrink(T**& _ptr,size_t n)
 	do	_single_flush(_ptr[--i]);
 	while(n<i);
 	_ptr = REALLOC(_ptr,n*sizeof(T*));
-}
-
-template<typename T>
-typename std::enable_if<!boost::type_traits::ice_and<boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >::value, void>::type
-#ifndef ZAIMONI_FORCE_ISO
-_delete_idx(T*& _ptr, size_t i)
-{
-	assert(_ptr);
-	const size_t _ptr_size = ArraySize(_ptr);
-#else
-_delete_idx(T*& _ptr, size_t& _ptr_size, size_t i)
-{
-	assert(_ptr && 0<_ptr_size);
-#endif
-	if (1==_ptr_size)
-		{
-		_flush(_ptr);
-		_ptr = 0;
-#ifdef ZAIMONI_FORCE_ISO
-		_ptr_size = 0;
-#endif
-		return;
-		}
-	T* Tmp = _new_buffer_nonNULL<T>(_ptr_size-1);
-	if (i+1<_ptr_size)
-		_copy_expendable_buffer(Tmp+i,_ptr+i+1,_ptr_size-(i+1));
-	if (0<i)
-		_copy_expendable_buffer(Tmp,_ptr,i);
-	_flush(_ptr);
-	_ptr = Tmp;		
-#ifdef ZAIMONI_FORCE_ISO
-	--_ptr_size;
-#endif
-}
-
-template<typename T>
-typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >::value, void>::type
-#ifndef ZAIMONI_FORCE_ISO
-_delete_idx(T*& _ptr, size_t i)
-{
-	assert(_ptr);
-	const size_t _ptr_size = ArraySize(_ptr);
-	assert(i<_ptr_size);
-#else
-_delete_idx(T*& _ptr, size_t& _ptr_size, size_t i)
-{
-	assert(_ptr);
-	assert(i<_ptr_size);
-	assert(0<_ptr_size);
-#endif
-	if (1==_ptr_size)
-		{
-		_flush(_ptr);
-		_ptr = 0;
-#ifdef ZAIMONI_FORCE_ISO
-		_ptr_size = 0;
-#endif
-		return;
-		}
-	if (2<=_ptr_size-i)
-		memmove(_ptr+i,_ptr+i+1,sizeof(*_ptr)*(_ptr_size-i-1));
-#ifndef ZAIMONI_FORCE_ISO
-	_ptr=REALLOC(_ptr,sizeof(*_ptr)*(_ptr_size-1));
-#else
-	_ptr=REALLOC(_ptr,sizeof(*_ptr)* --_ptr_size);
-#endif
 }
 
 // specializations for pointer arrays
@@ -643,35 +672,6 @@ bool _insert_n_slots_at(T**& _ptr, size_t& _ptr_size, size_t n, size_t i)
 		return true;
 		}
 	return false;
-}
-
-template<typename T>
-#ifndef ZAIMONI_FORCE_ISO
-void _weak_delete_idx(T**& _ptr, size_t i)
-{
-	assert(_ptr);
-	const size_t _ptr_size = ArraySize(_ptr);
-#else
-void _weak_delete_idx(T**& _ptr, size_t& _ptr_size, size_t i)
-{
-	assert(_ptr);
-#endif
-	assert(i<_ptr_size);
-	if (1==_ptr_size)
-		{
-		_weak_flush(_ptr);
-		_ptr = 0;
-#ifdef ZAIMONI_FORCE_ISO
-		_ptr_size = 0;
-#endif
-		return;
-		}
-	if (2<=_ptr_size-i)
-		memmove(_ptr+i,_ptr+i+1,sizeof(T*)*(_ptr_size-i-1));
-	_ptr=REALLOC(_ptr,sizeof(T*)*(_ptr_size-1));
-#ifdef ZAIMONI_FORCE_ISO
-	--_ptr_size;
-#endif
 }
 
 template<typename T>
