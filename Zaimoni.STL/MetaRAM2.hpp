@@ -66,12 +66,6 @@ void FlushNULLFromArray(T**& _ptr, size_t StartIdx)
 		}
 }
 
-template<typename T>
-inline bool ExtendByN(T*& _ptr, size_t N)
-{
-	return _resize(_ptr,SafeArraySize(_ptr)+N);
-}
-
 // indirection glue
 
 // _new_buffer_nonNULL and _flush have to be synchronized for ISO C++
@@ -499,6 +493,12 @@ _resize(T**& _ptr, size_t& _ptr_size, size_t n)
 		return true;
 		}
 	return false;
+}
+
+template<typename T>
+inline bool ExtendByN(T*& _ptr, size_t N)
+{
+	return _resize(_ptr,SafeArraySize(_ptr)+N);
 }
 
 template<typename T>

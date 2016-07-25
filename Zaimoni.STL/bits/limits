@@ -108,6 +108,36 @@ trailing_zero_bits(const T& x, bool& SecondBitIsOne)
 }
 
 template<typename T>
+typename std::enable_if<std::is_same<T,long double>::value, long double>::type
+force_exponent(T x,const signed long exp)
+{
+	if (0.0l==x) return x;
+	if (_is_infinite_or_NAN(x)) return x;
+
+	if (std::numeric_limits<long double>::max_exponent<=exp)
+		return _copysign(std::numeric_limits<long double>::infinity(),x);
+
+	ldouble_ushort Tmp;
+	Tmp._fp = x;
+
+	if (std::numeric_limits<long double>::min_exponent-2>=exp)
+		{
+		const signed long underflow_exp = exp-(std::numeric_limits<long double>::min_exponent-2);
+		if (-64>=underflow_exp)
+#if 0
+			return _copysign(0.0l,x);	// total loss of significance
+#else	// MingW32 prefers this
+			return (0.0l<x) ? 0.0l : -0.0l;	// total loss of significance
+#endif
+		Tmp._ushort_array[alt_numeric_limits<long double>::exponent_offset_as_short] &= 0x8000;
+		return x*_scalb(1.0l,underflow_exp);	// underflow
+		}
+
+	Tmp._ushort_array[alt_numeric_limits<long double>::exponent_offset_as_short] = ((Tmp._ushort_array[alt_numeric_limits<long double>::exponent_offset_as_short] & 0x8000) | ((exp-(signed short)(std::numeric_limits<long double>::min_exponent-2)) & 0x7FFF));
+	return Tmp._fp;
+}
+
+template<typename T>
 typename std::enable_if<std::is_same<long double,T>::value, unsigned int>::type
 this_product_will_not_overflow(const T& x, const T& y)
 {	//! \return the maximum exponent that the product can accept without overflowing
@@ -398,6 +428,9 @@ mantissa_risky_digits_precomputed(unsigned int LHS_digits,unsigned int RHS_digit
 
 
 // not for users
+inline unsigned int
+mantissa_digits(const long double& x) {return std::numeric_limits<long double>::digits-trailing_zero_bits(x);}
+
 template<typename T>
 inline typename std::enable_if<std::is_floating_point<T>::value, unsigned int>::type
 mantissa_risky_digits(const T& x, const T& y)
@@ -472,36 +505,6 @@ _scalb(T x,const signed long exp)
 
 	x_exponent += exp;
 	Tmp._ushort_array[alt_numeric_limits<long double>::exponent_offset_as_short] = ((Tmp._ushort_array[alt_numeric_limits<long double>::exponent_offset_as_short] & 0x8000) | ((x_exponent-(signed short)(std::numeric_limits<long double>::min_exponent-2)) & 0x7FFF));
-	return Tmp._fp;
-}
-
-template<typename T>
-typename std::enable_if<std::is_same<T,long double>::value, long double>::type
-force_exponent(T x,const signed long exp)
-{
-	if (0.0l==x) return x;
-	if (_is_infinite_or_NAN(x)) return x;
-
-	if (std::numeric_limits<long double>::max_exponent<=exp)
-		return _copysign(std::numeric_limits<long double>::infinity(),x);
-
-	ldouble_ushort Tmp;
-	Tmp._fp = x;
-
-	if (std::numeric_limits<long double>::min_exponent-2>=exp)
-		{
-		const signed long underflow_exp = exp-(std::numeric_limits<long double>::min_exponent-2);
-		if (-64>=underflow_exp)
-#if 0
-			return _copysign(0.0l,x);	// total loss of significance
-#else	// MingW32 prefers this
-			return (0.0l<x) ? 0.0l : -0.0l;	// total loss of significance
-#endif
-		Tmp._ushort_array[alt_numeric_limits<long double>::exponent_offset_as_short] &= 0x8000;
-		return x*_scalb(1.0l,underflow_exp);	// underflow
-		}
-
-	Tmp._ushort_array[alt_numeric_limits<long double>::exponent_offset_as_short] = ((Tmp._ushort_array[alt_numeric_limits<long double>::exponent_offset_as_short] & 0x8000) | ((exp-(signed short)(std::numeric_limits<long double>::min_exponent-2)) & 0x7FFF));
 	return Tmp._fp;
 }
 

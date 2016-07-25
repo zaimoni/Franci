@@ -48,14 +48,6 @@ inline typename std::enable_if<boost::type_traits::ice_and<std::numeric_limits<T
 mult_order(const T& x) {return (1==x) ? 1 : 0;}
 
 template<typename T>
-inline typename std::enable_if<boost::type_traits::ice_and<std::numeric_limits<T>::is_specialized, !std::numeric_limits<T>::is_integer>::value, bool>::type
-_is_zero_or_denormalized(const T& x) {return std::numeric_limits<T>::min_exponent-2==_exponent_of(x);}
-
-template<typename T>
-inline typename std::enable_if<boost::type_traits::ice_and<std::numeric_limits<T>::is_specialized, !std::numeric_limits<T>::is_integer>::value, bool>::type
-_is_infinite_or_NAN(const T& x) {return std::numeric_limits<T>::max_exponent==_exponent_of(x);}
-
-template<typename T>
 struct alt_numeric_limits
 {
 	enum {	exponent_digits = 0,
@@ -130,6 +122,14 @@ _exponent_of(const T& x)
 	raw_exponent >>= 15-alt_numeric_limits<T>::exponent_digits;
 	return raw_exponent + std::numeric_limits<T>::min_exponent-2;
 }
+
+template<typename T>
+inline typename std::enable_if<boost::type_traits::ice_and<std::numeric_limits<T>::is_specialized, !std::numeric_limits<T>::is_integer>::value, bool>::type
+_is_zero_or_denormalized(const T& x) {return std::numeric_limits<T>::min_exponent-2==_exponent_of(x);}
+
+template<typename T>
+inline typename std::enable_if<boost::type_traits::ice_and<std::numeric_limits<T>::is_specialized, !std::numeric_limits<T>::is_integer>::value, bool>::type
+_is_infinite_or_NAN(const T& x) {return std::numeric_limits<T>::max_exponent==_exponent_of(x);}
 
 // Highest resolution type for (short/long) (signed/unsigned) int/short/long, float, double, long double: long double
 // qualitative computation
