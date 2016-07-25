@@ -286,18 +286,6 @@ _new_buffer_uninitialized_nonNULL_throws(size_t i)
 	return tmp;
 }
 
-template<typename T>
-void CopyDataFromPtrToPtr(T*& dest, const T* src, size_t src_size)
-{	/* FORMALLY CORRECT: Kenneth Boyd, 4/28/2006 */
-	if (!_resize(dest,src_size))
-		{
-		_flush(dest);
-		dest = 0;
-		return;
-		};
-	_value_copy_buffer(dest,src,src_size*sizeof(T));
-}
-
 // boost::type_traits::ice_and<boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >::value : controls whether shrinking is safe
 
 // NOTE: boost::is_pod actually refers to is_pod-struct -- it implies trivial constructor when the standard doesn't.
@@ -464,6 +452,18 @@ _resize(T**& _ptr, size_t& _ptr_size, size_t n)
 		return true;
 		}
 	return false;
+}
+
+template<typename T>
+void CopyDataFromPtrToPtr(T*& dest, const T* src, size_t src_size)
+{	/* FORMALLY CORRECT: Kenneth Boyd, 4/28/2006 */
+	if (!_resize(dest,src_size))
+		{
+		_flush(dest);
+		dest = 0;
+		return;
+		};
+	_value_copy_buffer(dest,src,src_size*sizeof(T));
 }
 
 template<typename T>
