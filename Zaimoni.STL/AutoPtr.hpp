@@ -27,7 +27,7 @@ protected:
 
 	explicit _meta_auto_ptr() : _ptr(NULL) {};
 	explicit _meta_auto_ptr(T*& src) : _ptr(src) {src = NULL;};
-	explicit _meta_auto_ptr(const _meta_auto_ptr& src) {*this=src;};
+	explicit _meta_auto_ptr(const _meta_auto_ptr& src) : _ptr(NULL) {*this=src;};
 	~_meta_auto_ptr() {delete _ptr;};
 
 	void operator=(T* src);

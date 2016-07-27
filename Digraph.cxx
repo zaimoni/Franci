@@ -392,9 +392,9 @@ TVal Digraph::EdgeTruthValue(size_t From, size_t To)
 // Efficiency problems
 // Remove this define block if it proves necessary to support sparse graphs
 #if 1
-#define ExplicitEdge(A,B) DIGRAPH_SET_EDGE==DigraphFromToList[A][B]
-#define ExplicitNoEdge(A,B) DIGRAPH_RESET_EDGE==DigraphFromToList[A][B]
-#define ExplicitAmbiguousEdge(A,B) DIGRAPH_FORGET_EDGE==DigraphFromToList[A][B]
+#define ExplicitEdge(A,B) (DIGRAPH_SET_EDGE==DigraphFromToList[A][B])
+#define ExplicitNoEdge(A,B) (DIGRAPH_RESET_EDGE==DigraphFromToList[A][B])
+#define ExplicitAmbiguousEdge(A,B) (DIGRAPH_FORGET_EDGE==DigraphFromToList[A][B])
 
 #define SetEdge(A,B) DigraphFromToList[A][B]=DIGRAPH_SET_EDGE
 #define ResetEdge(A,B) DigraphFromToList[A][B]=DIGRAPH_RESET_EDGE
