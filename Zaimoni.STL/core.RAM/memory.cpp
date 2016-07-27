@@ -406,15 +406,15 @@ static void* __CreateAtBottom(size_t size)
 		SparePtrRAM = RawBlock.records[CountPointersAllocated-1]._address-LowBoundPtrSpace-sizeof(size_t);
 		TargetPtr = CHARPTR_FROM_IDX(CountPointersAllocated);
 		};
-	TargetPtr -= TargetSize;
-	if (SparePtrRAM>=TargetSize) return TargetPtr;
+	TargetPtr -= TargetEffSize;
+	if (SparePtrRAM>=TargetEffSize) return TargetPtr;
 	{
 	size_t PageCount = 0;
 	do	{
 		++PageCount;
 		SparePtrRAM+=PageSize;
 		}
-	while(SparePtrRAM<TargetSize);
+	while(SparePtrRAM<TargetEffSize);
 	return __CommitNextPtrPages(PageCount) ? TargetPtr : NULL;
 	};
 }
