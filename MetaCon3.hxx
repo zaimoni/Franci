@@ -109,7 +109,7 @@ private:
 	static const UseThisAsMakeImplyAux UseThisAsMakeImplyNAryTable[NXOR_MCM+1];
 public:
 	MetaConnective(MetaConnectiveModes LinkageType) : MetaConceptWithArgArray((ExactType_MC)(LinkageType+LogicalAND_MC)) {};
-	MetaConnective(MetaConcept**& NewArgList, MetaConnectiveModes LinkageType) THROW();
+	MetaConnective(MetaConcept**& NewArgList, MetaConnectiveModes LinkageType) throw();
 //	MetaConnective(const MetaConnective& Source);	// default OK
 	virtual ~MetaConnective();
 

@@ -137,9 +137,8 @@ bool MetaConceptWith2Args::Evaluate(MetaConcept*& dest)
 	// required either.
 	// There is no need to diagnose the inference rules.
 	DEBUG_LOG("Entering MetaConceptWith2Args::Evaluate");
-	char Buffer[10];
-	DEBUG_LOG(_ltoa(IdxCurrentSelfEvalRule,Buffer,10));
-	DEBUG_LOG(_ltoa(IdxCurrentEvalRule,Buffer,10));
+	DEBUG_LOG((intmax_t)IdxCurrentSelfEvalRule);
+	DEBUG_LOG((intmax_t)IdxCurrentEvalRule);
 	try {
 		bool RetVal = (MaxEvalRuleIdx_ER>=IdxCurrentEvalRule) ? (this->*EvaluateRuleLookup[IdxCurrentEvalRule-1])(dest)
 					: DelegateEvaluate(dest);

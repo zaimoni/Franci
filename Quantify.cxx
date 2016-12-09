@@ -11,22 +11,22 @@ unsigned long MetaQuantifier::NextID = 0;
 MetaQuantifier::MetaQuantifier(const char* Name, const AbstractClass* Domain, MetaQuantifierMode CreationMode)
 :	MetaConceptWith1Arg((ExactType_MC)(CreationMode+ForAll_MC)),
 	ID(NextID++),		// should not reach ULONG_MAX, and will roll over if it does
-	VariableName((!Name || !*Name) ? NULL : ZAIMONI_LEN_WITH_NULL(strlen(Name))),
+	VariableName((!Name || !*Name) ? 0 : ZAIMONI_LEN_WITH_NULL(strlen(Name))),
 	Bitmap1(None_MQ)
 {	// FORMALLY CORRECT: Kenneth Boyd, 5/18/2006
 	if (!VariableName.empty()) strcpy(VariableName,Name);
-	if (NULL!=Domain) Domain->CopyInto(Arg1);
+	if (Domain) Domain->CopyInto(Arg1);
 }
 
 MetaQuantifier::MetaQuantifier(const char* Name, const AbstractClass* Domain, MetaQuantifierMode CreationMode, bool Improvised)
 :	MetaConceptWith1Arg((ExactType_MC)(CreationMode+ForAll_MC)),
 	ID(NextID++),		// should not reach ULONG_MAX, and will roll over if it does
-	VariableName((!Name || !*Name) ? NULL : ZAIMONI_LEN_WITH_NULL(strlen(Name))),
+	VariableName((!Name || !*Name) ? 0 : ZAIMONI_LEN_WITH_NULL(strlen(Name))),
 	Bitmap1((Improvised)	? Improvised_MQ
 							: None_MQ)
 {	// FORMALLY CORRECT: Kenneth Boyd, 5/18/2006
 	if (!VariableName.empty()) strcpy(VariableName,Name);
-	if (NULL!=Domain) Domain->CopyInto(Arg1);
+	if (Domain) Domain->CopyInto(Arg1);
 }
 
 const MetaQuantifier& MetaQuantifier::operator=(const MetaQuantifier& src)
