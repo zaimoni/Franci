@@ -7,6 +7,7 @@
 
 #include "Logging.h"
 #include "MetaRAM.hpp"
+#include "z_memory.h"
 #include "Pure.C/stdio_c.h"
 
 namespace zaimoni {
