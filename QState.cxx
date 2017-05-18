@@ -97,13 +97,16 @@ void QuantifiedStatement::_forceStdForm() {ForceStdFormAux();}
 
 //  Evaluation functions
 bool QuantifiedStatement::SyntaxOK() const
-{	// FORMALLY CORRECT: Kenneth Boyd, 8/14/2000
+{	// FORMALLY CORRECT: Kenneth Boyd, 5/18/2017
 	if (!SyntaxOKAux() || 2>size()) return false;
 	{
 	size_t i = fast_size();
-	do	if (typeid(MetaQuantifier)!=typeid(*ArgArray[--i]))
-			return false;
-	while(1<i);
+	// GCC 5.1 appears to consider typeid to be a macro rather than a compiler construct; side-effecting operators like -- will multiple-execute
+	// GCC 4.2.1 doesn't have this problem; assumed that GCC 4.4 and higher do as they fail like GCC 5.1
+	while(1 <= --i)
+		{
+		if (typeid(MetaQuantifier)!=typeid(*ArgArray[i])) return false;
+		}
 	}
 	if (    MinPhrase1Idx_MC<=ArgArray[0]->ExactType()
 		|| (ForAll_MC<=ArgArray[0]->ExactType() && UnparsedText_MC>=ArgArray[0]->ExactType()))

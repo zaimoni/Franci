@@ -613,11 +613,14 @@ static bool NewVarsForSituation_handler(char*& InputBuffer)
 		if (!DoNotExplain) LogThis(ArgArray);
 		{
 		size_t i = ArgArray.ArraySize();
-		do	if (typeid(MetaQuantifier)!=typeid(*ArgArray[--i]))
+		do	{
+			--i;
+			if (typeid(MetaQuantifier)!=typeid(*ArgArray[i]))	// typeid macro-like in GCC 4.4+
 				{
 				Franci_SyntaxError();
 				return true;
 				}
+			}
 		while(0<i);
 		// This is a list of globally quantified variables.  Move it in.
 		i = ArgArray.ArraySize();
