@@ -182,10 +182,7 @@ bool MetaConceptWithArgArray::DestructiveEvaluateToSameType()
 			const bool Tmp = (MaxSelfEvalRuleIdx_SER>=IdxCurrentSelfEvalRule) ? (this->*SelfEvaluateRuleLookup[IdxCurrentSelfEvalRule-1])()
 							: DelegateSelfEvaluate();
 			DEBUG_LOG("selfeval worked");
-
-			if (!SyntaxOK())
-				FATAL((INFORM(*this),AlphaBadSyntaxGenerated));
-
+			SUCCEED_OR_DIE(SyntaxOK());
 			DEBUG_LOG(*this);
 			return Tmp;
 			}

@@ -164,10 +164,7 @@ bool MetaConceptWith2Args::DestructiveEvaluateToSameType()
 		try	{
 			const bool Tmp = (this->*SelfEvaluateRuleLookup[IdxCurrentSelfEvalRule-1])();
 			DEBUG_LOG("selfeval worked");
-
-			if (!SyntaxOK())
-				FATAL((INFORM(*this),AlphaBadSyntaxGenerated));
-
+			SUCCEED_OR_DIE(SyntaxOK());
 			DEBUG_LOG(*this);
 			return Tmp;
 			}

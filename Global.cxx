@@ -11,7 +11,6 @@ const char* const AlphaMiscallVFunction = "ALPHA ERROR: virtual function called 
 const char* const AlphaMiscallFunction = "ALPHA ERROR: function called in way that damages data integrity.  I QUIT!";
 const char* const AlphaNoEffectFunctionCall = "ALPHA ERROR: function call has no effect.  I QUIT!";
 const char* const AlphaRetValAssumption = "ALPHA ERROR: function return value assumptions violated.  I QUIT!";
-const char* const AlphaBadSyntaxGenerated = "ALPHA ERROR: Syntax error generated.  I QUIT!";
 const char* const RAMFailure = "FATAL ERROR: irrecoverable RAM failure in computation.  I QUIT!";
 
 //! \todo OPTIMIZE: STATIC MULTITHREADED: ReportTime is a target for a statically allocated buffer,

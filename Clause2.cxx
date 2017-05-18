@@ -277,8 +277,7 @@ MetaConceptWith2Args::ExtractInfixArglist(MetaConcept**& Target, size_t& Keyword
 	if (RHS_Arg2->HasSimpleTransition() && !RHS_Arg2->IsExactType(ExactType()))
 		DestructiveSyntacticallyEvaluateOnce(RHS_Arg2);
 
-	if (!SyntaxOK())
-		FATAL((INFORM(*this),AlphaBadSyntaxGenerated));	
+	SUCCEED_OR_DIE(SyntaxOK());
 
 	ForceStdForm();
 
@@ -301,8 +300,7 @@ MetaConceptWith2Args::ExtractPrefixArglist(MetaConcept**& Target, size_t Keyword
 	if (RHS_Arg2->HasSimpleTransition() && !RHS_Arg2->IsExactType(ExactType()))
 		DestructiveSyntacticallyEvaluateOnce(RHS_Arg2);
 
-	if (!SyntaxOK())
-		FATAL((INFORM(*this),AlphaBadSyntaxGenerated));	
+	SUCCEED_OR_DIE(SyntaxOK());
 
 	ForceStdForm();
 }

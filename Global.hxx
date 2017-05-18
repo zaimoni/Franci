@@ -33,7 +33,6 @@ extern const char* const AlphaMiscallVFunction;
 extern const char* const AlphaMiscallFunction;
 extern const char* const AlphaNoEffectFunctionCall;
 extern const char* const AlphaRetValAssumption;
-extern const char* const AlphaBadSyntaxGenerated;
 extern const char* const RAMFailure;
 
 void UnconditionalDataIntegrityFailure(void) NO_RETURN;
