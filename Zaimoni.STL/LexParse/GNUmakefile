@@ -7,7 +7,7 @@
 include ../POSIX.inc
 include ../POSIX.dep
 
-CXXFLAGS := -Os -Wall -Wextra -finline -Winline -Wdisabled-optimization --param max-inline-insns-single=500 -c -pipe -DNDEBUG
+CXXFLAGS := $(CFLAGS_CORE) $(CFLAGS_MICROOPT)
 
 #LIBS := libz_langconf.a libz_langconf_iso.a libz_csvtable.a libz_csvtable_iso.a
 LIBS := libz_langconf.a libz_langconf_iso.a libz_csvtable.a
