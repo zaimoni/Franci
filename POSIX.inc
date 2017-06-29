@@ -7,8 +7,8 @@ includedir = $(exec_prefix)/include
 libdir = $(exec_prefix)/lib
 
 AR = ar
-CC = gcc
-CXX = g++
+CC = gcc -std=gnu11
+CXX = g++ -std=gnu++11
 
 EXEEXT = exe
 OBJEXT = o

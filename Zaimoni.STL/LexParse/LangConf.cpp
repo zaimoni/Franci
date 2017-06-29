@@ -6,6 +6,7 @@ using namespace std;
 #include <memory.h>
 #include "LangConf.hpp"
 #include "../POD.hpp"
+#include "../Pure.C/format_util.h"
 
 using namespace zaimoni;
 
@@ -260,7 +261,7 @@ LangConf::Error(const char* msg, const char* filename, size_t line, size_t posit
 		};
 	if (0<line)
 		{
-		_ltoa(line,Buffer,10);
+		z_umaxtoa(line,Buffer,10);
 		leading_space += strlen(Buffer)+sizeof(", line ")-1;
 		};
 	if (0==leading_space)

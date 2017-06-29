@@ -10,8 +10,8 @@ libdir = $(exec_prefix)/lib
 host_libdir = lib/host.franci
 
 AR = ar
-CC = gcc
-CXX = g++
+CC = gcc -std=c11
+CXX = g++ -std=c++11
 
 EXEEXT = exe
 OBJEXT = o
