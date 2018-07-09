@@ -10,6 +10,13 @@
 #include <string.h>
 #include <stdlib.h>
 
+/* strictly speaking this is a stdlib.h repair */
+#ifndef MAX_PATH
+#ifdef _MAX_PATH
+#define MAX_PATH _MAX_PATH
+#endif
+#endif
+
 /* ZAIMONI_PROTECT_NONANSI_NONNULL_CHECKING_DEALLOCATORS : code fragment suitable as a guard clause for non-ansi free/delete that can't handle NULL */
 /* good alternative if needed: */
 /* if (NULL!=A) */

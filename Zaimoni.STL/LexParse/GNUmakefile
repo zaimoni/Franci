@@ -36,13 +36,13 @@ CSVTable_iso.o:
 	$(CXX) -c $< $(CXXFLAGS) $(ARCH_FLAGS) -DZAIMONI_FORCE_ISO -o $*.o
 
 libz_langconf.a: LangConf.o
-	$(AR) -ru libz_langconf.a LangConf.o
+	$(AR) $(ARFLAGS) libz_langconf.a LangConf.o
 
 libz_langconf_iso.a: LangConf_iso.o
-	$(AR) -ru libz_langconf_iso.a LangConf_iso.o
+	$(AR) $(ARFLAGS) libz_langconf_iso.a LangConf_iso.o
 
 libz_csvtable.a: CSVTable.o
-	$(AR) -ru libz_csvtable.a CSVTable.o
+	$(AR) $(ARFLAGS) libz_csvtable.a CSVTable.o
 
 ../../$(host_libdir)/libz_langconf.a: libz_langconf.a
 	cp libz_langconf.a ../../$(host_libdir)/libz_langconf.a

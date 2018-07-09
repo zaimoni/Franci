@@ -24,7 +24,7 @@ mutex.o: mutex.cpp
 	$(CXX) -c mutex.cpp $(CXXFLAGS) $(ARCH_FLAGS) -o mutex.o
 
 libz_mutex.a: mutex.o
-	$(AR) -ru libz_mutex.a mutex.o
+	$(AR) $(ARFLAGS) libz_mutex.a mutex.o
 
 ../../../$(host_libdir)/libz_mutex.a: libz_mutex.a
 	cp libz_mutex.a ../../../$(host_libdir)/libz_mutex.a

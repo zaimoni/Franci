@@ -10,8 +10,10 @@ using namespace zaimoni;
 
 #ifndef ZAIMONI_FORCE_ISO
 #define TEXT_LEN(A) _msize(A)
+#define CONST_TEXT_LEN(A) _msize(const_cast<char*>(A))
 #else
 #define TEXT_LEN(A) ZAIMONI_LEN_WITH_NULL(strlen(A))
+#define CONST_TEXT_LEN(A) ZAIMONI_LEN_WITH_NULL(strlen(A))
 #endif
 
 // _split is inspired by the Perl split function
@@ -32,7 +34,7 @@ static size_t _predict_split_chunk_count(const char SplitOn, const char* src)
 //! \todo delimited version
 static bool _find_undelimited_CSV_cell_in_line(const char* const Line, size_t Col, size_t& i, size_t& Idx2, char FieldSeparator)
 {
-	const size_t Length = TEXT_LEN(Line);
+	const size_t Length = CONST_TEXT_LEN(Line);
 	i = 0;
 	size_t CellCount = 0;
 	if (CellCount<Col)
