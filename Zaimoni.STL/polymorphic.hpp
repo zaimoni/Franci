@@ -47,7 +47,7 @@ struct is_polymorphic_final<volatile T> : public is_polymorphic_final<T>
 
 // yes, there is a boost::is_polymorphic.
 template<typename T>
-struct is_polymorphic : public boost::type_traits::ice_or<is_polymorphic_base<T>::value,is_polymorphic_final<T>::value >
+struct is_polymorphic : public std::integral_constant<bool, is_polymorphic_base<T>::value || is_polymorphic_final<T>::value>
 {
 };
 
@@ -82,6 +82,7 @@ struct has_MoveInto<volatile T> : public has_MoveInto<T>
 // all of these can throw std::bad_alloc
 // polymorphic_base<T> types should rely on CopyInto member functions
 template<typename T,typename U>
+//inline typename boost::enable_if<is_polymorphic_base<T>, void>::type
 inline typename std::enable_if<is_polymorphic_base<T>::value, void>::type
 CopyInto(const T& src, U*& dest)
 {	//! \todo should not be considered if T* is not convertible to U*
@@ -89,7 +90,7 @@ CopyInto(const T& src, U*& dest)
 }
 
 template<typename T,typename U>
-typename std::enable_if<boost::type_traits::ice_and<!is_polymorphic_base<T>::value, has_invalid_assignment_but_copyconstructable<T>::value >::value, void>::type
+typename std::enable_if<!is_polymorphic_base<T>::value && has_invalid_assignment_but_copyconstructable<T>::value, void>::type
 CopyInto(const T& src, U*& dest)
 {	//! \todo should not be considered if T* is not convertible to U*
 	if (dest) delete dest;
@@ -97,7 +98,7 @@ CopyInto(const T& src, U*& dest)
 }
 
 template<typename T,typename U>
-typename std::enable_if<boost::type_traits::ice_and<!is_polymorphic_base<T>::value, !has_invalid_assignment_but_copyconstructable<T>::value >::value, void>::type
+typename std::enable_if<!is_polymorphic_base<T>::value && !has_invalid_assignment_but_copyconstructable<T>::value, void>::type
 CopyInto(const T& src, U*& dest)
 {	//! \todo should not be considered if T* is not convertible to U*
 	if (!dest) dest = new T(src);
