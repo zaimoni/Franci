@@ -369,7 +369,7 @@ _same_sign_addition_has_epsilon(T x, T y, signed int x_exponent, bool x_second_b
 
 // safe operation detection
 template<typename T>
-typename std::enable_if<boost::type_traits::ice_and<boost::is_integral<T>::value, std::numeric_limits<T>::is_signed>::value, bool>::type
+typename std::enable_if<boost::is_integral<T>::value && std::numeric_limits<T>::is_signed, bool>::type
 safe_sum(T x, T y)
 {	//! \return true iff the sum doesn't overflow or underflow
 	if (0<=x) return (y<=qualitative_computation<T>::max-x);
@@ -378,14 +378,14 @@ safe_sum(T x, T y)
 }
 
 template<typename T>
-inline typename std::enable_if<boost::type_traits::ice_and<boost::is_integral<T>::value, !std::numeric_limits<T>::is_signed>::value, bool>::type
+inline typename std::enable_if<boost::is_integral<T>::value && !std::numeric_limits<T>::is_signed, bool>::type
 safe_sum(T x, T y)
 {	//! \return true iff the sum doesn't overflow or underflow
 	return (y<=qualitative_computation<T>::max-x);
 }
 
 template<typename T>
-typename std::enable_if<boost::type_traits::ice_and<boost::is_integral<T>::value, std::numeric_limits<T>::is_signed>::value, bool>::type
+typename std::enable_if<boost::is_integral<T>::value && std::numeric_limits<T>::is_signed, bool>::type
 safe_product(T x, T y)
 {	//! \return true iff the sum doesn't overflow or underflow
 	if (0==x) return true;
@@ -406,7 +406,7 @@ safe_product(T x, T y)
 }
 
 template<typename T>
-inline typename std::enable_if<boost::type_traits::ice_and<boost::is_integral<T>::value, !std::numeric_limits<T>::is_signed>::value, bool>::type
+inline typename std::enable_if<boost::is_integral<T>::value && !std::numeric_limits<T>::is_signed, bool>::type
 safe_product(T x, T y)
 {	//! \return true iff the sum doesn't overflow or underflow
 	if (0==x) return true;
