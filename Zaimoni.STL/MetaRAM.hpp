@@ -31,7 +31,7 @@
 namespace zaimoni	{
 //! for suppressing typecast on realloc
 template<typename T> inline
-typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value, boost::has_trivial_assign<T>::value >::value, T*>::type
+typename std::enable_if<boost::has_trivial_constructor<T>::value && boost::has_trivial_destructor<T>::value && boost::has_trivial_assign<T>::value, T*>::type
 REALLOC(T* Target, size_t newsize)
 {
 	return reinterpret_cast<T*>(realloc(Target,newsize));
@@ -157,7 +157,7 @@ _vector_assign(U* dest, const T& src, size_t Idx)
 }
 
 template<typename T>
-typename std::enable_if<!boost::type_traits::ice_and<boost::has_trivial_copy<T>::value,1==sizeof(T)>::value, void>::type
+typename std::enable_if<!(boost::has_trivial_copy<T>::value && 1==sizeof(T)), void>::type
 _vector_assign(T* dest,typename boost::call_traits<T>::param_type src, size_t Idx)
 {
 	do	dest[--Idx] = src;
@@ -165,7 +165,7 @@ _vector_assign(T* dest,typename boost::call_traits<T>::param_type src, size_t Id
 }
 
 template<typename T>
-inline typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_copy<T>::value,1==sizeof(T)>::value, void>::type
+inline typename std::enable_if<boost::has_trivial_copy<T>::value && 1==sizeof(T), void>::type
 _vector_assign(T* dest,typename boost::call_traits<T>::param_type src, size_t Idx)
 {
 	memset(dest,src,Idx);
@@ -246,28 +246,28 @@ _weak_flush(T** _ptr)
 // _new_buffer/_new_buffer_nonNULL_throws and _flush [MetaRAM2.hpp] have to be synchronized for ISO C++
 // _new_buffer_nonNULL is in MetaRAM2.hpp, as it depends on Logging.h
 template<typename T>
-inline typename std::enable_if<!boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>::value, T*>::type
+inline typename std::enable_if<!(boost::has_trivial_constructor<T>::value && boost::has_trivial_destructor<T>::value), T*>::type
 _new_buffer(size_t Idx)
 {
 	return new(std::nothrow) T[Idx];
 }
 
 template<typename T>
-inline typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>::value, T*>::type
+inline typename std::enable_if<boost::has_trivial_constructor<T>::value && boost::has_trivial_destructor<T>::value, T*>::type
 _new_buffer(size_t Idx)
 {
 	return reinterpret_cast<T*>(calloc(Idx,sizeof(T)));
 }
 
 template<typename T>
-inline typename std::enable_if<!boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>::value, T*>::type
+inline typename std::enable_if<!(boost::has_trivial_constructor<T>::value && boost::has_trivial_destructor<T>::value), T*>::type
 _new_buffer_nonNULL_throws(size_t Idx)
 {
 	return new T[Idx];
 }
 
 template<typename T>
-inline typename std::enable_if<boost::type_traits::ice_and<boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value>::value, T*>::type
+inline typename std::enable_if<boost::has_trivial_constructor<T>::value && boost::has_trivial_destructor<T>::value, T*>::type
 _new_buffer_nonNULL_throws(size_t Idx)
 {
 	T* tmp = reinterpret_cast<T*>(calloc(Idx,sizeof(T)));
