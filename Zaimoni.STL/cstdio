@@ -11,12 +11,11 @@
 #include "z_memory.h"
 #endif
 #include "Pure.C/stdio_c.h"
-#include "boost_core.hpp"
 
 namespace zaimoni {
 
 template<class T>
-inline typename std::enable_if<boost::has_trivial_assign<T>::value, void>::type
+inline typename std::enable_if<std::is_trivially_copy_assignable<T>::value, void>::type
 ConvertBinaryModeToTextMode(T*& buf ZAIMONI_ISO_PARAM(size_t& buf_len))
 {
 	if (buf)
@@ -44,7 +43,7 @@ ConvertBinaryModeToTextMode(T*& buf ZAIMONI_ISO_PARAM(size_t& buf_len))
 }
 
 template<class T>
-inline typename std::enable_if<boost::has_trivial_assign<T>::value, bool>::type
+inline typename std::enable_if<std::is_trivially_copy_assignable<T>::value, bool>::type
 GetBinaryFileImage(const char* const Filename,T*& Buffer ZAIMONI_ISO_PARAM(size_t& Buffer_size))
 {	// FORMALLY CORRECT: Kenneth Boyd, 11/10/2004
 	assert(Filename);
@@ -76,7 +75,7 @@ GetBinaryFileImage(const char* const Filename,T*& Buffer ZAIMONI_ISO_PARAM(size_
 }
 
 template<class T>
-inline typename std::enable_if<boost::has_trivial_assign<T>::value, bool>::type
+inline typename std::enable_if<std::is_trivially_copy_assignable<T>::value, bool>::type
 SaveBinaryFileImage(const char* const Filename,const T* const Buffer,size_t BufferLength)
 {	// FORMALLY CORRECT: Kenneth Boyd, 1/14/2007
 	assert(Filename);

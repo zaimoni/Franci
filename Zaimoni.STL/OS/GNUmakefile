@@ -26,7 +26,7 @@ log_adapter_inc_inform.o: log_adapter_inc_inform.cpp ../Pure.C/format_util.c
 log_adapter_log.o: log_adapter_log.cpp ../Pure.C/format_util.c
 
 .cpp.o:
-	$(CXX) -c $< $(CXXFLAGS) $(ARCH_FLAGS) -o $*.o
+	$(CXX) -c $< $(CXXFLAGS) $(FORCE_ISO) $(ARCH_FLAGS) -o $*.o
 
 libz_log_adapter.a: log_adapter_inc_inform.o log_adapter_inform.o log_adapter_log.o
 	$(AR) $(ARFLAGS) libz_log_adapter.a log_adapter_inc_inform.o log_adapter_inform.o log_adapter_log.o

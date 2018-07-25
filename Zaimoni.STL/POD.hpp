@@ -1,6 +1,6 @@
 // POD.hpp
 // standardized helpers for POD types
-// (C)2009 Kenneth Boyd, license: MIT.txt
+// (C)2009,2018 Kenneth Boyd, license: MIT.txt
 
 #ifndef ZAIMONI_STL_POD_HPP
 #define ZAIMONI_STL_POD_HPP 1
@@ -16,7 +16,7 @@ namespace zaimoni
 // zero-initialize anything with trivial assignment
 //! \todo use boost:;type_traits_ice_... to specialize this for sizeof(char),sizeof(short), etc.; then test to see if GCC benefits
 template<typename T>
-inline typename std::enable_if<boost::has_trivial_assign<T>::value, void>::type
+inline typename std::enable_if<boost::has_trivial_assign<typename std::remove_all_extents<T>::type>::value, void>::type
 clear(T& x)
 {	memset(&x,0,sizeof(T));}
 
