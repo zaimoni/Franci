@@ -19,11 +19,13 @@
 #define ZAIMONI_NULL_TERMINATE(A)
 #define ZAIMONI_ISO_PARAM(A)
 #define ZAIMONI_ISO_FAILOVER(A,B) A
+#define ZAIMONI_ISO_ONLY(A)
 #else
 #define ZAIMONI_LEN_WITH_NULL(A) ((A)+1)
 #define ZAIMONI_NULL_TERMINATE(A) A = '\0'
 #define ZAIMONI_ISO_PARAM(A) , A
 #define ZAIMONI_ISO_FAILOVER(A,B) B
+#define ZAIMONI_ISO_ONLY(A) A
 #endif
 
 /* delayed expansion of preprocessing operators */
