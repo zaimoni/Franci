@@ -1,7 +1,7 @@
 /* MetaRAM.hpp */
 /* C++ interface to C++/C memory management libraries */
 /* limited functionality in C */
-/* (C)2009,2015 Kenneth Boyd, license: MIT.txt */
+/* (C)2009,2015,2018 Kenneth Boyd, license: MIT.txt */
 
 #ifndef ZAIMONI_METARAM_HPP
 #define ZAIMONI_METARAM_HPP 1
@@ -9,6 +9,7 @@
 #include "flat_alg.h"
 #include <string.h>
 #include <stdlib.h>
+#include <new>
 
 /* strictly speaking this is a stdlib.h repair */
 #ifndef MAX_PATH
@@ -31,7 +32,7 @@
 namespace zaimoni	{
 //! for suppressing typecast on realloc
 template<typename T> inline
-typename std::enable_if<boost::has_trivial_constructor<T>::value && boost::has_trivial_destructor<T>::value && boost::has_trivial_assign<T>::value, T*>::type
+typename std::enable_if<std::is_trivially_default_constructible<T>::value && std::is_trivially_destructible<T>::value && std::is_trivially_copy_assignable<T>::value, T*>::type
 REALLOC(T* Target, size_t newsize)
 {
 	return reinterpret_cast<T*>(realloc(Target,newsize));
@@ -55,7 +56,7 @@ DELETEARRAY(T* Target)
 
 // has trivial destructor is required to free rather than delete
 template<typename T>
-inline typename std::enable_if<boost::has_trivial_destructor<T>::value, void>::type
+inline typename std::enable_if<std::is_trivially_destructible<T>::value, void>::type
 FREE(T* Target)
 {
 	ZAIMONI_PROTECT_NONANSI_NONNULL_CHECKING_DEALLOCATORS(Target) free(Target);
@@ -83,7 +84,7 @@ DELETEARRAY_AND_NULL(T*& Target)
 
 // has trivial destructor is required to free rather than delete
 template<typename T>
-inline typename std::enable_if<boost::has_trivial_destructor<T>::value, void>::type
+inline typename std::enable_if<std::is_trivially_destructible<T>::value, void>::type
 FREE_AND_NULL(T*& Target)
 {
 	ZAIMONI_PROTECT_NONANSI_NONNULL_CHECKING_DEALLOCATORS(Target)
@@ -107,7 +108,7 @@ _copy_buffer(U* dest, const T* src, size_t Idx)
 }
 
 template<typename T>
-typename std::enable_if<!boost::has_trivial_assign<T>::value, void>::type
+typename std::enable_if<!std::is_trivially_copy_assignable<T>::value, void>::type
 _copy_buffer(T* dest, const T* src, size_t Idx)
 {
 	do	{
@@ -118,7 +119,7 @@ _copy_buffer(T* dest, const T* src, size_t Idx)
 }
 
 template<typename T>
-inline typename std::enable_if<boost::has_trivial_assign<T>::value, void>::type
+inline typename std::enable_if<std::is_trivially_copy_assignable<T>::value, void>::type
 _copy_buffer(T* dest, const T* src, size_t Idx)
 {
 	memmove(dest,src,Idx*sizeof(T));
@@ -157,16 +158,16 @@ _vector_assign(U* dest, const T& src, size_t Idx)
 }
 
 template<typename T>
-typename std::enable_if<!(boost::has_trivial_copy<T>::value && 1==sizeof(T)), void>::type
-_vector_assign(T* dest,typename boost::call_traits<T>::param_type src, size_t Idx)
+typename std::enable_if<!(std::is_trivially_copy_assignable<T>::value && 1==sizeof(T)), void>::type
+_vector_assign(T* dest,typename zaimoni::param<T>::type src, size_t Idx)
 {
 	do	dest[--Idx] = src;
 	while(0<Idx);
 }
 
 template<typename T>
-inline typename std::enable_if<boost::has_trivial_copy<T>::value && 1==sizeof(T), void>::type
-_vector_assign(T* dest,typename boost::call_traits<T>::param_type src, size_t Idx)
+inline typename std::enable_if<std::is_trivially_copy_assignable<T>::value && 1==sizeof(T), void>::type
+_vector_assign(T* dest,typename zaimoni::param<T>::type src, size_t Idx)
 {
 	memset(dest,src,Idx);
 }
@@ -214,7 +215,7 @@ _vector_equal(const T& lhs, const U& rhs, size_t Idx)
 
 // objects
 template<typename T>
-inline typename std::enable_if<!boost::has_trivial_destructor<T>::value, void>::type
+inline typename std::enable_if<!std::is_trivially_destructible<T>::value, void>::type
 _single_flush(T* _ptr)
 {
 	delete _ptr;
@@ -230,7 +231,7 @@ _single_flush(T** _ptr)
 }
 
 template<typename T>
-inline typename std::enable_if<boost::has_trivial_destructor<T>::value, void>::type
+inline typename std::enable_if<std::is_trivially_destructible<T>::value, void>::type
 _single_flush(T* _ptr)
 {
 	free(_ptr);
@@ -246,28 +247,28 @@ _weak_flush(T** _ptr)
 // _new_buffer/_new_buffer_nonNULL_throws and _flush [MetaRAM2.hpp] have to be synchronized for ISO C++
 // _new_buffer_nonNULL is in MetaRAM2.hpp, as it depends on Logging.h
 template<typename T>
-inline typename std::enable_if<!(boost::has_trivial_constructor<T>::value && boost::has_trivial_destructor<T>::value), T*>::type
+inline typename std::enable_if<!(std::is_trivially_default_constructible<T>::value && std::is_trivially_destructible<T>::value), T*>::type
 _new_buffer(size_t Idx)
 {
 	return new(std::nothrow) T[Idx];
 }
 
 template<typename T>
-inline typename std::enable_if<boost::has_trivial_constructor<T>::value && boost::has_trivial_destructor<T>::value, T*>::type
+inline typename std::enable_if<std::is_trivially_default_constructible<T>::value && std::is_trivially_destructible<T>::value, T*>::type
 _new_buffer(size_t Idx)
 {
 	return reinterpret_cast<T*>(calloc(Idx,sizeof(T)));
 }
 
 template<typename T>
-inline typename std::enable_if<!(boost::has_trivial_constructor<T>::value && boost::has_trivial_destructor<T>::value), T*>::type
+inline typename std::enable_if<!(std::is_trivially_default_constructible<T>::value && std::is_trivially_destructible<T>::value), T*>::type
 _new_buffer_nonNULL_throws(size_t Idx)
 {
 	return new T[Idx];
 }
 
 template<typename T>
-inline typename std::enable_if<boost::has_trivial_constructor<T>::value && boost::has_trivial_destructor<T>::value, T*>::type
+inline typename std::enable_if<std::is_trivially_default_constructible<T>::value && std::is_trivially_destructible<T>::value, T*>::type
 _new_buffer_nonNULL_throws(size_t Idx)
 {
 	T* tmp = reinterpret_cast<T*>(calloc(Idx,sizeof(T)));

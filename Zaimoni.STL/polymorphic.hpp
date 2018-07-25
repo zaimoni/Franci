@@ -1,13 +1,12 @@
 // polymorphic.hpp
 // polymorphic type support
-// (C)2009,2015 Kenneth Boyd, license: MIT.txt
+// (C)2009,2015,2018 Kenneth Boyd, license: MIT.txt
 
 #ifndef ZAIMONI_STL_POLYMORPHIC_HPP
 #define ZAIMONI_STL_POLYMORPHIC_HPP 1
 
 #include <typeinfo>			// to properly support CopyInto (MingWin).  This requires RTTI.
 #include "repair.STL/type_traits"
-#include "boost_core.hpp"
 
 namespace zaimoni	{
 
@@ -51,6 +50,11 @@ struct is_polymorphic : public std::integral_constant<bool, is_polymorphic_base<
 {
 };
 
+template<typename T>
+struct param : public std::conditional<sizeof(T)<=sizeof(unsigned long long) && std::is_trivially_copy_assignable<T>::value, T , const T&>
+{
+};
+
 // objects with const or reference members do not have a valid assignment operator, but still can be copy-constructed.
 // override this by deriving from boost::true_type
 // * above caveat is not automatically true for subclasses
@@ -82,7 +86,6 @@ struct has_MoveInto<volatile T> : public has_MoveInto<T>
 // all of these can throw std::bad_alloc
 // polymorphic_base<T> types should rely on CopyInto member functions
 template<typename T,typename U>
-//inline typename boost::enable_if<is_polymorphic_base<T>, void>::type
 inline typename std::enable_if<is_polymorphic_base<T>::value, void>::type
 CopyInto(const T& src, U*& dest)
 {	//! \todo should not be considered if T* is not convertible to U*

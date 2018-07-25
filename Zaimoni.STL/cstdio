@@ -11,6 +11,7 @@
 #include "z_memory.h"
 #endif
 #include "Pure.C/stdio_c.h"
+#include "boost_core.hpp"
 
 namespace zaimoni {
 

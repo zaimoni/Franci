@@ -7,7 +7,8 @@
 #define ZAIMONI_METARAM2_HPP 1
 
 #include "MetaRAM.hpp"
-#ifndef ZAIMONI_FORCE_ISO
+#include "boost_core.hpp"
+#ifdef ZAIMONI_HAVE_ACCURATE_MSIZE
 #include "z_memory.h"
 #endif
 #include "Logging.h"
