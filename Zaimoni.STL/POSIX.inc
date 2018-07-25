@@ -19,7 +19,8 @@ ARCH_FLAGS =
 
 # other control points
 # FORCE_ISO: ZAIMONI_FORCE_ISO disables the custom memory manager
-FORCE_ISO =
+# ZAIMONI_HAVE_ACCURATE_MSIZE should require the custom memory manager
+FORCE_ISO = -DZAIMONI_HAVE_ACCURATE_MSIZE
 # FORCE_ISO = -DZAIMONI_FORCE_ISO
 
 # compiler options
