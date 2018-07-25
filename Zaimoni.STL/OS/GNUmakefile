@@ -21,7 +21,7 @@ clean:
 host_install: $(addprefix ../../$(host_libdir)/, $(LIBS))
 
 # rules
-log_adapter_inform.o: log_adapter_inform.cpp ../{ure.C/format_util.c
+log_adapter_inform.o: log_adapter_inform.cpp ../Pure.C/format_util.c
 log_adapter_inc_inform.o: log_adapter_inc_inform.cpp ../Pure.C/format_util.c
 log_adapter_log.o: log_adapter_log.cpp ../Pure.C/format_util.c
 
