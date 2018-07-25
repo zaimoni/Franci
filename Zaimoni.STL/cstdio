@@ -1,32 +1,26 @@
 // cstdio
 // header for file convenience functions
-// (C)2009 Kenneth Boyd, license: MIT.txt
+// (C)2009,2018 Kenneth Boyd, license: MIT.txt
 
 #ifndef ZAIMONI_CSTDIO
 #define ZAIMONI_CSTDIO 1
 
 #include "Logging.h"
 #include "MetaRAM.hpp"
+#ifdef ZAIMONI_HAVE_ACCURATE_MSIZE
 #include "z_memory.h"
+#endif
 #include "Pure.C/stdio_c.h"
 
 namespace zaimoni {
 
 template<class T>
 inline typename std::enable_if<boost::has_trivial_assign<T>::value, void>::type
-#ifndef ZAIMONI_FORCE_ISO
-ConvertBinaryModeToTextMode(T*& buf)
-#else
-ConvertBinaryModeToTextMode(T*& buf, size_t& buf_len)
-#endif
+ConvertBinaryModeToTextMode(T*& buf ZAIMONI_ISO_PARAM(size_t& buf_len))
 {
 	if (buf)
 		{
-#ifndef ZAIMONI_FORCE_ISO 
-		const size_t buf_len = ArraySize(buf);
-#else
-		assert(0<buf_len);
-#endif
+		ZAIMONI_ISO_FAILOVER(const size_t buf_len = ArraySize(buf),assert(0<buf_len));
 		size_t Displace = 0;
 		size_t i = 0;
 		do	if ('\r'==buf[i])
@@ -44,27 +38,17 @@ ConvertBinaryModeToTextMode(T*& buf, size_t& buf_len)
 				}
 		while(buf_len-Displace> ++i);
 		if (0<Displace)
-#ifndef ZAIMONI_FORCE_ISO
-			buf = REALLOC(buf,_msize(buf)-Displace);
-#else
-			buf = REALLOC(buf,(buf_len -= Displace));
-#endif
+			buf = REALLOC(buf,ZAIMONI_ISO_FAILOVER(_msize(buf)-Displace,(buf_len -= Displace)));
 		}
 }
 
 template<class T>
 inline typename std::enable_if<boost::has_trivial_assign<T>::value, bool>::type
-#ifndef ZAIMONI_FORCE_ISO
-GetBinaryFileImage(const char* const Filename,T*& Buffer)
-#else
-GetBinaryFileImage(const char* const Filename,T*& Buffer,size_t& Buffer_size)
-#endif
+GetBinaryFileImage(const char* const Filename,T*& Buffer ZAIMONI_ISO_PARAM(size_t& Buffer_size))
 {	// FORMALLY CORRECT: Kenneth Boyd, 11/10/2004
 	assert(Filename);
 	assert(!Buffer);
-#ifdef ZAIMONI_FORCE_ISO
-	assert(0==Buffer_size);
-#endif
+	ZAIMONI_ISO_ONLY(assert(0==Buffer_size);)
 
 	FILE* TargetFile = fopen(Filename, "rb");
 	if (!TargetFile) return false;
@@ -82,9 +66,7 @@ GetBinaryFileImage(const char* const Filename,T*& Buffer,size_t& Buffer_size)
 	if (0<ScriptLength)
 	{
 		Buffer = REALLOC(Buffer,ScriptLength);
-#ifdef ZAIMONI_FORCE_ISO
-		Buffer_size = ScriptLength;
-#endif
+		ZAIMONI_ISO_ONLY(Buffer_size = ScriptLength;)
 		ActuallyRead = fread(Buffer,sizeof(T),ScriptLength/sizeof(T),TargetFile);
 	}
 

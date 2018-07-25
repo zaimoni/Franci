@@ -27,7 +27,7 @@ CSVTable.o: CSVTable.cpp $(CSVTable_hpp) $(addprefix ../, $(cstdio)) ../fstream
 CSVTable_iso.o: CSVTable.cpp $(CSVTable_hpp) $(addprefix ../, $(cstdio)) ../fstream
 
 .cpp.o:
-	$(CXX) -c $< $(CXXFLAGS) $(ARCH_FLAGS) -o $*.o
+	$(CXX) -c $< $(CXXFLAGS) $(ARCH_FLAGS) -DZAIMONI_HAVE_ACCURATE_MSIZE -o $*.o
 
 LangConf_iso.o:
 	$(CXX) -c $< $(CXXFLAGS) $(ARCH_FLAGS) -DZAIMONI_FORCE_ISO -o $*.o
