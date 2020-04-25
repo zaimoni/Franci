@@ -12,7 +12,7 @@
 #include "../Logging.h"
 #include "../boost_core.hpp"
 #include "../MetaRAM.hpp"
-#include "../repair.STL/algorithm"
+#include <algorithm>
 #include "../logic_lt.hpp"
 #include "operator.hpp"
 

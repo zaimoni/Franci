@@ -6,8 +6,8 @@
 
 #include "Logging.h"
 #include "boost_core.hpp"
-#include "repair.STL/algorithm"
-#include "repair.STL/type_traits"
+#include <algorithm>
+#include <type_traits>
 
 namespace zaimoni {
 

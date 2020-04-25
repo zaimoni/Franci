@@ -157,8 +157,8 @@ static bool _interpret_line_as_csv(const char FieldSeparator, const char FieldDe
 		CSV = REALLOC(CSV,CellIdx);
 #else
 		{
-		if (0==CellIdx)
-			FREE_AND_NULL(CSV)
+		if (0 == CellIdx)
+			FREE_AND_NULL(CSV);
 		else
 			CSV = REALLOC(CSV,CellIdx);
 		}
@@ -471,7 +471,7 @@ void CSVTable::CellText(size_t Row, const char* const Col, char*& Text)
 bool CSVTable::DeleteRow(size_t Row)
 {
 	ForceLinesRepresentation();
-	if (NULL!=RawLines and Row<RawLines.ArraySize())
+	if (NULL!=RawLines && Row<RawLines.ArraySize())
 		{
 		if (NoZLS && Row+1<RawLines.ArraySize())
 			{	// must protect NoZLS format

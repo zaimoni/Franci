@@ -5,7 +5,7 @@
 #ifndef ZAIMONI_STL_POD_HPP
 #define ZAIMONI_STL_POD_HPP 1
 
-#include "repair.STL/type_traits"
+#include <type_traits>
 #include "boost_core.hpp"
 #include <string.h>
 

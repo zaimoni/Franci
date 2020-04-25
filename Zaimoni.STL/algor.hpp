@@ -6,7 +6,7 @@
 
 #include "Logging.h"
 #include "boost_core.hpp"
-#include "Repair.STL/algorithm"
+#include <algorithm>
 #include <boost/concept_check.hpp>
 #include "boost/functional.hpp"
 

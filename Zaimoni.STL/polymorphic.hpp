@@ -6,7 +6,7 @@
 #define ZAIMONI_STL_POLYMORPHIC_HPP 1
 
 #include <typeinfo>			// to properly support CopyInto (MingWin).  This requires RTTI.
-#include "repair.STL/type_traits"
+#include <type_traits>
 
 namespace zaimoni	{
 

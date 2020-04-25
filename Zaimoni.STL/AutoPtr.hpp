@@ -62,7 +62,7 @@ public:
 	const autodel_ptr& operator=(T* src) {_meta_auto_ptr<T>::operator=(src); return *this;};
 	const autodel_ptr& operator=(autodel_ptr& src) {this->reset(src._ptr); return *this;};
 
-	friend void zaimoni::swap(autodel_ptr& lhs, autodel_ptr& rhs) {std::swap(lhs._ptr,rhs._ptr);};
+	friend void swap(autodel_ptr& lhs, autodel_ptr& rhs) {std::swap(lhs._ptr,rhs._ptr);};
 };
 
 template<typename T>
@@ -82,7 +82,7 @@ public:
 	const autoval_ptr& operator=(T* src) {_meta_auto_ptr<T>::operator=(src); return *this;};
 	const autoval_ptr& operator=(const autoval_ptr& src) {_meta_auto_ptr<T>::operator=(src); return *this;};
 
-	friend void zaimoni::swap(autoval_ptr& lhs, autoval_ptr& rhs) {std::swap(lhs._ptr,rhs._ptr);};
+	friend void swap(autoval_ptr& lhs, autoval_ptr& rhs) {std::swap(lhs._ptr,rhs._ptr);};
 };
 
 template<typename T>
@@ -156,7 +156,7 @@ public:
 #endif
 	const weakautoarray_ptr& operator=(weakautoarray_ptr& src) {this->reset(src._ptr); return *this;};
 
-	friend void zaimoni::swap(weakautoarray_ptr& lhs, weakautoarray_ptr& rhs) {lhs.swap(rhs);};
+	friend void swap(weakautoarray_ptr& lhs, weakautoarray_ptr& rhs) {lhs.swap(rhs);};
 };
 
 template<typename T>
@@ -176,7 +176,7 @@ public:
 #endif
 	const weakautoarray_ptr_throws& operator=(weakautoarray_ptr_throws& src) {_meta_weakautoarray_ptr<T>::operator=(src); return *this;};
 
-	friend void zaimoni::swap(weakautoarray_ptr_throws& lhs, weakautoarray_ptr_throws& rhs) {lhs.swap(rhs);};
+	friend void swap(weakautoarray_ptr_throws& lhs, weakautoarray_ptr_throws& rhs) {lhs.swap(rhs);};
 };
 
 template<typename T>
@@ -197,7 +197,7 @@ public:
 #endif
 	const weakautovalarray_ptr& operator=(weakautovalarray_ptr& src) {this->reset(src._ptr); return *this;};
 
-	friend void zaimoni::swap(weakautovalarray_ptr& lhs, weakautovalarray_ptr& rhs) {lhs.swap(rhs);};
+	friend void swap(weakautovalarray_ptr& lhs, weakautovalarray_ptr& rhs) {lhs.swap(rhs);};
 };
 
 template<typename T>
@@ -217,7 +217,7 @@ public:
 #endif
 	const weakautovalarray_ptr_throws& operator=(const weakautovalarray_ptr_throws& src) {_meta_weakautoarray_ptr<T>::operator=(src); return *this;};
 
-	friend void zaimoni::swap(weakautovalarray_ptr_throws& lhs, weakautovalarray_ptr_throws& rhs) {lhs.swap(rhs);};
+	friend void swap(weakautovalarray_ptr_throws& lhs, weakautovalarray_ptr_throws& rhs) {lhs.swap(rhs);};
 };
 
 template<typename T>
@@ -281,7 +281,7 @@ public:
 	const autoarray_ptr& operator=(autoarray_ptr& src) {this->reset(src._ptr); return *this;};
 
 	// swaps
-	friend void zaimoni::swap(autoarray_ptr<T>& lhs, autoarray_ptr<T>& rhs) {lhs.swap(rhs);};
+	friend void swap(autoarray_ptr<T>& lhs, autoarray_ptr<T>& rhs) {lhs.swap(rhs);};
 };
 
 template<typename T>
@@ -309,7 +309,7 @@ public:
 	const autovalarray_ptr& operator=(const autovalarray_ptr& src) {_meta_autoarray_ptr<T>::operator=(src); return *this;};
 
 	// swaps
-	friend void zaimoni::swap(autovalarray_ptr<T>& lhs, autovalarray_ptr<T>& rhs) {lhs.swap(rhs);};
+	friend void swap(autovalarray_ptr<T>& lhs, autovalarray_ptr<T>& rhs) {lhs.swap(rhs);};
 };
 
 template<typename T>
@@ -337,7 +337,7 @@ public:
 	const autovalarray_ptr_throws& operator=(const autovalarray_ptr_throws& src) {_meta_autoarray_ptr<T>::operator=(src); return *this;};
 
 	// swaps
-	friend void zaimoni::swap(autovalarray_ptr_throws<T>& lhs, autovalarray_ptr_throws<T>& rhs) {lhs.swap(rhs);};
+	friend void swap(autovalarray_ptr_throws<T>& lhs, autovalarray_ptr_throws<T>& rhs) {lhs.swap(rhs);};
 };
 
 template<typename T>
