@@ -10,7 +10,6 @@
 #define ZAIMONI_STL_METATYPE_C_ARRAY_HPP 1
 
 #include "../Logging.h"
-#include "../boost_core.hpp"
 #include "../MetaRAM.hpp"
 #include <algorithm>
 #include "../logic_lt.hpp"
@@ -189,16 +188,5 @@ inline void swap(static_c_array<T,N>& x, static_c_array<T,N>& y)
 {	x.swap(y);	}
 
 }	// namespace zaimoni
-
-namespace boost {
-
-#define ZAIMONI_TEMPLATE template<class T,size_t N>
-#define ZAIMONI_TYPE zaimoni::static_c_array<T,N>
-ZAIMONI_POD_STRUCT(ZAIMONI_TEMPLATE,ZAIMONI_TYPE,T)
-ZAIMONI_POD(ZAIMONI_TEMPLATE,ZAIMONI_TYPE,T)
-#undef ZAIMONI_TYPE
-#undef ZAIMONI_TEMPlATE
-
-}
 
 #endif

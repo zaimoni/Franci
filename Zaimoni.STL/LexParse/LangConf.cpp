@@ -2,12 +2,12 @@
 // configuration class for lexing programming languages
 // (C)2009,2010 Kenneth Boyd, license: MIT.txt
 
-using namespace std;
 #include <memory.h>
 #include "LangConf.hpp"
 #include "../POD.hpp"
 #include "../Pure.C/format_util.h"
 
+using namespace std;
 using namespace zaimoni;
 
 //! <br>* global filters 					[FlatFile]

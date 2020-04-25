@@ -215,31 +215,25 @@ _vector_equal(const T& lhs, const U& rhs, size_t Idx)
 
 // objects
 template<typename T>
-inline typename std::enable_if<!std::is_trivially_destructible<T>::value, void>::type
-_single_flush(T* _ptr)
+void _single_flush(T* _ptr)
 {
-	delete _ptr;
+	if constexpr (std::is_trivially_destructible_v<T>) {
+		free(_ptr);
+	} else {
+		delete _ptr;
+	}
 }
 
 // pointer arrays
 template<typename T>
-inline void
-_single_flush(T** _ptr)
+void _single_flush(T** _ptr)
 {
 	single_flush(*_ptr);
 	free(_ptr);
 }
 
 template<typename T>
-inline typename std::enable_if<std::is_trivially_destructible<T>::value, void>::type
-_single_flush(T* _ptr)
-{
-	free(_ptr);
-}
-
-template<typename T>
-inline void
-_weak_flush(T** _ptr)
+void _weak_flush(T** _ptr)
 {
 	free(_ptr);
 }
@@ -247,33 +241,22 @@ _weak_flush(T** _ptr)
 // _new_buffer/_new_buffer_nonNULL_throws and _flush [MetaRAM2.hpp] have to be synchronized for ISO C++
 // _new_buffer_nonNULL is in MetaRAM2.hpp, as it depends on Logging.h
 template<typename T>
-inline typename std::enable_if<!(std::is_trivially_default_constructible<T>::value && std::is_trivially_destructible<T>::value), T*>::type
-_new_buffer(size_t Idx)
+T* _new_buffer(size_t Idx)
 {
-	return new(std::nothrow) T[Idx];
-}
-
-template<typename T>
-inline typename std::enable_if<std::is_trivially_default_constructible<T>::value && std::is_trivially_destructible<T>::value, T*>::type
-_new_buffer(size_t Idx)
-{
-	return reinterpret_cast<T*>(calloc(Idx,sizeof(T)));
-}
-
-template<typename T>
-inline typename std::enable_if<!(std::is_trivially_default_constructible<T>::value && std::is_trivially_destructible<T>::value), T*>::type
-_new_buffer_nonNULL_throws(size_t Idx)
-{
-	return new T[Idx];
+	return (std::is_trivially_constructible_v<T> && std::is_trivially_destructible_v<T>) ? reinterpret_cast<T*>(calloc(Idx,sizeof(T))) : new(std::nothrow) T[Idx];
 }
 
 template<typename T>
 inline typename std::enable_if<std::is_trivially_default_constructible<T>::value && std::is_trivially_destructible<T>::value, T*>::type
 _new_buffer_nonNULL_throws(size_t Idx)
 {
-	T* tmp = reinterpret_cast<T*>(calloc(Idx,sizeof(T)));
-	if (!tmp) throw std::bad_alloc();
-	return tmp;
+	if constexpr (std::is_trivially_constructible_v<T> && std::is_trivially_destructible_v<T>) {
+		T* tmp = reinterpret_cast<T*>(calloc(Idx, sizeof(T)));
+		if (!tmp) throw std::bad_alloc();
+		return tmp;
+	} else {
+		return new T[Idx];
+	}
 }
 
 }	// end namespace zaimoni

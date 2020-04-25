@@ -6,7 +6,6 @@
 
 #include <limits>
 #include "Logging.h"
-#include "boost_core.hpp"
 #include "lite_alg.hpp"
 #include "pure.C/native.h"
 #include <type_traits>

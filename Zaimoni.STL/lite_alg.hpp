@@ -5,7 +5,6 @@
 #define ZAIMONI_LITE_ALG_HPP 1
 
 #include "Logging.h"
-#include "boost_core.hpp"
 #include <algorithm>
 #include <type_traits>
 

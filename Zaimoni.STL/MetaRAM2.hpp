@@ -7,7 +7,6 @@
 #define ZAIMONI_METARAM2_HPP 1
 
 #include "MetaRAM.hpp"
-#include "boost_core.hpp"
 #ifdef ZAIMONI_HAVE_ACCURATE_MSIZE
 #include "z_memory.h"
 #endif
@@ -72,19 +71,9 @@ void FlushNULLFromArray(T**& _ptr, size_t StartIdx)
 // _new_buffer_nonNULL and _flush have to be synchronized for ISO C++
 // _new_buffer and _new_buffer_nonNULL_throws are in MetaRAM.hpp (they don't depend on Logging.h)
 template<typename T>
-typename std::enable_if<!(boost::has_trivial_constructor<T>::value, boost::has_trivial_destructor<T>::value), T*>::type
-_new_buffer_nonNULL(size_t i)
+T* _new_buffer_nonNULL(size_t i)
 {
-	T* tmp = new(std::nothrow) T[i];
-	if (!tmp) _fatal("Irrecoverable failure to allocate memory");
-	return tmp;
-}
-
-template<typename T>
-inline typename std::enable_if<boost::has_trivial_constructor<T>::value && boost::has_trivial_destructor<T>::value, T*>::type
-_new_buffer_nonNULL(size_t i)
-{
-	T* tmp = reinterpret_cast<T*>(calloc(i,sizeof(T)));
+	T* tmp = (std::is_trivially_constructible_v<T> && std::is_trivially_destructible_v<T>) ? reinterpret_cast<T*>(calloc(i,sizeof(T))) : new(std::nothrow) T[i];
 	if (!tmp) _fatal("Irrecoverable failure to allocate memory");
 	return tmp;
 }
@@ -123,17 +112,13 @@ _delete_idx(T*& _ptr, size_t& _ptr_size, size_t i)
 }
 
 template<typename T>
-inline typename std::enable_if<!(boost::has_trivial_constructor<T>::value && boost::has_trivial_destructor<T>::value), void>::type
-_flush(T* _ptr)
+void _flush(T* _ptr)
 {
-	delete [] _ptr;
-}
-
-template<typename T>
-inline typename std::enable_if<boost::has_trivial_constructor<T>::value && boost::has_trivial_destructor<T>::value, void>::type
-_flush(T* _ptr)
-{
-	free(_ptr);
+	if constexpr (std::is_trivially_constructible_v<T> && std::is_trivially_destructible_v<T>) {
+		free(_ptr);
+	} else {
+		delete[] _ptr;
+	}
 }
 
 template<typename T>

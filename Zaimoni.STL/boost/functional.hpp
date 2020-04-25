@@ -3,9 +3,6 @@
 #ifndef ZAIMONI_STL_BOOST_FUNCTIONAL_HPP
 #define ZAIMONI_STL_BOOST_FUNCTIONAL_HPP 1
 
-#include "../boost_core.hpp"
-#include <boost/functional.hpp>
-
 // The STL made a design decision not to directly support mixed-mode operators.  We do support this.
 
 namespace zaimoni {

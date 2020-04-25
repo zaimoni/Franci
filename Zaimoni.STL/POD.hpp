@@ -1,12 +1,11 @@
 // POD.hpp
 // standardized helpers for POD types
-// (C)2009,2018 Kenneth Boyd, license: MIT.txt
+// (C)2009,2018,2020 Kenneth Boyd, license: MIT.txt
 
 #ifndef ZAIMONI_STL_POD_HPP
 #define ZAIMONI_STL_POD_HPP 1
 
 #include <type_traits>
-#include "boost_core.hpp"
 #include <string.h>
 
 // ==, != operators a bit too sophisticated for templating, even with infrastructure to detect padding or lack thereof
@@ -14,19 +13,18 @@
 namespace zaimoni
 {
 // zero-initialize anything with trivial assignment
-//! \todo use boost:;type_traits_ice_... to specialize this for sizeof(char),sizeof(short), etc.; then test to see if GCC benefits
 template<typename T>
-inline typename std::enable_if<boost::has_trivial_assign<typename std::remove_all_extents<T>::type>::value, void>::type
+inline typename std::enable_if<std::is_trivially_copy_assignable_v<typename std::remove_all_extents<T>::type>, void>::type
 clear(T& x)
 {	memset(&x,0,sizeof(T));}
 
 template<typename T>
-typename std::enable_if<boost::has_trivial_assign<T>::value, void>::type
+typename std::enable_if<std::is_trivially_copy_assignable_v<T>, void>::type
 clear(T* x,size_t n)
 {	if (x) memset(x,0,n*sizeof(T));}
 
 template<size_t n, typename T>
-typename std::enable_if<boost::has_trivial_assign<T>::value, void>::type
+typename std::enable_if<std::is_trivially_copy_assignable_v<T>, void>::type
 clear(T* x)
 {	if (x) memset(x,0,n*sizeof(T));}
 
@@ -36,8 +34,8 @@ clear(T* x)
 template<class T1, class T2>
 struct POD_pair
 {
-	BOOST_STATIC_ASSERT(boost::is_pod<T1>::value);
-	BOOST_STATIC_ASSERT(boost::is_pod<T2>::value);
+	static_assert(std::is_pod_v<T1>);
+	static_assert(std::is_pod_v<T2>);
 
 	typedef T1 first_type;
 	typedef T2 second_type;
@@ -66,9 +64,9 @@ operator<(const POD_pair<T1, T2>& x, const POD_pair<U1, U2>& y)
 template<class T1, class T2, class T3>
 struct POD_triple
 {
-	BOOST_STATIC_ASSERT(boost::is_pod<T1>::value);
-	BOOST_STATIC_ASSERT(boost::is_pod<T2>::value);
-	BOOST_STATIC_ASSERT(boost::is_pod<T3>::value);
+	static_assert(std::is_pod_v<T1>);
+	static_assert(std::is_pod_v<T2>);
+	static_assert(std::is_pod_v<T3>);
 
 	typedef T1 first_type;
 	typedef T2 second_type;
@@ -101,10 +99,10 @@ operator<(const POD_triple<T1, T2, T3>& x, const POD_triple<U1, U2, U3>& y)
 template<class T1, class T2, class T3, class T4>
 struct POD_quartet
 {
-	BOOST_STATIC_ASSERT(boost::is_pod<T1>::value);
-	BOOST_STATIC_ASSERT(boost::is_pod<T2>::value);
-	BOOST_STATIC_ASSERT(boost::is_pod<T3>::value);
-	BOOST_STATIC_ASSERT(boost::is_pod<T4>::value);
+	static_assert(std::is_pod_v<T1>);
+	static_assert(std::is_pod_v<T2>);
+	static_assert(std::is_pod_v<T3>);
+	static_assert(std::is_pod_v<T4>);
 
 	typedef T1 first_type;
 	typedef T2 second_type;
@@ -186,58 +184,5 @@ union union_heptuple
 };
 
 } // namespace zaimoni
-
-namespace boost {
-
-#define ZAIMONI_TEMPLATE_SPEC template<typename _T1,typename _T2>
-#define ZAIMONI_CLASS_SPEC zaimoni::POD_pair<_T1,_T2>
-ZAIMONI_POD_STRUCT(ZAIMONI_TEMPLATE_SPEC,ZAIMONI_CLASS_SPEC,_T1)
-#undef ZAIMONI_CLASS_SPEC
-#undef ZAIMONI_TEMPLATE_SPEC
-
-#define ZAIMONI_TEMPLATE_SPEC template<typename _T1,typename _T2,typename _T3>
-#define ZAIMONI_CLASS_SPEC zaimoni::POD_triple<_T1,_T2,_T3>
-ZAIMONI_POD_STRUCT(ZAIMONI_TEMPLATE_SPEC,ZAIMONI_CLASS_SPEC,_T1)
-#undef ZAIMONI_CLASS_SPEC
-#undef ZAIMONI_TEMPLATE_SPEC
-
-#define ZAIMONI_TEMPLATE_SPEC template<typename _T1,typename _T2,typename _T3,typename _T4>
-#define ZAIMONI_CLASS_SPEC zaimoni::POD_quartet<_T1,_T2,_T3,_T4>
-ZAIMONI_POD_STRUCT(ZAIMONI_TEMPLATE_SPEC,ZAIMONI_CLASS_SPEC,_T1)
-#undef ZAIMONI_CLASS_SPEC
-#undef ZAIMONI_TEMPLATE_SPEC
-
-#define ZAIMONI_TEMPLATE_SPEC template<typename _T1,typename _T2>
-#define ZAIMONI_CLASS_SPEC zaimoni::union_pair<_T1,_T2>
-ZAIMONI_POD_STRUCT(ZAIMONI_TEMPLATE_SPEC,ZAIMONI_CLASS_SPEC,_T1)
-#undef ZAIMONI_CLASS_SPEC
-#undef ZAIMONI_TEMPLATE_SPEC
-
-#define ZAIMONI_TEMPLATE_SPEC template<typename _T1,typename _T2,typename _T3>
-#define ZAIMONI_CLASS_SPEC zaimoni::union_triple<_T1,_T2,_T3>
-ZAIMONI_POD_STRUCT(ZAIMONI_TEMPLATE_SPEC,ZAIMONI_CLASS_SPEC,_T1)
-#undef ZAIMONI_CLASS_SPEC
-#undef ZAIMONI_TEMPLATE_SPEC
-
-#define ZAIMONI_TEMPLATE_SPEC template<typename _T1,typename _T2,typename _T3,typename _T4>
-#define ZAIMONI_CLASS_SPEC zaimoni::union_quartet<_T1,_T2,_T3,_T4>
-ZAIMONI_POD_STRUCT(ZAIMONI_TEMPLATE_SPEC,ZAIMONI_CLASS_SPEC,_T1)
-#undef ZAIMONI_CLASS_SPEC
-#undef ZAIMONI_TEMPLATE_SPEC
-
-#define ZAIMONI_TEMPLATE_SPEC template<typename _T1,typename _T2,typename _T3,typename _T4,typename _T5>
-#define ZAIMONI_CLASS_SPEC zaimoni::union_quintet<_T1,_T2,_T3,_T4,_T5>
-ZAIMONI_POD_STRUCT(ZAIMONI_TEMPLATE_SPEC,ZAIMONI_CLASS_SPEC,_T1)
-#undef ZAIMONI_CLASS_SPEC
-#undef ZAIMONI_TEMPLATE_SPEC
-
-#define ZAIMONI_TEMPLATE_SPEC template<typename _T1,typename _T2,typename _T3,typename _T4,typename _T5,typename _T6,typename _T7>
-#define ZAIMONI_CLASS_SPEC zaimoni::union_heptuple<_T1,_T2,_T3,_T4,_T5,_T6,_T7>
-ZAIMONI_POD_STRUCT(ZAIMONI_TEMPLATE_SPEC,ZAIMONI_CLASS_SPEC,_T1)
-#undef ZAIMONI_CLASS_SPEC
-#undef ZAIMONI_TEMPLATE_SPEC
-
-}
-
 
 #endif
