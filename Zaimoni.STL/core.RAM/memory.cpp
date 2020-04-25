@@ -897,7 +897,7 @@ _DynamicRAMIsNotObviouslyCorrupted(void)
 
 std::new_handler ZaimoniNewHandler = NULL;
 
-void* operator new(size_t NewSize) throw (std::bad_alloc)
+void* operator new(size_t NewSize)
 {
 	void* Tmp = calloc(1,NewSize);
 	if (ZaimoniNewHandler)
@@ -907,7 +907,7 @@ void* operator new(size_t NewSize) throw (std::bad_alloc)
 	return Tmp;
 }
 
-void* operator new[](std::size_t NewSize) throw (std::bad_alloc)
+void* operator new[](std::size_t NewSize)
 {
 	void* Tmp = calloc(1,NewSize);
 	if (ZaimoniNewHandler)

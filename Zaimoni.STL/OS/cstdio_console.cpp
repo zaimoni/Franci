@@ -17,8 +17,8 @@ Console* _console = NULL;
 
 #include "../MetaRAM2.hpp"
 #include "../fstream"
-#include "../pure.C/format_util.h"
-#include "../pure.C/logging.h"
+#include "../Pure.C/format_util.h"
+#include "../Pure.C/logging.h"
 #include <memory.h>
 #include <time.h>
 

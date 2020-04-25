@@ -1,0 +1,7 @@
+if(NOT DEFINED $CACHE{ZSTL_WINDOWS_H})
+	set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+	try_compile(ZSTL_LIB_OK ${CMAKE_CURRENT_SOURCE_DIR} ../../mutex.cpp)
+	set(ZSTL_WINDOWS_H ${ZSTL_LIB_OK} CACHE BOOL "Assume #include <windows.h> is the Windows OS header")
+endif()
+
+add_library(z_mutex STATIC mutex.cpp)

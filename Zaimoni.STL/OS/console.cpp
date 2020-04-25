@@ -25,8 +25,8 @@ Console* _console = NULL;
 
 #include "../MetaRAM2.hpp"
 #include "../fstream"
-#include "../pure.C/format_util.h"
-#include "../pure.C/logging.h"
+#include "../Pure.C/format_util.h"
+#include "../Pure.C/logging.h"
 #include <memory.h>
 #include <time.h>
 
@@ -1159,7 +1159,7 @@ static void line_out(const char* const x, size_t span)
 		};
 }
 
-static void line_out(const char* const x, size_t i, size_t* const LineBreakTable)
+static void line_out(const char* const x, short i, size_t* const LineBreakTable)
 {
 	if (0<LineBreakTable[i])
 		{
