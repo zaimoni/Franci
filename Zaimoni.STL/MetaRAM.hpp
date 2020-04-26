@@ -1,7 +1,7 @@
 /* MetaRAM.hpp */
 /* C++ interface to C++/C memory management libraries */
 /* limited functionality in C */
-/* (C)2009,2015,2018 Kenneth Boyd, license: MIT.txt */
+/* (C)2009,2015,2018,2020 Kenneth Boyd, license: MIT.txt */
 
 #ifndef ZAIMONI_METARAM_HPP
 #define ZAIMONI_METARAM_HPP 1
@@ -108,43 +108,34 @@ _copy_buffer(U* dest, const T* src, size_t Idx)
 }
 
 template<typename T>
-typename std::enable_if<!std::is_trivially_copy_assignable<T>::value, void>::type
-_copy_buffer(T* dest, const T* src, size_t Idx)
+void _copy_buffer(T* dest, const T* src, size_t Idx)
 {
-	do	{
-		--Idx;
-		dest[Idx] = src[Idx];
-		}
-	while(0<Idx);
-}
-
-template<typename T>
-inline typename std::enable_if<std::is_trivially_copy_assignable<T>::value, void>::type
-_copy_buffer(T* dest, const T* src, size_t Idx)
-{
-	memmove(dest,src,Idx*sizeof(T));
+	if constexpr (std::is_trivially_copy_assignable_v<T>) {
+		memmove(dest, src, Idx * sizeof(T));
+	} else {
+		do {
+			--Idx;
+			dest[Idx] = src[Idx];
+		} while (0 < Idx);
+	}
 }
 
 // for resize
 template<typename T>
-typename std::enable_if<has_MoveInto<T>::value, void>::type
-_copy_expendable_buffer(T* dest, T* src, size_t Idx)
+void _copy_expendable_buffer(T* dest, T* src, size_t Idx)
 {
-	do	{
-		--Idx;
-		src[Idx].MoveInto(dest[Idx]);
-		}
-	while(0<Idx);
+	if constexpr (has_MoveInto<T>::value) {
+		do {
+			--Idx;
+			src[Idx].MoveInto(dest[Idx]);
+		} while (0 < Idx);
+	} else {
+		_copy_buffer(dest, src, Idx);
+	}
 }
 
 template<typename T>
-inline typename std::enable_if<!has_MoveInto<T>::value, void>::type
-_copy_expendable_buffer(T* dest, const T* src, size_t Idx)
-{	_copy_buffer(dest,src,Idx);	}
-
-template<typename T>
-void
-_copy_expendable_buffer(T** dest, const T** src, size_t Idx)
+void _copy_expendable_buffer(T** dest, const T** src, size_t Idx)
 {	_copy_buffer(dest,src,Idx);	}
 
 // _vector_assign competes with std::fill_n
@@ -158,18 +149,14 @@ _vector_assign(U* dest, const T& src, size_t Idx)
 }
 
 template<typename T>
-typename std::enable_if<!(std::is_trivially_copy_assignable<T>::value && 1==sizeof(T)), void>::type
-_vector_assign(T* dest,typename zaimoni::param<T>::type src, size_t Idx)
+void _vector_assign(T* dest,typename zaimoni::param<T>::type src, size_t Idx)
 {
-	do	dest[--Idx] = src;
-	while(0<Idx);
-}
-
-template<typename T>
-inline typename std::enable_if<std::is_trivially_copy_assignable<T>::value && 1==sizeof(T), void>::type
-_vector_assign(T* dest,typename zaimoni::param<T>::type src, size_t Idx)
-{
-	memset(dest,src,Idx);
+	if (std::is_trivially_copy_assignable_v(T) && 1 == sizeof(T)) {
+		memset(dest, src, Idx);
+	} else {
+		do	dest[--Idx] = src;
+		while (0 < Idx);
+	}
 }
 
 template<typename T>
@@ -247,7 +234,7 @@ T* _new_buffer(size_t Idx)
 }
 
 template<typename T>
-inline typename std::enable_if<std::is_trivially_default_constructible<T>::value && std::is_trivially_destructible<T>::value, T*>::type
+std::enable_if_t<std::is_trivially_default_constructible_v<T> && std::is_trivially_destructible_v<T>, T*>
 _new_buffer_nonNULL_throws(size_t Idx)
 {
 	if constexpr (std::is_trivially_constructible_v<T> && std::is_trivially_destructible_v<T>) {

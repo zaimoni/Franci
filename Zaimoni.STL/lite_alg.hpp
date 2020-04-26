@@ -1,5 +1,5 @@
 // lite_alg.hpp
-// (C)2009,2015 Kenneth Boyd, license: MIT.txt
+// (C)2009,2015,2020 Kenneth Boyd, license: MIT.txt
 
 #ifndef ZAIMONI_LITE_ALG_HPP
 #define ZAIMONI_LITE_ALG_HPP 1
@@ -18,10 +18,9 @@ in_range(unsigned long test, const unsigned long LB, const unsigned long UB)
 }
 
 template<unsigned long LB,unsigned long UB>
-bool
-in_range(unsigned long test)
+bool in_range(unsigned long test)
 {
-	BOOST_STATIC_ASSERT(LB<UB);
+	static_assert(LB<UB);
 	return test-LB<=UB-LB;
 }
 

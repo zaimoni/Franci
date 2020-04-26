@@ -12,6 +12,18 @@
 #endif
 #include "Logging.h"
 
+#ifdef ZAIMONI_FORCE_ISO
+#define ZAIMONI_ISO_PARAM(A) , A
+#define ZAIMONI_ISO_SRC(A) A
+#define ZAIMONI_NONISO_SRC(A)
+#define ZAIMONI_NONISO_ISO_SRC(A, B) B
+#else
+#define ZAIMONI_ISO_PARAM(A)
+#define ZAIMONI_ISO_SRC(A)
+#define ZAIMONI_NONISO_SRC(A) A
+#define ZAIMONI_NONISO_ISO_SRC(A, B) A
+#endif
+
 namespace zaimoni	{
 
 template <class T> void
@@ -79,16 +91,12 @@ T* _new_buffer_nonNULL(size_t i)
 }
 
 template<typename T>
-typename std::enable_if<!(boost::has_trivial_destructor<T>::value && boost::has_trivial_assign<T>::value), void>::type
+typename std::enable_if<!(std::is_trivially_destructible_v<T> && std::is_trivially_copy_assignable_v<T>), void>::type
+_delete_idx(T*& _ptr ZAIMONI_ISO_PARAM(size_t& _ptr_size), size_t i)
+{
+	assert(_ptr ZAIMONI_ISO_SRC(&& 0 < _ptr_size));
 #ifndef ZAIMONI_FORCE_ISO
-_delete_idx(T*& _ptr, size_t i)
-{
-	assert(_ptr);
 	const size_t _ptr_size = ArraySize(_ptr);
-#else
-_delete_idx(T*& _ptr, size_t& _ptr_size, size_t i)
-{
-	assert(_ptr && 0<_ptr_size);
 #endif
 	if (1==_ptr_size)
 		{
@@ -122,20 +130,14 @@ void _flush(T* _ptr)
 }
 
 template<typename T>
-#ifndef ZAIMONI_FORCE_ISO
-void _flush(T** _ptr)
+void _flush(T** _ptr ZAIMONI_ISO_PARAM(size_t& _ptr_size))
 {
-	if (_ptr)
-		{
-		size_t i = ArraySize(_ptr);
-#else
-void _flush(T** _ptr, size_t& _ptr_size)
-{
+#ifdef ZAIMONI_FORCE_ISO
 	assert(_ptr ? 0<_ptr_size : 0==_ptr_size);
+#endif
 	if (_ptr)
 		{
-		size_t i = _ptr_size;
-#endif
+		size_t i = ZAIMONI_NONISO_ISO_SRC(ArraySize(_ptr), _ptr_size);
 		do	_single_flush(_ptr[--i]);
 		while(0<i);
 		free(_ptr);
@@ -146,7 +148,7 @@ void _flush(T** _ptr, size_t& _ptr_size)
 }
 
 template<typename T>
-inline typename std::enable_if<!(boost::is_pointer<T>::value || boost::is_member_pointer<T>::value), void>::type
+inline typename std::enable_if<!(std::is_pointer_v<T> || std::is_member_pointer_v<T>), void>::type
 _value_copy_buffer(T* dest,const T* src, size_t Idx) {_copy_buffer(dest,src,Idx);}
 
 template<typename T,typename U>
@@ -164,49 +166,38 @@ _value_copy_buffer(U** dest,const T* const * src, size_t Idx)
 }
 
 template<typename T>
-typename std::enable_if<is_polymorphic<T>::value, void>::type
-_value_copy_buffer(T** dest,const T* const * src, size_t Idx)
-{	// T had better support the virtual member function CopyInto
-	do	{
-		if (src[--Idx]) src[Idx]->CopyInto(dest[Idx]);
-		else{
-			_flush(dest[Idx]);
-			dest[Idx] = 0;
-			}
-		}
-	while(0<Idx);
-}
-
-template<typename T>
-typename std::enable_if<!is_polymorphic<T>::value, void>::type
-_value_copy_buffer(T** dest,const T* const * src, size_t Idx)
+void _value_copy_buffer(T** dest, const T* const* src, size_t Idx)
 {
-	do	{
-		if (src[--Idx]) CopyInto(*src[Idx],dest[Idx]);
-		else{
-			_flush(dest[Idx]);
-			dest[Idx] = 0;
+	if constexpr (is_polymorphic<T>::value) {
+		do {
+			if (src[--Idx]) src[Idx]->CopyInto(dest[Idx]);
+			else {
+				_flush(dest[Idx]);
+				dest[Idx] = 0;
 			}
-		}
-	while(0<Idx);
+		} while (0 < Idx);
+	} else {
+		do {
+			if (src[--Idx]) CopyInto(*src[Idx], dest[Idx]);
+			else {
+				_flush(dest[Idx]);
+				dest[Idx] = 0;
+			}
+		} while (0 < Idx);
+	}
 }
 
-
 template<typename T>
-typename std::enable_if<boost::has_trivial_destructor<T>::value && boost::has_trivial_assign<T>::value, void>::type
+typename std::enable_if<std::is_trivially_destructible_v<T>&& std::is_trivially_copy_assignable_v<T>, void>::type
+_delete_idx(T*& _ptr ZAIMONI_ISO_PARAM(size_t& _ptr_size), size_t i)
+{
+	assert(_ptr);
 #ifndef ZAIMONI_FORCE_ISO
-_delete_idx(T*& _ptr, size_t i)
-{
-	assert(_ptr);
 	const size_t _ptr_size = ArraySize(_ptr);
-	assert(i<_ptr_size);
 #else
-_delete_idx(T*& _ptr, size_t& _ptr_size, size_t i)
-{
-	assert(_ptr);
-	assert(i<_ptr_size);
 	assert(0<_ptr_size);
 #endif
+	assert(i < _ptr_size);
 	if (1==_ptr_size)
 		{
 		_flush(_ptr);
@@ -218,50 +209,35 @@ _delete_idx(T*& _ptr, size_t& _ptr_size, size_t i)
 		}
 	if (2<=_ptr_size-i)
 		memmove(_ptr+i,_ptr+i+1,sizeof(*_ptr)*(_ptr_size-i-1));
-#ifndef ZAIMONI_FORCE_ISO
-	_ptr=REALLOC(_ptr,sizeof(*_ptr)*(_ptr_size-1));
-#else
-	_ptr=REALLOC(_ptr,sizeof(*_ptr)* --_ptr_size);
-#endif
+	_ptr = REALLOC(_ptr, sizeof(*_ptr) * ZAIMONI_NONISO_ISO_SRC((_ptr_size - 1), --_ptr_size));
 }
 
 template<typename T>
-#ifndef ZAIMONI_FORCE_ISO
-inline void _safe_delete_idx(T*& _ptr, size_t i)
+inline void _safe_delete_idx(T*& _ptr ZAIMONI_ISO_PARAM(size_t& _ptr_size), size_t i)
 {
-	if (_ptr && i<ArraySize(_ptr)) _delete_idx(_ptr,i);
+	if (_ptr && i < ZAIMONI_NONISO_ISO_SRC(ArraySize(_ptr), _ptr_size)) _delete_idx(_ptr ZAIMONI_ISO_PARAM(_ptr_size), i);
 }
-#else
-inline void _safe_delete_idx(T*& _ptr, size_t& _ptr_size, size_t i)
-{
-	if (_ptr && i<_ptr_size) _delete_idx(_ptr,_ptr_size,i);
-}
-#endif
 
 template<typename T>
-#ifndef ZAIMONI_FORCE_ISO
-void _weak_delete_idx(T**& _ptr, size_t i)
+void _weak_delete_idx(T**& _ptr ZAIMONI_ISO_PARAM(size_t& _ptr_size), size_t i)
 {
 	assert(_ptr);
+#ifndef ZAIMONI_FORCE_ISO
 	const size_t _ptr_size = ArraySize(_ptr);
-#else
-void _weak_delete_idx(T**& _ptr, size_t& _ptr_size, size_t i)
-{
-	assert(_ptr);
 #endif
-	assert(i<_ptr_size);
-	if (1==_ptr_size)
-		{
+	assert(i < _ptr_size);
+	if (1 == _ptr_size)
+	{
 		_weak_flush(_ptr);
 		_ptr = 0;
 #ifdef ZAIMONI_FORCE_ISO
 		_ptr_size = 0;
 #endif
 		return;
-		}
-	if (2<=_ptr_size-i)
-		memmove(_ptr+i,_ptr+i+1,sizeof(T*)*(_ptr_size-i-1));
-	_ptr=REALLOC(_ptr,sizeof(T*)*(_ptr_size-1));
+	}
+	if (2 <= _ptr_size - i)
+		memmove(_ptr + i, _ptr + i + 1, sizeof(T*) * (_ptr_size - i - 1));
+	_ptr = REALLOC(_ptr, sizeof(T*) * (_ptr_size - 1));
 #ifdef ZAIMONI_FORCE_ISO
 	--_ptr_size;
 #endif
