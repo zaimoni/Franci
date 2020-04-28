@@ -6,7 +6,7 @@
 namespace zaimoni {
 
 template<class T>
-inline typename std::enable_if<boost::has_trivial_assign<T>::value, bool>::type
+typename std::enable_if<std::is_trivially_copy_assignable_v<T>, bool>::type
 GetBinaryFileImage(const char* const Filename,_meta_autoarray_ptr<T>& buf)
 {	// FORMALLY CORRECT: Kenneth Boyd, 11/10/2004
 	assert(Filename && *Filename);

@@ -66,7 +66,7 @@ public:
 };
 
 template<typename T>
-struct has_MoveInto<autodel_ptr<T> > : public boost::true_type
+struct has_MoveInto<autodel_ptr<T> > : public std::true_type
 {
 };
 
@@ -86,7 +86,7 @@ public:
 };
 
 template<typename T>
-struct has_MoveInto<autoval_ptr<T> > : public boost::true_type
+struct has_MoveInto<autoval_ptr<T> > : public std::true_type
 {
 };
 
@@ -95,40 +95,27 @@ class _meta_weakautoarray_ptr : public POD_autoarray_ptr<T>
 {
 public:
 	explicit _meta_weakautoarray_ptr() {this->NULLPtr();};
-#ifndef ZAIMONI_FORCE_ISO
-	explicit _meta_weakautoarray_ptr(T*& src) {this->_ptr = src; src = NULL;};
-#else
-	explicit _meta_weakautoarray_ptr(T*& src,size_t src_size) {this->_ptr = src; this->_size = src_size; src = NULL;};
-#endif
-	explicit _meta_weakautoarray_ptr(size_t n) {this->de_novo(n);};
-	explicit _meta_weakautoarray_ptr(const std::nothrow_t& tracer, size_t n) {this->de_novo_nothrow(n);};
-	explicit _meta_weakautoarray_ptr(const _meta_weakautoarray_ptr& src) {this->NULLPtr(); *this=src;};
-	~_meta_weakautoarray_ptr() {_weak_flush(this->_ptr);};
+	explicit _meta_weakautoarray_ptr(T*& src ZAIMONI_ISO_PARAM(size_t src_size)) { this->_ptr = src; ZAIMONI_ISO_SRC(this->_size = src_size;) src = 0; }
+	explicit _meta_weakautoarray_ptr(size_t n) { this->de_novo(n); }
+	explicit _meta_weakautoarray_ptr(const std::nothrow_t& tracer, size_t n) { this->de_novo_nothrow(n); }
+	explicit _meta_weakautoarray_ptr(const _meta_weakautoarray_ptr& src) { this->NULLPtr(); *this = src; }
+	~_meta_weakautoarray_ptr() { _weak_flush(this->_ptr); }
 
 #ifndef ZAIMONI_FORCE_ISO
 	void operator=(T* src);
 #endif
 	void operator=(const _meta_weakautoarray_ptr& src);
 	template<typename U> bool value_copy_of(const U& src);	// STL interfaces required of U: size(),data()
-	void reset() {_weak_flush(this->_ptr); this->NULLPtr();};
+	void reset() {_weak_flush(this->_ptr); this->NULLPtr();}
 	void TransferOutAndNULL(T*& dest) {_weak_flush(dest); dest = this->_ptr; this->NULLPtr();}
 
-#ifndef ZAIMONI_FORCE_ISO
-	void reset(T*& src);
-	void MoveInto(_meta_weakautoarray_ptr<T>& dest) {dest.reset(this->_ptr);};
-	bool Resize(size_t n) {return _weak_resize(this->_ptr,n);};
-	void FastDeleteIdx(size_t n) {_weak_delete_idx(this->_ptr,n);};
-	void DeleteIdx(size_t n) {_safe_weak_delete_idx(this->_ptr,n);};
-	void DeleteNSlotsAt(size_t n, size_t Idx) {_weak_delete_n_slots_at(this->_ptr,n,Idx);};
-#else
-	void reset(T*& src,size_t n);
-	void MoveInto(_meta_weakautoarray_ptr<T>& dest) {dest.reset(this->_ptr,this->_size);};
-	bool Resize(size_t n) {return _weak_resize(this->_ptr,this->_size,n);};
-	void FastDeleteIdx(size_t n) {_weak_delete_idx(this->_ptr,this->_size,n);};
-	void DeleteIdx(size_t n) {_safe_weak_delete_idx(this->_ptr,this->_size,n);};
-	void DeleteNSlotsAt(size_t n, size_t Idx) {_weak_delete_n_slots_at(this->_ptr,this->_size,n,Idx);};
-#endif
-	void resize(size_t n) {if (!Resize(n)) throw std::bad_alloc();};	
+	void reset(T*& src ZAIMONI_ISO_PARAM(size_t n));
+	void MoveInto(_meta_weakautoarray_ptr<T>& dest) { dest.reset(this->_ptr ZAIMONI_ISO_PARAM(this->_size)); }
+	bool Resize(size_t n) { return _weak_resize(this->_ptr ZAIMONI_ISO_PARAM(this->_size), n); }
+	void FastDeleteIdx(size_t n) { _weak_delete_idx(this->_ptr ZAIMONI_ISO_PARAM(this->_size), n); }
+	void DeleteIdx(size_t n) { _safe_weak_delete_idx(this->_ptr ZAIMONI_ISO_PARAM(this->_size), n); }
+	void DeleteNSlotsAt(size_t n, size_t Idx) { _weak_delete_n_slots_at(this->_ptr ZAIMONI_ISO_PARAM(this->_size), n, Idx); }
+	void resize(size_t n) {if (!Resize(n)) throw std::bad_alloc();}
 	
 	// Perl grep
 	// next two require of U: STL size(),data()
@@ -136,7 +123,7 @@ public:
 	template<typename U,typename op> bool invgrep(const U& src,op Predicate);
 
 	// erase all elements
-	void clear() {_weak_flush(this->_ptr); this->NULLPtr();};
+	void clear() {_weak_flush(this->_ptr); this->NULLPtr();}
 };
 
 template<typename T>
@@ -145,11 +132,11 @@ class weakautoarray_ptr : public _meta_weakautoarray_ptr<T>
 public:
 	ZAIMONI_STL_TYPE_GLUE_ARRAY(T);
 
-	explicit weakautoarray_ptr() {};
-	explicit weakautoarray_ptr(T*& src) : _meta_weakautoarray_ptr<T>(src) {};
-	explicit weakautoarray_ptr(size_t n) : _meta_weakautoarray_ptr<T>(std::nothrow,n) {};
-	explicit weakautoarray_ptr(weakautoarray_ptr& src) : _meta_weakautoarray_ptr<T>(src._ptr) {};
-//	~weakautoarray_ptr();	// default OK
+	explicit weakautoarray_ptr() = default;
+	explicit weakautoarray_ptr(T*& src) : _meta_weakautoarray_ptr<T>(src) {}
+	explicit weakautoarray_ptr(size_t n) : _meta_weakautoarray_ptr<T>(std::nothrow,n) {}
+	explicit weakautoarray_ptr(weakautoarray_ptr& src) : _meta_weakautoarray_ptr<T>(src._ptr) {}
+	~weakautoarray_ptr() = default;
 
 #ifndef ZAIMONI_FORCE_ISO
 	const weakautoarray_ptr& operator=(T* src) {_meta_weakautoarray_ptr<T>::operator=(src); return *this;};
@@ -165,11 +152,11 @@ class weakautoarray_ptr_throws : public _meta_weakautoarray_ptr<T>
 public:
 	ZAIMONI_STL_TYPE_GLUE_ARRAY(T);
 
-	explicit weakautoarray_ptr_throws() {};
-	explicit weakautoarray_ptr_throws(T*& src) : _meta_weakautoarray_ptr<T>(src) {};
-	explicit weakautoarray_ptr_throws(size_t n) : _meta_weakautoarray_ptr<T>(n) {};
-	explicit weakautoarray_ptr_throws(weakautoarray_ptr_throws& src) : _meta_weakautoarray_ptr<T>(src._ptr) {};
-//	~weakautoarray_ptr_throws();	// default OK
+	explicit weakautoarray_ptr_throws() = default;
+	explicit weakautoarray_ptr_throws(T*& src) : _meta_weakautoarray_ptr<T>(src) {}
+	explicit weakautoarray_ptr_throws(size_t n) : _meta_weakautoarray_ptr<T>(n) {}
+	explicit weakautoarray_ptr_throws(weakautoarray_ptr_throws& src) : _meta_weakautoarray_ptr<T>(src._ptr) {}
+	~weakautoarray_ptr_throws() = default;
 
 #ifndef ZAIMONI_FORCE_ISO
 	const weakautoarray_ptr_throws& operator=(T* src) {_meta_weakautoarray_ptr<T>::operator=(src); return *this;};
@@ -185,19 +172,19 @@ class weakautovalarray_ptr : public _meta_weakautoarray_ptr<T>
 public:
 	ZAIMONI_STL_TYPE_GLUE_ARRAY(T);
 
-	explicit weakautovalarray_ptr() {};
-	explicit weakautovalarray_ptr(T*& src) : _meta_weakautoarray_ptr<T>(src) {};
-	explicit weakautovalarray_ptr(size_t n) : _meta_weakautoarray_ptr<T>(std::nothrow,n) {};
-	explicit weakautovalarray_ptr(const weakautovalarray_ptr& src) : _meta_weakautoarray_ptr<T>(src) {};
-	explicit weakautovalarray_ptr(const _meta_weakautoarray_ptr<T>& src) : _meta_weakautoarray_ptr<T>(src) {};
-//	~weakautoarray_ptr();	// default OK
+	explicit weakautovalarray_ptr() = default;
+	explicit weakautovalarray_ptr(T*& src) : _meta_weakautoarray_ptr<T>(src) {}
+	explicit weakautovalarray_ptr(size_t n) : _meta_weakautoarray_ptr<T>(std::nothrow,n) {}
+	explicit weakautovalarray_ptr(const weakautovalarray_ptr& src) : _meta_weakautoarray_ptr<T>(src) {}
+	explicit weakautovalarray_ptr(const _meta_weakautoarray_ptr<T>& src) : _meta_weakautoarray_ptr<T>(src) {}
+	~weakautovalarray_ptr() = default;
 
 #ifndef ZAIMONI_FORCE_ISO
-	const weakautovalarray_ptr& operator=(T* src) {_meta_weakautoarray_ptr<T>::operator=(src); return *this;};
+	const weakautovalarray_ptr& operator=(T* src) {_meta_weakautoarray_ptr<T>::operator=(src); return *this;}
 #endif
-	const weakautovalarray_ptr& operator=(weakautovalarray_ptr& src) {this->reset(src._ptr); return *this;};
+	const weakautovalarray_ptr& operator=(weakautovalarray_ptr& src) {this->reset(src._ptr); return *this;}
 
-	friend void swap(weakautovalarray_ptr& lhs, weakautovalarray_ptr& rhs) {lhs.swap(rhs);};
+	friend void swap(weakautovalarray_ptr& lhs, weakautovalarray_ptr& rhs) {lhs.swap(rhs);}
 };
 
 template<typename T>
@@ -206,34 +193,30 @@ class weakautovalarray_ptr_throws : public _meta_weakautoarray_ptr<T>
 public:
 	ZAIMONI_STL_TYPE_GLUE_ARRAY(T);
 
-	explicit weakautovalarray_ptr_throws() {};
-	explicit weakautovalarray_ptr_throws(T*& src) : _meta_weakautoarray_ptr<T>(src) {};
-	explicit weakautovalarray_ptr_throws(size_t n) : _meta_weakautoarray_ptr<T>(n) {};
-	explicit weakautovalarray_ptr_throws(const weakautovalarray_ptr_throws& src) : _meta_weakautoarray_ptr<T>(src) {};
-//	~weakautoarray_ptr_throws();	// default OK
+	explicit weakautovalarray_ptr_throws() = default;
+	explicit weakautovalarray_ptr_throws(T*& src) : _meta_weakautoarray_ptr<T>(src) {}
+	explicit weakautovalarray_ptr_throws(size_t n) : _meta_weakautoarray_ptr<T>(n) {}
+	explicit weakautovalarray_ptr_throws(const weakautovalarray_ptr_throws& src) : _meta_weakautoarray_ptr<T>(src) {}
+	~weakautovalarray_ptr_throws() = default;
 
 #ifndef ZAIMONI_FORCE_ISO
-	const weakautovalarray_ptr_throws& operator=(T* src) {_meta_weakautoarray_ptr<T>::operator=(src); return *this;};
+	const weakautovalarray_ptr_throws& operator=(T* src) {_meta_weakautoarray_ptr<T>::operator=(src); return *this;}
 #endif
-	const weakautovalarray_ptr_throws& operator=(const weakautovalarray_ptr_throws& src) {_meta_weakautoarray_ptr<T>::operator=(src); return *this;};
+	const weakautovalarray_ptr_throws& operator=(const weakautovalarray_ptr_throws& src) {_meta_weakautoarray_ptr<T>::operator=(src); return *this;}
 
-	friend void swap(weakautovalarray_ptr_throws& lhs, weakautovalarray_ptr_throws& rhs) {lhs.swap(rhs);};
+	friend void swap(weakautovalarray_ptr_throws& lhs, weakautovalarray_ptr_throws& rhs) {lhs.swap(rhs);}
 };
 
 template<typename T>
 class _meta_autoarray_ptr : public POD_autoarray_ptr<T>
 {
 protected:
-	explicit _meta_autoarray_ptr() {this->NULLPtr();};	
-#ifndef ZAIMONI_FORCE_ISO
-	explicit _meta_autoarray_ptr(T*& src) {this->_ptr = src; src = NULL;};
-#else
-	explicit _meta_autoarray_ptr(T*& src,size_t src_size) {this->_ptr = src; this->_size = src_size; src = NULL;};
-#endif
-	explicit _meta_autoarray_ptr(size_t n) {this->de_novo(n);};
-	explicit _meta_autoarray_ptr(const std::nothrow_t& tracer, size_t n) {this->de_novo_nothrow(n);};
-	explicit _meta_autoarray_ptr(const _meta_autoarray_ptr& src) {this->NULLPtr(); *this=src;};
-	~_meta_autoarray_ptr() {_flush(this->_ptr);};
+	explicit _meta_autoarray_ptr() {this->NULLPtr();}
+	explicit _meta_autoarray_ptr(T*& src, size_t src_size) { this->_ptr = src; ZAIMONI_ISO_SRC(this->_size = src_size;) src = 0; }
+	explicit _meta_autoarray_ptr(size_t n) {this->de_novo(n);}
+	explicit _meta_autoarray_ptr(const std::nothrow_t& tracer, size_t n) {this->de_novo_nothrow(n);}
+	explicit _meta_autoarray_ptr(const _meta_autoarray_ptr& src) {this->NULLPtr(); *this=src;}
+	~_meta_autoarray_ptr() {_flush(this->_ptr);}
 
 #ifndef ZAIMONI_FORCE_ISO
 	void operator=(T* src);
@@ -245,24 +228,18 @@ public:
 	ZAIMONI_STL_TYPE_GLUE_ARRAY(T);
 
 	template<typename U> bool value_copy_of(const U& src);	// STL interfaces required of U: size(),data()
-	void reset() {_flush(this->_ptr); this->NULLPtr();};
-	void TransferOutAndNULL(T*& dest) {_flush(dest); dest = this->_ptr; this->NULLPtr();};
+	void reset() {_flush(this->_ptr); this->NULLPtr();}
+	void TransferOutAndNULL(T*& dest) {_flush(dest); dest = this->_ptr; this->NULLPtr();}
 
-#ifndef ZAIMONI_FORCE_ISO
-	void reset(T*& src);
-	void MoveInto(_meta_autoarray_ptr<T>& dest) {dest.reset(this->_ptr);};
-#else
-	void reset(T*& src,size_t n);
-	void MoveInto(_meta_autoarray_ptr<T>& dest) {dest.reset(this->_ptr,this->_size);};
-#endif
+	void reset(T*& src ZAIMONI_ISO_PARAM(size_t n));
+	void MoveInto(_meta_autoarray_ptr<T>& dest) { dest.reset(this->_ptr ZAIMONI_ISO_PARAM(this->_size)); }
 
 	// Perl grep
 	// these two assume T has valid * operator
 	template<typename U> bool grep(UnaryPredicate* Predicate,_meta_autoarray_ptr<U*>& dest) const;
 	template<typename U> bool invgrep(UnaryPredicate* Predicate,_meta_autoarray_ptr<U*>& dest) const;
 
-	// erase all elements
-	void clear() {_flush(this->_ptr); this->NULLPtr();};
+	void clear() {_flush(this->_ptr); this->NULLPtr();} // erase all elements
 };
 
 template<typename T>
@@ -271,21 +248,21 @@ class autoarray_ptr : public _meta_autoarray_ptr<T>
 public:
 	ZAIMONI_STL_TYPE_GLUE_ARRAY(T);
 
-	explicit autoarray_ptr() {};
-	explicit autoarray_ptr(T*& src) : _meta_autoarray_ptr<T>(src) {};
-	explicit autoarray_ptr(size_t n) : _meta_autoarray_ptr<T>(std::nothrow,n) {};
-	explicit autoarray_ptr(autoarray_ptr& src) : _meta_autoarray_ptr<T>(src._ptr) {};
-//	~autoarray_ptr();	// default OK
+	explicit autoarray_ptr() = default;
+	explicit autoarray_ptr(T*& src) : _meta_autoarray_ptr<T>(src) {}
+	explicit autoarray_ptr(size_t n) : _meta_autoarray_ptr<T>(std::nothrow,n) {}
+	explicit autoarray_ptr(autoarray_ptr& src) : _meta_autoarray_ptr<T>(src._ptr) {}
+	~autoarray_ptr() = default;
 
-	const autoarray_ptr& operator=(T* src) {_meta_autoarray_ptr<T>::operator=(src); return *this;};
-	const autoarray_ptr& operator=(autoarray_ptr& src) {this->reset(src._ptr); return *this;};
+	const autoarray_ptr& operator=(T* src) {_meta_autoarray_ptr<T>::operator=(src); return *this;}
+	const autoarray_ptr& operator=(autoarray_ptr& src) {this->reset(src._ptr); return *this;}
 
 	// swaps
-	friend void swap(autoarray_ptr<T>& lhs, autoarray_ptr<T>& rhs) {lhs.swap(rhs);};
+	friend void swap(autoarray_ptr<T>& lhs, autoarray_ptr<T>& rhs) {lhs.swap(rhs);}
 };
 
 template<typename T>
-struct has_MoveInto<autoarray_ptr<T> > : public boost::true_type
+struct has_MoveInto<autoarray_ptr<T> > : public std::true_type
 {
 };
 
@@ -295,25 +272,21 @@ class autovalarray_ptr : public _meta_autoarray_ptr<T>
 public:
 	ZAIMONI_STL_TYPE_GLUE_ARRAY(T);
 
-	explicit autovalarray_ptr() {};
-#ifndef ZAIMONI_FORCE_ISO
-	explicit autovalarray_ptr(T*& src) : _meta_autoarray_ptr<T>(src) {};
-#else
-	explicit autovalarray_ptr(T*& src,size_t src_size) : _meta_autoarray_ptr<T>(src,src_size) {};
-#endif
-	explicit autovalarray_ptr(size_t n) : _meta_autoarray_ptr<T>(std::nothrow,n) {};
-	autovalarray_ptr(const autovalarray_ptr& src) : _meta_autoarray_ptr<T>(src) {};
-//	~autovalarray_ptr();	// default OK
+	explicit autovalarray_ptr() = default;
+	explicit autovalarray_ptr(T * &src ZAIMONI_ISO_PARAM(size_t src_size)) : _meta_autoarray_ptr<T>(src ZAIMONI_ISO_PARAM(src_size)) {}
+	explicit autovalarray_ptr(size_t n) : _meta_autoarray_ptr<T>(std::nothrow, n) {}
+	autovalarray_ptr(const autovalarray_ptr & src) : _meta_autoarray_ptr<T>(src) {}
+	~autovalarray_ptr() = default;
 
-	const autovalarray_ptr& operator=(T* src) {_meta_autoarray_ptr<T>::operator=(src); return *this;};
-	const autovalarray_ptr& operator=(const autovalarray_ptr& src) {_meta_autoarray_ptr<T>::operator=(src); return *this;};
+	const autovalarray_ptr& operator=(T * src) { _meta_autoarray_ptr<T>::operator=(src); return *this; }
+	const autovalarray_ptr& operator=(const autovalarray_ptr & src) { _meta_autoarray_ptr<T>::operator=(src); return *this; }
 
 	// swaps
-	friend void swap(autovalarray_ptr<T>& lhs, autovalarray_ptr<T>& rhs) {lhs.swap(rhs);};
+	friend void swap(autovalarray_ptr<T> & lhs, autovalarray_ptr<T> & rhs) { lhs.swap(rhs); }
 };
 
 template<typename T>
-struct has_MoveInto<autovalarray_ptr<T> > : public boost::true_type
+struct has_MoveInto<autovalarray_ptr<T> > : public std::true_type
 {
 };
 
@@ -323,25 +296,21 @@ class autovalarray_ptr_throws : public _meta_autoarray_ptr<T>
 public:
 	ZAIMONI_STL_TYPE_GLUE_ARRAY(T);
 
-	explicit autovalarray_ptr_throws() {};
-#ifndef ZAIMONI_FORCE_ISO
-	explicit autovalarray_ptr_throws(T*& src) : _meta_autoarray_ptr<T>(src) {};
-#else
-	explicit autovalarray_ptr_throws(T*& src,size_t src_size) : _meta_autoarray_ptr<T>(src,src_size) {};
-#endif
-	explicit autovalarray_ptr_throws(size_t n) : _meta_autoarray_ptr<T>(n) {};
-	autovalarray_ptr_throws(const autovalarray_ptr_throws& src) : _meta_autoarray_ptr<T>(src) {};
-//	~autovalarray_ptr_throw();	// default OK
+	explicit autovalarray_ptr_throws() = default;
+	explicit autovalarray_ptr_throws(T * &src ZAIMONI_ISO_PARAM(size_t src_size)) : _meta_autoarray_ptr<T>(src ZAIMONI_ISO_PARAM(src_size)) {}
+	explicit autovalarray_ptr_throws(size_t n) : _meta_autoarray_ptr<T>(n) {}
+	autovalarray_ptr_throws(const autovalarray_ptr_throws & src) : _meta_autoarray_ptr<T>(src) {}
+	~autovalarray_ptr_throws() = default;
 
-	const autovalarray_ptr_throws& operator=(T* src) {_meta_autoarray_ptr<T>::operator=(src); return *this;};
-	const autovalarray_ptr_throws& operator=(const autovalarray_ptr_throws& src) {_meta_autoarray_ptr<T>::operator=(src); return *this;};
+	const autovalarray_ptr_throws& operator=(T * src) { _meta_autoarray_ptr<T>::operator=(src); return *this; }
+	const autovalarray_ptr_throws& operator=(const autovalarray_ptr_throws & src) { _meta_autoarray_ptr<T>::operator=(src); return *this; }
 
 	// swaps
-	friend void swap(autovalarray_ptr_throws<T>& lhs, autovalarray_ptr_throws<T>& rhs) {lhs.swap(rhs);};
+	friend void swap(autovalarray_ptr_throws<T> & lhs, autovalarray_ptr_throws<T> & rhs) { lhs.swap(rhs); }
 };
 
 template<typename T>
-struct has_MoveInto<autovalarray_ptr_throws<T> > : public boost::true_type
+struct has_MoveInto<autovalarray_ptr_throws<T> > : public std::true_type
 {
 };
 
@@ -510,11 +479,7 @@ _meta_autoarray_ptr<T>::value_copy_of(const U& src)
 }
 
 template<typename T>
-#ifndef ZAIMONI_FORCE_ISO
-void _meta_autoarray_ptr<T>::reset(T*& src)
-#else
-void _meta_autoarray_ptr<T>::reset(T*& src, size_t n)
-#endif
+void _meta_autoarray_ptr<T>::reset(T*& src ZAIMONI_ISO_PARAM(size_t n))
 {	// this convolution handles a recursion issue
 	T* tmp = src;
 	src = NULL;
@@ -529,11 +494,7 @@ void _meta_autoarray_ptr<T>::reset(T*& src, size_t n)
 }
 
 template<typename T>
-#ifndef ZAIMONI_FORCE_ISO
-void _meta_weakautoarray_ptr<T>::reset(T*& src)
-#else
-void _meta_weakautoarray_ptr<T>::reset(T*& src,size_t n)
-#endif
+void _meta_weakautoarray_ptr<T>::reset(T*& src ZAIMONI_ISO_PARAM(size_t n))
 {	// this convolution handles a recursion issue
 	T* tmp = src;
 	src = NULL;

@@ -288,8 +288,8 @@ LangConf::Error(const char* msg, const char* filename, size_t line, size_t posit
 		strcpy(tracking_target,Buffer);
 		tracking_target += strlen(Buffer);
 		}
-	strcpy(tracking_target,": error: ");
-	tracking_target += sizeof(": error: ")-1;
+	strcpy(tracking_target,": er" "ror: ");	// work around Visual Studio 2020-04-28
+	tracking_target += sizeof(": er" "ror: ")-1;
 	strcpy(tracking_target,msg);
 	INFORM(target);
 	free(target);
