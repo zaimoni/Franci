@@ -1,5 +1,5 @@
 // c_array.hpp
-// (C)2009,2011 Kenneth Boyd, license: MIT.txt
+// (C)2009,2011,2020 Kenneth Boyd, license: MIT.txt
 
 // base types to signal that a class type is meant to be used like a C array.
 
@@ -103,15 +103,15 @@ struct c_array_CRTP : public c_array<T>
 	std::reverse_iterator<const T*> rend() const { return begin(); };
 
 	// assign one value to all elements
-	void assign(typename boost::call_traits<T>::param_type value)
+	void assign(typename zaimoni::param<T>::type value)
 	{	_vector_assign(begin(),value,static_cast<Derived*>(this)->size());	};
 };
 
-// not a true aggregate type, since it has a base class.  Use boost::array if that is really needed.
+// not a true aggregate type, since it has a base class.  Use std::array if that is really needed.
 template<class T,size_t N>
 struct static_c_array : public c_array_CRTP<static_c_array<T,N>, T>
 {
-	BOOST_STATIC_ASSERT(1<=N);
+	static_assert(1<=N);
 	ZAIMONI_STL_TYPE_GLUE_ARRAY(T);
 
 	T x_i[N];	// the array
@@ -122,7 +122,7 @@ struct static_c_array : public c_array_CRTP<static_c_array<T,N>, T>
 	// static_c_array& operator=(const static_c_array& src);	// ok
 
 	// default-initialize to given value
-	explicit static_c_array(typename boost::call_traits<T>::param_type src) {this->assign(src);};
+	explicit static_c_array(typename zaimoni::param<T>::type src) {this->assign(src);};
 	// default-initialize from another static_c_array
 	template<class U> explicit static_c_array(const static_c_array<U,N>& src) {std::copy_n(src.data(),N,x_i);}
 	// default-initialize from iterator
@@ -184,8 +184,7 @@ ZAIMONI_CROSSSUBTYPE_TOTAL_ORDERING(ZAIMONI_CROSS_TEMPLATE,ZAIMONI_CROSS_STATIC_
 
 // global swap()
 template<class T, size_t N>
-inline void swap(static_c_array<T,N>& x, static_c_array<T,N>& y)
-{	x.swap(y);	}
+void swap(static_c_array<T,N>& x, static_c_array<T,N>& y) {	x.swap(y);	}
 
 }	// namespace zaimoni
 

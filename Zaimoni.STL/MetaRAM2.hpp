@@ -1,7 +1,7 @@
 // MetaRAM2.hpp
 // more C++ memory interface functions
 // these require the Iskandria memory manager
-// (C)2009,2010,2015 Kenneth Boyd, license: MIT.txt
+// (C)2009,2010,2015,2020 Kenneth Boyd, license: MIT.txt
 
 #ifndef ZAIMONI_METARAM2_HPP
 #define ZAIMONI_METARAM2_HPP 1
@@ -510,27 +510,21 @@ bool _weak_resize(T**& _ptr ZAIMONI_ISO_PARAM(size_t& _ptr_size), size_t n)
 }
 
 template<typename T,typename U>
-typename std::enable_if<boost::has_trivial_constructor<T>::value && boost::has_trivial_assign<T>::value, bool>::type
-#ifndef ZAIMONI_FORCE_ISO
-_insert_slot_at(T*& _ptr,size_t i,U _default)
+std::enable_if_t<std::is_trivially_constructible_v<T> && std::is_trivially_copy_assignable_v<T>, bool>
+_insert_slot_at(T*& _ptr ZAIMONI_ISO_PARAM(size_t& _ptr_size), size_t i, U _default)
 {
-	const size_t _ptr_size_old = SafeArraySize(_ptr);
-	if (_resize(_ptr,_ptr_size_old+1))
-#else
-_insert_slot_at(T*& _ptr,size_t& _ptr_size,size_t i,U _default)
-{
+#ifdef ZAIMONI_FORCE_ISO
 	assert(_ptr ? 0<_ptr_size : 0==_ptr_size);
-	const size_t _ptr_size_old = _ptr_size;
-	if (_resize(_ptr,_ptr_size,_ptr_size_old+1))
 #endif
-		{
+	const size_t _ptr_size_old = ZAIMONI_NONISO_ISO_SRC(SafeArraySize(_ptr), _ptr_size);
+	if (_resize(_ptr ZAIMONI_ISO_PARAM(_ptr_size),_ptr_size_old+1)) {
 		T* const _offset_ptr = _ptr+i;
 		if (_ptr_size_old>i)
 			memmove(_offset_ptr+1,_offset_ptr,sizeof(*_ptr)*(_ptr_size_old-i));
 
 		*_offset_ptr = _default;	// do not static-cast
 		return true;
-		}
+	}
 	return false;
 }
 
@@ -554,46 +548,33 @@ bool _insert_slot_at(T**& _ptr ZAIMONI_ISO_PARAM(size_t& _ptr_size), size_t i, U
 }
 
 template<typename T>
-#ifndef ZAIMONI_FORCE_ISO
-typename std::enable_if<boost::has_trivial_constructor<T>::value && boost::has_trivial_assign<T>::value, bool>::type
-_insert_n_slots_at(T*& _ptr, size_t n, size_t i)
+std::enable_if_t<std::is_trivially_constructible_v<T>&& std::is_trivially_copy_assignable_v<T>, bool>
+_insert_n_slots_at(T*& _ptr ZAIMONI_ISO_PARAM(size_t& _ptr_size), size_t n, size_t i)
 {
-	const size_t _ptr_size_old = SafeArraySize(_ptr);
-	if (_resize(_ptr,_ptr_size_old+n))
-#else
-typename std::enable_if<boost::has_trivial_constructor<T>::value && boost::has_trivial_assign<T>::value, bool>::type
-_insert_n_slots_at(T*& _ptr, size_t& _ptr_size, size_t n, size_t i)
-{
-	assert(_ptr ? 0<_ptr_size : 0==_ptr_size);
-	const size_t _ptr_size_old = _ptr_size;
-	if (_resize(_ptr,_ptr_size,_ptr_size_old+n))
+#ifdef ZAIMONI_FORCE_ISO
+	assert(_ptr ? 0 < _ptr_size : 0 == _ptr_size);
 #endif
-		{
-		T* const _offset_ptr = _ptr+i;
-		if (_ptr_size_old>i)
-			memmove(_offset_ptr+n,_offset_ptr,sizeof(*_ptr)*(_ptr_size_old-i));
+	const size_t _ptr_size_old = ZAIMONI_NONISO_ISO_SRC(SafeArraySize(_ptr), _ptr_size);
+	if (_resize(_ptr ZAIMONI_ISO_PARAM(_ptr_size), _ptr_size_old + n)) {
+		T* const _offset_ptr = _ptr + i;
+		if (_ptr_size_old > i)
+			memmove(_offset_ptr + n, _offset_ptr, sizeof(*_ptr) * (_ptr_size_old - i));
 #ifdef ZAIMONI_FORCE_ISO
 		_ptr_size += n;
 #endif
 		return true;
-		}
+	}
 	return false;
 }
 
 template<typename T>
-#ifndef ZAIMONI_FORCE_ISO
-bool _insert_n_slots_at(T**& _ptr, size_t n, size_t i)
+bool _insert_n_slots_at(T**& _ptr ZAIMONI_ISO_PARAM(size_t& _ptr_size), size_t n, size_t i)
 {
-	const size_t _ptr_size_old = SafeArraySize(_ptr);
-	if (_weak_resize(_ptr,_ptr_size_old+n))
-#else
-bool _insert_n_slots_at(T**& _ptr, size_t& _ptr_size, size_t n, size_t i)
-{
+#ifdef ZAIMONI_FORCE_ISO
 	assert(_ptr ? 0<_ptr_size : 0==_ptr_size);
-	const size_t _ptr_size_old = _ptr_size;
-	if (_weak_resize(_ptr,_ptr_size,_ptr_size_old+n))
 #endif
-		{
+	const size_t _ptr_size_old = ZAIMONI_NONISO_ISO_SRC(SafeArraySize(_ptr), _ptr_size);
+	if (_weak_resize(_ptr ZAIMONI_ISO_PARAM(_ptr_size),_ptr_size_old+n)) {
 		T** const _offset_ptr = _ptr+i;
 		if (_ptr_size_old>i)
 			memmove(_offset_ptr+n,_offset_ptr,sizeof(*_ptr)*(_ptr_size_old-i));
@@ -603,33 +584,29 @@ bool _insert_n_slots_at(T**& _ptr, size_t& _ptr_size, size_t n, size_t i)
 		_ptr_size += n;
 #endif
 		return true;
-		}
+	}
 	return false;
 }
 
 template<typename T>
-typename std::enable_if<boost::has_trivial_destructor<T>::value && boost::has_trivial_assign<T>::value, void>::type
-#ifndef ZAIMONI_FORCE_ISO
-_delete_n_slots_at(T*& _ptr, size_t n, size_t i)
+std::enable_if_t<std::is_trivially_destructible_v<T> && std::is_trivially_copy_assignable_v<T>, void>
+_delete_n_slots_at(T*& _ptr ZAIMONI_ISO_PARAM(size_t& _ptr_size), size_t n, size_t i)
 {
 	assert(_ptr);
+#ifndef ZAIMONI_FORCE_ISO
 	const size_t _ptr_size = ArraySize(_ptr);
 #else
-_delete_n_slots_at(T*& _ptr, size_t& _ptr_size, size_t n, size_t i)
-{
-	assert(_ptr);
 	assert(0<_ptr_size);
 #endif
 
-	if (0==i && _ptr_size<=n)
-		{
+	if (0==i && _ptr_size<=n) {
 		_flush(_ptr);
 		_ptr = 0;
 #ifdef ZAIMONI_FORCE_ISO
 		_ptr_size = 0;
 #endif
 		return;
-		}
+	}
 	T* const _offset_ptr = _ptr+i;
 	if (n<_ptr_size)
 		{
@@ -639,100 +616,86 @@ _delete_n_slots_at(T*& _ptr, size_t& _ptr_size, size_t n, size_t i)
 #ifdef ZAIMONI_FORCE_ISO
 		_ptr_size -= n;
 #endif
-		}
-	else{
+	} else{
 		_flush(_ptr);
 		_ptr = 0;
 #ifdef ZAIMONI_FORCE_ISO
 		_ptr_size = 0;
 #endif
-		}
+	}
 }
 
 template<typename T>
-#ifndef ZAIMONI_FORCE_ISO
-void _delete_n_slots_at(T**& _ptr, size_t n, size_t i)
+void _delete_n_slots_at(T**& _ptr ZAIMONI_ISO_PARAM(size_t& _ptr_size), size_t n, size_t i)
 {
 	assert(_ptr);
+#ifndef ZAIMONI_FORCE_ISO
 	const size_t _ptr_size = ArraySize(_ptr);
 #else
-void _delete_n_slots_at(T**& _ptr, size_t& _ptr_size, size_t n, size_t i)
-{
-	assert(_ptr);
-	assert(0<_ptr_size);
+	assert(0 < _ptr_size);
 #endif
 
-	if (0==i && _ptr_size<=n)
-		{
+	if (0 == i && _ptr_size <= n) {
 		_flush(_ptr);
 		_ptr = 0;
 #ifdef ZAIMONI_FORCE_ISO
 		_ptr_size = 0;
 #endif
 		return;
-		}
-	T** const _offset_ptr = _ptr+i;
-	{
-	size_t NImage = n;
-	do	{
-		_single_flush(_offset_ptr[--NImage]);
-		_offset_ptr[NImage] = 0;
-		}
-	while(0<NImage);
 	}
-	if (n<_ptr_size)
-		{
-		if (i+n<_ptr_size)
-			memmove(_offset_ptr,_offset_ptr+n,sizeof(*_ptr)*(_ptr_size-i-n));
-		_ptr = REALLOC(_ptr,sizeof(*_ptr)*(_ptr_size-n));
+	T** const _offset_ptr = _ptr + i;
+	{
+		size_t NImage = n;
+		do {
+			_single_flush(_offset_ptr[--NImage]);
+			_offset_ptr[NImage] = 0;
+		} while (0 < NImage);
+	}
+	if (n < _ptr_size) {
+		if (i + n < _ptr_size)
+			memmove(_offset_ptr, _offset_ptr + n, sizeof(*_ptr) * (_ptr_size - i - n));
+		_ptr = REALLOC(_ptr, sizeof(*_ptr) * (_ptr_size - n));
 #ifdef ZAIMONI_FORCE_ISO
 		_ptr_size -= n;
 #endif
-		}
-	else{
+	} else {
 		free(_ptr);
 		_ptr = 0;
 #ifdef ZAIMONI_FORCE_ISO
 		_ptr_size = 0;
 #endif
-		}
+	}
 }
 
 template<typename T>
-typename std::enable_if<boost::has_trivial_destructor<T>::value && boost::has_trivial_assign<T>::value, void>::type
-#ifndef ZAIMONI_FORCE_ISO
-_delete_n_slots(T*& _ptr, size_t* _indexes, size_t n)
+std::enable_if_t<std::is_trivially_destructible_v<T>&& std::is_trivially_copy_assignable_v<T>, void>
+_delete_n_slots(T*& _ptr ZAIMONI_ISO_PARAM(size_t& _ptr_size), size_t* _indexes, size_t n)
 {
 	assert(_ptr);
 	assert(_indexes);
+#ifndef ZAIMONI_FORCE_ISO
 	const size_t _ptr_size = ArraySize(_ptr);
 #else
-_delete_n_slots(T*& _ptr, size_t& _ptr_size, size_t* _indexes, size_t n)
-{
-	assert(_ptr);
-	assert(_indexes);
 	assert(0<_ptr_size);
 #endif
 	if (0>=n) return;
 	assert(_indexes[0]<_ptr_size);
-	if (_ptr_size<=n)
-		{
+	if (_ptr_size<=n) {
 		_flush(_ptr);
 		_ptr = 0;
 #ifdef ZAIMONI_FORCE_ISO
 		_ptr_size = 0;
 #endif
 		return;
-		}
+	}
 
 	size_t i = 0;
-	while(i<n)
-		{
+	while(i<n) {
 		assert(i+1>=n || _indexes[i]>_indexes[i+1]);
 		if (_indexes[i]+i<_ptr_size)
 			memmove(_ptr+_indexes[i],_ptr+_indexes[i]+1,sizeof(*_ptr)*(_ptr_size-(_indexes[i]+i)));
 		++i;
-		}
+	}
 
 	_ptr = REALLOC(_ptr,sizeof(*_ptr)*(_ptr_size-n));
 #ifdef ZAIMONI_FORCE_ISO
@@ -741,40 +704,34 @@ _delete_n_slots(T*& _ptr, size_t& _ptr_size, size_t* _indexes, size_t n)
 }
 
 template<typename T>
-#ifndef ZAIMONI_FORCE_ISO
-void _delete_n_slots(T**& _ptr, size_t* _indexes, size_t n)
+void _delete_n_slots(T**& _ptr ZAIMONI_ISO_PARAM(size_t& _ptr_size), size_t* _indexes, size_t n)
 {
 	assert(_ptr);
 	assert(_indexes);
+#ifndef ZAIMONI_FORCE_ISO
 	const size_t _ptr_size = ArraySize(_ptr);
 #else
-void _delete_n_slots(T**& _ptr, size_t& _ptr_size, size_t* _indexes, size_t n)
-{
-	assert(_ptr);
-	assert(_indexes);
 	assert(0<_ptr_size);
 #endif
 	if (0>=n) return;
 	assert(_indexes[0]<_ptr_size);
-	if (_ptr_size<=n)
-		{
+	if (_ptr_size<=n) {
 		_flush(_ptr);
 		_ptr = 0;
 #ifdef ZAIMONI_FORCE_ISO
 		_ptr_size = 0;
 #endif
 		return;
-		}
+	}
 
 	size_t i = 0;
-	while(i<n)
-		{
+	while(i<n) {
 		assert(i+1>=n || _indexes[i]>_indexes[i+1]);
 		_single_flush(_ptr[_indexes[i]]);
 		if (_indexes[i]+i<_ptr_size)
 			memmove(_ptr+_indexes[i],_ptr+_indexes[i]+1,sizeof(*_ptr)*(_ptr_size-(_indexes[i]+i)));
 		++i;
-		}
+	}
 
 	_ptr = REALLOC(_ptr,sizeof(*_ptr)*(_ptr_size-n));
 #ifdef ZAIMONI_FORCE_ISO
@@ -783,43 +740,37 @@ void _delete_n_slots(T**& _ptr, size_t& _ptr_size, size_t* _indexes, size_t n)
 }
 
 template<typename T>
-#ifndef ZAIMONI_FORCE_ISO
-void _weak_delete_n_slots_at(T**& _ptr, size_t n, size_t i)
+void _weak_delete_n_slots_at(T**& _ptr ZAIMONI_ISO_PARAM(size_t& _ptr_size), size_t n, size_t i)
 {
 	assert(_ptr);
+#ifndef ZAIMONI_FORCE_ISO
 	const size_t _ptr_size = ArraySize(_ptr);
 #else
-void _weak_delete_n_slots_at(T**& _ptr, size_t& _ptr_size, size_t n, size_t i)
-{
-	assert(_ptr);
 	assert(0<_ptr_size);
 #endif
-	if (0==i && _ptr_size<=n)
-		{
+	if (0==i && _ptr_size<=n) {
 		_weak_flush(_ptr);
 		_ptr = 0;
 #ifdef ZAIMONI_FORCE_ISO
 		_ptr_size = 0;
 #endif
 		return;
-		}
+	}
 	T** const _offset_ptr = _ptr+i;
-	if (n<_ptr_size)
-		{
+	if (n<_ptr_size) {
 		if (i+n<_ptr_size)
 			memmove(_offset_ptr,_offset_ptr+n,sizeof(T*)*(_ptr_size-i-n));
 		_ptr = REALLOC(_ptr,sizeof(T*)*(_ptr_size-n));
 #ifdef ZAIMONI_FORCE_ISO
 		_ptr_size -= n;
 #endif
-		}
-	else{
+	} else {
 		free(_ptr);
 		_ptr = 0;
 #ifdef ZAIMONI_FORCE_ISO
 		_ptr_size = 0;
 #endif
-		}
+	}
 }
 
 }	// end namespace zaimoni
