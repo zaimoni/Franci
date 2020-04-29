@@ -10,7 +10,6 @@ using namespace std;
 
 void InitializeDefaultSetsAndClasses(void); // defined in Class.cxx
 void DiagnoseMetaConceptVFT(void);			// defined in MetaCon1.cxx
-int OneStageAnalyzeSituation(void);			// defined in LexParse.cxx; returns 
 void InitializeFranciInterpreter(void);		// defined in LexParse.cxx
 void InitializeLexerDefs(void);			// defined in LangConf.cxx
 void Init_Unparsed_Eval(void);			// defined in Unparsed.cxx
@@ -40,9 +39,9 @@ OSIndependentInitialize(void)
 	srand(clock());	// sets RNG seed to # of clock ticks
 }
 
-#ifndef _WIN32
+#if defined(FRANCI_CLI) || !defined(_WIN32)
 #pragma message("NOTE: Compiling main")
-main(int argc, char* argv[], char* envp[])
+int main(int argc, char* argv[], char* envp[])
 // the mainline of ProtoAI
 {
 	AppRunning = 1;
@@ -57,7 +56,7 @@ main(int argc, char* argv[], char* envp[])
 
 	do	{	//! \todo main window message handler iteration also goes here
 		_console->LookAtConsoleInput();
-		};
+		}
 	while(1);
 	//! \todo install the message handler loop, for OS ___
 	return 0;	// success
