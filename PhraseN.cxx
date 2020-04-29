@@ -127,7 +127,7 @@ bool PhraseNArg::SyntaxOK() const
 
 bool PhraseNArg::SyntaxOKAuxCommaListVarNames() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 11/27/2007
-	return and_range_n(boost::mem_fun(&MetaConcept::IsPotentialVarName),ArgArray.begin(),fast_size());
+	return and_range_n([](const MetaConcept* x) { return x->IsPotentialVarName(); }, ArgArray.begin(), fast_size());
 }
 
 const char* PhraseNArg::ViewKeyword() const {return PhraseKeyword;}

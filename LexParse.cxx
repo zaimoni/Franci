@@ -10,6 +10,7 @@
 #include "Unparsed.hxx"
 #include "FlatFile.hxx"
 #include "CmdShell.hxx"
+#include <ctype.h>
 
 #include "Zaimoni.STL/except/syntax_error.hpp"
 #include "Zaimoni.STL/Pure.C/logging.h"
@@ -76,7 +77,7 @@ bool DestructiveSyntacticallyEvaluateOnce(MetaConcept*& dest)
 {	// FORMALLY CORRECT: Kenneth Boyd, 3/2/2006
 	assert(dest);
 	const long revert_to = get_checkpoint();
-	DEBUG_LOG(__PRETTY_FUNCTION__);
+	DEBUG_LOG(ZAIMONI_FUNCNAME);
 	DEBUG_LOG(dest->name());
 	DEBUG_LOG(*dest);
 	dest->ForceStdForm();
@@ -126,7 +127,7 @@ OneStageAnalyzeSituation(MetaConcept*& Situation, const clock_t EvalTime0)
 {	// FORMALLY CORRECT: Kenneth Boyd, 3/10/2003
 	// returns true iff more processing to do
 	// using goto to condense exit code; this routine is I/O heavy
-	DEBUG_LOG(__PRETTY_FUNCTION__);
+	DEBUG_LOG(ZAIMONI_FUNCNAME);
 	DEBUG_LOG(Situation->name());
 	Situation->ForceStdForm();
 	if (Situation->CanEvaluate())
@@ -145,7 +146,7 @@ OneStageAnalyzeSituation(MetaConcept*& Situation, const clock_t EvalTime0)
 			Situation->LogThis("evaluates to:");
 		ReportTime(EvalTime0,clock());
 		DEBUG_LOG("Leaving/true");
-		DEBUG_LOG(__PRETTY_FUNCTION__);
+		DEBUG_LOG(ZAIMONI_FUNCNAME);
 		return true;
 		};
 	DEBUG_LOG("CanEvaluate OK, false");
@@ -155,7 +156,7 @@ OneStageAnalyzeSituation(MetaConcept*& Situation, const clock_t EvalTime0)
 StopEvalLeave:
 	ReportTime(EvalTime0,clock());
 	DEBUG_LOG("Leaving/false");
-	DEBUG_LOG(__PRETTY_FUNCTION__);
+	DEBUG_LOG(ZAIMONI_FUNCNAME);
 	return false;
 }
 

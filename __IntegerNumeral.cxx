@@ -17,6 +17,7 @@ using namespace zaimoni;
 // multiplicative inverse
 #define MULT_INV_TEXT "<sup>-1</sup>"
 
+// \todo consider upgrading on 64-bit ptr systems
 // This type works in base 10^9
 enum PowersOfTen	{
 					TEN_TO_0	= 1,

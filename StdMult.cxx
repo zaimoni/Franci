@@ -149,7 +149,7 @@ bool StdMultiplication::_IsExplicitConstant() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 8/24/2001
 	if (ArgArray.empty()) return true;
 	if (0>IdxCurrentSelfEvalRule)
-		return and_range_n(boost::mem_fun(&MetaConcept::IsExplicitConstant),ArgArray.begin(),ArgArray.ArraySize());
+		return and_range_n([](const MetaConcept* x) {return x->IsExplicitConstant(); }, ArgArray.begin(), ArgArray.ArraySize());
 	return false;
 }
 
@@ -165,7 +165,7 @@ bool StdMultiplication::SyntaxOK() const
 bool StdMultiplication::_IsOne() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/29/2000
 	if (ArgArray.empty()) return true;
-	if (!and_range_n(boost::mem_fun(&MetaConcept::IsOne),ArgArray.begin(),ArgArray.ArraySize()))
+	if (!and_range_n([](const MetaConcept* x) {return x->IsOne(); },ArgArray.begin(),ArgArray.ArraySize()))
 		return false;
 	return DetermineDynamicType();
 }
@@ -173,7 +173,7 @@ bool StdMultiplication::_IsOne() const
 bool StdMultiplication::_IsZero() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/29/2000
 	if (ArgArray.empty()) return false;
-	return or_range_n(boost::mem_fun(&MetaConcept::IsZero),ArgArray.begin(),ArgArray.ArraySize());
+	return or_range_n([](const MetaConcept * x) { return x->IsZero(); },ArgArray.begin(),ArgArray.ArraySize());
 }
 
 // text I/O functions
@@ -360,7 +360,7 @@ bool StdMultiplication::InvokeEqualArgRule() const
 //! to affect the sole module-target variable.
 bool StdMultiplication::DetermineDynamicType() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 1/23/2003
-	DEBUG_LOG(__PRETTY_FUNCTION__);
+	DEBUG_LOG(ZAIMONI_FUNCNAME);
 	autodel_ptr<AbstractClass> TmpDynamicType;
 	bool NULLTypesFound = false;
 	size_t i = fast_size();
@@ -539,7 +539,7 @@ static bool BothConstantAndNonConstantArgsForFactoring(MetaConcept** ArgArray)
 {
 	if (   ArgArray[0]->IsExplicitConstant()
 		|| ArgArray[ArraySize(ArgArray)-1]->IsExplicitConstant())
-		return !and_range_n(boost::mem_fun(&MetaConcept::IsExplicitConstant),ArgArray,ArraySize(ArgArray));
+		return !and_range_n([](const MetaConcept* x) { return x->IsExplicitConstant(); }, ArgArray, ArraySize(ArgArray));
 	return false;
 }
 

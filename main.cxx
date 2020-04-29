@@ -1,10 +1,10 @@
 // main.cxx
 
+#include "OS.hxx"
+#include "VConsole.hxx"
 #include <stdlib.h>
 #include <fstream>
 #include <time.h>
-#include "OS.hxx"
-#include "VConsole.hxx"
 
 using namespace std;
 
@@ -19,13 +19,11 @@ extern size_t AppRunning;	// defined in memory.cxx: controls Microsoft bypass
 
 #ifndef NDEBUG
 // does a low-level system test
-void SystemTest_TruthValue(void);	// low-level test of TruthValue
 void SystemTest_MetaQuantifier(void);	// low-level test of MetaQuantifier
 
 void
 SystemTest(void)
 {	// MUTABLE CODE
-	SystemTest_TruthValue();
 	SystemTest_MetaQuantifier();
 }
 #endif
@@ -68,6 +66,7 @@ main(int argc, char* argv[], char* envp[])
 
 #ifdef _WIN32
 
+#define WIN32_LEAN_AND_MEAN 1
 #include <WINDOWS.H>
 // #include <MAPIDEFS.H>
 // #include <MAPINLS.H>

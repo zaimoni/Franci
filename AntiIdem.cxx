@@ -60,7 +60,7 @@ MetaConnectiveBinaryRelation* const detectAntiIdempotentAux[]
 	detectAntiIdempotentAuxNANDNOR,
 	detectAntiIdempotentAuxNANDNOR
 	};
-BOOST_STATIC_ASSERT(StrictBound_MCM==STATIC_SIZE(detectAntiIdempotentAux));
+static_assert(StrictBound_MCM==STATIC_SIZE(detectAntiIdempotentAux));
 
 bool MetaConnective::isAntiIdempotentTo(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/11/1999

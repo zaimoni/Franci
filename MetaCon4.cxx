@@ -154,7 +154,7 @@ bool MetaConceptWith2Args::Evaluate(MetaConcept*& dest)
 
 bool MetaConceptWith2Args::DestructiveEvaluateToSameType()
 {	// FORMALLY CORRECT: Kenneth Boyd, Jan. 29 2016
-	DEBUG_LOG(__PRETTY_FUNCTION__);
+	DEBUG_LOG(ZAIMONI_FUNCNAME);
 	DiagnoseInferenceRules();
 	DEBUG_LOG("DiagnoseInferenceRules OK");
 	DEBUG_LOG(name());

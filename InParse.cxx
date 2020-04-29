@@ -99,7 +99,7 @@ bool LookUpVar(MetaConcept*& Target, const AbstractClass* Domain);
 
 bool InterpretOneStage(MetaConcept**& ArgArray)
 {
-	autotransform_n(ArgArray,SafeArraySize(ArgArray),boost::mem_fun(&MetaConcept::ForceStdForm));
+	autotransform_n(ArgArray, SafeArraySize(ArgArray), [](MetaConcept* x) {return x->ForceStdForm(); });
 	return FranciScriptParser.ParseOneStep(ArgArray);
 }
 

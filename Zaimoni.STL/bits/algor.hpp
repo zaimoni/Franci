@@ -56,7 +56,6 @@ template<typename T>
 void
 downheap(T** const TargetArray,size_t v,size_t N)
 {
-	boost::function_requires<boost::LessThanComparableConcept<T> >();
 	size_t w = 2*v+1;
 	while(w<N)
 		{

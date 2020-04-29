@@ -1278,7 +1278,7 @@ static _canUseAsMakeImply* const canUseThisAsMakeImply2AryTable[]
 		canUseThisAsMakeImply2AryANDOR,
 		canUseThisAsMakeImply2AryIFF
 	};
-BOOST_STATIC_ASSERT(STATIC_SIZE(canUseThisAsMakeImply2AryTable)==IFF_MCM+1);
+static_assert(STATIC_SIZE(canUseThisAsMakeImply2AryTable)==IFF_MCM+1);
 
 static bool canUseThisAsMakeImplyNAryAND(const MetaConcept& Target,const MetaConcept* const * const ArgArray)
 {	// FORMALLY CORRECT: Kenneth Boyd, 2/25/2001
@@ -1339,7 +1339,7 @@ static _canUseAsMakeImply* const canUseThisAsMakeImplyNAryTable[]
 		canUseThisAsMakeImplyNAryORXORNXOR,
 		canUseThisAsMakeImplyNAryORXORNXOR
 	};
-BOOST_STATIC_ASSERT(STATIC_SIZE(canUseThisAsMakeImplyNAryTable)==NXOR_MCM+1);
+static_assert(STATIC_SIZE(canUseThisAsMakeImplyNAryTable)==NXOR_MCM+1);
 
 bool MetaConnective::CanUseThisAsMakeImply(const MetaConcept& Target) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/21/2000
@@ -1684,7 +1684,7 @@ void MetaConnective::DiagnoseInferenceRulesContradiction2Ary() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 1/5/2000
 	//! \pre Arg0 is CONTRADICTION
 	assert(ArgArray[0]->IsExactType(TruthValue_MC));
-	assert(static_cast<TruthValue*>(ArgArray[0])->IsContradiction());
+	assert(static_cast<TruthValue*>(ArgArray[0])->_x.is(TVal::Contradiction));
 	if (IsExactType(LogicalOR_MC))
 		{
 		InferenceParameter1 = 1;
@@ -1698,7 +1698,7 @@ void MetaConnective::DiagnoseInferenceRulesTrue2Ary() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 1/5/2000
 	//! \pre Arg0 is TRUE
 	assert(ArgArray[0]->IsExactType(TruthValue_MC));
-	assert(static_cast<TruthValue*>(ArgArray[0])->IsTrue());
+	assert(static_cast<TruthValue*>(ArgArray[0])->_x.is(TVal::True));
 	InvokeEvalForceArg(1!=array_index());
 }
 
@@ -1706,7 +1706,7 @@ void MetaConnective::DiagnoseInferenceRulesFalse2Ary() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 1/5/2000
 	//! \pre Arg0 is FALSE
 	assert(ArgArray[0]->IsExactType(TruthValue_MC));
-	assert(static_cast<TruthValue*>(ArgArray[0])->IsFalse());
+	assert(static_cast<TruthValue*>(ArgArray[0])->_x.is(TVal::False));
 	InferenceParameter1 = 1;
 	IdxCurrentEvalRule=truthValueFalseAry2Table[array_index()];
 }
@@ -1715,7 +1715,7 @@ void MetaConnective::DiagnoseInferenceRulesUnknown2Ary() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 1/5/2000
 	//! \pre Arg0 is UNKNOWN 
 	assert(ArgArray[0]->IsExactType(TruthValue_MC));
-	assert(static_cast<TruthValue*>(ArgArray[0])->IsUnknown());
+	assert(static_cast<TruthValue*>(ArgArray[0])->_x.is(TVal::Unknown));
 	if (ArgArray[1]->IsExactType(TruthValue_MC))
 		{	// it's sorted...so it's Unknown
 		InvokeEvalForceArg(0);
@@ -1728,7 +1728,7 @@ bool MetaConnective::DiagnoseInferenceRulesContradictionNAry() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 1/5/2000
 	//! \pre Arg0 is CONTRADICTION
 	assert(ArgArray[0]->IsExactType(TruthValue_MC));
-	assert(static_cast<TruthValue*>(ArgArray[0])->IsContradiction());
+	assert(static_cast<TruthValue*>(ArgArray[0])->_x.is(TVal::Contradiction));
 	// this invokes the false rules for Logical: OR, XOR, NXOR.
 	// otherwise, forces contradiction.
 
@@ -1742,7 +1742,7 @@ bool MetaConnective::DiagnoseInferenceRulesTrueNAry() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 5/20/2000
 	//! \pre Arg0 is TRUE
 	assert(ArgArray[0]->IsExactType(TruthValue_MC));
-	assert(static_cast<TruthValue*>(ArgArray[0])->IsTrue());
+	assert(static_cast<TruthValue*>(ArgArray[0])->_x.is(TVal::True));
 	if 		(IsExactType(LogicalOR_MC))
 		{
 		InferenceParameter1 = 2;
@@ -1890,7 +1890,7 @@ bool MetaConnective::DiagnoseInferenceRulesUnknownNAry() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 6/19/2000
 	//! \pre Arg0 is UNKNOWN
 	assert(ArgArray[0]->IsExactType(TruthValue_MC));
-	assert(static_cast<TruthValue*>(ArgArray[0])->IsUnknown());
+	assert(static_cast<TruthValue*>(ArgArray[0])->_x.is(TVal::Unknown));
 	if (ArgArray[1]->IsExactType(TruthValue_MC))
 		{	// sorted, thus Unknown
 		// Quick unknown mergence: args 0, 1 both TruthValue Unknown => merge
@@ -3048,7 +3048,7 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 6/22/2000
 	// ASSUMPTION: the args have already been sorted by DiagnoseIntermediateRules
 	assert(2<size());
-	DEBUG_LOG(__PRETTY_FUNCTION__);
+	DEBUG_LOG(ZAIMONI_FUNCNAME);
 	// 3+ary case
 	// NOTE: ==, anti-idempotent pairs have already been cleaned up.  Also,
 	// AND-objects do not contain quantifiers.
@@ -6722,7 +6722,7 @@ MetaConnective::LogicalANDCreateSpeculativeOR(void) const
 		|| LogicalOR_MC>ArgArray[fast_size()-1]->ExactType())
 		return false;
 
-	DEBUG_LOG(__PRETTY_FUNCTION__);
+	DEBUG_LOG(ZAIMONI_FUNCNAME);
 	//! \todo META: GREP Target?
 	// OR-span
 	size_t LowORIdx = 0;
@@ -7020,8 +7020,8 @@ void MetaConnective::DoSelfDeMorgan()
 	// De Morgan's Law: NAND to OR, negate all arguments
 	// or NOR to AND, negate all arguments
 	assert(IsExactType(LogicalNOR_MC) || IsExactType(LogicalNAND_MC));
-	BOOST_STATIC_ASSERT(LogicalAND_MC==LogicalNOR_MC-6);
-	BOOST_STATIC_ASSERT(LogicalOR_MC==LogicalNAND_MC-6);
+	static_assert(LogicalAND_MC==LogicalNOR_MC-6);
+	static_assert(LogicalOR_MC==LogicalNAND_MC-6);
 
 	SetExactTypeV2((ExactType_MC)(ExactType()-6));
 

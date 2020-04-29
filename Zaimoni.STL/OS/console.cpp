@@ -15,7 +15,7 @@
 Console* _console = NULL;
 
 #ifdef _WIN32
-#include <WINDOWS.H>
+#include <windows.h>
 
 // prevent collision with later template function definition in MetaRAM.hpp
 #undef DELETE

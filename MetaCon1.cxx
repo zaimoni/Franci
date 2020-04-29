@@ -94,68 +94,68 @@ const MetaConceptVFT MetaConceptLookUp[MaxSemanticIdx_MC+1]
 
 // TruthValue_MC is the smallest type with ultimatetype TruthValues
 // 1 == TruthValue_MC
-BOOST_STATIC_ASSERT(1==TruthValue_MC);
+static_assert(1==TruthValue_MC);
 
 // MetaConnective:
 // * MetaConnective IDs are a block
-BOOST_STATIC_ASSERT(7==LogicalNAND_MC-LogicalAND_MC);
+static_assert(7==LogicalNAND_MC-LogicalAND_MC);
 // * Lowest MetaConnective ID is LogicalAND_MC
-BOOST_STATIC_ASSERT(LogicalAND_MC<LogicalOR_MC);
-BOOST_STATIC_ASSERT(LogicalAND_MC<LogicalIFF_MC);
-BOOST_STATIC_ASSERT(LogicalAND_MC<LogicalXOR_MC);
-BOOST_STATIC_ASSERT(LogicalAND_MC<LogicalNXOR_MC);
-BOOST_STATIC_ASSERT(LogicalAND_MC<LogicalNIFF_MC);
-BOOST_STATIC_ASSERT(LogicalAND_MC<LogicalNOR_MC);
-BOOST_STATIC_ASSERT(LogicalAND_MC<LogicalNAND_MC);
+static_assert(LogicalAND_MC<LogicalOR_MC);
+static_assert(LogicalAND_MC<LogicalIFF_MC);
+static_assert(LogicalAND_MC<LogicalXOR_MC);
+static_assert(LogicalAND_MC<LogicalNXOR_MC);
+static_assert(LogicalAND_MC<LogicalNIFF_MC);
+static_assert(LogicalAND_MC<LogicalNOR_MC);
+static_assert(LogicalAND_MC<LogicalNAND_MC);
 // * Paired s.t. logical-negations are on opposite ends, similar offset
-BOOST_STATIC_ASSERT(LogicalAND_MC+LogicalNAND_MC==LogicalOR_MC+LogicalNOR_MC);
-BOOST_STATIC_ASSERT(LogicalAND_MC+LogicalNAND_MC==LogicalIFF_MC+LogicalNIFF_MC);
-BOOST_STATIC_ASSERT(LogicalAND_MC+LogicalNAND_MC==LogicalXOR_MC+LogicalNXOR_MC);
+static_assert(LogicalAND_MC+LogicalNAND_MC==LogicalOR_MC+LogicalNOR_MC);
+static_assert(LogicalAND_MC+LogicalNAND_MC==LogicalIFF_MC+LogicalNIFF_MC);
+static_assert(LogicalAND_MC+LogicalNAND_MC==LogicalXOR_MC+LogicalNXOR_MC);
 // * -2 converts NIFF to XOR, NXOR to IFF
-BOOST_STATIC_ASSERT(LogicalNIFF_MC-2==LogicalXOR_MC);
-BOOST_STATIC_ASSERT(LogicalNXOR_MC-2==LogicalIFF_MC);
+static_assert(LogicalNIFF_MC-2==LogicalXOR_MC);
+static_assert(LogicalNXOR_MC-2==LogicalIFF_MC);
 // * -6 converts NOR to AND, NAND to OR
-BOOST_STATIC_ASSERT(LogicalNAND_MC-6==LogicalOR_MC);
-BOOST_STATIC_ASSERT(LogicalNOR_MC-6==LogicalAND_MC);
+static_assert(LogicalNAND_MC-6==LogicalOR_MC);
+static_assert(LogicalNOR_MC-6==LogicalAND_MC);
 // * NOR, NAND are terminal block, NOR<NAND
 //	BOOST_STATIC_ASSERT(LogicalAND_MC<LogicalNOR_MC);	// already done above
-BOOST_STATIC_ASSERT(LogicalOR_MC<LogicalNOR_MC);
-BOOST_STATIC_ASSERT(LogicalIFF_MC<LogicalNOR_MC);
-BOOST_STATIC_ASSERT(LogicalXOR_MC<LogicalNOR_MC);
-BOOST_STATIC_ASSERT(LogicalNXOR_MC<LogicalNOR_MC);
-BOOST_STATIC_ASSERT(LogicalNIFF_MC<LogicalNOR_MC);
-BOOST_STATIC_ASSERT(LogicalNOR_MC<LogicalNAND_MC);
+static_assert(LogicalOR_MC<LogicalNOR_MC);
+static_assert(LogicalIFF_MC<LogicalNOR_MC);
+static_assert(LogicalXOR_MC<LogicalNOR_MC);
+static_assert(LogicalNXOR_MC<LogicalNOR_MC);
+static_assert(LogicalNIFF_MC<LogicalNOR_MC);
+static_assert(LogicalNOR_MC<LogicalNAND_MC);
 
 // * EqualRelation IDs are a block
-BOOST_STATIC_ASSERT(5==NOTALLEQUAL_MC-ALLEQUAL_MC);
+static_assert(5==NOTALLEQUAL_MC-ALLEQUAL_MC);
 // * Lowest EqualRelation ID is ALLEQUAL_MC
-BOOST_STATIC_ASSERT(ALLEQUAL_MC<ALLDISTINCT_MC);
-BOOST_STATIC_ASSERT(ALLEQUAL_MC<DISTINCTFROMALLOF_MC);
-BOOST_STATIC_ASSERT(ALLEQUAL_MC<EQUALTOONEOF_MC);
-BOOST_STATIC_ASSERT(ALLEQUAL_MC<NOTALLDISTINCT_MC);
-BOOST_STATIC_ASSERT(ALLEQUAL_MC<NOTALLEQUAL_MC);
+static_assert(ALLEQUAL_MC<ALLDISTINCT_MC);
+static_assert(ALLEQUAL_MC<DISTINCTFROMALLOF_MC);
+static_assert(ALLEQUAL_MC<EQUALTOONEOF_MC);
+static_assert(ALLEQUAL_MC<NOTALLDISTINCT_MC);
+static_assert(ALLEQUAL_MC<NOTALLEQUAL_MC);
 // * Paired s.t. logical-negations are on opposite ends, similar offset
-BOOST_STATIC_ASSERT(ALLEQUAL_MC+NOTALLEQUAL_MC==ALLDISTINCT_MC+NOTALLDISTINCT_MC);
-BOOST_STATIC_ASSERT(ALLEQUAL_MC+NOTALLEQUAL_MC==DISTINCTFROMALLOF_MC+EQUALTOONEOF_MC);
+static_assert(ALLEQUAL_MC+NOTALLEQUAL_MC==ALLDISTINCT_MC+NOTALLDISTINCT_MC);
+static_assert(ALLEQUAL_MC+NOTALLEQUAL_MC==DISTINCTFROMALLOF_MC+EQUALTOONEOF_MC);
 // * -2 maps EQUALTOONEOF to ALLEQUAL, DISTINCTFROMALLOF to ALLDISTINCT
-BOOST_STATIC_ASSERT(EQUALTOONEOF_MC-2==ALLEQUAL_MC);
-BOOST_STATIC_ASSERT(DISTINCTFROMALLOF_MC-2==ALLDISTINCT_MC);
+static_assert(EQUALTOONEOF_MC-2==ALLEQUAL_MC);
+static_assert(DISTINCTFROMALLOF_MC-2==ALLDISTINCT_MC);
 
 // * MetaQuantifier IDs are a block
 // * There are 5 identifiers in the block
-BOOST_STATIC_ASSERT(4==ThereIsNot_MC-ForAll_MC);
+static_assert(4==ThereIsNot_MC-ForAll_MC);
 // * Lowest MetaQuantifier ID is ForAll_MC
-BOOST_STATIC_ASSERT(ForAll_MC<ThereIs_MC);
-BOOST_STATIC_ASSERT(ForAll_MC<Free_MC);
-BOOST_STATIC_ASSERT(ForAll_MC<ForAllNot_MC);
-BOOST_STATIC_ASSERT(ForAll_MC<ThereIsNot_MC);
+static_assert(ForAll_MC<ThereIs_MC);
+static_assert(ForAll_MC<Free_MC);
+static_assert(ForAll_MC<ForAllNot_MC);
+static_assert(ForAll_MC<ThereIsNot_MC);
 // * Paired s.t. logical-negations are on opposite ends, similar offset
-BOOST_STATIC_ASSERT(ForAll_MC+ThereIsNot_MC==ThereIs_MC+ForAllNot_MC);
-BOOST_STATIC_ASSERT(ForAll_MC+ThereIsNot_MC==Free_MC+Free_MC);
+static_assert(ForAll_MC+ThereIsNot_MC==ThereIs_MC+ForAllNot_MC);
+static_assert(ForAll_MC+ThereIsNot_MC==Free_MC+Free_MC);
 // * 6*[highest ID in block] does not cause an arithmetic overflow
-BOOST_STATIC_ASSERT(UCHAR_MAX/6>=ThereIsNot_MC);
+static_assert(UCHAR_MAX/6>=ThereIsNot_MC);
 // FREE is at offset 2 (PhraseNArg wants this)
-BOOST_STATIC_ASSERT(2==(Free_MC-ForAll_MC));
+static_assert(2==(Free_MC-ForAll_MC));
 
 void DiagnoseMetaConceptVFT()
 {	// FORMALLY CORRECT: Kenneth Boyd, 6/17/1999
@@ -224,7 +224,7 @@ bool MetaConcept::ValidateFunctionArgList(MetaConcept** const& ArgValList, unsig
 		|| FunctionArityImage<ArgListSizeImage
 		|| ArraySize(ArgValList)!=ArgListSizeImage)
 		return false;
-	if (!and_range(boost::bind2nd(std::less<unsigned long>(),FunctionArityImage),ArgList,ArgList+ArgListSizeImage))
+	if (!and_range([&](unsigned long x) { return x < FunctionArityImage; }, ArgList, ArgList + ArgListSizeImage))
 		return false;
 	return pairwise_distinct(std::less<unsigned long>(),ArgList,ArgList+ArgListSizeImage);
 	//! \todo type-checking on args when pairwise distinct (needs function UltimateTypes to work)

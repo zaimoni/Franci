@@ -6,9 +6,6 @@
 #if !defined(CMDSHELL_HXX)
 #define CMDSHELL_HXX 1
 
-#include <cstddef>
-#include <climits>
-
 // how many bytes are needed for null-termination of dynamically allocated strings
 // Use 1 if you have a generic C memory manager
 // Use 0 if your C memory manager does null-initialization of at least one byte as a terminating guard block
@@ -25,8 +22,8 @@ typedef bool CmdShellHandler3(bool defaultreturn, char*& InputBuffer);
 class CmdShell
 {
 protected:
-	signed long command_index[UCHAR_MAX+1];
-	signed long command_index_end[UCHAR_MAX+1];
+	signed long command_index[(unsigned char)(-1)+1];
+	signed long command_index_end[(unsigned char)(-1) +1];
 	char** command_names;					// owned
 	CmdShellHandler2** do_commands;			// not owned
 	CmdShellHandler2** complete_commands;	// not owned

@@ -137,7 +137,7 @@ bool StdAddition::_IsExplicitConstant() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 8/14/2000
 	if (ArgArray.empty()) return true;
 	if (0>IdxCurrentSelfEvalRule)
-		return and_range_n(boost::mem_fun(&MetaConcept::IsExplicitConstant),ArgArray.begin(),ArgArray.ArraySize());
+		return and_range_n([](const MetaConcept* x) { return x->IsExplicitConstant(); }, ArgArray.begin(), ArgArray.ArraySize());
 	return false;
 }
 
@@ -155,7 +155,7 @@ bool StdAddition::SyntaxOK() const
 bool StdAddition::_IsZero() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 8/12/2000
 	if (ArgArray.empty()) return true;
-	if (!and_range_n(boost::mem_fun(&MetaConcept::IsZero),ArgArray.begin(),ArgArray.ArraySize()))
+	if (!and_range_n([](const MetaConcept* x) { return x->IsZero(); },ArgArray.begin(),ArgArray.ArraySize()))
 		return false;
 	return DetermineDynamicType();
 }

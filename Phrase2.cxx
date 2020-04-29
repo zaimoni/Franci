@@ -204,17 +204,17 @@ bool Phrase2Arg::SyntaxOK() const
 const char* Phrase2Arg::ViewKeyword() const {return PhraseKeyword;}
 
 // we have some constraints to make the diagnosis efficient
-BOOST_STATIC_ASSERT(1==MULT_Phrase2_MC-SUM_Phrase2_MC);
-BOOST_STATIC_ASSERT(2==PERMUTATION_Phrase2_MC-SUM_Phrase2_MC);
-BOOST_STATIC_ASSERT(3==COMBINATION_Phrase2_MC-SUM_Phrase2_MC);
+static_assert(1==MULT_Phrase2_MC-SUM_Phrase2_MC);
+static_assert(2==PERMUTATION_Phrase2_MC-SUM_Phrase2_MC);
+static_assert(3==COMBINATION_Phrase2_MC-SUM_Phrase2_MC);
 
 // Formal manipulation functions
 void Phrase2Arg::DiagnoseInferenceRules()
 {	// FORMALLY CORRECT: Kenneth Boyd, 7/6/2001
 	// more constraints
-	BOOST_STATIC_ASSERT(Phrase2Arg::ConvertToCombination_ER-Phrase2Arg::ConvertToStdAddition_ER==COMBINATION_Phrase2_MC-SUM_Phrase2_MC);
-	BOOST_STATIC_ASSERT(Phrase2Arg::ConvertToPermutation_ER-Phrase2Arg::ConvertToStdAddition_ER==PERMUTATION_Phrase2_MC-SUM_Phrase2_MC);
-	BOOST_STATIC_ASSERT(Phrase2Arg::ConvertToStdMultiplication_ER-Phrase2Arg::ConvertToStdAddition_ER==MULT_Phrase2_MC-SUM_Phrase2_MC);
+	static_assert(Phrase2Arg::ConvertToCombination_ER-Phrase2Arg::ConvertToStdAddition_ER==COMBINATION_Phrase2_MC-SUM_Phrase2_MC);
+	static_assert(Phrase2Arg::ConvertToPermutation_ER-Phrase2Arg::ConvertToStdAddition_ER==PERMUTATION_Phrase2_MC-SUM_Phrase2_MC);
+	static_assert(Phrase2Arg::ConvertToStdMultiplication_ER-Phrase2Arg::ConvertToStdAddition_ER==MULT_Phrase2_MC-SUM_Phrase2_MC);
 	if (!IdxCurrentEvalRule && !IdxCurrentSelfEvalRule)
 		{
 		if (in_range<SUM_Phrase2_MC,COMBINATION_Phrase2_MC>((unsigned long)ExactType()))
@@ -369,7 +369,7 @@ Phrase2Arg::CanConstruct(const MetaConcept* const * src, size_t KeywordIdx)
 bool Phrase2Arg::ConvertToStdAddition(MetaConcept*& dest)
 {	// FORMALLY CORRECT: Kenneth Boyd, 3/2/2006
 	// This routine is called only from Evaluate, so it may destroy data in Phrase2Arg.
-	DEBUG_LOG(__PRETTY_FUNCTION__);
+	DEBUG_LOG(ZAIMONI_FUNCNAME);
 	assert(!dest);
 	assert(IsExactType(SUM_Phrase2_MC));
 	weakautoarray_ptr_throws<MetaConcept*> NewArgArray(2);
@@ -444,7 +444,7 @@ bool Phrase2Arg::ConvertToStdAddition(MetaConcept*& dest)
 bool Phrase2Arg::ConvertToStdMultiplication(MetaConcept*& dest)
 {	// FORMALLY CORRECT: Kenneth Boyd, 3/2/2006
 	// This routine is called only from Evaluate, so it may destroy data in Phrase2Arg.
-	DEBUG_LOG(__PRETTY_FUNCTION__);
+	DEBUG_LOG(ZAIMONI_FUNCNAME);
 	assert(!dest);
 	assert(IsExactType(MULT_Phrase2_MC));
 	weakautoarray_ptr_throws<MetaConcept*> NewArgArray(2);
@@ -499,7 +499,7 @@ bool Phrase2Arg::ConvertToStdMultiplication(MetaConcept*& dest)
 bool Phrase2Arg::ConvertToPermutation(MetaConcept*& dest)
 {	// FORMALLY CORRECT: Kenneth Boyd, 3/2/2006
 	// This routine is called only from Evaluate, so it may destroy data in Phrase2Arg.
-	DEBUG_LOG(__PRETTY_FUNCTION__);
+	DEBUG_LOG(ZAIMONI_FUNCNAME);
 	assert(!dest);
 	assert(IsExactType(PERMUTATION_Phrase2_MC));
 	weakautoarray_ptr_throws<MetaConcept*> NewArgArray(2);
@@ -519,7 +519,7 @@ bool Phrase2Arg::ConvertToPermutation(MetaConcept*& dest)
 bool Phrase2Arg::ConvertToCombination(MetaConcept*& dest)
 {	// FORMALLY CORRECT: Kenneth Boyd, 3/2/2006
 	// This routine is called only from Evaluate, so it may destroy data in Phrase2Arg.
-	DEBUG_LOG(__PRETTY_FUNCTION__);
+	DEBUG_LOG(ZAIMONI_FUNCNAME);
 	assert(!dest);
 	assert(IsExactType(COMBINATION_Phrase2_MC));
 	weakautoarray_ptr_throws<MetaConcept*> NewArgArray(2);

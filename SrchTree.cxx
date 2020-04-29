@@ -240,7 +240,7 @@ bool SearchTree::FlushUnwantedChildren()
 // Internal functions
 signed int SearchTree::BreadthSearchOneStage(bool& RAMStalled)
 {	// TODO: VERIFY
-	DEBUG_LOG(__PRETTY_FUNCTION__);
+	DEBUG_LOG(ZAIMONI_FUNCNAME);
 	// scan loop for evaluation
 	if (SelfEvalRuleCleanTrailingArg_SER==IdxCurrentSelfEvalRule)
 		AUDIT_STATEMENT(return SC_FATAL);

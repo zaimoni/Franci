@@ -5,8 +5,8 @@
 #define __INTEGERNUMERAL_HPP 1
 
 #include <stddef.h>
+#include <algorithm>
 #include "Zaimoni.STL/Compiler.h"
-#include "Zaimoni.STL/Repair.STL/algorithm"
 
 class _IntegerNumeral {
 public:
@@ -77,9 +77,10 @@ public:
 		{	std::swap(lhs.ShortInteger,rhs.ShortInteger);
 			std::swap(lhs.VFT2Idx,rhs.VFT2Idx);};
 private:
-	static_assert(sizeof(unsigned long)==sizeof(unsigned long*));
+	static_assert(sizeof(unsigned long)<=sizeof(unsigned long*));
+	static_assert(sizeof(uintptr_t) == sizeof(unsigned long*));
 	union	{
-			unsigned long ShortInteger;
+			uintptr_t ShortInteger;
 			unsigned long* LongInteger;
 			};
 	signed short VFT2Idx;
