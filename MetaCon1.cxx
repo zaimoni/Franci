@@ -7,7 +7,7 @@
 
 #include "Zaimoni.STL/Pure.C/logging.h"
 
-#include <boost/functional.hpp>
+#include <functional>
 
 #define DECLARE_METACONCEPT(MINA,MAXA,NAME,FLAGS,GRAMMAR)	\
    { MINA, MAXA, NAME##_MC, FLAGS, #NAME, (char)(GRAMMAR) }

@@ -5,10 +5,8 @@
 #define ZAIMONI_ALGOR_HPP 1
 
 #include "Logging.h"
-#include "boost_core.hpp"
 #include <algorithm>
-#include <boost/concept_check.hpp>
-#include "boost/functional.hpp"
+#include <functional>
 
 namespace zaimoni
 {
@@ -187,7 +185,7 @@ sort_net_2(T* TargetArray, V (&transform)(U))
 }
 
 template<typename T, typename U>
-typename std::enable_if<boost::is_convertible<T, U>::value, void>::type
+std::enable_if_t<std::is_convertible_v<T, U>, void>
 sort_net_2(T* TargetArray, bool (&less_than)(U,U))
 {
 	if (less_than(TargetArray[1],TargetArray[0]))
@@ -196,10 +194,8 @@ sort_net_2(T* TargetArray, bool (&less_than)(U,U))
 
 // pointer to pointer versions
 template<typename T>
-void
-sort_net_2(T** TargetArray)
+void sort_net_2(T** TargetArray)
 {
-	boost::function_requires<boost::LessThanComparableConcept<T> >();
 	if (*TargetArray[1]<*TargetArray[0])
 		swap(*TargetArray[0],*TargetArray[1]);
 }
@@ -208,13 +204,12 @@ template<typename T, typename U, typename V>
 void
 sort_net_2(T** TargetArray, V (&transform)(U))
 {
-	boost::function_requires<boost::LessThanComparableConcept<V> >();
 	if (transform(*TargetArray[1])<transform(*TargetArray[0]))
 		swap(TargetArray[0],TargetArray[1]);
 }
 
 template<typename T, typename U>
-typename std::enable_if<boost::is_convertible<T, U>::value, void>::type
+std::enable_if_t<std::is_convertible_v<T, U>, void>
 sort_net_2(T** TargetArray, bool (&less_than)(U,U))
 {
 	if (less_than(*TargetArray[1],*TargetArray[0]))
@@ -230,7 +225,6 @@ template<typename T>
 void
 heapsort(T* const TargetArray, size_t N)
 {
-	boost::function_requires<boost::LessThanComparableConcept<T> >();
 	if (!TargetArray || 1==N) return;
 	if (2==N)
 		{
@@ -255,7 +249,6 @@ template<typename T, typename U, typename V>
 void
 heapsort(T* const TargetArray, size_t N, V (&transform)(U))
 {
-	boost::function_requires<boost::LessThanComparableConcept<V> >();
 	if (!TargetArray || 1==N) return;
 	if (2==N)
 		{
@@ -277,7 +270,7 @@ heapsort(T* const TargetArray, size_t N, V (&transform)(U))
 }
 
 template<typename T, typename U>
-typename std::enable_if<boost::is_convertible<T, U>::value, void>::type
+std::enable_if_t<std::is_convertible_v<T, U>, void>
 heapsort(T* const TargetArray, size_t N, bool (&less_than)(U,U))
 {
 	if (!TargetArray || 1==N) return;
@@ -304,7 +297,6 @@ template<typename T>
 void
 heapsort(T* const TargetArray)
 {
-	boost::function_requires<boost::LessThanComparableConcept<T> >();
 	if (!TargetArray) return;
 	heapsort(TargetArray,ArraySize(TargetArray));
 }
@@ -318,7 +310,7 @@ heapsort(T* const TargetArray, V (&transform)(U))
 }
 
 template<typename T, typename U>
-typename std::enable_if<boost::is_convertible<T, U>::value, void>::type
+std::enable_if_t<std::is_convertible_v<T, U>, void>
 heapsort(T* const TargetArray, bool (&less_than)(U,U))
 {
 	if (!TargetArray) return;
@@ -330,7 +322,6 @@ template<typename T>
 void
 heapsort(T** const TargetArray, size_t N)
 {
-	boost::function_requires<boost::LessThanComparableConcept<T> >();
 	if (!TargetArray || 1==N) return;
 	if (2==N)
 		{
@@ -355,7 +346,6 @@ template<typename T, typename U, typename V>
 void
 heapsort(T** const TargetArray, size_t N, V (&transform)(U))
 {
-	boost::function_requires<boost::LessThanComparableConcept<V> >();
 	if (!TargetArray || 1==N) return;
 	if (2==N)
 		{
@@ -377,7 +367,7 @@ heapsort(T** const TargetArray, size_t N, V (&transform)(U))
 }
 
 template<typename T, typename U>
-typename std::enable_if<boost::is_convertible<T, U>::value, void>::type
+std::enable_if_t<std::is_convertible_v<T, U>, void>
 heapsort(T** const TargetArray, size_t N, bool (&less_than)(U,U))
 {
 	if (!TargetArray || 1==N) return;
@@ -404,7 +394,6 @@ template<typename T>
 void
 heapsort(T** const TargetArray)
 {
-	boost::function_requires<boost::LessThanComparableConcept<T> >();
 	if (!TargetArray) return;
 	heapsort(TargetArray,ArraySize(TargetArray));
 }
@@ -418,7 +407,7 @@ heapsort(T** const TargetArray, V (&transform)(U))
 }
 
 template<typename T, typename U>
-typename std::enable_if<boost::is_convertible<T, U>::value, void>::type
+std::enable_if_t<std::is_convertible_v<T, U>, void>
 heapsort(T** const TargetArray, bool (&less_than)(U,U))
 {
 	if (!TargetArray) return;
@@ -430,7 +419,6 @@ template<typename T>
 void
 bubble_up(T* const TargetArray, size_t Idx, size_t N)
 {
-	boost::function_requires<boost::LessThanComparableConcept<T> >();
 	if (!TargetArray) return;
 	while(++Idx<N && TargetArray[Idx]<TargetArray[Idx-1])
 		swap(TargetArray[Idx-1],TargetArray[Idx]);
@@ -440,7 +428,6 @@ template<typename T, typename U, typename V>
 void
 bubble_up(T* const TargetArray, size_t Idx, size_t N, V (&transform)(U))
 {
-	boost::function_requires<boost::LessThanComparableConcept<V> >();
 	if (!TargetArray) return;
 	const V Tmp = transform(TargetArray[Idx]);
 	while(++Idx<N && transform(TargetArray[Idx])<Tmp)
@@ -460,7 +447,6 @@ template<typename T>
 void
 bubble_down(T* const TargetArray, size_t Idx)
 {
-	boost::function_requires<boost::LessThanComparableConcept<T> >();
 	if (!TargetArray) return;
 	while(0<Idx && TargetArray[Idx]<TargetArray[Idx-1])
 		{
@@ -473,7 +459,6 @@ template<typename T, typename U, typename V>
 void
 bubble_down(T* const TargetArray, size_t Idx, V (&transform)(U))
 {
-	boost::function_requires<boost::LessThanComparableConcept<V> >();
 	if (!TargetArray) return;
 	const V Tmp = transform(TargetArray[Idx]);
 	while(0<Idx && Tmp<transform(TargetArray[Idx-1]))
@@ -498,9 +483,8 @@ bubble_down(T* const TargetArray, size_t Idx, bool (&less_than)(U,U))
 // searches
 template<typename T>
 signed long
-supremum_search_sorted(const T* TargetArray, size_t StrictUB, typename boost::call_traits<T>::param_type supremum)
+supremum_search_sorted(const T* TargetArray, size_t StrictUB, typename zaimoni::param<T>::type supremum)
 {
-	boost::function_requires<boost::LessThanComparableConcept<T> >();
 	if (!TargetArray) return -1;
 	if (supremum<TargetArray[0]) return -1;
 	
@@ -522,9 +506,8 @@ supremum_search_sorted(const T* TargetArray, size_t StrictUB, typename boost::ca
 
 template<typename T, typename U, typename V>
 signed long
-supremum_search_sorted(const T* TargetArray, size_t StrictUB, typename boost::call_traits<V>::param_type supremum, V (&transform)(U))
+supremum_search_sorted(const T* TargetArray, size_t StrictUB, typename zaimoni::param<T>::type supremum, V (&transform)(U))
 {
-	boost::function_requires<boost::LessThanComparableConcept<V> >();
 	if (!TargetArray) return -1;
 	if (supremum<transform(TargetArray[0])) return -1;
 	
@@ -569,9 +552,8 @@ supremum_search_sorted(const T* TargetArray, size_t StrictUB, const U& supremum,
 
 template<typename T>
 signed long
-strict_supremum_search_sorted(const T* TargetArray, size_t StrictUB, typename boost::call_traits<T>::param_type supremum)
+strict_supremum_search_sorted(const T* TargetArray, size_t StrictUB, typename zaimoni::param<T>::type supremum)
 {
-	boost::function_requires<boost::LessThanComparableConcept<T> >();
 	if (!TargetArray) return -1;
 	if (supremum<TargetArray[0]) return -1;
 	
@@ -593,9 +575,8 @@ strict_supremum_search_sorted(const T* TargetArray, size_t StrictUB, typename bo
 
 template<typename T, typename U, typename V>
 signed long
-strict_supremum_search_sorted(const T* TargetArray, size_t StrictUB, typename boost::call_traits<V>::param_type supremum, V (&transform)(U))
+strict_supremum_search_sorted(const T* TargetArray, size_t StrictUB, typename zaimoni::param<V>::type supremum, V (&transform)(U))
 {
-	boost::function_requires<boost::LessThanComparableConcept<V> >();
 	if (!TargetArray) return -1;
 	if (supremum<transform(TargetArray[0])) return -1;
 	

@@ -7,7 +7,7 @@
 #include "StdMult.hxx"
 #include "LowRel.hxx"
 
-#include <boost/functional.hpp>
+#include <functional>
 
 StdMultiplication::SelfEvaluateRule StdMultiplication::SelfEvaluateRuleLookup[MaxSelfEvalRuleIdx_SER]
   =	{

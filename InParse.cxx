@@ -20,7 +20,7 @@
 #include "Zaimoni.STL/LexParse/Parser.hpp"
 #include "Zaimoni.STL/Pure.C/logging.h"
 
-#include <boost/functional.hpp>
+#include <functional>
 
 extern Parser<MetaConcept> FranciScriptParser;
 

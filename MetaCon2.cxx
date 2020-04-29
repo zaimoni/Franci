@@ -7,7 +7,6 @@
 #include "TruthVal.hxx"
 #include "LowRel.hxx"
 
-#include "Zaimoni.STL/boost/functional.hpp"
 #include "Zaimoni.STL/Pure.C/logging.h"
 
 MetaConceptWithArgArray::EvaluateToOtherRule MetaConceptWithArgArray::EvaluateRuleLookup[MaxEvalRuleIdx_ER]
@@ -90,7 +89,7 @@ bool MetaConceptWithArgArray::CanEvaluate() const
 	if 		(None_SER>IdxCurrentSelfEvalRule) {assert(NULL==InferenceParameterMC); return false;}
 	else if (IdxCurrentSelfEvalRule || IdxCurrentEvalRule) return true;
 	assert(NULL==InferenceParameterMC);
-	DEBUG_LOG(__PRETTY_FUNCTION__);
+	DEBUG_LOG(ZAIMONI_FUNCNAME);
 	DEBUG_LOG(name());
 	DEBUG_STATEMENT(const long revert_to = get_checkpoint());
 	DiagnoseInferenceRules();
@@ -124,7 +123,7 @@ bool MetaConceptWithArgArray::CanEvaluateToSameType() const
 	if      (None_SER>IdxCurrentSelfEvalRule) {assert(NULL==InferenceParameterMC); return false;}
 	else if (IdxCurrentSelfEvalRule) return true;
 	else if (IdxCurrentEvalRule) return false;
-	DEBUG_LOG(__PRETTY_FUNCTION__);
+	DEBUG_LOG(ZAIMONI_FUNCNAME);
 	DEBUG_LOG(name());
 	assert(InferenceParameterMC.empty());
 	DEBUG_LOG("Attempting DiagnoseInferenceRules/CanEvaluateToSameType");
@@ -165,7 +164,7 @@ bool MetaConceptWithArgArray::Evaluate(MetaConcept*& dest)		// same, or differen
 
 bool MetaConceptWithArgArray::DestructiveEvaluateToSameType()
 {	// FORMALLY CORRECT: Kenneth Boyd, 5/16/1999
-	DEBUG_LOG(__PRETTY_FUNCTION__);
+	DEBUG_LOG(ZAIMONI_FUNCNAME);
 	DEBUG_LOG(name());
 	DEBUG_LOG(*this);
 
@@ -205,7 +204,8 @@ STANDARD_DECLARE_ARGN(MetaConceptWithArgArray,ARGN_BODY)
 bool MetaConceptWithArgArray::EqualAux2(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 11/29/2007
 	if (fast_size()==static_cast<const MetaConceptWithArgArray&>(rhs).fast_size())
-		return and_range_n(addref_binary_functor<std::equal_to<MetaConcept>,1,1>(),ArgArray.begin(),fast_size(),static_cast<const MetaConceptWithArgArray&>(rhs).ArgArray.begin());
+		return and_range_n([](MetaConcept* lhs, MetaConcept* rhs) {return (*lhs) == (*rhs); },
+			ArgArray.begin(), fast_size(), static_cast<const MetaConceptWithArgArray&>(rhs).ArgArray.begin());
 	return false;
 }
 
@@ -258,7 +258,7 @@ void MetaConceptWithArgArray::ConvertVariableToCurrentQuantification(MetaQuantif
 
 bool MetaConceptWithArgArray::UsesQuantifierAux(const MetaQuantifier& x) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 11/29/2007
-	return or_range(boost::bind1st(boost::mem_fun_ref(&MetaQuantifier::MetaConceptPtrUsesThisQuantifier),x),ArgArray.begin(),ArgArray.end());
+	return or_range([&](const MetaConcept* src) { return x.MetaConceptPtrUsesThisQuantifier(src); }, ArgArray.begin(), ArgArray.end());
 }
 
 bool MetaConceptWithArgArray::EvalForceArg(MetaConcept*& dest)
@@ -590,7 +590,7 @@ bool MetaConceptWithArgArray::ForceValue(MetaConcept*& dest)
 bool MetaConceptWithArgArray::SelfEvalRuleEvaluateArg()
 {	// FORMALLY CORRECT: Kenneth Boyd, 1/24/2002
 	assert(size()>InferenceParameter1);
-	DEBUG_LOG(__PRETTY_FUNCTION__);
+	DEBUG_LOG(ZAIMONI_FUNCNAME);
 	DEBUG_LOG(*this);
 	DEBUG_LOG(*ArgArray[InferenceParameter1]);
 	if (DestructiveSyntacticallyEvaluateOnce(ArgArray[InferenceParameter1]))
@@ -741,7 +741,7 @@ bool MetaConceptWithArgArray::SelfEvalRuleEvaluateArgs()
 	// anything up.
 	assert(size()>InferenceParameter2);
 	assert(InferenceParameter1<=InferenceParameter2);
-	DEBUG_LOG(__PRETTY_FUNCTION__);
+	DEBUG_LOG(ZAIMONI_FUNCNAME);
 	bool Flag = false;
 	size_t i = InferenceParameter1;
 	if (HasAnnihilatorKey())
@@ -1474,7 +1474,7 @@ bool MetaConceptWithArgArray::VerifyArgsExplicitConstant(size_t lb, size_t stric
 {	// FORMALLY CORRECT: Kenneth Boyd, 6/22/2000
 	assert(ArgArray.size()>=strict_ub);
 	assert(lb<strict_ub);
-	return and_range(boost::mem_fun(&MetaConcept::IsExplicitConstant),ArgArray+lb,ArgArray+strict_ub);
+	return and_range([](MetaConcept* x) { return x->IsExplicitConstant(); }, ArgArray + lb, ArgArray + strict_ub);
 }
 
 bool FindExplicitConstantArg(const MetaConcept* const * const ArgArray, size_t i, size_t& Param1)

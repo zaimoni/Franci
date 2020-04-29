@@ -82,50 +82,58 @@ void INFORM(long double B);
 void LOG(long double B);
 void INC_INFORM(long double B);
 
-#ifdef __GNUC__
-inline void INFORM(unsigned long B) {return INFORM((uintmax_t)(B));}
-inline void LOG(unsigned long B) {return LOG((uintmax_t)(B));}
-inline void INC_INFORM(unsigned long B) {return INC_INFORM((uintmax_t)(B));}
-#endif
+#pragma start_copy signed_inform
+inline void INFORM(signed long B) { return INFORM((intmax_t)(B)); }
+inline void LOG(signed long B) { return LOG((intmax_t)(B)); }
+inline void INC_INFORM(signed long B) { return INC_INFORM((intmax_t)(B)); }
+#pragma end_copy
+#pragma for F in int,short,signed char
+#pragma substitute $F for signed long in signed_inform
+inline void INFORM(int B) { return INFORM((intmax_t)(B)); }
+inline void LOG(int B) { return LOG((intmax_t)(B)); }
+inline void INC_INFORM(int B) { return INC_INFORM((intmax_t)(B)); }
+inline void INFORM(short B) { return INFORM((intmax_t)(B)); }
+inline void LOG(short B) { return LOG((intmax_t)(B)); }
+inline void INC_INFORM(short B) { return INC_INFORM((intmax_t)(B)); }
+inline void INFORM(signed char B) { return INFORM((intmax_t)(B)); }
+inline void LOG(signed char B) { return LOG((intmax_t)(B)); }
+inline void INC_INFORM(signed char B) { return INC_INFORM((intmax_t)(B)); }
+#pragma end_substitute
+#pragma done
 
-#ifdef __GNUC__
-inline void INFORM(unsigned int B) {return INFORM((uintmax_t)(B));}
-inline void LOG(unsigned int B) {return LOG((uintmax_t)(B));}
-inline void INC_INFORM(unsigned int B) {return INC_INFORM((uintmax_t)(B));}
-#endif
+#pragma start_copy unsigned_inform
+inline void INFORM(unsigned long B) { return INFORM((uintmax_t)(B)); }
+inline void LOG(unsigned long B) { return LOG((uintmax_t)(B)); }
+inline void INC_INFORM(unsigned long B) { return INC_INFORM((uintmax_t)(B)); }
+#pragma end_copy
+#pragma for F in unsigned int,unsigned short,unsigned char
+#pragma substitute $F for unsigned long in unsigned_inform
+inline void INFORM(unsigned int B) { return INFORM((uintmax_t)(B)); }
+inline void LOG(unsigned int B) { return LOG((uintmax_t)(B)); }
+inline void INC_INFORM(unsigned int B) { return INC_INFORM((uintmax_t)(B)); }
+inline void INFORM(unsigned short B) { return INFORM((uintmax_t)(B)); }
+inline void LOG(unsigned short B) { return LOG((uintmax_t)(B)); }
+inline void INC_INFORM(unsigned short B) { return INC_INFORM((uintmax_t)(B)); }
+inline void INFORM(unsigned char B) { return INFORM((uintmax_t)(B)); }
+inline void LOG(unsigned char B) { return LOG((uintmax_t)(B)); }
+inline void INC_INFORM(unsigned char B) { return INC_INFORM((uintmax_t)(B)); }
+#pragma end_substitute
+#pragma done
 
-#ifdef __GNUC__
-inline void INFORM(int B) {return INFORM((intmax_t)(B));}
-inline void LOG(int B) {return LOG((intmax_t)(B));}
-inline void INC_INFORM(int B) {return INC_INFORM((intmax_t)(B));}
-#endif
-
-#ifdef __GNUC__
-inline void INFORM(unsigned short B) {return INFORM((uintmax_t)(B));}
-inline void LOG(unsigned short B) {return LOG((uintmax_t)(B));}
-inline void INC_INFORM(unsigned short B) {return INC_INFORM((uintmax_t)(B));}
-#endif
-
-#ifdef __GNUC__
-inline void INFORM(unsigned char B) {return INFORM((uintmax_t)(B));}
-inline void LOG(unsigned char B) {return LOG((uintmax_t)(B));}
-inline void INC_INFORM(unsigned char B) {return INC_INFORM((uintmax_t)(B));}
-#endif
+inline void INFORM(double B) { return INFORM((long double)(B)); }
+inline void LOG(double B) { return LOG((long double)(B)); }
+inline void INC_INFORM(double B) { return INC_INFORM((long double)(B)); }
+inline void INFORM(float B) { return INFORM((long double)(B)); }
+inline void LOG(float B) { return LOG((long double)(B)); }
+inline void INC_INFORM(float B) { return INC_INFORM((long double)(B)); }
 
 #else	/* !defined(__cplusplus) */
 #ifdef NDEBUG
 #	define FATAL(B) _fatal(B)
 #	define FATAL_CODE(B,CODE) _fatal_code(B,CODE)
-#elif defined(__GNUC__)
-#	define FATAL(B) _fatal((_LOG(__PRETTY_FUNCTION__),LOG_STRING_LITERAL(__FILE__ ":" DEEP_STRINGIZE(__LINE__)),B))
-#	define FATAL_CODE(B,CODE) _fatal_code((LOG(__PRETTY_FUNCTION__),LOG_STRING_LITERAL(__FILE__ ":" DEEP_STRINGIZE(__LINE__)),B),CODE)
-#elif 1300<=_MSC_VER	/* __FUNCDNAME__ extension cuts in at Visual C++ .NET 2002 */
-#	define FATAL(B) _fatal((_LOG(__FUNCDNAME__),LOG_STRING_LITERAL(__FILE__ ":" DEEP_STRINGIZE(__LINE__)),B))
-#	define FATAL_CODE(B,CODE) _fatal_code((LOG(__FUNCDNAME__),LOG_STRING_LITERAL(__FILE__ ":" DEEP_STRINGIZE(__LINE__)),B),CODE)
 #else
-/* if no extensions, assume C99 */
-#	define FATAL(B) _fatal((LOG(__func__),LOG_STRING_LITERAL(__FILE__ ":" DEEP_STRINGIZE(__LINE__)),B));
-#	define FATAL_CODE(B,CODE) _fatal_code((LOG(__func__),LOG_STRING_LITERAL(__FILE__ ":" DEEP_STRINGIZE(__LINE__)),B),CODE);
+#   define FATAL(B) _fatal((_LOG(ZAIMONI_FUNCNAME),LOG_STRING_LITERAL(__FILE__ ":" DEEP_STRINGIZE(__LINE__)),B))
+#   define FATAL_CODE(B,CODE) _fatal_code((LOG(ZAIMONI_FUNCNAME),LOG_STRING_LITERAL(__FILE__ ":" DEEP_STRINGIZE(__LINE__)),B),CODE)
 #endif
 #define INC_INFORM(B) _inc_inform(B,strlen(B))
 #define INFORM(B) _inform(B,strlen(B))
@@ -139,16 +147,8 @@ inline void INC_INFORM(unsigned char B) {return INC_INFORM((uintmax_t)(B));}
 #ifndef NDEBUG	/* self-aware version */
 /* use similar extensions on other compilers */
 #ifdef __cplusplus
-#	ifdef __GNUC__
-#		define FATAL(B) FATAL((LOG(__PRETTY_FUNCTION__),LOG_STRING_LITERAL(__FILE__ ":" DEEP_STRINGIZE(__LINE__)),B))
-#		define FATAL_CODE(B,CODE) FATAL_CODE((LOG(__PRETTY_FUNCTION__),LOG_STRING_LITERAL(__FILE__ ":" DEEP_STRINGIZE(__LINE__)),B),CODE)
-#	elif 1300<=_MSC_VER	/* __FUNCDNAME__ extension cuts in at Visual C++ .NET 2002 */
-#		define FATAL(B) FATAL((LOG(__FUNCDNAME__),LOG_STRING_LITERAL(__FILE__ ":" DEEP_STRINGIZE(__LINE__)),B))
-#		define FATAL_CODE(B,CODE) FATAL_CODE((LOG(__FUNCDNAME__),LOG_STRING_LITERAL(__FILE__ ":" DEEP_STRINGIZE(__LINE__)),B),CODE)
-#	else	/* if no extensions, assume C99 */		
-#		define FATAL(B) FATAL((LOG(__func__),LOG_STRING_LITERAL(__FILE__ ":" DEEP_STRINGIZE(__LINE__)),B));
-#		define FATAL_CODE(B,CODE) FATAL_CODE((LOG(__func__),LOG_STRING_LITERAL(__FILE__ ":" DEEP_STRINGIZE(__LINE__)),B),CODE);
-#	endif
+#   define FATAL(B) FATAL((LOG(ZAIMONI_FUNCNAME),LOG_STRING_LITERAL(__FILE__ ":" DEEP_STRINGIZE(__LINE__)),B))
+#   define FATAL_CODE(B,CODE) FATAL_CODE((LOG(ZAIMONI_FUNCNAME),LOG_STRING_LITERAL(__FILE__ ":" DEEP_STRINGIZE(__LINE__)),B),CODE)
 #endif
 
 #define ARG_TRACE_PARAMS , const char* const _file, long _line

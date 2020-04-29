@@ -9,7 +9,7 @@
 
 #include "Zaimoni.STL/lite_alg.hpp"
 
-#include <boost/functional.hpp>
+#include <functional>
 
 #define DIGRAPH_SET_EDGE '\x01'
 #define DIGRAPH_RESET_EDGE '\x02'

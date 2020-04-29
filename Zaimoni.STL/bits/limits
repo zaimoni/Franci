@@ -369,49 +369,37 @@ _same_sign_addition_has_epsilon(T x, T y, signed int x_exponent, bool x_second_b
 
 // safe operation detection
 template<typename T>
-typename std::enable_if<boost::is_integral<T>::value && std::numeric_limits<T>::is_signed, bool>::type
-safe_sum(T x, T y)
+std::enable_if_t<std::is_integral_v<T>, bool> safe_sum(T x, T y)
 {	//! \return true iff the sum doesn't overflow or underflow
-	if (0<=x) return (y<=qualitative_computation<T>::max-x);
-	if (0<=y) return (x<=qualitative_computation<T>::max-y);
-	return (y>=qualitative_computation<T>::min-x);
+	if constexpr (std::numeric_limits<T>::is_signed) {
+		if (0 <= x) return (y <= qualitative_computation<T>::max - x);
+		if (0 <= y) return (x <= qualitative_computation<T>::max - y);
+		return (y >= qualitative_computation<T>::min - x);
+	} else {
+		return (y <= qualitative_computation<T>::max - x);
+	}
 }
 
 template<typename T>
-inline typename std::enable_if<boost::is_integral<T>::value && !std::numeric_limits<T>::is_signed, bool>::type
-safe_sum(T x, T y)
-{	//! \return true iff the sum doesn't overflow or underflow
-	return (y<=qualitative_computation<T>::max-x);
-}
-
-template<typename T>
-typename std::enable_if<boost::is_integral<T>::value && std::numeric_limits<T>::is_signed, bool>::type
-safe_product(T x, T y)
+std::enable_if_t<std::is_integral_v<T>, bool> safe_product(T x, T y)
 {	//! \return true iff the sum doesn't overflow or underflow
 	if (0==x) return true;
 	if (0==y) return true;
-	if (0<x)
-		{
-		if (0<y)
-			return (x<=qualitative_computation<T>::max/y);
-		else	// 0<y
-			return (x<=qualitative_computation<T>::min/y);	
+	if constexpr (std::numeric_limits<T>::is_signed) {
+		if (0 < x) {
+			if (0 < y)
+				return (x <= qualitative_computation<T>::max / y);
+			else	// 0<y
+				return (x <= qualitative_computation<T>::min / y);
+		} else {	// 0>x
+			if (0 < y)
+				return (x >= qualitative_computation<T>::min / y);
+			else	// 0<y
+				return (x >= qualitative_computation<T>::max / y);
 		}
-	else{	// 0>x
-		if (0<y)
-			return (x>=qualitative_computation<T>::min/y);
-		else	// 0<y
-			return (x>=qualitative_computation<T>::max/y);	
-		}
-}
-
-template<typename T>
-inline typename std::enable_if<boost::is_integral<T>::value && !std::numeric_limits<T>::is_signed, bool>::type
-safe_product(T x, T y)
-{	//! \return true iff the sum doesn't overflow or underflow
-	if (0==x) return true;
-	if (0==y) return true;
-	return (x<=qualitative_computation<T>::max/y);
+	} else {
+		return (x <= qualitative_computation<T>::max / y);
+	}
 }
 
 // definitely not for users

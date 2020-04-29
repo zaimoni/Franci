@@ -7,7 +7,6 @@
 #include <stddef.h>
 #include "Zaimoni.STL/Compiler.h"
 #include "Zaimoni.STL/Repair.STL/algorithm"
-#include <boost/static_assert.hpp>
 
 class _IntegerNumeral {
 public:
@@ -78,7 +77,7 @@ public:
 		{	std::swap(lhs.ShortInteger,rhs.ShortInteger);
 			std::swap(lhs.VFT2Idx,rhs.VFT2Idx);};
 private:
-	BOOST_STATIC_ASSERT(sizeof(unsigned long)==sizeof(unsigned long*));
+	static_assert(sizeof(unsigned long)==sizeof(unsigned long*));
 	union	{
 			unsigned long ShortInteger;
 			unsigned long* LongInteger;

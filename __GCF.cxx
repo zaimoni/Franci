@@ -2,7 +2,6 @@
 
 #include "__GCF.hxx"
 #include "Zaimoni.STL/algor.hpp"
-#include "Zaimoni.STL/boost/functional.hpp"
 
 using namespace zaimoni;
 
@@ -69,7 +68,7 @@ bool ValidateArgArray(const _IntegerNumeral* const * const ArgArray)
 				_fatal("Please contact tech support.  I QUIT!");
 				}
 		while(0<i);
-		return and_range_n(boost::mem_fun(&_IntegerNumeral::SyntaxOK),ArgArray,LocalArraySize);
+		return and_range_n([](const _IntegerNumeral* x) { return x->SyntaxOK(); }, ArgArray, LocalArraySize);
 		};
 	return false;
 }
@@ -77,7 +76,7 @@ bool ValidateArgArray(const _IntegerNumeral* const * const ArgArray)
 bool _GCF::SyntaxOK() const
 {
 	if (ValidateArgArray(ArgArray))	// NOTE: this routine catches NULL entries
-		return and_range(boost::mem_fun(&_IntegerNumeral::in_Z),ArgArray.begin(),ArgArray.end());
+		return and_range([](const _IntegerNumeral* x) { return x->in_Z(); }, ArgArray.begin(), ArgArray.end());
 	return false;
 }
 

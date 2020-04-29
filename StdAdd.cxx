@@ -7,7 +7,7 @@
 #include "StdAdd.hxx"
 #include "LowRel.hxx"
 
-#include <boost/functional.hpp>
+#include <functional>
 
 StdAddition::SelfEvaluateRule StdAddition::SelfEvaluateRuleLookup[MaxSelfEvalRuleIdx_SER]
   =	{

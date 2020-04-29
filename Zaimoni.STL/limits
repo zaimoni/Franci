@@ -74,7 +74,7 @@ struct alt_numeric_limits<float>
 			exponent_offset_as_short = 0
 #endif
 		 };
-	BOOST_STATIC_ASSERT(sizeof(float)>=size_as_chararray);
+	static_assert(sizeof(float)>=size_as_chararray);
 };
 
 template<>
@@ -90,7 +90,7 @@ struct alt_numeric_limits<double>
 			exponent_offset_as_short = 0
 #endif
 		 };
-	BOOST_STATIC_ASSERT(sizeof(double)>=size_as_chararray);
+	static_assert(sizeof(double)>=size_as_chararray);
 };
 
 // This is for Intel hardware long double
@@ -108,7 +108,7 @@ struct alt_numeric_limits<long double>
 			exponent_offset_as_short = 0
 #endif
 		 };
-	BOOST_STATIC_ASSERT(sizeof(long double)>=size_as_chararray);
+	static_assert(sizeof(long double)>=size_as_chararray);
 };
 
 // low-level diagnostics
@@ -116,7 +116,7 @@ template<typename T>
 typename std::enable_if<std::is_floating_point<T>::value, signed int>::type
 _exponent_of(const T& x)
 {
-	BOOST_STATIC_ASSERT(15>=alt_numeric_limits<T>::exponent_digits);
+	static_assert(15>=alt_numeric_limits<T>::exponent_digits);
 	volatile signed short raw_exponent = reinterpret_cast<const unsigned short*>(&x)[alt_numeric_limits<T>::exponent_offset_as_short] & SHRT_MAX;
 	raw_exponent >>= 15-alt_numeric_limits<T>::exponent_digits;
 	return raw_exponent + std::numeric_limits<T>::min_exponent-2;
@@ -268,14 +268,15 @@ struct qualitative_computation<long double>
 
 // absolute value
 template<typename T>
-typename std::enable_if<std::numeric_limits<T>::is_specialized && std::numeric_limits<T>::is_signed, typename qualitative_computation<T>::unsigned_type>::type
+std::enable_if_t<std::numeric_limits<T>::is_specialized, std::conditional_t<std::numeric_limits<T>::is_signed, typename qualitative_computation<T>::unsigned_type, T> >
 abs(T x)
-{	return	(0<=x) ? x : -x;}
-
-template<typename T>
-typename std::enable_if<std::numeric_limits<T>::is_specialized && !std::numeric_limits<T>::is_signed, T>::type
-abs(T x)
-{	return	x;}
+{
+	if constexpr(std::numeric_limits<T>::is_signed) {
+		return	(0 <= x) ? x : -x;
+	} else {
+		return	x;
+	}
+}
 
 #include "bits/limits"
 

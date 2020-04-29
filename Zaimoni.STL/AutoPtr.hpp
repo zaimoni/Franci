@@ -1,6 +1,6 @@
 // AutoPtr.hpp
 // a family of pointers that automatically delete themselves when going out of scope
-// (C)2009-2011 Kenneth Boyd, license: MIT.txt
+// (C)2009-2011,2020 Kenneth Boyd, license: MIT.txt
 
 // autodel_ptr: single pointer
 // weakautoarray_ptr: array of weak pointers
@@ -212,7 +212,7 @@ class _meta_autoarray_ptr : public POD_autoarray_ptr<T>
 {
 protected:
 	explicit _meta_autoarray_ptr() {this->NULLPtr();}
-	explicit _meta_autoarray_ptr(T*& src, size_t src_size) { this->_ptr = src; ZAIMONI_ISO_SRC(this->_size = src_size;) src = 0; }
+	explicit _meta_autoarray_ptr(T*& src ZAIMONI_ISO_PARAM(size_t src_size)) { this->_ptr = src; ZAIMONI_ISO_SRC(this->_size = src_size;) src = 0; }
 	explicit _meta_autoarray_ptr(size_t n) {this->de_novo(n);}
 	explicit _meta_autoarray_ptr(const std::nothrow_t& tracer, size_t n) {this->de_novo_nothrow(n);}
 	explicit _meta_autoarray_ptr(const _meta_autoarray_ptr& src) {this->NULLPtr(); *this=src;}

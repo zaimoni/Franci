@@ -100,11 +100,10 @@ scale_quotient(unsigned long X,unsigned long numerator,unsigned long denominator
 }
 
 template<class T>
-void
-quotient_of_products_incremental_init(T*& numerator,T*& denominator,typename boost::call_traits<T>::param_type for_numerator, typename boost::call_traits<T>::param_type for_denominator,size_t Idx)
+void quotient_of_products_incremental_init(T*& numerator,T*& denominator,typename zaimoni::param<T>::type for_numerator, typename zaimoni::param<T>::type for_denominator,size_t Idx)
 {
-	assert(NULL!=numerator);
-	assert(NULL!=denominator);
+	assert(numerator);
+	assert(denominator);
 	assert(0<Idx);
 	if 		(for_denominator==1)
 		{

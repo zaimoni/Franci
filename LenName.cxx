@@ -48,7 +48,7 @@ const char* const MetaConnectiveNames[8] =	{
 											LogicKeyword_NAND	// NAND
 											};
 
-BOOST_STATIC_ASSERT(sizeof(const char*)*(LogicalNAND_MC-LogicalAND_MC+1)==sizeof(MetaConnectiveNames));
+static_assert(sizeof(const char*)*(LogicalNAND_MC-LogicalAND_MC+1)==sizeof(MetaConnectiveNames));
 
 // MetaQuantifier
 const char* const QuantificationNames[5] =	{
@@ -59,7 +59,7 @@ const char* const QuantificationNames[5] =	{
 											PredCalcKeyword_THEREISNO
 											};
 
-BOOST_STATIC_ASSERT(sizeof(const char*)*(ThereIsNot_MC-ForAll_MC+1)==sizeof(QuantificationNames));
+static_assert(sizeof(const char*)*(ThereIsNot_MC-ForAll_MC+1)==sizeof(QuantificationNames));
 
 // Actual implementations of ConstructSelfLengthNameAux()
 // NOTE: Name, in the next two routines, relies on implicit null termination.

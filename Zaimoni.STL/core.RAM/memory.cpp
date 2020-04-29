@@ -661,8 +661,6 @@ int _no_obvious_overwrites(void)
 }
 
 #ifdef __cplusplus
-namespace std
-{
 // actual implementation
 extern "C"
 #endif
@@ -737,9 +735,6 @@ void __cdecl free(void* memblock)
 #endif
 		};
 }
-#ifdef __cplusplus
-}	// namespace std
-#endif
 
 static void* __SlideUp(char* memblock, size_t CurrIdx, size_t size)
 {	// FORMALLY CORRECT: Kenneth Boyd, 11/3/1999
@@ -760,8 +755,6 @@ static void* __SlideUp(char* memblock, size_t CurrIdx, size_t size)
 }
 
 #ifdef __cplusplus
-namespace std
-{
 extern "C"
 #endif
 void* __cdecl realloc(void* memblock, size_t size)
@@ -835,9 +828,8 @@ void* __cdecl realloc(void* memblock, size_t size)
 	return Tmp;
 	}
 }
-#ifdef __cplusplus
-}	// namespace std
 
+#ifdef __cplusplus
 extern "C"
 #endif
 void* _expand(void* memblock, size_t size)

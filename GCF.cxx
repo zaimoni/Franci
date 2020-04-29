@@ -5,7 +5,7 @@
 #include "Integer1.hxx"
 #include "GCF.hxx"
 
-#include <boost/functional.hpp>
+#include <functional>
 
 // NOTE: 0 is a "bad case" for the definition of GCF.
 // Franci uses the following definitions to handle 0 and 1-ary cases
@@ -63,7 +63,7 @@ void GCF::_forceStdForm()
 bool GCF::SyntaxOK() const
 {	//! \todo FIX when more interesting rings come along (all rings where primes are defined)
 	if (SyntaxOKAux())	// NOTE: this routine catches NULL entries
-		return and_range_n(boost::bind2nd(boost::mem_fun(&MetaConcept::IsUltimateType),&Integer),ArgArray.begin(),fast_size());
+		return and_range_n([](MetaConcept* x) {return x->IsUltimateType(&Integer); }, ArgArray.begin(), fast_size());
 	return false;
 }
 
