@@ -24,8 +24,7 @@ using namespace std;
 extern CmdShell FranciScript;
 
 // Strange keys
-int
-RET_handler(void)
+static int RET_handler(void)
 {	// FORMALLY CORRECT: Kenneth Boyd, 3/4/2005
 	FranciScript.cmdstep();
 	RET_handler_core();
@@ -36,13 +35,12 @@ RET_handler(void)
 KeyMouseResponse* ReturnHandler = RET_handler;
 
 VConsole::VConsole()
-{	// FORMALLY CORRECT: Kenneth Boyd, 3/4/2005
-	// other initialization	
+{	// other initialization	
 	LogfileInName = "Franci.htm";	// name of infile for log cleaning
 	LogfileOutName = "Franci2.htm";	// name of outfile for log cleaning
 
 	// app-level strings
-	AppName = "Franci, Math Consultant\x99 V0.4.0.0";
+	set_AppName("Franci, Math Consultant\x99 V0.4.0.0");
 	LogfileAppname = "<head><title>Franci, Math Consultant\x99 V0.4.0.0 logfile</title></head><body>";
 	ScriptUnopened = "I regret that I could not open the script.";
 	LogUnopened = "I wasn't able to open the log file Franci.htm.";
@@ -53,10 +51,6 @@ VConsole::VConsole()
 	OS_ID = ::OS_ID;
 	SelfLogSign = "</pre></b><p>Franci:<br><pre>";
 	UserLogSign = "</pre>User:<b><pre>\n";
-}
-
-VConsole::~VConsole()
-{	// FORMALLY CORRECT: Kenneth Boyd, 3/4/2005
 }
 
 // Interpreter functions

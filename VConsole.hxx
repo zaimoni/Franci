@@ -11,12 +11,12 @@ class VConsole : public Console
 {
 public:
 	VConsole();
-	virtual ~VConsole();
+	~VConsole() = default;
 
 protected:
-	virtual void LinkInScripting(void);
-	virtual bool ScanForStartLogFileBlock(void);
-	virtual void ShrinkBlock(unsigned long StartBlock, unsigned long EndBlock, unsigned long& ReviewedPoint,size_t LogLength);
+	void LinkInScripting(void) override;
+	bool ScanForStartLogFileBlock(void) override;
+	void ShrinkBlock(unsigned long StartBlock, unsigned long EndBlock, unsigned long& ReviewedPoint,size_t LogLength) override;
 };
 
 #endif

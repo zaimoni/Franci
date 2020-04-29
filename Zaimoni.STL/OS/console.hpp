@@ -64,6 +64,8 @@ protected:
 
 	void CopyBlock(unsigned long StartBlock, unsigned long EndBlock, unsigned long& ReviewedPoint);
 
+	void set_AppName(const char*);
+
 	// data members
 	zaimoni::custom_scoped_ptr<std::ifstream> CleanLog;			// infile for log cleaning
 	zaimoni::custom_scoped_ptr<std::ofstream> ImageCleanLog;	// outfile for log cleaning

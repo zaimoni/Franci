@@ -253,7 +253,6 @@ Console::Console()
 	SetConsoleTextAttribute(StdOutputHandle,Text_White);
 	GetConsoleScreenBufferInfo(StdOutputHandle,&ScreenBufferState);
 	GetConsoleCursorInfo(StdOutputHandle,&CursorState);
-	SetConsoleTitle(AppName);
 	ResetInput(UserBarY()+1);
 	LowerRightCornerConsole.X = ScreenBufferState.dwSize.X-1;
 	LowerRightCornerConsole.Y = ScreenBufferState.dwSize.Y-1;
@@ -271,6 +270,12 @@ Console::~Console()
 #ifdef _WIN32
 	FreeConsole();
 #endif
+}
+
+void Console::set_AppName(const char* src)
+{
+	AppName = src;
+	if (AppName && *AppName) SetConsoleTitle(AppName);
 }
 
 static void ScrollUserScreenOneLine()

@@ -73,6 +73,11 @@ Console::~Console()
 {
 }
 
+void Console::set_AppName(const char* src)
+{
+	AppName = src;
+}
+
 //! This is the default getline handler for the CmdShell object in LexParse's InitializeFranciInterpreter
 void GetLineFromKeyboardHook(char*& InputBuffer)
 {
