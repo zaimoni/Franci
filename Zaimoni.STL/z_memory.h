@@ -31,8 +31,14 @@
  * defined in memory.cpp: controls Microsoft bypass for realloc.
  * Set to something non-zero in your program entry point, *immediately*.
  */
-extern size_t AppRunning;	
+#ifdef _WIN32
+__declspec(dllimport)
+#endif
+extern size_t AppRunning;
 
+#ifdef _WIN32
+__declspec(dllexport)
+#endif
 #ifdef __cplusplus
 extern "C"
 #endif

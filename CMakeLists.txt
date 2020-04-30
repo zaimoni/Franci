@@ -37,4 +37,13 @@ target_link_options(Franci_console PRIVATE /FORCE:MULTIPLE)
 target_compile_definitions(Franci_console PUBLIC FRANCI_CLI)
 # add_dependencies(... AutoDetect)
 
+add_custom_command(TARGET Franci POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_FILE:z_memory>
+        $<TARGET_FILE_DIR:Franci>)
+add_custom_command(TARGET Franci_console POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_FILE:z_memory>
+        $<TARGET_FILE_DIR:Franci>)
+
 # EXCLUDE_FROM_ALL means "can't test"

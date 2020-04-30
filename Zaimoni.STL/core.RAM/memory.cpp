@@ -47,7 +47,7 @@
 #define ZAIMONI_HAVE_ACCURATE_MSIZE
 
 #include "../z_memory.h"
-#include "../Pure.C/format_util.h"
+#include <stdio.h>
 
 #undef ZAIMONI_STL_IN_MEMORY_CPP
 
@@ -81,6 +81,9 @@
 #define AlphaInvalidLocationsDetected "ALPHA: overlapping memory blocks detected."
 #define AlphaPointerTableOverextended "ALPHA: pointer table overextended."
 
+#ifdef _WIN32
+__declspec(dllexport)
+#endif
 size_t AppRunning = 0;	// Controls Microsoft bypass
 
 #ifdef __cplusplus
@@ -113,6 +116,9 @@ typedef union _track_toggle _track_toggle;
 //!	<br>** Ptr-sizeof(size_t): size_t recording size of allocated memory
 //!	<br>** Ptr: start of allocated memory
 //!	<br>** sizeof(void*) after: NULL [guard bytes]
+
+static const constexpr size_t GuessMaxAlignment = sizeof(size_t) < sizeof(void*) ? sizeof(void*) : sizeof(size_t);
+constexpr size_t AlignedSize(size_t x) { return (((x - 1) / GuessMaxAlignment) + 1) * GuessMaxAlignment; }
 
 static _track_toggle RawBlock = {NULL};
 static size_t SizeOfRawBlock = 0;
@@ -147,7 +153,13 @@ static void __ReportErrorAndCrash(const char* const FatalErrorMessage)
 	exit(EXIT_FAILURE);
 }
 
-inline void InitBlock(void* memblock, size_t size)
+static void AuditPtr(void* memblock, const size_t n)
+{
+	if (n != reinterpret_cast<size_t*>(reinterpret_cast<char*>(memblock) - sizeof(size_t))[0]) __ReportErrorAndCrash("pointer: local size corrupted");
+	if (n != _msize(memblock)) __ReportErrorAndCrash("pointer: API-local size corrupted");
+}
+
+static void InitBlock(void* memblock, size_t size)
 {	// FORMALLY CORRECT: Kenneth Boyd, 9/15/1999
 #ifdef __cplusplus
 	reinterpret_cast<size_t*>(reinterpret_cast<char*>(memblock)-sizeof(size_t))[0]=size;
@@ -236,15 +248,13 @@ __IdxOfPointerInPtrList(const void* const Target, size_t strict_ub, const _track
 static char*
 __FindHole(size_t size, char* AboveThisAddress, size_t AllocPtrCount, char* StrictUpperBoundPtrSpace)
 {	// FORMALLY CORRECT: Kenneth Boyd, 9/19/1999
+	const size_t aligned = AlignedSize(size);
 	if (AllocPtrCount)
 		{
 		const size_t TargetSize = size+sizeof(size_t)+sizeof(void*);
-#ifdef _WIN32
-		const size_t Target1EffSize = (20>=TargetSize) ? 20 : 16*((TargetSize-5)/16)+20;
-		const size_t TargetNEffSize = (16>=TargetSize) ? 16 : 16*((TargetSize-1)/16)+16;
-#else
-#error must implement alignment code
-#endif
+		const size_t Target1EffSize = aligned + sizeof(size_t) + sizeof(void*);
+		const size_t TargetNEffSize = aligned + 2*sizeof(size_t) + sizeof(void*);
+
 		char* Hole1 = NULL;
 		size_t Hole1Size = 0;
 		size_t Idx = 0;	// logically CurrIdx-1
@@ -262,17 +272,17 @@ __FindHole(size_t size, char* AboveThisAddress, size_t AllocPtrCount, char* Stri
 			};
 Restart:
 		while(HoleSize<TargetNEffSize && ++Idx<AllocPtrCount &&	 AboveThisAddress
-															<CHARPTR_FROM_IDX(Idx)-TargetSize)
+															<CHARPTR_FROM_IDX(Idx)- aligned)
 			HoleSize = HOLESIZE(Idx);
 
-		if		(HoleSize==TargetNEffSize)
-			return CHARPTR_FROM_IDX(Idx)-TargetSize;
+		if (HoleSize==TargetNEffSize)
+			return CHARPTR_FROM_IDX(Idx)- TargetNEffSize + sizeof(size_t);
 		else if (HoleSize>TargetNEffSize)
 			{
 			if (NULL==Hole1 || Hole1Size>HoleSize)
 				{
 				Hole1Size = HoleSize;
-				Hole1 = CHARPTR_FROM_IDX(Idx)-TargetNEffSize;
+				Hole1 = CHARPTR_FROM_IDX(Idx)-TargetNEffSize + sizeof(size_t);
 				}
 			HoleSize = 0;
 			goto Restart;
@@ -386,30 +396,23 @@ static void* __CreateAtBottom(size_t size)
 	// this routine tries to make space at the bottom of PTRspace for a memory block of
 	// size bytes, plus overhead [sizeof(size_t)+sizeof(void*)].  It does *not* actually
 	// allocate anything.
-	const size_t TargetSize = size+sizeof(size_t)+sizeof(void*);
+	const size_t aligned = AlignedSize(size);
 	size_t TargetEffSize;
 	size_t SparePtrRAM;
 	char* TargetPtr;
 	if (0==CountPointersAllocated)
 		{
-#ifdef _WIN32
-		TargetEffSize = (20>=TargetSize) ? 20 : 16*((TargetSize-5)/16)+20;
-#else
-#error must implement alignment code
-#endif
+		TargetEffSize = aligned + sizeof(size_t) + sizeof(void*);
 		SparePtrRAM = HighBoundPtrSpace-LowBoundPtrSpace;
-		TargetPtr = HighBoundPtrSpace+sizeof(size_t);
+		TargetPtr = HighBoundPtrSpace;
 		}
 	else{
-#ifdef _WIN32
-		TargetEffSize = (16>=TargetSize) ? 16 : 16*((TargetSize-1)/16)+16;
-#else
-#error must implement alignment code
-#endif
+		TargetEffSize = aligned + 2*sizeof(size_t) + sizeof(void*);
 		SparePtrRAM = RawBlock.records[CountPointersAllocated-1]._address-LowBoundPtrSpace-sizeof(size_t);
 		TargetPtr = CHARPTR_FROM_IDX(CountPointersAllocated);
 		};
 	TargetPtr -= TargetEffSize;
+	TargetPtr += sizeof(size_t);
 	if (SparePtrRAM>=TargetEffSize) return TargetPtr;
 	{
 	size_t PageCount = 0;
@@ -528,7 +531,12 @@ static void __EmergencyInitialize(void)
 #endif
 	while(NULL==RawBlock.raw && AllocateStep!=BaseSize)
 		{
-		BaseSize -= AllocateStep;
+		if (BaseSize / 4 >= AllocateStep) {
+			BaseSize /= 2;
+			BaseSize = (((BaseSize - 1) / AllocateStep) + 1) * AllocateStep;
+		} else {
+			BaseSize -= AllocateStep;
+		}
 #ifdef __cplusplus
 		RawBlock.raw = reinterpret_cast<char*>(VirtualAlloc(NULL,BaseSize,MEM_RESERVE,PAGE_EXECUTE_READWRITE));
 #else
@@ -580,6 +588,9 @@ static void __DetectOverwrites(void)
 		j = i;
 		do	{
 			_track_pointer* CurrentOffset = PtrRecordBase+ --j;
+#ifndef NDEBUG
+			size_t audit = _msize(CurrentOffset->_address);
+#endif
 			if (_msize(CurrentOffset->_address)!=CurrentOffset->_size)	// #1
 				__ReportErrorAndCrash(PointerSizeInfoCorrupted);
 			}
@@ -595,11 +606,14 @@ static void __DetectOverwrites(void)
 #endif
 			if (NULL!=(VOID_CAST(Target+TargetSize))[0])
 				{	// FATAL ERROR CODE
-				char Buffer[10];
+				char Buffer[20];
 				ReportError(InvalidWriteDetected);
-				ReportError(z_umaxtoa((size_t)((VOID_CAST(Target+TargetSize))[0]),Buffer,16));
+				sprintf(Buffer, "%llu", (unsigned long long)((VOID_CAST(Target + TargetSize))[0]), Buffer, 16);
+				ReportError(Buffer);
+//				ReportError(z_umaxtoa((size_t)((VOID_CAST(Target+TargetSize))[0]),Buffer,16));
 #undef VOID_CAST
-				__ReportErrorAndCrash(z_umaxtoa(TargetSize,Buffer,10));
+				sprintf(Buffer, "%llu", (unsigned long long)(TargetSize));
+				__ReportErrorAndCrash(Buffer);
 				};
 			}
 		while(0<i);
@@ -660,6 +674,9 @@ int _no_obvious_overwrites(void)
 	return 1;
 }
 
+#ifdef _WIN32
+__declspec(dllexport)
+#endif
 #ifdef __cplusplus
 // actual implementation
 extern "C"
@@ -691,10 +708,14 @@ void* __cdecl malloc(size_t size)
 #ifdef __cplusplus
 	RAMBlock.UnLock();
 #endif
+	AuditPtr(Tmp, size);
 	return Tmp;
 	}
 }
 
+#ifdef _WIN32
+__declspec(dllexport)
+#endif
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -704,11 +725,14 @@ void* __cdecl calloc(size_t num, size_t size)
 	if ((size_t)(-1)/size>=num)
 	{	// CERT-mandated fix (MEM07): we NULL out rather than take an integer overflow.
 		Tmp = malloc(num*size);
-		if (NULL!=Tmp) memset(Tmp,'\0',_msize(Tmp));
+		if (NULL!=Tmp) memset(Tmp, 0, num * size);
 	}
 	return Tmp;
 }
 
+#ifdef _WIN32
+__declspec(dllexport)
+#endif
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -754,6 +778,9 @@ static void* __SlideUp(char* memblock, size_t CurrIdx, size_t size)
 	return CHARPTR_FROM_IDX(CurrIdx);
 }
 
+#ifdef _WIN32
+__declspec(dllexport)
+#endif
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -774,14 +801,6 @@ void* __cdecl realloc(void* memblock, size_t size)
 	if (!CurrIdx)
 		// error reporting
 		__ReportErrorAndCrash(ReallocNonNULLInvalid);
-#if 0
-	if (!AppRunning)
-		{	// Microsoft bypass: size request is a non-ANSI *multiplier*
-			// need this to start in VC++ 4 (at least)
-			// disable once in main()/WinMain()
-		size *= _msize(memblock);
-		}
-#endif
 
 	{
 	// This code tries to "flip up" the memory block.
@@ -804,6 +823,7 @@ void* __cdecl realloc(void* memblock, size_t size)
 		CHARPTR_FROM_IDX(CurrIdx) = ((char*)(Tmp));
 		__OnePassInsertSort(RawBlock.records+CurrIdx-1,CurrIdx);
 #endif
+		AuditPtr(Tmp, size);
 		return Tmp;
 		};
 	if (__ExpandV2(memblock,CurrIdx,size))
@@ -825,10 +845,14 @@ void* __cdecl realloc(void* memblock, size_t size)
 #ifdef __cplusplus
 	RAMBlock.UnLock();
 #endif
+	if (Tmp) AuditPtr(Tmp, size);
 	return Tmp;
 	}
 }
 
+#ifdef _WIN32
+__declspec(dllexport)
+#endif
 #ifdef __cplusplus
 extern "C"
 #endif

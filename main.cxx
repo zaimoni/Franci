@@ -2,6 +2,11 @@
 
 #include "OS.hxx"
 #include "VConsole.hxx"
+
+#ifdef ZAIMONI_HAVE_ACCURATE_MSIZE
+#include "Zaimoni.STL/z_memory.h"
+#endif
+
 #include <stdlib.h>
 #include <fstream>
 #include <time.h>
@@ -13,8 +18,6 @@ void DiagnoseMetaConceptVFT(void);			// defined in MetaCon1.cxx
 void InitializeFranciInterpreter(void);		// defined in LexParse.cxx
 void InitializeLexerDefs(void);			// defined in LangConf.cxx
 void Init_Unparsed_Eval(void);			// defined in Unparsed.cxx
-
-extern size_t AppRunning;	// defined in memory.cxx: controls Microsoft bypass
 
 #ifndef NDEBUG
 // does a low-level system test
@@ -44,7 +47,9 @@ OSIndependentInitialize(void)
 int main(int argc, char* argv[], char* envp[])
 // the mainline of ProtoAI
 {
+#ifdef ZAIMONI_HAVE_ACCURATE_MSIZE
 	AppRunning = 1;
+#endif
 	VConsole Tmp;
 	_console = &Tmp;
 	OSIndependentInitialize();
@@ -61,9 +66,8 @@ int main(int argc, char* argv[], char* envp[])
 	//! \todo install the message handler loop, for OS ___
 	return 0;	// success
 };
-#endif
 
-#ifdef _WIN32
+#else
 
 #define WIN32_LEAN_AND_MEAN 1
 #include <WINDOWS.H>
@@ -78,7 +82,9 @@ WinMain(HINSTANCE  hInstance,	/* handle to current instance */
         LPSTR  lpCmdLine,	/* pointer to command line */
         int  nShowCmd 	/* show state of window */)
 {
+#ifdef ZAIMONI_HAVE_ACCURATE_MSIZE
 	AppRunning = 1;
+#endif
 	VConsole Tmp;
 	_console = &Tmp;
 	OSIndependentInitialize();
