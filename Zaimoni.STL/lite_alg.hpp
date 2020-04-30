@@ -17,11 +17,11 @@ in_range(unsigned long test, const unsigned long LB, const unsigned long UB)
 	return test-LB<=UB-LB;
 }
 
-template<unsigned long LB,unsigned long UB>
-bool in_range(unsigned long test)
+template<auto LB, auto UB>
+bool in_range(uintmax_t test)
 {
-	static_assert(LB<UB);
-	return test-LB<=UB-LB;
+	static_assert(LB < UB);
+	return test - LB <= UB - LB;
 }
 
 #include "bits/lite_alg.hpp"

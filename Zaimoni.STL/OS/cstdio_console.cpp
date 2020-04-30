@@ -78,18 +78,22 @@ void Console::set_AppName(const char* src)
 	AppName = src;
 }
 
+// dest is NULL and to be allocated
 //! This is the default getline handler for the CmdShell object in LexParse's InitializeFranciInterpreter
-void GetLineFromKeyboardHook(char*& InputBuffer)
+void GetLineFromKeyboardHook(char*& dest)
 {
+	assert(!dest);
 	if (feof(stdin)) exit(EXIT_SUCCESS);
 	if (ferror(stdin)) exit(EXIT_FAILURE);
 	size_t inchar = 0;
 	int tmp = fgetc(stdin);
 	while(EOF!=tmp && '\n'!=tmp)
 		{
-		if (char* const tmp2 = REALLOC(InputBuffer,++inchar)) InputBuffer = tmp2;
+		++inchar;
+		if (char* const tmp2 = REALLOC(dest,ZAIMONI_LEN_WITH_NULL(inchar))) dest = tmp2;
 		else FATAL("RAM failure when getting line for parsing");
-		InputBuffer[inchar-1] = (char)tmp;
+		dest[inchar-1] = (char)tmp;
+		ZAIMONI_NULL_TERMINATE(dest[inchar]);
 		tmp = fgetc(stdin);
 		}
 }

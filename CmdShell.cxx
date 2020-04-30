@@ -227,17 +227,17 @@ CmdShell::RemoveCommandHandler(const char* kill_command_name)
 	return quieter_errors;
 }
 
-bool
-CmdShell::get_line_to_interpret(char*& InputBuffer)
+bool CmdShell::get_line_to_interpret(char*& InputBuffer)
 {
+	assert(!InputBuffer);
 	// default: return false (to stop execution), set InputBuffer to NULL;
 	// if the configuration hook is defined, strip leading/trailing whitespace
 	// cannot do interior spaces because this doesn't handle string literals, etc.
 	// Franci needs this
-	if (NULL!=GetLineHook || NULL!=GetLineHookNoFail)
+	if (GetLineHook || GetLineHookNoFail)
 		{
 		bool Result = false;
-		if (NULL!=GetLineHookNoFail)
+		if (GetLineHookNoFail)
 			{
 			GetLineHookNoFail(InputBuffer);
 			Result = true;
@@ -245,16 +245,17 @@ CmdShell::get_line_to_interpret(char*& InputBuffer)
 		else{
 			Result = GetLineHook(InputBuffer);
 			}
-		if (Result && NULL!=InputBuffer)
+		if (Result && InputBuffer)
 			{	// strip leading/trailing whitespace
 			size_t InitialLength = strlen(InputBuffer);
 			size_t Offset = 0;
-			while(isspace(InputBuffer[Offset])) Offset++;
-			if (Offset==InitialLength)
-				{
-				FREE_AND_NULL(InputBuffer);
-				return true;
-				}
+			while (isspace(InputBuffer[Offset])) {
+				if (++Offset == InitialLength)
+					{
+					FREE_AND_NULL(InputBuffer);
+					return true;
+					}
+			}
 			while(isspace(InputBuffer[InitialLength-1])) InitialLength--;
 			InitialLength -= Offset;
 			memmove(InputBuffer,InputBuffer+Offset,InitialLength);
@@ -270,7 +271,7 @@ CmdShell::get_line_to_interpret(char*& InputBuffer)
 void
 CmdShell::cmdstep(void)
 {
-	char* InputBuffer = NULL;
+	char* InputBuffer = 0;
 	preloop();
 	if (get_line_to_interpret(InputBuffer))
 		{
@@ -283,7 +284,7 @@ CmdShell::cmdstep(void)
 void
 CmdShell::cmdloop(void)
 {
-	char* InputBuffer = NULL;
+	char* InputBuffer = 0;
 	preloop();
 	do	{
 		if (!get_line_to_interpret(InputBuffer)) break;

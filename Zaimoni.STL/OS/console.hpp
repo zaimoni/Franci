@@ -24,7 +24,7 @@ void RET_handler_core(void);
 bool GetLineForScriptHook(char*& InputBuffer);
 
 // use following as standard getline hook for CmdShell
-void GetLineFromKeyboardHook(char*& InputBuffer);
+void GetLineFromKeyboardHook(char*& InputBuffer);	// InputBuffer is NULL and to be allocated
 
 // this is an intentional singleton class
 // also, linking in Console provides the Zaimoni.STL core logging functions

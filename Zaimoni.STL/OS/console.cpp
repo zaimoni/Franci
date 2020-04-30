@@ -29,6 +29,7 @@ Console* _console = NULL;
 #include "../Pure.C/logging.h"
 #include <memory.h>
 #include <time.h>
+#include <string.h>
 
 using namespace std;
 using namespace zaimoni;
@@ -73,9 +74,9 @@ inline size_t UserBarY()
 {return (LowerRightCornerConsole.Y>>1)+1;}	// >>1 is /2
 #endif
 
-void ExtendInputBuffer(size_t ExtraLength,COORD Origin)
+static void ExtendInputBuffer(size_t ExtraLength,COORD Origin)
 {
-	unsigned long CharCount;	
+	unsigned long CharCount;
 	if (!_resize(InputBuffer,InputBufferLength += ExtraLength))
 		{
 		FREE_AND_NULL(InputBuffer);
@@ -87,21 +88,21 @@ void ExtendInputBuffer(size_t ExtraLength,COORD Origin)
 #endif
 }
 
-void
-FinalExtendInputBuffer(size_t ExtraLength,COORD Origin,char*& InputBuffer2)
+static void FinalExtendInputBuffer(size_t ExtraLength,COORD Origin,char*& dest)
 {
-	unsigned long CharCount;	
-	if (!_resize(InputBuffer2,InputBufferLength += ExtraLength))
-		{
-		FREE_AND_NULL(InputBuffer);
-		InputBufferLength = 0;
-		exit(EXIT_FAILURE);
-		}
+	assert(!dest);
+	const auto old_len = InputBufferLength;
+	InputBufferLength += ExtraLength;
+	if (!_resize(InputBuffer, ZAIMONI_LEN_WITH_NULL(InputBufferLength))) exit(EXIT_FAILURE);
+	dest = InputBuffer;
+	memset(dest + old_len, 0, ExtraLength*sizeof(*dest));
+
 #ifdef _WIN32
-	ReadConsoleOutputCharacter(StdOutputHandle,InputBuffer2+InputBufferLength-ExtraLength,ExtraLength,Origin,&CharCount);
+	unsigned long CharCount;
+	ReadConsoleOutputCharacter(StdOutputHandle, dest + old_len, ExtraLength, Origin, &CharCount);
 #endif
-	InputBuffer = NULL;
-	InputBufferLength = 0;
+	// leave InputBufferLength at its last value so we can use it
+	ZAIMONI_NULL_TERMINATE(dest[InputBufferLength]);
 }
 
 // We have a reasonable definition for <, and == on COORD.  Use them.
@@ -674,19 +675,27 @@ int DEL_handler()
 	return META_DEL();
 }
 
+// 2020-04-30 We're having some problems with garbage after the main content on Windows 10
+static bool blacklist_char(char& x)
+{
+	if (!x) return true;
+	if (126 < x || 0 > x) {
+		x = 0;
+		return true;
+	}
+	return false;
+}
+
+// dest is NULL and to be allocated
 //! This is the default getline handler for the CmdShell object in LexParse's InitializeFranciInterpreter
-void GetLineFromKeyboardHook(char*& InputBuffer)
-{	// FORMALLY CORRECT: Kenneth Boyd, 12/5/2004
-	FinalExtendInputBuffer(LogicalEnd-LogicalOrigin,LogicalOrigin,InputBuffer);
-	if (NULL!=InputBuffer && '\x00'==InputBuffer[ArraySize(InputBuffer)-1])
-		{
-#if ZAIMONI_REALLOC_TO_ZERO_IS_NULL
-		InputBuffer = REALLOC(InputBuffer,_msize(InputBuffer)-sizeof(char));
-#else
-#error need to handle non-NULL realloc(x,0);
-#endif
-		InputBufferLength--;
-		}
+void GetLineFromKeyboardHook(char*& dest)
+{
+	assert(!dest);
+	FinalExtendInputBuffer(LogicalEnd-LogicalOrigin,LogicalOrigin,dest);
+	while (dest && blacklist_char(dest[InputBufferLength - 1])) {
+		if (0 < --InputBufferLength) dest = REALLOC(dest, ZAIMONI_LEN_WITH_NULL(InputBufferLength));
+		else FREE_AND_NULL(dest);
+	}
 }
 
 void RET_handler_core()
