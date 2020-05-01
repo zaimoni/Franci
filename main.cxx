@@ -47,9 +47,6 @@ OSIndependentInitialize(void)
 int main(int argc, char* argv[], char* envp[])
 // the mainline of ProtoAI
 {
-#ifdef ZAIMONI_HAVE_ACCURATE_MSIZE
-	AppRunning = 1;
-#endif
 	VConsole Tmp;
 	_console = &Tmp;
 	OSIndependentInitialize();
@@ -82,9 +79,6 @@ WinMain(HINSTANCE  hInstance,	/* handle to current instance */
         LPSTR  lpCmdLine,	/* pointer to command line */
         int  nShowCmd 	/* show state of window */)
 {
-#ifdef ZAIMONI_HAVE_ACCURATE_MSIZE
-	AppRunning = 1;
-#endif
 	VConsole Tmp;
 	_console = &Tmp;
 	OSIndependentInitialize();

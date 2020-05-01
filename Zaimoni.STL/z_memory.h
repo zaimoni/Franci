@@ -27,15 +27,6 @@
 #undef ZAIMONI_REALLOC_TO_ZERO_IS_NULL
 #define ZAIMONI_REALLOC_TO_ZERO_IS_NULL 1
 
-/*
- * defined in memory.cpp: controls Microsoft bypass for realloc.
- * Set to something non-zero in your program entry point, *immediately*.
- */
-#ifdef _WIN32
-__declspec(dllimport)
-#endif
-extern size_t AppRunning;
-
 #ifdef _WIN32
 __declspec(dllexport)
 #endif

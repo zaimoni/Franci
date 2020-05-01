@@ -81,11 +81,6 @@
 #define AlphaInvalidLocationsDetected "ALPHA: overlapping memory blocks detected."
 #define AlphaPointerTableOverextended "ALPHA: pointer table overextended."
 
-#ifdef _WIN32
-__declspec(dllexport)
-#endif
-size_t AppRunning = 0;	// Controls Microsoft bypass
-
 #ifdef __cplusplus
 // This needs the AIMutex.hxx header
 static AIMutex RAMBlock;	// RAM Block.  Must unlock for exit()
