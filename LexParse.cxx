@@ -1207,7 +1207,7 @@ Franci_precmd(char*& InputBuffer)
 		if (   '/'==InputBuffer[0]
 			&& '/'==InputBuffer[1])
 			{
-			DELETEARRAY_AND_NULL(InputBuffer);
+			FREE_AND_NULL(InputBuffer);
 			return;
 			}
 		_console->LogUserInput(InputBuffer);
