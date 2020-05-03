@@ -9,6 +9,12 @@
 #include <type_traits>
 
 namespace zaimoni	{
+	// https://devblogs.microsoft.com/oldnewthing/20200413-00/?p=103669 [Raymond Chen/"The Old New Thing"]
+	template<typename T, typename...>
+	using unconditional_t = T;
+
+	template<typename T, T v, typename...>
+	inline constexpr T unconditional_v = v;
 
 // polymorphic objects should not use assignment unless they are "final"
 // they should resort to the CopyInto member function instead (don't override these without a CopyInto)
@@ -82,37 +88,31 @@ struct has_MoveInto<volatile T> : public has_MoveInto<T>
 {
 };
 
-// CopyInto family of functions
-// all of these can throw std::bad_alloc
 // polymorphic_base<T> types should rely on CopyInto member functions
-template<typename T,typename U>
-inline typename std::enable_if<is_polymorphic_base<T>::value, void>::type
+template<typename T, typename U>
+std::enable_if_t<std::is_base_of_v<U, T>, void>
 CopyInto(const T& src, U*& dest)
-{	//! \todo should not be considered if T* is not convertible to U*
-	src.CopyInto(dest);
-}
-
-template<typename T,typename U>
-typename std::enable_if<!is_polymorphic_base<T>::value && has_invalid_assignment_but_copyconstructable<T>::value, void>::type
-CopyInto(const T& src, U*& dest)
-{	//! \todo should not be considered if T* is not convertible to U*
-	if (dest) delete dest;
-	dest = new T(src);
-}
-
-template<typename T,typename U>
-typename std::enable_if<!is_polymorphic_base<T>::value && !has_invalid_assignment_but_copyconstructable<T>::value, void>::type
-CopyInto(const T& src, U*& dest)
-{	//! \todo should not be considered if T* is not convertible to U*
-	if (!dest) dest = new T(src);
-	else if (typeid(*dest)==typeid(src))
-		{
-		*static_cast<T*>(dest) = src;
+{
+	if constexpr (is_polymorphic_base<U>::value) {
+		src.CopyInto(dest);
+	} else {
+		if constexpr (std::is_copy_constructible_v<T>) {
+			if constexpr (std::is_copy_assignable_v<T>) {
+				if (!dest) dest = new T(src);
+				else if (typeid(*dest) == typeid(src)) {
+					*static_cast<T*>(dest) = src;
+				} else {
+					delete dest;
+					dest = new T(src);
+				}
+			} else {
+				if (dest) delete dest;
+				dest = new T(src);
+			}
+		} else {
+			static_assert(unconditional_v<bool, false, T>, "unclear how to copy type");
 		}
-	else{
-		delete dest;
-		dest = new T(src);
-		}
+	}
 }
 
 // following recurses to a class member function MoveInto
