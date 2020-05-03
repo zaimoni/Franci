@@ -619,33 +619,26 @@ AbstractClass::CreateIdentityForOperation(MetaConcept*& dest, ExactType_MC Opera
 	return false;
 }
 
-void
-AbstractClass::ConstructUpwardTopologicalRay(signed long EndPoint,bool Open,AbstractClass*& Domain) const
+void AbstractClass::ConstructUpwardTopologicalRay(signed long EndPoint,bool Open,AbstractClass*& Domain) const
 {
-	if (Subclass(Real))
+	if (!Subclass(Real)) UnconditionalCallAssumptionFailure();
+	try	{
+		zaimoni::autoval_ptr<AbstractClass> IntervalDomain;
+		zaimoni::autoval_ptr<MetaConcept> lhs;
+		zaimoni::autoval_ptr<MetaConcept> rhs;
+		zaimoni::autoval_ptr<MetaConcept> Target;
+
+		IntervalDomain = new AbstractClass(*this);
+		rhs = new SymbolicConstant(LinearInfinity_SC);
+		lhs = new IntegerNumeral(EndPoint);
+		Target = new LinearInterval(lhs, rhs, IntervalDomain, Open, true);
+		Domain = new AbstractClass(Target);
+		return;
+		}
+	catch(const bad_alloc&)
 		{
-		AbstractClass* IntervalDomain = NULL;
-		MetaConcept* rhs = NULL;
-		MetaConcept* lhs = NULL;
-		MetaConcept* Target = NULL;
-		try	{
-			CopyInto(IntervalDomain);
-			rhs = new SymbolicConstant(LinearInfinity_SC);
-			lhs = new IntegerNumeral(EndPoint);
-			Target = new LinearInterval(lhs, rhs, IntervalDomain, Open, true);
-			Domain = new AbstractClass(Target);
-			return;
-			}
-		catch(const bad_alloc&)
-			{
-			delete Target;
-			delete lhs;
-			delete rhs;
-			delete IntervalDomain;
-			UnconditionalRAMFailure();
-			}
-		};
-	UnconditionalCallAssumptionFailure();
+		UnconditionalRAMFailure();
+		}
 }
 
 void

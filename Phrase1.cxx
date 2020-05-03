@@ -113,7 +113,7 @@ bool Phrase1Arg::SyntaxOK_IN() const
 bool Phrase1Arg::SyntaxOK_FACTORIAL() const
 {	//! \todo SyntaxOK_FACTORIAL should compare against 0...&infin;
 	return Integer.HasAsElement(*Arg1);
-//	return NonnegativeInteger()->HasAsElement(*Arg1);
+//	return NonnegativeInteger().HasAsElement(*Arg1);
 }
 
 bool Phrase1Arg::Evaluate(MetaConcept*& dest)	// same, or different type

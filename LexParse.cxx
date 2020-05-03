@@ -66,11 +66,11 @@ InitMetaConceptParserArray(autoarray_ptr<MetaConcept*>& ArgArray,char*& InputBuf
 
 
 // AbstractClass helpers -- here to permit clearing on new situation
-const AbstractClass* NonnegativeInteger()
+const AbstractClass& NonnegativeInteger()
 {
-	static AbstractClass* Z_0 = 0;
+	static zaimoni::autoval_ptr<AbstractClass> Z_0;
 	if (!Z_0) Integer.ConstructUpwardTopologicalRay(0,false,Z_0);
-	return Z_0;
+	return *Z_0;
 }
 
 bool DestructiveSyntacticallyEvaluateOnce(MetaConcept*& dest)

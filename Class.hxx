@@ -140,7 +140,7 @@ bool ForceVarUltimateType(MetaConcept*& Target,const AbstractClass* TargetType);
 void CopyOrThrow(AbstractClass*& dest, AbstractClass*& src);	// throws bad_alloc on failure
 
 // helpers defined in LexParse.cxx
-const AbstractClass* NonnegativeInteger();
+const AbstractClass& NonnegativeInteger();
 
 extern const AbstractClass TruthValues;
 extern const AbstractClass Integer;

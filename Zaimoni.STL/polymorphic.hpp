@@ -93,25 +93,33 @@ template<typename T, typename U>
 std::enable_if_t<std::is_base_of_v<U, T>, void>
 CopyInto(const T& src, U*& dest)
 {
-	if constexpr (is_polymorphic_base<U>::value) {
+	if constexpr (std::is_copy_constructible_v<T>) {
+		if (!dest) {
+			dest = new T(src);
+			return;
+		}
+	};
+	if constexpr (std::is_copy_assignable_v<T>) {
+		if constexpr (std::is_same_v<T, U>) {
+			*static_cast<T*>(dest) = src;
+			return;
+		} else if (typeid(*dest) == typeid(src) && dest) {
+			if constexpr (std::is_copy_constructible_v<T>) {
+				*static_cast<T*>(dest) = src;
+				return;
+			} else if (dest) {
+				*static_cast<T*>(dest) = src;
+				return;
+			}
+		}
+	}
+	if constexpr (std::is_copy_constructible_v<T>) {
+		dest = new T(src);
+		return;
+	} else if constexpr (is_polymorphic_base<U>::value) {
 		src.CopyInto(dest);
 	} else {
-		if constexpr (std::is_copy_constructible_v<T>) {
-			if constexpr (std::is_copy_assignable_v<T>) {
-				if (!dest) dest = new T(src);
-				else if (typeid(*dest) == typeid(src)) {
-					*static_cast<T*>(dest) = src;
-				} else {
-					delete dest;
-					dest = new T(src);
-				}
-			} else {
-				if (dest) delete dest;
-				dest = new T(src);
-			}
-		} else {
-			static_assert(unconditional_v<bool, false, T>, "unclear how to copy type");
-		}
+		static_assert(unconditional_v<bool, false, T>, "unclear how to copy type");
 	}
 }
 
