@@ -66,10 +66,10 @@ InitMetaConceptParserArray(autoarray_ptr<MetaConcept*>& ArgArray,char*& InputBuf
 
 
 // AbstractClass helpers -- here to permit clearing on new situation
-static AbstractClass* Z_0 = NULL;
 const AbstractClass* NonnegativeInteger()
-{	// FORMALLY CORRECT: Kenneth Boyd, 1/9/2004
-	if (NULL==Z_0) Integer.ConstructUpwardTopologicalRay(0,false,Z_0);
+{
+	static AbstractClass* Z_0 = 0;
+	if (!Z_0) Integer.ConstructUpwardTopologicalRay(0,false,Z_0);
 	return Z_0;
 }
 
@@ -371,9 +371,6 @@ NewSituation_handler(char*& InputBuffer)
 		INFORM("Forgetting old situation.");
 		DELETE_AND_NULL(Situation);
 		}
-
-	// AbstractClass helper cleanup
-	DELETE_AND_NULL(Z_0);
 
 	INFORM("New situation created.");
 	return true;
