@@ -101,7 +101,6 @@ private:
 	static const DiagnoseIntermediateRulesFunc DiagnoseRules2AryAux[IFF_MCM+1];
 	static const DiagnoseIntermediateRulesFunc2 DiagnoseRules2AryStrictlyImpliesAux[IFF_MCM+1];
 	static const DiagnoseIntermediateRulesFunc2 DiagnoseRulesNAryStrictlyImpliesAux[NXOR_MCM+1];
-	static const DiagnoseIntermediateRulesFunc DiagnoseRulesTVal2AryAux[4];	// 4 TruthValues
 	static const DiagnoseIntermediateRulesFunc2 DiagnoseRulesTValNAryAux[4];	// 4 TruthValues
 	static const LogicalANDFindDetailedRuleAux ANDDetailedRuleAux[NIFF_MCM-AND_MCM+1];
 	static const StrictModifyAuxFunc StrictlyModifiesAux[NIFF_MCM-AND_MCM+1];

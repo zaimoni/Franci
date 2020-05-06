@@ -224,7 +224,7 @@ const signed short MetaConnective::TruthValueFalseAryNSelfTable[NIFF_MCM]
 		DECLARE_CONVERT_TO_OR(NIFF)
 	};
 
-static const MetaConceptWithArgArray::EvalRuleIdx_ER truthValueFalseAry2Table[IFF_MCM+1]
+static constexpr const MetaConceptWithArgArray::EvalRuleIdx_ER truthValueFalseAry2Table[IFF_MCM+1]
   =	{	MetaConceptWithArgArray::DECLARE_FALSE(AND),
 		MetaConceptWithArgArray::DECLARE_ARG(OR),
 		MetaConceptWithArgArray::DECLARE_NOTARG(IFF)
@@ -236,13 +236,6 @@ static const MetaConceptWithArgArray::EvalRuleIdx_ER truthValueFalseAry2Table[IF
 #undef DECLARE_TRUE
 #undef DECLARE_FALSE
 #undef DECLARE_UNKNOWN
-
-const MetaConnective::DiagnoseIntermediateRulesFunc MetaConnective::DiagnoseRulesTVal2AryAux[4]	// 4 TruthValues
-  =	{	&MetaConnective::DiagnoseInferenceRulesContradiction2Ary,
-		&MetaConnective::DiagnoseInferenceRulesTrue2Ary,
-		&MetaConnective::DiagnoseInferenceRulesFalse2Ary,
-		&MetaConnective::DiagnoseInferenceRulesUnknown2Ary
-	};
 
 const MetaConnective::DiagnoseIntermediateRulesFunc2 MetaConnective::DiagnoseRulesTValNAryAux[4]	// 4 TruthValues
   =	{	&MetaConnective::DiagnoseInferenceRulesContradictionNAry,
@@ -1592,10 +1585,17 @@ void MetaConnective::DiagnoseInferenceRules() const
 	// next rules want to know about T/F
 	if (2==fast_size())
 		{
+		static const MetaConnective::DiagnoseIntermediateRulesFunc diagnoseTVal2ary[4]	// 4 TruthValues
+			= { &MetaConnective::DiagnoseInferenceRulesContradiction2Ary,
+				  &MetaConnective::DiagnoseInferenceRulesTrue2Ary,
+				  &MetaConnective::DiagnoseInferenceRulesFalse2Ary,
+				  &MetaConnective::DiagnoseInferenceRulesUnknown2Ary
+		};
+
 Ary2Finish:
 		if (ArgArray[0]->IsExactType(TruthValue_MC))
 			{
-			(this->*DiagnoseRulesTVal2AryAux[static_cast<TruthValue*>(ArgArray[0])->_x.array_index()])();
+			(this->*diagnoseTVal2ary[static_cast<TruthValue*>(ArgArray[0])->_x.array_index()])();
 			return;
 			};
 		// antiidempotent scanner
