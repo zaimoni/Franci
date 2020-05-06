@@ -11,7 +11,7 @@
 // headers
 #include <memory.h>
 #include <fstream>
-#include "keyword1.hxx"
+#include "TVal.hxx"
 #include "OS.hxx"
 #include "CmdShell.hxx"
 #include "VConsole.hxx"
@@ -117,8 +117,8 @@ VConsole::ShrinkBlock(unsigned long StartBlock, unsigned long EndBlock, unsigned
 			TestPoint = CleanLog->tellg();
 			}
 		else if (    0!=StartExplore2
-				 && (   !strcmp(Buffer,TruthValue_False)
-				     || !strcmp(Buffer,TruthValue_Unknown)))
+				 && (   !strcmp(Buffer, TVal::Names[TVal::False])
+				     || !strcmp(Buffer, TVal::Names[TVal::Unknown])))
 			{
 			size_t FirstExperiment = 0;
 			size_t LastExperiment = 0;

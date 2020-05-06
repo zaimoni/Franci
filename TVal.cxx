@@ -9,31 +9,27 @@
 /* size of a static array */
 #define STATIC_SIZE(A) (sizeof(A)/sizeof(*A))
 
-static const char* const TruthValueNames[4] =	{	TruthValue_Contradiction,
-													TruthValue_True,
-													TruthValue_False,
-													TruthValue_Unknown	};
-
-static const char NegatedTVal[4] =	{(char)(TVal::Contradiction),
+static constexpr const char NegatedTVal[] = {(char)(TVal::Contradiction),
 									 (char)(TVal::False),
 									 (char)(TVal::True),
 									 (char)(TVal::Unknown)};
+static_assert(STATIC_SIZE(NegatedTVal) == (TVal::Unknown + 1));
 
 bool TVal::read(const char* src)
 {
 	if (!src) return false;
 	size_t i = 0;
-	do	if (0==strcmp(src,TruthValueNames[i]))
+	do	if (0 == strcmp(src, Names[i]))
 		{
 		_x = (char)i;
 		return true;
 		}
-	while(STATIC_SIZE(TruthValueNames)> ++i);
+	while(STATIC_SIZE(Names)> ++i);
 	return false;
 }
 
-void TVal::ConstructSelfNameAux(char* Name) const { strcpy(Name,TruthValueNames[_x]); }
-size_t TVal::LengthOfSelfName() const { return strlen(TruthValueNames[_x]); }
+void TVal::ConstructSelfNameAux(char* Name) const { strcpy(Name, Names[_x]); }
+size_t TVal::LengthOfSelfName() const { return strlen(Names[_x]); }
 void TVal::SelfLogicalNOT() {_x = NegatedTVal[_x];}
 bool TVal::isAntiIdempotentTo(const TVal& rhs) const { return _x==NegatedTVal[rhs._x]; }
 

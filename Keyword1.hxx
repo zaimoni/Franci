@@ -27,11 +27,6 @@ extern const char* const PrefixKeyword_PERMUTATION_ALT;
 extern const char* const PrefixKeyword_COMBINATION;
 extern const char* const PrefixKeyword_COMBINATION_ALT;
 
-#define TruthValue_True "TRUE"
-#define TruthValue_False "FALSE"
-#define TruthValue_Unknown "UNKNOWN"
-#define TruthValue_Contradiction "CONTRADICTION"
-
 extern const char* const EqualRelation_NOTALLDISTINCT;
 extern const char* const EqualRelation_NOTALLEQUAL;
 extern const char* const EqualRelation_DISTINCTFROMALLOF;
