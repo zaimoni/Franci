@@ -120,6 +120,15 @@ bool DestructiveSyntacticallyEvaluateOnce(MetaConcept*& dest)
 	return false;
 }
 
+//! \todo OPTIMIZE: STATIC MULTITHREADED: ReportTime is a target for a statically allocated buffer,
+//! with AIMutex to block it....
+void ReportTime(clock_t Clock0, clock_t Clock1)
+{	// FORMALLY CORRECT: Kenneth Boyd, 11/18/1999
+	char Buffer[] = "# 0.01 sec.:            ";
+	_ltoa(((Clock1 - Clock0) * 100) / CLOCKS_PER_SEC, Buffer + 13, 10);
+	Console::Whisper(Buffer);
+}
+
 // #define FRANCI_WARY 1
 
 bool

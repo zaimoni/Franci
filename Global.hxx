@@ -26,21 +26,19 @@ CopyInto_ForceSyntaxOK(const T& src, U*& dest)
 		}
 }
 
-extern const char* const AlphaCallAssumption;
-extern const char* const AlphaDataIntegrity;
-extern const char* const AlphaMustDefineVFunction;
-extern const char* const AlphaMiscallVFunction;
-extern const char* const AlphaMiscallFunction;
-extern const char* const AlphaNoEffectFunctionCall;
-extern const char* const AlphaRetValAssumption;
-extern const char* const RAMFailure;
+inline constexpr const char* const AlphaCallAssumption = "ALPHA ERROR: function call assumptions violated.  I QUIT!";
+inline constexpr const char* const AlphaDataIntegrity = "ALPHA ERROR: data structure integrity violated.  I QUIT!";
+inline constexpr const char* const AlphaMustDefineVFunction = "ALPHA ERROR: virtual function needs to be defined for C++ class.  I QUIT!";
+inline constexpr const char* const AlphaMiscallVFunction = "ALPHA ERROR: virtual function called for C++ class that must not implement it.  I QUIT!";
+inline constexpr const char* const AlphaMiscallFunction = "ALPHA ERROR: function called in way that damages data integrity.  I QUIT!";
+inline constexpr const char* const AlphaNoEffectFunctionCall = "ALPHA ERROR: function call has no effect.  I QUIT!";
+inline constexpr const char* const AlphaRetValAssumption = "ALPHA ERROR: function return value assumptions violated.  I QUIT!";
+inline constexpr const char* const RAMFailure = "FATAL ERROR: irrecoverable RAM failure in computation.  I QUIT!";
 
 void UnconditionalDataIntegrityFailure(void) NO_RETURN;
 void UnconditionalRAMFailure(void) NO_RETURN;
 void UnconditionalCallAssumptionFailure(void) NO_RETURN;
 
 void ReportTime(clock_t Clock0, clock_t Clock1);
-
-void FlushLeadingBlankLinesFromTextBuffer(char*& Buffer, size_t& StartingLogicalLineNumber);
 
 #endif

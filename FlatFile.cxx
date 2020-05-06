@@ -143,6 +143,20 @@ void FlatFile::unshift(char*& Line,size_t& LineNumber, const char*& SourceFileNa
 	FastDeleteIdx(0);
 }
 
+static void FlushLeadingBlankLinesFromTextBuffer(char*& Buffer, size_t& StartingLogicalLineNumber)
+{	// FORMALLY CORRECT: Kenneth Boyd, 11/27/2007
+	size_t SweepIdx = strspn(Buffer, "\n");
+	if (ArraySize(Buffer) == SweepIdx) {
+		DELETE_AND_NULL(Buffer);
+		return;
+	}
+	if (0 < SweepIdx) {
+		StartingLogicalLineNumber += SweepIdx;
+		memmove(Buffer, &Buffer[SweepIdx], _msize(Buffer) - SweepIdx);
+		Buffer = REALLOC(Buffer, _msize(Buffer) - SweepIdx);
+	}
+}
+
 bool FlatFile::SplitLineIntoCache(char*& Buffer, const char* const Filename)
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/17/2004
 	assert(Buffer);
