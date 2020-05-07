@@ -290,13 +290,6 @@ const MetaConnective::DiagnoseIntermediateRulesFunc MetaConnective::DiagnoseRule
 	&MetaConnective::DiagnoseIntermediateRulesIFF2AryAux
 	};
 
-const MetaConnective::DiagnoseIntermediateRulesFunc2 MetaConnective::DiagnoseRules2AryStrictlyImpliesAux[IFF_MCM+1]
-  =	{
-	&MetaConnective::DiagnoseStrictlyImplies2AryAND,
-	&MetaConnective::DiagnoseStrictlyImplies2AryOR,
-	&MetaConnective::DiagnoseStrictlyImplies2AryIFF
-	};
-
 const MetaConnective::DiagnoseIntermediateRulesFunc2 MetaConnective::DiagnoseRulesNAryStrictlyImpliesAux[NXOR_MCM+1]
   =	{
 	&MetaConnective::DiagnoseStrictlyImpliesNAryAND,
@@ -1592,10 +1585,10 @@ Ary2Finish:
 		// antiidempotent scanner
 		if (IsAntiIdempotentTo(*ArgArray[1],*ArgArray[0]))
 			{
-			static constexpr const MetaConceptWithArgArray::EvalRuleIdx_ER antiIdempotent2AryRulesTable[]
-				= { MetaConceptWithArgArray::EvalForceContradiction_ER,	// AND
-					MetaConceptWithArgArray::EvalForceTrue_ER,	// OR
-					MetaConceptWithArgArray::EvalForceContradiction_ER	// IFF
+			static constexpr const MetaConceptWithArgArray::EvalRuleIdx_ER antiIdempotent2AryRulesTable[] = {
+				EvalForceContradiction_ER, // AND
+				EvalForceTrue_ER,          // OR
+				EvalForceContradiction_ER  // IFF
 			};
 
 			LOG("(Using anti-idempotent arguments)");
@@ -1605,6 +1598,12 @@ Ary2Finish:
 			IdxCurrentEvalRule= antiIdempotent2AryRulesTable[array_index()];
 			return;
 			};
+		static constexpr const DiagnoseIntermediateRulesFunc2 DiagnoseRules2AryStrictlyImpliesAux[IFF_MCM + 1] = {
+			&MetaConnective::DiagnoseStrictlyImplies2AryAND,
+			&MetaConnective::DiagnoseStrictlyImplies2AryOR,
+			&MetaConnective::DiagnoseStrictlyImplies2AryIFF
+		};
+
 		// A=>B, A=>~B scanners
 		if (   DiagnoseStandardEvalRules()
 			|| (this->*DiagnoseRules2AryStrictlyImpliesAux[array_index()])())
