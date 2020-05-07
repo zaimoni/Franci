@@ -196,15 +196,6 @@ const MetaConceptWithArgArray::EvalRuleIdx_ER MetaConnective::Idempotent2AryRule
 	  DECLARE_CONTRADICTION(NIFF)
 	 };
 
-const MetaConceptWithArgArray::EvalRuleIdx_ER MetaConnective::AntiIdempotent2AryRulesTable[NIFF_MCM+1]
-  = { DECLARE_CONTRADICTION(AND),
-      DECLARE_TRUE(OR),
-	  DECLARE_CONTRADICTION(IFF),
-	  DECLARE_TRUE(XOR),
-	  DECLARE_CONTRADICTION(NXOR),
-	  DECLARE_TRUE(NIFF)
-	 };
-
 // NOTE: MetaConnective::DiagnoseInferenceRulesTrueNAry assumes only LogicalAND entry is DECLARE_CLEANARG
 const signed short MetaConnective::TruthValueTrueAryNSelfTable[NIFF_MCM+1]
   =	{	DECLARE_CLEANARG(AND),
@@ -1601,11 +1592,17 @@ Ary2Finish:
 		// antiidempotent scanner
 		if (IsAntiIdempotentTo(*ArgArray[1],*ArgArray[0]))
 			{
+			static constexpr const MetaConceptWithArgArray::EvalRuleIdx_ER antiIdempotent2AryRulesTable[]
+				= { MetaConceptWithArgArray::EvalForceContradiction_ER,	// AND
+					MetaConceptWithArgArray::EvalForceTrue_ER,	// OR
+					MetaConceptWithArgArray::EvalForceContradiction_ER	// IFF
+			};
+
 			LOG("(Using anti-idempotent arguments)");
 			LOG(*ArgArray[0]);
 			LOG(*ArgArray[1]);
 			LOG(*this);
-			IdxCurrentEvalRule=AntiIdempotent2AryRulesTable[array_index()];
+			IdxCurrentEvalRule= antiIdempotent2AryRulesTable[array_index()];
 			return;
 			};
 		// A=>B, A=>~B scanners

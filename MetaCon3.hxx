@@ -93,7 +93,6 @@ private:
 	static const signed short IdempotentNArySelfEvalRulesTable[NIFF_MCM+1];
 	static const MetaConceptWithArgArray::EvalRuleIdx_ER AntiIdempotentNAryEvalRulesTable[NIFF_MCM+1];
 	static const signed short AntiIdempotentNArySelfEvalRulesTable[NIFF_MCM+1];
-	static const MetaConceptWithArgArray::EvalRuleIdx_ER AntiIdempotent2AryRulesTable[NIFF_MCM+1];
 	static const MetaConceptWithArgArray::EvalRuleIdx_ER Idempotent2AryRulesTable[NIFF_MCM+1];
 	static const signed short TruthValueTrueAryNSelfTable[NIFF_MCM+1];
 	static const signed short TruthValueFalseAryNSelfTable[NIFF_MCM];
