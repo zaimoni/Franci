@@ -283,13 +283,6 @@ const MetaConnective::DiagnoseIntermediateRulesFunc MetaConnective::DiagnoseRule
 	&MetaConnective::DiagnoseIntermediateRulesNIFFAux
 	};
 
-const MetaConnective::DiagnoseIntermediateRulesFunc MetaConnective::DiagnoseRules2AryAux[IFF_MCM+1]
-  =	{
-	&MetaConnective::DiagnoseIntermediateRulesAND2AryAux,
-	&MetaConnective::DiagnoseIntermediateRulesOR2AryAux,
-	&MetaConnective::DiagnoseIntermediateRulesIFF2AryAux
-	};
-
 const MetaConnective::DiagnoseIntermediateRulesFunc2 MetaConnective::DiagnoseRulesNAryStrictlyImpliesAux[NXOR_MCM+1]
   =	{
 	&MetaConnective::DiagnoseStrictlyImpliesNAryAND,
@@ -1569,11 +1562,11 @@ void MetaConnective::DiagnoseInferenceRules() const
 	// next rules want to know about T/F
 	if (2==fast_size())
 		{
-		static const MetaConnective::DiagnoseIntermediateRulesFunc diagnoseTVal2ary[4]	// 4 TruthValues
-			= { &MetaConnective::DiagnoseInferenceRulesContradiction2Ary,
-				  &MetaConnective::DiagnoseInferenceRulesTrue2Ary,
-				  &MetaConnective::DiagnoseInferenceRulesFalse2Ary,
-				  &MetaConnective::DiagnoseInferenceRulesUnknown2Ary
+		static const MetaConnective::DiagnoseIntermediateRulesFunc diagnoseTVal2ary[] = {
+			&MetaConnective::DiagnoseInferenceRulesContradiction2Ary,
+			&MetaConnective::DiagnoseInferenceRulesTrue2Ary,
+			&MetaConnective::DiagnoseInferenceRulesFalse2Ary,
+			&MetaConnective::DiagnoseInferenceRulesUnknown2Ary
 		};
 
 Ary2Finish:
@@ -1598,7 +1591,7 @@ Ary2Finish:
 			IdxCurrentEvalRule= antiIdempotent2AryRulesTable[array_index()];
 			return;
 			};
-		static constexpr const DiagnoseIntermediateRulesFunc2 DiagnoseRules2AryStrictlyImpliesAux[IFF_MCM + 1] = {
+		static constexpr const DiagnoseIntermediateRulesFunc2 DiagnoseRules2AryStrictlyImpliesAux[] = {
 			&MetaConnective::DiagnoseStrictlyImplies2AryAND,
 			&MetaConnective::DiagnoseStrictlyImplies2AryOR,
 			&MetaConnective::DiagnoseStrictlyImplies2AryIFF
@@ -1608,6 +1601,13 @@ Ary2Finish:
 		if (   DiagnoseStandardEvalRules()
 			|| (this->*DiagnoseRules2AryStrictlyImpliesAux[array_index()])())
 			return;
+
+		static constexpr const DiagnoseIntermediateRulesFunc DiagnoseRules2AryAux[] = {
+			&MetaConnective::DiagnoseIntermediateRulesAND2AryAux,
+			&MetaConnective::DiagnoseIntermediateRulesOR2AryAux,
+			&MetaConnective::DiagnoseIntermediateRulesIFF2AryAux
+		};
+
 		(this->*DiagnoseRules2AryAux[array_index()])();
 		return;
 		}

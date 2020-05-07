@@ -97,7 +97,6 @@ private:
 	static const signed short TruthValueTrueAryNSelfTable[NIFF_MCM+1];
 	static const signed short TruthValueFalseAryNSelfTable[NIFF_MCM];
 	static const DiagnoseIntermediateRulesFunc DiagnoseRulesAux[NIFF_MCM+1];
-	static const DiagnoseIntermediateRulesFunc DiagnoseRules2AryAux[IFF_MCM+1];
 	static const DiagnoseIntermediateRulesFunc2 DiagnoseRulesNAryStrictlyImpliesAux[NXOR_MCM+1];
 	static const DiagnoseIntermediateRulesFunc2 DiagnoseRulesTValNAryAux[4];	// 4 TruthValues
 	static const LogicalANDFindDetailedRuleAux ANDDetailedRuleAux[NIFF_MCM-AND_MCM+1];
