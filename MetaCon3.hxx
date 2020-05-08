@@ -239,6 +239,10 @@ private:
 	bool DiagnoseInferenceRulesTrueNAry() const;
 	bool DiagnoseInferenceRulesFalseNAry() const;
 	bool DiagnoseInferenceRulesUnknownNAry() const;
+	bool WouldDiagnoseInferenceRulesContradictionNAry() const;
+	bool WouldDiagnoseInferenceRulesTrueNAry() const;
+	bool WouldDiagnoseInferenceRulesFalseNAry() const;
+	bool WouldDiagnoseInferenceRulesUnknownNAry() const;
 
 	bool DiagnoseStrictlyImplies2AryAND() const;
 	bool DiagnoseStrictlyImplies2AryOR() const;

@@ -1555,7 +1555,7 @@ void MetaConnective::DiagnoseInferenceRules() const
 	// next rules want to know about T/F
 	if (2==fast_size())
 		{
-		static const MetaConnective::DiagnoseIntermediateRulesFunc diagnoseTVal2ary[] = {
+		static const DiagnoseIntermediateRulesFunc diagnoseTVal2ary[] = {
 			&MetaConnective::DiagnoseInferenceRulesContradiction2Ary,
 			&MetaConnective::DiagnoseInferenceRulesTrue2Ary,
 			&MetaConnective::DiagnoseInferenceRulesFalse2Ary,
@@ -1611,7 +1611,7 @@ Ary2Finish:
 		return;
 		}
 	else if (ArgArray[0]->IsExactType(TruthValue_MC))
-		{
+		{	// XXX fix \todo this architecture is hard to maintain...WouldDiagnose family should be returning member function pointers instead
 		static constexpr const DiagnoseIntermediateRulesFunc2 DiagnoseRulesTValNAryAux[] = {
 			&MetaConnective::DiagnoseInferenceRulesContradictionNAry,
 			&MetaConnective::DiagnoseInferenceRulesTrueNAry,
@@ -1619,9 +1619,17 @@ Ary2Finish:
 			&MetaConnective::DiagnoseInferenceRulesUnknownNAry
 		};
 
-		if ((this->*DiagnoseRulesTValNAryAux[static_cast<TruthValue*>(ArgArray[0])->_x.array_index()])())
-			return;
-		if (2==fast_size()) goto Ary2Finish;
+		static constexpr const DiagnoseIntermediateRulesFunc2 WouldDiagnoseRulesTValNAryAux[] = {
+			&MetaConnective::WouldDiagnoseInferenceRulesContradictionNAry,
+			&MetaConnective::WouldDiagnoseInferenceRulesTrueNAry,
+			&MetaConnective::WouldDiagnoseInferenceRulesFalseNAry,
+			&MetaConnective::WouldDiagnoseInferenceRulesUnknownNAry
+		};
+
+retryNAryTVal:
+		if ((this->*DiagnoseRulesTValNAryAux[static_cast<TruthValue*>(ArgArray[0])->_x.array_index()])()) return;
+		if (2 == fast_size()) goto Ary2Finish;
+		if (ArgArray[0]->IsExactType(TruthValue_MC) && (this->*WouldDiagnoseRulesTValNAryAux[static_cast<TruthValue*>(ArgArray[0])->_x.array_index()])()) goto retryNAryTVal;
 		};
 		// Internal VFT
 	// consider : ==, eval, Associative options
@@ -1720,6 +1728,13 @@ void MetaConnective::DiagnoseInferenceRulesUnknown2Ary() const
 	DiagnoseStandardEvalRules();
 }
 
+bool MetaConnective::WouldDiagnoseInferenceRulesContradictionNAry() const
+{
+	if ("\x00\x01\x00\x01\x01"[array_index()])	// sixth entry is implicitly \x00
+		return WouldDiagnoseInferenceRulesFalseNAry();
+	return true;
+}
+
 bool MetaConnective::DiagnoseInferenceRulesContradictionNAry() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 1/5/2000
 	//! \pre Arg0 is CONTRADICTION
@@ -1732,6 +1747,40 @@ bool MetaConnective::DiagnoseInferenceRulesContradictionNAry() const
 		return DiagnoseInferenceRulesFalseNAry();
 	InvokeEvalForceArg(0);
 	return true;
+}
+
+bool MetaConnective::WouldDiagnoseInferenceRulesTrueNAry() const
+{	// FORMALLY CORRECT: Kenneth Boyd, 5/20/2000
+	//! \pre Arg0 is TRUE
+	assert(ArgArray[0]->IsExactType(TruthValue_MC));
+	assert(static_cast<TruthValue*>(ArgArray[0])->_x.is(TVal::True));
+	if (IsExactType(LogicalOR_MC)) return true;
+	else if (IsExactType(LogicalAND_MC)) return true;
+	else if (IsExactType(LogicalIFF_MC)) return true;
+	else if (IsExactType(LogicalXOR_MC))
+	{
+		if (ArgArray[1]->IsExactType(TruthValue_MC))
+		{
+			if (static_cast<TruthValue*>(ArgArray[1])->_x.is(true)) return true;
+			else if (static_cast<TruthValue*>(ArgArray[1])->_x.is(false))
+			{
+				if (ArgArray[fast_size() - 1]->IsExactType(TruthValue_MC)) return true;
+				else if (ArgArray[fast_size() - 2]->IsExactType(TruthValue_MC))
+				{
+					if (static_cast<TruthValue*>(ArgArray[fast_size() - 2])->_x.is(false)) return true;
+					// otherwise, next-to-last arg is UNKNOWN
+				};
+				return false;
+			}
+			else {	// second arg is UNKNOWN
+				if (ArgArray[fast_size() - 1]->IsExactType(TruthValue_MC)) return true;
+				return false;
+			}
+		};
+		return false;
+	}
+	else if (IsExactType(LogicalNXOR_MC)) return true;
+	return false;
 }
 
 bool MetaConnective::DiagnoseInferenceRulesTrueNAry() const
@@ -1837,11 +1886,18 @@ bool MetaConnective::DiagnoseInferenceRulesTrueNAry() const
 	return true;
 }
 
+bool MetaConnective::WouldDiagnoseInferenceRulesFalseNAry() const
+{
+	assert(ArgArray[0]->IsExactType(TruthValue_MC));
+	assert(!static_cast<TruthValue*>(ArgArray[0])->_x.could_be(true));
+	return true;
+}
+
 bool MetaConnective::DiagnoseInferenceRulesFalseNAry() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 5/3/2000
 	//! \pre Arg0 is FALSE or CONTRADICTION (latter is recursion)
 	assert(ArgArray[0]->IsExactType(TruthValue_MC));
-	assert(static_cast<TruthValue*>(ArgArray[0])->_x.is(false));
+	assert(!static_cast<TruthValue*>(ArgArray[0])->_x.could_be(true));
 	if 		(IsExactType(LogicalAND_MC))
 		{
 		InferenceParameter1 = 2;
@@ -1852,12 +1908,12 @@ bool MetaConnective::DiagnoseInferenceRulesFalseNAry() const
 	else if (IsExactType(LogicalOR_MC))
 		{
 		if (   ArgArray[1]->IsExactType(TruthValue_MC)
-			&& static_cast<TruthValue*>(ArgArray[1])->_x.is(false))
+			&& !static_cast<TruthValue*>(ArgArray[1])->_x.could_be(true))
 			{
 			size_t i = 1;
 			while(   fast_size()-1>i
 				  && ArgArray[i+1]->IsExactType(TruthValue_MC)
-				  && static_cast<TruthValue*>(ArgArray[i+1])->_x.is(false)) ++i;
+				  && !static_cast<TruthValue*>(ArgArray[i+1])->_x.could_be(true)) ++i;
 			if (fast_size()-2<=i)
 				{	// all but the last arg is FALSE; the last one is unspecified.
 				InvokeEvalForceArg(fast_size()-1);
@@ -1870,7 +1926,7 @@ bool MetaConnective::DiagnoseInferenceRulesFalseNAry() const
 			};
 		// deleting leading FALSE.  *TRIVIAL*
 		const_cast<MetaConnective*>(this)->FastDeleteIdx(0);
-		return false;		
+		return false;
 		};
 	IdxCurrentSelfEvalRule=TruthValueFalseAryNSelfTable[ExactType()-LogicalOR_MC];
 	InferenceParameter1 = 0;	// all the rules want this
@@ -1880,6 +1936,14 @@ bool MetaConnective::DiagnoseInferenceRulesFalseNAry() const
 	// NOTE: only LogicalOR_MC sets up SelfEvalRuleCleanArg_SER==IdxCurrentSelfEvalRule
 	if (IsExactType(LogicalNIFF_MC)) InferenceParameter2 = LogicalOR_MC;
 	return true;
+}
+
+bool MetaConnective::WouldDiagnoseInferenceRulesUnknownNAry() const
+{
+	assert(ArgArray[0]->IsExactType(TruthValue_MC));
+	assert(static_cast<TruthValue*>(ArgArray[0])->_x.is(TVal::Unknown));
+	if (ArgArray[1]->IsExactType(TruthValue_MC)) return true;
+	return false;
 }
 
 bool MetaConnective::DiagnoseInferenceRulesUnknownNAry() const
