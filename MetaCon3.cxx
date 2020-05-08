@@ -228,13 +228,6 @@ static constexpr const MetaConceptWithArgArray::EvalRuleIdx_ER truthValueFalseAr
 #undef DECLARE_FALSE
 #undef DECLARE_UNKNOWN
 
-const MetaConnective::DiagnoseIntermediateRulesFunc2 MetaConnective::DiagnoseRulesTValNAryAux[4]	// 4 TruthValues
-  =	{	&MetaConnective::DiagnoseInferenceRulesContradictionNAry,
-		&MetaConnective::DiagnoseInferenceRulesTrueNAry,
-		&MetaConnective::DiagnoseInferenceRulesFalseNAry,
-		&MetaConnective::DiagnoseInferenceRulesUnknownNAry
-	};
-
 const MetaConnective::UseThisAsMakeImplyAux MetaConnective::UseThisAsMakeImply2AryTable[IFF_MCM+1]
   =	{	&MetaConnective::UseThisAsMakeImply2AryAND,
 		&MetaConnective::UseThisAsMakeImply2AryOR,
@@ -1619,6 +1612,13 @@ Ary2Finish:
 		}
 	else if (ArgArray[0]->IsExactType(TruthValue_MC))
 		{
+		static constexpr const DiagnoseIntermediateRulesFunc2 DiagnoseRulesTValNAryAux[] = {
+			&MetaConnective::DiagnoseInferenceRulesContradictionNAry,
+			&MetaConnective::DiagnoseInferenceRulesTrueNAry,
+			&MetaConnective::DiagnoseInferenceRulesFalseNAry,
+			&MetaConnective::DiagnoseInferenceRulesUnknownNAry
+		};
+
 		if ((this->*DiagnoseRulesTValNAryAux[static_cast<TruthValue*>(ArgArray[0])->_x.array_index()])())
 			return;
 		if (2==fast_size()) goto Ary2Finish;
