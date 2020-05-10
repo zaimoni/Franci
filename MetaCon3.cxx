@@ -167,16 +167,6 @@ const signed short MetaConnective::IdempotentNArySelfEvalRulesTable[NIFF_MCM+1]
 	DECLARE_CLEANARGNIFFXOR(NIFF)
 	};
 
-const MetaConceptWithArgArray::EvalRuleIdx_ER MetaConnective::AntiIdempotentNAryEvalRulesTable[NIFF_MCM+1]
-  =	{
-	DECLARE_CONTRADICTION(AND),
-	DECLARE_TRUE(OR),
-	DECLARE_CONTRADICTION(IFF),
-	None_ER,
-	None_ER,
-	DECLARE_TRUE(NIFF)
-	};
-
 const signed short MetaConnective::AntiIdempotentNArySelfEvalRulesTable[NIFF_MCM+1]
   =	{
 	None_SER,
@@ -1648,6 +1638,15 @@ retryNAryTVal:
 	//    constructor will be interested in this one
 	if (FindTwoAntiIdempotentArgsSymmetric())
 		{
+		static constexpr const unsigned short AntiIdempotentNAryEvalRulesTable[] = {
+			EvalForceContradiction_ER, // AND
+			EvalForceTrue_ER, // OR
+			EvalForceContradiction_ER, // IFF
+			None_ER, // XOR
+			None_ER, // NXOR
+			EvalForceTrue_ER // NIFF
+		};
+
 		LOG("(Using anti-idempotent arguments)");
 		LOG(*ArgArray[InferenceParameter1]);
 		LOG(*ArgArray[InferenceParameter2]);
