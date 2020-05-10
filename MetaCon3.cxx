@@ -256,15 +256,6 @@ const MetaConnective::DiagnoseIntermediateRulesFunc MetaConnective::DiagnoseRule
 	&MetaConnective::DiagnoseIntermediateRulesNIFFAux
 	};
 
-const MetaConnective::DiagnoseIntermediateRulesFunc2 MetaConnective::DiagnoseRulesNAryStrictlyImpliesAux[NXOR_MCM+1]
-  =	{
-	&MetaConnective::DiagnoseStrictlyImpliesNAryAND,
-	&MetaConnective::DiagnoseStrictlyImpliesNAryOR,
-	&MetaConnective::DiagnoseStrictlyImpliesNAryIFF,
-	&MetaConnective::DiagnoseStrictlyImpliesNAryXOR,
-	&MetaConnective::DiagnoseStrictlyImpliesNAryNXOR
-	};
-
 const MetaConnective::LogicalANDFindDetailedRuleAux MetaConnective::ANDDetailedRuleAux[NIFF_MCM-AND_MCM+1]
   =	{
     NULL,
@@ -1674,6 +1665,14 @@ retryNAryTVal:
 	// Above call can, for efficiency reasons, drop the arity down to 2...at which point
 	// the following code will legitimately crash
 	if (2==fast_size()) goto Ary2Finish;
+
+	static constexpr const DiagnoseIntermediateRulesFunc2 DiagnoseRulesNAryStrictlyImpliesAux[] = {
+		  &MetaConnective::DiagnoseStrictlyImpliesNAryAND,
+		  &MetaConnective::DiagnoseStrictlyImpliesNAryOR,
+		  &MetaConnective::DiagnoseStrictlyImpliesNAryIFF,
+		  &MetaConnective::DiagnoseStrictlyImpliesNAryXOR,
+		  &MetaConnective::DiagnoseStrictlyImpliesNAryNXOR
+	};
 
 	if (   !IsExactType(LogicalNIFF_MC)
 	    && (this->*DiagnoseRulesNAryStrictlyImpliesAux[array_index()])())
