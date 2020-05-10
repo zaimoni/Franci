@@ -91,7 +91,6 @@ private:
 	static const BinaryRelationAuxFunc2 StrictlyImpliesAux[StrictBound_MCM];
 	static const BinaryRelationAuxFunc2 CanStrictlyModifyAux[StrictBound_MCM];
 	static const signed short IdempotentNArySelfEvalRulesTable[NIFF_MCM+1];
-	static const signed short AntiIdempotentNArySelfEvalRulesTable[NIFF_MCM+1];
 	static const MetaConceptWithArgArray::EvalRuleIdx_ER Idempotent2AryRulesTable[NIFF_MCM+1];
 	static const signed short TruthValueTrueAryNSelfTable[NIFF_MCM+1];
 	static const signed short TruthValueFalseAryNSelfTable[NIFF_MCM];

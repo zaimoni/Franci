@@ -167,16 +167,6 @@ const signed short MetaConnective::IdempotentNArySelfEvalRulesTable[NIFF_MCM+1]
 	DECLARE_CLEANARGNIFFXOR(NIFF)
 	};
 
-const signed short MetaConnective::AntiIdempotentNArySelfEvalRulesTable[NIFF_MCM+1]
-  =	{
-	None_SER,
-	None_SER,
-	None_SER,
-	DECLARE_REPLACEARGS_WITH_TRUE(XOR),
-	DECLARE_REPLACEARGS_WITH_TRUE(NXOR),
-	None_SER
-	};
-
 const MetaConceptWithArgArray::EvalRuleIdx_ER MetaConnective::Idempotent2AryRulesTable[NIFF_MCM+1]
   = { DECLARE_ARG(AND),
       DECLARE_ARG(OR),
@@ -1645,6 +1635,15 @@ retryNAryTVal:
 			None_ER, // XOR
 			None_ER, // NXOR
 			EvalForceTrue_ER // NIFF
+		};
+
+		static constexpr const signed short AntiIdempotentNArySelfEvalRulesTable[] = {
+		  None_SER, // AND
+		  None_SER, // OR
+		  None_SER, // IFF
+		  ReplaceArgsWithTrue_SER, // XOR
+		  ReplaceArgsWithTrue_SER, // NXOR
+		  None_SER // NIFF
 		};
 
 		LOG("(Using anti-idempotent arguments)");
