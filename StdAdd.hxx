@@ -36,7 +36,7 @@ public:
 	StdAddition(void) : MetaConceptWithArgArray(StdAddition_MC) {};
 	StdAddition(MetaConcept**& NewArgList);
 //	StdAddition(const StdAddition& src);	// default ok
-	virtual ~StdAddition();
+	virtual ~StdAddition() = default;
 
 	const StdAddition& operator=(const StdAddition& src);	// ACID
 	void CopyInto(MetaConcept*& dest) const final {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure

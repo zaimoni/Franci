@@ -98,13 +98,13 @@ protected:
 	MetaConceptWithArgArray(const MetaConceptWithArgArray& src);
 	void operator=(const MetaConceptWithArgArray& src);
 public:
-	virtual ~MetaConceptWithArgArray();
-	virtual void CopyInto(MetaConcept*& Target) const = 0;	// can throw memory failure
-	virtual void MoveInto(MetaConcept*& Target) = 0;	// can throw memory failure.  If it succeeds, it destroys the source.
+	virtual ~MetaConceptWithArgArray() = default;
+//	virtual void CopyInto(MetaConcept*& Target) const = 0;	// can throw memory failure
+//	virtual void MoveInto(MetaConcept*& Target) = 0;	// can throw memory failure.  If it succeeds, it destroys the source.
 	void ForceCheckForEvaluation() const {IdxCurrentSelfEvalRule=None_SER;};
 	bool SelfEvalCleanEnd() const {IdxCurrentSelfEvalRule = None_SER; return true;};
 //  Type ID functions
-	virtual const AbstractClass* UltimateType() const = 0;
+//	virtual const AbstractClass* UltimateType() const = 0;
 //	Arity functions
 	virtual size_t size() const {return ArgArray.size();};
 	size_t fast_size() const {assert(!ArgArray.empty()); return ArgArray.ArraySize();};

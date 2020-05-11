@@ -22,7 +22,7 @@ protected:
 			MetaConcept::operator=(src);
 		};
 public:
-	virtual ~MetaConceptWith1Arg();
+	virtual ~MetaConceptWith1Arg() = default;
 //	virtual void CopyInto(MetaConcept*& dest) const = 0;	// can throw memory failure
 //	virtual void MoveInto(MetaConcept*& dest) = 0;	// can throw memory failure.  If it succeeds, it destroys the source.
 	void MoveIntoAux(MetaConceptWith1Arg& dest);

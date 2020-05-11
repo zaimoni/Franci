@@ -44,7 +44,7 @@ public:
 	explicit IntegerNumeral(unsigned long src) : MetaConceptZeroArgs(IntegerNumeral_MC),_IntegerNumeral(src) {};
 	explicit IntegerNumeral(signed long src) : MetaConceptZeroArgs(IntegerNumeral_MC),_IntegerNumeral(src) {};
 	explicit IntegerNumeral(const char* src) : MetaConceptZeroArgs(IntegerNumeral_MC),_IntegerNumeral(src) {};
-	virtual ~IntegerNumeral();
+	virtual ~IntegerNumeral() = default;
 
 // inherited from MetaConcept
 	const IntegerNumeral& operator=(const IntegerNumeral& src);

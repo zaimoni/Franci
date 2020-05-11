@@ -40,7 +40,7 @@ enum EvalRuleIdx_ER	{
 public:
 	ClauseNArg(MetaConcept**& src, size_t& KeywordIdx);
 //	ClauseNArg(const ClauseNArg& src);	// default OK
-	virtual ~ClauseNArg();
+	virtual ~ClauseNArg() = default;
 //	const ClauseNArg& operator=(const ClauseNArg& src);	// default OK
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(ClauseNArg*& dest) {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure

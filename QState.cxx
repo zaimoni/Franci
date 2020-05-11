@@ -62,6 +62,14 @@ QuantifiedStatement::QuantifiedStatement(const QuantifiedStatement& src)
 		};
 }
 
+QuantifiedStatement::~QuantifiedStatement()
+{	// FORMALLY CORRECT: Kenneth Boyd, 11/20/2000
+	// We have to delete the statement [ArgArray[0]] BEFORE the quantification, in order to 
+	// prevent dangling pointers.  This has to be done here [no guarantee that the immediate
+	// ancestor does it correctly].
+	DELETE_AND_NULL(ArgArray[0]);
+}
+
 const QuantifiedStatement& QuantifiedStatement::operator=(const QuantifiedStatement& src)
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/13/1999
 	// Note that the quantified variables must be properly substituted after the construction.

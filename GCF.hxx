@@ -21,7 +21,7 @@ public:
 	GCF() : MetaConceptWithArgArray(GCF_MC) {};
 	GCF(MetaConcept**& NewArgList);
 //	GCF(const GCF& src);	// default OK
-	virtual ~GCF();
+	virtual ~GCF() = default;
 
 //	const GCF& operator=(const GCF& src);	// default ok
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure

@@ -33,7 +33,7 @@ public:
 	AbstractClass(const char* const NewName);	// object now has copy of NewName
 	AbstractClass(MetaConcept*& src);	// AbstractClass owns Target afterwards.
 //	AbstractClass(const AbstractClass& src);	// default OK
-	virtual ~AbstractClass();
+	virtual ~AbstractClass() = default;
 	
 	const AbstractClass& operator=(const AbstractClass& src);
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure

@@ -31,7 +31,7 @@ private:
 public:
 	Clause2Arg(MetaConcept**& src, size_t& KeywordIdx);
 //	Clause2Arg(const Clause2Arg& src);	// default OK
-	virtual ~Clause2Arg();
+	virtual ~Clause2Arg() = default;
 //	const Clause2Arg& operator=(const Clause2Arg& src);	// default OK
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(Clause2Arg*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure

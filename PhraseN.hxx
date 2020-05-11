@@ -38,7 +38,7 @@ protected:
 public:
 	PhraseNArg(MetaConcept**& src, size_t& KeywordIdx);
 //	PhraseNArg(const PhraseNArg& src);	// default OK
-	virtual ~PhraseNArg();
+	virtual ~PhraseNArg() = default;
 //	const PhraseNArg& operator=(const PhraseNArg& src);	// default OK
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(PhraseNArg*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure

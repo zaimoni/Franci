@@ -34,7 +34,7 @@ private:
 public:
 	Phrase2Arg(MetaConcept**& src, size_t& KeywordIdx);
 //	Phrase2Arg(const Phrase2Arg& src);	// default OK
-	virtual ~Phrase2Arg();
+	virtual ~Phrase2Arg() = default;
 //	const Phrase2Arg& operator=(const Phrase2Arg& src); //	default ok
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(Phrase2Arg*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure

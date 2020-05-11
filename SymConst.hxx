@@ -29,7 +29,7 @@ public:
 	SymbolicConstant(SymConstantIndex ExactSymConstant);
 //	SymbolicConstant(const SymbolicConstant& src);	// default OK
 
-	virtual ~SymbolicConstant();	// default OK, but need to control location linked
+	virtual ~SymbolicConstant() = default;
 
 //	const SymbolicConstant& operator=(const SymbolicConstant& src); 	// default OK
 

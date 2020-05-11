@@ -57,7 +57,7 @@ protected:
 	UnparsedText(char*& src,unsigned short NewSelfClassify);
 public:
 //	UnparsedText(const UnparsedText& src);	// default OK
-	~UnparsedText();
+	~UnparsedText() = default;
 
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(UnparsedText*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};

@@ -53,7 +53,7 @@ public:
 	SeriesOperation(ExactType_MC Operation);
 	SeriesOperation(MetaConcept**& NewArgList,ExactType_MC Operation);
 //	SeriesOperation(const SeriesOperation& src);	// default OK
-	virtual ~SeriesOperation();
+	virtual ~SeriesOperation() = default;
 
 	const SeriesOperation& operator=(const SeriesOperation& src);	// provided to be ACID
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure

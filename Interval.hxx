@@ -82,7 +82,7 @@ public:
 
 	LinearInterval(MetaConcept*& lhs, MetaConcept*& rhs, AbstractClass*& UltimateDomain, bool OpenOnLeft, bool OpenOnRight);
 	LinearInterval(const LinearInterval& src);
-	virtual ~LinearInterval();
+	virtual ~LinearInterval() = default;
 	const LinearInterval& operator=(const LinearInterval& src);
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(LinearInterval*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure

@@ -36,7 +36,7 @@ public:
 	Phrase1Arg(MetaConcept**& src, size_t KeywordIdx);	// constructor
 													// NOTE: constructor fails by failing SyntaxOK()
 //	Phrase1Arg(const Phrase1Arg& src);	// default OK
-	virtual ~Phrase1Arg();
+	virtual ~Phrase1Arg() = default;
 //	const Phrase1Arg& operator=(const Phrase1Arg& src);	// default OK
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(Phrase1Arg*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure

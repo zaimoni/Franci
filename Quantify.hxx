@@ -49,7 +49,7 @@ public:
 	MetaQuantifier(const char* Name, const AbstractClass* Domain, MetaQuantifierMode CreationMode);
 	MetaQuantifier(const char* Name, const AbstractClass* Domain, MetaQuantifierMode CreationMode, bool Improvised);
 //	MetaQuantifier(const MetaQuantifier& src);	// default OK
-	virtual ~MetaQuantifier();
+	virtual ~MetaQuantifier() = default;
 
 	const MetaQuantifier& operator=(const MetaQuantifier& src);
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure

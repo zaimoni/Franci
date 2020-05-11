@@ -45,7 +45,7 @@ protected:
 	MetaConceptWith2Args(const MetaConceptWith2Args& src);
 	void operator=(const MetaConceptWith2Args& src);
 public:
-	virtual ~MetaConceptWith2Args();
+	virtual ~MetaConceptWith2Args() = default;
 //	virtual void CopyInto(MetaConcept*& dest) const = 0;	// can throw memory failure
 //	virtual void MoveInto(MetaConcept*& dest) = 0;	// can throw memory failure.  If it succeeds, it destroys the source.
 	inline void ForceCheckForEvaluation() const {IdxCurrentSelfEvalRule=None_SER;};

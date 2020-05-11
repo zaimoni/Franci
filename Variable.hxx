@@ -25,7 +25,7 @@ protected:
 public:
 	Variable(MetaQuantifier* NewName) :	MetaConceptZeroArgs(Variable_MC),Arg1(NewName) {};	// FORMALLY CORRECT: Kenneth Boyd, 4/22/2006
 //	Variable(const Variable& src); default ok
-	~Variable();
+	~Variable() = default;
 //	const Variable& operator=(const Variable& src);	// default ok
 
 // Inherited from MetaConcept

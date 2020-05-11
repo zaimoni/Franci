@@ -37,7 +37,7 @@ public:
 	StdMultiplication() : MetaConceptWithArgArray(StdMultiplication_MC) {};
 	StdMultiplication(MetaConcept**& NewArgList);
 //	StdMultiplication(const StdMultiplication& src);	// default ok
-	virtual ~StdMultiplication();
+	virtual ~StdMultiplication() = default;
 
 	const StdMultiplication& operator=(const StdMultiplication& src);
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure

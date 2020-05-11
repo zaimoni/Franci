@@ -51,7 +51,7 @@ public:
 	CombinatorialLike(CombinatorialModes LinkageType) : MetaConceptWithArgArray((ExactType_MC)(LinkageType+Factorial_MC)) {};
 	CombinatorialLike(MetaConcept**& NewArgList, CombinatorialModes LinkageType);
 //	CombinatorialLike(const CombinatorialLike& src);	// default OK
-	virtual ~CombinatorialLike();
+	virtual ~CombinatorialLike() = default;
 
 //	const CombinatorialLike& operator=(const CombinatorialLike& src) // default OK
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure

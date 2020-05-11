@@ -14,7 +14,7 @@ protected:
 	explicit MetaConceptZeroArgs(ExactType_MC NewType) : MetaConcept(NewType) {};
 	explicit MetaConceptZeroArgs(ExactType_MC NewType,unsigned char NewBitmap) : MetaConcept(NewType,NewBitmap) {};
 	MetaConceptZeroArgs(const MetaConceptZeroArgs& src) : MetaConcept(src) {};
-	virtual ~MetaConceptZeroArgs();
+	virtual ~MetaConceptZeroArgs() = default;
 	void operator=(const MetaConceptZeroArgs& src) {MetaConcept::operator=(src);};
 public:
 //	virtual void CopyInto(MetaConcept*& dest) const = 0;	// can throw memory failure

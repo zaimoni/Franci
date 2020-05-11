@@ -102,7 +102,7 @@ public:
 	MetaConnective(MetaConnectiveModes LinkageType) : MetaConceptWithArgArray((ExactType_MC)(LinkageType+LogicalAND_MC)) {};
 	MetaConnective(MetaConcept**& NewArgList, MetaConnectiveModes LinkageType) throw();
 //	MetaConnective(const MetaConnective& Source);	// default OK
-	virtual ~MetaConnective();
+	virtual ~MetaConnective() = default;
 
 	const MetaConnective& operator=(const MetaConnective& src) {MetaConceptWithArgArray::operator=(src);return *this;};
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
