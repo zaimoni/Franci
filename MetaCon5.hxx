@@ -23,12 +23,12 @@ protected:
 		};
 public:
 	virtual ~MetaConceptWith1Arg();
-	virtual void CopyInto(MetaConcept*& dest) const = 0;	// can throw memory failure
-	virtual void MoveInto(MetaConcept*& dest) = 0;	// can throw memory failure.  If it succeeds, it destroys the source.
+//	virtual void CopyInto(MetaConcept*& dest) const = 0;	// can throw memory failure
+//	virtual void MoveInto(MetaConcept*& dest) = 0;	// can throw memory failure.  If it succeeds, it destroys the source.
 	void MoveIntoAux(MetaConceptWith1Arg& dest);
 
 //  Type ID functions
-	virtual const AbstractClass* UltimateType() const = 0;
+//	virtual const AbstractClass* UltimateType() const = 0;
 	virtual size_t size() const {return 1;};
 	virtual const MetaConcept* ArgN(size_t n) const;
 	virtual MetaConcept* ArgN(size_t n);
@@ -51,7 +51,7 @@ public:
 protected:
 	virtual bool InternalDataLTAux(const MetaConcept& rhs) const;
 	virtual bool EqualAux2(const MetaConcept& rhs) const;
-	virtual void _forceStdForm();
+	void _forceStdForm() override;
 	virtual bool _IsExplicitConstant() const;
 };
 

@@ -26,7 +26,7 @@ struct is_polymorphic_final<SeriesOperation> : public std::true_type {};
 
 }
 
-class SeriesOperation : public MetaConceptWithArgArray
+class SeriesOperation final : public MetaConceptWithArgArray
 {
 	enum EvalRuleIdx_ER	{
 		ExpandZeroAry_ER = MetaConceptWithArgArray::MaxEvalRuleIdx_ER+1,
@@ -56,7 +56,7 @@ public:
 	virtual ~SeriesOperation();
 
 	const SeriesOperation& operator=(const SeriesOperation& src);	// provided to be ACID
-	virtual void CopyInto(MetaConcept*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
+	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(SeriesOperation*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
 	void MoveInto(SeriesOperation*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
@@ -73,7 +73,7 @@ public:
 protected:
 	virtual bool EqualAux2(const MetaConcept& rhs) const;
 	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
-	virtual void _forceStdForm();
+	void _forceStdForm() override;
 	virtual bool _IsExplicitConstant() const;
 	virtual bool _IsOne() const;
 	virtual bool _IsZero() const;

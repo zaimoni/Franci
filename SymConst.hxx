@@ -23,7 +23,7 @@ struct is_polymorphic_final<SymbolicConstant> : public std::true_type {};
 
 }
 
-class SymbolicConstant : public MetaConceptZeroArgs
+class SymbolicConstant final : public MetaConceptZeroArgs
 {
 public:
 	SymbolicConstant(SymConstantIndex ExactSymConstant);
@@ -33,7 +33,7 @@ public:
 
 //	const SymbolicConstant& operator=(const SymbolicConstant& src); 	// default OK
 
-	virtual void CopyInto(MetaConcept*& dest) const {zaimoni::CopyInto(*this,dest);};	// can throw memory failure
+	void CopyInto(MetaConcept*& dest) const override {zaimoni::CopyInto(*this,dest);};	// can throw memory failure
 	void CopyInto(SymbolicConstant*& dest) const {zaimoni::CopyInto(*this,dest);};	// can throw memory failure
 	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
 	void MoveInto(SymbolicConstant*& dest) {zaimoni::CopyInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.

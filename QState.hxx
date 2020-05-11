@@ -14,7 +14,7 @@ struct is_polymorphic_final<QuantifiedStatement> : public std::true_type {};
 
 }
 
-class QuantifiedStatement: public MetaConceptWithArgArray
+class QuantifiedStatement final : public MetaConceptWithArgArray
 {
 	enum SelfEvalRuleIdx_SER{
 		SortQuantifiers_SER = MetaConceptWithArgArray::MaxSelfEvalRuleIdx_SER+1,
@@ -30,7 +30,7 @@ public:
 	QuantifiedStatement() :	MetaConceptWithArgArray(QuantifiedStatement_MC),QuantifiersExplicitlySorted('\x00') {};
 	QuantifiedStatement(const QuantifiedStatement& src);
 	virtual ~QuantifiedStatement();
-	virtual void CopyInto(MetaConcept*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
+	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(QuantifiedStatement*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
 	void MoveInto(QuantifiedStatement*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
@@ -48,7 +48,7 @@ public:
 protected:
 	virtual bool EqualAux2(const MetaConcept& rhs) const;
 	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
-	virtual void _forceStdForm();
+	void _forceStdForm() override;
 
 	virtual void DiagnoseInferenceRules() const;
 	virtual bool InvokeEqualArgRule() const;

@@ -25,7 +25,7 @@ enum SEARCHTREE_RESERVED	{
 
 // NOTE: The true type of a SearchTree is that of its first-branching node.
 
-class SearchTree : public MetaConceptWithArgArray
+class SearchTree final : public MetaConceptWithArgArray
 {
 private:
 	SearchTree* Parent;
@@ -51,7 +51,7 @@ public:
 	virtual ~SearchTree();
 
 	const SearchTree& operator=(const SearchTree& src);
-	virtual void CopyInto(MetaConcept*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
+	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(SearchTree*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
 	void MoveInto(SearchTree*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
@@ -69,7 +69,7 @@ public:
 	signed int ApprovalScore(const MetaConcept* const Target) const;
 	bool DestructiveExtractUniqueResult(MetaConcept*& dest);
 protected:
-	virtual void _forceStdForm();
+	void _forceStdForm() override;
 private:
 	const MetaConcept* FindLeafLikeThis(const MetaConcept& Target) const;
 	bool getBranchedArgArray(SearchTree* const Target, MetaConcept**& NewArray) const;

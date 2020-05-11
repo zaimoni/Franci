@@ -43,15 +43,14 @@ struct is_polymorphic_final<MetaConceptExternal<T> > : public std::true_type {};
 
 // we'd like to replace most derivations from MetaConceptZeroAry (MetaCon6.hxx/cxx) with this
 template<class T>
-class MetaConceptExternal : public MetaConcept
+class MetaConceptExternal final : public MetaConcept
 {
 public:
 	T _x;	// we would provide full accessors anyway so may as well be public
 
 	MetaConceptExternal() : MetaConcept(MetaConcept_lookup<T>::exact_type()) {};
 	MetaConceptExternal(const T& src) : MetaConcept(MetaConcept_lookup<T>::exact_type()),_x(src) {};
-	MetaConceptExternal(const MetaConceptExternal& src)
-		: MetaConcept(src),_x(src._x) {};
+	MetaConceptExternal(const MetaConceptExternal& src) : MetaConcept(src),_x(src._x) {};
 	virtual ~MetaConceptExternal() {};	// as a template doesn't go in Destruct.cxx
 	void operator=(const MetaConceptExternal& src) {
 		_x = src._x;	// presumably this is ACID
@@ -61,7 +60,7 @@ public:
 		_x = src;	// presumably this is ACID
 	};
 
-	virtual void CopyInto(MetaConcept*& dest) const {zaimoni::CopyInto(*this,dest);};	// can throw memory failure
+	void CopyInto(MetaConcept*& dest) const override {zaimoni::CopyInto(*this,dest);};	// can throw memory failure
 	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
 	void MoveInto(MetaConceptExternal*& dest) {zaimoni::CopyInto(*this,dest);};
 
@@ -69,8 +68,8 @@ public:
 	virtual typename std::enable_if<MetaConcept_lookup<T>::return_code==1,const AbstractClass*>::type UltimateType() const {return &TruthValues;};	// specialize or else
 //	Arity functions
 	virtual size_t size() const {return 0;};
-	virtual const MetaConcept* ArgN(size_t n) const {return NULL;};
-	virtual MetaConcept* ArgN(size_t n) {return NULL;};
+	virtual const MetaConcept* ArgN(size_t n) const {return 0;};
+	virtual MetaConcept* ArgN(size_t n) {return 0;};
 // Syntactical equality and inequality
 	virtual bool IsAbstractClassDomain() const {return true;};
 //  Evaluation functions
@@ -99,7 +98,7 @@ protected:
 	virtual bool EqualAux2(const MetaConcept& rhs) const {return _x==static_cast<const MetaConceptExternal&>(rhs)._x;};
 	virtual bool InternalDataLTAux(const MetaConcept& rhs) const {return MetaConcept_lookup<T>::lt_aux(_x,static_cast<const MetaConceptExternal<T>&>(rhs)._x);};
 	virtual void ConstructSelfNameAux(char* Name) const {return MetaConcept_lookup<T>::construct_self_name_aux(Name,_x);};		// overwrites what is already there
-	virtual void _forceStdForm() {};
+	void _forceStdForm() override {};
 	virtual bool _IsExplicitConstant() const {return true;};
 private:
 	virtual typename std::enable_if<MetaConcept_lookup<T>::return_code==1,bool>::type isAntiIdempotentTo(const MetaConcept& rhs) const {return MetaConcept_lookup<T>::isAntiIdempotentTo(this->_x,static_cast<const MetaConceptExternal&>(rhs)._x);};

@@ -34,7 +34,7 @@ enum MetaQuantifierMode		{
 							ThereIsNot_MQM = ThereIsNot_MC-ForAll_MC
 							};
 
-class MetaQuantifier : public MetaConceptWith1Arg
+class MetaQuantifier final : public MetaConceptWith1Arg
 {
 private:
 	static unsigned long NextID;
@@ -52,7 +52,7 @@ public:
 	virtual ~MetaQuantifier();
 
 	const MetaQuantifier& operator=(const MetaQuantifier& src);
-	virtual void CopyInto(MetaConcept*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
+	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(MetaQuantifier*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
 	void MoveInto(MetaQuantifier*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.

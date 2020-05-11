@@ -34,7 +34,7 @@ struct is_polymorphic_final<IntegerNumeral> : public std::true_type {};
 
 }
 
-class IntegerNumeral : public MetaConceptZeroArgs,public _IntegerNumeral
+class IntegerNumeral final : public MetaConceptZeroArgs,public _IntegerNumeral
 {
 public:
 	IntegerNumeral() : MetaConceptZeroArgs(IntegerNumeral_MC) {};
@@ -48,7 +48,7 @@ public:
 
 // inherited from MetaConcept
 	const IntegerNumeral& operator=(const IntegerNumeral& src);
-	virtual void CopyInto(MetaConcept*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
+	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(IntegerNumeral*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
 	void MoveInto(IntegerNumeral*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.

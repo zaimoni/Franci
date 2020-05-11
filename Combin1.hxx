@@ -28,7 +28,7 @@ enum CombinatorialModes	{
 						StrictBound_CM		= PERMUTATIONCOUNT_CM+1				/* 5 */
 						};
 
-class CombinatorialLike : public MetaConceptWithArgArray
+class CombinatorialLike final : public MetaConceptWithArgArray
 {
 private:
 	enum EvalRuleIdx_ER	{
@@ -54,7 +54,7 @@ public:
 	virtual ~CombinatorialLike();
 
 //	const CombinatorialLike& operator=(const CombinatorialLike& src) // default OK
-	virtual void CopyInto(MetaConcept*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
+	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(CombinatorialLike*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
 	void MoveInto(CombinatorialLike*& dest);		// can throw memory failure.  If it succeeds, it destroys the source.
@@ -69,7 +69,7 @@ public:
 	virtual bool IsNegative() const;
 protected:
 	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
-	virtual void _forceStdForm();
+	void _forceStdForm() override;
 	virtual bool _IsOne() const;
 
 //  Helper functions for CanEvaluate... routines

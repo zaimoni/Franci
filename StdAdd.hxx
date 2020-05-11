@@ -18,7 +18,7 @@ struct is_polymorphic_final<StdAddition> : public std::true_type {};
 
 // NOTE: a 0-ary StdAddition is an "omnizero": a zero that matches its context
 
-class StdAddition : public MetaConceptWithArgArray
+class StdAddition final : public MetaConceptWithArgArray
 {
 	enum SelfEvalRuleIdx_SER {
 		CleanAddInv_SER = MetaConceptWithArgArray::MaxSelfEvalRuleIdx_SER+1,
@@ -39,7 +39,7 @@ public:
 	virtual ~StdAddition();
 
 	const StdAddition& operator=(const StdAddition& src);	// ACID
-	virtual void CopyInto(MetaConcept*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
+	void CopyInto(MetaConcept*& dest) const final {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(StdAddition*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
 	void MoveInto(StdAddition*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
@@ -52,7 +52,7 @@ public:
 	virtual size_t LengthOfSelfName() const;
 protected:
 	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
-	virtual void _forceStdForm();
+	void _forceStdForm() override;
 	virtual bool _IsExplicitConstant() const;
 	virtual bool _IsZero() const;
 	virtual bool SelfInverse(const ExactType_MC Operation);

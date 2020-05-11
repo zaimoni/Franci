@@ -14,7 +14,7 @@ struct is_polymorphic_final<ClauseNArg> : public std::true_type {};
 
 }
 
-class ClauseNArg: public MetaConceptWithArgArray
+class ClauseNArg final : public MetaConceptWithArgArray
 {
 private:
 enum EvalRuleIdx_ER	{
@@ -42,7 +42,7 @@ public:
 //	ClauseNArg(const ClauseNArg& src);	// default OK
 	virtual ~ClauseNArg();
 //	const ClauseNArg& operator=(const ClauseNArg& src);	// default OK
-	virtual void CopyInto(MetaConcept*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
+	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(ClauseNArg*& dest) {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure; success destroys integrity of source
 	void MoveInto(ClauseNArg*& dest);	// can throw memory failure; success destroys integrity of source
@@ -62,7 +62,7 @@ public:
 	static ExactType_MC CanConstructPostfix(const MetaConcept* const * src, size_t KeywordIdx);
 protected:
 	virtual void ConstructSelfNameAux(char* Name) const;	// overwrites what is already there
-	virtual void _forceStdForm();
+	void _forceStdForm() override;
 
 	virtual void DiagnoseInferenceRules() const;
 	virtual bool InvokeEqualArgRule() const;

@@ -14,7 +14,7 @@ struct is_polymorphic_final<FlatFile> : public std::true_type {};
 
 }
 
-class FlatFile : public MetaConceptWithArgArray
+class FlatFile final : public MetaConceptWithArgArray
 {
 protected:
 	static char** Filenames;
@@ -26,7 +26,7 @@ public:
 	FlatFile() {};
 	FlatFile(const FlatFile& src);
 	virtual ~FlatFile();
-	virtual void CopyInto(MetaConcept*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
+	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	virtual void CopyInto(FlatFile*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
 	virtual void MoveInto(FlatFile*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
@@ -43,7 +43,7 @@ public:
 	bool DumpASCIIFile(const char* const Filename);	// writes entire ASCII file from object
 protected:
 	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
-	virtual void _forceStdForm();
+	void _forceStdForm() override;
 
 	virtual void DiagnoseInferenceRules() const;	// This is *not* the Interface!
 	virtual bool InvokeEqualArgRule() const;

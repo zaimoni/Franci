@@ -130,9 +130,3 @@ MetaConnective::~MetaConnective()
 MetaConceptWithArgArray::~MetaConceptWithArgArray()
 {	// FORMALLY CORRECT: Kenneth Boyd, 5/19/2006
 }
-
-// foundation
-MetaConcept::~MetaConcept()
-{	// FORMALLY CORRECT: Kenneth Boyd, 4/6/1998
-}
-

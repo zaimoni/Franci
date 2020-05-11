@@ -18,7 +18,7 @@ struct is_polymorphic_final<Variable> : public std::true_type {};
 class AbstractClass;
 
 // NOTE: Variable does *not* own its domain!
-class Variable : public MetaConceptZeroArgs
+class Variable final : public MetaConceptZeroArgs
 {
 protected:
 	MetaQuantifier* Arg1;	// cannot be const MetaQuantifier* because of ForceUltimateType
@@ -29,7 +29,7 @@ public:
 //	const Variable& operator=(const Variable& src);	// default ok
 
 // Inherited from MetaConcept
-	virtual void CopyInto(MetaConcept*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
+	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(Variable*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
 	void MoveInto(Variable*& dest) {zaimoni::CopyInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
@@ -62,7 +62,7 @@ protected:
 	virtual bool EqualAux2(const MetaConcept& rhs) const;
 	virtual bool InternalDataLTAux(const MetaConcept& rhs) const;
 	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
-	virtual void _forceStdForm();
+	void _forceStdForm() override;
 	virtual bool _IsExplicitConstant() const {return false;};
 private:
 	virtual bool isAntiIdempotentTo(const MetaConcept& rhs) const;

@@ -14,7 +14,7 @@ struct is_polymorphic_final<Phrase1Arg> : public std::true_type {};
 
 }
 
-class Phrase1Arg : public MetaConceptWith1Arg
+class Phrase1Arg final : public MetaConceptWith1Arg
 {
 private:
 	typedef	bool (Phrase1Arg::*SyntaxOKAuxFunc)(void) const;
@@ -38,7 +38,7 @@ public:
 //	Phrase1Arg(const Phrase1Arg& src);	// default OK
 	virtual ~Phrase1Arg();
 //	const Phrase1Arg& operator=(const Phrase1Arg& src);	// default OK
-	virtual void CopyInto(MetaConcept*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
+	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(Phrase1Arg*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
 	void MoveInto(Phrase1Arg*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.

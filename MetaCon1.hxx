@@ -245,16 +245,15 @@ protected:
 	MetaConcept() : VFTable1(NULL),MultiPurposeBitmap(NoModifiers_VF) {};
 	explicit MetaConcept(ExactType_MC NewType) : VFTable1(&MetaConceptLookUp[NewType]),MultiPurposeBitmap(NoModifiers_VF) {};
 	explicit MetaConcept(ExactType_MC NewType,unsigned char NewBitmap) : VFTable1(&MetaConceptLookUp[NewType]),MultiPurposeBitmap(NewBitmap) {};
-	MetaConcept(const MetaConcept& src) : VFTable1(src.VFTable1),MultiPurposeBitmap(src.MultiPurposeBitmap) {};
-	void operator=(const MetaConcept& src)
-		{	VFTable1 = src.VFTable1;
-			MultiPurposeBitmap = src.MultiPurposeBitmap;
-		};
+	MetaConcept(const MetaConcept& src) = default;
+	MetaConcept(MetaConcept&& src) = default;
+	MetaConcept& operator=(const MetaConcept & src) = default;
+	MetaConcept& operator=(MetaConcept&& src) = default;
 public:
 	// detects whether lhs is hard-coded logical negation of rhs
 	friend bool IsAntiIdempotentTo(const MetaConcept& lhs, const MetaConcept& rhs);
 
-	virtual ~MetaConcept();
+	virtual ~MetaConcept() = default;
 	virtual void CopyInto(MetaConcept*& dest) const = 0;	// can throw memory failure
 	virtual void MoveInto(MetaConcept*& dest) = 0;	// can throw memory failure.  If it succeeds, it destroys the source.
 

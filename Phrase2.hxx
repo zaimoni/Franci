@@ -14,7 +14,7 @@ struct is_polymorphic_final<Phrase2Arg> : public std::true_type {};
 
 }
 
-class Phrase2Arg: public MetaConceptWith2Args
+class Phrase2Arg final : public MetaConceptWith2Args
 {
 private:
 	enum EvalRuleIdx_ER	{
@@ -36,7 +36,7 @@ public:
 //	Phrase2Arg(const Phrase2Arg& src);	// default OK
 	virtual ~Phrase2Arg();
 //	const Phrase2Arg& operator=(const Phrase2Arg& src); //	default ok
-	virtual void CopyInto(MetaConcept*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
+	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(Phrase2Arg*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure; success destroys integrity of source
 	void MoveInto(Phrase2Arg*& dest);	// can throw memory failure; success destroys integrity of source

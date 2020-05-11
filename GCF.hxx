@@ -15,7 +15,7 @@ struct is_polymorphic_final<GCF> : public std::true_type {};
 
 }
 
-class GCF : public MetaConceptWithArgArray
+class GCF final : public MetaConceptWithArgArray
 {
 public:
 	GCF() : MetaConceptWithArgArray(GCF_MC) {};
@@ -24,7 +24,7 @@ public:
 	virtual ~GCF();
 
 //	const GCF& operator=(const GCF& src);	// default ok
-	virtual void CopyInto(MetaConcept*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
+	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(GCF*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
 	void MoveInto(GCF*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
@@ -38,7 +38,7 @@ public:
 	bool ThisIsAnnihilatorKey(size_t& ArgIdx, signed short& SelfEvalRule, unsigned short& EvalRule) const;
 protected:
 	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
-	virtual void _forceStdForm();
+	void _forceStdForm() override;
 
 	virtual bool _IsOne() const;
 	virtual bool _IsZero() const;

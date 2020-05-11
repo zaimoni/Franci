@@ -15,7 +15,7 @@ struct is_polymorphic_final<UnparsedText> : public std::true_type {};
 
 }
 
-class UnparsedText : public MetaConceptZeroArgs
+class UnparsedText final : public MetaConceptZeroArgs
 {
 private:
 	autovalarray_ptr_throws<char> Text;
@@ -59,7 +59,7 @@ public:
 //	UnparsedText(const UnparsedText& src);	// default OK
 	~UnparsedText();
 
-	virtual void CopyInto(MetaConcept*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
+	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(UnparsedText*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};
 	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
 	void MoveInto(UnparsedText*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.

@@ -15,7 +15,7 @@ struct is_polymorphic_final<AbstractClass> : public std::true_type {};
 
 }
 
-class AbstractClass : public MetaConceptWith1Arg
+class AbstractClass final : public MetaConceptWith1Arg
 {
 private:
 	enum AbstractClassAttributes1	{
@@ -36,7 +36,7 @@ public:
 	virtual ~AbstractClass();
 	
 	const AbstractClass& operator=(const AbstractClass& src);
-	virtual void CopyInto(MetaConcept*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
+	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(AbstractClass*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
 	void MoveInto(AbstractClass*& dest);	// destroys the source.

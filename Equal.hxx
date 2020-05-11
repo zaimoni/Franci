@@ -28,7 +28,7 @@ struct is_polymorphic_final<EqualRelation> : public std::true_type{};
 
 //! \todo implement AND-Factor support
 //! \todo implement hypothesis augmentation
-class EqualRelation : public MetaConceptWithArgArray
+class EqualRelation final : public MetaConceptWithArgArray
 {
 private:
 	enum EvalRuleIdx_ER	{
@@ -80,7 +80,7 @@ public:
 	virtual ~EqualRelation();
 
 //	const EqualRelation& operator=(const EqualRelation& src);
-	virtual void CopyInto(MetaConcept*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
+	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(EqualRelation*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
 	void MoveInto(EqualRelation*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
@@ -106,7 +106,7 @@ public:
 	bool ImproviseDomainsEQUALTOONEOF(bool& Target);
 protected:
 	virtual void ConstructSelfNameAux(char* Name) const;	// overwrites what is already there
-	virtual void _forceStdForm();
+	void _forceStdForm() override;
 
 	virtual void DiagnoseInferenceRules() const;
 	virtual bool InvokeEqualArgRule() const;

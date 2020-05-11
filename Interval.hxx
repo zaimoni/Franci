@@ -66,7 +66,7 @@ enum IntersectionUnion_LI
 	DestructiveIntersectable_LI = Intersect_CB_LI | Intersect_AD_LI
 };
 
-class LinearInterval: public MetaConceptWith2Args
+class LinearInterval final : public MetaConceptWith2Args
 {
 private:
 	autodel_ptr<AbstractClass> IntervalDomain;
@@ -84,7 +84,7 @@ public:
 	LinearInterval(const LinearInterval& src);
 	virtual ~LinearInterval();
 	const LinearInterval& operator=(const LinearInterval& src);
-	virtual void CopyInto(MetaConcept*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
+	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(LinearInterval*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure; success destroys integrity of source
 	void MoveInto(LinearInterval& dest);	// destroys integrity of source
@@ -131,7 +131,7 @@ public:
 protected:
 	virtual bool EqualAux2(const MetaConcept& rhs) const;
 	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
-	virtual void _forceStdForm();
+	void _forceStdForm() override;
 	virtual bool _IsExplicitConstant() const;
 
 	virtual void DiagnoseInferenceRules();	// This is *not* the Interface!

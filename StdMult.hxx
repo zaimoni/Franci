@@ -18,7 +18,7 @@ struct is_polymorphic_final<StdMultiplication> : public std::true_type {};
 
 // NOTE: a 0-ary StdMultiplication is an "omnione": a one that matches its context
 
-class StdMultiplication : public MetaConceptWithArgArray
+class StdMultiplication final : public MetaConceptWithArgArray
 {
 	enum SelfEvalRuleIdx_SER{
 		AddIntegerToIntegerFraction_SER = MetaConceptWithArgArray::MaxSelfEvalRuleIdx_SER+1,
@@ -40,7 +40,7 @@ public:
 	virtual ~StdMultiplication();
 
 	const StdMultiplication& operator=(const StdMultiplication& src);
-	virtual void CopyInto(MetaConcept*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
+	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(StdMultiplication*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
 	void MoveInto(StdMultiplication*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
@@ -62,7 +62,7 @@ public:
 	bool DetermineDynamicType(void) const;
 protected:
 	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
-	virtual void _forceStdForm();
+	void _forceStdForm() override;
 	virtual bool _IsExplicitConstant() const;
 	virtual bool _IsOne() const;
 	virtual bool _IsZero() const;

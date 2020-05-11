@@ -46,11 +46,11 @@ protected:
 	void operator=(const MetaConceptWith2Args& src);
 public:
 	virtual ~MetaConceptWith2Args();
-	virtual void CopyInto(MetaConcept*& dest) const = 0;	// can throw memory failure
-	virtual void MoveInto(MetaConcept*& dest) = 0;	// can throw memory failure.  If it succeeds, it destroys the source.
+//	virtual void CopyInto(MetaConcept*& dest) const = 0;	// can throw memory failure
+//	virtual void MoveInto(MetaConcept*& dest) = 0;	// can throw memory failure.  If it succeeds, it destroys the source.
 	inline void ForceCheckForEvaluation() const {IdxCurrentSelfEvalRule=None_SER;};
 //  Type ID functions
-	virtual const AbstractClass* UltimateType() const = 0;
+//	virtual const AbstractClass* UltimateType() const = 0;
 	virtual size_t size() const {return 2;};
 	virtual const MetaConcept* ArgN(size_t n) const;
 	virtual MetaConcept* ArgN(size_t n);
@@ -83,7 +83,7 @@ protected:
 	void MoveIntoAux(MetaConceptWith2Args& dest);
 	virtual bool EqualAux2(const MetaConcept& rhs) const;
 	virtual bool InternalDataLTAux(const MetaConcept& rhs) const;
-	virtual void _forceStdForm();
+	void _forceStdForm() override;
 	virtual bool _IsExplicitConstant() const;
 
 	virtual void DiagnoseInferenceRules(void) = 0;	// This is *not* the Interface!

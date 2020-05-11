@@ -22,7 +22,7 @@ struct is_polymorphic_final<Digraph> : public std::true_type {};
 // class EvalFiniteAryFunctionAtArgs(MetaConcept& Function, MetaConcept**& ArgValList, unsigned long**& ArgList);
 // This class provides a transparent interface for evaluating a function with certain args predefined.
 
-class Digraph : public MetaConceptWithArgArray
+class Digraph final : public MetaConceptWithArgArray
 {
 private:
 	unsigned char** DigraphFromToList;
@@ -35,7 +35,7 @@ public:
 	virtual ~Digraph();
 
 	const Digraph& operator=(const Digraph& src);
-	virtual void CopyInto(MetaConcept*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
+	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(Digraph*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
 	void MoveInto(Digraph*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
@@ -142,7 +142,7 @@ public:
 	void GenerateXORClauseList(MetaConcept**& ClauseList,const MetaConcept** const ArgArray);	// generates XOR clauses not implied by prior information
 #endif
 protected:
-	virtual void _forceStdForm();
+	void _forceStdForm() override;
 
 	virtual void DiagnoseInferenceRules() const;
 	virtual bool InvokeEqualArgRule() const;
