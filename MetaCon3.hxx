@@ -30,7 +30,7 @@ struct is_polymorphic_final<MetaConnective> : public std::true_type {};
 
 class Variable;
 
-class MetaConnective : public MetaConceptWithArgArray
+class MetaConnective final : public MetaConceptWithArgArray
 {
 private:
 	enum EvalRuleIdx_ER	{
@@ -94,7 +94,6 @@ private:
 	static const MetaConceptWithArgArray::EvalRuleIdx_ER Idempotent2AryRulesTable[NIFF_MCM+1];
 	static const signed short TruthValueTrueAryNSelfTable[NIFF_MCM+1];
 	static const signed short TruthValueFalseAryNSelfTable[NIFF_MCM];
-	static const DiagnoseIntermediateRulesFunc DiagnoseRulesAux[NIFF_MCM+1];
 	static const LogicalANDFindDetailedRuleAux ANDDetailedRuleAux[NIFF_MCM-AND_MCM+1];
 	static const StrictModifyAuxFunc StrictlyModifiesAux[NIFF_MCM-AND_MCM+1];
 	static const UseThisAsMakeImplyAux UseThisAsMakeImply2AryTable[IFF_MCM+1];
@@ -106,7 +105,7 @@ public:
 	virtual ~MetaConnective();
 
 	const MetaConnective& operator=(const MetaConnective& src) {MetaConceptWithArgArray::operator=(src);return *this;};
-	virtual void CopyInto(MetaConcept*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
+	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(MetaConnective*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
 	void MoveInto(MetaConnective*& dest);		// can throw memory failure.  If it succeeds, it destroys the source.
@@ -170,7 +169,7 @@ public:
 protected:
 	virtual bool EqualAux2(const MetaConcept& rhs) const;
 	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
-	virtual void _forceStdForm();
+	void _forceStdForm() override;
 
 //  Helper functions for CanEvaluate... routines
 	virtual void DiagnoseInferenceRules() const;

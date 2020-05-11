@@ -246,16 +246,6 @@ const MetaConnective::UseThisAsMakeImplyAux MetaConnective::UseThisAsMakeImplyNA
 // NOTE: this lookup is now computable "on the fly" [index in is MetaConcept ID shifted
 // to start at 0].  Technically, we don't have to store a pointer to this table now.
 
-const MetaConnective::DiagnoseIntermediateRulesFunc MetaConnective::DiagnoseRulesAux[NIFF_MCM+1]
-  =	{
-	&MetaConnective::DiagnoseIntermediateRulesANDAux,
-	&MetaConnective::DiagnoseIntermediateRulesORAux,
-	&MetaConnective::DiagnoseIntermediateRulesIFFAux,
-	&MetaConnective::DiagnoseIntermediateRulesXORAux,
-	&MetaConnective::DiagnoseIntermediateRulesNXORAux,
-	&MetaConnective::DiagnoseIntermediateRulesNIFFAux
-	};
-
 const MetaConnective::LogicalANDFindDetailedRuleAux MetaConnective::ANDDetailedRuleAux[NIFF_MCM-AND_MCM+1]
   =	{
     NULL,
@@ -1672,6 +1662,15 @@ retryNAryTVal:
 		  &MetaConnective::DiagnoseStrictlyImpliesNAryIFF,
 		  &MetaConnective::DiagnoseStrictlyImpliesNAryXOR,
 		  &MetaConnective::DiagnoseStrictlyImpliesNAryNXOR
+	};
+
+	static constexpr const DiagnoseIntermediateRulesFunc DiagnoseRulesAux[] = {
+		&MetaConnective::DiagnoseIntermediateRulesANDAux,
+		&MetaConnective::DiagnoseIntermediateRulesORAux,
+		&MetaConnective::DiagnoseIntermediateRulesIFFAux,
+		&MetaConnective::DiagnoseIntermediateRulesXORAux,
+		&MetaConnective::DiagnoseIntermediateRulesNXORAux,
+		&MetaConnective::DiagnoseIntermediateRulesNIFFAux
 	};
 
 	if (   !IsExactType(LogicalNIFF_MC)
