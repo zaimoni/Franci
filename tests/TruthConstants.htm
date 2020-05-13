@@ -1,0 +1,1195 @@
+<head><title>Franci, Math Consultant™ V0.4.0.0 logfile</title></head><body>
+Franci, Math Consultant™ V0.4.0.0
+<br>(1 GHz Cyrix III, Win2000)<br>
+<br>Log file Franci.htm now open.
+evaluate AND(CONTRADICTION, X)
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(AND(CONTRADICTION,X))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate CONTRADICTION AND X
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(AND(CONTRADICTION,X))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate AND(FALSE, X)
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(AND(FALSE,X))
+evaluates to:
+FALSE
+</pre>User:<b><pre>
+evaluate FALSE AND X
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(AND(FALSE,X))
+evaluates to:
+FALSE
+</pre>User:<b><pre>
+evaluate AND(TRUE, X)
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(AND(TRUE,X))
+evaluates to:
+(THEREIS X IN TruthValues)(X)
+</pre>User:<b><pre>
+evaluate TRUE AND X
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(AND(TRUE,X))
+evaluates to:
+(THEREIS X IN TruthValues)(X)
+</pre>User:<b><pre>
+evaluate AND(UNKNOWN, X)
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(AND(UNKNOWN,X))
+evaluates to:
+(THEREIS X IN TruthValues)(AND(UNKNOWN,X))
+</pre>User:<b><pre>
+evaluate UNKNOWN AND X
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(AND(UNKNOWN,X))
+evaluates to:
+(THEREIS X IN TruthValues)(AND(UNKNOWN,X))
+</pre>User:<b><pre>
+evaluate OR(CONTRADICTION, X)
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(OR(CONTRADICTION,X))
+evaluates to:
+(THEREIS X IN TruthValues)(X)
+</pre>User:<b><pre>
+evaluate CONTRADICTION OR X
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(OR(CONTRADICTION,X))
+evaluates to:
+(THEREIS X IN TruthValues)(X)
+</pre>User:<b><pre>
+evaluate OR(FALSE, X)
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(OR(FALSE,X))
+evaluates to:
+(THEREIS X IN TruthValues)(X)
+</pre>User:<b><pre>
+evaluate FALSE OR X
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(OR(FALSE,X))
+evaluates to:
+(THEREIS X IN TruthValues)(X)
+</pre>User:<b><pre>
+evaluate OR(TRUE, X)
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(OR(TRUE,X))
+evaluates to:
+TRUE
+</pre>User:<b><pre>
+evaluate TRUE OR X
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(OR(TRUE,X))
+evaluates to:
+TRUE
+</pre>User:<b><pre>
+evaluate OR(UNKNOWN, X)
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(OR(UNKNOWN,X))
+evaluates to:
+(THEREIS X IN TruthValues)(OR(UNKNOWN,X))
+</pre>User:<b><pre>
+evaluate UNKNOWN OR X
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(OR(UNKNOWN,X))
+evaluates to:
+(THEREIS X IN TruthValues)(OR(UNKNOWN,X))
+</pre>User:<b><pre>
+evaluate IFF(CONTRADICTION, X)
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(IFF(CONTRADICTION,X))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate CONTRADICTION IFF X
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(IFF(CONTRADICTION,X))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate IFF(FALSE, X)
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(IFF(FALSE,X))
+evaluates to:
+(THEREIS X IN TruthValues)(NOT X)
+</pre>User:<b><pre>
+evaluate FALSE IFF X
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(IFF(FALSE,X))
+evaluates to:
+(THEREIS X IN TruthValues)(NOT X)
+</pre>User:<b><pre>
+evaluate IFF(TRUE, X)
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(IFF(TRUE,X))
+evaluates to:
+(THEREIS X IN TruthValues)(X)
+</pre>User:<b><pre>
+evaluate TRUE IFF X
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(IFF(TRUE,X))
+evaluates to:
+(THEREIS X IN TruthValues)(X)
+</pre>User:<b><pre>
+evaluate IFF(UNKNOWN, X)
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(IFF(UNKNOWN,X))
+evaluates to:
+(THEREIS X IN TruthValues)(IFF(UNKNOWN,X))
+</pre>User:<b><pre>
+evaluate UNKNOWN IFF X
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(IFF(UNKNOWN,X))
+evaluates to:
+(THEREIS X IN TruthValues)(IFF(UNKNOWN,X))
+</pre>User:<b><pre>
+evaluate AND(X, NOT X)
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(AND(X,NOT X))
+evaluates to:
+(Using anti-idempotent arguments)
+X
+NOT X
+AND(X,NOT X)
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate X AND NOT X
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(AND(X,NOT X))
+evaluates to:
+(Using anti-idempotent arguments)
+X
+NOT X
+AND(X,NOT X)
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate OR(X, NOT X)
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(OR(X,NOT X))
+evaluates to:
+(Using anti-idempotent arguments)
+X
+NOT X
+OR(X,NOT X)
+TRUE
+</pre>User:<b><pre>
+evaluate X OR NOT X
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(OR(X,NOT X))
+evaluates to:
+(Using anti-idempotent arguments)
+X
+NOT X
+OR(X,NOT X)
+TRUE
+</pre>User:<b><pre>
+evaluate IFF(X, NOT X)
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(IFF(X,NOT X))
+evaluates to:
+(Using anti-idempotent arguments)
+X
+NOT X
+IFF(X,NOT X)
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate X IFF NOT X
+</pre></b><p>Franci:<br><pre>(THEREIS X IN TruthValues)(IFF(X,NOT X))
+evaluates to:
+(Using anti-idempotent arguments)
+X
+NOT X
+IFF(X,NOT X)
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate AND(UNKNOWN, X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(AND(UNKNOWN,X,Y))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y IN TruthValues)(AND(UNKNOWN,X,Y))
+</pre>User:<b><pre>
+evaluate OR(UNKNOWN, X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(OR(UNKNOWN,X,Y))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y IN TruthValues)(OR(UNKNOWN,X,Y))
+</pre>User:<b><pre>
+evaluate IFF(UNKNOWN, X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(IFF(UNKNOWN,X,Y))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y IN TruthValues)(IFF(UNKNOWN,X,Y))
+</pre>User:<b><pre>
+evaluate XOR(UNKNOWN, X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(XOR(UNKNOWN,X,Y))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y IN TruthValues)(XOR(UNKNOWN,X,Y))
+</pre>User:<b><pre>
+evaluate NXOR(UNKNOWN, X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(NXOR(UNKNOWN,X,Y))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y IN TruthValues)(NXOR(UNKNOWN,X,Y))
+</pre>User:<b><pre>
+evaluate NIFF(UNKNOWN, X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(NIFF(UNKNOWN,X,Y))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y IN TruthValues)(NIFF(UNKNOWN,X,Y))
+</pre>User:<b><pre>
+evaluate AND(UNKNOWN, X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(AND(UNKNOWN,X,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y,Z IN TruthValues)(AND(UNKNOWN,X,Y,Z))
+</pre>User:<b><pre>
+evaluate OR(UNKNOWN, X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(OR(UNKNOWN,X,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y,Z IN TruthValues)(OR(UNKNOWN,X,Y,Z))
+</pre>User:<b><pre>
+evaluate IFF(UNKNOWN, X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(IFF(UNKNOWN,X,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y,Z IN TruthValues)(IFF(UNKNOWN,X,Y,Z))
+</pre>User:<b><pre>
+evaluate XOR(UNKNOWN, X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(XOR(UNKNOWN,X,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y,Z IN TruthValues)(XOR(UNKNOWN,X,Y,Z))
+</pre>User:<b><pre>
+evaluate NXOR(UNKNOWN, X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(NXOR(UNKNOWN,X,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y,Z IN TruthValues)(NXOR(UNKNOWN,X,Y,Z))
+</pre>User:<b><pre>
+evaluate NIFF(UNKNOWN, X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(NIFF(UNKNOWN,X,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y,Z IN TruthValues)(NIFF(UNKNOWN,X,Y,Z))
+</pre>User:<b><pre>
+evaluate AND(FALSE, X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(AND(FALSE,X,Y))
+evaluates to:
+FALSE
+</pre>User:<b><pre>
+evaluate OR(FALSE, X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(OR(FALSE,X,Y))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y IN TruthValues)(OR(X,Y))
+</pre>User:<b><pre>
+evaluate IFF(FALSE, X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(IFF(FALSE,X,Y))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y IN TruthValues)(AND(NOT X,NOT Y))
+</pre>User:<b><pre>
+evaluate XOR(FALSE, X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(XOR(FALSE,X,Y))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y IN TruthValues)(IFF(X,NOT Y))
+</pre>User:<b><pre>
+evaluate NXOR(FALSE, X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(NXOR(FALSE,X,Y))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y IN TruthValues)(IFF(X,Y))
+</pre>User:<b><pre>
+evaluate NIFF(FALSE, X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(NIFF(FALSE,X,Y))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y IN TruthValues)(OR(X,Y))
+</pre>User:<b><pre>
+evaluate AND(FALSE, X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(AND(FALSE,X,Y,Z))
+evaluates to:
+FALSE
+</pre>User:<b><pre>
+evaluate OR(FALSE, X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(OR(FALSE,X,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y,Z IN TruthValues)(OR(X,Y,Z))
+</pre>User:<b><pre>
+evaluate IFF(FALSE, X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(IFF(FALSE,X,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y,Z IN TruthValues)(AND(NOT X,NOT Y,NOT Z))
+</pre>User:<b><pre>
+evaluate XOR(FALSE, X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(XOR(FALSE,X,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y,Z IN TruthValues)(XOR(X,Y,Z))
+</pre>User:<b><pre>
+evaluate NXOR(FALSE, X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(NXOR(FALSE,X,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y,Z IN TruthValues)(NXOR(X,Y,Z))
+</pre>User:<b><pre>
+evaluate NIFF(FALSE, X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(NIFF(FALSE,X,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y,Z IN TruthValues)(OR(X,Y,Z))
+</pre>User:<b><pre>
+evaluate AND(TRUE, X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(AND(TRUE,X,Y))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y IN TruthValues)(AND(X,Y))
+</pre>User:<b><pre>
+evaluate OR(TRUE, X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(OR(TRUE,X,Y))
+evaluates to:
+TRUE
+</pre>User:<b><pre>
+evaluate IFF(TRUE, X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(IFF(TRUE,X,Y))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y IN TruthValues)(AND(X,Y))
+</pre>User:<b><pre>
+evaluate XOR(TRUE, X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(XOR(TRUE,X,Y))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y IN TruthValues)(AND(NOT X,NOT Y))
+</pre>User:<b><pre>
+evaluate NXOR(TRUE, X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(NXOR(TRUE,X,Y))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y IN TruthValues)(OR(X,Y))
+</pre>User:<b><pre>
+evaluate NIFF(TRUE, X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(NIFF(TRUE,X,Y))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y IN TruthValues)(OR(NOT X,NOT Y))
+</pre>User:<b><pre>
+evaluate AND(TRUE, X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(AND(TRUE,X,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y,Z IN TruthValues)(AND(X,Y,Z))
+</pre>User:<b><pre>
+evaluate OR(TRUE, X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(OR(TRUE,X,Y,Z))
+evaluates to:
+TRUE
+</pre>User:<b><pre>
+evaluate IFF(TRUE, X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(IFF(TRUE,X,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y,Z IN TruthValues)(AND(X,Y,Z))
+</pre>User:<b><pre>
+evaluate XOR(TRUE, X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(XOR(TRUE,X,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y,Z IN TruthValues)(AND(NOT X,NOT Y,NOT Z))
+</pre>User:<b><pre>
+evaluate NXOR(TRUE, X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(NXOR(TRUE,X,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y,Z IN TruthValues)(OR(X,Y,Z))
+</pre>User:<b><pre>
+evaluate NIFF(TRUE, X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(NIFF(TRUE,X,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y,Z IN TruthValues)(OR(NOT X,NOT Y,NOT Z))
+</pre>User:<b><pre>
+evaluate AND(CONTRADICTION, X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(AND(CONTRADICTION,X,Y))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate OR(CONTRADICTION, X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(OR(CONTRADICTION,X,Y))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y IN TruthValues)(OR(X,Y))
+</pre>User:<b><pre>
+evaluate IFF(CONTRADICTION, X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(IFF(CONTRADICTION,X,Y))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate XOR(CONTRADICTION, X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(XOR(CONTRADICTION,X,Y))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y IN TruthValues)(IFF(X,NOT Y))
+</pre>User:<b><pre>
+evaluate NXOR(CONTRADICTION, X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(NXOR(CONTRADICTION,X,Y))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y IN TruthValues)(IFF(X,Y))
+</pre>User:<b><pre>
+evaluate NIFF(CONTRADICTION, X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(NIFF(CONTRADICTION,X,Y))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate AND(CONTRADICTION, X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(AND(CONTRADICTION,X,Y,Z))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate OR(CONTRADICTION, X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(OR(CONTRADICTION,X,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y,Z IN TruthValues)(OR(X,Y,Z))
+</pre>User:<b><pre>
+evaluate IFF(CONTRADICTION, X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(IFF(CONTRADICTION,X,Y,Z))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate XOR(CONTRADICTION, X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(XOR(CONTRADICTION,X,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y,Z IN TruthValues)(XOR(X,Y,Z))
+</pre>User:<b><pre>
+evaluate NXOR(CONTRADICTION, X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(NXOR(CONTRADICTION,X,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS X,Y,Z IN TruthValues)(NXOR(X,Y,Z))
+</pre>User:<b><pre>
+evaluate NIFF(CONTRADICTION, X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(NIFF(CONTRADICTION,X,Y,Z))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate AND(UNKNOWN, UNKNOWN, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(AND(UNKNOWN,UNKNOWN,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(AND(UNKNOWN,Y))
+</pre>User:<b><pre>
+evaluate OR(UNKNOWN, UNKNOWN, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(OR(UNKNOWN,UNKNOWN,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(OR(UNKNOWN,Y))
+</pre>User:<b><pre>
+evaluate IFF(UNKNOWN, UNKNOWN, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(IFF(UNKNOWN,UNKNOWN,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(IFF(UNKNOWN,Y))
+</pre>User:<b><pre>
+evaluate XOR(UNKNOWN, UNKNOWN, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(XOR(UNKNOWN,UNKNOWN,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(IFF(UNKNOWN,NOT Y))
+</pre>User:<b><pre>
+evaluate NXOR(UNKNOWN, UNKNOWN, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(NXOR(UNKNOWN,UNKNOWN,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(IFF(UNKNOWN,Y))
+</pre>User:<b><pre>
+evaluate NIFF(UNKNOWN, UNKNOWN, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(NIFF(UNKNOWN,UNKNOWN,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(IFF(UNKNOWN,NOT Y))
+</pre>User:<b><pre>
+evaluate AND(UNKNOWN, UNKNOWN, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(AND(UNKNOWN,UNKNOWN,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(AND(UNKNOWN,Y,Z))
+</pre>User:<b><pre>
+evaluate OR(UNKNOWN, UNKNOWN, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(OR(UNKNOWN,UNKNOWN,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(OR(UNKNOWN,Y,Z))
+</pre>User:<b><pre>
+evaluate IFF(UNKNOWN, UNKNOWN, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(IFF(UNKNOWN,UNKNOWN,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(IFF(UNKNOWN,Y,Z))
+</pre>User:<b><pre>
+evaluate XOR(UNKNOWN, UNKNOWN, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(XOR(UNKNOWN,UNKNOWN,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(XOR(UNKNOWN,Y,Z))
+</pre>User:<b><pre>
+evaluate NXOR(UNKNOWN, UNKNOWN, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(NXOR(UNKNOWN,UNKNOWN,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(NXOR(UNKNOWN,Y,Z))
+</pre>User:<b><pre>
+evaluate NIFF(UNKNOWN, UNKNOWN, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(NIFF(UNKNOWN,UNKNOWN,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(NIFF(UNKNOWN,Y,Z))
+</pre>User:<b><pre>
+evaluate AND(FALSE, UNKNOWN, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(AND(FALSE,UNKNOWN,Y))
+evaluates to:
+FALSE
+</pre>User:<b><pre>
+evaluate OR(FALSE, UNKNOWN, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(OR(FALSE,UNKNOWN,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(OR(UNKNOWN,Y))
+</pre>User:<b><pre>
+evaluate IFF(FALSE, UNKNOWN, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(IFF(FALSE,UNKNOWN,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(AND(UNKNOWN,NOT Y))
+</pre>User:<b><pre>
+evaluate XOR(FALSE, UNKNOWN, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(XOR(FALSE,UNKNOWN,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(IFF(UNKNOWN,NOT Y))
+</pre>User:<b><pre>
+evaluate NXOR(FALSE, UNKNOWN, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(NXOR(FALSE,UNKNOWN,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(IFF(UNKNOWN,Y))
+</pre>User:<b><pre>
+evaluate NIFF(FALSE, UNKNOWN, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(NIFF(FALSE,UNKNOWN,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(OR(UNKNOWN,Y))
+</pre>User:<b><pre>
+evaluate AND(FALSE, UNKNOWN, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(AND(FALSE,UNKNOWN,Y,Z))
+evaluates to:
+FALSE
+</pre>User:<b><pre>
+evaluate OR(FALSE, UNKNOWN, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(OR(FALSE,UNKNOWN,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(OR(UNKNOWN,Y,Z))
+</pre>User:<b><pre>
+evaluate IFF(FALSE, UNKNOWN, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(IFF(FALSE,UNKNOWN,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(AND(UNKNOWN,NOT Y,NOT Z))
+</pre>User:<b><pre>
+evaluate XOR(FALSE, UNKNOWN, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(XOR(FALSE,UNKNOWN,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(XOR(UNKNOWN,Y,Z))
+</pre>User:<b><pre>
+evaluate NXOR(FALSE, UNKNOWN, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(NXOR(FALSE,UNKNOWN,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(NXOR(UNKNOWN,Y,Z))
+</pre>User:<b><pre>
+evaluate NIFF(FALSE, UNKNOWN, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(NIFF(FALSE,UNKNOWN,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(OR(UNKNOWN,Y,Z))
+</pre>User:<b><pre>
+evaluate AND(FALSE, FALSE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(AND(FALSE,FALSE,Y))
+evaluates to:
+FALSE
+</pre>User:<b><pre>
+evaluate OR(FALSE, FALSE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(OR(FALSE,FALSE,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(Y)
+</pre>User:<b><pre>
+evaluate IFF(FALSE, FALSE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(IFF(FALSE,FALSE,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(NOT Y)
+</pre>User:<b><pre>
+evaluate XOR(FALSE, FALSE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(XOR(FALSE,FALSE,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(Y)
+</pre>User:<b><pre>
+evaluate NXOR(FALSE, FALSE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(NXOR(FALSE,FALSE,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(NOT Y)
+</pre>User:<b><pre>
+evaluate NIFF(FALSE, FALSE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(NIFF(FALSE,FALSE,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(Y)
+</pre>User:<b><pre>
+evaluate AND(FALSE, FALSE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(AND(FALSE,FALSE,Y,Z))
+evaluates to:
+FALSE
+</pre>User:<b><pre>
+evaluate OR(FALSE, FALSE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(OR(FALSE,FALSE,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(OR(Y,Z))
+</pre>User:<b><pre>
+evaluate IFF(FALSE, FALSE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(IFF(FALSE,FALSE,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(AND(NOT Y,NOT Z))
+</pre>User:<b><pre>
+evaluate XOR(FALSE, FALSE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(XOR(FALSE,FALSE,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(IFF(Y,NOT Z))
+</pre>User:<b><pre>
+evaluate NXOR(FALSE, FALSE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(NXOR(FALSE,FALSE,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(IFF(Y,Z))
+</pre>User:<b><pre>
+evaluate NIFF(FALSE, FALSE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(NIFF(FALSE,FALSE,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(OR(Y,Z))
+</pre>User:<b><pre>
+evaluate AND(TRUE, UNKNOWN, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(AND(TRUE,UNKNOWN,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(AND(UNKNOWN,Y))
+</pre>User:<b><pre>
+evaluate OR(TRUE, UNKNOWN, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(OR(TRUE,UNKNOWN,Y))
+evaluates to:
+TRUE
+</pre>User:<b><pre>
+evaluate IFF(TRUE, UNKNOWN, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(IFF(TRUE,UNKNOWN,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(AND(UNKNOWN,Y))
+</pre>User:<b><pre>
+evaluate XOR(TRUE, UNKNOWN, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(XOR(TRUE,UNKNOWN,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(AND(UNKNOWN,NOT Y))
+</pre>User:<b><pre>
+evaluate NXOR(TRUE, UNKNOWN, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(NXOR(TRUE,UNKNOWN,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(OR(UNKNOWN,Y))
+</pre>User:<b><pre>
+evaluate NIFF(TRUE, UNKNOWN, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(NIFF(TRUE,UNKNOWN,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(OR(UNKNOWN,NOT Y))
+</pre>User:<b><pre>
+evaluate AND(TRUE, UNKNOWN, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(AND(TRUE,UNKNOWN,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(AND(UNKNOWN,Y,Z))
+</pre>User:<b><pre>
+evaluate OR(TRUE, UNKNOWN, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(OR(TRUE,UNKNOWN,Y,Z))
+evaluates to:
+TRUE
+</pre>User:<b><pre>
+evaluate IFF(TRUE, UNKNOWN, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(IFF(TRUE,UNKNOWN,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(AND(UNKNOWN,Y,Z))
+</pre>User:<b><pre>
+evaluate XOR(TRUE, UNKNOWN, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(XOR(TRUE,UNKNOWN,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(AND(UNKNOWN,NOT Y,NOT Z))
+</pre>User:<b><pre>
+evaluate NXOR(TRUE, UNKNOWN, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(NXOR(TRUE,UNKNOWN,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(OR(UNKNOWN,Y,Z))
+</pre>User:<b><pre>
+evaluate NIFF(TRUE, UNKNOWN, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(NIFF(TRUE,UNKNOWN,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(OR(UNKNOWN,NOT Y,NOT Z))
+</pre>User:<b><pre>
+evaluate AND(TRUE, FALSE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(AND(TRUE,FALSE,Y))
+evaluates to:
+FALSE
+</pre>User:<b><pre>
+evaluate OR(TRUE, FALSE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(OR(TRUE,FALSE,Y))
+evaluates to:
+TRUE
+</pre>User:<b><pre>
+evaluate IFF(TRUE, FALSE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(IFF(TRUE,FALSE,Y))
+evaluates to:
+FALSE
+</pre>User:<b><pre>
+evaluate XOR(TRUE, FALSE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(XOR(TRUE,FALSE,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(NOT Y)
+</pre>User:<b><pre>
+evaluate NXOR(TRUE, FALSE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(NXOR(TRUE,FALSE,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(Y)
+</pre>User:<b><pre>
+evaluate NIFF(TRUE, FALSE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(NIFF(TRUE,FALSE,Y))
+evaluates to:
+TRUE
+</pre>User:<b><pre>
+evaluate AND(TRUE, FALSE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(AND(TRUE,FALSE,Y,Z))
+evaluates to:
+FALSE
+</pre>User:<b><pre>
+evaluate OR(TRUE, FALSE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(OR(TRUE,FALSE,Y,Z))
+evaluates to:
+TRUE
+</pre>User:<b><pre>
+evaluate IFF(TRUE, FALSE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(IFF(TRUE,FALSE,Y,Z))
+evaluates to:
+FALSE
+</pre>User:<b><pre>
+evaluate XOR(TRUE, FALSE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(XOR(TRUE,FALSE,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(AND(NOT Y,NOT Z))
+</pre>User:<b><pre>
+evaluate NXOR(TRUE, FALSE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(NXOR(TRUE,FALSE,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(OR(Y,Z))
+</pre>User:<b><pre>
+evaluate NIFF(TRUE, FALSE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(NIFF(TRUE,FALSE,Y,Z))
+evaluates to:
+TRUE
+</pre>User:<b><pre>
+evaluate AND(TRUE, TRUE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(AND(TRUE,TRUE,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(Y)
+</pre>User:<b><pre>
+evaluate OR(TRUE, TRUE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(OR(TRUE,TRUE,Y))
+evaluates to:
+TRUE
+</pre>User:<b><pre>
+evaluate IFF(TRUE, TRUE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(IFF(TRUE,TRUE,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(Y)
+</pre>User:<b><pre>
+evaluate XOR(TRUE, TRUE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(XOR(TRUE,TRUE,Y))
+evaluates to:
+FALSE
+</pre>User:<b><pre>
+evaluate NXOR(TRUE, TRUE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(NXOR(TRUE,TRUE,Y))
+evaluates to:
+TRUE
+</pre>User:<b><pre>
+evaluate NIFF(TRUE, TRUE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(NIFF(TRUE,TRUE,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(NOT Y)
+</pre>User:<b><pre>
+evaluate AND(TRUE, TRUE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(AND(TRUE,TRUE,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(AND(Y,Z))
+</pre>User:<b><pre>
+evaluate OR(TRUE, TRUE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(OR(TRUE,TRUE,Y,Z))
+evaluates to:
+TRUE
+</pre>User:<b><pre>
+evaluate IFF(TRUE, TRUE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(IFF(TRUE,TRUE,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(AND(Y,Z))
+</pre>User:<b><pre>
+evaluate XOR(TRUE, TRUE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(XOR(TRUE,TRUE,Y,Z))
+evaluates to:
+FALSE
+</pre>User:<b><pre>
+evaluate NXOR(TRUE, TRUE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(NXOR(TRUE,TRUE,Y,Z))
+evaluates to:
+TRUE
+</pre>User:<b><pre>
+evaluate NIFF(TRUE, TRUE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(NIFF(TRUE,TRUE,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(OR(NOT Y,NOT Z))
+</pre>User:<b><pre>
+evaluate AND(CONTRADICTION, UNKNOWN, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(AND(CONTRADICTION,UNKNOWN,Y))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate OR(CONTRADICTION, UNKNOWN, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(OR(CONTRADICTION,UNKNOWN,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(OR(UNKNOWN,Y))
+</pre>User:<b><pre>
+evaluate IFF(CONTRADICTION, UNKNOWN, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(IFF(CONTRADICTION,UNKNOWN,Y))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate XOR(CONTRADICTION, UNKNOWN, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(XOR(CONTRADICTION,UNKNOWN,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(IFF(UNKNOWN,NOT Y))
+</pre>User:<b><pre>
+evaluate NXOR(CONTRADICTION, UNKNOWN, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(NXOR(CONTRADICTION,UNKNOWN,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(IFF(UNKNOWN,Y))
+</pre>User:<b><pre>
+evaluate NIFF(CONTRADICTION, UNKNOWN, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(NIFF(CONTRADICTION,UNKNOWN,Y))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate AND(CONTRADICTION, UNKNOWN, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(AND(CONTRADICTION,UNKNOWN,Y,Z))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate OR(CONTRADICTION, UNKNOWN, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(OR(CONTRADICTION,UNKNOWN,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(OR(UNKNOWN,Y,Z))
+</pre>User:<b><pre>
+evaluate IFF(CONTRADICTION, UNKNOWN, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(IFF(CONTRADICTION,UNKNOWN,Y,Z))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate XOR(CONTRADICTION, UNKNOWN, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(XOR(CONTRADICTION,UNKNOWN,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(XOR(UNKNOWN,Y,Z))
+</pre>User:<b><pre>
+evaluate NXOR(CONTRADICTION, UNKNOWN, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(NXOR(CONTRADICTION,UNKNOWN,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(NXOR(UNKNOWN,Y,Z))
+</pre>User:<b><pre>
+evaluate NIFF(CONTRADICTION, UNKNOWN, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(NIFF(CONTRADICTION,UNKNOWN,Y,Z))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate AND(CONTRADICTION, FALSE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(AND(CONTRADICTION,FALSE,Y))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate OR(CONTRADICTION, FALSE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(OR(CONTRADICTION,FALSE,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(Y)
+</pre>User:<b><pre>
+evaluate IFF(CONTRADICTION, FALSE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(IFF(CONTRADICTION,FALSE,Y))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate XOR(CONTRADICTION, FALSE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(XOR(CONTRADICTION,FALSE,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(Y)
+</pre>User:<b><pre>
+evaluate NXOR(CONTRADICTION, FALSE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(NXOR(CONTRADICTION,FALSE,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(NOT Y)
+</pre>User:<b><pre>
+evaluate NIFF(CONTRADICTION, FALSE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(NIFF(CONTRADICTION,FALSE,Y))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate AND(CONTRADICTION, FALSE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(AND(CONTRADICTION,FALSE,Y,Z))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate OR(CONTRADICTION, FALSE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(OR(CONTRADICTION,FALSE,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(OR(Y,Z))
+</pre>User:<b><pre>
+evaluate IFF(CONTRADICTION, FALSE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(IFF(CONTRADICTION,FALSE,Y,Z))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate XOR(CONTRADICTION, FALSE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(XOR(CONTRADICTION,FALSE,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(IFF(Y,NOT Z))
+</pre>User:<b><pre>
+evaluate NXOR(CONTRADICTION, FALSE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(NXOR(CONTRADICTION,FALSE,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(IFF(Y,Z))
+</pre>User:<b><pre>
+evaluate NIFF(CONTRADICTION, FALSE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(NIFF(CONTRADICTION,FALSE,Y,Z))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate AND(CONTRADICTION, TRUE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(AND(CONTRADICTION,TRUE,Y))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate OR(CONTRADICTION, TRUE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(OR(CONTRADICTION,TRUE,Y))
+evaluates to:
+TRUE
+</pre>User:<b><pre>
+evaluate IFF(CONTRADICTION, TRUE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(IFF(CONTRADICTION,TRUE,Y))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate XOR(CONTRADICTION, TRUE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(XOR(CONTRADICTION,TRUE,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(NOT Y)
+</pre>User:<b><pre>
+evaluate NXOR(CONTRADICTION, TRUE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(NXOR(CONTRADICTION,TRUE,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(Y)
+</pre>User:<b><pre>
+evaluate NIFF(CONTRADICTION, TRUE, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(NIFF(CONTRADICTION,TRUE,Y))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate AND(CONTRADICTION, TRUE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(AND(CONTRADICTION,TRUE,Y,Z))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate OR(CONTRADICTION, TRUE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(OR(CONTRADICTION,TRUE,Y,Z))
+evaluates to:
+TRUE
+</pre>User:<b><pre>
+evaluate IFF(CONTRADICTION, TRUE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(IFF(CONTRADICTION,TRUE,Y,Z))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate XOR(CONTRADICTION, TRUE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(XOR(CONTRADICTION,TRUE,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(AND(NOT Y,NOT Z))
+</pre>User:<b><pre>
+evaluate NXOR(CONTRADICTION, TRUE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(NXOR(CONTRADICTION,TRUE,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(OR(Y,Z))
+</pre>User:<b><pre>
+evaluate NIFF(CONTRADICTION, TRUE, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(NIFF(CONTRADICTION,TRUE,Y,Z))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate AND(CONTRADICTION, CONTRADICTION, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(AND(CONTRADICTION,CONTRADICTION,Y))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate OR(CONTRADICTION, CONTRADICTION, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(OR(CONTRADICTION,CONTRADICTION,Y))
+evaluates to:
+(THEREIS Y IN TruthValues)(Y)
+</pre>User:<b><pre>
+evaluate IFF(CONTRADICTION, CONTRADICTION, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(IFF(CONTRADICTION,CONTRADICTION,Y))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate XOR(CONTRADICTION, CONTRADICTION, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(XOR(CONTRADICTION,CONTRADICTION,Y))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate NXOR(CONTRADICTION, CONTRADICTION, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(NXOR(CONTRADICTION,CONTRADICTION,Y))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate NIFF(CONTRADICTION, CONTRADICTION, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y IN TruthValues)(NIFF(CONTRADICTION,CONTRADICTION,Y))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate AND(CONTRADICTION, CONTRADICTION, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(AND(CONTRADICTION,CONTRADICTION,Y,Z))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate OR(CONTRADICTION, CONTRADICTION, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(OR(CONTRADICTION,CONTRADICTION,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(OR(Y,Z))
+</pre>User:<b><pre>
+evaluate IFF(CONTRADICTION, CONTRADICTION, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(IFF(CONTRADICTION,CONTRADICTION,Y,Z))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate XOR(CONTRADICTION, CONTRADICTION, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(XOR(CONTRADICTION,CONTRADICTION,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(IFF(Y,NOT Z))
+</pre>User:<b><pre>
+evaluate NXOR(CONTRADICTION, CONTRADICTION, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(NXOR(CONTRADICTION,CONTRADICTION,Y,Z))
+evaluates to:
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(IFF(Y,Z))
+</pre>User:<b><pre>
+evaluate NIFF(CONTRADICTION, CONTRADICTION, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y IN TruthValues)(NIFF(CONTRADICTION,CONTRADICTION,Y,Z))
+evaluates to:
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate AND(X, NOT X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(AND(X,NOT X,Y))
+evaluates to:
+(Using anti-idempotent arguments)
+NOT X
+X
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate OR(X, NOT X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(OR(X,NOT X,Y))
+evaluates to:
+(Using anti-idempotent arguments)
+NOT X
+X
+TRUE
+</pre>User:<b><pre>
+evaluate IFF(X, NOT X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(IFF(X,NOT X,Y))
+evaluates to:
+(Using anti-idempotent arguments)
+NOT X
+X
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate XOR(X, NOT X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(XOR(X,NOT X,Y))
+evaluates to:
+(Using anti-idempotent arguments)
+NOT X
+X
+(THEREIS Y IN TruthValues)(NOT Y)
+</pre>User:<b><pre>
+evaluate NXOR(X, NOT X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(NXOR(X,NOT X,Y))
+evaluates to:
+(Using anti-idempotent arguments)
+NOT X
+X
+(THEREIS Y IN TruthValues)(Y)
+</pre>User:<b><pre>
+evaluate NIFF(X, NOT X, Y)
+</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(NIFF(X,NOT X,Y))
+evaluates to:
+(Using anti-idempotent arguments)
+NOT X
+X
+TRUE
+</pre>User:<b><pre>
+evaluate AND(X, NOT X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(AND(X,NOT X,Y,Z))
+evaluates to:
+(Using anti-idempotent arguments)
+NOT X
+X
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate OR(X, NOT X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(OR(X,NOT X,Y,Z))
+evaluates to:
+(Using anti-idempotent arguments)
+NOT X
+X
+TRUE
+</pre>User:<b><pre>
+evaluate IFF(X, NOT X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(IFF(X,NOT X,Y,Z))
+evaluates to:
+(Using anti-idempotent arguments)
+NOT X
+X
+CONTRADICTION
+</pre>User:<b><pre>
+evaluate XOR(X, NOT X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(XOR(X,NOT X,Y,Z))
+evaluates to:
+(Using anti-idempotent arguments)
+NOT X
+X
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(AND(NOT Y,NOT Z))
+</pre>User:<b><pre>
+evaluate NXOR(X, NOT X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(NXOR(X,NOT X,Y,Z))
+evaluates to:
+(Using anti-idempotent arguments)
+NOT X
+X
+(by sorting quantifiers)
+(THEREIS Y,Z IN TruthValues)(OR(Y,Z))
+</pre>User:<b><pre>
+evaluate NIFF(X, NOT X, Y, Z)
+</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(NIFF(X,NOT X,Y,Z))
+evaluates to:
+(Using anti-idempotent arguments)
+NOT X
+X
+TRUE
+</pre>User:<b><pre>
+end logfile
+</pre></b><p>Franci:<br><pre>Closing log file Franci.htm.
+</body>
+
