@@ -1,21 +1,13 @@
 Notes on coding idioms
-=====
-strlen of a string constant is a compile time constant that won't be 
-automatically optimized away.  We want to optimize it, but catch 
-misdefinitions at compile time.
 
-The C++ standard mandates that a string constant's length is one less than 
-its sizeof (null-termination).  So use a BOOST_STATIC_ASSERT to check that the 
-hand-optimization is valid at compile time.
+* This project started pre-C++98.  It needs enough test cases to identify and fix the current breakage from the "big leap" to C++17.  Last known good build was on TDM-MingW32 GCC 5.2; TDM-MingW32 GCC 5.3-5.5 verified to miscompile, badly.
 
-Instances:
-LenName.cxx/UNNAMED_CLASS, etc.
-=====
-There appears to be no significant performance penalty for Franci's internal 
-datatypes to have ACID assignment operators.  Keep.for now.
-=====
-GCC 4.3.3 won't work:
-Equal.cxx: In member function 'bool EqualRelation::UseStdMultiplicationALLDISTIN
-CT() const':
-Equal.cxx:1876: internal compiler error: in initialize_flags_in_bb, at tree-into
--ssa.c:437
+* The C memory manager overrides are incompatible with MSVC++ Debug libraries (this affects both MSVC++ and CLang in Visual Studio).  Reference build compiler in Visual Studio is CLang, Release mode.
+
+* Many re-implementations of C++11 and higher features are intended to go away.
+
+Requirements imposed by calculation validity include:
+
+* Real-time checks for out-of-bounds memory access.  The C memory manager replacement fulfils this requirement.  It is reasonable to expect that an ISO build with debug libraries would also work.
+
+* ACID assignment operators (in general Franci needs the strongest implementable safety guarantees)
