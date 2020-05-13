@@ -101,10 +101,12 @@ private:
 public:
 	MetaConnective(MetaConnectiveModes LinkageType) : MetaConceptWithArgArray((ExactType_MC)(LinkageType+LogicalAND_MC)) {};
 	MetaConnective(MetaConcept**& NewArgList, MetaConnectiveModes LinkageType) throw();
-//	MetaConnective(const MetaConnective& Source);	// default OK
+	MetaConnective(const MetaConnective& src) = default;
+	MetaConnective(MetaConnective&& src) = default;
+	MetaConnective& operator=(const MetaConnective & src) = default;
+	MetaConnective& operator=(MetaConnective&& src) = default;
 	virtual ~MetaConnective() = default;
 
-	const MetaConnective& operator=(const MetaConnective& src) {MetaConceptWithArgArray::operator=(src);return *this;};
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(MetaConnective*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.

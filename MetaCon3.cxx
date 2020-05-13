@@ -441,10 +441,9 @@ MetaConnective::MetaConnective(MetaConcept**& NewArgList, MetaConnectiveModes Li
 }
 
 void MetaConnective::MoveInto(MetaConnective*& dest)		// can throw memory failure.  If it succeeds, it destroys the source.
-{	// FORMALLY CORRECT: Kenneth Boyd, 3/17/2000
-	if (!dest)
-		dest = new MetaConnective((MetaConnectiveModes)(array_index()));
-	MoveIntoAux(*dest);
+{
+	if (!dest) dest = new MetaConnective(std::move(*this));
+	else *dest = std::move(*this);
 }
 
 bool MetaConnective::EqualAux2(const MetaConcept& rhs) const

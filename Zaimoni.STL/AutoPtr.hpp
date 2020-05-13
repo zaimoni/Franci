@@ -28,10 +28,16 @@ protected:
 	explicit _meta_auto_ptr() : _ptr(NULL) {};
 	explicit _meta_auto_ptr(T*& src) : _ptr(src) {src = NULL;};
 	explicit _meta_auto_ptr(const _meta_auto_ptr& src) : _ptr(NULL) {*this=src;};
-	~_meta_auto_ptr() {delete _ptr;};
+	explicit _meta_auto_ptr(_meta_auto_ptr&& src) : _ptr(src._ptr) { src._ptr = 0; };
+	~_meta_auto_ptr() { _single_flush(_ptr); _ptr = 0; };
 
 	void operator=(T* src);
 	void operator=(const _meta_auto_ptr& src);
+	void operator=(_meta_auto_ptr&& src) {
+		_single_flush(_ptr);
+		_ptr = src._ptr;
+		src._ptr = 0;
+	}
 public:
 	void reset() {delete _ptr; _ptr = NULL;};
 	void reset(T*& src);
@@ -54,13 +60,15 @@ template<typename T>
 class autodel_ptr : public _meta_auto_ptr<T>
 {
 public:
-	explicit autodel_ptr() {};
+	explicit autodel_ptr() = default;
 	explicit autodel_ptr(T*& src) : _meta_auto_ptr<T>(src) {};
 	explicit autodel_ptr(autodel_ptr& src) : _meta_auto_ptr<T>(src._ptr) {};
-//	~autodel_ptr();	// default OK
+	explicit autodel_ptr(autodel_ptr&& src) = default;
+	~autodel_ptr() = default;
 
 	const autodel_ptr& operator=(T* src) {_meta_auto_ptr<T>::operator=(src); return *this;};
-	const autodel_ptr& operator=(autodel_ptr& src) {this->reset(src._ptr); return *this;};
+	autodel_ptr& operator=(autodel_ptr& src) {this->reset(src._ptr); return *this;};
+	autodel_ptr& operator=(autodel_ptr&& src) = default;
 
 	friend void swap(autodel_ptr& lhs, autodel_ptr& rhs) {std::swap(lhs._ptr,rhs._ptr);};
 };
@@ -76,11 +84,13 @@ class autoval_ptr : public _meta_auto_ptr<T>
 public:
 	explicit autoval_ptr() {};
 	explicit autoval_ptr(T*& src) : _meta_auto_ptr<T>(src) {};
-	explicit autoval_ptr(const autoval_ptr& src) : _meta_auto_ptr<T>(src) {};
-//	~autoval_ptr();	// default OK
+	explicit autoval_ptr(const autoval_ptr& src) = default;
+	explicit autoval_ptr(autoval_ptr&& src) = default;
+	autoval_ptr& operator=(const autoval_ptr & src) = default;
+	autoval_ptr& operator=(autoval_ptr&& src) = default;
+	~autoval_ptr() = default;
 
 	const autoval_ptr& operator=(T* src) {_meta_auto_ptr<T>::operator=(src); return *this;};
-	const autoval_ptr& operator=(const autoval_ptr& src) {_meta_auto_ptr<T>::operator=(src); return *this;};
 
 	friend void swap(autoval_ptr& lhs, autoval_ptr& rhs) {std::swap(lhs._ptr,rhs._ptr);};
 };
@@ -116,7 +126,7 @@ public:
 	void DeleteIdx(size_t n) { _safe_weak_delete_idx(this->_ptr ZAIMONI_ISO_PARAM(this->_size), n); }
 	void DeleteNSlotsAt(size_t n, size_t Idx) { _weak_delete_n_slots_at(this->_ptr ZAIMONI_ISO_PARAM(this->_size), n, Idx); }
 	void resize(size_t n) {if (!Resize(n)) throw std::bad_alloc();}
-	
+
 	// Perl grep
 	// next two require of U: STL size(),data()
 	template<typename U,typename op> bool grep(const U& src,op Predicate);
@@ -216,12 +226,18 @@ protected:
 	explicit _meta_autoarray_ptr(size_t n) {this->de_novo(n);}
 	explicit _meta_autoarray_ptr(const std::nothrow_t& tracer, size_t n) {this->de_novo_nothrow(n);}
 	explicit _meta_autoarray_ptr(const _meta_autoarray_ptr& src) {this->NULLPtr(); *this=src;}
+	explicit _meta_autoarray_ptr(_meta_autoarray_ptr&& src) { POD_autoarray_ptr<T>::operator=(src); src.NULLPtr(); }
 	~_meta_autoarray_ptr() {_flush(this->_ptr);}
 
 #ifndef ZAIMONI_FORCE_ISO
 	void operator=(T* src);
 #endif
 	void operator=(const _meta_autoarray_ptr& src);
+	void operator=(_meta_autoarray_ptr&& src) {
+		_flush(this->_ptr);
+		POD_autoarray_ptr<T>::operator=(src);
+		src.NULLPtr();
+	};
 public:
 	typedef bool UnaryPredicate(const T&);
 
@@ -275,11 +291,13 @@ public:
 	explicit autovalarray_ptr() = default;
 	explicit autovalarray_ptr(T * &src ZAIMONI_ISO_PARAM(size_t src_size)) : _meta_autoarray_ptr<T>(src ZAIMONI_ISO_PARAM(src_size)) {}
 	explicit autovalarray_ptr(size_t n) : _meta_autoarray_ptr<T>(std::nothrow, n) {}
-	autovalarray_ptr(const autovalarray_ptr & src) : _meta_autoarray_ptr<T>(src) {}
+	autovalarray_ptr(const autovalarray_ptr& src) = default;
+	autovalarray_ptr(autovalarray_ptr&& src) = default;
+	autovalarray_ptr& operator=(const autovalarray_ptr& src) = default;
+	autovalarray_ptr& operator=(autovalarray_ptr&& src) = default;
 	~autovalarray_ptr() = default;
 
 	const autovalarray_ptr& operator=(T * src) { _meta_autoarray_ptr<T>::operator=(src); return *this; }
-	const autovalarray_ptr& operator=(const autovalarray_ptr & src) { _meta_autoarray_ptr<T>::operator=(src); return *this; }
 
 	// swaps
 	friend void swap(autovalarray_ptr<T> & lhs, autovalarray_ptr<T> & rhs) { lhs.swap(rhs); }
@@ -299,11 +317,13 @@ public:
 	explicit autovalarray_ptr_throws() = default;
 	explicit autovalarray_ptr_throws(T * &src ZAIMONI_ISO_PARAM(size_t src_size)) : _meta_autoarray_ptr<T>(src ZAIMONI_ISO_PARAM(src_size)) {}
 	explicit autovalarray_ptr_throws(size_t n) : _meta_autoarray_ptr<T>(n) {}
-	autovalarray_ptr_throws(const autovalarray_ptr_throws & src) : _meta_autoarray_ptr<T>(src) {}
+	autovalarray_ptr_throws(const autovalarray_ptr_throws& src) = default;
+	autovalarray_ptr_throws(autovalarray_ptr_throws&& src) = default;
+	autovalarray_ptr_throws& operator=(const autovalarray_ptr_throws & src) = default;
+	autovalarray_ptr_throws& operator=(autovalarray_ptr_throws&& src) = default;
 	~autovalarray_ptr_throws() = default;
 
 	const autovalarray_ptr_throws& operator=(T * src) { _meta_autoarray_ptr<T>::operator=(src); return *this; }
-	const autovalarray_ptr_throws& operator=(const autovalarray_ptr_throws & src) { _meta_autoarray_ptr<T>::operator=(src); return *this; }
 
 	// swaps
 	friend void swap(autovalarray_ptr_throws<T> & lhs, autovalarray_ptr_throws<T> & rhs) { lhs.swap(rhs); }

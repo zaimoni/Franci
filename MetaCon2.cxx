@@ -48,17 +48,6 @@ MetaConceptWithArgArray::SelfEvaluateRule MetaConceptWithArgArray::SelfEvaluateR
 	&MetaConceptWithArgArray::TranslateInterval
 	};
 
-MetaConceptWithArgArray::MetaConceptWithArgArray(const MetaConceptWithArgArray& src)
-:	MetaConcept(src),
-	ArgArray(src.ArgArray),
-	InferenceParameter1(src.InferenceParameter1),
-	InferenceParameter2(src.InferenceParameter2),
-	InferenceParameterMC(src.InferenceParameterMC),
-	IdxCurrentEvalRule(src.IdxCurrentEvalRule),
-	IdxCurrentSelfEvalRule(src.IdxCurrentSelfEvalRule)
-{	// FORMALLY CORRECT: Kenneth Boyd, 9/29/2006
-}
-
 void MetaConceptWithArgArray::MoveIntoAux(MetaConceptWithArgArray& dest)
 {	// FORMALLY CORRECT: Kenneth Boyd, 9/29/2006
 	dest.MetaConcept::operator=(*this);
@@ -72,11 +61,11 @@ void MetaConceptWithArgArray::MoveIntoAux(MetaConceptWithArgArray& dest)
 
 void MetaConceptWithArgArray::operator=(const MetaConceptWithArgArray& src)
 {	// FORMALLY CORRECT: Kenneth Boyd, 9/29/2006
-	autovalarray_ptr_throws<MetaConcept*> tmp(src.ArgArray);
+	decltype(auto) tmp(src.ArgArray);
 	InferenceParameterMC = src.InferenceParameterMC;
 	
 	// OK now.
-	tmp.MoveInto(ArgArray);
+	ArgArray = std::move(tmp);
 	MetaConcept::operator=(src);
 	InferenceParameter1 = src.InferenceParameter1;
 	InferenceParameter2 = src.InferenceParameter2;

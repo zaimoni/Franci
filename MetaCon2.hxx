@@ -95,8 +95,10 @@ protected:
 	explicit MetaConceptWithArgArray(ExactType_MC NewType,unsigned char NewBitmap) : MetaConcept(NewType,NewBitmap),IdxCurrentEvalRule(None_ER),IdxCurrentSelfEvalRule(None_SER) {};
 	explicit MetaConceptWithArgArray(ExactType_MC NewType,MetaConcept**& NewArgArray) : MetaConcept(NewType),ArgArray(NewArgArray),IdxCurrentEvalRule(None_ER),IdxCurrentSelfEvalRule(None_SER) {};
 	explicit MetaConceptWithArgArray(ExactType_MC NewType,unsigned char NewBitmap,MetaConcept**& NewArgArray) : MetaConcept(NewType,NewBitmap),ArgArray(NewArgArray),IdxCurrentEvalRule(None_ER),IdxCurrentSelfEvalRule(None_SER) {};
-	MetaConceptWithArgArray(const MetaConceptWithArgArray& src);
-	void operator=(const MetaConceptWithArgArray& src);
+	MetaConceptWithArgArray(const MetaConceptWithArgArray& src) = default;
+	MetaConceptWithArgArray(MetaConceptWithArgArray&& src) = default;
+	void operator=(const MetaConceptWithArgArray & src);	// default not clearly ACID
+	MetaConceptWithArgArray& operator=(MetaConceptWithArgArray&& src) = default;
 public:
 	virtual ~MetaConceptWithArgArray() = default;
 //	virtual void CopyInto(MetaConcept*& Target) const = 0;	// can throw memory failure
