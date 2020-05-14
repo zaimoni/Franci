@@ -24,48 +24,50 @@ protected:
 	MetaQuantifier* Arg1;	// cannot be const MetaQuantifier* because of ForceUltimateType
 public:
 	Variable(MetaQuantifier* NewName) :	MetaConceptZeroArgs(Variable_MC),Arg1(NewName) {};	// FORMALLY CORRECT: Kenneth Boyd, 4/22/2006
-//	Variable(const Variable& src); default ok
+	Variable(const Variable& src) = default;
+	Variable(Variable&& src) = default;
+	Variable& operator=(const Variable& src) = default;
+	Variable& operator=(Variable&& src) = default;
 	~Variable() = default;
-//	const Variable& operator=(const Variable& src);	// default ok
 
 // Inherited from MetaConcept
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
-	void CopyInto(Variable*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
-	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
-	void MoveInto(Variable*& dest) {zaimoni::CopyInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
-	virtual bool IsAbstractClassDomain() const {return false;};
+	void CopyInto(Variable*& dest) const;	// can throw memory failure
+	void MoveInto(MetaConcept*& dest) override {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
+	void MoveInto(Variable*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
+	bool IsAbstractClassDomain() const override {return false;};
 //  Type ID functions
-	virtual const AbstractClass* UltimateType() const;
-	virtual bool ForceUltimateType(const AbstractClass* const rhs);
+	const AbstractClass* UltimateType() const override { return Arg1->UltimateType(); };
+	bool ForceUltimateType(const AbstractClass* const rhs) override { return Arg1->ForceUltimateType(rhs); }
 //  Evaluation functions
-	virtual bool CanEvaluate() const;
-	virtual bool CanEvaluateToSameType() const;
-	virtual bool SyntaxOK() const;							
-	virtual bool Evaluate(MetaConcept*& dest);
-	virtual bool DestructiveEvaluateToSameType();
-	virtual bool ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& lhs, const MetaConcept& rhs, LowLevelAction* RHSInducedActionOnArg, LowLevelBinaryRelation* TargetRelation);
+	bool CanEvaluate() const override { return false; };
+	bool CanEvaluateToSameType() const override { return false; };
+	bool SyntaxOK() const override;
+	bool Evaluate(MetaConcept*& dest) override { return false; }
+	bool DestructiveEvaluateToSameType() override { return false; }
+	bool ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& lhs, const MetaConcept& rhs, LowLevelAction* RHSInducedActionOnArg, LowLevelBinaryRelation* TargetRelation) override;
 // text I/O functions
-	virtual size_t LengthOfSelfName() const;
-	virtual const char* ViewKeyword() const {return Arg1->ViewKeyword();};
+	size_t LengthOfSelfName() const override;
+	const char* ViewKeyword() const override {return Arg1->ViewKeyword();};
 // Formal manipulation functions
 	// These two must be conditionally implemented: their overrides work only when the
 	// variable is of type TruthValue
-	virtual void SelfLogicalNOT();	// instantiate when UltimateType is TruthValues
-	virtual bool LogicalANDOrthogonalClause() const;
-	virtual bool StrictlyImplies(const MetaConcept& rhs) const;
-	virtual void ConvertVariableToCurrentQuantification(MetaQuantifier& src);
-	virtual bool UsesQuantifierAux(const MetaQuantifier& x) const;
+	void SelfLogicalNOT() override;	// instantiate when UltimateType is TruthValues
+	bool LogicalANDOrthogonalClause() const override { return true; }
+	bool StrictlyImplies(const MetaConcept& rhs) const override;
+	void ConvertVariableToCurrentQuantification(MetaQuantifier& src) override;
+	bool UsesQuantifierAux(const MetaQuantifier& x) const override { return x.MetaConceptPtrUsesThisQuantifier(Arg1); }
 
 // type-specific functions
 	bool IsLogicalNegatedVar(void) const {return ((unsigned char)(LogicalNegated_VF) & MultiPurposeBitmap) ? true : false;};
 protected:
-	virtual bool EqualAux2(const MetaConcept& rhs) const;
-	virtual bool InternalDataLTAux(const MetaConcept& rhs) const;
-	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
-	void _forceStdForm() override;
-	virtual bool _IsExplicitConstant() const {return false;};
+	bool EqualAux2(const MetaConcept& rhs) const override;
+	bool InternalDataLTAux(const MetaConcept& rhs) const override;
+	void ConstructSelfNameAux(char* Name) const override; // overwrites what is already there
+	void _forceStdForm() override {};
+	bool _IsExplicitConstant() const override {return false;};
 private:
-	virtual bool isAntiIdempotentTo(const MetaConcept& rhs) const;
+	bool isAntiIdempotentTo(const MetaConcept& rhs) const override;
 };
 
 #endif

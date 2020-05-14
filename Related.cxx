@@ -121,15 +121,8 @@ MetaConceptWith2Args::ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const Met
 		};
 }
 
-bool
-MetaConceptZeroArgs::ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& lhs, const MetaConcept& rhs, LowLevelAction* RHSInducedActionOnArg, LowLevelBinaryRelation* TargetRelation)
-{return true;}
-
-bool
-Variable::ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& lhs,
-														   const MetaConcept& rhs,
-														   LowLevelAction* RHSInducedActionOnArg,
-														   LowLevelBinaryRelation* TargetRelation)
+bool Variable::ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& lhs, const MetaConcept& rhs,
+	LowLevelAction* RHSInducedActionOnArg, LowLevelBinaryRelation* TargetRelation)
 {	// FORMALLY CORRECT: Kenneth Boyd, 1/5/2003
 	if (typeid(MetaQuantifier)==typeid(lhs))
 		{	// testing against quantifier....

@@ -49,21 +49,20 @@ static bool detectAntiIdempotentAuxNIFFNXOR(const MetaConnective& lhs, const Met
 
 typedef bool MetaConnectiveBinaryRelation(const MetaConnective& lhs, const MetaConnective& rhs);
 
-MetaConnectiveBinaryRelation* const detectAntiIdempotentAux[]
-  =	{
-	detectAntiIdempotentAuxANDOR,
-	detectAntiIdempotentAuxANDOR,
-	detectAntiIdempotentAuxIFFXOR,
-	detectAntiIdempotentAuxIFFXOR,
-	detectAntiIdempotentAuxNIFFNXOR,
-	detectAntiIdempotentAuxNIFFNXOR,
-	detectAntiIdempotentAuxNANDNOR,
-	detectAntiIdempotentAuxNANDNOR
-	};
-static_assert(StrictBound_MCM==STATIC_SIZE(detectAntiIdempotentAux));
-
 bool MetaConnective::isAntiIdempotentTo(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/11/1999
+	static constexpr MetaConnectiveBinaryRelation* const detectAntiIdempotentAux[] = {
+		  detectAntiIdempotentAuxANDOR,
+		  detectAntiIdempotentAuxANDOR,
+		  detectAntiIdempotentAuxIFFXOR,
+		  detectAntiIdempotentAuxIFFXOR,
+		  detectAntiIdempotentAuxNIFFNXOR,
+		  detectAntiIdempotentAuxNIFFNXOR,
+		  detectAntiIdempotentAuxNANDNOR,
+		  detectAntiIdempotentAuxNANDNOR
+	};
+	static_assert(StrictBound_MCM == STATIC_SIZE(detectAntiIdempotentAux));
+
 	return (detectAntiIdempotentAux[array_index()])(*this,static_cast<const MetaConnective&>(rhs));
 }
 

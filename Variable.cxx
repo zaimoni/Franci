@@ -16,6 +16,17 @@
 
 // META: Variable's Arg1 points to a MetaQuantifier...so _msize takes its name's strlen()
 
+void Variable::CopyInto(Variable*& dest) const
+{
+	if (!dest) dest = new Variable(*this);
+	else *dest = *this;
+}
+
+void Variable::MoveInto(Variable*& dest) {
+	if (!dest) dest = new Variable(std::move(*this));
+	else *dest = std::move(*this);
+};
+
 bool Variable::EqualAux2(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: 1/21/2003, Kenneth Boyd
 	//! \todo ASSUMPTION: MetaConceptWith1Arg::EqualAux2 only checks for 
@@ -43,21 +54,7 @@ bool Variable::InternalDataLTAux(const MetaConcept& rhs) const
 	return false;
 }
 
-void Variable::_forceStdForm() {}
-
-//  Type ID functions
-const AbstractClass* Variable::UltimateType() const
-{return Arg1->UltimateType();}
-
-bool Variable::ForceUltimateType(const AbstractClass* const rhs)
-{	// FORMALLY CORRECT: Kenneth Boyd, 6/27/2000
-	return Arg1->ForceUltimateType(rhs);
-}
-
 //  Evaluation functions
-bool Variable::CanEvaluate() const {return false;}
-bool Variable::CanEvaluateToSameType() const {return false;}
-
 bool Variable::SyntaxOK() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 1/19/2000
 	if (   NULL!=Arg1
@@ -69,9 +66,6 @@ bool Variable::SyntaxOK() const
 	return false;
 }
 
-bool Variable::Evaluate(MetaConcept*& dest) {return false;}
-bool Variable::DestructiveEvaluateToSameType() {return false;}
-
 void Variable::SelfLogicalNOT()
 {	// FORMALLY CORRECT: Kenneth Boyd, 5/27/1999
 	if (IsUltimateType(&TruthValues))
@@ -82,8 +76,6 @@ void Variable::SelfLogicalNOT()
 	MetaConcept::SelfLogicalNOT();
 }
 
-bool Variable::LogicalANDOrthogonalClause() const {return true;}
-
 bool Variable::StrictlyImplies(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/13/1999
 	if (!SelfLogicalNOTWorks()) return false;
@@ -93,11 +85,6 @@ bool Variable::StrictlyImplies(const MetaConcept& rhs) const
 void Variable::ConvertVariableToCurrentQuantification(MetaQuantifier& src)
 {	// FORMALLY CORRECT: Kenneth Boyd, 1/17/1999
 	if (src==*Arg1) Arg1 = &src;
-}
-
-bool Variable::UsesQuantifierAux(const MetaQuantifier& x) const
-{
-	return x.MetaConceptPtrUsesThisQuantifier(Arg1);
 }
 
 // MetaQuantifier functions

@@ -13,9 +13,11 @@ private:
 protected:
 	explicit MetaConceptZeroArgs(ExactType_MC NewType) : MetaConcept(NewType) {};
 	explicit MetaConceptZeroArgs(ExactType_MC NewType,unsigned char NewBitmap) : MetaConcept(NewType,NewBitmap) {};
-	MetaConceptZeroArgs(const MetaConceptZeroArgs& src) : MetaConcept(src) {};
+	MetaConceptZeroArgs(const MetaConceptZeroArgs& src) = default;
+	MetaConceptZeroArgs(MetaConceptZeroArgs&& src) = default;
+	MetaConceptZeroArgs& operator=(const MetaConceptZeroArgs & src) = default;
+	MetaConceptZeroArgs& operator=(MetaConceptZeroArgs&& src) = default;
 	virtual ~MetaConceptZeroArgs() = default;
-	void operator=(const MetaConceptZeroArgs& src) {MetaConcept::operator=(src);};
 public:
 //	virtual void CopyInto(MetaConcept*& dest) const = 0;	// can throw memory failure
 //	virtual void MoveInto(MetaConcept*& dest) = 0;	// can throw memory failure.  If it succeeds, it destroys the source.
@@ -23,11 +25,11 @@ public:
 //  Type ID functions
 //	virtual const AbstractClass* UltimateType() const = 0;
 //	Arity functions
-	virtual size_t size() const {return 0;};
-	virtual const MetaConcept* ArgN(size_t n) const {return 0;};
-	virtual MetaConcept* ArgN(size_t n) {return 0;};
+	size_t size() const override final {return 0;};
+	const MetaConcept* ArgN(size_t n) const override final {return 0;};
+	MetaConcept* ArgN(size_t n) override final {return 0;};
 // Syntactical equality and inequality
-	virtual bool IsAbstractClassDomain() const {return true;};
+	bool IsAbstractClassDomain() const override {return true;};
 //  Evaluation functions
 //	virtual bool CanEvaluate() const = 0;
 //	virtual bool CanEvaluateToSameType() const = 0;
@@ -35,14 +37,14 @@ public:
 //	virtual bool Evaluate(MetaConcept*& dest) = 0;		// same, or different type
 //	virtual bool DestructiveEvaluateToSameType() = 0;	// overwrites itself iff returns true
 // Formal manipulation functions
-	virtual void ConvertVariableToCurrentQuantification(MetaQuantifier& src) {};
+	void ConvertVariableToCurrentQuantification(MetaQuantifier& src) override {};
 	virtual bool HasArgRelatedToThisConceptBy(const MetaConcept& Target, LowLevelBinaryRelation* TargetRelation) const;
-	virtual bool UsesQuantifierAux(const MetaQuantifier& x) const {return false;};
-	virtual bool ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& lhs, const MetaConcept& rhs, LowLevelAction* RHSInducedActionOnArg, LowLevelBinaryRelation* TargetRelation);
+	bool UsesQuantifierAux(const MetaQuantifier& x) const override {return false;};
+	bool ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& lhs, const MetaConcept& rhs, LowLevelAction* RHSInducedActionOnArg, LowLevelBinaryRelation* TargetRelation) override { return true; }
 protected:
-	virtual bool EqualAux2(const MetaConcept& rhs) const = 0;
+//	virtual bool EqualAux2(const MetaConcept& rhs) const = 0;
 	void _forceStdForm() override {};
-	virtual bool _IsExplicitConstant() const {return true;};
+	bool _IsExplicitConstant() const override {return true;};
 };
 
 namespace zaimoni {
