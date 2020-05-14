@@ -464,8 +464,7 @@ void MetaConnective::_forceStdForm()
 }
 
 //  Type ID functions
-const AbstractClass* MetaConnective::UltimateType() const
-{return &TruthValues;}
+const AbstractClass* MetaConnective::UltimateType() const { return &TruthValues; }
 
 //  Evaluation functions
 bool MetaConnective::SyntaxOK() const

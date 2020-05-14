@@ -39,7 +39,7 @@ public:
 	void MoveInto(Clause2Arg*& dest);	// can throw memory failure; success destroys integrity of source
 
 //  Type ID functions
-	virtual const AbstractClass* UltimateType() const;
+	const AbstractClass* UltimateType() const override;
 //  Evaluation functions
 	virtual bool SyntaxOK() const;
 // text I/O functions

@@ -85,7 +85,7 @@ public:
 	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
 	void MoveInto(EqualRelation*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
 //  Type ID functions
-	virtual const AbstractClass* UltimateType() const;
+	const AbstractClass* UltimateType() const override;
 //  Evaluation functions
 	virtual bool SyntaxOK() const;
 // text I/O functions
@@ -97,7 +97,7 @@ public:
 	virtual bool CanStrictlyModify(const MetaConcept& rhs) const;
 	virtual bool LogicalANDFindDetailedRule(MetaConcept& rhs, size_t LHSIdx, size_t RHSIdx, size_t& Param1, size_t& Param2, signed short& SelfEvalIdx, unsigned short& EvalIdx);
 	virtual bool LogicalANDNonTrivialFindDetailedRule() const;
-	virtual bool LogicalANDOrthogonalClause() const;
+	bool LogicalANDOrthogonalClause() const override;
 	// Basis clause support
 	virtual size_t BasisClauseCount() const;
 	virtual bool DirectCreateBasisClauseIdx(size_t Idx, MetaConcept*& dest) const;

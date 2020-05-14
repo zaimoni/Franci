@@ -91,8 +91,7 @@ void QuantifiedStatement::MoveInto(QuantifiedStatement*& dest)		// can throw mem
 }
 
 //  Type ID functions
-const AbstractClass* QuantifiedStatement::UltimateType() const
-{return &TruthValues;}
+const AbstractClass* QuantifiedStatement::UltimateType() const { return &TruthValues; }
 
 // Syntactical equality and inequality
 bool QuantifiedStatement::EqualAux2(const MetaConcept& rhs) const
@@ -882,9 +881,7 @@ bool MetaConnective::LogicalANDDoNotExplore() const
 	assert(IsExactType(LogicalAND_MC));
 	size_t NonTrivialCount = 0;
 	size_t i = fast_size();
-	do	if (   !ArgArray[--i]->LogicalANDOrthogonalClause()
-			&& 2==++NonTrivialCount)
-			return false;
+	do	if (!ArgArray[--i]->LogicalANDOrthogonalClause() && 2 == ++NonTrivialCount) return false;
 	while(0<i);
 	return true;
 }

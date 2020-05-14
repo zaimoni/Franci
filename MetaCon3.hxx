@@ -113,7 +113,7 @@ public:
 	void MoveInto(MetaConnective*& dest);		// can throw memory failure.  If it succeeds, it destroys the source.
 
 //  Type ID functions
-	virtual const AbstractClass* UltimateType() const;
+	const AbstractClass* UltimateType() const override;
 //  Evaluation functions
 	virtual bool SyntaxOK() const;
 // text I/O functions
@@ -121,7 +121,7 @@ public:
 // Formal manipulation functions
 	virtual bool LogicalANDFindDetailedRule(MetaConcept& RHS, size_t LHSIdx, size_t RHSIdx, size_t& Param1, size_t& Param2, signed short& SelfEvalIdx, unsigned short& EvalIdx);
 	virtual bool LogicalANDNonTrivialFindDetailedRule() const;
-	virtual bool LogicalANDOrthogonalClause() const;
+	bool LogicalANDOrthogonalClause() const override;
 	// Logical Amplification support
 	virtual bool WantToBeAmplified() const;
 	virtual bool CanAmplifyClause() const;
