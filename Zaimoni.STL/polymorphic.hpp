@@ -126,7 +126,7 @@ CopyInto(const T& src, U*& dest)
 // following recurses to a class member function MoveInto
 // intended semantics: dest has former value of src, src is only good for destruction
 template<typename T,typename U>
-void
+std::enable_if_t<std::is_base_of_v<U, T> && !std::is_same_v<U, T>, void>
 MoveInto(T& src, U*& dest)
 {	//! \todo should not be considered if T* is not convertible to U*
 	if (dest && typeid(src)!=typeid(*dest))
@@ -135,6 +135,28 @@ MoveInto(T& src, U*& dest)
 		dest = 0;
 		}
 	src.MoveInto(reinterpret_cast<T*&>(dest));
+}
+
+// rename to MoveInto once old version disconnected
+template<typename T, typename U>
+std::enable_if_t<std::is_base_of_v<U, T> && !std::is_same_v<U, T>, void>
+MoveIntoV2(T&& src, U*& dest)
+{
+	if (dest) {
+		if (typeid(T) == typeid(*dest)) {
+			static_cast<T&>(*dest) = std::move(src);
+			return;
+		}
+		delete dest;
+	}
+	dest = new T(std::move(src));
+}
+
+template<typename T>
+void MoveIntoV2(T&& src, T*& dest)
+{
+	if (!dest) dest = new T(std::move(src));
+	else *dest = std::move(src);
 }
 
 }	// end namespace zaimoni

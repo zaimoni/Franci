@@ -51,20 +51,21 @@ private:
 	static zaimoni::weakautoarray_ptr<Recognize*> EvalRecognizers;
 	static zaimoni::weakautoarray_ptr<Parse*> EvalParsers;
 public:
-	UnparsedText(char*& src);
+	explicit UnparsedText(char*& src);
 	UnparsedText(char*& src,bool Interpreted);
 protected:
 	UnparsedText(char*& src,unsigned short NewSelfClassify);
 public:
-//	UnparsedText(const UnparsedText& src);	// default OK
+	UnparsedText(const UnparsedText& src) = default;
+	UnparsedText(UnparsedText&& src) = default;
+	UnparsedText& operator=(const UnparsedText& src) = default;
+	UnparsedText& operator=(UnparsedText&& src) = default;
 	~UnparsedText() = default;
 
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(UnparsedText*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};
-	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
-	void MoveInto(UnparsedText*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
-	void MoveInto(UnparsedText& dest);	// If it succeeds, it destroys the source.
-	UnparsedText& operator=(const UnparsedText& src);
+	void MoveInto(MetaConcept*& dest) override { zaimoni::MoveIntoV2(std::move(*this),dest); }
+	void MoveInto(UnparsedText*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
 
 	static UnparsedText* up_cast(MetaConcept* src);
 	static const UnparsedText* up_cast(const MetaConcept* src);

@@ -299,33 +299,6 @@ UnparsedText::UnparsedText(char*& src, bool Interpreted)
 	if (!SelfClassifyBitmap && !Text.empty()) SpecializeSemantics();
 }
 
-void UnparsedText::MoveInto(UnparsedText*& dest)	// can throw memory failure.  If it succeeds, it destroys the source.
-{	// FORMALLY CORRECT: 12/9/2004, Kenneth Boyd
-	if (NULL==dest)
-		{
-		char* TmpString = NULL;
-		dest = new UnparsedText(TmpString);
-		};
-	MoveInto(*dest);
-}
-
-void UnparsedText::MoveInto(UnparsedText& dest)	// If it succeeds, it destroys the source.
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/30/2005
-	Text.MoveInto(dest.Text);
-	dest.SelfClassifyBitmap=SelfClassifyBitmap;
-}
-
-UnparsedText& UnparsedText::operator=(const UnparsedText& src)
-{	// FORMALLY CORRECT: Kenneth Boyd, 11/26/2006
-	Text = src.Text;		
-	MetaConceptZeroArgs::operator=(src);
-	LogicalLineNumber = src.LogicalLineNumber;
-	LogicalLineOrigin = src.LogicalLineOrigin;
-	SourceFileName = src.SourceFileName;
-	SelfClassifyBitmap = src.SelfClassifyBitmap;
-	return *this;
-}
-
 UnparsedText* UnparsedText::up_cast(MetaConcept* src)
 {
 	if (NULL!=src && src->IsExactType(UnparsedText_MC))

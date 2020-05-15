@@ -272,8 +272,8 @@ public:
 	bool IsPotentialVarName() const;
 	bool IsPotentialArg() const;	
 //	Arity functions
-	inline size_t min_size() const {return VFTable1->MinArity;};
-	inline size_t max_size() const {return VFTable1->MaxArity;};
+	size_t min_size() const {return VFTable1->MinArity;};
+	size_t max_size() const {return VFTable1->MaxArity;};
 	virtual size_t size() const = 0;	// abstract function
 	virtual const MetaConcept* ArgN(size_t n) const = 0;
 	virtual MetaConcept* ArgN(size_t n) = 0;

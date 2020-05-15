@@ -123,10 +123,10 @@ public:
 	virtual bool LogicalANDNonTrivialFindDetailedRule() const;
 	bool LogicalANDOrthogonalClause() const override;
 	// Logical Amplification support
-	virtual bool WantToBeAmplified() const;
-	virtual bool CanAmplifyClause() const;
-	virtual bool CanAmplifyThisClause(const MetaConcept& rhs) const;
-	virtual bool AmplifyThisClause(MetaConcept*& rhs) const;
+	bool WantToBeAmplified() const override;
+	bool CanAmplifyClause() const override;
+	bool CanAmplifyThisClause(const MetaConcept& rhs) const override;
+	bool AmplifyThisClause(MetaConcept*& rhs) const override;
 	// Basis clause support
 	virtual size_t BasisClauseCount() const;
 	virtual bool DirectCreateBasisClauseIdx(size_t Idx, MetaConcept*& dest) const;

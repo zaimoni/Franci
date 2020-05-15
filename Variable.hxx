@@ -31,10 +31,10 @@ public:
 	~Variable() = default;
 
 // Inherited from MetaConcept
-	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
+	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);}	// can throw memory failure
 	void CopyInto(Variable*& dest) const;	// can throw memory failure
-	void MoveInto(MetaConcept*& dest) override {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
-	void MoveInto(Variable*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
+	void MoveInto(MetaConcept*& dest) override { zaimoni::MoveIntoV2(std::move(*this), dest); }
+	void MoveInto(Variable*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
 	bool IsAbstractClassDomain() const override {return false;};
 //  Type ID functions
 	const AbstractClass* UltimateType() const override { return Arg1->UltimateType(); };

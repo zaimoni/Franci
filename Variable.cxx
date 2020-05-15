@@ -22,11 +22,6 @@ void Variable::CopyInto(Variable*& dest) const
 	else *dest = *this;
 }
 
-void Variable::MoveInto(Variable*& dest) {
-	if (!dest) dest = new Variable(std::move(*this));
-	else *dest = std::move(*this);
-};
-
 bool Variable::EqualAux2(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: 1/21/2003, Kenneth Boyd
 	//! \todo ASSUMPTION: MetaConceptWith1Arg::EqualAux2 only checks for 
