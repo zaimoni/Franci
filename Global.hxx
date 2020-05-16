@@ -26,14 +26,14 @@ CopyInto_ForceSyntaxOK(const T& src, U*& dest)
 		}
 }
 
-inline constexpr const char* const AlphaCallAssumption = "ALPHA ERROR: function call assumptions violated.  I QUIT!";
-inline constexpr const char* const AlphaDataIntegrity = "ALPHA ERROR: data structure integrity violated.  I QUIT!";
-inline constexpr const char* const AlphaMustDefineVFunction = "ALPHA ERROR: virtual function needs to be defined for C++ class.  I QUIT!";
-inline constexpr const char* const AlphaMiscallVFunction = "ALPHA ERROR: virtual function called for C++ class that must not implement it.  I QUIT!";
-inline constexpr const char* const AlphaMiscallFunction = "ALPHA ERROR: function called in way that damages data integrity.  I QUIT!";
-inline constexpr const char* const AlphaNoEffectFunctionCall = "ALPHA ERROR: function call has no effect.  I QUIT!";
-inline constexpr const char* const AlphaRetValAssumption = "ALPHA ERROR: function return value assumptions violated.  I QUIT!";
-inline constexpr const char* const RAMFailure = "FATAL ERROR: irrecoverable RAM failure in computation.  I QUIT!";
+constexpr const char* const AlphaCallAssumption = "ALPHA ERROR: function call assumptions violated.  I QUIT!";
+constexpr const char* const AlphaDataIntegrity = "ALPHA ERROR: data structure integrity violated.  I QUIT!";
+constexpr const char* const AlphaMustDefineVFunction = "ALPHA ERROR: virtual function needs to be defined for C++ class.  I QUIT!";
+constexpr const char* const AlphaMiscallVFunction = "ALPHA ERROR: virtual function called for C++ class that must not implement it.  I QUIT!";
+constexpr const char* const AlphaMiscallFunction = "ALPHA ERROR: function called in way that damages data integrity.  I QUIT!";
+constexpr const char* const AlphaNoEffectFunctionCall = "ALPHA ERROR: function call has no effect.  I QUIT!";
+constexpr const char* const AlphaRetValAssumption = "ALPHA ERROR: function return value assumptions violated.  I QUIT!";
+constexpr const char* const RAMFailure = "FATAL ERROR: irrecoverable RAM failure in computation.  I QUIT!";
 
 void UnconditionalDataIntegrityFailure(void) NO_RETURN;
 void UnconditionalRAMFailure(void) NO_RETURN;

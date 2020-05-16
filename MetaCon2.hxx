@@ -6,6 +6,7 @@
 
 #include "MetaCon1.hxx"
 #include "Zaimoni.STL/AutoPtr.hpp"
+#include <functional>
 
 // ASSUMPTION: the memory manager does not overallocate by more than sizeof(MetaConcept*)-1.
 // failing this breaks void StrictBoundIdxArray(void) const;
@@ -183,6 +184,7 @@ public:
 	bool DualFindTwoRelatedArgs(LowLevelBinaryRelation& TargetRelation, size_t StartIdx) const;
 	// next: args found are pointed to by InferenceParameter1
 	bool FindTwoRelatedArgs(const MetaConceptWithArgArray& rhs, LowLevelBinaryRelation& TargetRelation) const;
+	bool FindTwoRelatedArgs(const MetaConceptWithArgArray& rhs, LowLevelBinaryRelation& TargetRelation, std::function<bool(const MetaConcept&)> lhs_ok) const;
 	bool FindTwoRelatedArgs(const MetaConceptWithArgArray& rhs, LowLevelBinaryRelation& TargetRelation, size_t IgnoreLHSArg, size_t IgnoreRHSArg) const;
 	bool FindTwoEqualArgs() const;
 	bool FindTwoEqualArgsLHSRHSLexicalOrderedArgs(const MetaConceptWithArgArray& rhs) const;

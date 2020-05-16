@@ -526,23 +526,21 @@ bool MetaConnective::Prefilter_CanAmplifyThisClause(const MetaConcept& rhs) cons
 }
 
 bool MetaConnective::OR_CanAmplifyThisClause(const MetaConnective& rhs) const
-{
-	if (   rhs.FindTwoRelatedArgs(*this,NonStrictlyImpliesLogicalNOTOf)
-		&& !NonStrictlyImplies(*rhs.ArgArray[rhs.InferenceParameter1],*this))
-		return true;
-	return false;
+{	// FORMALLY CORRECT: 2020-05-15
+	return rhs.FindTwoRelatedArgs(*this, NonStrictlyImpliesLogicalNOTOf, [&](const MetaConcept& l) {
+		return !NonStrictlyImplies(l, *this);
+	});
 }
 
 bool MetaConnective::XOR_CanAmplifyThisClause(const MetaConnective& rhs) const
-{
-	if (   rhs.FindTwoRelatedArgs(*this,NonStrictlyImplies)
-		&& !NonStrictlyImplies(*rhs.ArgArray[rhs.InferenceParameter1],*this))
-		return true;
-	return false;
+{	// FORMALLY CORRECT: 2020-05-15
+	return rhs.FindTwoRelatedArgs(*this, NonStrictlyImplies, [&](const MetaConcept& l) {
+		return !NonStrictlyImplies(l, *this);
+	});
 }
 
 bool MetaConnective::CanAmplifyThisClause(const MetaConcept& rhs) const
-{	// FORMALLY CORRECT: 10/17/2004
+{	// FORMALLY CORRECT: 2020-05-15
 	if (!Prefilter_CanAmplifyThisClause(rhs)) return false;
 	
 	const MetaConnective& VR_rhs = static_cast<const MetaConnective&>(rhs);
@@ -553,14 +551,10 @@ bool MetaConnective::CanAmplifyThisClause(const MetaConcept& rhs) const
 		if (2==fast_size()) return OR_CanAmplifyThisClause(VR_rhs);
 		}
 	else if (IsExactType(LogicalIFF_MC))
-		{
-		if (    VR_rhs.FindTwoRelatedArgs(*this,NonStrictlyImpliesThisOrLogicalNOTOf)
-			&& !NonStrictlyImplies(*VR_rhs.ArgArray[VR_rhs.InferenceParameter1],*this))
-			return true;
-		return false;
-		}
-	else if (IsExactType(LogicalXOR_MC))
-		return XOR_CanAmplifyThisClause(VR_rhs);
+		return VR_rhs.FindTwoRelatedArgs(*this, NonStrictlyImpliesThisOrLogicalNOTOf, [&](const MetaConcept& l) {
+			return !NonStrictlyImplies(l, *this);
+		});
+	else if (IsExactType(LogicalXOR_MC)) return XOR_CanAmplifyThisClause(VR_rhs);
 	return false;
 }
 

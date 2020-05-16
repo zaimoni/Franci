@@ -1153,15 +1153,32 @@ bool MetaConceptWithArgArray::FindTwoRelatedArgs(const MetaConceptWithArgArray& 
 	do	{
 		--i;
 		size_t j = rhs.fast_size();
-		do	if (TargetRelation(*ArgArray[i],*rhs.ArgArray[--j]))
-				{
-				InferenceParameter1 = i;
-				rhs.InferenceParameter1 = j;
-				return true;
-				}
-		while(0<j);
+		do	if (TargetRelation(*ArgArray[i],*rhs.ArgArray[--j])) {
+			InferenceParameter1 = i;
+			rhs.InferenceParameter1 = j;
+			return true;
+		} while(0<j);
 		}
 	while(0<i);
+	return false;
+}
+
+bool MetaConceptWithArgArray::FindTwoRelatedArgs(const MetaConceptWithArgArray& rhs, LowLevelBinaryRelation& TargetRelation, std::function<bool(const MetaConcept&)> lhs_ok) const
+{	// FORMALLY CORRECT: 2020-05-15
+	assert(!ArgArray.empty());
+	assert(!rhs.ArgArray.empty());
+
+	size_t i = fast_size();
+	do {
+		const MetaConcept& anchor = *ArgArray[--i];
+		if (!lhs_ok(anchor)) continue;
+		size_t j = rhs.fast_size();
+		do	if (TargetRelation(anchor, *rhs.ArgArray[--j])) {
+			InferenceParameter1 = i;
+			rhs.InferenceParameter1 = j;
+			return true;
+		} while (0 < j);
+	} while (0 < i);
 	return false;
 }
 
