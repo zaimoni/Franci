@@ -261,6 +261,7 @@ bool CmdShell::get_line_to_interpret(char*& InputBuffer)
 			memmove(InputBuffer,InputBuffer+Offset,InitialLength);
 			InputBuffer[InitialLength] = '\x00';
 			InputBuffer = reinterpret_cast<char*>(realloc(InputBuffer,InitialLength+1));
+			// regression test failures are from missing line breaks
 			}
 		return Result;
 		}
