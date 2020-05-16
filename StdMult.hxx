@@ -36,14 +36,16 @@ class StdMultiplication final : public MetaConceptWithArgArray
 public:
 	StdMultiplication() : MetaConceptWithArgArray(StdMultiplication_MC) {};
 	StdMultiplication(MetaConcept**& NewArgList);
-//	StdMultiplication(const StdMultiplication& src);	// default ok
+	StdMultiplication(const StdMultiplication& src) = default;
+	StdMultiplication(StdMultiplication&& src) = default;
+	StdMultiplication& operator=(const StdMultiplication& src);
+	StdMultiplication& operator=(StdMultiplication&& src) = default;
 	virtual ~StdMultiplication() = default;
 
-	const StdMultiplication& operator=(const StdMultiplication& src);
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(StdMultiplication*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
-	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
-	void MoveInto(StdMultiplication*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
+	void MoveInto(MetaConcept*& dest) override { zaimoni::MoveIntoV2(std::move(*this), dest); }
+	void MoveInto(StdMultiplication*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
 //  Type ID functions
 	virtual const AbstractClass* UltimateType() const;
 	virtual bool ForceUltimateType(const AbstractClass* const rhs);

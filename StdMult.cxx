@@ -24,8 +24,7 @@ StdMultiplication::StdMultiplication(MetaConcept**& NewArgList)
 	if (SyntaxOK()) _forceStdForm();
 }
 
-const StdMultiplication&
-StdMultiplication::operator=(const StdMultiplication& src)
+StdMultiplication& StdMultiplication::operator=(const StdMultiplication& src)
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/27/2002
 	autoval_ptr<AbstractClass> Tmp1(_DesiredType);
 	autoval_ptr<AbstractClass> Tmp2(_DynamicType);
@@ -34,14 +33,6 @@ StdMultiplication::operator=(const StdMultiplication& src)
 	Tmp1.MoveInto(_DesiredType);
 	Tmp2.MoveInto(_DynamicType);
 	return *this;
-}
-
-void StdMultiplication::MoveInto(StdMultiplication*& dest)		// can throw memory failure.  If it succeeds, it destroys the source.
-{	// FORMALLY CORRECT: Kenneth Boyd, 12/29/2000
-	if (!dest) dest = new StdMultiplication();
-	MoveIntoAux(*dest);
-	_DesiredType.MoveInto(dest->_DesiredType);
-	_DynamicType.MoveInto(dest->_DynamicType);
 }
 
 //  Type ID functions

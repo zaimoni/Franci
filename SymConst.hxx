@@ -27,16 +27,16 @@ class SymbolicConstant final : public MetaConceptZeroArgs
 {
 public:
 	SymbolicConstant(SymConstantIndex ExactSymConstant);
-//	SymbolicConstant(const SymbolicConstant& src);	// default OK
-
+	SymbolicConstant(const SymbolicConstant& src) = default;
+	SymbolicConstant(SymbolicConstant&& src) = default;
+	SymbolicConstant& operator=(const SymbolicConstant& src) = default;
+	SymbolicConstant& operator=(SymbolicConstant&& src) = default;
 	virtual ~SymbolicConstant() = default;
-
-//	const SymbolicConstant& operator=(const SymbolicConstant& src); 	// default OK
 
 	void CopyInto(MetaConcept*& dest) const override {zaimoni::CopyInto(*this,dest);};	// can throw memory failure
 	void CopyInto(SymbolicConstant*& dest) const {zaimoni::CopyInto(*this,dest);};	// can throw memory failure
-	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
-	void MoveInto(SymbolicConstant*& dest) {zaimoni::CopyInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
+	void MoveInto(MetaConcept*& dest) override { zaimoni::MoveIntoV2(std::move(*this), dest); }
+	void MoveInto(SymbolicConstant*& dest) {zaimoni::MoveIntoV2(std::move(*this),dest);}
 
 //  Type ID functions
 	virtual const AbstractClass* UltimateType() const;
