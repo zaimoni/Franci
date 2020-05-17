@@ -560,7 +560,6 @@ bool MetaConnective::CanAmplifyThisClause(const MetaConcept& rhs) const
 
 bool MetaConnective::OR_AmplifyThisClause(MetaConnective& rhs) const
 {
-	MetaConnective* NewArg = NULL;
 	const size_t IncomingParam1 = InferenceParameter1;
 	const size_t IncomingRHSParam1 = rhs.InferenceParameter1;
 	assert(rhs.ArgArray.size()>IncomingRHSParam1);
@@ -573,8 +572,9 @@ bool MetaConnective::OR_AmplifyThisClause(MetaConnective& rhs) const
 		&& OR_CanAmplifyThisClause(*static_cast<MetaConnective*>(rhs.ArgArray[IncomingRHSParam1])))
 		return OR_AmplifyThisClause(*static_cast<MetaConnective*>(rhs.ArgArray[IncomingRHSParam1]));
 
+	std::unique_ptr<MetaConnective> NewArg;
 	try	{
-		CopyInto(NewArg);
+		NewArg = std::unique_ptr<MetaConnective>(new MetaConnective(*this));
 		}
 	catch(const bad_alloc&)
 		{
@@ -591,7 +591,7 @@ bool MetaConnective::OR_AmplifyThisClause(MetaConnective& rhs) const
 			return false;
 		}
 	NewArg->SetExactTypeV2(LogicalAND_MC);
-	rhs.ArgArray[IncomingRHSParam1] = NewArg;
+	rhs.ArgArray[IncomingRHSParam1] = NewArg.release();
 	// immediately normalize AND
 	if (rhs.IsExactType(LogicalAND_MC))
 		{
