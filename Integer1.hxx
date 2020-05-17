@@ -38,7 +38,10 @@ class IntegerNumeral final : public MetaConceptZeroArgs,public _IntegerNumeral
 {
 public:
 	IntegerNumeral() : MetaConceptZeroArgs(IntegerNumeral_MC) {};
-	IntegerNumeral(const IntegerNumeral& src) : MetaConceptZeroArgs(src),_IntegerNumeral(src) {};
+	IntegerNumeral(const IntegerNumeral& src) = default;
+	IntegerNumeral(IntegerNumeral&& src) = default;
+	IntegerNumeral& operator=(const IntegerNumeral& src) = default;
+	IntegerNumeral& operator=(IntegerNumeral&& src) = default;
 	explicit IntegerNumeral(unsigned short src) : MetaConceptZeroArgs(IntegerNumeral_MC),_IntegerNumeral(src) {};
 	explicit IntegerNumeral(signed short src) : MetaConceptZeroArgs(IntegerNumeral_MC),_IntegerNumeral(src) {};
 	explicit IntegerNumeral(unsigned long src) : MetaConceptZeroArgs(IntegerNumeral_MC),_IntegerNumeral(src) {};
@@ -47,12 +50,10 @@ public:
 	virtual ~IntegerNumeral() = default;
 
 // inherited from MetaConcept
-	const IntegerNumeral& operator=(const IntegerNumeral& src);
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(IntegerNumeral*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
-	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
-	void MoveInto(IntegerNumeral*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
-	void MoveInto(IntegerNumeral& dest);  // destroys the source
+	void MoveInto(MetaConcept*& dest) override { zaimoni::MoveIntoV2(std::move(*this), dest); }
+	void MoveInto(IntegerNumeral*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
 	bool operator==(signed short rhs) const {return _IntegerNumeral::operator==(rhs);};
 	bool operator==(unsigned short rhs) const {return _IntegerNumeral::operator==(rhs);};
 

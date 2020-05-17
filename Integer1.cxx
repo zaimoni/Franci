@@ -38,13 +38,6 @@
 //	More useful might be a condensed series in order (this would permit bailing 
 //	out at a sufficiently early point)
 
-const IntegerNumeral& IntegerNumeral::operator=(const IntegerNumeral& src)
-{	// FORMALLY CORRECT: 7/12/2007, Kenneth Boyd
-	_IntegerNumeral::operator=(src);
-	MetaConceptZeroArgs::operator=(src);
-	return *this;
-}
-
 const IntegerNumeral& IntegerNumeral::operator=(signed short src)
 {	// FORMALLY CORRECT: 7/12/2007, Kenneth Boyd
 	MultiPurposeBitmap = NoModifiers_VF;
@@ -71,18 +64,6 @@ const IntegerNumeral& IntegerNumeral::operator=(unsigned long src)
 	MultiPurposeBitmap = NoModifiers_VF;
 	_IntegerNumeral::operator=(src);
 	return *this;
-}
-
-void IntegerNumeral::MoveInto(IntegerNumeral*& dest)	// can throw memory failure.  If it succeeds, it destroys the source.
-{	// FORMALLY CORRECT: 12/9/2004, Kenneth Boyd
-	if (NULL==dest) dest = new IntegerNumeral();
-	MoveInto(*dest);
-}
-
-void IntegerNumeral::MoveInto(IntegerNumeral& dest)	// destroys the source.
-{	// FORMALLY CORRECT: 7/12/2007, Kenneth Boyd
-	_IntegerNumeral::MoveInto(dest);
-	dest.MultiPurposeBitmap = MultiPurposeBitmap;
 }
 
 bool IntegerNumeral::SyntacticalStandardLTAux(const MetaConcept& rhs) const
@@ -177,9 +158,11 @@ IntegerNumeral::DestructiveAddABBothZ(IntegerNumeral*& A, IntegerNumeral*& B)
 		if (A->ForceRearrangeProduct(*B))	//! \todo standard order for product?
 			{
 			A->DestructiveNormalProductFormWithRHS(*B);
-			if(A->IsOne()) B->MoveInto(*this);
-			assert(B->IsOne());
-			A->MoveInto(*this);
+			if(A->IsOne()) *this = std::move(*B);
+			else {
+				assert(B->IsOne());
+				*this = std::move(*A);
+			}
 			DELETE_AND_NULL(A);
 			DELETE_AND_NULL(B);
 			return true;
@@ -195,7 +178,7 @@ IntegerNumeral::DestructiveAddABBothZ(IntegerNumeral*& A, IntegerNumeral*& B)
 			{
 			if (ForceRearrangeSum(*B))
 				{
-				if (IsZero()) B->MoveInto(*this);
+				if (IsZero()) *this = std::move(*B);
 				DELETE_AND_NULL(A);
 				DELETE_AND_NULL(B);
 				return true;
@@ -207,7 +190,7 @@ IntegerNumeral::DestructiveAddABBothZ(IntegerNumeral*& A, IntegerNumeral*& B)
 
 		if (ForceRearrangeSum(*A))
 			{
-			if (IsZero()) A->MoveInto(*this);
+			if (IsZero()) *this = std::move(*A);
 			DELETE_AND_NULL(A);
 			DELETE_AND_NULL(B);
 			return true;

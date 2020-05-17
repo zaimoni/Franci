@@ -7,8 +7,18 @@
 #include <stddef.h>
 #include <algorithm>
 #include "Zaimoni.STL/Compiler.h"
+#include "Zaimoni.STL/polymorphic.hpp"
 
 class _IntegerNumeral {
+private:
+	static_assert(sizeof(unsigned long) <= sizeof(unsigned long*));
+	static_assert(sizeof(uintptr_t) == sizeof(unsigned long*));
+	union {
+		uintptr_t ShortInteger;
+		unsigned long* LongInteger;
+	};
+	signed short VFT2Idx;
+
 public:
 	enum operation_index 	{
 							Addition = 0,
@@ -17,6 +27,7 @@ public:
 
 	_IntegerNumeral() :	VFT2Idx(0) {};	// defaults to zero
 	_IntegerNumeral(const _IntegerNumeral& src);
+	_IntegerNumeral(_IntegerNumeral&& src);
 	explicit _IntegerNumeral(unsigned short src);
 	explicit _IntegerNumeral(signed short src);
 	explicit _IntegerNumeral(unsigned long src);
@@ -24,14 +35,14 @@ public:
 	explicit _IntegerNumeral(const char* src);
 	~_IntegerNumeral();
 
-	const _IntegerNumeral& operator=(const _IntegerNumeral& src);
-	const _IntegerNumeral& operator=(signed short src);
-	const _IntegerNumeral& operator=(unsigned short src);
-	const _IntegerNumeral& operator=(signed long src);
-	const _IntegerNumeral& operator=(unsigned long src);
+	_IntegerNumeral& operator=(const _IntegerNumeral& src);
+	_IntegerNumeral& operator=(_IntegerNumeral&& src);
+	_IntegerNumeral& operator=(signed short src);
+	_IntegerNumeral& operator=(unsigned short src);
+	_IntegerNumeral& operator=(signed long src);
+	_IntegerNumeral& operator=(unsigned long src);
 
-	void MoveInto(_IntegerNumeral*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
-	void MoveInto(_IntegerNumeral& dest);	// destroys the source.
+	void MoveInto(_IntegerNumeral*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
 
 	bool operator==(const _IntegerNumeral& rhs) const;	
 	bool operator==(signed short rhs) const;
@@ -76,15 +87,8 @@ public:
 	friend void swap(_IntegerNumeral& lhs, _IntegerNumeral& rhs)
 		{	std::swap(lhs.ShortInteger,rhs.ShortInteger);
 			std::swap(lhs.VFT2Idx,rhs.VFT2Idx);};
-private:
-	static_assert(sizeof(unsigned long)<=sizeof(unsigned long*));
-	static_assert(sizeof(uintptr_t) == sizeof(unsigned long*));
-	union	{
-			uintptr_t ShortInteger;
-			unsigned long* LongInteger;
-			};
-	signed short VFT2Idx;
 
+private:
 	typedef void (_IntegerNumeral::*FinishAssignmentAuxFunc)(const _IntegerNumeral& src);
 	typedef bool (_IntegerNumeral::*OpLT_AuxFunc)(const _IntegerNumeral& rhs) const;
 	typedef size_t (_IntegerNumeral::*LengthOfSelfNameAuxFunc)() const;

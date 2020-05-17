@@ -285,7 +285,7 @@ _IntegerNumeral::~_IntegerNumeral()
 		free(LongInteger);
 }
 
-const _IntegerNumeral& _IntegerNumeral::operator=(const _IntegerNumeral& src)
+_IntegerNumeral& _IntegerNumeral::operator=(const _IntegerNumeral& src)
 {	// FORMALLY CORRECT: Kenneth Boyd, 5/18/2006
 	// NOTE: mixed-mode interpretation problems.
 	if (Large_INT==IntegerRAMForm[VFT2Idx+ZeroOffset_VFT2])
@@ -301,7 +301,23 @@ const _IntegerNumeral& _IntegerNumeral::operator=(const _IntegerNumeral& src)
 	return *this;
 }
 
-const _IntegerNumeral& _IntegerNumeral::operator=(signed short src)
+_IntegerNumeral::_IntegerNumeral(_IntegerNumeral&& src) : ShortInteger(src.ShortInteger), VFT2Idx(src.VFT2Idx)
+{
+	src.ShortInteger = 0;
+	src.VFT2Idx = ZeroIdx_VFT2;
+}
+
+_IntegerNumeral& _IntegerNumeral::operator=(_IntegerNumeral&& src)
+{
+	if (Large_INT == IntegerRAMForm[VFT2Idx + ZeroOffset_VFT2]) free(LongInteger);
+	ShortInteger = src.ShortInteger;
+	VFT2Idx = src.VFT2Idx;
+	src.ShortInteger = 0;
+	src.VFT2Idx = ZeroIdx_VFT2;
+	return *this;
+}
+
+_IntegerNumeral& _IntegerNumeral::operator=(signed short src)
 {	// FORMALLY CORRECT: Kenneth Boyd, 4/13/2003
 	if (Large_INT==IntegerRAMForm[VFT2Idx+ZeroOffset_VFT2])
 		free(LongInteger);
@@ -319,7 +335,7 @@ const _IntegerNumeral& _IntegerNumeral::operator=(signed short src)
 	return *this;
 }
 
-const _IntegerNumeral& _IntegerNumeral::operator=(unsigned short src)
+_IntegerNumeral& _IntegerNumeral::operator=(unsigned short src)
 {	// FORMALLY CORRECT: Kenneth Boyd, 4/13/2003
 	if (Large_INT==IntegerRAMForm[VFT2Idx+ZeroOffset_VFT2])
 		free(LongInteger);
@@ -332,7 +348,7 @@ const _IntegerNumeral& _IntegerNumeral::operator=(unsigned short src)
 	return *this;
 }
 
-const _IntegerNumeral& _IntegerNumeral::operator=(signed long src)
+_IntegerNumeral& _IntegerNumeral::operator=(signed long src)
 {	// FORMALLY CORRECT: Kenneth Boyd, 4/13/2003
 	if (WRAPLB<=src || -WRAPLB>=src)
 		{
@@ -379,7 +395,7 @@ const _IntegerNumeral& _IntegerNumeral::operator=(signed long src)
 	return *this;
 }
 
-const _IntegerNumeral& _IntegerNumeral::operator=(unsigned long src)
+_IntegerNumeral& _IntegerNumeral::operator=(unsigned long src)
 {	// FORMALLY CORRECT: Kenneth Boyd, 4/13/2003
 	if (WRAPLB<=src)
 		{
@@ -429,21 +445,6 @@ void _IntegerNumeral::FinishAssignmentAuxLargeInt(const _IntegerNumeral& src)
 
 void _IntegerNumeral::FinishAssignmentAuxHardCodedInt(const _IntegerNumeral& src)
 {	// FORMALLY CORRECT: Kenneth Boyd, 6/6/1999
-}
-
-void _IntegerNumeral::MoveInto(_IntegerNumeral*& dest)	// can throw memory failure.  If it succeeds, it destroys the source.
-{	// FORMALLY CORRECT: 12/9/2004, Kenneth Boyd
-	if (NULL==dest) dest = new _IntegerNumeral();
-	MoveInto(*dest);
-}
-
-void _IntegerNumeral::MoveInto(_IntegerNumeral& dest)	// destroys the source.
-{	// FORMALLY CORRECT: 2/22/2002, Kenneth Boyd
-	if (Large_INT==IntegerRAMForm[dest.VFT2Idx+ZeroOffset_VFT2])
-		free(dest.LongInteger);
-	dest.ShortInteger=ShortInteger;
-	dest.VFT2Idx=VFT2Idx;
-	VFT2Idx = ZeroIdx_VFT2;
 }
 
 bool _IntegerNumeral::operator==(const _IntegerNumeral& rhs) const

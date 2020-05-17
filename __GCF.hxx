@@ -11,9 +11,12 @@ class _GCF
 {
 public:
 	_GCF(_IntegerNumeral**& NewArgList);
-//	default OK: copy constructor, assignment, destructor
+	_GCF(const _GCF& src) = default;
+	_GCF(_GCF&& src) = default;
+	_GCF& operator=(const _GCF & src) = default;
+	_GCF& operator=(_GCF&& src) = default;
 
-	void MoveInto(_GCF*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
+	void MoveInto(_GCF*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
 	void ForceStdForm();
 
 //  Evaluation functions
@@ -24,7 +27,7 @@ public:
 	_IntegerNumeral& operator()();
 private:
 	zaimoni::autovalarray_ptr_throws<_IntegerNumeral*> ArgArray;
-	_GCF() {};
+	_GCF() = default;
 };
 
 #endif

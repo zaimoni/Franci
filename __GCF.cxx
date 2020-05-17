@@ -26,12 +26,6 @@ _GCF::_GCF(_IntegerNumeral**& NewArgList)
 	if (SyntaxOK()) ForceStdForm();
 }
 
-void _GCF::MoveInto(_GCF*& dest)
-{	// FORMALLY CORRECT: Kenneth Boyd, 8/10/2001
-	if (!dest) dest = new _GCF();
-	ArgArray.MoveInto(dest->ArgArray);
-}
-
 void _GCF::ForceStdForm()
 {	// FORMALLY CORRECT: Kenneth Boyd, 7/11/2007
 	assert(!ArgArray.empty());
