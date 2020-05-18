@@ -43,9 +43,7 @@ public:
 				LowLevelBinaryRelation* NewCanUseBranchingOperation,
 				LowLevelIntValueBinaryFunction* NewApprovalFunction,
 				MetaConcept**& NewBranchingOperationSources,
-				MetaConcept**& NewApprovalTargets,
-				bool OwnBranchingOperationSources,
-				bool OwnApprovalTargets);
+				MetaConcept**& NewApprovalTargets);
 	SearchTree(SearchTree* NewParent, MetaConcept**& NewArgArray);	// Leaf for search tree
 	SearchTree(const SearchTree& src);
 	virtual ~SearchTree();
@@ -63,8 +61,8 @@ public:
 	virtual size_t LengthOfSelfName() const;
 	virtual void ConstructSelfNameAux(char* Name) const;	// overwrites what is already there
 // Internal functions
-	void HasUniqueLeaves() {__UniqueLeaves = true;};
-	void HasNonUniqueLeaves() {__UniqueLeaves = false;};
+//	void HasUniqueLeaves() {__UniqueLeaves = true;};
+//	void HasNonUniqueLeaves() {__UniqueLeaves = false;};
 	signed int BreadthSearchOneStage(bool& RAMStalled);
 	signed int ApprovalScore(const MetaConcept* const Target) const;
 	bool DestructiveExtractUniqueResult(MetaConcept*& dest);

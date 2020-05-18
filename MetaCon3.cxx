@@ -3380,9 +3380,7 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 											CanUseAmplification,
 											AmplifiedStatementIsUseful,
 											AmplifySource,
-											ApprovalTargetsImage,
-											false,
-											false);
+											ApprovalTargetsImage);
 				}
 			catch(const bad_alloc&)
 				{
@@ -3392,8 +3390,6 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 				delete TraceAmplification;
 				goto EndAmplification;				
 				}
-
-			ExploreThis->HasUniqueLeaves();
 
 			LOG("Testing amplification of");
 			LOG(*TraceAmplification->ArgN(i));

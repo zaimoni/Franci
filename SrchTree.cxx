@@ -9,9 +9,7 @@ SearchTree::SearchTree(MetaConcept**& NewArgArray,							// specs new search tre
 			LowLevelBinaryRelation* NewCanUseBranchingOperation,
 			LowLevelIntValueBinaryFunction* NewApprovalFunction,
 			MetaConcept**& NewBranchingOperationSources,
-			MetaConcept**& NewApprovalTargets,
-			bool OwnBranchingOperationSources,
-			bool OwnApprovalTargets)
+			MetaConcept**& NewApprovalTargets)
 :	MetaConceptWithArgArray(Unknown_MC,NewArgArray),
 	Parent(NULL),
 	BranchingOperation(NewBranchingOperation),
@@ -19,13 +17,13 @@ SearchTree::SearchTree(MetaConcept**& NewArgArray,							// specs new search tre
 	ApprovalFunction2Ary(NewApprovalFunction),
 	BranchingOperationSources(NewBranchingOperationSources),
 	ApprovalTargets(NewApprovalTargets),
-	__OwnBranchingOperationSources(OwnBranchingOperationSources),
-	__OwnApprovalTargets(OwnApprovalTargets),
-	__UniqueLeaves(false)
+	__OwnBranchingOperationSources(false),
+	__OwnApprovalTargets(false),
+	__UniqueLeaves(true)
 {
-	if (!OwnBranchingOperationSources)
+	if (!__OwnBranchingOperationSources)
 		NewBranchingOperationSources = BranchingOperationSources;
-	if (!OwnApprovalTargets)
+	if (!__OwnApprovalTargets)
 		NewApprovalTargets = ApprovalTargets;
 }
 
