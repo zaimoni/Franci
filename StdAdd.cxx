@@ -27,7 +27,7 @@ StdAddition::StdAddition(MetaConcept**& NewArgList)
 	if (SyntaxOK()) _forceStdForm();
 }
 
-const StdAddition& StdAddition::operator=(const StdAddition& src)
+StdAddition& StdAddition::operator=(const StdAddition& src)
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/27/2002
 	autoval_ptr<AbstractClass> Tmp1(src.DesiredType);
 	autoval_ptr<AbstractClass> Tmp2(src.DynamicType);
@@ -36,15 +36,6 @@ const StdAddition& StdAddition::operator=(const StdAddition& src)
 	Tmp1.MoveInto(DesiredType);
 	Tmp2.MoveInto(DynamicType);
 	return *this;
-}
-
-void StdAddition::MoveInto(StdAddition*& dest)		// can throw memory failure.  If it succeeds, it destroys the source.
-{	// FORMALLY CORRECT: Kenneth Boyd, 3/28/2002
-	if (!dest) dest = new StdAddition();
-
-	MoveIntoAux(*dest);
-	DesiredType.MoveInto(dest->DesiredType);
-	DynamicType.MoveInto(dest->DynamicType);
 }
 
 //  Type ID functions

@@ -33,16 +33,18 @@ class StdAddition final : public MetaConceptWithArgArray
 	mutable autoval_ptr<AbstractClass> DynamicType;
 	mutable autoval_ptr<AbstractClass> DesiredType;
 public:
-	StdAddition(void) : MetaConceptWithArgArray(StdAddition_MC) {};
+	StdAddition() : MetaConceptWithArgArray(StdAddition_MC) {};
 	StdAddition(MetaConcept**& NewArgList);
-//	StdAddition(const StdAddition& src);	// default ok
+	StdAddition(const StdAddition& src) = default;
+	StdAddition(StdAddition&& src) = default;
+	StdAddition& operator=(const StdAddition & src); // ACID
+	StdAddition& operator=(StdAddition&& src) = default;
 	virtual ~StdAddition() = default;
 
-	const StdAddition& operator=(const StdAddition& src);	// ACID
-	void CopyInto(MetaConcept*& dest) const final {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
+	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(StdAddition*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
-	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
-	void MoveInto(StdAddition*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
+	void MoveInto(MetaConcept*& dest) override { zaimoni::MoveIntoV2(std::move(*this), dest); }
+	void MoveInto(StdAddition*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
 //  Type ID functions
 	virtual const AbstractClass* UltimateType() const;
 	virtual bool ForceUltimateType(const AbstractClass* const rhs);
