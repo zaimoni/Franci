@@ -419,7 +419,7 @@ static void StrictlyModify(MetaConcept*& Target, const MetaConcept& Inducer)
 }
 
 // Main code
-MetaConnective::MetaConnective(MetaConcept**& NewArgList, MetaConnectiveModes LinkageType) throw()
+MetaConnective::MetaConnective(MetaConcept**& NewArgList, MetaConnectiveModes LinkageType)
 :	MetaConceptWithArgArray((ExactType_MC)(LinkageType+LogicalAND_MC),NewArgList)
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/18/1999
 	// If the syntax is already bad, then we don't need to proceed further

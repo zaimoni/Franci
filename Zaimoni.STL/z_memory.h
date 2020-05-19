@@ -111,7 +111,7 @@ int _no_obvious_overwrites(void);
  * These must come before #include <new> to prevent compiler errors,
  * but don't show these to memory.cpp
  */
-inline void operator delete(void* Target) throw ()
+inline void operator delete(void* Target) throw()
 {/* FORMALLY CORRECT: 4/16/98, Kenneth Boyd */ free(Target);}
 
 inline void operator delete[](void* Target) throw()

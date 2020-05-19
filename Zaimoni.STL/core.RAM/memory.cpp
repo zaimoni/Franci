@@ -928,7 +928,7 @@ void* operator new[](std::size_t NewSize)
 	return Tmp;
 }
 
-void* operator new(size_t NewSize, const std::nothrow_t&) throw ()
+void* operator new(size_t NewSize, const std::nothrow_t&) noexcept
 {
 	void* Tmp = calloc(1,NewSize);
 	if (ZaimoniNewHandler)
@@ -943,7 +943,7 @@ void* operator new(size_t NewSize, const std::nothrow_t&) throw ()
 	return Tmp;
 }
 
-void* operator new[](std::size_t NewSize, const std::nothrow_t&) throw ()
+void* operator new[](std::size_t NewSize, const std::nothrow_t&) noexcept
 {
 	void* Tmp = calloc(1,NewSize);
 	if (ZaimoniNewHandler)
@@ -958,16 +958,16 @@ void* operator new[](std::size_t NewSize, const std::nothrow_t&) throw ()
 	return Tmp;
 }
 
-void operator delete(void* Target) throw ()
+void operator delete(void* Target) noexcept
 {/* FORMALLY CORRECT: 4/16/98, Kenneth Boyd */ free(Target);}
 
-void operator delete(void* Target, const std::nothrow_t&) throw ()
+void operator delete(void* Target, const std::nothrow_t&) noexcept
 {/* FORMALLY CORRECT: 4/16/98, Kenneth Boyd */ free(Target);}
 
-void operator delete[](void* Target) throw()
+void operator delete[](void* Target) noexcept
 {/* FORMALLY CORRECT: 9/27/2005, Kenneth Boyd */ free(Target);}
 
-void operator delete[](void* Target, const std::nothrow_t&) throw()
+void operator delete[](void* Target, const std::nothrow_t&) noexcept
 {/* FORMALLY CORRECT: 9/27/2005, Kenneth Boyd */ free(Target);}
 
 #endif
