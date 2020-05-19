@@ -26,12 +26,12 @@ StdMultiplication::StdMultiplication(MetaConcept**& NewArgList)
 
 StdMultiplication& StdMultiplication::operator=(const StdMultiplication& src)
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/27/2002
-	autoval_ptr<AbstractClass> Tmp1(_DesiredType);
-	autoval_ptr<AbstractClass> Tmp2(_DynamicType);
+	decltype(_DesiredType) backup_Desired(_DesiredType);
+	decltype(_DynamicType) backup_Dynamic(_DynamicType);
 
 	MetaConceptWithArgArray::operator=(src);
-	Tmp1.MoveInto(_DesiredType);
-	Tmp2.MoveInto(_DynamicType);
+	_DesiredType = std::move(backup_Desired);
+	_DynamicType = std::move(backup_Dynamic);
 	return *this;
 }
 

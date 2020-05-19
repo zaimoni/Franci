@@ -29,12 +29,12 @@ StdAddition::StdAddition(MetaConcept**& NewArgList)
 
 StdAddition& StdAddition::operator=(const StdAddition& src)
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/27/2002
-	autoval_ptr<AbstractClass> Tmp1(src.DesiredType);
-	autoval_ptr<AbstractClass> Tmp2(src.DynamicType);
+	decltype(DesiredType) backup_Desired(src.DesiredType);
+	decltype(DynamicType) backup_Dynamic(src.DynamicType);
 
 	MetaConceptWithArgArray::operator=(src);
-	Tmp1.MoveInto(DesiredType);
-	Tmp2.MoveInto(DynamicType);
+	DesiredType = std::move(backup_Desired);
+	DynamicType = std::move(backup_Dynamic);
 	return *this;
 }
 

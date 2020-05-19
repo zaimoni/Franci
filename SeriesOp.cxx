@@ -186,19 +186,12 @@ void SeriesOperation::ConstructSelfNameAux(char* Name) const		// overwrites what
 	*Name++ = ')';
 }
 
-const SeriesOperation& SeriesOperation::operator=(const SeriesOperation& src)
+SeriesOperation& SeriesOperation::operator=(const SeriesOperation& src)
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/27/2002
-	autoval_ptr<AbstractClass> tmp(src.DesiredType);
+	decltype(src.DesiredType) tmp(src.DesiredType);
 	MetaConceptWithArgArray::operator=(src);
-	tmp.MoveInto(DesiredType);
+	DesiredType = std::move(tmp);
 	return *this;
-}
-
-void SeriesOperation::MoveInto(SeriesOperation*& dest)		// can throw memory failure.  If it succeeds, it destroys the source.
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/28/2002
-	if (!dest) dest = new SeriesOperation(StdAddition_MC);	// overwritten anyway
-	MoveIntoAux(*dest);
-	DesiredType.MoveInto(dest->DesiredType);
 }
 
 //  Type ID functions

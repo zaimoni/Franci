@@ -52,14 +52,16 @@ public:
 
 	SeriesOperation(ExactType_MC Operation);
 	SeriesOperation(MetaConcept**& NewArgList,ExactType_MC Operation);
-//	SeriesOperation(const SeriesOperation& src);	// default OK
+	SeriesOperation(const SeriesOperation& src) = default;
+	SeriesOperation(SeriesOperation&& src) = default;
+	SeriesOperation& operator=(const SeriesOperation & src);	// provided to be ACID
+	SeriesOperation& operator=(SeriesOperation&& src) = default;
 	virtual ~SeriesOperation() = default;
 
-	const SeriesOperation& operator=(const SeriesOperation& src);	// provided to be ACID
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(SeriesOperation*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
-	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
-	void MoveInto(SeriesOperation*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
+	void MoveInto(MetaConcept*& dest) override { zaimoni::MoveIntoV2(std::move(*this), dest); }
+	void MoveInto(SeriesOperation*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
 //  Type ID functions
 	virtual const AbstractClass* UltimateType() const;
 	virtual bool ForceUltimateType(const AbstractClass* const rhs);

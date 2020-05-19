@@ -663,7 +663,6 @@ bool MetaConnective::IFF_AmplifyThisClauseV1(MetaConnective& rhs) const
 
 bool MetaConnective::IFF_AmplifyThisClauseV2(MetaConnective& rhs) const
 {
-	MetaConnective* NewArg = NULL;
 	const size_t IncomingParam1 = InferenceParameter1;
 	const size_t IncomingRHSParam1 = rhs.InferenceParameter1;
 	assert(ArgArray.size()>IncomingParam1);
@@ -674,16 +673,19 @@ bool MetaConnective::IFF_AmplifyThisClauseV2(MetaConnective& rhs) const
 
 	if (Prefilter_CanAmplifyThisClause(*rhs.ArgArray[IncomingRHSParam1]))
 		{
-		if 		(    rhs.FindTwoRelatedArgs(*this,NonStrictlyImpliesLogicalNOTOf)
-				 && !NonStrictlyImplies(*rhs.ArgArray[IncomingRHSParam1],*this))
+		if (rhs.FindTwoRelatedArgs(*this,NonStrictlyImpliesLogicalNOTOf, [&](const MetaConcept& l) {
+			return !NonStrictlyImplies(l, *this);
+		}))
 			return IFF_AmplifyThisClauseV1(*static_cast<MetaConnective*>(rhs.ArgArray[IncomingRHSParam1]));
-		else if (    rhs.FindTwoRelatedArgs(*this,NonStrictlyImplies)
-				 && !NonStrictlyImplies(*rhs.ArgArray[IncomingRHSParam1],*this))
+		else if (rhs.FindTwoRelatedArgs(*this,NonStrictlyImplies, [&](const MetaConcept& l) {
+			return !NonStrictlyImplies(l, *this);
+		}))
 			return IFF_AmplifyThisClauseV2(*static_cast<MetaConnective*>(rhs.ArgArray[IncomingRHSParam1]));
 		}
 
+	std::unique_ptr<MetaConnective> NewArg;
 	try	{
-		CopyInto(NewArg);
+		NewArg = std::unique_ptr<MetaConnective>(new MetaConnective(*this));
 		}
 	catch(const bad_alloc&)
 		{
@@ -699,7 +701,7 @@ bool MetaConnective::IFF_AmplifyThisClauseV2(MetaConnective& rhs) const
 			return false;
 		}			
 	NewArg->SetExactTypeV2(LogicalAND_MC);
-	rhs.ArgArray[IncomingRHSParam1] = NewArg;
+	rhs.ArgArray[IncomingRHSParam1] = NewArg.release();
 	// immediately normalize AND
 	if (rhs.IsExactType(LogicalAND_MC))
 		{
