@@ -717,7 +717,6 @@ bool MetaConnective::IFF_AmplifyThisClauseV2(MetaConnective& rhs) const
 
 bool MetaConnective::XOR_AmplifyThisClause(MetaConnective& rhs) const
 {
-	MetaConnective* NewArg = NULL;
 	const size_t IncomingParam1 = InferenceParameter1;
 	const size_t IncomingRHSParam1 = rhs.InferenceParameter1;
 	assert(ArgArray.size()>IncomingParam1);
@@ -730,8 +729,9 @@ bool MetaConnective::XOR_AmplifyThisClause(MetaConnective& rhs) const
 		&& XOR_CanAmplifyThisClause(*static_cast<MetaConnective*>(rhs.ArgArray[IncomingRHSParam1])))
 		return XOR_AmplifyThisClause(*static_cast<MetaConnective*>(rhs.ArgArray[IncomingRHSParam1]));
 
+	std::unique_ptr<MetaConnective> NewArg;
 	try	{
-		CopyInto(NewArg);
+		NewArg = std::unique_ptr<MetaConnective>(new MetaConnective(*this));
 		}
 	catch(const bad_alloc&)
 		{
@@ -749,7 +749,7 @@ bool MetaConnective::XOR_AmplifyThisClause(MetaConnective& rhs) const
 			return false;
 		}
 	NewArg->SetNANDNOR(LogicalNOR_MC);
-	rhs.ArgArray[IncomingRHSParam1] = NewArg;
+	rhs.ArgArray[IncomingRHSParam1] = NewArg.release();
 	// immediately normalize AND
 	if (rhs.IsExactType(LogicalAND_MC))
 		{
