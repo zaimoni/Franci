@@ -70,7 +70,7 @@ QuantifiedStatement::~QuantifiedStatement()
 	DELETE_AND_NULL(ArgArray[0]);
 }
 
-const QuantifiedStatement& QuantifiedStatement::operator=(const QuantifiedStatement& src)
+QuantifiedStatement& QuantifiedStatement::operator=(const QuantifiedStatement& src)
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/13/1999
 	// Note that the quantified variables must be properly substituted after the construction.
 	MetaConceptWithArgArray::operator=(src);
@@ -82,12 +82,6 @@ const QuantifiedStatement& QuantifiedStatement::operator=(const QuantifiedStatem
 		while(1<i);
 		};
 	return *this;
-}
-
-void QuantifiedStatement::MoveInto(QuantifiedStatement*& dest)		// can throw memory failure.  If it succeeds, it destroys the source.
-{	// FORMALLY CORRECT: Kenneth Boyd, 3/17/2000
-	if (!dest) dest = new QuantifiedStatement();
-	MoveIntoAux(*dest);
 }
 
 //  Type ID functions

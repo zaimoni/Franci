@@ -29,7 +29,7 @@ MetaQuantifier::MetaQuantifier(const char* Name, const AbstractClass* Domain, Me
 	if (Domain) Domain->CopyInto(Arg1);
 }
 
-const MetaQuantifier& MetaQuantifier::operator=(const MetaQuantifier& src)
+MetaQuantifier& MetaQuantifier::operator=(const MetaQuantifier& src)
 {	// FORMALLY CORRECT: 11/26/2006
 	if (VariableName.size()>=src.VariableName.size())
 		{
@@ -46,16 +46,6 @@ const MetaQuantifier& MetaQuantifier::operator=(const MetaQuantifier& src)
 	return *this;
 }
 
-void MetaQuantifier::MoveInto(MetaQuantifier*& dest)	// can throw memory failure.  If it succeeds, it destroys the source.
-{	// FORMALLY CORRECT: 3/17/2000, Kenneth Boyd
-	if (NULL==dest)
-		dest = new MetaQuantifier(NULL,NULL,(MetaQuantifierMode)(ExactType()-ForAll_MC));
-	VariableName.MoveInto(dest->VariableName);
-	dest->Bitmap1=Bitmap1;
-	dest->ID = ID;
-	MoveIntoAux(*dest);
-}
-	
 //  Type ID functions
 const AbstractClass* MetaQuantifier::UltimateType() const
 {return static_cast<AbstractClass* const>((MetaConcept*)Arg1);}

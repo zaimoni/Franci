@@ -25,15 +25,17 @@ class QuantifiedStatement final : public MetaConceptWithArgArray
 	static SelfEvaluateRule SelfEvaluateRuleLookup[MaxSelfEvalRuleIdx_SER];
 
 	unsigned char QuantifiersExplicitlySorted;
-	const QuantifiedStatement& operator=(const QuantifiedStatement& src);
+	QuantifiedStatement& operator=(const QuantifiedStatement& src);	// ACID
 public:
 	QuantifiedStatement() :	MetaConceptWithArgArray(QuantifiedStatement_MC),QuantifiersExplicitlySorted('\x00') {};
 	QuantifiedStatement(const QuantifiedStatement& src);
+	QuantifiedStatement(QuantifiedStatement&& src) = default;
+	QuantifiedStatement& operator=(QuantifiedStatement&& src) = default;
 	virtual ~QuantifiedStatement();
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(QuantifiedStatement*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
-	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
-	void MoveInto(QuantifiedStatement*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
+	void MoveInto(MetaConcept*& dest) override { zaimoni::MoveIntoV2(std::move(*this), dest); }
+	void MoveInto(QuantifiedStatement*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
 
 //  Type ID functions
 	const AbstractClass* UltimateType() const override;

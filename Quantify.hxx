@@ -48,14 +48,16 @@ private:
 public:
 	MetaQuantifier(const char* Name, const AbstractClass* Domain, MetaQuantifierMode CreationMode);
 	MetaQuantifier(const char* Name, const AbstractClass* Domain, MetaQuantifierMode CreationMode, bool Improvised);
-//	MetaQuantifier(const MetaQuantifier& src);	// default OK
+	MetaQuantifier(const MetaQuantifier& src) = default;
+	MetaQuantifier(MetaQuantifier&& src) = default;
+	MetaQuantifier& operator=(const MetaQuantifier & src);	// ACID
+	MetaQuantifier& operator=(MetaQuantifier&& src) = default;
 	virtual ~MetaQuantifier() = default;
 
-	const MetaQuantifier& operator=(const MetaQuantifier& src);
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(MetaQuantifier*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
-	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
-	void MoveInto(MetaQuantifier*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
+	void MoveInto(MetaConcept*& dest) override { zaimoni::MoveIntoV2(std::move(*this),dest); }
+	void MoveInto(MetaQuantifier*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
 
 //  Type ID functions
 	virtual const AbstractClass* UltimateType() const;
