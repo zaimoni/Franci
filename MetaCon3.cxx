@@ -837,20 +837,22 @@ bool MetaConnective::DirectCreateBasisClauseIdx(size_t Idx, MetaConcept*& dest) 
 	try	{
 		if      (IsExactType(LogicalIFF_MC))
 			{
-			CopyInto(dest);
+			MetaConnective* tmp_mc = new MetaConnective(*this);
 			if (0==Idx)
-				static_cast<MetaConnective*>(dest)->SetExactTypeV2(LogicalAND_MC);
+				tmp_mc->SetExactTypeV2(LogicalAND_MC);
 			else	// if (1==Idx)
-				static_cast<MetaConnective*>(dest)->SetNANDNOR(LogicalNOR_MC);
+				tmp_mc->SetNANDNOR(LogicalNOR_MC);
+			dest = tmp_mc;
 			return true;
 			}
 		else if (IsExactType(LogicalOR_MC))
 			{
 			if (0==Idx)
 				{
-				CopyInto(dest);
-				static_cast<MetaConnective*>(dest)->SetExactTypeV2(LogicalAND_MC);
-				return true;				
+				MetaConnective* tmp_mc = new MetaConnective(*this);
+				tmp_mc->SetExactTypeV2(LogicalAND_MC);
+				dest = tmp_mc;
+				return true;
 				}
 			if (fast_size()>=Idx)
 				{
@@ -865,9 +867,10 @@ bool MetaConnective::DirectCreateBasisClauseIdx(size_t Idx, MetaConcept*& dest) 
 					return true;
 					}
 				else{
-					CopyInto(dest);
-					static_cast<MetaConnective*>(dest)->DeleteIdx(Idx-1);
-					dest->SelfLogicalNOT();
+					MetaConnective* tmp_mc = new MetaConnective(*this);
+					tmp_mc->DeleteIdx(Idx-1);
+					tmp_mc->SelfLogicalNOT();
+					dest = tmp_mc;
 					return true;
 					}
 				}
@@ -882,8 +885,8 @@ bool MetaConnective::DirectCreateBasisClauseIdx(size_t Idx, MetaConcept*& dest) 
 				return true;
 				}
 
-			MetaConcept** NewArgArray = _new_buffer<MetaConcept*>(2);
-			if (!NewArgArray) return false;
+			autovalarray_ptr<MetaConcept*> NewArgArray(2);
+			if (NewArgArray.empty()) return false;
 
 			size_t Arity = fast_size()-1;
 			size_t FirstArg = 0;
@@ -904,20 +907,12 @@ bool MetaConnective::DirectCreateBasisClauseIdx(size_t Idx, MetaConcept*& dest) 
 					}
 				};
 
-			try	{
-				ArgArray[FirstArg]->CopyInto(NewArgArray[0]);
-				ArgArray[FirstArg+Idx+1]->CopyInto(NewArgArray[1]);
+			ArgArray[FirstArg]->CopyInto(NewArgArray[0]);
+			ArgArray[FirstArg+Idx+1]->CopyInto(NewArgArray[1]);
 
-				if (incremental_data_mode)
-					NewArgArray[1]->SelfLogicalNOT();
+			if (incremental_data_mode) NewArgArray[1]->SelfLogicalNOT();
 
-				dest = new MetaConnective(NewArgArray,IFF_MCM);
-				}
-			catch(const bad_alloc&)
-				{
-				BLOCKDELETEARRAY(NewArgArray);
-				return false;
-				}
+			dest = new MetaConnective(NewArgArray,IFF_MCM);
 			return true;
 			}
 		}
