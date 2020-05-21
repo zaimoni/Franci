@@ -25,9 +25,9 @@ public:
 												   "FALSE",
 												   "UNKNOWN" };
 
-	constexpr TVal() : _x(Unknown) {};
-	constexpr TVal(Flags src) : _x(src) {};
-	constexpr TVal(bool src) : _x(src ? True : False) {};
+	constexpr TVal() noexcept : _x(Unknown) {}
+	constexpr TVal(Flags src) noexcept : _x(src) {}
+	constexpr TVal(bool src) noexcept : _x(src ? True : False) {}
 	~TVal() = default;
 	TVal(const TVal& src) = default;
 	TVal(TVal&& src) = default;

@@ -242,9 +242,9 @@ protected:
 						StdAdditionInv_VF = 0x02,	// needs UltimateType to support StdAddition
 						StdMultInv_VF = 0x04	// needs UltimateType to support StdMultiplication
 						};
-	MetaConcept() : VFTable1(NULL),MultiPurposeBitmap(NoModifiers_VF) {};
-	explicit MetaConcept(ExactType_MC NewType) : VFTable1(&MetaConceptLookUp[NewType]),MultiPurposeBitmap(NoModifiers_VF) {};
-	explicit MetaConcept(ExactType_MC NewType,unsigned char NewBitmap) : VFTable1(&MetaConceptLookUp[NewType]),MultiPurposeBitmap(NewBitmap) {};
+	MetaConcept() noexcept : VFTable1(0), MultiPurposeBitmap(NoModifiers_VF) {}
+	explicit MetaConcept(ExactType_MC NewType) noexcept : VFTable1(&MetaConceptLookUp[NewType]),MultiPurposeBitmap(NoModifiers_VF) {};
+	explicit MetaConcept(ExactType_MC NewType,unsigned char NewBitmap) noexcept : VFTable1(&MetaConceptLookUp[NewType]),MultiPurposeBitmap(NewBitmap) {};
 	MetaConcept(const MetaConcept& src) = default;
 	MetaConcept(MetaConcept&& src) = default;
 	MetaConcept& operator=(const MetaConcept & src) = default;

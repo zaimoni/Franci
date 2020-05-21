@@ -48,21 +48,23 @@ class MetaConceptExternal final : public MetaConcept
 public:
 	T _x;	// we would provide full accessors anyway so may as well be public
 
-	MetaConceptExternal() : MetaConcept(MetaConcept_lookup<T>::exact_type()) {};
-	MetaConceptExternal(const T& src) : MetaConcept(MetaConcept_lookup<T>::exact_type()),_x(src) {};
-	MetaConceptExternal(const MetaConceptExternal& src) : MetaConcept(src),_x(src._x) {};
-	virtual ~MetaConceptExternal() {};	// as a template doesn't go in Destruct.cxx
-	void operator=(const MetaConceptExternal& src) {
+	MetaConceptExternal() noexcept(std::is_nothrow_default_constructible_v<T>) : MetaConcept(MetaConcept_lookup<T>::exact_type()) {}
+	MetaConceptExternal(const T& src) noexcept(std::is_nothrow_copy_constructible_v<T>) : MetaConcept(MetaConcept_lookup<T>::exact_type()),_x(src) {}
+	MetaConceptExternal(const MetaConceptExternal& src) = default;
+	MetaConceptExternal(MetaConceptExternal&& src) = default;
+	virtual ~MetaConceptExternal() {}	// as a template doesn't go in Destruct.cxx
+	MetaConceptExternal& operator=(const MetaConceptExternal& src) noexcept(std::is_nothrow_copy_assignable_v<T>) {
 		_x = src._x;	// presumably this is ACID
 		MetaConcept::operator=(src);
 	};
-	void operator=(const T& src) {
+	MetaConceptExternal& operator=(MetaConceptExternal&& src) = default;
+	MetaConceptExternal& operator=(const T& src) noexcept(std::is_nothrow_copy_assignable_v<T>) {
 		_x = src;	// presumably this is ACID
 	};
 
 	void CopyInto(MetaConcept*& dest) const override {zaimoni::CopyInto(*this,dest);};	// can throw memory failure
-	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
-	void MoveInto(MetaConceptExternal*& dest) {zaimoni::CopyInto(*this,dest);};
+	void MoveInto(MetaConcept*& dest) override { zaimoni::MoveIntoV2(std::move(*this), dest); }
+	void MoveInto(MetaConceptExternal*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
 
 //  Type ID functions
 	virtual typename std::enable_if<MetaConcept_lookup<T>::return_code==1,const AbstractClass*>::type UltimateType() const {return &TruthValues;};	// specialize or else
