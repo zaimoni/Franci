@@ -149,7 +149,7 @@ _vector_assign(U* dest, const T& src, size_t Idx)
 }
 
 template<typename T>
-void _vector_assign(T* dest,typename zaimoni::param<T>::type src, size_t Idx)
+void _vector_assign(T* dest, typename zaimoni::param<T>::type src, size_t Idx)
 {
 	if (std::is_trivially_copy_assignable_v(T) && 1 == sizeof(T)) {
 		memset(dest, src, Idx);
@@ -202,7 +202,7 @@ _vector_equal(const T& lhs, const U& rhs, size_t Idx)
 
 // objects
 template<typename T>
-void _single_flush(T* _ptr)
+void _single_flush(T* _ptr) noexcept
 {
 	if constexpr (std::is_trivially_destructible_v<T>) {
 		free(_ptr);
@@ -213,14 +213,14 @@ void _single_flush(T* _ptr)
 
 // pointer arrays
 template<typename T>
-void _single_flush(T** _ptr)
+void _single_flush(T** _ptr) noexcept
 {
 	single_flush(*_ptr);
 	free(_ptr);
 }
 
 template<typename T>
-void _weak_flush(T** _ptr)
+void _weak_flush(T** _ptr) noexcept
 {
 	free(_ptr);
 }
@@ -230,7 +230,7 @@ void _weak_flush(T** _ptr)
 template<typename T>
 T* _new_buffer(size_t Idx)
 {
-	return (std::is_trivially_constructible_v<T> && std::is_trivially_destructible_v<T>) ? reinterpret_cast<T*>(calloc(Idx,sizeof(T))) : new(std::nothrow) T[Idx];
+	return (std::is_trivially_constructible_v<T> && std::is_trivially_destructible_v<T>) ? reinterpret_cast<T*>(calloc(Idx, sizeof(T))) : new(std::nothrow) T[Idx];
 }
 
 template<typename T>

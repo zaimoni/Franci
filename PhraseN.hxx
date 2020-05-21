@@ -33,20 +33,22 @@ private:
 	static LengthOfSelfNameAuxFunc LengthOfSelfNameAuxArray[(MaxPhraseNIdx_MC-MinPhraseNIdx_MC)+1];
 	static ConstructSelfNameAuxFunc ConstructSelfNameAuxArray[(MaxPhraseNIdx_MC-MinPhraseNIdx_MC)+1];
 	static SyntaxOKAuxFunc SyntaxOKAuxArray[(MaxPhraseNIdx_MC-MinPhraseNIdx_MC)+1];
-protected:
-	PhraseNArg() {};
 public:
+	PhraseNArg() = delete;
 	PhraseNArg(MetaConcept**& src, size_t& KeywordIdx);
-//	PhraseNArg(const PhraseNArg& src);	// default OK
+	PhraseNArg(const PhraseNArg& src) = default;
+	PhraseNArg(PhraseNArg&& src) = default;
+	PhraseNArg& operator=(const PhraseNArg & src) = default;
+	PhraseNArg& operator=(PhraseNArg&& src) = default;
 	virtual ~PhraseNArg() = default;
-//	const PhraseNArg& operator=(const PhraseNArg& src);	// default OK
+
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(PhraseNArg*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
-	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure; success destroys integrity of source
-	void MoveInto(PhraseNArg*& dest);	// can throw memory failure; success destroys integrity of source
+	void MoveInto(MetaConcept*& dest) override { zaimoni::MoveIntoV2(std::move(*this),dest); }
+	void MoveInto(PhraseNArg*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
 
 //  Type ID functions
-	virtual const AbstractClass* UltimateType() const;
+	const AbstractClass* UltimateType() const override { return 0; }
 //  Evaluation functions
 	virtual bool SyntaxOK() const;
 // text I/O functions

@@ -100,17 +100,7 @@ PhraseNArg::PhraseNArg(MetaConcept**& src, size_t& KeywordIdx)
 	return;
 }
 
-void PhraseNArg::MoveInto(PhraseNArg*& dest)		// can throw memory failure.  If it succeeds, it destroys the source.
-{	// FORMALLY CORRECT: Kenneth Boyd, 3/17/2000
-	if (NULL==dest) dest = new PhraseNArg();
-	dest->VFTable1=VFTable1;
-	dest->PhraseKeyword=PhraseKeyword;
-	MoveIntoAux(*dest);
-}
-
 //  Type ID functions
-const AbstractClass* PhraseNArg::UltimateType() const {return NULL;}
-
 void PhraseNArg::_forceStdForm()
 {	// FORMALLY CORRECT: Kenneth Boyd, 4/23/2000
 	ForceStdFormAux();

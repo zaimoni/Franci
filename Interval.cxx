@@ -56,7 +56,7 @@ const LinearInterval& LinearInterval::operator=(const LinearInterval& src)
 	autodel_ptr<AbstractClass> Tmp;
 	src.IntervalDomain->CopyInto(Tmp);
 	MetaConceptWith2Args::operator=(src);
-	IntervalDomain = Tmp;
+	IntervalDomain = std::move(Tmp);
 
 	LeftPointOpen = src.LeftPointOpen;
 	RightPointOpen = src.RightPointOpen;
@@ -73,7 +73,7 @@ void LinearInterval::MoveInto(LinearInterval& dest)
 {	// FORMALLY CORRECT: Kenneth Boyd, 7/12/2002
 	dest.LeftPointOpen = LeftPointOpen;
 	dest.RightPointOpen = RightPointOpen;
-	dest.IntervalDomain = IntervalDomain;
+	dest.IntervalDomain = std::move(IntervalDomain);
 	MoveIntoAux(dest);
 }
 

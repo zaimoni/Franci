@@ -288,7 +288,7 @@ bool CSVTable::FirstRowIsColumnHeaders()
 	
 	if (NULL!=CSVRawText[0])
 		{
-		ColHeaders = CSVRawText[0];
+		ColHeaders = std::move(CSVRawText[0]);
 		CSVRawText.FastDeleteIdx(0);
 		RawLines.FastDeleteIdx(0);
 		return true;
