@@ -26,7 +26,7 @@ protected:
 public:
 	ZAIMONI_STL_TYPE_GLUE_ARRAY(T);
 	// core infrastructure
-	void NULLPtr() { _ptr = 0; ZAIMONI_ISO_SRC(_size = 0;) }
+	void NULLPtr() noexcept { _ptr = 0; ZAIMONI_ISO_SRC(_size = 0;) }
 	void de_novo(size_t n) { _ptr = n ? _new_buffer_nonNULL_throws<T>(n) : 0; ZAIMONI_ISO_SRC(_size = n;) }
 	void de_novo_nothrow(size_t n) { _ptr = _new_buffer<T>(n); ZAIMONI_ISO_SRC(_size = n;) }
 
@@ -63,7 +63,7 @@ public:
 	void DeleteIdx(size_t n) { _safe_delete_idx(this->_ptr ZAIMONI_ISO_PARAM(this->_size), n); };
 	void DeleteNSlotsAt(size_t n, size_t Idx) { _delete_n_slots_at(this->_ptr ZAIMONI_ISO_PARAM(this->_size), n, Idx); };
 	void DeleteNSlots(size_t* indexes, size_t n) { _delete_n_slots(this->_ptr ZAIMONI_ISO_PARAM(this->_size), indexes, n); };
-	void resize(size_t n) {if (!this->Resize(n)) throw std::bad_alloc();};	
+	void resize(size_t n) { if (!this->Resize(n)) throw std::bad_alloc(); }
 };
 
 template<class T>
