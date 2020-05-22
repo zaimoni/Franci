@@ -960,7 +960,7 @@ bool MetaConnective::DirectCreateANDFactorIdx(size_t Idx, MetaConcept*& dest) co
 			}
 		else if (IsExactType(LogicalIFF_MC))
 			{
-			MetaConcept** NewArgArray = _new_buffer<MetaConcept*>(2);
+			autovalarray_ptr<MetaConcept*> NewArgArray(2);
 			if (!NewArgArray) return false;
 
 			size_t Arity = fast_size()-1;
@@ -975,16 +975,9 @@ bool MetaConnective::DirectCreateANDFactorIdx(size_t Idx, MetaConcept*& dest) co
 			assert(ArgArray.size()>FirstArg);
 			assert(ArgArray.size()>FirstArg+Idx+1);
 
-			try	{
-				ArgArray[FirstArg]->CopyInto(NewArgArray[0]);
-				ArgArray[FirstArg+Idx+1]->CopyInto(NewArgArray[1]);
-				dest = new MetaConnective(NewArgArray,IFF_MCM);
-				}
-			catch(const bad_alloc&)
-				{
-				BLOCKDELETEARRAY(NewArgArray);
-				return false;
-				}
+			ArgArray[FirstArg]->CopyInto(NewArgArray[0]);
+			ArgArray[FirstArg+Idx+1]->CopyInto(NewArgArray[1]);
+			dest = new MetaConnective(NewArgArray,IFF_MCM);
 			return true;
 			}
 		}
@@ -1026,8 +1019,9 @@ bool MetaConnective::MakesLHSImplyRHS(const MetaConcept& lhs, const MetaConcept&
 		size_t Arg1;
 		// XOR(A,B,C): if D=>A and ~C=>E, then XOR(A,B,C) enables D=>E
 		if (   FindArgRelatedToLHS(lhs,NonStrictlyImplies)
-			&& (Arg1=InferenceParameter1,FindArgRelatedToRHS(rhs,LogicalNOTOfNonStrictlyImplies))
-			&&  Arg1!=InferenceParameter1)
+			&& (Arg1 = InferenceParameter1, FindArgRelatedToRHS(rhs, LogicalNOTOfNonStrictlyImplies, [&](const MetaConcept& l) {
+					return l != *ArgArray[Arg1];
+				})))
 			return true;
 		// XOR(A,B,C): if D=>~B, D=>~C, and A=>E, then XOR(A,B,C) enables D=>E
 		if (FindArgRelatedToRHS(rhs,NonStrictlyImplies))

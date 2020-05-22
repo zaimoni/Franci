@@ -1392,6 +1392,17 @@ bool MetaConceptWithArgArray::FindArgRelatedToRHS(const MetaConcept& rhs, LowLev
 	return false;
 }
 
+bool MetaConceptWithArgArray::FindArgRelatedToRHS(const MetaConcept& rhs, LowLevelBinaryRelation& TargetRelation, std::function<bool(const MetaConcept&)> lhs_ok) const
+{
+	size_t i = ArgArray.size();
+	while (0 < i)
+		if (TargetRelation(*ArgArray[--i], rhs) && lhs_ok(*ArgArray[i])) {
+			InferenceParameter1 = i;
+			return true;
+		};
+	return false;
+}
+
 bool MetaConceptWithArgArray::FindArgRelatedToRHS(const MetaConcept& rhs, LowLevelBinaryRelation& TargetRelation, const size_t NonStrictLB, const size_t NonStrictUB) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 3/26/2000
 	assert(ArgArray.size()>NonStrictUB);
