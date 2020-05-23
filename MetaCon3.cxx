@@ -441,12 +441,6 @@ MetaConnective::MetaConnective(MetaConcept**& NewArgList, MetaConnectiveModes Li
 	if (LogicalNOR_MC<=ExactType()) DoSelfDeMorgan();
 }
 
-void MetaConnective::MoveInto(MetaConnective*& dest)		// can throw memory failure.  If it succeeds, it destroys the source.
-{
-	if (!dest) dest = new MetaConnective(std::move(*this));
-	else *dest = std::move(*this);
-}
-
 bool MetaConnective::EqualAux2(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 4/23/2000
 	if (MetaConceptWithArgArray::EqualAux2(rhs)) return true;

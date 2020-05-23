@@ -109,8 +109,8 @@ public:
 
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(MetaConnective*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
-	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
-	void MoveInto(MetaConnective*& dest);		// can throw memory failure.  If it succeeds, it destroys the source.
+	void MoveInto(MetaConcept*& dest) override { zaimoni::MoveIntoV2(std::move(*this), dest); }
+	void MoveInto(MetaConnective*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
 
 //  Type ID functions
 	const AbstractClass* UltimateType() const override;

@@ -30,19 +30,21 @@ private:
 	const char* PhraseKeyword;	// this controls the intended semantics
 								// Phrase2Arg does *NOT* own this!
 
-	Phrase2Arg() {};
 public:
+	Phrase2Arg() = delete;
 	Phrase2Arg(MetaConcept**& src, size_t& KeywordIdx);
-//	Phrase2Arg(const Phrase2Arg& src);	// default OK
+	Phrase2Arg(const Phrase2Arg& src) = default;
+	Phrase2Arg(Phrase2Arg&& src) = default;
+	Phrase2Arg& operator=(const Phrase2Arg & src) = default;
+	Phrase2Arg& operator=(Phrase2Arg&& src) = default;
 	virtual ~Phrase2Arg() = default;
-//	const Phrase2Arg& operator=(const Phrase2Arg& src); //	default ok
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(Phrase2Arg*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
-	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure; success destroys integrity of source
-	void MoveInto(Phrase2Arg*& dest);	// can throw memory failure; success destroys integrity of source
+	void MoveInto(MetaConcept*& dest) override { zaimoni::MoveIntoV2(std::move(*this), dest); }
+	void MoveInto(Phrase2Arg*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
 
 //  Type ID functions
-	virtual const AbstractClass* UltimateType() const;
+	const AbstractClass* UltimateType() const override { return 0; }
 
 //  Evaluation functions
 	virtual bool SyntaxOK() const;

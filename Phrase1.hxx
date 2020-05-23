@@ -30,21 +30,23 @@ private:
 	const char* PhraseKeyword;	// this controls the intended semantics
 								// Phrase1Arg does *NOT* own this!
 	static const Phrase1ArgVFT VFTable2Lookup[(MaxPhrase1Idx_MC-MinPhrase1Idx_MC)+1];
-protected:
-	Phrase1Arg() {};
 public:
+	Phrase1Arg() = delete;
 	Phrase1Arg(MetaConcept**& src, size_t KeywordIdx);	// constructor
 													// NOTE: constructor fails by failing SyntaxOK()
-//	Phrase1Arg(const Phrase1Arg& src);	// default OK
+	Phrase1Arg(const Phrase1Arg& src) = default;
+	Phrase1Arg(Phrase1Arg&& src) = default;
+	Phrase1Arg& operator=(const Phrase1Arg& src) = default;
+	Phrase1Arg& operator=(Phrase1Arg&& src) = default;
 	virtual ~Phrase1Arg() = default;
-//	const Phrase1Arg& operator=(const Phrase1Arg& src);	// default OK
+
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(Phrase1Arg*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
-	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
-	void MoveInto(Phrase1Arg*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
+	void MoveInto(MetaConcept*& dest) override { zaimoni::MoveIntoV2(std::move(*this), dest); }
+	void MoveInto(Phrase1Arg*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
 
 //  Type ID functions
-	virtual const AbstractClass* UltimateType() const;
+	const AbstractClass* UltimateType() const override { return 0; }
 //  Evaluation functions
 	virtual bool CanEvaluate() const;
 	virtual bool CanEvaluateToSameType() const;

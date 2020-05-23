@@ -65,18 +65,6 @@ Phrase2Arg::Phrase2Arg(MetaConcept**& src, size_t& KeywordIdx)
 	};
 }
 
-void Phrase2Arg::MoveInto(Phrase2Arg*& dest)		// can throw memory failure.  If it succeeds, it destroys the source.
-{	// FORMALLY CORRECT: Kenneth Boyd, 8/13/2000
-	if (!dest) dest = new Phrase2Arg();
-	dest->VFTable1=VFTable1;
-	dest->PhraseKeyword=PhraseKeyword;
-	MoveIntoAux(*dest);
-}
-
-//  Type ID functions
-// FORMALLY CORRECT: Kenneth Boyd, 8/13/2000
-const AbstractClass* Phrase2Arg::UltimateType() const {return NULL;}
-
 // Syntactical equality and inequality
 //  Evaluation functions
 

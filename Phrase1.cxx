@@ -71,16 +71,6 @@ Phrase1Arg::Phrase1Arg(MetaConcept**& src, size_t KeywordIdx)
 	};
 }
 
-void Phrase1Arg::MoveInto(Phrase1Arg*& dest)		// can throw memory failure.  If it succeeds, it destroys the source.
-{	// FORMALLY CORRECT: Kenneth Boyd, 3/17/2000
-	if (NULL==dest) dest = new Phrase1Arg();
-	dest->VFTable1=VFTable1;
-	dest->PhraseKeyword=PhraseKeyword;
-	MoveIntoAux(*dest);
-}
-
-const AbstractClass* Phrase1Arg::UltimateType() const {return NULL;}
-
 bool Phrase1Arg::EqualAux2(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 2/16/2000
 	if (   MetaConceptWith1Arg::EqualAux2(rhs)
