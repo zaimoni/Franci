@@ -114,8 +114,7 @@ bool MetaQuantifier::EqualAux2(const MetaConcept& rhs) const
 
 bool MetaQuantifier::InternalDataLTAux(const MetaConcept& rhs) const
 {
-	if (!MetaConceptWith1Arg::EqualAux2(rhs))
-		return MetaConceptWith1Arg::InternalDataLTAux(rhs);
+	if (!MetaConceptWith1Arg::EqualAux2(rhs)) return MetaConceptWith1Arg::InternalDataLTAux(rhs);
 	return static_cast<const MetaQuantifier&>(rhs).LexicalGT(*this);
 }
 

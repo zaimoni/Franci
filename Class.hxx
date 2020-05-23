@@ -6,6 +6,7 @@
 
 #include "MetaCon5.hxx"
 #include "TVal.hxx"
+#include <string>
 
 class AbstractClass;
 namespace zaimoni {
@@ -26,21 +27,22 @@ private:
 									TopologicalCompletesWithInfinity	= 0x00000010,
 									ContainsInfinity					= 0x00000020
 									};
-	autovalarray_ptr_throws<char> ClassName;
+	std::string ClassName;
 	unsigned long Attributes1Bitmap;
 public:
-	AbstractClass();	// as below, but implied NULL pointer
-	AbstractClass(const char* const NewName);	// object now has copy of NewName
+	AbstractClass() : MetaConceptWith1Arg(AbstractClass_MC),Attributes1Bitmap(0) {}	// as below, but implied NULL pointer
+	AbstractClass(std::string&& src) : MetaConceptWith1Arg(AbstractClass_MC), ClassName((assert(!src.empty()),std::move(src))), Attributes1Bitmap(0) {}
 	AbstractClass(MetaConcept*& src);	// AbstractClass owns Target afterwards.
-//	AbstractClass(const AbstractClass& src);	// default OK
+	AbstractClass(const AbstractClass& src) = default;
+	AbstractClass(AbstractClass&& src) = default;
+	AbstractClass& operator=(const AbstractClass& src);	// ACID
+	AbstractClass& operator=(AbstractClass&& src) = default;
 	virtual ~AbstractClass() = default;
 	
-	const AbstractClass& operator=(const AbstractClass& src);
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(AbstractClass*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
-	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
-	void MoveInto(AbstractClass*& dest);	// destroys the source.
-	void MoveInto(AbstractClass& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
+	void MoveInto(MetaConcept*& dest) override { zaimoni::MoveIntoV2(std::move(*this), dest); }
+	void MoveInto(AbstractClass*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
 //  Type ID functions
 	virtual const AbstractClass* UltimateType() const;
 //	Arity functions

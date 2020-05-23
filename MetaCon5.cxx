@@ -19,8 +19,11 @@ STANDARD_DECLARE_ARGN(MetaConceptWith1Arg,ARGN_BODY)
 #undef ARGN_BODY
 
 bool MetaConceptWith1Arg::InternalDataLTAux(const MetaConcept& rhs) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 2/16/2000
-	return Arg1->InternalDataLT(*static_cast<const MetaConceptWith1Arg&>(rhs).Arg1);
+{	// FORMALLY CORRECT: 2020-05-23
+	if (Arg1.empty()) return true;
+	const MetaConceptWith1Arg& VR_rhs = static_cast<const MetaConceptWith1Arg&>(rhs);
+	if (VR_rhs.Arg1.empty()) return false;
+	return Arg1->InternalDataLT(*VR_rhs.Arg1);
 }
 
 bool MetaConceptWith1Arg::EqualAux2(const MetaConcept& rhs) const

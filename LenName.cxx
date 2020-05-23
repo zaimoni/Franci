@@ -318,7 +318,7 @@ void AbstractClass::ConstructSelfNameAux(char* Name) const		// overwrites what i
 			}
 		}
 	else
-		strcpy(Name,ClassName);
+		strcpy(Name,ClassName.c_str());
 }
 
 // technically, this is just for infix 2-ary clauses
@@ -833,7 +833,7 @@ void Variable::ConstructSelfNameAux(char* Name) const
 // Actual implementations of LengthOfSelfName()
 size_t AbstractClass::LengthOfSelfName() const
 {	// FORMALLY CORRECT: 12/29/2002
-	if (!ClassName.empty()) return strlen(ClassName);
+	if (!ClassName.empty()) return strlen(ClassName.c_str());
 	if (Arg1.empty()) return sizeof(UNNAMED_CLASS)-1;
 
 	size_t CorrectLength = Arg1->LengthOfSelfName();

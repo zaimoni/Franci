@@ -25,20 +25,6 @@ const char* const Reserved_ClassAdditionMultiplicationDefined = "_ADD_MULT_DEF_"
 
 //! \todo When the alternative description methods are used, they will use Arg1.
 
-AbstractClass::AbstractClass(void)
-:	MetaConceptWith1Arg(AbstractClass_MC),
-	Attributes1Bitmap(0)
-{
-}
-
-AbstractClass::AbstractClass(const char* const NewName)	// object now has copy of NewName
-:	MetaConceptWith1Arg(AbstractClass_MC),
-	ClassName((assert(NewName && *NewName),ZAIMONI_LEN_WITH_NULL(strlen(NewName)))),
-	Attributes1Bitmap(0)
-{
-	strcpy(ClassName,NewName);
-}
-
 AbstractClass::AbstractClass(MetaConcept*& src)
 :	MetaConceptWith1Arg(AbstractClass_MC,(assert(src),assert(src->IsAbstractClassDomain()),assert(!src->CanEvaluate()),src)),
 	Attributes1Bitmap(0)
@@ -46,18 +32,11 @@ AbstractClass::AbstractClass(MetaConcept*& src)
 	Set_IsProperSet();
 }
 
-const AbstractClass& AbstractClass::operator=(const AbstractClass& src)
-{	// FORMALLY CORRECT: Kenneth Boyd, 11/26/2006
-	if (ClassName.size()>=src.ClassName.size())
-		{
-		MetaConceptWith1Arg::operator=(src);
-		ClassName = src.ClassName;		
-		}
-	else{
-		autovalarray_ptr_throws<char> tmp(src.ClassName);
-		MetaConceptWith1Arg::operator=(src);
-		tmp.MoveInto(ClassName);
-		}
+AbstractClass& AbstractClass::operator=(const AbstractClass& src)
+{	// FORMALLY CORRECT: 2020-05-23
+	decltype(ClassName) tmp(src.ClassName);
+	MetaConceptWith1Arg::operator=(src);
+	ClassName = std::move(tmp);
 	Attributes1Bitmap = src.Attributes1Bitmap;
 	return *this;
 }
@@ -74,42 +53,24 @@ bool AbstractClass::SetToThis(const AbstractClass& src)
 		};
 }
 
-void AbstractClass::MoveInto(AbstractClass*& dest)	// can throw memory failure.  If it succeeds, it destroys the source.
-{	// FORMALLY CORRECT: Kenneth Boyd, 12/9/2004
-	if (!dest) dest = new AbstractClass();
-	MoveInto(*dest);
-}
-
-void AbstractClass::MoveInto(AbstractClass& dest)	// destroys the source.
-{	// FORMALLY CORRECT: Kenneth Boyd, 11/26/2006
-	ClassName.MoveInto(dest.ClassName);
-	dest.Attributes1Bitmap=Attributes1Bitmap;
-	MoveIntoAux(dest);
-}
-
 bool AbstractClass::EqualAux2(const MetaConcept& rhs) const
-{	// FORMALLY CORRECT: 1/22/1999, Kenneth Boyd
-	if (   MetaConceptWith1Arg::EqualAux2(rhs)
-		&& Attributes1Bitmap == static_cast<const AbstractClass&>(rhs).Attributes1Bitmap
-		&& 0 == strcmp(ClassName,static_cast<const AbstractClass&>(rhs).ClassName))
-		return true;
-	return false;
+{	// FORMALLY CORRECT: 2020-05-23
+	if (!MetaConceptWith1Arg::EqualAux2(rhs)) return false;
+	const AbstractClass& VR_rhs = static_cast<const AbstractClass&>(rhs);
+	if (Attributes1Bitmap != VR_rhs.Attributes1Bitmap) return false;
+	if (VR_rhs.ClassName.empty()) return ClassName.empty();
+	if (ClassName.empty()) return false;
+	return 0 == strcmp(ClassName.c_str(), VR_rhs.ClassName.c_str());
 }
 
 bool AbstractClass::InternalDataLTAux(const MetaConcept& rhs) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 6/27/2000
-	if (!MetaConceptWith1Arg::EqualAux2(rhs))
-		return MetaConceptWith1Arg::InternalDataLTAux(rhs);
+{	// FORMALLY CORRECT: 2020-05-23
+	if (!MetaConceptWith1Arg::EqualAux2(rhs)) return MetaConceptWith1Arg::InternalDataLTAux(rhs);
 
 	const AbstractClass& VR_rhs = static_cast<const AbstractClass&>(rhs);
-	{
-	int Tmp = strcmp(ClassName,VR_rhs.ClassName);
-	if (Tmp) return 0>Tmp;
-	}
-	// type is known to be the same
-	if (VR_rhs.Arg1.empty()) return false;
-	if (Arg1.empty()) return true;
-	return Arg1->InternalDataLT(*VR_rhs.Arg1);
+	if (VR_rhs.ClassName.empty()) return false;
+	if (ClassName.empty()) return true;
+	return 0 > strcmp(ClassName.c_str(), VR_rhs.ClassName.c_str());
 }
 
 bool AbstractClass::_IsExplicitConstant() const
@@ -196,7 +157,7 @@ AbstractClass::Set_ContainsInfinity(void)
 }
 
 
-const char* AbstractClass::ViewKeyword() const {return ClassName;}
+const char* AbstractClass::ViewKeyword() const {return ClassName.empty() ? 0 : ClassName.c_str();}
 
 bool AbstractClass::IsReservedSetClassName(const char* Name)
 {	// FORMALLY CORRECT: Kenneth Boyd, 6/27/2000
