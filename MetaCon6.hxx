@@ -8,11 +8,10 @@
 
 class MetaConceptZeroArgs : public MetaConcept
 {
-private:
-	MetaConceptZeroArgs() {};
 protected:
-	explicit MetaConceptZeroArgs(ExactType_MC NewType) : MetaConcept(NewType) {};
-	explicit MetaConceptZeroArgs(ExactType_MC NewType,unsigned char NewBitmap) : MetaConcept(NewType,NewBitmap) {};
+	MetaConceptZeroArgs() = delete;
+	explicit MetaConceptZeroArgs(ExactType_MC NewType) noexcept : MetaConcept(NewType) {};
+	explicit MetaConceptZeroArgs(ExactType_MC NewType,unsigned char NewBitmap) noexcept : MetaConcept(NewType,NewBitmap) {};
 	MetaConceptZeroArgs(const MetaConceptZeroArgs& src) = default;
 	MetaConceptZeroArgs(MetaConceptZeroArgs&& src) = default;
 	MetaConceptZeroArgs& operator=(const MetaConceptZeroArgs & src) = default;
@@ -25,11 +24,11 @@ public:
 //  Type ID functions
 //	virtual const AbstractClass* UltimateType() const = 0;
 //	Arity functions
-	size_t size() const override final {return 0;};
-	const MetaConcept* ArgN(size_t n) const override final {return 0;};
-	MetaConcept* ArgN(size_t n) override final {return 0;};
+	size_t size() const override final { return 0; }
+	const MetaConcept* ArgN(size_t n) const override final { return 0; }
+	MetaConcept* ArgN(size_t n) override final { return 0; }
 // Syntactical equality and inequality
-	bool IsAbstractClassDomain() const override {return true;};
+	bool IsAbstractClassDomain() const override { return true; }
 //  Evaluation functions
 //	virtual bool CanEvaluate() const = 0;
 //	virtual bool CanEvaluateToSameType() const = 0;

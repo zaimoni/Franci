@@ -14,14 +14,6 @@
 // ordering for _R_ in that order.  In this scenario, we probably should require only 
 // positive versions.
 
-SymbolicConstant::SymbolicConstant(SymConstantIndex ExactSymConstant)
-:	MetaConceptZeroArgs((ExactType_MC)(LinearInfinity_MC+ExactSymConstant))
-{
-}
-
-// FORMALLY CORRECT: Kenneth Boyd, 11/8/2002
-bool SymbolicConstant::EqualAux2(const MetaConcept& rhs) const {return true;}
-
 bool SymbolicConstant::SyntacticalStandardLTAux(const MetaConcept& rhs) const
 {	// MUTABLE
 	if 		(typeid(SymbolicConstant)==typeid(rhs))

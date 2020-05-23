@@ -23,7 +23,7 @@ class Variable final : public MetaConceptZeroArgs
 protected:
 	MetaQuantifier* Arg1;	// cannot be const MetaQuantifier* because of ForceUltimateType
 public:
-	Variable(MetaQuantifier* NewName) :	MetaConceptZeroArgs(Variable_MC),Arg1(NewName) {};	// FORMALLY CORRECT: Kenneth Boyd, 4/22/2006
+	Variable(MetaQuantifier* NewName) noexcept : MetaConceptZeroArgs(Variable_MC),Arg1(NewName) {}	// FORMALLY CORRECT: Kenneth Boyd, 4/22/2006
 	Variable(const Variable& src) = default;
 	Variable(Variable&& src) = default;
 	Variable& operator=(const Variable& src) = default;

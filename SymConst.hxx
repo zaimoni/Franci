@@ -26,7 +26,7 @@ struct is_polymorphic_final<SymbolicConstant> : public std::true_type {};
 class SymbolicConstant final : public MetaConceptZeroArgs
 {
 public:
-	SymbolicConstant(SymConstantIndex ExactSymConstant);
+	SymbolicConstant(SymConstantIndex ExactSymConstant) noexcept : MetaConceptZeroArgs((ExactType_MC)(LinearInfinity_MC + ExactSymConstant)) {}
 	SymbolicConstant(const SymbolicConstant& src) = default;
 	SymbolicConstant(SymbolicConstant&& src) = default;
 	SymbolicConstant& operator=(const SymbolicConstant& src) = default;
@@ -57,7 +57,7 @@ public:
 	virtual bool IsPositive() const;	// needs total order *and* IsZero
 	virtual bool IsNegative() const;	// needs total order *and* IsZero
 protected:
-	virtual bool EqualAux2(const MetaConcept& rhs) const;
+	bool EqualAux2(const MetaConcept& rhs) const override { return true; }
 	virtual bool InternalDataLTAux(const MetaConcept& rhs) const;
 	virtual bool SyntacticalStandardLTAux(const MetaConcept& rhs) const;
 	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
