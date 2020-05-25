@@ -295,12 +295,6 @@ EqualRelation::EqualRelation(MetaConcept**& NewArgList, EqualRelationModes Linka
 	ForceStdForm();
 }
 
-void EqualRelation::MoveInto(EqualRelation*& dest)		// can throw memory failure.  If it succeeds, it destroys the source.
-{	// FORMALLY CORRECT: Kenneth Boyd, 3/17/2000
-	if (!dest) dest = new EqualRelation((EqualRelationModes)(array_index()));
-	MoveIntoAux(*dest);
-}
-
 //  Type ID functions
 const AbstractClass* EqualRelation::UltimateType() const {return &TruthValues;}
 

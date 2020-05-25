@@ -29,7 +29,7 @@ public:
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	virtual void CopyInto(FlatFile*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
-	virtual void MoveInto(FlatFile*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
+	void MoveInto(FlatFile*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
 	virtual const AbstractClass* UltimateType() const;
 	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override;
 	virtual bool SyntaxOK() const;

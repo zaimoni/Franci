@@ -26,12 +26,6 @@ GCF::GCF(MetaConcept**& NewArgList)
 	if (SyntaxOK()) _forceStdForm();
 }
 
-void GCF::MoveInto(GCF*& dest)
-{	// FORMALLY CORRECT: Kenneth Boyd, 11/29/2007
-	if (!dest) dest = new GCF;
-	MoveIntoAux(*dest);
-}
-
 const AbstractClass* GCF::UltimateType() const
 {	//! \todo FIX this when more interesting rings show up (union)
 	return &Integer;

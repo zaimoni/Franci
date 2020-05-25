@@ -20,14 +20,16 @@ class GCF final : public MetaConceptWithArgArray
 public:
 	GCF() : MetaConceptWithArgArray(GCF_MC) {};
 	GCF(MetaConcept**& NewArgList);
-//	GCF(const GCF& src);	// default OK
+	GCF(const GCF& src) = default;
+	GCF(GCF&& src) = default;
+	GCF& operator=(const GCF & src) = default;
+	GCF& operator=(GCF&& src) = default;
 	virtual ~GCF() = default;
 
-//	const GCF& operator=(const GCF& src);	// default ok
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(GCF*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
-	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
-	void MoveInto(GCF*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
+	void MoveInto(MetaConcept*& dest) override { zaimoni::MoveIntoV2(std::move(*this), dest); }
+	void MoveInto(GCF*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
 //  Type ID functions
 	virtual const AbstractClass* UltimateType() const;
 

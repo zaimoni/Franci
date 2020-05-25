@@ -50,14 +50,16 @@ private:
 public:
 	CombinatorialLike(CombinatorialModes LinkageType) : MetaConceptWithArgArray((ExactType_MC)(LinkageType+Factorial_MC)) {};
 	CombinatorialLike(MetaConcept**& NewArgList, CombinatorialModes LinkageType);
-//	CombinatorialLike(const CombinatorialLike& src);	// default OK
+	CombinatorialLike(const CombinatorialLike& src) = default;
+	CombinatorialLike(CombinatorialLike&& src) = default;
+	CombinatorialLike& operator=(const CombinatorialLike & src) = default;
+	CombinatorialLike& operator=(CombinatorialLike&& src) = default;
 	virtual ~CombinatorialLike() = default;
 
-//	const CombinatorialLike& operator=(const CombinatorialLike& src) // default OK
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(CombinatorialLike*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
-	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
-	void MoveInto(CombinatorialLike*& dest);		// can throw memory failure.  If it succeeds, it destroys the source.
+	void MoveInto(MetaConcept*& dest) override { zaimoni::MoveIntoV2(std::move( *this), dest); }
+	void MoveInto(CombinatorialLike*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
 
 //  Type ID functions
 	virtual const AbstractClass* UltimateType() const;

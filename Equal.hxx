@@ -76,14 +76,16 @@ private:
 public:
 	EqualRelation(EqualRelationModes LinkageType) :	MetaConceptWithArgArray((ExactType_MC)(LinkageType+ALLEQUAL_MC)) {};
 	EqualRelation(MetaConcept**& NewArgList, EqualRelationModes LinkageType);
-//	EqualRelation(const EqualRelation& src);	// default OK
+	EqualRelation(const EqualRelation& src) = default;
+	EqualRelation(EqualRelation&& src) = default;
+	EqualRelation& operator=(const EqualRelation & src) = default;
+	EqualRelation& operator=(EqualRelation&& src) = default;
 	virtual ~EqualRelation() = default;
 
-//	const EqualRelation& operator=(const EqualRelation& src);
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(EqualRelation*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
-	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
-	void MoveInto(EqualRelation*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
+	void MoveInto(MetaConcept*& dest) override { zaimoni::MoveIntoV2(std::move(*this), dest); }
+	void MoveInto(EqualRelation*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
 //  Type ID functions
 	const AbstractClass* UltimateType() const override;
 //  Evaluation functions

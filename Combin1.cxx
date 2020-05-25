@@ -67,14 +67,6 @@ CombinatorialLike::CombinatorialLike(MetaConcept**& NewArgList, CombinatorialMod
 	if (SyntaxOK()) ForceStdForm();
 }
 
-void CombinatorialLike::MoveInto(CombinatorialLike*& dest)
-{	// FORMALLY CORRECT: Kenneth Boyd, 4/12/2003
-	if (!dest)
-		dest = new CombinatorialLike((CombinatorialModes)(ExactType()-Factorial_MC));
-
-	MoveIntoAux(*dest);
-}
-
 void CombinatorialLike::_forceStdForm()
 {	//! \todo IMPLEMENT
 }
