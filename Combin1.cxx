@@ -292,6 +292,11 @@ bool CombinatorialLike::IsNegative() const
 	return IsMetaAddInverted();
 }
 
+std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > CombinatorialLike::canEvaluate() const // \todo obviate DiagnoseInferenceRules
+{
+	return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >();
+}
+
 //  Helper functions for CanEvaluate... routines
 void CombinatorialLike::DiagnoseInferenceRules() const
 {	//! \todo IMPLEMENT

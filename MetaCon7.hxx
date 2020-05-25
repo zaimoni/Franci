@@ -75,6 +75,7 @@ public:
 // Syntactical equality and inequality
 	virtual bool IsAbstractClassDomain() const {return true;};
 //  Evaluation functions
+	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override { return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >(); }
 	virtual bool CanEvaluate() const {return false;};
 	virtual bool CanEvaluateToSameType() const {return false;};
 	virtual bool SyntaxOK() const {return MetaConcept_lookup<T>::syntax_ok(_x);};	// actually should do a syntax check on its arg

@@ -269,6 +269,11 @@ void ClauseNArg::SelfLogicalNOT()
 	SetExactType(SelfLogicalNOTLookup_ClauseN[array_index()]);
 }
 
+std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > ClauseNArg::canEvaluate() const // \todo obviate DiagnoseInferenceRules
+{
+	return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >();
+}
+
 void ClauseNArg::DiagnoseInferenceRules() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 9/11/1999
 	if (LogicalAND_ClauseN_MC<=ExactType() && LogicalNAND_ClauseN_MC>=ExactType())

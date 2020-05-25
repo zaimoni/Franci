@@ -1211,6 +1211,11 @@ bool EqualRelation::DirectCreateBasisClauseIdx(size_t Idx, MetaConcept*& dest) c
 	return false;
 }
 
+std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > EqualRelation::canEvaluate() const // \todo obviate DiagnoseInferenceRules
+{
+	return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >();
+}
+
 //  Helper functions for CanEvaluate... routines
 void EqualRelation::DiagnoseInferenceRules() const
 {	// MUTABLE

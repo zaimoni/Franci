@@ -197,6 +197,11 @@ Digraph::EvaluateFunction(MetaConcept** const& ArgValList, unsigned long*& ArgLi
 		}
 }
 
+std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > Digraph::canEvaluate() const // \todo obviate DiagnoseInferenceRules
+{
+	return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >();
+}
+
 void Digraph::DiagnoseInferenceRules() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 9/6/2001
 	if (DiagnoseStandardEvalRules()) return;

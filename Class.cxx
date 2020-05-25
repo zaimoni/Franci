@@ -87,13 +87,13 @@ const AbstractClass* AbstractClass::UltimateType() const
 		return NULL;
 }
 
-//	Arity functions
-size_t AbstractClass::size() const {return 0;}
-const MetaConcept* AbstractClass::ArgN(size_t n) const {return NULL;}
-MetaConcept* AbstractClass::ArgN(size_t n) {return NULL;}
-
 //  Evaluation functions
 //! \todo change the evaluation functions to delegate to non-NULL Arg1
+std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > AbstractClass::canEvaluate() const
+{
+	return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >();
+}
+
 bool AbstractClass::CanEvaluate() const {return false;}
 bool AbstractClass::CanEvaluateToSameType() const {return false;}
 

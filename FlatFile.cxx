@@ -83,6 +83,11 @@ void FlatFile::ConstructSelfNameAux(char* Name) const		// overwrites what is alr
 {	//! \todo IMPLEMENT
 }
 
+std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > FlatFile::canEvaluate() const // \todo obviate DiagnoseInferenceRules
+{
+	return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >();
+}
+
 void FlatFile::DiagnoseInferenceRules() const
 {
 	IdxCurrentSelfEvalRule = SelfEvalSyntaxOKNoRules_SER;

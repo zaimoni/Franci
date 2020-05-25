@@ -81,6 +81,7 @@ public:
 //  Type ID functions
 	virtual const AbstractClass* UltimateType() const;	// untyped i.e. free
 //  Evaluation functions
+	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override;
 	virtual bool CanEvaluate() const;
 	virtual bool CanEvaluateToSameType() const;		
 	virtual bool SyntaxOK() const;

@@ -50,6 +50,7 @@ public:
 	virtual const AbstractClass* UltimateType() const;
 	virtual bool ForceUltimateType(const AbstractClass* const rhs);
 //  Evaluation functions
+	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override;
 	virtual bool SyntaxOK() const;
 	virtual bool StdAddCanDestructiveInteract() const;
 	virtual bool StdAddCanDestructiveInteract(const MetaConcept& Target,size_t& ActOnThisRule) const;

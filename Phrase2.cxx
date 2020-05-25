@@ -191,6 +191,11 @@ bool Phrase2Arg::SyntaxOK() const
 // text I/O functions
 const char* Phrase2Arg::ViewKeyword() const {return PhraseKeyword;}
 
+std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > Phrase2Arg::canEvaluate() const // \todo obviate DiagnoseInferenceRules
+{
+	return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >();
+}
+
 // we have some constraints to make the diagnosis efficient
 static_assert(1==MULT_Phrase2_MC-SUM_Phrase2_MC);
 static_assert(2==PERMUTATION_Phrase2_MC-SUM_Phrase2_MC);

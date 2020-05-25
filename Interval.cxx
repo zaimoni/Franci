@@ -414,6 +414,11 @@ bool LinearInterval::DestructiveExtendBy(MetaConcept*& rhs)
 	return false;
 }
 
+std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > LinearInterval::canEvaluate() const	// \todo obviate DiagnoseInferenceRules
+{
+	return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >();
+}
+
 void LinearInterval::DiagnoseInferenceRules()
 {	//! \todo IMPLEMENT
 	// NOTE: empty intervals are handled by the master type, not this!

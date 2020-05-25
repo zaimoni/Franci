@@ -81,7 +81,33 @@ bool DestructiveSyntacticallyEvaluateOnce(MetaConcept*& dest)
 	DEBUG_LOG(dest->name());
 	DEBUG_LOG(*dest);
 	dest->ForceStdForm();
-	if (dest->CanEvaluate())
+	auto eval_spec = dest->canEvaluate();
+	if (eval_spec.first) {
+		DEBUG_LOG("Leaving; destructive self-evaluate");
+		bool ret = dest->DestructiveEvaluateToSameType();
+		SUCCEED_OR_DIE(dest->SyntaxOK());
+		DEBUG_LOG(dest->name());
+		DEBUG_LOG(*dest);
+		return ret;
+	} else if (eval_spec.second) {
+		try {
+			MetaConcept* Tmp = 0;
+			if (dest->Evaluate(Tmp)) {
+				DEBUG_LOG("Leaving; destructive evaluate");
+				assert(Tmp);
+				delete dest;
+				dest = Tmp;
+				SUCCEED_OR_DIE(dest->SyntaxOK());
+				DEBUG_LOG(dest->name());
+				DEBUG_LOG(*dest);
+				return true;
+			};
+			DEBUG_LOG("Leaving/false fallthrough");
+		} catch (const std::bad_alloc&) {
+			DEBUG_LOG("Leaving/false bad_alloc");
+			return false;
+		}
+	} else if (dest->CanEvaluate())
 		{
 		DEBUG_LOG("dest->CanEvaluate() true");
 		if (dest->CanEvaluateToSameType())

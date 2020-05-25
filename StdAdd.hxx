@@ -49,6 +49,7 @@ public:
 	virtual const AbstractClass* UltimateType() const;
 	virtual bool ForceUltimateType(const AbstractClass* const rhs);
 //  Evaluation functions
+	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override;
 	virtual bool SyntaxOK() const;
 // text I/O functions
 	virtual size_t LengthOfSelfName() const;

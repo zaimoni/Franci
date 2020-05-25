@@ -143,6 +143,11 @@ bool QuantifiedStatement::SortQuantifiers()
 	return SelfEvalCleanEnd();
 }
 
+std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > QuantifiedStatement::canEvaluate() const // \todo obviate DiagnoseInferenceRules
+{
+	return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >();
+}
+
 void QuantifiedStatement::DiagnoseInferenceRules() const
 {	// UNSTABLE
 	// NOTE; unused variable deletion [1 var] is the only evaluation to a different type

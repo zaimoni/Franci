@@ -40,6 +40,7 @@ public:
 	const AbstractClass* UltimateType() const override { return Arg1->UltimateType(); };
 	bool ForceUltimateType(const AbstractClass* const rhs) override { return Arg1->ForceUltimateType(rhs); }
 //  Evaluation functions
+	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override { return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >(); }
 	bool CanEvaluate() const override { return false; };
 	bool CanEvaluateToSameType() const override { return false; };
 	bool SyntaxOK() const override;

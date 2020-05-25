@@ -92,6 +92,11 @@ GCF::ThisIsAnnihilatorKey(size_t& ArgIdx, signed short& SelfEvalRule, unsigned s
 	return false;
 }
 
+std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > GCF::canEvaluate() const // \todo obviate DiagnoseInferenceRules
+{
+	return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >();
+}
+
 void GCF::DiagnoseInferenceRules() const
 {	//! \todo IMPLEMENT
 	// These rules are domain-independent

@@ -1483,6 +1483,11 @@ bool MetaConnective::InvokeEqualArgRule() const
 		}
 }
 
+std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > MetaConnective::canEvaluate() const // \todo obviate DiagnoseInferenceRules
+{
+	return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >();
+}
+
 void MetaConnective::DiagnoseInferenceRules() const
 {
 	assert(LogicalNOR_MC>ExactType());

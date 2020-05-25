@@ -251,6 +251,11 @@ StdMultiplication::ThisIsAnnihilatorKey(size_t& ArgIdx, signed short& SelfEvalRu
 	return false;
 }
 
+std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > StdMultiplication::canEvaluate() const	// \todo obviate DiagnoseInferenceRules
+{
+	return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >();
+}
+
 //  Helper functions for CanEvaluate... routines
 void StdMultiplication::DiagnoseInferenceRules() const
 {	//! \todo IMPLEMENT

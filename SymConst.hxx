@@ -44,7 +44,8 @@ public:
 // text I/O functions
 	virtual size_t LengthOfSelfName(void) const;
 //  Evaluation functions
-	virtual bool CanEvaluate() const;			
+	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override { return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >(); }
+	virtual bool CanEvaluate() const;
 	virtual bool CanEvaluateToSameType() const;				
 	virtual bool SyntaxOK() const;							
 	virtual bool Evaluate(MetaConcept*& dest);		// same, or different type

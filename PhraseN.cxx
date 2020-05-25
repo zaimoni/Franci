@@ -122,6 +122,11 @@ bool PhraseNArg::SyntaxOKAuxCommaListVarNames() const
 
 const char* PhraseNArg::ViewKeyword() const {return PhraseKeyword;}
 
+std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > PhraseNArg::canEvaluate() const // \todo obviate DiagnoseInferenceRules
+{
+	return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >();
+}
+
 // type-specific functions
 void PhraseNArg::DiagnoseInferenceRules() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 4/21/2000

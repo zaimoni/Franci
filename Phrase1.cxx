@@ -79,6 +79,11 @@ bool Phrase1Arg::EqualAux2(const MetaConcept& rhs) const
 	return false;
 }
 
+std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > Phrase1Arg::canEvaluate() const // \todo obviate CanEvaluate
+{
+	return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >();
+}
+
 bool Phrase1Arg::CanEvaluate() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 1/5/2003
 	if (IsExactType(FACTORIAL_Phrase1_MC)) return true;

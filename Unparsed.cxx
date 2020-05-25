@@ -377,6 +377,11 @@ bool UnparsedText::InternalDataLTAux(const MetaConcept& rhs) const
 	return 0>strcmp(Text,static_cast<const UnparsedText&>(rhs).Text);
 }
 
+std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > UnparsedText::canEvaluate() const // \todo obviate CanEvaluate
+{
+	return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >();
+}
+
 //  Evaluation functions
 bool UnparsedText::CanEvaluate() const
 {	// FORMALLY CORRECT: 9/4/2006

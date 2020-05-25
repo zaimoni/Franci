@@ -5,6 +5,8 @@
 #define METACONCEPT_DEF
 
 #include "Global.hxx"
+#include <functional>
+#include <utility>
 
 enum LinguisticType_LT	{
 						CommonNoun_LT	=	0x00000001,
@@ -290,6 +292,7 @@ public:
 	bool IsExplicitConstant() const {return _IsExplicitConstant();};
 	virtual bool IsAbstractClassDomain() const = 0;
 //  Evaluation functions
+	virtual std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const = 0;
 	virtual bool CanEvaluate() const = 0;	// either same or different-type
 	virtual bool CanEvaluateToSameType() const = 0;				
 	virtual bool SyntaxOK() const = 0;							

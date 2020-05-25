@@ -211,6 +211,11 @@ StdAddition::ThisIsAnnihilatorKey(size_t& ArgIdx, signed short& SelfEvalRule, un
 	return false;
 }
 
+std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > StdAddition::canEvaluate() const	// \todo obviate DiagnoseInferenceRules
+{
+	return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >();
+}
+
 //  Helper functions for CanEvaluate... routines
 void StdAddition::DiagnoseInferenceRules() const
 {	// FORMALLY CORRECT: 1/17/2000

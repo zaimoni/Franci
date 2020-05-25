@@ -56,6 +56,7 @@ public:
 //  Type ID functions
 	virtual const AbstractClass* UltimateType() const;
 //  Evaluation functions
+	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override { return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >(); }
 	virtual bool SyntaxOK() const;
 // text I/O functions
 	virtual size_t LengthOfSelfName() const;

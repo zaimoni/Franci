@@ -107,6 +107,11 @@ void Clause2Arg::SelfLogicalNOT()
 	SetExactType(SelfLogicalNOTLookup_Clause2[array_index()]);
 }
 
+std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > Clause2Arg::canEvaluate() const // \todo obviate DiagnoseInferenceRules
+{
+	return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >();
+}
+
 void Clause2Arg::DiagnoseInferenceRules()
 {	// FORMALLY CORRECT: Kenneth Boyd, 9/11/1999
 	if (!IdxCurrentEvalRule && !IdxCurrentSelfEvalRule)

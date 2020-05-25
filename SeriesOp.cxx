@@ -382,6 +382,11 @@ bool SeriesOperation::_IsZero() const
 	return false;
 }
 
+std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > SeriesOperation::canEvaluate() const // \todo obviate DiagnoseInferenceRules
+{
+	return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >();
+}
+
 //  Helper functions for CanEvaluate... routines
 void SeriesOperation::DiagnoseInferenceRules() const
 {	//! \todo IMPLEMENT

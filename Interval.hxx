@@ -94,6 +94,7 @@ public:
 	virtual const AbstractClass* UltimateType() const;
 	virtual bool ForceUltimateType(const AbstractClass* const src);
 //  Evaluation functions
+	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override;
 	virtual bool SyntaxOK() const;
 	virtual bool IsAbstractClassDomain() const;
 // text I/O functions
