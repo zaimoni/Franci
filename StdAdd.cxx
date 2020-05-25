@@ -2,12 +2,10 @@
 // definition of StdAddition, an n-ary commutative operation defined for a variety of sets
 // StdAddition is assumed to endow the set it operates on with an abelian group structure
 
+#include "StdAdd.hxx"
 #include "Class.hxx"
 #include "Integer1.hxx"
-#include "StdAdd.hxx"
 #include "LowRel.hxx"
-
-#include <functional>
 
 StdAddition::SelfEvaluateRule StdAddition::SelfEvaluateRuleLookup[MaxSelfEvalRuleIdx_SER]
   =	{

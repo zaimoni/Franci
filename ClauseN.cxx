@@ -203,21 +203,9 @@ ClauseNArg::ClauseNArg(MetaConcept**& src, size_t& KeywordIdx)
 	ForceStdForm();
 }
 
-void ClauseNArg::MoveInto(ClauseNArg*& dest)		// can throw memory failure.  If it succeeds, it destroys the source.
-{	// FORMALLY CORRECT: Kenneth Boyd, 3/17/2000
-	//! \todo retrofit most other types
-	if (!dest) dest = new ClauseNArg();
-	dest->VFTable1=VFTable1;
-	dest->ClauseKeyword=ClauseKeyword;
-	MoveIntoAux(*dest);
-}
-
 //  Type ID functions
 // FORMALLY CORRECT: 8/8/1999
 const AbstractClass* ClauseNArg::UltimateType() const {return &TruthValues;}
-
-// FORMALLY CORRECT: Kenneth Boyd, 4/23/2000
-void ClauseNArg::_forceStdForm() {ForceStdFormAux();}
 
 //  Evaluation functions
 bool ClauseNArg::SyntaxOK() const

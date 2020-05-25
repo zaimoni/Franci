@@ -36,16 +36,18 @@ enum EvalRuleIdx_ER	{
 	static ConstructSelfNameAuxFunc ConstructSelfNameAuxArray[(MaxClauseNIdx_MC-MinClauseNIdx_MC)+1];
 	static SyntaxOKAuxFunc SyntaxOKAuxArray[(MaxClauseNIdx_MC-MinClauseNIdx_MC)+1];
 
-	ClauseNArg(void) {};
 public:
+	ClauseNArg() = delete;
 	ClauseNArg(MetaConcept**& src, size_t& KeywordIdx);
-//	ClauseNArg(const ClauseNArg& src);	// default OK
+	ClauseNArg(const ClauseNArg& src) = default;
+	ClauseNArg(ClauseNArg&& src) = default;
+	ClauseNArg& operator=(const ClauseNArg & src) = default;
+	ClauseNArg& operator=(ClauseNArg&& src) = default;
 	virtual ~ClauseNArg() = default;
-//	const ClauseNArg& operator=(const ClauseNArg& src);	// default OK
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(ClauseNArg*& dest) {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
-	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure; success destroys integrity of source
-	void MoveInto(ClauseNArg*& dest);	// can throw memory failure; success destroys integrity of source
+	void MoveInto(MetaConcept*& dest) override { zaimoni::MoveIntoV2(std::move(*this),dest); }
+	void MoveInto(ClauseNArg*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
 
 //  Type ID functions
 	const AbstractClass* UltimateType() const override;
@@ -63,7 +65,7 @@ public:
 	static ExactType_MC CanConstructPostfix(const MetaConcept* const * src, size_t KeywordIdx);
 protected:
 	virtual void ConstructSelfNameAux(char* Name) const;	// overwrites what is already there
-	void _forceStdForm() override;
+	void _forceStdForm() override { ForceStdFormAux(); }
 
 	virtual void DiagnoseInferenceRules() const;
 	virtual bool InvokeEqualArgRule() const;

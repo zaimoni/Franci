@@ -2,9 +2,9 @@
 // former implementation for InParse, the type for an incompletely parsed object
 // this implements the parsing for FranciScript
 
+#include "InParse.hxx"
 #include "SymConst.hxx"
 #include "Class.hxx"
-#include "InParse.hxx"
 #include "Quantify.hxx"
 #include "Unparsed.hxx"
 #include "Integer1.hxx"
@@ -19,8 +19,6 @@
 #include "Zaimoni.STL/lite_alg.hpp"
 #include "Zaimoni.STL/LexParse/Parser.hpp"
 #include "Zaimoni.STL/Pure.C/logging.h"
-
-#include <functional>
 
 extern Parser<MetaConcept> FranciScriptParser;
 

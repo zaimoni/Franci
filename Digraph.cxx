@@ -1,15 +1,13 @@
 // Digraph.cxx
 // Implementation for Digraph class, which represents digraphs.
 
+#include "Digraph.hxx"
 #include "Class.hxx"
 #include "TruthVal.hxx"
-#include "Digraph.hxx"
 #include "LowRel.hxx"
 #include "Keyword1.hxx"
 
 #include "Zaimoni.STL/lite_alg.hpp"
-
-#include <functional>
 
 #define DIGRAPH_SET_EDGE '\x01'
 #define DIGRAPH_RESET_EDGE '\x02'

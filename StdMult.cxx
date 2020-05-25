@@ -2,12 +2,10 @@
 // implementation of StdMultiplication, an n-ary operation defined for a variety of sets
 // Commutativity is optional (different mode).
 
+#include "StdMult.hxx"
 #include "Class.hxx"
 #include "Integer1.hxx"
-#include "StdMult.hxx"
 #include "LowRel.hxx"
-
-#include <functional>
 
 StdMultiplication::SelfEvaluateRule StdMultiplication::SelfEvaluateRuleLookup[MaxSelfEvalRuleIdx_SER]
   =	{

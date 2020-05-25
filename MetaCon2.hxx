@@ -6,7 +6,6 @@
 
 #include "MetaCon1.hxx"
 #include "Zaimoni.STL/AutoPtr.hpp"
-#include <functional>
 
 // ASSUMPTION: the memory manager does not overallocate by more than sizeof(MetaConcept*)-1.
 // failing this breaks void StrictBoundIdxArray(void) const;

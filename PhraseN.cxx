@@ -7,7 +7,6 @@
 #include "Keyword1.hxx"
 
 #include "Zaimoni.STL/except/syntax_error.hpp"
-#include <functional>
 
 // PHRASES IMPLEMENTED
 // FORALL|THEREIS|FORALLNOT|THEREISNO __ [, ___]...; ___ is a potential variable name

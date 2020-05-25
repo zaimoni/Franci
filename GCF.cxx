@@ -1,11 +1,9 @@
 // GCF.cxx
 // implementation for the class GCF, which handles Greatest Common Factor.
 
+#include "GCF.hxx"
 #include "Class.hxx"
 #include "Integer1.hxx"
-#include "GCF.hxx"
-
-#include <functional>
 
 // NOTE: 0 is a "bad case" for the definition of GCF.
 // Franci uses the following definitions to handle 0 and 1-ary cases

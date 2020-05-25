@@ -27,16 +27,18 @@ private:
 	const char* ClauseKeyword;	// this controls the intended semantics
 								// Clause2Arg does *NOT* own this!
 
-	Clause2Arg() {};
 public:
+	Clause2Arg() = delete;
 	Clause2Arg(MetaConcept**& src, size_t& KeywordIdx);
-//	Clause2Arg(const Clause2Arg& src);	// default OK
+	Clause2Arg(const Clause2Arg& src) = default;
+	Clause2Arg(Clause2Arg&& src) = default;
+	Clause2Arg& operator=(const Clause2Arg & src) = default;
+	Clause2Arg& operator=(Clause2Arg&& src) = default;
 	virtual ~Clause2Arg() = default;
-//	const Clause2Arg& operator=(const Clause2Arg& src);	// default OK
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(Clause2Arg*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
-	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure; success destroys integrity of source
-	void MoveInto(Clause2Arg*& dest);	// can throw memory failure; success destroys integrity of source
+	void MoveInto(MetaConcept*& dest) override { zaimoni::MoveIntoV2(std::move(*this),dest); }
+	void MoveInto(Clause2Arg*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
 
 //  Type ID functions
 	const AbstractClass* UltimateType() const override;
@@ -45,7 +47,7 @@ public:
 	virtual bool SyntaxOK() const;
 // text I/O functions
 	virtual size_t LengthOfSelfName() const;
-	virtual const char* ViewKeyword() const;
+	const char* ViewKeyword() const override { return ClauseKeyword; }
 // Formal manipulation functions
 	virtual void SelfLogicalNOT();	// instantiate when UltimateType is TruthValues
 // type-specific functions

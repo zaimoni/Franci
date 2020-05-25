@@ -58,14 +58,6 @@ Clause2Arg::Clause2Arg(MetaConcept**& src, size_t& KeywordIdx)
 	ExtractInfixArglist(src,KeywordIdx);
 }
 
-void Clause2Arg::MoveInto(Clause2Arg*& dest)		// can throw memory failure.  If it succeeds, it destroys the source.
-{	// FORMALLY CORRECT: Kenneth Boyd, 3/17/2000
-	if (NULL==dest) dest = new Clause2Arg();
-	dest->VFTable1=VFTable1;
-	dest->ClauseKeyword=ClauseKeyword;
-	MoveIntoAux(*dest);
-}
-
 //  Type ID functions
 // FORMALLY CORRECT: 8/21/1999
 const AbstractClass* Clause2Arg::UltimateType() const {return &TruthValues;}
@@ -87,9 +79,6 @@ bool Clause2Arg::SyntaxOK() const
 		return true;
 	return false;
 }
-
-// text I/O functions
-const char* Clause2Arg::ViewKeyword() const {return ClauseKeyword;}
 
 static ExactType_MC SelfLogicalNOTLookup_Clause2[(MaxClause2Idx_MC-MinClause2Idx_MC)+1]	=
 	{	LogicalNAND_Clause2_MC,
