@@ -8,92 +8,55 @@ SearchTree::SearchTree(MetaConcept**& NewArgArray,							// specs new search tre
 			LowLevelAction* NewBranchingOperation,
 			LowLevelBinaryRelation* NewCanUseBranchingOperation,
 			LowLevelIntValueBinaryFunction* NewApprovalFunction,
-			MetaConcept**& NewBranchingOperationSources,
-			MetaConcept**& NewApprovalTargets)
+			MetaConcept** NewBranchingOperationSources,
+			MetaConcept** NewApprovalTargets)
 :	MetaConceptWithArgArray(Unknown_MC,NewArgArray),
-	Parent(NULL),
+	Parent(0),
 	BranchingOperation(NewBranchingOperation),
 	CanUseBranchingOperation(NewCanUseBranchingOperation),
 	ApprovalFunction2Ary(NewApprovalFunction),
 	BranchingOperationSources(NewBranchingOperationSources),
 	ApprovalTargets(NewApprovalTargets),
-	__OwnBranchingOperationSources(false),
-	__OwnApprovalTargets(false),
 	__UniqueLeaves(true)
 {
-	if (!__OwnBranchingOperationSources)
-		NewBranchingOperationSources = BranchingOperationSources;
-	if (!__OwnApprovalTargets)
-		NewApprovalTargets = ApprovalTargets;
 }
 
 SearchTree::SearchTree(SearchTree* NewParent, MetaConcept**& NewArgArray)	// Leaf for search tree
 :	MetaConceptWithArgArray(Unknown_MC,NewArgArray),
 	Parent(NewParent),
-	BranchingOperation(NULL),
-	CanUseBranchingOperation(NULL),
-	ApprovalFunction2Ary(NULL),
-	__OwnBranchingOperationSources(false),
-	__OwnApprovalTargets(false),
+	BranchingOperation(0),
+	CanUseBranchingOperation(0),
+	ApprovalFunction2Ary(0),
 	__UniqueLeaves(false)
 {
-}
-
-SearchTree::SearchTree(const SearchTree& src)
-{	//! \todo IMPLEMENT
-	FATAL(AlphaMustDefineVFunction);
-}
-
-SearchTree::~SearchTree()
-{	// FORMALLY CORRECT: Kenneth Boyd, 11/5/2005
-	if (NULL==Parent)
-		{	// We are the root.  We cannot own functions.
-		if (!__OwnBranchingOperationSources)
-			BranchingOperationSources.NULLPtr();
-		if (!__OwnApprovalTargets) ApprovalTargets.NULLPtr();
-		};
-}
-
-const SearchTree& SearchTree::operator=(const SearchTree& src)
-{	//! \todo IMPLEMENT
-	FATAL(AlphaMustDefineVFunction);
-	return *this;
-}
-
-void SearchTree::MoveInto(SearchTree*& dest)	// can throw memory failure.  If it succeeds, it destroys the source.
-{	//! \todo IMPLEMENT
-	FATAL(AlphaMustDefineVFunction);
 }
 
 //  Type ID functions
 const AbstractClass* SearchTree::UltimateType() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 7/29/2003
-	if (ArgArray.empty()) return NULL;
+	if (ArgArray.empty()) return 0;
 	return ArgArray[2==fast_size()]->UltimateType();
 }
-
-// FORMALLY CORRECT: Kenneth Boyd, 7/29/2003
-void SearchTree::_forceStdForm() {}
 
 //  Evaluation functions
 bool SearchTree::SyntaxOK() const
 {
 	if (!SyntaxOKAux()) return false;
-	if (NULL==Parent)
+	if (!Parent)	// top-level
 		{
-		if (   NULL==BranchingOperation
-			|| NULL==CanUseBranchingOperation
-			|| NULL==ApprovalFunction2Ary
+		if (   !BranchingOperation
+			|| !CanUseBranchingOperation
+			|| !ApprovalFunction2Ary
 			|| !ValidateArgArray(BranchingOperationSources)
 			|| !ValidateArgArray(ApprovalTargets))
 			return false;
 		}
 	else{
-		if (   NULL!=BranchingOperation
-			|| NULL!=CanUseBranchingOperation
-			|| NULL!=ApprovalFunction2Ary
-			|| !BranchingOperationSources.empty()
-			|| !ApprovalTargets.empty())
+		if (   BranchingOperation
+			|| CanUseBranchingOperation
+			|| ApprovalFunction2Ary
+			|| !BranchingOperationSources
+			|| !ApprovalTargets)
 			return false;
 		};
 	return true;
@@ -145,7 +108,7 @@ SearchTree::getBranchedArgArray(SearchTree* const Target, MetaConcept**& NewArra
 
 	assert(!NewArray);
 	MetaConcept* LocalRoot = Target->ArgArray[0];
-	size_t i = BranchingOperationSources.ArraySize();
+	size_t i = ArraySize(BranchingOperationSources);
 	do	if (CanUseBranchingOperation(*LocalRoot,*BranchingOperationSources[--i]))
 			{
 			size_t CountBranches = 1;
@@ -193,16 +156,14 @@ SearchTree::getBranchedArgArray(SearchTree* const Target, MetaConcept**& NewArra
 	return false;
 }
 
-signed int
-SearchTree::ApprovalScore(const MetaConcept* const Target) const
+int SearchTree::ApprovalScore(const MetaConcept* const Target) const
 {
-	if (NULL!=Parent)
-		return Parent->ApprovalScore(Target);
+	if (Parent) return Parent->ApprovalScore(Target);
 
 	signed int CumulativeRating = 0;
-	if (NULL!=ApprovalFunction2Ary)
+	if (ApprovalFunction2Ary)
 		{	//	2-ary approval function; highest rating passes through (may need other modes later)
-		size_t i = ApprovalTargets.ArraySize();
+		size_t i = ArraySize(ApprovalTargets);
 		do	{
 			signed int LocalRating = ApprovalFunction2Ary(*Target,*ApprovalTargets[--i]);
 			if (LocalRating>CumulativeRating)
@@ -236,7 +197,7 @@ bool SearchTree::FlushUnwantedChildren()
 }
 
 // Internal functions
-signed int SearchTree::BreadthSearchOneStage(bool& RAMStalled)
+int SearchTree::BreadthSearchOneStage(bool& RAMStalled)
 {	// TODO: VERIFY
 	DEBUG_LOG(ZAIMONI_FUNCNAME);
 	// scan loop for evaluation

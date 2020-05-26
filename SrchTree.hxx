@@ -32,9 +32,8 @@ private:
 	LowLevelAction* BranchingOperation;
 	LowLevelBinaryRelation* CanUseBranchingOperation;
 	LowLevelIntValueBinaryFunction* ApprovalFunction2Ary;
-	autoarray_ptr<MetaConcept*> BranchingOperationSources;
-	autoarray_ptr<MetaConcept*> ApprovalTargets;
-	bool __OwnBranchingOperationSources;
+	MetaConcept** BranchingOperationSources;	// not owned
+	MetaConcept** ApprovalTargets;	// not owned
 	bool __OwnApprovalTargets;
 	bool __UniqueLeaves;
 public:
@@ -42,17 +41,19 @@ public:
 				LowLevelAction* NewBranchingOperation,
 				LowLevelBinaryRelation* NewCanUseBranchingOperation,
 				LowLevelIntValueBinaryFunction* NewApprovalFunction,
-				MetaConcept**& NewBranchingOperationSources,
-				MetaConcept**& NewApprovalTargets);
+				MetaConcept** NewBranchingOperationSources,
+				MetaConcept** NewApprovalTargets);
 	SearchTree(SearchTree* NewParent, MetaConcept**& NewArgArray);	// Leaf for search tree
-	SearchTree(const SearchTree& src);
-	virtual ~SearchTree();
+	SearchTree(const SearchTree& src) = default;
+	SearchTree(SearchTree&& src) = default;
+	SearchTree& operator=(const SearchTree & src) = default;
+	SearchTree& operator=(SearchTree&& src) = default;
+	virtual ~SearchTree() = default;
 
-	const SearchTree& operator=(const SearchTree& src);
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(SearchTree*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
-	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
-	void MoveInto(SearchTree*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
+	void MoveInto(MetaConcept*& dest) override { zaimoni::MoveIntoV2(std::move(*this), dest); }
+	void MoveInto(SearchTree*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
 //  Type ID functions
 	virtual const AbstractClass* UltimateType() const;
 //  Evaluation functions
@@ -64,11 +65,11 @@ public:
 // Internal functions
 //	void HasUniqueLeaves() {__UniqueLeaves = true;};
 //	void HasNonUniqueLeaves() {__UniqueLeaves = false;};
-	signed int BreadthSearchOneStage(bool& RAMStalled);
-	signed int ApprovalScore(const MetaConcept* const Target) const;
+	int BreadthSearchOneStage(bool& RAMStalled);
+	int ApprovalScore(const MetaConcept* const Target) const;
 	bool DestructiveExtractUniqueResult(MetaConcept*& dest);
 protected:
-	void _forceStdForm() override;
+	void _forceStdForm() override {}
 private:
 	const MetaConcept* FindLeafLikeThis(const MetaConcept& Target) const;
 	bool getBranchedArgArray(SearchTree* const Target, MetaConcept**& NewArray) const;
