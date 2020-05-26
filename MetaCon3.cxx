@@ -224,13 +224,6 @@ const MetaConnective::UseThisAsMakeImplyAux MetaConnective::UseThisAsMakeImplyNA
 	};
 
 // lookup tables
-#define SelfLogicalNOT_AND SelfLogicalNOT_ANDOR
-#define SelfLogicalNOT_NAND SelfLogicalNOT_Normal
-#define SelfLogicalNOT_OR SelfLogicalNOT_ANDOR
-#define SelfLogicalNOT_NOR SelfLogicalNOT_Normal
-#define SelfLogicalNOT_NIFF SelfLogicalNOT_Normal
-#define SelfLogicalNOT_NXOR SelfLogicalNOT_Normal
-
 #define StrictlyImplies_NOR NORNANDFatal
 #define StrictlyImplies_NAND NORNANDFatal
 #define StrictlyImpliesLogicalNOTOf_NOR NORNANDFatal
@@ -265,18 +258,6 @@ const MetaConnective::StrictModifyAuxFunc MetaConnective::StrictlyModifiesAux[NI
 	&MetaConnective::StrictlyModifies_XOR,
 	&MetaConnective::StrictlyModifies_NXOR,
 	&MetaConnective::StrictlyModifies_NIFF
-	};
-
-const MetaConnective::SelfLogicalNOTFunc MetaConnective::SelfLogicalNOTAux[StrictBound_MCM]
-  =	{
-	&MetaConnective::SelfLogicalNOT_AND,
-	&MetaConnective::SelfLogicalNOT_OR,
-	&MetaConnective::SelfLogicalNOT_IFF,
-	&MetaConnective::SelfLogicalNOT_XOR,
-	&MetaConnective::SelfLogicalNOT_NXOR,
-	&MetaConnective::SelfLogicalNOT_NIFF,
-	&MetaConnective::SelfLogicalNOT_NOR,
-	&MetaConnective::SelfLogicalNOT_NAND
 	};
 
 const MetaConnective::BinaryRelationAuxFunc2 MetaConnective::StrictlyImpliesAux[StrictBound_MCM]
@@ -315,13 +296,6 @@ const MetaConnective::BinaryRelationAuxFunc2 MetaConnective::CanStrictlyModifyAu
 #undef StrictlyImpliesLogicalNOTOf_NOR
 #undef StrictlyImplies_NAND
 #undef StrictlyImplies_NOR
-
-#undef SelfLogicalNOT_AND
-#undef SelfLogicalNOT_NAND
-#undef SelfLogicalNOT_OR
-#undef SelfLogicalNOT_NOR
-#undef SelfLogicalNOT_NIFF
-#undef SelfLogicalNOT_NXOR
 
 #undef DECLARE_MCVFT
 
@@ -1436,6 +1410,21 @@ void MetaConnective::UseThisAsMakeImplyNAryNXOR(const MetaConcept& Target)
 
 void MetaConnective::SelfLogicalNOT()
 {	// FORMALLY CORRECT: Kenneth Boyd, 2/14/1999
+	typedef void (MetaConnective::* SelfLogicalNOTFunc)();
+
+	static const SelfLogicalNOTFunc SelfLogicalNOTAux[]
+		= {
+		  &MetaConnective::SelfLogicalNOT_ANDOR,
+		  &MetaConnective::SelfLogicalNOT_ANDOR,
+		  &MetaConnective::SelfLogicalNOT_IFF,
+		  &MetaConnective::SelfLogicalNOT_XOR,
+		  &MetaConnective::SelfLogicalNOT_Normal,
+		  &MetaConnective::SelfLogicalNOT_Normal,
+		  &MetaConnective::SelfLogicalNOT_Normal,
+		  &MetaConnective::SelfLogicalNOT_Normal
+	};
+	static_assert(sizeof(SelfLogicalNOTAux)/sizeof(*SelfLogicalNOTAux) == StrictBound_MCM);
+
 	(this->*SelfLogicalNOTAux[array_index()])();
 }
 

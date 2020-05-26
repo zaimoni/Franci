@@ -85,9 +85,7 @@ private:
 	typedef void (MetaConnective::*UseThisAsMakeImplyAux)(const MetaConcept& Target);
 	typedef	bool (MetaConnective::*BinaryRelationAuxFunc)(const MetaConnective& Arg2) const;
 	typedef	bool (MetaConnective::*BinaryRelationAuxFunc2)(const MetaConcept& Arg2) const;
-	typedef void (MetaConnective::*SelfLogicalNOTFunc)(void);
 
-	static const SelfLogicalNOTFunc SelfLogicalNOTAux[StrictBound_MCM];
 	static const BinaryRelationAuxFunc2 StrictlyImpliesAux[StrictBound_MCM];
 	static const BinaryRelationAuxFunc2 CanStrictlyModifyAux[StrictBound_MCM];
 	static const signed short IdempotentNArySelfEvalRulesTable[NIFF_MCM+1];
