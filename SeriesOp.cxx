@@ -288,7 +288,7 @@ bool SeriesOperation::EqualAux2(const MetaConcept& rhs) const
 		if (   ArgArray[EXPRESSION_IDX]->IsExactType(VR_rhs.ArgArray[EXPRESSION_IDX]->ExactType())
 			&& ArgArray[EXPRESSION_IDX]->size()==VR_rhs.ArgArray[EXPRESSION_IDX]->size())
 			{
-			autodel_ptr<MetaConcept> VRExpression;
+			autoval_ptr<MetaConcept> VRExpression;
 			try	{
 				VR_rhs.ArgArray[EXPRESSION_IDX]->CopyInto(VRExpression);
 				}
@@ -492,7 +492,7 @@ bool SeriesOperation::ExpandUnary(MetaConcept*& dest)
 	// This essentially takes the expression arg, and substitutes the sole expression for
 	// the target
 	assert(!dest);
-	autodel_ptr<MetaConcept> TmpVar;
+	autoval_ptr<MetaConcept> TmpVar;
 	TmpVar = new Variable(static_cast<MetaQuantifier*>(ArgArray[SeriesOperation::INDEXVAR_IDX]));
 
 	LOG("Replacing 1-ary series with its sole term:");

@@ -69,7 +69,7 @@ enum IntersectionUnion_LI
 class LinearInterval final : public MetaConceptWith2Args
 {
 private:
-	autodel_ptr<AbstractClass> IntervalDomain;
+	autoval_ptr<AbstractClass> IntervalDomain;
 	bool LeftPointOpen;
 	bool RightPointOpen;	
 
@@ -82,16 +82,18 @@ public:
 
 	LinearInterval(MetaConcept*& lhs, MetaConcept*& rhs, AbstractClass*& UltimateDomain, bool OpenOnLeft, bool OpenOnRight);
 	LinearInterval(const LinearInterval& src);
+	LinearInterval(LinearInterval&& src) = default;
+	LinearInterval& operator=(const LinearInterval& src);
+	LinearInterval& operator=(LinearInterval& src) = default;
 	virtual ~LinearInterval() = default;
-	const LinearInterval& operator=(const LinearInterval& src);
+
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(LinearInterval*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
-	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure; success destroys integrity of source
-	void MoveInto(LinearInterval& dest);	// destroys integrity of source
-	void MoveInto(LinearInterval*& dest);	// can throw memory failure; success destroys integrity of source
+	void MoveInto(MetaConcept*& dest) override { zaimoni::MoveIntoV2(std::move(*this),dest); }
+	void MoveInto(LinearInterval*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
 
 //  Type ID functions
-	virtual const AbstractClass* UltimateType() const;
+	const AbstractClass* UltimateType() const override { return IntervalDomain; }
 	virtual bool ForceUltimateType(const AbstractClass* const src);
 //  Evaluation functions
 	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override;

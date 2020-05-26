@@ -536,7 +536,7 @@ void
 ConstraintForSituationAux2(autoarray_ptr<MetaConcept*>& ArgArray, MetaConcept*& InitialResult)
 {	// FORMALLY CORRECT: Kenneth Boyd, 5/19/2006
 	try	{
-		autodel_ptr<QuantifiedStatement> Tmp;
+		autoval_ptr<QuantifiedStatement> Tmp;
 		Tmp = new QuantifiedStatement;
 		Tmp->insertNSlotsAt(NewVarsOnThisPass.ArraySize()+1,0);
 		InitialResult = ArgArray[0];
@@ -825,7 +825,7 @@ EvaluateExpression_handler(char*& InputBuffer)
 		}
 	else{
 		try	{
-			autodel_ptr<QuantifiedStatement> Tmp;
+			autoval_ptr<QuantifiedStatement> Tmp;
 			Tmp = new QuantifiedStatement;
 			Tmp->insertNSlotsAt(NewVarsOnThisPass.ArraySize()+1,0);
 			InitialResult = ArgArray[0];

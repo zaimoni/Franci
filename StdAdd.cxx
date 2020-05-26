@@ -321,7 +321,7 @@ void StdAddition::DiagnoseInferenceRules() const
 bool StdAddition::DetermineDynamicType() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 1/23/2003
 //! \todo IMPLEMENT: New AbstractClass variant of Subclass, etc.: specifies an operation that must extend....
-	autodel_ptr<AbstractClass> TmpDynamicType;
+	decltype(DynamicType) TmpDynamicType;
 	bool NULLTypesFound = false;
 	size_t i = fast_size();
 	do	if (NULL!=ArgArray[--i]->UltimateType())
@@ -370,7 +370,7 @@ bool StdAddition::DetermineDynamicType() const
 			|| (   !TmpDynamicType->IntersectionWithIsNULLSet(*DesiredType)
 				&&  TmpDynamicType->IntersectWith(*DesiredType)))		//! \todo should "construct object containing both types as subobject with StdAddition"
 			{	// TmpDynamicType dictates DynamicType
-			TmpDynamicType.MoveInto(DynamicType);
+			DynamicType = std::move(TmpDynamicType);
 			return true;
 			}
 		return false;

@@ -355,7 +355,6 @@ bool StdMultiplication::InvokeEqualArgRule() const
 bool StdMultiplication::DetermineDynamicType() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 1/23/2003
 	DEBUG_LOG(ZAIMONI_FUNCNAME);
-	autodel_ptr<AbstractClass> TmpDynamicType;
 	bool NULLTypesFound = false;
 	size_t i = fast_size();
 	// NOTE: Integers can be used to define + via their multiplication.  Even one arg in _C_
@@ -396,6 +395,7 @@ bool StdMultiplication::DetermineDynamicType() const
 	AUDIT_IF_RETURN(0<ComplexCount && 0<MultiplyOnlyCount,false);	// one _C_ arg forces all others to support +
 	AUDIT_IF_RETURN(2<=AddOnlyCount,false);							// can't multiply two of these
 
+	decltype(_DynamicType) TmpDynamicType;
 	// Desired type crunch: if all args except one have domain in the desired type, force it
 	i = fast_size();
 	try	{
@@ -427,7 +427,7 @@ bool StdMultiplication::DetermineDynamicType() const
 				&&  TmpDynamicType->IntersectWith(*_DesiredType)))		//! \todo FIX: should "construct object containing both types as subobject with StdMultiplication"
 			{	// TmpDynamicType dictates DynamicType
 			DEBUG_LOG("Known type");
-			TmpDynamicType.MoveInto(_DynamicType);
+			_DynamicType = std::move(TmpDynamicType);
 			AUDIT_STATEMENT(return true);
 			}
 		AUDIT_STATEMENT(return false);

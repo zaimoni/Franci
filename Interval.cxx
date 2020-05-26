@@ -51,9 +51,9 @@ LinearInterval::LinearInterval(const LinearInterval& src)
 	src.IntervalDomain->CopyInto(IntervalDomain);
 }
 
-const LinearInterval& LinearInterval::operator=(const LinearInterval& src)
+LinearInterval& LinearInterval::operator=(const LinearInterval& src)
 {	// FORMALLY CORRECT: Kenneth Boyd, 5/23/2002
-	autodel_ptr<AbstractClass> Tmp;
+	decltype(IntervalDomain) Tmp;
 	src.IntervalDomain->CopyInto(Tmp);
 	MetaConceptWith2Args::operator=(src);
 	IntervalDomain = std::move(Tmp);
@@ -61,25 +61,6 @@ const LinearInterval& LinearInterval::operator=(const LinearInterval& src)
 	LeftPointOpen = src.LeftPointOpen;
 	RightPointOpen = src.RightPointOpen;
 	return *this;
-}
-
-void LinearInterval::MoveInto(LinearInterval*& dest)		// can throw memory failure.  If it succeeds, it destroys the source.
-{	// FORMALLY CORRECT: Kenneth Boyd, 5/23/2002
-	if (!dest) dest = new LinearInterval();
-	MoveInto(*dest);
-}
-
-void LinearInterval::MoveInto(LinearInterval& dest)
-{	// FORMALLY CORRECT: Kenneth Boyd, 7/12/2002
-	dest.LeftPointOpen = LeftPointOpen;
-	dest.RightPointOpen = RightPointOpen;
-	dest.IntervalDomain = std::move(IntervalDomain);
-	MoveIntoAux(dest);
-}
-
-const AbstractClass* LinearInterval::UltimateType() const
-{
-	return IntervalDomain;
 }
 
 bool
@@ -487,7 +468,7 @@ bool LinearInterval::DestructiveMergeWith(LinearInterval& rhs)
 			return true;
 		else if (Subclass_LI & Result)
 			{	// i.e, RHS is superclass
-			rhs.MoveInto(*this);
+			*this = std::move(rhs);
 			return true;
 			}
 		else if (Union_BC_LI & Result)
