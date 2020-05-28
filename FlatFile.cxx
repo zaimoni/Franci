@@ -46,34 +46,6 @@ FlatFile::~FlatFile()
 		}
 }
 
-FlatFile::FlatFile(const FlatFile& src)
-:	MetaConceptWithArgArray(src)
-{	//! \todo: fixup reference counts, or convert to boost::shared_ptr
-}
-
-const FlatFile& FlatFile::operator=(const FlatFile& src)
-{	//! \todo: fixup reference counts, or convert to boost::shared_ptr
-	MetaConceptWithArgArray::operator=(src);
-	return *this;
-}
-
-void FlatFile::MoveInto(FlatFile*& dest)		// can throw memory failure.  If it succeeds, it destroys the source.
-{	//! \todo IMPLEMENT
-	FATAL(AlphaMustDefineVFunction);
-#if 0
-	if (!dest)
-		{
-		MetaConcept** TmpArgArray = NULL;
-		dest = new FlatFile(TmpArgArray,(MetaConnectiveModes)(ExactType()-LogicalAND_MC));
-		};
-	MoveIntoAux(*dest);
-#endif
-}
-
-const AbstractClass* FlatFile::UltimateType() const {return NULL;}
-bool FlatFile::SyntaxOK() const {return SyntaxOKAux();}
-void FlatFile::_forceStdForm() {}
-
 size_t FlatFile::LengthOfSelfName() const
 {	//! \todo IMPLEMENT
 	return 0;
@@ -92,8 +64,6 @@ void FlatFile::DiagnoseInferenceRules() const
 {
 	IdxCurrentSelfEvalRule = SelfEvalSyntaxOKNoRules_SER;
 }
-
-bool FlatFile::InvokeEqualArgRule() const {return false;}
 
 //! \todo Relocate/Rename to MetaConceptWithArgArray
 void FlatFile::RemoveLineBlock(size_t NonStrictLB, size_t NonStrictUB)

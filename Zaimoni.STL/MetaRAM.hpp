@@ -234,8 +234,7 @@ T* _new_buffer(size_t Idx)
 }
 
 template<typename T>
-std::enable_if_t<std::is_trivially_default_constructible_v<T> && std::is_trivially_destructible_v<T>, T*>
-_new_buffer_nonNULL_throws(size_t Idx)
+T* _new_buffer_nonNULL_throws(size_t Idx)
 {
 	if constexpr (std::is_trivially_constructible_v<T> && std::is_trivially_destructible_v<T>) {
 		T* tmp = reinterpret_cast<T*>(calloc(Idx, sizeof(T)));

@@ -21,18 +21,20 @@ protected:
 	static size_t* FilenameRefCount;
 	static size_t LastFilenameIdx;
 
-	const FlatFile& operator=(const FlatFile& src);
 public:
-	FlatFile() {};
-	FlatFile(const FlatFile& src);
+	FlatFile() = default;
+	FlatFile(const FlatFile& src) = default;
+	FlatFile(FlatFile&& src) = default;
+	FlatFile& operator=(const FlatFile & src) = default;
+	FlatFile& operator=(FlatFile&& src) = default;
 	virtual ~FlatFile();
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	virtual void CopyInto(FlatFile*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
-	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
-	void MoveInto(FlatFile*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
-	virtual const AbstractClass* UltimateType() const;
+	void MoveInto(MetaConcept*& dest) override { zaimoni::MoveIntoV2(std::move(*this), dest); }
+	void MoveInto(FlatFile*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
+	const AbstractClass* UltimateType() const override { return 0; }
 	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override;
-	virtual bool SyntaxOK() const;
+	bool SyntaxOK() const override { return SyntaxOKAux(); }
 // text I/O functions
 	virtual size_t LengthOfSelfName(void) const;
 	// type-specific functions
@@ -44,10 +46,10 @@ public:
 	bool DumpASCIIFile(const char* const Filename);	// writes entire ASCII file from object
 protected:
 	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
-	void _forceStdForm() override;
+	void _forceStdForm() override {}
 
 	virtual void DiagnoseInferenceRules() const;	// This is *not* the Interface!
-	virtual bool InvokeEqualArgRule() const;
+	bool InvokeEqualArgRule() const override { return false; }
 private:
 	bool SplitLineIntoCache(char*& Buffer, const char* const Filename);
 	bool ValidateFilename(const char* const Filename) const;
