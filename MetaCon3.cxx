@@ -158,16 +158,6 @@ MetaConnective::SelfEvaluateRule MetaConnective::SelfEvaluateRuleLookup[MaxSelfE
 #define DECLARE_TARGETVARFALSE_AND_XOR(A)	TargetVariableFalse_SER
 #define DECLARE_TARGETVARTRUE_OR_NXOR(A)	TargetVariableTrue_SER
 
-const signed short MetaConnective::IdempotentNArySelfEvalRulesTable[NIFF_MCM+1]
-  = {
-	DECLARE_CLEANARG(AND),
-	DECLARE_CLEANARG(OR),
-	DECLARE_CLEANARG(IFF),
-	DECLARE_TARGETVARFALSE_AND_XOR(XOR),
-	DECLARE_TARGETVARTRUE_OR_NXOR(NXOR),
-	DECLARE_CLEANARGNIFFXOR(NIFF)
-	};
-
 const MetaConceptWithArgArray::EvalRuleIdx_ER MetaConnective::Idempotent2AryRulesTable[NIFF_MCM+1]
   = { DECLARE_ARG(AND),
       DECLARE_ARG(OR),
@@ -1463,6 +1453,15 @@ bool MetaConnective::InvokeEqualArgRule() const
 		return true;
 		}
 	else{
+		constexpr const signed short IdempotentNArySelfEvalRulesTable[] = {
+			SelfEvalRuleCleanArg_SER,	// AND
+			SelfEvalRuleCleanArg_SER,	// OR
+			SelfEvalRuleCleanArg_SER,	// IFF
+			TargetVariableFalse_SER,	// XOR
+			TargetVariableTrue_SER,	// NXOR
+			SelfEvalRuleNIFFXORCleanArg_SER	// NIFF
+		};
+
 		IdxCurrentSelfEvalRule = IdempotentNArySelfEvalRulesTable[array_index()];
 		if 		(SelfEvalRuleCleanArg_SER==IdxCurrentSelfEvalRule)
 			return CheckForTrailingCleanArg(AreSyntacticallyEqual,SelfEvalRuleCleanTrailingArg_SER,2);
