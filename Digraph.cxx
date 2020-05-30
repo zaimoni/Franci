@@ -17,7 +17,6 @@ Digraph::Digraph(MetaConcept**& NewArgList, bool OwnVertices, LowLevelBinaryRela
 :	MetaConceptWithArgArray(Unknown_MC,NewArgList),
 	DigraphFromToList(NULL),
 	_RelationDefinition(RelationDefinition),
-	RealUltimateType(NULL),
 	_OwnVertices(OwnVertices)
 {	// FORMALLY CORRECT: Kenneth Boyd, 4/21/2006
 	if (!ArgArray) return;
@@ -40,7 +39,6 @@ Digraph::Digraph(const Digraph& src)
 :	MetaConceptWithArgArray(src),
 	DigraphFromToList(NULL),
 	_RelationDefinition(src._RelationDefinition),
-	RealUltimateType(NULL),	// redundant now...not so with dynamically compiled functions
 	_OwnVertices(true)
 {	// FORMALLY CORRECT: Kenneth Boyd, 4/21/2006
 	if (src.DigraphFromToList)

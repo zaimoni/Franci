@@ -27,7 +27,6 @@ class Digraph final : public MetaConceptWithArgArray
 private:
 	unsigned char** DigraphFromToList;
 	LowLevelBinaryRelation* _RelationDefinition;
-	AbstractClass* RealUltimateType;
 	bool _OwnVertices;
 public:
 	Digraph(MetaConcept**& NewArgList, bool OwnVertices, LowLevelBinaryRelation* RelationDefinition);
