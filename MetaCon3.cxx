@@ -158,25 +158,6 @@ MetaConnective::SelfEvaluateRule MetaConnective::SelfEvaluateRuleLookup[MaxSelfE
 #define DECLARE_TARGETVARFALSE_AND_XOR(A)	TargetVariableFalse_SER
 #define DECLARE_TARGETVARTRUE_OR_NXOR(A)	TargetVariableTrue_SER
 
-const MetaConceptWithArgArray::EvalRuleIdx_ER MetaConnective::Idempotent2AryRulesTable[NIFF_MCM+1]
-  = { DECLARE_ARG(AND),
-      DECLARE_ARG(OR),
-	  DECLARE_TRUE(IFF),
-	  DECLARE_CONTRADICTION(XOR),
-	  DECLARE_TRUE(NXOR),
-	  DECLARE_CONTRADICTION(NIFF)
-	 };
-
-// NOTE: MetaConnective::DiagnoseInferenceRulesTrueNAry assumes only LogicalAND entry is DECLARE_CLEANARG
-const signed short MetaConnective::TruthValueTrueAryNSelfTable[NIFF_MCM+1]
-  =	{	DECLARE_CLEANARG(AND),
-		None_SER,
-		DECLARE_CONVERT_TO_AND(IFF),
-		DECLARE_CONVERT_TO_NOR(XOR),
-		DECLARE_CONVERT_TO_OR(NXOR),
-		DECLARE_CONVERT_TO_NAND(NIFF)
-	};
-
 // NOTE: MetaConnective::DiagnoseInferenceRulesFalseNAry assumes only LogicalOR entry is DECLARE_CLEANARG
 const signed short MetaConnective::TruthValueFalseAryNSelfTable[NIFF_MCM]
   =	{	DECLARE_CLEANARG(OR),
@@ -1448,12 +1429,21 @@ bool MetaConnective::InvokeEqualArgRule() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 2/23/2000
 	if (2==fast_size())
 		{
+		static constexpr const unsigned short Idempotent2AryRulesTable[] = {
+			EvalForceArg_ER,	// AND
+			EvalForceArg_ER,	// OR
+			EvalForceTrue_ER,	// IFF
+			EvalForceContradiction_ER,	// XOR
+			EvalForceTrue_ER,	// NXOR
+			EvalForceContradiction_ER	// NIFF
+		};
+
 		InferenceParameter1 = 0;
 		IdxCurrentEvalRule=Idempotent2AryRulesTable[array_index()];
 		return true;
 		}
 	else{
-		constexpr const signed short IdempotentNArySelfEvalRulesTable[] = {
+		static constexpr const signed short IdempotentNArySelfEvalRulesTable[] = {
 			SelfEvalRuleCleanArg_SER,	// AND
 			SelfEvalRuleCleanArg_SER,	// OR
 			SelfEvalRuleCleanArg_SER,	// IFF
@@ -1802,6 +1792,16 @@ bool MetaConnective::DiagnoseInferenceRulesTrueNAry() const
 		const_cast<MetaConnective*>(this)->FastDeleteIdx(0);
 		return false;
 		};
+	// NOTE: MetaConnective::DiagnoseInferenceRulesTrueNAry assumes only LogicalAND entry is DECLARE_CLEANARG
+	static constexpr const signed short TruthValueTrueAryNSelfTable[] = {
+		SelfEvalRuleCleanArg_SER,	// AND
+		None_SER,	// OR
+		CompatibleRetypeOtherArgs_SER,	// IFF
+		ConvertToNOROtherArgs_SER,	// XOR
+		CompatibleRetypeOtherArgs_SER,	// NXOR
+		ConvertToNANDOtherArgs_SER	// NIFF
+	};
+
 	IdxCurrentSelfEvalRule=TruthValueTrueAryNSelfTable[array_index()];
 	InferenceParameter1 = 0;	// all the rules want this
 	if 		(IsExactType(LogicalIFF_MC))
