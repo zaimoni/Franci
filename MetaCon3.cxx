@@ -158,15 +158,6 @@ MetaConnective::SelfEvaluateRule MetaConnective::SelfEvaluateRuleLookup[MaxSelfE
 #define DECLARE_TARGETVARFALSE_AND_XOR(A)	TargetVariableFalse_SER
 #define DECLARE_TARGETVARTRUE_OR_NXOR(A)	TargetVariableTrue_SER
 
-// NOTE: MetaConnective::DiagnoseInferenceRulesFalseNAry assumes only LogicalOR entry is DECLARE_CLEANARG
-const signed short MetaConnective::TruthValueFalseAryNSelfTable[NIFF_MCM]
-  =	{	DECLARE_CLEANARG(OR),
-		DECLARE_CONVERT_TO_NOR(IFF),
-		DECLARE_CLEANARGNIFFXOR(XOR),
-		DECLARE_CLEANARGNXOR(NXOR),
-		DECLARE_CONVERT_TO_OR(NIFF)
-	};
-
 static constexpr const MetaConceptWithArgArray::EvalRuleIdx_ER truthValueFalseAry2Table[IFF_MCM+1]
   =	{	MetaConceptWithArgArray::DECLARE_FALSE(AND),
 		MetaConceptWithArgArray::DECLARE_ARG(OR),
@@ -1897,6 +1888,15 @@ bool MetaConnective::DiagnoseInferenceRulesFalseNAry() const
 		const_cast<MetaConnective*>(this)->FastDeleteIdx(0);
 		return false;
 		};
+	// NOTE: MetaConnective::DiagnoseInferenceRulesFalseNAry assumes only LogicalOR entry is DECLARE_CLEANARG
+	static constexpr const signed short TruthValueFalseAryNSelfTable[] = {
+		SelfEvalRuleCleanArg_SER,	// OR
+		ConvertToNOROtherArgs_SER,	// IFF
+		SelfEvalRuleNIFFXORCleanArg_SER,	// XOR
+		SelfEvalRuleAry2CorrectedCleanArg_SER,	// NXOR
+		CompatibleRetypeOtherArgs_SER	// NIFF
+	};
+
 	IdxCurrentSelfEvalRule=TruthValueFalseAryNSelfTable[ExactType()-LogicalOR_MC];
 	InferenceParameter1 = 0;	// all the rules want this
 	InferenceParameter2 = LogicalIFF_MC;	// NXOR version wants this

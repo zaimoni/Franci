@@ -88,7 +88,6 @@ private:
 
 	static const BinaryRelationAuxFunc2 StrictlyImpliesAux[StrictBound_MCM];
 	static const BinaryRelationAuxFunc2 CanStrictlyModifyAux[StrictBound_MCM];
-	static const signed short TruthValueFalseAryNSelfTable[NIFF_MCM];
 	static const LogicalANDFindDetailedRuleAux ANDDetailedRuleAux[NIFF_MCM-AND_MCM+1];
 	static const StrictModifyAuxFunc StrictlyModifiesAux[NIFF_MCM-AND_MCM+1];
 	static const UseThisAsMakeImplyAux UseThisAsMakeImply2AryTable[IFF_MCM+1];
