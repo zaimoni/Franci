@@ -61,9 +61,19 @@ Digraph::Digraph(const Digraph& src)
 		}
 }
 
+Digraph::Digraph(Digraph&& src)
+:	MetaConceptWithArgArray(std::move(src)),
+	DigraphFromToList(src.DigraphFromToList),
+	_RelationDefinition(src._RelationDefinition),
+	_OwnVertices(src._OwnVertices)
+{
+	src.DigraphFromToList = 0;
+	src._RelationDefinition = 0;
+	src._OwnVertices = false;
+}
+
 Digraph::~Digraph()
-{	//! \todo relocate to Destruct.cxx
-	//! \bug this code will leak if the function pointed to by _RelationDefinition is dynamically compiled.
+{
 	if (DigraphFromToList)
 		BLOCKDELETEARRAY_AND_NULL(DigraphFromToList);
 	if (!_OwnVertices)
@@ -73,8 +83,8 @@ Digraph::~Digraph()
 		}
 }
 
-const Digraph& Digraph::operator=(const Digraph& src)
-{	//! \bug this code will cause undetected pinned pointers if the function pointed to by  _RelationDefinition is dynamically compiled.
+Digraph& Digraph::operator=(const Digraph& src)
+{
 	_RelationDefinition = src._RelationDefinition;
 	if (NULL!=src.DigraphFromToList)
 		{
@@ -108,20 +118,23 @@ const Digraph& Digraph::operator=(const Digraph& src)
 	return *this;
 }
 
-void Digraph::MoveInto(Digraph*& dest)
-{	
-	if (dest->DigraphFromToList)
-		BLOCKDELETEARRAY_AND_NULL(dest->DigraphFromToList);
-	dest->DigraphFromToList = DigraphFromToList;
-	DigraphFromToList = NULL;
-	if (!dest->ArgArray.empty() && !dest->_OwnVertices)
-		{
+Digraph& Digraph::operator=(Digraph&& src)
+{
+	if (DigraphFromToList)
+		BLOCKDELETEARRAY_AND_NULL(DigraphFromToList);
+	if (!_OwnVertices)
+		{	// default corrupts RAM if vertices not owned
 		free(ArgArray);
 		ArgArray.NULLPtr();
 		}
-	ArgArray.MoveInto(dest->ArgArray);
-	dest->_OwnVertices = _OwnVertices;
-	dest->_RelationDefinition = _RelationDefinition;
+	MetaConceptWithArgArray::operator=(std::move(src));
+	DigraphFromToList = src.DigraphFromToList;
+	_RelationDefinition = src._RelationDefinition;
+	_OwnVertices = src._OwnVertices;
+	src.DigraphFromToList = 0;
+	src._RelationDefinition = 0;
+	src._OwnVertices = false;
+	return *this;
 }
 
 //  Type ID functions
@@ -129,8 +142,6 @@ const AbstractClass* Digraph::UltimateType() const
 {	//! \bug once we have function types; correct type is Vertex x Vertex |-> TruthValue
 	return NULL;
 }
-
-void Digraph::_forceStdForm() {ForceStdFormAux();}
 
 //  Evaluation functions
 bool Digraph::SyntaxOK() const

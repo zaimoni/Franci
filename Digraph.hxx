@@ -31,13 +31,15 @@ private:
 public:
 	Digraph(MetaConcept**& NewArgList, bool OwnVertices, LowLevelBinaryRelation* RelationDefinition);
 	Digraph(const Digraph& src);
+	Digraph(Digraph&& src);
+	Digraph& operator=(const Digraph& src);
+	Digraph& operator=(Digraph&& src);
 	virtual ~Digraph();
 
-	const Digraph& operator=(const Digraph& src);
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(Digraph*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
-	virtual void MoveInto(MetaConcept*& dest) {zaimoni::MoveInto(*this,dest);};	// can throw memory failure.  If it succeeds, it destroys the source.
-	void MoveInto(Digraph*& dest);	// can throw memory failure.  If it succeeds, it destroys the source.
+	void MoveInto(MetaConcept*& dest) override { zaimoni::MoveIntoV2(std::move(*this),dest); }
+	void MoveInto(Digraph*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
 //  Type ID functions
 	virtual const AbstractClass* UltimateType() const;
 //  Evaluation functions
@@ -142,7 +144,7 @@ public:
 	void GenerateXORClauseList(MetaConcept**& ClauseList,const MetaConcept** const ArgArray);	// generates XOR clauses not implied by prior information
 #endif
 protected:
-	void _forceStdForm() override;
+	void _forceStdForm() override { ForceStdFormAux(); }
 
 	virtual void DiagnoseInferenceRules() const;
 	virtual bool InvokeEqualArgRule() const;
