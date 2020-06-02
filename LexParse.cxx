@@ -84,7 +84,7 @@ bool DestructiveSyntacticallyEvaluateOnce(MetaConcept*& dest)
 	auto eval_spec = dest->canEvaluate();
 	if (eval_spec.first) {
 		DEBUG_LOG("Leaving; destructive self-evaluate");
-		bool ret = dest->DestructiveEvaluateToSameType();
+		bool ret = eval_spec.first();
 		SUCCEED_OR_DIE(dest->SyntaxOK());
 		DEBUG_LOG(dest->name());
 		DEBUG_LOG(*dest);
@@ -92,11 +92,15 @@ bool DestructiveSyntacticallyEvaluateOnce(MetaConcept*& dest)
 	} else if (eval_spec.second) {
 		try {
 			MetaConcept* Tmp = 0;
-			if (dest->Evaluate(Tmp)) {
-				DEBUG_LOG("Leaving; destructive evaluate");
-				assert(Tmp);
-				delete dest;
-				dest = Tmp;
+			if (eval_spec.second(Tmp)) {
+				if (Tmp) {
+					DEBUG_LOG("Leaving; destructive evaluate");
+					assert(Tmp);
+					delete dest;
+					dest = Tmp;
+				} else {
+					DEBUG_LOG("Leaving; destructive self-evaluate");
+				}
 				SUCCEED_OR_DIE(dest->SyntaxOK());
 				DEBUG_LOG(dest->name());
 				DEBUG_LOG(*dest);

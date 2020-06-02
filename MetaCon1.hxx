@@ -373,6 +373,7 @@ public:
 	bool MetaConceptPtrRelatedToThisConceptBy(const MetaConcept* LHS, LowLevelBinaryRelation* TargetRelation) const;
 	// substitution implementation
 	virtual bool ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& LHS, const MetaConcept& RHS, LowLevelAction* RHSInducedActionOnArg, LowLevelBinaryRelation* TargetRelation) = 0;
+	virtual std::function<bool(MetaConcept*&)> _CanUseThisAsMakeImply(const MetaConcept& Target) { return 0; }
 	virtual bool CanUseThisAsMakeImply(const MetaConcept& Target) const {return false;};
 	virtual void UseThisAsMakeImply(const MetaConcept& Target) {};
 // Grammar support

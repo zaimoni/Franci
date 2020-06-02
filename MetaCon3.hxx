@@ -133,6 +133,7 @@ public:
 	virtual bool MakesLHSImplyRHS(const MetaConcept& lhs, const MetaConcept& rhs) const;
 	virtual bool ValidLHSForMakesLHSImplyRHS(const MetaConcept& lhs) const;
 	virtual bool ValidRHSForMakesLHSImplyRHS(const MetaConcept& rhs) const;
+	std::function<bool(MetaConcept*&)> _CanUseThisAsMakeImply(const MetaConcept& Target) override;
 	virtual bool CanUseThisAsMakeImply(const MetaConcept& Target) const;
 	virtual void UseThisAsMakeImply(const MetaConcept& Target);
 	// Logical operation support

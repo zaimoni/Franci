@@ -1194,6 +1194,75 @@ bool MetaConnective::CanUseThisAsMakeImply(const MetaConcept& Target) const
 	return false;
 }
 
+typedef std::function<bool(MetaConcept*&)>(canUseAsMakeImply)(const MetaConcept&, autovalarray_ptr_throws<MetaConcept*>&, MetaConnective&);
+std::function<bool(MetaConcept*&)> _CanUseThisAsMakeImplyAND(const MetaConcept& Target, autovalarray_ptr_throws<MetaConcept*>& ArgArray, MetaConnective& dest)
+{
+	assert(!ArgArray.empty());
+	size_t i = ArgArray.ArraySize();
+	do	if (Target.ValidLHSForMakesLHSImplyRHS(*ArgArray[--i]))
+			{
+			}
+	while (0 < i);
+	return 0;
+}
+
+std::function<bool(MetaConcept*&)> _CanUseThisAsMakeImplyOR(const MetaConcept& Target, autovalarray_ptr_throws<MetaConcept*>& ArgArray, MetaConnective& dest)
+{
+	assert(!ArgArray.empty());
+	size_t i = ArgArray.ArraySize();
+	do	if (Target.ValidLHSForMakesLHSImplyRHS(*ArgArray[--i]))
+			{
+			}
+	while (0 < i);
+	return 0;
+}
+
+std::function<bool(MetaConcept*&)> _CanUseThisAsMakeImplyIFF(const MetaConcept& Target, autovalarray_ptr_throws<MetaConcept*>& ArgArray, MetaConnective& dest)
+{
+	assert(!ArgArray.empty());
+	size_t i = ArgArray.ArraySize();
+	do	if (Target.ValidLHSForMakesLHSImplyRHS(*ArgArray[--i]))
+			{
+			}
+	while (0 < i);
+	return 0;
+}
+
+std::function<bool(MetaConcept*&)> _CanUseThisAsMakeImplyXOR(const MetaConcept& Target, autovalarray_ptr_throws<MetaConcept*>& ArgArray, MetaConnective& dest)
+{
+	assert(!ArgArray.empty());
+	size_t i = ArgArray.ArraySize();
+	do	if (Target.ValidLHSForMakesLHSImplyRHS(*ArgArray[--i]))
+			{
+			}
+	while (0 < i);
+	return 0;
+}
+
+std::function<bool(MetaConcept*&)> _CanUseThisAsMakeImplyNXOR(const MetaConcept& Target, autovalarray_ptr_throws<MetaConcept*>& ArgArray, MetaConnective& dest)
+{
+	assert(!ArgArray.empty());
+	size_t i = ArgArray.ArraySize();
+	do	if (Target.ValidLHSForMakesLHSImplyRHS(*ArgArray[--i]))
+			{
+			}
+	while (0 < i);
+	return 0;
+}
+
+std::function<bool(MetaConcept*&)> MetaConnective::_CanUseThisAsMakeImply(const MetaConcept& Target)
+{
+	static constexpr canUseAsMakeImply* const UseThisAsMakeImplyTable[] {
+		_CanUseThisAsMakeImplyAND,
+		_CanUseThisAsMakeImplyOR,
+		_CanUseThisAsMakeImplyIFF,
+		_CanUseThisAsMakeImplyXOR,
+		_CanUseThisAsMakeImplyNXOR
+	};
+	if (LogicalNXOR_MC >= ExactType()) return (*(UseThisAsMakeImplyTable[ExactType() - LogicalAND_MC]))(Target, ArgArray, *this);
+	return 0;
+}
+
 void MetaConnective::UseThisAsMakeImply(const MetaConcept& Target)
 {	// FORMALLY CORRECT: Kenneth Boyd, 2/25/2001
 	// this activates iff the Target generates an implies that can be used for reduction.
