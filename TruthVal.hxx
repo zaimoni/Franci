@@ -29,4 +29,10 @@ struct MetaConcept_lookup<TVal>
 
 typedef MetaConceptExternal<TVal> TruthValue;
 
+template<auto tval>
+bool ForceTruth(MetaConcept*&)
+{
+	return new TruthValue(TVal(tval));
+}
+
 #endif

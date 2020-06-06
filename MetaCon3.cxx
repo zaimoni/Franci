@@ -1201,6 +1201,31 @@ std::function<bool(MetaConcept*&)> _CanUseThisAsMakeImplyAND(const MetaConcept& 
 	size_t i = ArgArray.ArraySize();
 	do	if (Target.ValidLHSForMakesLHSImplyRHS(*ArgArray[--i]))
 			{
+			size_t j = ArgArray.ArraySize();
+			do	if (i != --j && Target.MakesLHSImplyLogicalNOTOfRHS(*ArgArray[i], *ArgArray[j]))
+					return ForceTruth<TVal::False>; // AND(A,B): CONTRADICTION [AND(A,B,OR(~A,~B))|->...|->FALSE]
+			while (0 < j);
+			size_t DeleteThis = -1;
+			j = ArgArray.ArraySize();
+			do	if (i != --j && Target.MakesLHSImplyRHS(*ArgArray[i], *ArgArray[j]))
+					{
+					if (-1 != DeleteThis) ArgArray.DeleteIdx(DeleteThis);
+					DeleteThis = j;
+					if (2 == ArgArray.ArraySize()) {
+						return [&](MetaConcept*& dest) mutable {
+							dest = ArgArray[1 - DeleteThis];
+							ArgArray[1 - DeleteThis] = 0;
+							return true;
+						};
+					}
+					}
+			while (0 < j);
+			if (-1 != DeleteThis) {
+				return [&](MetaConcept*& dest) mutable {
+					ArgArray.DeleteIdx(DeleteThis);
+					return true;
+				};
+			}
 			}
 	while (0 < i);
 	return 0;
@@ -1212,6 +1237,28 @@ std::function<bool(MetaConcept*&)> _CanUseThisAsMakeImplyOR(const MetaConcept& T
 	size_t i = ArgArray.ArraySize();
 	do	if (Target.ValidLHSForMakesLHSImplyRHS(*ArgArray[--i]))
 			{
+			size_t DeleteThis = -1;
+			size_t j = ArgArray.ArraySize();
+			do	if (i != --j && Target.MakesLHSImplyRHS(*ArgArray[i], *ArgArray[j]))
+					{
+					if (-1 != DeleteThis) ArgArray.DeleteIdx(DeleteThis);
+					DeleteThis = i;
+					if (2 == ArgArray.ArraySize()) {
+						return [&](MetaConcept*& dest) mutable {
+							dest = ArgArray[1 - DeleteThis];
+							ArgArray[1 - DeleteThis] = 0;
+							return true;
+						};
+					}
+					break;
+					}
+			while (0 < j);
+			if (-1 != DeleteThis) {
+				return [&](MetaConcept*& dest) mutable {
+					ArgArray.DeleteIdx(DeleteThis);
+					return true;
+				};
+			}
 			}
 	while (0 < i);
 	return 0;
