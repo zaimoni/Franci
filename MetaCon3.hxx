@@ -109,7 +109,7 @@ public:
 //  Type ID functions
 	const AbstractClass* UltimateType() const override;
 //  Evaluation functions
-	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override;
+	evalspec canEvaluate() const override;
 	virtual bool SyntaxOK() const;
 // text I/O functions
 	virtual size_t LengthOfSelfName(void) const;
@@ -133,7 +133,7 @@ public:
 	virtual bool MakesLHSImplyRHS(const MetaConcept& lhs, const MetaConcept& rhs) const;
 	virtual bool ValidLHSForMakesLHSImplyRHS(const MetaConcept& lhs) const;
 	virtual bool ValidRHSForMakesLHSImplyRHS(const MetaConcept& rhs) const;
-	std::function<bool(MetaConcept*&)> _CanUseThisAsMakeImply(const MetaConcept& Target) override;
+	evalspec _CanUseThisAsMakeImply(const MetaConcept& Target) override;
 	virtual bool CanUseThisAsMakeImply(const MetaConcept& Target) const;
 	virtual void UseThisAsMakeImply(const MetaConcept& Target);
 	// Logical operation support
@@ -164,6 +164,14 @@ public:
 	bool ImprovisedUsesSpeculativeOR(const MetaConnective& Target) const;
 	bool ANDValidConclusionForSymmetry() const;
 	bool WantStateDump() const;	// for LogicalAND only; inference engine helper
+
+	template<ExactType_MC dest> void set() {
+		static_assert(LogicalAND_MC <= dest && LogicalNAND_MC >= dest);
+		SetExactType(dest);
+		IdxCurrentSelfEvalRule = None_SER;
+		if constexpr (LogicalNOR_MC <= dest) DoSelfDeMorgan();
+	}
+
 protected:
 	virtual bool EqualAux2(const MetaConcept& rhs) const;
 	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
@@ -172,9 +180,10 @@ protected:
 //  Helper functions for CanEvaluate... routines
 	virtual void DiagnoseInferenceRules() const;
 	virtual bool InvokeEqualArgRule() const;
+
 private:
 	void DoSelfDeMorgan();
-	inline void SetNANDNOR(ExactType_MC NewType) {SetExactType(NewType); IdxCurrentSelfEvalRule = None_SER; DoSelfDeMorgan();};
+	void SetNANDNOR(ExactType_MC NewType);
 
 	bool LogicalANDFindDetailedRuleForOR(MetaConcept& RHS, size_t LHSIdx, size_t RHSIdx, size_t& Param1, size_t& Param2, signed short& SelfEvalIdx, unsigned short& EvalIdx);
 	bool LogicalANDFindDetailedRuleForIFF(MetaConcept& RHS, size_t LHSIdx, size_t RHSIdx, size_t& Param1, size_t& Param2, signed short& SelfEvalIdx, unsigned short& EvalIdx);

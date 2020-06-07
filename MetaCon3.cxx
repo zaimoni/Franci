@@ -576,7 +576,7 @@ bool MetaConnective::IFF_AmplifyThisClauseV1(MetaConnective& rhs) const
 		if (!NewArg->AddArgAtEndAndForceCorrectForm(rhs.ArgArray[IncomingRHSParam1]))
 			return false;
 		}
-	NewArg->SetNANDNOR(LogicalNOR_MC);
+	NewArg->set<LogicalNOR_MC>();
 	rhs.ArgArray[IncomingRHSParam1] = NewArg.release();
 	// immediately normalize AND
 	if (rhs.IsExactType(LogicalAND_MC))
@@ -678,7 +678,7 @@ bool MetaConnective::XOR_AmplifyThisClause(MetaConnective& rhs) const
 		if (NewArg->AddArgAtEndAndForceCorrectForm(rhs.ArgArray[IncomingRHSParam1]))
 			return false;
 		}
-	NewArg->SetNANDNOR(LogicalNOR_MC);
+	NewArg->set<LogicalNOR_MC>();
 	rhs.ArgArray[IncomingRHSParam1] = NewArg.release();
 	// immediately normalize AND
 	if (rhs.IsExactType(LogicalAND_MC))
@@ -769,9 +769,9 @@ bool MetaConnective::DirectCreateBasisClauseIdx(size_t Idx, MetaConcept*& dest) 
 			{
 			MetaConnective* tmp_mc = new MetaConnective(*this);
 			if (0==Idx)
-				tmp_mc->SetExactTypeV2(LogicalAND_MC);
+				tmp_mc->set<LogicalAND_MC>();
 			else	// if (1==Idx)
-				tmp_mc->SetNANDNOR(LogicalNOR_MC);
+				tmp_mc->set<LogicalNOR_MC>();
 			dest = tmp_mc;
 			return true;
 			}
@@ -1194,8 +1194,8 @@ bool MetaConnective::CanUseThisAsMakeImply(const MetaConcept& Target) const
 	return false;
 }
 
-typedef std::function<bool(MetaConcept*&)>(canUseAsMakeImply)(const MetaConcept&, autovalarray_ptr_throws<MetaConcept*>&, MetaConnective&);
-std::function<bool(MetaConcept*&)> _CanUseThisAsMakeImplyAND(const MetaConcept& Target, autovalarray_ptr_throws<MetaConcept*>& ArgArray, MetaConnective& dest)
+typedef MetaConcept::evalspec(canUseAsMakeImply)(const MetaConcept&, autovalarray_ptr_throws<MetaConcept*>&, MetaConnective&);
+MetaConcept::evalspec _CanUseThisAsMakeImplyAND(const MetaConcept& Target, autovalarray_ptr_throws<MetaConcept*>& ArgArray, MetaConnective& dest)
 {
 	assert(!ArgArray.empty());
 	size_t i = ArgArray.ArraySize();
@@ -1203,7 +1203,7 @@ std::function<bool(MetaConcept*&)> _CanUseThisAsMakeImplyAND(const MetaConcept& 
 			{
 			size_t j = ArgArray.ArraySize();
 			do	if (i != --j && Target.MakesLHSImplyLogicalNOTOfRHS(*ArgArray[i], *ArgArray[j]))
-					return ForceTruth<TVal::False>; // AND(A,B): CONTRADICTION [AND(A,B,OR(~A,~B))|->...|->FALSE]
+					return MetaConcept::evalspec(0, ForceTruth<TVal::False>); // AND(A,B): CONTRADICTION [AND(A,B,OR(~A,~B))|->...|->FALSE]
 			while (0 < j);
 			size_t DeleteThis = -1;
 			j = ArgArray.ArraySize();
@@ -1212,26 +1212,26 @@ std::function<bool(MetaConcept*&)> _CanUseThisAsMakeImplyAND(const MetaConcept& 
 					if (-1 != DeleteThis) ArgArray.DeleteIdx(DeleteThis);
 					DeleteThis = j;
 					if (2 == ArgArray.ArraySize()) {
-						return [&](MetaConcept*& dest) mutable {
+						return MetaConcept::evalspec(0, [&](MetaConcept*& dest) mutable {
 							dest = ArgArray[1 - DeleteThis];
 							ArgArray[1 - DeleteThis] = 0;
 							return true;
-						};
+						});
 					}
 					}
 			while (0 < j);
 			if (-1 != DeleteThis) {
-				return [&](MetaConcept*& dest) mutable {
+				return MetaConcept::evalspec([&]() mutable {
 					ArgArray.DeleteIdx(DeleteThis);
 					return true;
-				};
+				},0);
 			}
 			}
 	while (0 < i);
-	return 0;
+	return MetaConcept::evalspec();
 }
 
-std::function<bool(MetaConcept*&)> _CanUseThisAsMakeImplyOR(const MetaConcept& Target, autovalarray_ptr_throws<MetaConcept*>& ArgArray, MetaConnective& dest)
+MetaConcept::evalspec _CanUseThisAsMakeImplyOR(const MetaConcept& Target, autovalarray_ptr_throws<MetaConcept*>& ArgArray, MetaConnective& dest)
 {
 	assert(!ArgArray.empty());
 	size_t i = ArgArray.ArraySize();
@@ -1244,27 +1244,48 @@ std::function<bool(MetaConcept*&)> _CanUseThisAsMakeImplyOR(const MetaConcept& T
 					if (-1 != DeleteThis) ArgArray.DeleteIdx(DeleteThis);
 					DeleteThis = i;
 					if (2 == ArgArray.ArraySize()) {
-						return [&](MetaConcept*& dest) mutable {
+						return MetaConcept::evalspec(0, [&](MetaConcept*& dest) mutable {
 							dest = ArgArray[1 - DeleteThis];
 							ArgArray[1 - DeleteThis] = 0;
 							return true;
-						};
+						});
 					}
 					break;
 					}
 			while (0 < j);
 			if (-1 != DeleteThis) {
-				return [&](MetaConcept*& dest) mutable {
+				return MetaConcept::evalspec([&]() mutable {
 					ArgArray.DeleteIdx(DeleteThis);
 					return true;
-				};
+				}, 0);
 			}
 			}
 	while (0 < i);
-	return 0;
+	return MetaConcept::evalspec();
 }
 
-std::function<bool(MetaConcept*&)> _CanUseThisAsMakeImplyIFF(const MetaConcept& Target, autovalarray_ptr_throws<MetaConcept*>& ArgArray, MetaConnective& dest)
+MetaConcept::evalspec _CanUseThisAsMakeImplyIFF(const MetaConcept& Target, autovalarray_ptr_throws<MetaConcept*>& ArgArray, MetaConnective& dest)
+{
+	assert(!ArgArray.empty());
+	size_t i = ArgArray.ArraySize();
+	do	if (Target.ValidLHSForMakesLHSImplyRHS(*ArgArray[--i]))
+			{
+			size_t j = ArgArray.ArraySize();
+			// \todo what about transition to AND?
+			do	if (i!= --j && Target.MakesLHSImplyLogicalNOTOfRHS(*ArgArray[i],*ArgArray[j]))
+					{	// IFF(A,B,...): boost to NOR(A,B,...) [AND(IFF(A,B,...),OR(~A,~B))]
+					return MetaConcept::evalspec([&]() mutable {
+						dest.set<LogicalNOR_MC>();
+						return true;
+					}, 0);
+					}
+			while(0<j);
+			}
+	while (0 < i);
+	return MetaConcept::evalspec();
+}
+
+MetaConcept::evalspec _CanUseThisAsMakeImplyXOR(const MetaConcept& Target, autovalarray_ptr_throws<MetaConcept*>& ArgArray, MetaConnective& dest)
 {
 	assert(!ArgArray.empty());
 	size_t i = ArgArray.ArraySize();
@@ -1272,10 +1293,10 @@ std::function<bool(MetaConcept*&)> _CanUseThisAsMakeImplyIFF(const MetaConcept& 
 			{
 			}
 	while (0 < i);
-	return 0;
+	return MetaConcept::evalspec();
 }
 
-std::function<bool(MetaConcept*&)> _CanUseThisAsMakeImplyXOR(const MetaConcept& Target, autovalarray_ptr_throws<MetaConcept*>& ArgArray, MetaConnective& dest)
+MetaConcept::evalspec _CanUseThisAsMakeImplyNXOR(const MetaConcept& Target, autovalarray_ptr_throws<MetaConcept*>& ArgArray, MetaConnective& dest)
 {
 	assert(!ArgArray.empty());
 	size_t i = ArgArray.ArraySize();
@@ -1283,21 +1304,10 @@ std::function<bool(MetaConcept*&)> _CanUseThisAsMakeImplyXOR(const MetaConcept& 
 			{
 			}
 	while (0 < i);
-	return 0;
+	return MetaConcept::evalspec();
 }
 
-std::function<bool(MetaConcept*&)> _CanUseThisAsMakeImplyNXOR(const MetaConcept& Target, autovalarray_ptr_throws<MetaConcept*>& ArgArray, MetaConnective& dest)
-{
-	assert(!ArgArray.empty());
-	size_t i = ArgArray.ArraySize();
-	do	if (Target.ValidLHSForMakesLHSImplyRHS(*ArgArray[--i]))
-			{
-			}
-	while (0 < i);
-	return 0;
-}
-
-std::function<bool(MetaConcept*&)> MetaConnective::_CanUseThisAsMakeImply(const MetaConcept& Target)
+MetaConcept::evalspec MetaConnective::_CanUseThisAsMakeImply(const MetaConcept& Target)
 {
 	static constexpr canUseAsMakeImply* const UseThisAsMakeImplyTable[] {
 		_CanUseThisAsMakeImplyAND,
@@ -1307,7 +1317,7 @@ std::function<bool(MetaConcept*&)> MetaConnective::_CanUseThisAsMakeImply(const 
 		_CanUseThisAsMakeImplyNXOR
 	};
 	if (LogicalNXOR_MC >= ExactType()) return (*(UseThisAsMakeImplyTable[ExactType() - LogicalAND_MC]))(Target, ArgArray, *this);
-	return 0;
+	return evalspec();
 }
 
 void MetaConnective::UseThisAsMakeImply(const MetaConcept& Target)
@@ -1568,9 +1578,9 @@ bool MetaConnective::InvokeEqualArgRule() const
 		}
 }
 
-std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > MetaConnective::canEvaluate() const // \todo obviate DiagnoseInferenceRules
+MetaConcept::evalspec MetaConnective::canEvaluate() const // \todo obviate DiagnoseInferenceRules
 {
-	return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >();
+	return evalspec();
 }
 
 void MetaConnective::DiagnoseInferenceRules() const
@@ -2876,9 +2886,9 @@ bool MetaConnective::AugmentHypothesis(MetaConcept*& Hypothesis) const
 		else{	// IsExactType(LogicalNIFF_MC)
 			CopyInto(Tmp);
 			if (LogicalNOTOfNonStrictlyImplies(*ArgArray[InferenceParameter1],*Hypothesis))
-				static_cast<MetaConnective*>(Tmp)->SetExactTypeV2(LogicalAND_MC);
+				static_cast<MetaConnective*>(Tmp)->set<LogicalAND_MC>();
 			else	// if (NonStrictlyImplies(*ArgArray[InferenceParameter1],*Hypothesis))
-				static_cast<MetaConnective*>(Tmp)->SetNANDNOR(LogicalNOR_MC);
+				static_cast<MetaConnective*>(Tmp)->set<LogicalNOR_MC>();
 			static_cast<MetaConnective*>(Tmp)->DeleteIdx(InferenceParameter1);
 			}
 		}
@@ -2936,9 +2946,9 @@ void MetaConnective::StrictlyModifies_OR(MetaConcept*& rhs) const
 		rhs->UseThisAsMakeImply(*this);
 		}
 	else if (LogicalAND_MC==static_cast<MetaConnective*>(rhs)->InferenceParameter1)
-		static_cast<MetaConnective*>(rhs)->SetExactTypeV2(LogicalAND_MC);
+		static_cast<MetaConnective*>(rhs)->set<LogicalAND_MC>();
 	else	// if (LogicalNOR_MC==static_cast<MetaConnective*>(RHS)->InferenceParameter1)
-		static_cast<MetaConnective*>(rhs)->SetNANDNOR(LogicalNOR_MC);
+		static_cast<MetaConnective*>(rhs)->set<LogicalNOR_MC>();
 }
 
 bool
@@ -4040,7 +4050,7 @@ bool MetaConnective::LogicalANDAry2IFFSpliceAntiIdempotentArg()
 	Parameter1.OverwriteAndNULL(tmp);
 	ArgArray = tmp;
 	}
-	SetExactTypeV2(LogicalIFF_MC);
+	set<LogicalIFF_MC>();
 	assert(SyntaxOK());
 	return true;
 }
@@ -5000,16 +5010,16 @@ bool MetaConnective::LogicalANDReplaceORAndXORWithXORAndNORArg()
 		while(static_cast<MetaConnective*>(ArgArray[InferenceParameter1])->fast_size()>++FirstNonMatchIdx);
 		}
 	}
-	static_cast<MetaConnective*>(ArgArray[InferenceParameter2])->SetNANDNOR(LogicalNOR_MC);
+	static_cast<MetaConnective*>(ArgArray[InferenceParameter2])->set<LogicalNOR_MC>();
 	
 	// Convert OR to XOR.  If arity-2, fix it to IFF
 	if (2==static_cast<MetaConnective*>(ArgArray[InferenceParameter1])->fast_size())
 		{
 		static_cast<MetaConnective*>(ArgArray[InferenceParameter1])->ArgArray[1]->SelfLogicalNOT();
-		static_cast<MetaConnective*>(ArgArray[InferenceParameter1])->SetExactType(LogicalIFF_MC);
+		static_cast<MetaConnective*>(ArgArray[InferenceParameter1])->set<LogicalIFF_MC>();
 		}
 	else
-		static_cast<MetaConnective*>(ArgArray[InferenceParameter1])->SetExactType(LogicalXOR_MC);
+		static_cast<MetaConnective*>(ArgArray[InferenceParameter1])->set<LogicalXOR_MC>();
 	static_cast<MetaConnective*>(ArgArray[InferenceParameter1])->ForceCheckForEvaluation();
 
 	// NOTE: END Bugfix here
@@ -5023,7 +5033,7 @@ bool MetaConnective::LogicalANDReplaceORAndXORWithXORAndNORArg()
 bool MetaConnective::ConvertToNANDOtherArgs()
 {	// FORMALLY CORRECT: Kenneth Boyd, 5/15/1999
 	DeleteIdx(InferenceParameter1);
-	SetNANDNOR(LogicalNAND_MC);
+	set<LogicalNAND_MC>();
 	assert(SyntaxOK());
 	return true;
 }
@@ -5031,7 +5041,7 @@ bool MetaConnective::ConvertToNANDOtherArgs()
 bool MetaConnective::ConvertToNOROtherArgs()
 {	// FORMALLY CORRECT: Kenneth Boyd, 5/15/1999
 	DeleteIdx(InferenceParameter1);
-	SetNANDNOR(LogicalNOR_MC);
+	set<LogicalNOR_MC>();
 	assert(SyntaxOK());
 	return true;
 }
@@ -5047,11 +5057,8 @@ bool MetaConnective::ReplaceArgsWithTrue()
 	DELETE_AND_NULL(ArgArray[InferenceParameter1]);
 	DELETE_AND_NULL(ArgArray[InferenceParameter2]);
 	FlushNULLFromArray((MetaConcept**&)ArgArray,(InferenceParameter1<InferenceParameter2) ? InferenceParameter1 : InferenceParameter2);
-	if (IsExactType(LogicalXOR_MC))
-		// XOR:
-		SetNANDNOR(LogicalNOR_MC);	
-	else	// NXOR:
-		SetExactTypeV2(LogicalOR_MC);
+	if (IsExactType(LogicalXOR_MC)) set<LogicalNOR_MC>(); // XOR:
+	else set<LogicalOR_MC>(); // NXOR:
 	assert(SyntaxOK());
 	return true;
 }
@@ -6057,14 +6064,10 @@ MetaConnective::HyperNonStrictlyImpliesReplacement(const MetaConcept& LHS, const
 					SetLHSToRHS(ArgArray[i],RHS);		//! \todo replace with intelligent actions
 				else{
 					FastDeleteIdx(i);
-					if      (IsExactType(LogicalIFF_MC))
-						SetExactType(LogicalAND_MC);
-					else if (IsExactType(LogicalXOR_MC))
-						SetNANDNOR(LogicalNOR_MC);
-					else if (IsExactType(LogicalNXOR_MC))
-						SetExactType(LogicalOR_MC);
-					else if (IsExactType(LogicalNIFF_MC))
-						SetNANDNOR(LogicalNAND_MC);
+					if      (IsExactType(LogicalIFF_MC))  set<LogicalAND_MC>();
+					else if (IsExactType(LogicalXOR_MC))  set<LogicalNOR_MC>();
+					else if (IsExactType(LogicalNXOR_MC)) set<LogicalOR_MC>();
+					else if (IsExactType(LogicalNIFF_MC)) set<LogicalNAND_MC>();
 					}
 				IdxCurrentSelfEvalRule = None_SER;      // resets syntax-immunity at this level
 				}
@@ -6113,8 +6116,7 @@ MetaConnective::HyperNonStrictlyImpliesLogicalNOTOfReplacement(const MetaConcept
 					SetLHSToLogicalNOTOfRHS(ArgArray[i],RHS);
 				else{
 					FastDeleteIdx(i);
-					if      (IsExactType(LogicalIFF_MC))
-						SetNANDNOR(LogicalNOR_MC);
+					if      (IsExactType(LogicalIFF_MC)) set<LogicalNOR_MC>();
 					else if (IsExactType(LogicalXOR_MC))
 						{
 						if (2==fast_size())
@@ -6393,7 +6395,7 @@ MetaConnective::LogicalANDBoostORWithIFF(MetaConnective*& SpeculativeTarget, siz
 				MetaConnective* Target = NULL;
 				static_cast<MetaConnective*>(ArgArray[Idx4])->CopyInto(Target);
 				Target->TransferInAndOverwriteRaw(Target->InferenceParameter1,TmpTruthValue.release());
-				Target->SetNANDNOR(LogicalNOR_MC);
+				Target->set<LogicalNOR_MC>();
 				SpeculativeTarget->TransferInAndOverwriteRaw(SpeculativeTarget->InferenceParameter1,Target);
 				Tweaked = true;
 				}
@@ -7172,6 +7174,13 @@ void MetaConnective::DoSelfDeMorgan()
 	do	ArgArray[--i]->SelfLogicalNOT();
 	while(0<i);
 	ForceTotalLexicalArgOrder();
+}
+
+void MetaConnective::SetNANDNOR(ExactType_MC NewType)
+{
+	SetExactType(NewType);
+	IdxCurrentSelfEvalRule = None_SER;
+	DoSelfDeMorgan();
 }
 
 //! \todo OPTIMIZE: TIME

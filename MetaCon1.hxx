@@ -252,6 +252,8 @@ protected:
 	MetaConcept& operator=(const MetaConcept & src) = default;
 	MetaConcept& operator=(MetaConcept&& src) = default;
 public:
+	using evalspec = std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >;
+
 	// detects whether lhs is hard-coded logical negation of rhs
 	friend bool IsAntiIdempotentTo(const MetaConcept& lhs, const MetaConcept& rhs);
 
@@ -292,7 +294,7 @@ public:
 	bool IsExplicitConstant() const {return _IsExplicitConstant();};
 	virtual bool IsAbstractClassDomain() const = 0;
 //  Evaluation functions
-	virtual std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const = 0;
+	virtual evalspec canEvaluate() const = 0;
 	virtual bool CanEvaluate() const = 0;	// either same or different-type
 	virtual bool CanEvaluateToSameType() const = 0;				
 	virtual bool SyntaxOK() const = 0;							
@@ -373,7 +375,7 @@ public:
 	bool MetaConceptPtrRelatedToThisConceptBy(const MetaConcept* LHS, LowLevelBinaryRelation* TargetRelation) const;
 	// substitution implementation
 	virtual bool ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& LHS, const MetaConcept& RHS, LowLevelAction* RHSInducedActionOnArg, LowLevelBinaryRelation* TargetRelation) = 0;
-	virtual std::function<bool(MetaConcept*&)> _CanUseThisAsMakeImply(const MetaConcept& Target) { return 0; }
+	virtual evalspec _CanUseThisAsMakeImply(const MetaConcept& Target) { return evalspec(0,0); }
 	virtual bool CanUseThisAsMakeImply(const MetaConcept& Target) const {return false;};
 	virtual void UseThisAsMakeImply(const MetaConcept& Target) {};
 // Grammar support
