@@ -1291,6 +1291,14 @@ MetaConcept::evalspec _CanUseThisAsMakeImplyXOR(const MetaConcept& Target, autov
 	size_t i = ArgArray.ArraySize();
 	do	if (Target.ValidLHSForMakesLHSImplyRHS(*ArgArray[--i]))
 			{
+			size_t j = ArgArray.ArraySize();
+			do	if (i!= --j && Target.MakesLHSImplyLogicalNOTOfRHS(*ArgArray[i],*ArgArray[j]))
+					{	// A=>B: force ~A AND XOR(...)
+					return MetaConcept::evalspec([&]() mutable {
+						return dest.TargetVariableFalse(i);
+					}, 0);
+					}
+			while(0<j);
 			}
 	while (0 < i);
 	return MetaConcept::evalspec();
@@ -1302,6 +1310,14 @@ MetaConcept::evalspec _CanUseThisAsMakeImplyNXOR(const MetaConcept& Target, auto
 	size_t i = ArgArray.ArraySize();
 	do	if (Target.ValidLHSForMakesLHSImplyRHS(*ArgArray[--i]))
 			{
+			size_t j = ArgArray.ArraySize();
+			do	if (i!= --j && Target.MakesLHSImplyLogicalNOTOfRHS(*ArgArray[i],*ArgArray[j]))
+					{	// A=>B: force A OR NXOR(...)
+					return MetaConcept::evalspec([&]() mutable {
+						return dest.TargetVariableTrue(i);
+					}, 0);
+					}
+			while(0<j);
 			}
 	while (0 < i);
 	return MetaConcept::evalspec();
@@ -5064,17 +5080,13 @@ bool MetaConnective::ReplaceArgsWithTrue()
 }
 
 bool MetaConnective::TargetVariableFalse()
-{	// FORMALLY CORRECT: Kenneth Boyd, 11/12/2004
+{	// FORMALLY CORRECT: 2020-06-10
 	// This is called from XOR
 	// result: ~A AND XOR(...) [XOR(A,A,B): ~A AND B]
 	assert(IsExactType(LogicalXOR_MC));
-	MetaConnective* TmpXOR = new(nothrow) MetaConnective((3==fast_size()) ? IFF_MCM : XOR_MCM);
+	std::unique_ptr<MetaConnective> TmpXOR(new(nothrow) MetaConnective((3 == fast_size()) ? IFF_MCM : XOR_MCM));
 	if (!TmpXOR) return false;
-	if (!TmpXOR->InsertNSlotsAtV2(2,0))
-		{
-		delete TmpXOR;
-		return false;
-		};
+	if (!TmpXOR->InsertNSlotsAtV2(2, 0)) return false;
 
 	TransferOutAndNULL(InferenceParameter1,TmpXOR->ArgArray[0]);
 	TmpXOR->ArgArray[0]->SelfLogicalNOT();
@@ -5088,24 +5100,20 @@ bool MetaConnective::TargetVariableFalse()
 	}
 
 	swap(ArgArray,TmpXOR->ArgArray);
-	ArgArray[1] = TmpXOR;
-	SetExactTypeV2(LogicalAND_MC);
+	ArgArray[1] = TmpXOR.release();
+	set<LogicalAND_MC>();
 	assert(SyntaxOK());
 	return true;
 }
 
 bool MetaConnective::TargetVariableTrue()
-{	// FORMALLY CORRECT: Kenneth Boyd, 11/12/2004
+{	// FORMALLY CORRECT: 2020-06-10
 	// Called from NXOR for idempotent case
 	// result: A OR NXOR(...) [NXOR(A,A,B): A OR ~B]
 	assert(IsExactType(LogicalNXOR_MC));
-	MetaConnective* TmpNXOR = new(nothrow) MetaConnective((3==fast_size()) ? IFF_MCM : NXOR_MCM);
+	std::unique_ptr<MetaConnective> TmpNXOR(new(nothrow) MetaConnective((3==fast_size()) ? IFF_MCM : NXOR_MCM));
 	if (!TmpNXOR) return false;
-	if (!TmpNXOR->InsertNSlotsAtV2(2,0))
-		{
-		delete TmpNXOR;
-		return false;
-		};
+	if (!TmpNXOR->InsertNSlotsAtV2(2, 0)) return false;
 
 	TransferOutAndNULL(InferenceParameter1,TmpNXOR->ArgArray[0]);
 	DeleteIdx(InferenceParameter1);
@@ -5118,8 +5126,8 @@ bool MetaConnective::TargetVariableTrue()
 	}
 
 	swap(ArgArray,TmpNXOR->ArgArray);
-	ArgArray[1] = TmpNXOR;	
-	SetExactTypeV2(LogicalOR_MC);
+	ArgArray[1] = TmpNXOR.release();
+	set<LogicalOR_MC>();
 	assert(SyntaxOK());
 	return true;
 }

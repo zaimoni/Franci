@@ -172,6 +172,16 @@ public:
 		if constexpr (LogicalNOR_MC <= dest) DoSelfDeMorgan();
 	}
 
+	// thin forwarders to support lambda functions
+	bool TargetVariableFalse(size_t i) {
+		InferenceParameter1 = i;
+		return TargetVariableFalse();
+	}
+	bool TargetVariableTrue(size_t i) {
+		InferenceParameter1 = i;
+		return TargetVariableTrue();
+	}
+
 protected:
 	virtual bool EqualAux2(const MetaConcept& rhs) const;
 	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
