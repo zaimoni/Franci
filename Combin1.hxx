@@ -48,7 +48,7 @@ private:
 	typedef bool (CombinatorialLike::*SelfEvaluateRule)();
 	static SelfEvaluateRule SelfEvaluateRuleLookup[MaxSelfEvalRuleIdx_SER];
 public:
-	CombinatorialLike(CombinatorialModes LinkageType) : MetaConceptWithArgArray((ExactType_MC)(LinkageType+Factorial_MC)) {};
+	CombinatorialLike(CombinatorialModes LinkageType) noexcept : MetaConceptWithArgArray((ExactType_MC)(LinkageType+Factorial_MC)) {};
 	CombinatorialLike(MetaConcept**& NewArgList, CombinatorialModes LinkageType);
 	CombinatorialLike(const CombinatorialLike& src) = default;
 	CombinatorialLike(CombinatorialLike&& src) = default;

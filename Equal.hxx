@@ -74,7 +74,7 @@ private:
 	static ImpliesAux CanStrictlyModifyAux[StrictBound_EM];
 	static ModifiesAux StrictlyModifiesAux[StrictBound_EM];
 public:
-	EqualRelation(EqualRelationModes LinkageType) :	MetaConceptWithArgArray((ExactType_MC)(LinkageType+ALLEQUAL_MC)) {};
+	EqualRelation(EqualRelationModes LinkageType) noexcept : MetaConceptWithArgArray((ExactType_MC)(LinkageType+ALLEQUAL_MC)) {};
 	EqualRelation(MetaConcept**& NewArgList, EqualRelationModes LinkageType);
 	EqualRelation(const EqualRelation& src) = default;
 	EqualRelation(EqualRelation&& src) = default;

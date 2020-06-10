@@ -90,11 +90,11 @@ protected:
 	static EvaluateToOtherRule EvaluateRuleLookup[MaxEvalRuleIdx_ER];
 	static SelfEvaluateRule SelfEvaluateRuleLookup[MaxSelfEvalRuleIdx_SER];
 
-	MetaConceptWithArgArray() : IdxCurrentEvalRule(None_ER),IdxCurrentSelfEvalRule(None_SER) {};
-	explicit MetaConceptWithArgArray(ExactType_MC NewType) : MetaConcept(NewType),IdxCurrentEvalRule(None_ER),IdxCurrentSelfEvalRule(None_SER) {};
-	explicit MetaConceptWithArgArray(ExactType_MC NewType,unsigned char NewBitmap) : MetaConcept(NewType,NewBitmap),IdxCurrentEvalRule(None_ER),IdxCurrentSelfEvalRule(None_SER) {};
-	explicit MetaConceptWithArgArray(ExactType_MC NewType,MetaConcept**& NewArgArray) : MetaConcept(NewType),ArgArray(NewArgArray),IdxCurrentEvalRule(None_ER),IdxCurrentSelfEvalRule(None_SER) {};
-	explicit MetaConceptWithArgArray(ExactType_MC NewType,unsigned char NewBitmap,MetaConcept**& NewArgArray) : MetaConcept(NewType,NewBitmap),ArgArray(NewArgArray),IdxCurrentEvalRule(None_ER),IdxCurrentSelfEvalRule(None_SER) {};
+	MetaConceptWithArgArray() noexcept : IdxCurrentEvalRule(None_ER),IdxCurrentSelfEvalRule(None_SER) {};
+	explicit MetaConceptWithArgArray(ExactType_MC NewType) noexcept : MetaConcept(NewType),IdxCurrentEvalRule(None_ER),IdxCurrentSelfEvalRule(None_SER) {};
+	explicit MetaConceptWithArgArray(ExactType_MC NewType,unsigned char NewBitmap) noexcept : MetaConcept(NewType,NewBitmap),IdxCurrentEvalRule(None_ER),IdxCurrentSelfEvalRule(None_SER) {};
+	explicit MetaConceptWithArgArray(ExactType_MC NewType,MetaConcept**& NewArgArray) noexcept : MetaConcept(NewType),ArgArray(NewArgArray),IdxCurrentEvalRule(None_ER),IdxCurrentSelfEvalRule(None_SER) {};
+	explicit MetaConceptWithArgArray(ExactType_MC NewType,unsigned char NewBitmap,MetaConcept**& NewArgArray) noexcept : MetaConcept(NewType,NewBitmap),ArgArray(NewArgArray),IdxCurrentEvalRule(None_ER),IdxCurrentSelfEvalRule(None_SER) {};
 	MetaConceptWithArgArray(const MetaConceptWithArgArray& src) = default;
 	MetaConceptWithArgArray(MetaConceptWithArgArray&& src) = default;
 	void operator=(const MetaConceptWithArgArray & src);	// default not clearly ACID

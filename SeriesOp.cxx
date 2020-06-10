@@ -46,6 +46,8 @@ SeriesOperation::EvaluateToOtherRule SeriesOperation::EvaluateRuleLookup[MaxEval
 	&SeriesOperation::ExpandIntegerNumeralRange
 	};
 
+static_assert(SeriesAddition_MC - StdAddition_MC == SeriesMultiplication_MC - StdMultiplication_MC);
+
 ExactType_MC SeriesOperation::CoreOperation[OperationCount]
   =	{
 	StdAddition_MC,
@@ -58,7 +60,7 @@ static ExactType_MC MetaConceptToOperation(ExactType_MC Operation)
 	{
 	default: UnconditionalCallAssumptionFailure();
 	case StdAddition_MC: return SeriesAddition_MC;
-	case StdMultiplication_MC: return StdMultiplication_MC;
+	case StdMultiplication_MC: return SeriesMultiplication_MC;
 	}
 }
 

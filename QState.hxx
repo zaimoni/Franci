@@ -27,7 +27,7 @@ class QuantifiedStatement final : public MetaConceptWithArgArray
 	unsigned char QuantifiersExplicitlySorted;
 	QuantifiedStatement& operator=(const QuantifiedStatement& src);	// ACID
 public:
-	QuantifiedStatement() :	MetaConceptWithArgArray(QuantifiedStatement_MC),QuantifiersExplicitlySorted('\x00') {};
+	QuantifiedStatement() noexcept : MetaConceptWithArgArray(QuantifiedStatement_MC),QuantifiersExplicitlySorted('\x00') {};
 	QuantifiedStatement(const QuantifiedStatement& src);
 	QuantifiedStatement(QuantifiedStatement&& src) = default;
 	QuantifiedStatement& operator=(QuantifiedStatement&& src) = default;

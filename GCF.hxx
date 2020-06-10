@@ -18,7 +18,7 @@ struct is_polymorphic_final<GCF> : public std::true_type {};
 class GCF final : public MetaConceptWithArgArray
 {
 public:
-	GCF() : MetaConceptWithArgArray(GCF_MC) {};
+	GCF() noexcept : MetaConceptWithArgArray(GCF_MC) {};
 	GCF(MetaConcept**& NewArgList);
 	GCF(const GCF& src) = default;
 	GCF(GCF&& src) = default;

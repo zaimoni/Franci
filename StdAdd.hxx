@@ -33,7 +33,7 @@ class StdAddition final : public MetaConceptWithArgArray
 	mutable autoval_ptr<AbstractClass> DynamicType;
 	mutable autoval_ptr<AbstractClass> DesiredType;
 public:
-	StdAddition() : MetaConceptWithArgArray(StdAddition_MC) {};
+	StdAddition() noexcept : MetaConceptWithArgArray(StdAddition_MC) {};
 	StdAddition(MetaConcept**& NewArgList);
 	StdAddition(const StdAddition& src) = default;
 	StdAddition(StdAddition&& src) = default;

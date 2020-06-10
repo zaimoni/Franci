@@ -34,7 +34,7 @@ class StdMultiplication final : public MetaConceptWithArgArray
 	mutable autoval_ptr<AbstractClass> _DynamicType;
 	mutable autoval_ptr<AbstractClass> _DesiredType;
 public:
-	StdMultiplication() : MetaConceptWithArgArray(StdMultiplication_MC) {};
+	StdMultiplication() noexcept : MetaConceptWithArgArray(StdMultiplication_MC) {};
 	StdMultiplication(MetaConcept**& NewArgList);
 	StdMultiplication(const StdMultiplication& src) = default;
 	StdMultiplication(StdMultiplication&& src) = default;

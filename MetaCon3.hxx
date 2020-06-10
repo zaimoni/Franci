@@ -93,7 +93,7 @@ private:
 	static const UseThisAsMakeImplyAux UseThisAsMakeImply2AryTable[IFF_MCM+1];
 	static const UseThisAsMakeImplyAux UseThisAsMakeImplyNAryTable[NXOR_MCM+1];
 public:
-	MetaConnective(MetaConnectiveModes LinkageType) : MetaConceptWithArgArray((ExactType_MC)(LinkageType+LogicalAND_MC)) {};
+	MetaConnective(MetaConnectiveModes LinkageType) noexcept : MetaConceptWithArgArray((ExactType_MC)(LinkageType+LogicalAND_MC)) {};
 	MetaConnective(MetaConcept**& NewArgList, MetaConnectiveModes LinkageType);
 	MetaConnective(const MetaConnective& src) = default;
 	MetaConnective(MetaConnective&& src) = default;
