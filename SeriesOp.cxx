@@ -48,15 +48,20 @@ SeriesOperation::EvaluateToOtherRule SeriesOperation::EvaluateRuleLookup[MaxEval
 
 static_assert(SeriesAddition_MC - StdAddition_MC == SeriesMultiplication_MC - StdMultiplication_MC);
 
-ExactType_MC SeriesOperation::CoreOperation[OperationCount]
-  =	{
-	StdAddition_MC,
-	StdMultiplication_MC,
-	};
+static constexpr ExactType_MC toCoreOp(ExactType_MC op) {	// \todo if CPU is a problem, rewrite to subtraction
+	switch (op)
+	{
+	default: UnconditionalCallAssumptionFailure();
+	case SeriesAddition_MC: return StdAddition_MC;
+	case SeriesMultiplication_MC: return StdMultiplication_MC;
+	}
+}
 
-static ExactType_MC MetaConceptToOperation(ExactType_MC Operation)
-{
-	switch(Operation)
+static_assert(StdAddition_MC == toCoreOp(SeriesAddition_MC));
+static_assert(StdMultiplication_MC == toCoreOp(SeriesMultiplication_MC));
+
+static constexpr ExactType_MC toSeriesOp(ExactType_MC op) noexcept {
+	switch (op)
 	{
 	default: UnconditionalCallAssumptionFailure();
 	case StdAddition_MC: return SeriesAddition_MC;
@@ -64,14 +69,17 @@ static ExactType_MC MetaConceptToOperation(ExactType_MC Operation)
 	}
 }
 
-SeriesOperation::SeriesOperation(ExactType_MC Operation)
-:	MetaConceptWithArgArray(MetaConceptToOperation(Operation))	// NOTE: Uses a low-level dependency
+static_assert(SeriesAddition_MC == toSeriesOp(StdAddition_MC));
+static_assert(SeriesMultiplication_MC == toSeriesOp(StdMultiplication_MC));
+
+SeriesOperation::SeriesOperation(ExactType_MC Operation) noexcept
+:	MetaConceptWithArgArray(toSeriesOp(Operation))	// NOTE: Uses a low-level dependency
 {	// FORMALLY CORRECT: Kenneth Boyd, 1/6/2003
 }
 
 
 SeriesOperation::SeriesOperation(MetaConcept**& NewArgList,ExactType_MC Operation)
-:	MetaConceptWithArgArray(MetaConceptToOperation(Operation),NewArgList)	// NOTE: Uses a low-level dependency
+:	MetaConceptWithArgArray(toSeriesOp(Operation),NewArgList)	// NOTE: Uses a low-level dependency
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/28/2002
 	if (!SyntaxOK()) _forceStdForm();
 }
@@ -213,8 +221,7 @@ const AbstractClass* SeriesOperation::UltimateType() const
 bool SeriesOperation::ForceUltimateType(const AbstractClass* const rhs)
 {	// FORMALLY CORRECT: Kenneth Boyd, 1/5/2003
 	if (MetaConcept::ForceUltimateType(rhs)) return true;
-	if (!rhs->SupportsThisOperation(CoreOperation[ExactType()-SeriesAddition_MC]))
-		return false;
+	if (!rhs->SupportsThisOperation(toCoreOp(ExactType()))) return false;
 
 /*! This
 	if (NULL==RHS)
@@ -394,7 +401,7 @@ void SeriesOperation::DiagnoseInferenceRules() const
 {	//! \todo IMPLEMENT
 	//!\todo NULLSet index set turns to omnizero(+) or omnione(*).  Retain DesiredType information, though.
 	if (   *ArgArray[DOMAIN_IDX]==NULLSet
-		&& UltimateType()->CanCreateIdentityForOperation(CoreOperation[ExactType()-SeriesAddition_MC]))
+		&& UltimateType()->CanCreateIdentityForOperation(toCoreOp(ExactType())))
 		{
 		IdxCurrentEvalRule = ExpandZeroAry_ER;
 		return;
@@ -466,20 +473,21 @@ bool SeriesOperation::DelegateEvaluate(MetaConcept*& dest)
 	return (this->*EvaluateRuleLookup[IdxCurrentEvalRule-(MetaConceptWithArgArray::MaxEvalRuleIdx_ER+1)])(dest);
 }
 
+static MetaConceptWithArgArray* createIdentity(ExactType_MC op) {
+	switch (op)
+	{
+	default: UnconditionalCallAssumptionFailure();
+	case StdAddition_MC: return new StdAddition();
+	case StdMultiplication_MC: return new StdMultiplication();
+	}
+}
+
 bool SeriesOperation::ExpandZeroAry(MetaConcept*& dest)
 {	// FORMALLY CORRECT: Kenneth Boyd, 1/5/2003
 	assert(!dest);
-	if (UltimateType()->CreateIdentityForOperation(dest,SeriesOperation::CoreOperation[ExactType()-SeriesAddition_MC]))
+	if (UltimateType()->CreateIdentityForOperation(dest,toCoreOp(ExactType())))
 		{
-		if (!dest)
-			{
-			if 		(IsExactType(SeriesAddition_MC))
-				dest = new StdAddition();
-			else if (IsExactType(SeriesMultiplication_MC))
-				dest = new StdMultiplication();
-			else
-				return false;
-			}
+		if (!dest) dest = createIdentity(ExactType());
 		LOG("Replacing zero-ary series with corresponding identity:");
 		LOG(*this);
 		LOG(*dest);
@@ -520,70 +528,42 @@ bool SeriesOperation::ExpandIntegerNumeralRange(MetaConcept*& dest)
 	// NOTE: if expression uses index var, we need to be careful about excessive expansion
 	// this function doesn't like automatic memory management
 	assert(!dest);
-	MetaConceptWithArgArray* Tmp = NULL;
-	MetaConcept* NewSeriesArg = NULL;
+	std::unique_ptr<MetaConceptWithArgArray> Tmp(createIdentity(ExactType()));
 	signed long Range;
 	bool IsSmallDifference = static_cast<IntegerNumeral*>(ArgArray[SeriesOperation::DOMAIN_IDX]->ArgN(1))->SmallDifference(*static_cast<IntegerNumeral*>(ArgArray[SeriesOperation::DOMAIN_IDX]->ArgN(0)),Range);
 
-	try	{
-		if (!IsSmallDifference || 2<Range)
-			NewSeriesArg = new SeriesOperation(SeriesOperation::CoreOperation[ExactType()-SeriesAddition_MC]);
-		if (IsExactType(SeriesAddition_MC))
-			Tmp = new StdAddition();
-		else	// if (IsExactType(SeriesMultiplication_MC))
-			Tmp = new StdMultiplication();
-		}
-	catch(const bad_alloc&)
-		{
-		delete NewSeriesArg;
-		return false;
-		};
-
-	MetaConcept** NewArgArray = _new_buffer<MetaConcept*>((IsSmallDifference && 1==Range) ? 2 : 3);
-	if (!NewArgArray)
-		{
-		delete Tmp;
-		delete NewSeriesArg;
-		return false;
-		}
-
-	MetaConcept* TmpVar = NULL;
+	zaimoni::autovalarray_ptr_throws<MetaConcept*> NewArgArray((IsSmallDifference && 1 == Range) ? 2 : 3);
 
 	LOG("Expanding this series:");
 	LOG(*this);
 
-			// Now: to initialize the Argarray "safely"
-	try	{	// We know that for the LinearInterval, ArgN(0)<ArgN(1) and are IntegerNumerals.
-			// The instant-expansion range is ArgN(1)-ArgN(0)+1.  If we can't do that, we should 
-			// strip at least two arguments...to put things mildly, "everything is risky".
-			// This suggests that 2-3 args would always be immediately expanded.
-			// We can always avoid incrementing positive integers/decrementing negative integers to
-			// a larger-representation value.
-			ArgArray[SeriesOperation::EXPRESSION_IDX]->CopyInto(NewArgArray[1]);
-			if (IsSmallDifference && 2>=Range)
-				{
-				ArgArray[SeriesOperation::EXPRESSION_IDX]->CopyInto(NewArgArray[0]);
-				if (2==Range)	// 3 args.
-					ArgArray[SeriesOperation::EXPRESSION_IDX]->CopyInto(NewArgArray[2]);
-				}
-			else{
-				if (ArgArray[SeriesOperation::DOMAIN_IDX]->ArgN(1)->IsPositive())
-					{	// decrement upper bound is safe
-					ArgArray[SeriesOperation::EXPRESSION_IDX]->CopyInto(NewArgArray[2]);
-					}
-				else{	// increment lower bound is safe
-					ArgArray[SeriesOperation::EXPRESSION_IDX]->CopyInto(NewArgArray[0]);
-					};
-				}
-		TmpVar = new Variable(static_cast<MetaQuantifier*>(ArgArray[SeriesOperation::INDEXVAR_IDX]));
+	// Now: to initialize the Argarray "safely"
+	// we rely on our only caller being LexParse's evaluate processor (which has a std::bad_alloc handler)
+	// We know that for the LinearInterval, ArgN(0)<ArgN(1) and are IntegerNumerals.
+	// The instant-expansion range is ArgN(1)-ArgN(0)+1.  If we can't do that, we should 
+	// strip at least two arguments...to put things mildly, "everything is risky".
+	// This suggests that 2-3 args would always be immediately expanded.
+	// We can always avoid incrementing positive integers/decrementing negative integers to
+	// a larger-representation value.
+	ArgArray[SeriesOperation::EXPRESSION_IDX]->CopyInto(NewArgArray[1]);
+	if (IsSmallDifference && 2>=Range)
+		{
+		ArgArray[SeriesOperation::EXPRESSION_IDX]->CopyInto(NewArgArray[0]);
+		if (2==Range)	// 3 args.
+			ArgArray[SeriesOperation::EXPRESSION_IDX]->CopyInto(NewArgArray[2]);
 		}
-	catch(const bad_alloc&)
-		{	// TODO: better error handling.  What if we got one in the leftover series mode?
-		BLOCKDELETEARRAY(NewArgArray);
-		delete Tmp;
-		delete NewSeriesArg;
-		return false;
+	else{
+		if (ArgArray[SeriesOperation::DOMAIN_IDX]->ArgN(1)->IsPositive())
+			{	// decrement upper bound is safe
+			ArgArray[SeriesOperation::EXPRESSION_IDX]->CopyInto(NewArgArray[2]);
+			}
+		else{	// increment lower bound is safe
+			ArgArray[SeriesOperation::EXPRESSION_IDX]->CopyInto(NewArgArray[0]);
+			};
 		}
+
+	zaimoni::autoval_ptr<Variable> TmpVar;
+	TmpVar = new Variable(static_cast<MetaQuantifier*>(ArgArray[SeriesOperation::INDEXVAR_IDX]));
 
 	if (IsSmallDifference && 2>=Range)
 		{
@@ -620,8 +600,7 @@ bool SeriesOperation::ExpandIntegerNumeralRange(MetaConcept*& dest)
 			if (!StrongVarSubstitute(NewArgArray[1],*TmpVar,*ArgArray[SeriesOperation::DOMAIN_IDX]->ArgN(1)))
 				goto ExitFailCleanAll;
 			static_cast<IntegerNumeral*>(ArgArray[SeriesOperation::DOMAIN_IDX]->ArgN(1))->ReduceAbsValByN(1);
-			MoveInto(NewSeriesArg);
-			NewArgArray[0] = NewSeriesArg;
+			MoveInto(NewArgArray[0]);
 			}
 		else{	// increment lower bound is safe
 			if (!StrongVarSubstitute(NewArgArray[0],*TmpVar,*ArgArray[SeriesOperation::DOMAIN_IDX]->ArgN(0)))
@@ -630,16 +609,14 @@ bool SeriesOperation::ExpandIntegerNumeralRange(MetaConcept*& dest)
 			if (!StrongVarSubstitute(NewArgArray[1],*TmpVar,*ArgArray[SeriesOperation::DOMAIN_IDX]->ArgN(0)))
 				goto ExitFailCleanAll;
 			static_cast<IntegerNumeral*>(ArgArray[SeriesOperation::DOMAIN_IDX]->ArgN(0))->ReduceAbsValByN(1);
-			MoveInto(NewSeriesArg);
-			NewArgArray[2] = NewSeriesArg;
+			MoveInto(NewArgArray[2]);
 			};
 		}
-	delete TmpVar;
 
 	// NewArgArray is now initialized
 	Tmp->ReplaceArgArray(NewArgArray);
 	Tmp->ForceCheckForEvaluation();
-	dest = Tmp;
+	dest = Tmp.release();
 
 	LOG("to:");
 	LOG(*dest);
@@ -647,10 +624,6 @@ bool SeriesOperation::ExpandIntegerNumeralRange(MetaConcept*& dest)
 	assert(dest->SyntaxOK());
 	return true;
 ExitFailCleanAll:
-	delete TmpVar;
-	BLOCKDELETEARRAY(NewArgArray);
-	delete Tmp;
-	delete NewSeriesArg;
 	return false;
 }
 

@@ -48,9 +48,7 @@ public:
 					OperationCount = SeriesMultiplication_MC-SeriesAddition_MC+1
 					};
 
-	static ExactType_MC CoreOperation[OperationCount];	
-
-	SeriesOperation(ExactType_MC Operation);
+	SeriesOperation(ExactType_MC Operation) noexcept;
 	SeriesOperation(MetaConcept**& NewArgList,ExactType_MC Operation);
 	SeriesOperation(const SeriesOperation& src) = default;
 	SeriesOperation(SeriesOperation&& src) = default;
