@@ -82,7 +82,7 @@ protected:
 	typedef void (MetaConceptWithArgArray::*VertexPairSelfProcess)(size_t Idx, size_t Idx2);
 
 	autovalarray_ptr_throws<MetaConcept*> ArgArray;
-	evalspec _evalRule;
+	mutable evalspec _evalRule;
 	mutable size_t InferenceParameter1;
 	mutable size_t InferenceParameter2;
 	mutable autoval_ptr<MetaConcept> InferenceParameterMC;
@@ -104,8 +104,8 @@ public:
 	virtual ~MetaConceptWithArgArray() = default;
 //	virtual void CopyInto(MetaConcept*& Target) const = 0;	// can throw memory failure
 //	virtual void MoveInto(MetaConcept*& Target) = 0;	// can throw memory failure.  If it succeeds, it destroys the source.
-	void ForceCheckForEvaluation() const {IdxCurrentSelfEvalRule=None_SER;};
-	bool SelfEvalCleanEnd() const {IdxCurrentSelfEvalRule = None_SER; return true;};
+	void ForceCheckForEvaluation() const { IdxCurrentSelfEvalRule = None_SER; _evalRule.first = 0; _evalRule.second = 0; }
+	bool SelfEvalCleanEnd() const { ForceCheckForEvaluation(); return true; }
 //  Type ID functions
 //	virtual const AbstractClass* UltimateType() const = 0;
 //	Arity functions

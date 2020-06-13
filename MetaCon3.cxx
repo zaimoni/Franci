@@ -1212,9 +1212,17 @@ MetaConcept::evalspec _CanUseThisAsMakeImplyAND(const MetaConcept& Target, autov
 					if (-1 != DeleteThis) ArgArray.DeleteIdx(DeleteThis);
 					DeleteThis = j;
 					if (2 == ArgArray.ArraySize()) {
-						return MetaConcept::evalspec(0, [&](MetaConcept*& dest) mutable {
-							dest = ArgArray[1 - DeleteThis];
-							ArgArray[1 - DeleteThis] = 0;
+						if (typeid(MetaConnective) == typeid(*ArgArray[1 - DeleteThis])) {
+							return MetaConcept::evalspec([&]() mutable {
+								auto stage = static_cast<MetaConnective*>(ArgArray[1 - DeleteThis]);
+								ArgArray[1 - DeleteThis] = 0;
+								dest = std::move(*stage);
+								delete stage;
+								return true;
+								}, 0);
+						}
+						return MetaConcept::evalspec(0, [&](MetaConcept*& _dest) mutable {
+							dest.TransferOutAndNULL(1 - DeleteThis, _dest);
 							return true;
 						});
 					}
@@ -1244,9 +1252,17 @@ MetaConcept::evalspec _CanUseThisAsMakeImplyOR(const MetaConcept& Target, autova
 					if (-1 != DeleteThis) ArgArray.DeleteIdx(DeleteThis);
 					DeleteThis = i;
 					if (2 == ArgArray.ArraySize()) {
-						return MetaConcept::evalspec(0, [&](MetaConcept*& dest) mutable {
-							dest = ArgArray[1 - DeleteThis];
-							ArgArray[1 - DeleteThis] = 0;
+						if (typeid(MetaConnective) == typeid(*ArgArray[1 - DeleteThis])) {
+							return MetaConcept::evalspec([&]() mutable {
+								auto stage = static_cast<MetaConnective*>(ArgArray[1 - DeleteThis]);
+								ArgArray[1 - DeleteThis] = 0;
+								dest = std::move(*stage);
+								delete stage;
+								return true;
+							}, 0);
+						}
+						return MetaConcept::evalspec(0, [&](MetaConcept*& _dest) mutable {	// suspected compiler error or undefined behavior -- tracer statements uncrash
+							dest.TransferOutAndNULL(1 - DeleteThis, _dest);
 							return true;
 						});
 					}
@@ -6534,10 +6550,58 @@ RetryBoostedOR:
 			&& 1<LowXORIdx-HighORIdx)			// low-level dependency: OR<IFF<XOR
 			{
 			size_t Idx4 = LowXORIdx;	// IFF is an imply-inducing type
-			while(--Idx4>HighORIdx)
-				// IFF is an imply-inducing type
+			while (--Idx4 > HighORIdx) {
+#if 0
+				auto rules = SpeculativeTarget->_CanUseThisAsMakeImply(*ArgArray[Idx4]);
+				if (rules.first) {
+					LOG("Using this");
+					LOG(*ArgArray[Idx4]);
+//					LOG("to reduce speculative OR");
+					LOG("to non-destructively reduce speculative OR");
+					LOG(*SpeculativeTarget);
+					LOG("to");
+					rules.first();
+					LOG(*SpeculativeTarget);
+					if (!SpeculativeTarget->IsExactType(LogicalOR_MC)) {
+						// 2020-06-13: this heuristic is questionable
+						if (!FindArgRelatedToRHS(*SpeculativeTarget, NonStrictlyImplies)) {
+							InferenceParameterMC = SpeculativeTarget;	// spawn IFF, probably
+							IdxCurrentSelfEvalRule = SelfEvalAddArgAtEndAndForceCorrectForm__SER;
+							LOG("Spawning this");
+							LOG(*SpeculativeTarget);
+							return true;
+						}
+						// expected to reduce further: historical behavior is to terminate exploration pre-emptively
+						return false;
+					}
+					SpeculativeTarget->ForceCheckForEvaluation();
+					goto RestartSpeculativeOR;
+				} else if (rules.second) {
+					LOG("Using this");
+					LOG(*ArgArray[Idx4]);
+//					LOG("to reduce speculative OR");
+					LOG("to destructively reduce speculative OR");
+					LOG(*SpeculativeTarget);
+					LOG("to");
+					MetaConcept* test = 0;
+					rules.second(test);	// crashes on trying to use std::function
+					LOG(*test);
+					SUCCEED_OR_DIE(!test->IsExactType(LogicalOR_MC));	// associativity of OR should prohibit this
+					if (!FindArgRelatedToRHS(*test, NonStrictlyImplies)) {
+						InferenceParameterMC = test;
+						IdxCurrentSelfEvalRule = SelfEvalAddArgAtEndAndForceCorrectForm__SER;
+						LOG("Spawning this");
+						LOG(*test);
+						DELETE_AND_NULL(SpeculativeTarget);
+						return true;
+					}
+					// expected to reduce further: historical behavior is to terminate exploration pre-emptively
+					return false;
+				}
+				SUCCEED_OR_DIE(!SpeculativeTarget->CanUseThisAsMakeImply(*ArgArray[Idx4]));	// integrity check: std::function should not be double-null while historical succeeds
+#else
 				if (SpeculativeTarget->CanUseThisAsMakeImply(*ArgArray[Idx4]))
-					{	// Arity 3+: use it!
+				{	// Arity 3+: use it!
 					LOG("Using this");
 					LOG(*ArgArray[Idx4]);
 					LOG("to reduce speculative OR");
@@ -6545,18 +6609,20 @@ RetryBoostedOR:
 					LOG("to");
 					SpeculativeTarget->UseThisAsMakeImply(*ArgArray[Idx4]);
 					LOG(*SpeculativeTarget);
-					if (   !SpeculativeTarget->IsExactType(LogicalOR_MC)
-						&& !FindArgRelatedToRHS(*SpeculativeTarget,NonStrictlyImplies))
-						{	// spawn IFF, probably
+					if (!SpeculativeTarget->IsExactType(LogicalOR_MC)
+						&& !FindArgRelatedToRHS(*SpeculativeTarget, NonStrictlyImplies))
+					{	// spawn IFF, probably
 						InferenceParameterMC = SpeculativeTarget;
 						IdxCurrentSelfEvalRule = SelfEvalAddArgAtEndAndForceCorrectForm__SER;
 						LOG("Spawning this");
 						LOG(*SpeculativeTarget);
 						return true;
-						};
+					};
 					SpeculativeTarget->ForceCheckForEvaluation();
 					goto RestartSpeculativeOR;
-					}
+				}
+#endif
+			}
 
 			if (   fast_size()>HighORIdx
 				&& LogicalANDBoostORWithIFF(SpeculativeTarget,LowXORIdx,HighORIdx))	// Destructive!
