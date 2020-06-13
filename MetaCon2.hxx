@@ -82,6 +82,7 @@ protected:
 	typedef void (MetaConceptWithArgArray::*VertexPairSelfProcess)(size_t Idx, size_t Idx2);
 
 	autovalarray_ptr_throws<MetaConcept*> ArgArray;
+	evalspec _evalRule;
 	mutable size_t InferenceParameter1;
 	mutable size_t InferenceParameter2;
 	mutable autoval_ptr<MetaConcept> InferenceParameterMC;
@@ -115,11 +116,11 @@ public:
 // Syntactical equality and inequality
 	virtual bool IsAbstractClassDomain() const;
 //  Evaluation functions
-	virtual bool CanEvaluate() const;
-	virtual bool CanEvaluateToSameType() const;
+	bool CanEvaluate() const final;
+	bool CanEvaluateToSameType() const final;
 	virtual bool SyntaxOK() const = 0;
-	virtual bool Evaluate(MetaConcept*& dest);		// same, or different type
-	virtual bool DestructiveEvaluateToSameType();	// overwrites itself iff returns true
+	bool Evaluate(MetaConcept*& dest) final;		// same, or different type
+	bool DestructiveEvaluateToSameType() final;	// overwrites itself iff returns true
 	virtual void ConvertVariableToCurrentQuantification(MetaQuantifier& src);
 	virtual bool HasArgRelatedToThisConceptBy(const MetaConcept& Target, LowLevelBinaryRelation* TargetRelation) const;
 	virtual bool UsesQuantifierAux(const MetaQuantifier& x) const;

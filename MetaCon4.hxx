@@ -31,6 +31,7 @@ protected:
 
 	autoval_ptr<MetaConcept> LHS_Arg1;
 	autoval_ptr<MetaConcept> RHS_Arg2;
+	evalspec _evalRule;
 	mutable unsigned short IdxCurrentEvalRule;
 	mutable signed short IdxCurrentSelfEvalRule;
 
@@ -58,11 +59,11 @@ public:
 //	Override this for non-commutative types, or complicated internal structure
 	virtual bool IsAbstractClassDomain() const;
 //  Evaluation functions
-	virtual bool CanEvaluate() const;
-	virtual bool CanEvaluateToSameType() const;
+	bool CanEvaluate() const final;
+	bool CanEvaluateToSameType() const final;
 	virtual bool SyntaxOK() const = 0;
-	virtual bool Evaluate(MetaConcept*& dest);		// same, or different type
-	virtual bool DestructiveEvaluateToSameType();	// overwrites itself iff returns true
+	bool Evaluate(MetaConcept*& dest) final;		// same, or different type
+	bool DestructiveEvaluateToSameType() final;	// overwrites itself iff returns true
 // NOTE: we may need this further down
 // Formal manipulation functions
 //	virtual bool SelfLogicalNOT(void);	// instantiate when above is true

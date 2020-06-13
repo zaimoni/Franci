@@ -116,22 +116,21 @@ void MetaConceptWith2Args::_forceStdForm()
 }
 
 bool MetaConceptWith2Args::CanEvaluate() const
-{	// FORMALLY CORRECT: Kenneth Boyd, 5/23/2002
+{	// FORMALLY CORRECT: 2020-06-13
 	const_cast<MetaConceptWith2Args* const>(this)->DiagnoseInferenceRules();
 	if (None_SER>IdxCurrentSelfEvalRule) return false;
-	return IdxCurrentEvalRule || IdxCurrentSelfEvalRule;
+	return IdxCurrentEvalRule || IdxCurrentSelfEvalRule || _evalRule.first || _evalRule.second;
 }
 
 bool MetaConceptWith2Args::CanEvaluateToSameType() const
-{	// FORMALLY CORRECT: Kenneth Boyd, 5/23/2002
+{	// FORMALLY CORRECT: 2020-06-13
 	const_cast<MetaConceptWith2Args* const>(this)->DiagnoseInferenceRules();
 	if (None_SER>IdxCurrentSelfEvalRule) return false;
-	return IdxCurrentSelfEvalRule;
+	return IdxCurrentSelfEvalRule || _evalRule.first;
 }
 
 bool MetaConceptWith2Args::Evaluate(MetaConcept*& dest)
-{	// FORMALLY CORRECT: Kenneth Boyd, Jan. 29 2016
-	// NOTE: there is exactly one call to Evaluate in Franci.  This call is preceded by
+{	// NOTE: there is exactly one call to Evaluate in Franci.  This call is preceded by
 	// a call to CanEvaluate()...so the rules have been initialized, and are guaranteed
 	// to be appropriate.  The SelfEvaluate rules have been already done, so this is not
 	// required either.
@@ -140,6 +139,12 @@ bool MetaConceptWith2Args::Evaluate(MetaConcept*& dest)
 	DEBUG_LOG((intmax_t)IdxCurrentSelfEvalRule);
 	DEBUG_LOG((intmax_t)IdxCurrentEvalRule);
 	try {
+		if (_evalRule.second) {	// prototyping July 13 2020
+			bool ret = _evalRule.second(dest);
+			DEBUG_LOG(*dest);
+			return ret;
+		}
+		// Formally correct Jan. 29 2016
 		bool RetVal = (MaxEvalRuleIdx_ER>=IdxCurrentEvalRule) ? (this->*EvaluateRuleLookup[IdxCurrentEvalRule-1])(dest)
 					: DelegateEvaluate(dest);
 		DEBUG_LOG(*dest);
@@ -153,13 +158,25 @@ bool MetaConceptWith2Args::Evaluate(MetaConcept*& dest)
 }
 
 bool MetaConceptWith2Args::DestructiveEvaluateToSameType()
-{	// FORMALLY CORRECT: Kenneth Boyd, Jan. 29 2016
+{
 	DEBUG_LOG(ZAIMONI_FUNCNAME);
 	DiagnoseInferenceRules();
 	DEBUG_LOG("DiagnoseInferenceRules OK");
 	DEBUG_LOG(name());
 	DEBUG_LOG(IdxCurrentSelfEvalRule);
-	if (IdxCurrentSelfEvalRule)
+	if (_evalRule.first) {	// prototyping July 13 2020
+		try {
+			const bool ret = _evalRule.first();
+			DEBUG_LOG("selfeval worked");
+			SUCCEED_OR_DIE(SyntaxOK());
+			DEBUG_LOG(*this);
+			return ret;
+		} catch (const std::bad_alloc&) {
+			DEBUG_LOG("MetaConceptWith2Args::DestructiveEvaluateToSameType failed: std::bad_alloc()");
+			return false;
+		}
+	}
+	if (IdxCurrentSelfEvalRule)	// Formally correct Jan. 29 2016
 		{
 		try	{
 			const bool Tmp = (this->*SelfEvaluateRuleLookup[IdxCurrentSelfEvalRule-1])();

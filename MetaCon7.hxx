@@ -76,8 +76,8 @@ public:
 	virtual bool IsAbstractClassDomain() const {return true;};
 //  Evaluation functions
 	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override { return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >(); }
-	virtual bool CanEvaluate() const {return false;};
-	virtual bool CanEvaluateToSameType() const {return false;};
+	bool CanEvaluate() const override { return false; }
+	bool CanEvaluateToSameType() const override { return false; }
 	virtual bool SyntaxOK() const {return MetaConcept_lookup<T>::syntax_ok(_x);};	// actually should do a syntax check on its arg
 	virtual bool Evaluate(MetaConcept*& dest) {return false;};		// same, or different type
 	virtual bool DestructiveEvaluateToSameType() {return false;};	// overwrites itself iff returns true

@@ -74,9 +74,9 @@ void MetaConceptWithArgArray::operator=(const MetaConceptWithArgArray& src)
 }
 
 bool MetaConceptWithArgArray::CanEvaluate() const
-{	// FORMALLY CORRECT: Kenneth Boyd, 4/22/2000
+{	// FORMALLY CORRECT: 2020-06-13
 	if 		(None_SER>IdxCurrentSelfEvalRule) {assert(NULL==InferenceParameterMC); return false;}
-	else if (IdxCurrentSelfEvalRule || IdxCurrentEvalRule) return true;
+	else if (IdxCurrentSelfEvalRule || IdxCurrentEvalRule || _evalRule.first || _evalRule.second) return true;
 	assert(NULL==InferenceParameterMC);
 	DEBUG_LOG(ZAIMONI_FUNCNAME);
 	DEBUG_LOG(name());
@@ -108,8 +108,10 @@ bool MetaConceptWithArgArray::CanEvaluate() const
 }
 
 bool MetaConceptWithArgArray::CanEvaluateToSameType() const
-{	// FORMALLY CORRECT: Kenneth Boyd, 4/22/2000
+{	// FORMALLY CORRECT: 2020-06-13
 	if      (None_SER>IdxCurrentSelfEvalRule) {assert(NULL==InferenceParameterMC); return false;}
+	else if (_evalRule.first) return true;
+	else if (_evalRule.second) return false;
 	else if (IdxCurrentSelfEvalRule) return true;
 	else if (IdxCurrentEvalRule) return false;
 	DEBUG_LOG(ZAIMONI_FUNCNAME);
@@ -119,6 +121,8 @@ bool MetaConceptWithArgArray::CanEvaluateToSameType() const
 	DiagnoseInferenceRules();
 	DEBUG_LOG("DiagnoseInferenceRules OK");
 	if 		(None_SER>IdxCurrentSelfEvalRule) return false;
+	else if (_evalRule.first) return true;
+	else if (_evalRule.second) return false;
 	else if (IdxCurrentSelfEvalRule) return true;
 	if (EvalForceArg_ER==IdxCurrentEvalRule && HasSameImplementationAs(*ArgArray[InferenceParameter1]))
 		{
@@ -130,8 +134,7 @@ bool MetaConceptWithArgArray::CanEvaluateToSameType() const
 }
 
 bool MetaConceptWithArgArray::Evaluate(MetaConcept*& dest)		// same, or different type
-{	// FORMALLY CORRECT: 4/22/2000
-	// NOTE: there is exactly one call to Evaluate in Franci.  This call is preceded by
+{	// NOTE: there is exactly one call to Evaluate in Franci.  This call is preceded by
 	// a call to CanEvaluate()...so the rules have been initialized, and are guaranteed
 	// to be appropriate.  The SelfEvaluate rules have been already done, so this is not
 	// required either.
@@ -139,6 +142,12 @@ bool MetaConceptWithArgArray::Evaluate(MetaConcept*& dest)		// same, or differen
 	DEBUG_LOG("MetaConceptWithArgArray::Evaluate");
 	DEBUG_LOG(*this);
 	try {
+		if (_evalRule.second) {	// prototyping July 13 2020
+			bool ret = _evalRule.second(dest);
+			DEBUG_LOG(*dest);
+			return ret;
+		}
+		// Formally correct April 22 2000
 		bool RetVal = (MaxEvalRuleIdx_ER>=IdxCurrentEvalRule) ? (this->*EvaluateRuleLookup[IdxCurrentEvalRule-1])(dest)
 					: DelegateEvaluate(dest);
 		DEBUG_LOG(*dest);
@@ -152,7 +161,7 @@ bool MetaConceptWithArgArray::Evaluate(MetaConcept*& dest)		// same, or differen
 }
 
 bool MetaConceptWithArgArray::DestructiveEvaluateToSameType()
-{	// FORMALLY CORRECT: Kenneth Boyd, 5/16/1999
+{
 	DEBUG_LOG(ZAIMONI_FUNCNAME);
 	DEBUG_LOG(name());
 	DEBUG_LOG(*this);
@@ -164,7 +173,19 @@ bool MetaConceptWithArgArray::DestructiveEvaluateToSameType()
 	DEBUG_LOG(InferenceParameter1);
 	DEBUG_LOG(InferenceParameter2);
 
-	if (None_SER<IdxCurrentSelfEvalRule)
+	if (_evalRule.first) {	// prototyping July 13 2020
+		try {
+			const bool ret = _evalRule.first();
+			DEBUG_LOG("selfeval worked");
+			SUCCEED_OR_DIE(SyntaxOK());
+			DEBUG_LOG(*this);
+			return ret;
+		} catch (const std::bad_alloc&) {
+			DEBUG_LOG("MetaConceptWithArgArray::DestructiveEvaluateToSameType failed: std::bad_alloc()");
+			return false;
+		}
+	}
+	if (None_SER<IdxCurrentSelfEvalRule)	// Formally correct May 16, 1999
 		{	// it evaluates to something of the same type
 		try	{
 			const bool Tmp = (MaxSelfEvalRuleIdx_SER>=IdxCurrentSelfEvalRule) ? (this->*SelfEvaluateRuleLookup[IdxCurrentSelfEvalRule-1])()
