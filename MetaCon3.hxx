@@ -207,6 +207,12 @@ private:
 	bool IFF_AmplifyThisClauseV2(MetaConnective& rhs) const;
 	bool XOR_AmplifyThisClause(MetaConnective& rhs) const;
 
+	evalspec _CanUseThisAsMakeImplyAND(const MetaConcept& Target);
+	evalspec _CanUseThisAsMakeImplyOR(const MetaConcept& Target);
+	evalspec _CanUseThisAsMakeImplyIFF(const MetaConcept& Target);
+	evalspec _CanUseThisAsMakeImplyXOR(const MetaConcept& Target);
+	evalspec _CanUseThisAsMakeImplyNXOR(const MetaConcept& Target);
+
 	void UseThisAsMakeImply2AryAND(const MetaConcept& Target);
 	void UseThisAsMakeImply2AryOR(const MetaConcept& Target);
 	void UseThisAsMakeImply2AryIFF(const MetaConcept& Target);

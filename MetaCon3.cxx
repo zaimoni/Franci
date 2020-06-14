@@ -1194,8 +1194,9 @@ bool MetaConnective::CanUseThisAsMakeImply(const MetaConcept& Target) const
 	return false;
 }
 
-typedef MetaConcept::evalspec(canUseAsMakeImply)(const MetaConcept&, autovalarray_ptr_throws<MetaConcept*>&, MetaConnective&);
-MetaConcept::evalspec _CanUseThisAsMakeImplyAND(const MetaConcept& Target, autovalarray_ptr_throws<MetaConcept*>& ArgArray, MetaConnective& dest)
+// Clang says free function has problems with miscomplling or undefined behavior in returned lambda functions
+typedef MetaConcept::evalspec(MetaConnective::*canUseAsMakeImply)(const MetaConcept&);
+MetaConcept::evalspec MetaConnective::_CanUseThisAsMakeImplyAND(const MetaConcept& Target)
 {
 	assert(!ArgArray.empty());
 	size_t i = ArgArray.ArraySize();
@@ -1203,7 +1204,7 @@ MetaConcept::evalspec _CanUseThisAsMakeImplyAND(const MetaConcept& Target, autov
 			{
 			size_t j = ArgArray.ArraySize();
 			do	if (i != --j && Target.MakesLHSImplyLogicalNOTOfRHS(*ArgArray[i], *ArgArray[j]))
-					return MetaConcept::evalspec(0, ForceTruth<TVal::False>); // AND(A,B): CONTRADICTION [AND(A,B,OR(~A,~B))|->...|->FALSE]
+					return evalspec(0, ForceTruth<TVal::False>); // AND(A,B): CONTRADICTION [AND(A,B,OR(~A,~B))|->...|->FALSE]
 			while (0 < j);
 			size_t DeleteThis = -1;
 			j = ArgArray.ArraySize();
@@ -1213,33 +1214,33 @@ MetaConcept::evalspec _CanUseThisAsMakeImplyAND(const MetaConcept& Target, autov
 					DeleteThis = j;
 					if (2 == ArgArray.ArraySize()) {
 						if (typeid(MetaConnective) == typeid(*ArgArray[1 - DeleteThis])) {
-							return MetaConcept::evalspec([&]() mutable {
+							return evalspec([&]() mutable {
 								auto stage = static_cast<MetaConnective*>(ArgArray[1 - DeleteThis]);
 								ArgArray[1 - DeleteThis] = 0;
-								dest = std::move(*stage);
+								*this = std::move(*stage);
 								delete stage;
 								return true;
 								}, 0);
 						}
-						return MetaConcept::evalspec(0, [&](MetaConcept*& _dest) mutable {
-							dest.TransferOutAndNULL(1 - DeleteThis, _dest);
+						return evalspec(0, [&](MetaConcept*& _dest) mutable {
+							TransferOutAndNULL(1 - DeleteThis, _dest);
 							return true;
 						});
 					}
 					}
 			while (0 < j);
 			if (-1 != DeleteThis) {
-				return MetaConcept::evalspec([&]() mutable {
+				return evalspec([&]() mutable {
 					ArgArray.DeleteIdx(DeleteThis);
 					return true;
 				},0);
 			}
 			}
 	while (0 < i);
-	return MetaConcept::evalspec();
+	return evalspec();
 }
 
-MetaConcept::evalspec _CanUseThisAsMakeImplyOR(const MetaConcept& Target, autovalarray_ptr_throws<MetaConcept*>& ArgArray, MetaConnective& dest)
+MetaConcept::evalspec MetaConnective::_CanUseThisAsMakeImplyOR(const MetaConcept& Target)
 {
 	assert(!ArgArray.empty());
 	size_t i = ArgArray.ArraySize();
@@ -1253,16 +1254,16 @@ MetaConcept::evalspec _CanUseThisAsMakeImplyOR(const MetaConcept& Target, autova
 					DeleteThis = i;
 					if (2 == ArgArray.ArraySize()) {
 						if (typeid(MetaConnective) == typeid(*ArgArray[1 - DeleteThis])) {
-							return MetaConcept::evalspec([&]() mutable {
+							return evalspec([&]() mutable {
 								auto stage = static_cast<MetaConnective*>(ArgArray[1 - DeleteThis]);
 								ArgArray[1 - DeleteThis] = 0;
-								dest = std::move(*stage);
+								*this = std::move(*stage);
 								delete stage;
 								return true;
 							}, 0);
 						}
-						return MetaConcept::evalspec(0, [&](MetaConcept*& _dest) mutable {	// suspected compiler error or undefined behavior -- tracer statements uncrash
-							dest.TransferOutAndNULL(1 - DeleteThis, _dest);
+						return evalspec(0, [&](MetaConcept*& _dest) mutable {
+							TransferOutAndNULL(1 - DeleteThis, _dest);
 							return true;
 						});
 					}
@@ -1270,17 +1271,17 @@ MetaConcept::evalspec _CanUseThisAsMakeImplyOR(const MetaConcept& Target, autova
 					}
 			while (0 < j);
 			if (-1 != DeleteThis) {
-				return MetaConcept::evalspec([&]() mutable {
+				return evalspec([&]() mutable {
 					ArgArray.DeleteIdx(DeleteThis);
 					return true;
 				}, 0);
 			}
 			}
 	while (0 < i);
-	return MetaConcept::evalspec();
+	return evalspec();
 }
 
-MetaConcept::evalspec _CanUseThisAsMakeImplyIFF(const MetaConcept& Target, autovalarray_ptr_throws<MetaConcept*>& ArgArray, MetaConnective& dest)
+MetaConcept::evalspec MetaConnective::_CanUseThisAsMakeImplyIFF(const MetaConcept& Target)
 {
 	assert(!ArgArray.empty());
 	size_t i = ArgArray.ArraySize();
@@ -1290,18 +1291,18 @@ MetaConcept::evalspec _CanUseThisAsMakeImplyIFF(const MetaConcept& Target, autov
 			// \todo what about transition to AND?
 			do	if (i!= --j && Target.MakesLHSImplyLogicalNOTOfRHS(*ArgArray[i],*ArgArray[j]))
 					{	// IFF(A,B,...): boost to NOR(A,B,...) [AND(IFF(A,B,...),OR(~A,~B))]
-					return MetaConcept::evalspec([&]() mutable {
-						dest.set<LogicalNOR_MC>();
+					return evalspec([&]() mutable {
+						set<LogicalNOR_MC>();
 						return true;
 					}, 0);
 					}
 			while(0<j);
 			}
 	while (0 < i);
-	return MetaConcept::evalspec();
+	return evalspec();
 }
 
-MetaConcept::evalspec _CanUseThisAsMakeImplyXOR(const MetaConcept& Target, autovalarray_ptr_throws<MetaConcept*>& ArgArray, MetaConnective& dest)
+MetaConcept::evalspec MetaConnective::_CanUseThisAsMakeImplyXOR(const MetaConcept& Target)
 {
 	assert(!ArgArray.empty());
 	size_t i = ArgArray.ArraySize();
@@ -1310,17 +1311,17 @@ MetaConcept::evalspec _CanUseThisAsMakeImplyXOR(const MetaConcept& Target, autov
 			size_t j = ArgArray.ArraySize();
 			do	if (i!= --j && Target.MakesLHSImplyLogicalNOTOfRHS(*ArgArray[i],*ArgArray[j]))
 					{	// A=>B: force ~A AND XOR(...)
-					return MetaConcept::evalspec([&]() mutable {
-						return dest.TargetVariableFalse(i);
+					return evalspec([&]() mutable {
+						return TargetVariableFalse(i);
 					}, 0);
 					}
 			while(0<j);
 			}
 	while (0 < i);
-	return MetaConcept::evalspec();
+	return evalspec();
 }
 
-MetaConcept::evalspec _CanUseThisAsMakeImplyNXOR(const MetaConcept& Target, autovalarray_ptr_throws<MetaConcept*>& ArgArray, MetaConnective& dest)
+MetaConcept::evalspec MetaConnective::_CanUseThisAsMakeImplyNXOR(const MetaConcept& Target)
 {
 	assert(!ArgArray.empty());
 	size_t i = ArgArray.ArraySize();
@@ -1329,26 +1330,26 @@ MetaConcept::evalspec _CanUseThisAsMakeImplyNXOR(const MetaConcept& Target, auto
 			size_t j = ArgArray.ArraySize();
 			do	if (i!= --j && Target.MakesLHSImplyLogicalNOTOfRHS(*ArgArray[i],*ArgArray[j]))
 					{	// A=>B: force A OR NXOR(...)
-					return MetaConcept::evalspec([&]() mutable {
-						return dest.TargetVariableTrue(i);
+					return evalspec([&]() mutable {
+						return TargetVariableTrue(i);
 					}, 0);
 					}
 			while(0<j);
 			}
 	while (0 < i);
-	return MetaConcept::evalspec();
+	return evalspec();
 }
 
 MetaConcept::evalspec MetaConnective::_CanUseThisAsMakeImply(const MetaConcept& Target)
 {
-	static constexpr canUseAsMakeImply* const UseThisAsMakeImplyTable[] {
-		_CanUseThisAsMakeImplyAND,
-		_CanUseThisAsMakeImplyOR,
-		_CanUseThisAsMakeImplyIFF,
-		_CanUseThisAsMakeImplyXOR,
-		_CanUseThisAsMakeImplyNXOR
+	static constexpr canUseAsMakeImply const UseThisAsMakeImplyTable[] {
+		&MetaConnective::_CanUseThisAsMakeImplyAND,
+		&MetaConnective::_CanUseThisAsMakeImplyOR,
+		&MetaConnective::_CanUseThisAsMakeImplyIFF,
+		&MetaConnective::_CanUseThisAsMakeImplyXOR,
+		&MetaConnective::_CanUseThisAsMakeImplyNXOR
 	};
-	if (LogicalNXOR_MC >= ExactType()) return (*(UseThisAsMakeImplyTable[ExactType() - LogicalAND_MC]))(Target, ArgArray, *this);
+	if (LogicalNXOR_MC >= ExactType()) return ((this->*UseThisAsMakeImplyTable[ExactType() - LogicalAND_MC]))(Target);
 	return evalspec();
 }
 
@@ -6523,7 +6524,7 @@ RestartSpeculativeOR:
 		MetaConcept* SpeculativeTarget2 = SpeculativeTarget;
 		SpeculativeTarget = NULL;
 		while(DestructiveSyntacticallyEvaluateOnce(SpeculativeTarget2));
-		if (!SpeculativeTarget2->IsExactType(TruthValue_MC))
+		if (!SpeculativeTarget2->IsExactType(TruthValue_MC) && !SpeculativeTarget2->IsExactType(LogicalOR_MC))
 			{
 			InferenceParameterMC = SpeculativeTarget2;
 			IdxCurrentSelfEvalRule = SelfEvalAddArgAtEndAndForceCorrectForm__SER;
@@ -6537,7 +6538,6 @@ RestartSpeculativeOR:
 	//	**	if arity of OR(B,C)>N-1 (or is no longer OR), drop out;
 	if (MaxArityWanted>=SpeculativeTarget->fast_size())
 		{
-RetryBoostedOR:
 		MetaConcept* SpeculativeTargetMirror = SpeculativeTarget;
 		if (   (fast_size()>LowXORIdx && LogicalANDCanUseSpeculativeTarget(SpeculativeTargetMirror,LowXORIdx,HighXORIdx+1))
 			|| (fast_size()>LowORIdx  && LogicalANDCanUseSpeculativeTarget(SpeculativeTargetMirror,LowORIdx,HighORIdx+1)))
@@ -6598,6 +6598,11 @@ RetryBoostedOR:
 					// expected to reduce further: historical behavior is to terminate exploration pre-emptively
 					return false;
 				}
+				if (SpeculativeTarget->CanUseThisAsMakeImply(*ArgArray[Idx4])) {
+					LOG(*SpeculativeTarget);
+					LOG(*ArgArray[Idx4]);
+					SUCCEED_OR_DIE(0 && "got past std::function");
+				}
 				SUCCEED_OR_DIE(!SpeculativeTarget->CanUseThisAsMakeImply(*ArgArray[Idx4]));	// integrity check: std::function should not be double-null while historical succeeds
 #else
 				if (SpeculativeTarget->CanUseThisAsMakeImply(*ArgArray[Idx4]))
@@ -6626,8 +6631,8 @@ RetryBoostedOR:
 
 			if (   fast_size()>HighORIdx
 				&& LogicalANDBoostORWithIFF(SpeculativeTarget,LowXORIdx,HighORIdx))	// Destructive!
-				goto RetryBoostedOR;
-			}
+				goto RestartSpeculativeOR;
+		}
 		}
 	return false;
 }
