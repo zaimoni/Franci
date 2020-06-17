@@ -1248,8 +1248,9 @@ MetaConcept::evalspec MetaConnective::_CanUseThisAsMakeImplyOR(const MetaConcept
 			{
 			size_t DeleteThis = -1;
 			size_t j = ArgArray.ArraySize();
-			do	if (i != --j && Target.MakesLHSImplyRHS(*ArgArray[i], *ArgArray[j]))
-					{
+			do {
+				if (i == --j) continue;
+				if (Target.MakesLHSImplyRHS(*ArgArray[i], *ArgArray[j])) {
 					if (-1 != DeleteThis) ArgArray.DeleteIdx(DeleteThis);
 					DeleteThis = i;
 					if (2 == ArgArray.ArraySize()) {
@@ -1260,15 +1261,23 @@ MetaConcept::evalspec MetaConnective::_CanUseThisAsMakeImplyOR(const MetaConcept
 								*this = std::move(*stage);
 								delete stage;
 								return true;
-							}, 0);
+								}, 0);
 						}
 						return evalspec(0, [&](MetaConcept*& _dest) mutable {
 							TransferOutAndNULL(1 - DeleteThis, _dest);
 							return true;
-						});
+							});
 					}
 					break;
+				} else if (2 == ArgArray.ArraySize() || (3 == ArgArray.ArraySize() && -1 != DeleteThis)) {
+					if (Target.MakesLHSImplyLogicalNOTOfRHS(*ArgArray[i], *ArgArray[j])) {
+						if (-1 != DeleteThis) ArgArray.DeleteIdx(DeleteThis);
+						return evalspec([&]() mutable {
+							return AB_ToIFF_AnotB();
+						}, 0);
 					}
+				}
+			}
 			while (0 < j);
 			if (-1 != DeleteThis) {
 				return evalspec([&]() mutable {
@@ -6503,8 +6512,7 @@ RetryBoostedOR:
 // auxilliary functions for MetaConnective::LogicalANDCreateSpeculativeOR
 // NOTE: false means failure; true means success, SpeculativeTarget
 // has been consumed.
-bool
-MetaConnective::LogicalANDCreateSpeculativeORAux(MetaConnective*& SpeculativeTarget, size_t MaxArityWanted, size_t HighXORIdx, size_t LowXORIdx, size_t HighORIdx, size_t LowORIdx) const
+bool MetaConnective::LogicalANDCreateSpeculativeORAux(MetaConnective*& SpeculativeTarget, size_t MaxArityWanted, size_t HighXORIdx, size_t LowXORIdx, size_t HighORIdx, size_t LowORIdx) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/17/2004
 	//	**	evaluate OR(B,C) until it stabilizes.
 	if (SpeculativeTarget->ForceStdForm(),SpeculativeTarget->CanEvaluateToSameType())
@@ -6513,15 +6521,9 @@ MetaConnective::LogicalANDCreateSpeculativeORAux(MetaConnective*& SpeculativeTar
 		while(SpeculativeTarget->ForceStdForm(),SpeculativeTarget->DestructiveEvaluateToSameType());
 		LOG("====");
 		};
-#if 0
-	size_t iterations = 0;
-#endif
 RestartSpeculativeOR:
 	// If it's already drifted from OR, return false:
 	if (!SpeculativeTarget->IsExactType(LogicalOR_MC)) return false;
-#if 0
-	++iterations;
-#endif
 
 	if (SpeculativeTarget->ForceStdForm(),SpeculativeTarget->CanEvaluate())
 		{
@@ -6539,12 +6541,6 @@ RestartSpeculativeOR:
 		DELETE(SpeculativeTarget2);
 		return false;
 		};
-#if 0
-	if (2 <= iterations) {
-		LOG("----");
-		LOG(*SpeculativeTarget);
-	}
-#endif
 	//	**	if arity of OR(B,C)>N-1 (or is no longer OR), drop out;
 	if (MaxArityWanted>=SpeculativeTarget->fast_size())
 		{
@@ -6561,13 +6557,11 @@ RestartSpeculativeOR:
 			{
 			size_t Idx4 = LowXORIdx;	// IFF is an imply-inducing type
 			while (--Idx4 > HighORIdx) {
-#if 0
 				auto rules = SpeculativeTarget->_CanUseThisAsMakeImply(*ArgArray[Idx4]);
 				if (rules.first) {
 					LOG("Using this");
 					LOG(*ArgArray[Idx4]);
 					LOG("to reduce speculative OR");
-//					LOG("to non-destructively reduce speculative OR");
 					LOG(*SpeculativeTarget);
 					LOG("to");
 					rules.first();
@@ -6590,7 +6584,6 @@ RestartSpeculativeOR:
 					LOG("Using this");
 					LOG(*ArgArray[Idx4]);
 					LOG("to reduce speculative OR");
-//					LOG("to destructively reduce speculative OR");
 					LOG(*SpeculativeTarget);
 					LOG("to");
 					MetaConcept* test = 0;
@@ -6610,37 +6603,10 @@ RestartSpeculativeOR:
 				}
 				if (SpeculativeTarget->CanUseThisAsMakeImply(*ArgArray[Idx4])) {
 					LOG("====");
-#if 0
-					LOG(iterations);
-#endif
 					LOG(*SpeculativeTarget);
 					LOG(*ArgArray[Idx4]);
 					SUCCEED_OR_DIE(0 && "got past std::function");
 				}
-				SUCCEED_OR_DIE(!SpeculativeTarget->CanUseThisAsMakeImply(*ArgArray[Idx4]));	// integrity check: std::function should not be double-null while historical succeeds
-#else
-				if (SpeculativeTarget->CanUseThisAsMakeImply(*ArgArray[Idx4]))
-				{	// Arity 3+: use it!
-					LOG("Using this");
-					LOG(*ArgArray[Idx4]);
-					LOG("to reduce speculative OR");
-					LOG(*SpeculativeTarget);
-					LOG("to");
-					SpeculativeTarget->UseThisAsMakeImply(*ArgArray[Idx4]);
-					LOG(*SpeculativeTarget);
-					if (!SpeculativeTarget->IsExactType(LogicalOR_MC)
-						&& !FindArgRelatedToRHS(*SpeculativeTarget, NonStrictlyImplies))
-					{	// spawn IFF, probably
-						InferenceParameterMC = SpeculativeTarget;
-						IdxCurrentSelfEvalRule = SelfEvalAddArgAtEndAndForceCorrectForm__SER;
-						LOG("Spawning this");
-						LOG(*SpeculativeTarget);
-						return true;
-					};
-					SpeculativeTarget->ForceCheckForEvaluation();
-					goto RestartSpeculativeOR;
-				}
-#endif
 			}
 
 			if (   fast_size()>HighORIdx
