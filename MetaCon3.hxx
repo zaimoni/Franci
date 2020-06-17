@@ -168,8 +168,8 @@ public:
 	template<ExactType_MC dest> void set() {
 		static_assert(LogicalAND_MC <= dest && LogicalNAND_MC >= dest);
 		SetExactType(dest);
-		IdxCurrentSelfEvalRule = None_SER;
 		if constexpr (LogicalNOR_MC <= dest) DoSelfDeMorgan();
+		ForceCheckForEvaluation();
 	}
 
 	// thin forwarders to support lambda functions

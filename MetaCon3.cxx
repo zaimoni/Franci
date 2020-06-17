@@ -6388,8 +6388,7 @@ IFFCreationFailure:
 }
 #endif
 
-bool
-MetaConnective::LogicalANDBoostORWithIFF(MetaConnective*& SpeculativeTarget, size_t LowXORIdx, size_t HighORIdx) const
+bool MetaConnective::LogicalANDBoostORWithIFF(MetaConnective*& SpeculativeTarget, size_t LowXORIdx, size_t HighORIdx) const
 {
 	bool Tweaked = false;
 	size_t Idx4 = LowXORIdx;
@@ -6399,10 +6398,9 @@ MetaConnective::LogicalANDBoostORWithIFF(MetaConnective*& SpeculativeTarget, siz
 			try	{
 				autoval_ptr<TruthValue> TmpTruthValue;
 				TmpTruthValue = new TruthValue(true);
-				MetaConnective* Target = NULL;
-				static_cast<MetaConnective*>(ArgArray[Idx4])->CopyInto(Target);
+				MetaConnective* Target = new MetaConnective(*static_cast<MetaConnective*>(ArgArray[Idx4]));
 				Target->TransferInAndOverwriteRaw(Target->InferenceParameter1,TmpTruthValue.release());
-				Target->SetExactTypeV2(LogicalAND_MC);
+				Target->set<LogicalAND_MC>();
 				SpeculativeTarget->TransferInAndOverwriteRaw(SpeculativeTarget->InferenceParameter1,Target);
 				Tweaked = true;
 				}
@@ -6417,8 +6415,7 @@ MetaConnective::LogicalANDBoostORWithIFF(MetaConnective*& SpeculativeTarget, siz
 			try	{
 				autoval_ptr<TruthValue> TmpTruthValue;
 				TmpTruthValue = new TruthValue(false);
-				MetaConnective* Target = NULL;
-				static_cast<MetaConnective*>(ArgArray[Idx4])->CopyInto(Target);
+				MetaConnective* Target = new MetaConnective(*static_cast<MetaConnective*>(ArgArray[Idx4]));
 				Target->TransferInAndOverwriteRaw(Target->InferenceParameter1,TmpTruthValue.release());
 				Target->set<LogicalNOR_MC>();
 				SpeculativeTarget->TransferInAndOverwriteRaw(SpeculativeTarget->InferenceParameter1,Target);
@@ -6430,6 +6427,7 @@ MetaConnective::LogicalANDBoostORWithIFF(MetaConnective*& SpeculativeTarget, siz
 				continue;
 				}
 			};
+	if (Tweaked) SpeculativeTarget->ForceCheckForEvaluation();
 	return Tweaked;
 }
 
@@ -6515,9 +6513,15 @@ MetaConnective::LogicalANDCreateSpeculativeORAux(MetaConnective*& SpeculativeTar
 		while(SpeculativeTarget->ForceStdForm(),SpeculativeTarget->DestructiveEvaluateToSameType());
 		LOG("====");
 		};
+#if 0
+	size_t iterations = 0;
+#endif
 RestartSpeculativeOR:
 	// If it's already drifted from OR, return false:
 	if (!SpeculativeTarget->IsExactType(LogicalOR_MC)) return false;
+#if 0
+	++iterations;
+#endif
 
 	if (SpeculativeTarget->ForceStdForm(),SpeculativeTarget->CanEvaluate())
 		{
@@ -6535,6 +6539,12 @@ RestartSpeculativeOR:
 		DELETE(SpeculativeTarget2);
 		return false;
 		};
+#if 0
+	if (2 <= iterations) {
+		LOG("----");
+		LOG(*SpeculativeTarget);
+	}
+#endif
 	//	**	if arity of OR(B,C)>N-1 (or is no longer OR), drop out;
 	if (MaxArityWanted>=SpeculativeTarget->fast_size())
 		{
@@ -6556,8 +6566,8 @@ RestartSpeculativeOR:
 				if (rules.first) {
 					LOG("Using this");
 					LOG(*ArgArray[Idx4]);
-//					LOG("to reduce speculative OR");
-					LOG("to non-destructively reduce speculative OR");
+					LOG("to reduce speculative OR");
+//					LOG("to non-destructively reduce speculative OR");
 					LOG(*SpeculativeTarget);
 					LOG("to");
 					rules.first();
@@ -6579,8 +6589,8 @@ RestartSpeculativeOR:
 				} else if (rules.second) {
 					LOG("Using this");
 					LOG(*ArgArray[Idx4]);
-//					LOG("to reduce speculative OR");
-					LOG("to destructively reduce speculative OR");
+					LOG("to reduce speculative OR");
+//					LOG("to destructively reduce speculative OR");
 					LOG(*SpeculativeTarget);
 					LOG("to");
 					MetaConcept* test = 0;
@@ -6599,6 +6609,10 @@ RestartSpeculativeOR:
 					return false;
 				}
 				if (SpeculativeTarget->CanUseThisAsMakeImply(*ArgArray[Idx4])) {
+					LOG("====");
+#if 0
+					LOG(iterations);
+#endif
 					LOG(*SpeculativeTarget);
 					LOG(*ArgArray[Idx4]);
 					SUCCEED_OR_DIE(0 && "got past std::function");

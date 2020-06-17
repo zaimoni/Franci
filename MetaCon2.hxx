@@ -104,7 +104,7 @@ public:
 	virtual ~MetaConceptWithArgArray() = default;
 //	virtual void CopyInto(MetaConcept*& Target) const = 0;	// can throw memory failure
 //	virtual void MoveInto(MetaConcept*& Target) = 0;	// can throw memory failure.  If it succeeds, it destroys the source.
-	void ForceCheckForEvaluation() const { IdxCurrentSelfEvalRule = None_SER; _evalRule.first = 0; _evalRule.second = 0; }
+	void ForceCheckForEvaluation() const { IdxCurrentSelfEvalRule = None_SER; IdxCurrentEvalRule = None_ER; _evalRule.first = 0; _evalRule.second = 0; }
 	bool SelfEvalCleanEnd() const { ForceCheckForEvaluation(); return true; }
 //  Type ID functions
 //	virtual const AbstractClass* UltimateType() const = 0;
