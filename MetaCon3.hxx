@@ -151,7 +151,6 @@ public:
 	//	type-specific functions
 	bool HyperNonStrictlyImpliesReplacement(const MetaConcept& LHS, const MetaConcept& RHS);
 	bool HyperNonStrictlyImpliesLogicalNOTOfReplacement(const MetaConcept& LHS, const MetaConcept& RHS);
-	bool ExploreImprovisedUsesSpeculativeOR(const MetaConnective& Target) const;
 	// next members are implemented in QState.cxx
 	bool LogicalANDDoNotExplore(void) const;
 	void LogicalANDCleanOrthogonalClauses(const clock_t EvalTime0);

@@ -6443,6 +6443,7 @@ bool MetaConnective::LogicalANDBoostORWithIFF(MetaConnective*& SpeculativeTarget
 bool
 MetaConnective::ExploreImprovisedUsesSpeculativeORAux(MetaConnective*& SpeculativeTarget, const MetaConnective& Target, size_t MaxArityWanted, size_t HighXORIdx, size_t LowXORIdx, size_t HighORIdx, size_t LowORIdx) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 2/12/2005
+	assert(SpeculativeTarget && SpeculativeTarget->IsExactType(LogicalOR_MC));
 	//	**	evaluate OR(B,C) until it stabilizes.
 	if (SpeculativeTarget->ForceStdForm(),SpeculativeTarget->CanEvaluateToSameType())
 		{
@@ -6463,7 +6464,7 @@ RestartSpeculativeOR:
 		if (   Target.IsExactType(LogicalXOR_MC)
 			&& SpeculativeTarget->SubvectorArgList(Target))
 			{
-			DELETE(SpeculativeTarget);
+			DELETE_AND_NULL(SpeculativeTarget);
 			return true;	//	**	if XOR plus this OR would trigger OR/XOR reduction, 
 			}
 
@@ -6476,7 +6477,7 @@ RetryBoostedOR:
 			while(SpeculativeTarget->FindArgRelatedToRHS(*Target.ArgArray[--Idx4],NonStrictlyImpliesLogicalNOTOf))
 				if (0==Idx4)
 					{
-					DELETE(SpeculativeTarget);
+					DELETE_AND_NULL(SpeculativeTarget);
 					return true;
 					}
 //	OR(NOT A1B3_EQ_0,NOT A4B1_EQ_0)
@@ -6495,8 +6496,7 @@ RetryBoostedOR:
 					// IFF is an imply-inducing type
 					if (SpeculativeTarget->CanUseThisAsMakeImply(*ArgArray[Idx4]))
 						{	// Arity 3+: use it!
-						if (!SpeculativeTarget->IsExactType(LogicalOR_MC))
-							return false;
+						SUCCEED_OR_DIE(SpeculativeTarget->IsExactType(LogicalOR_MC));	// invariant check; may not actually need this
 						SpeculativeTarget->ForceCheckForEvaluation();
 						goto RestartSpeculativeOR;
 						}
@@ -6530,6 +6530,7 @@ RestartSpeculativeOR:
 		MetaConcept* SpeculativeTarget2 = SpeculativeTarget;
 		SpeculativeTarget = NULL;
 		while(DestructiveSyntacticallyEvaluateOnce(SpeculativeTarget2));
+		// discard OR here to prevent infinite-looping issues
 		if (!SpeculativeTarget2->IsExactType(TruthValue_MC) && !SpeculativeTarget2->IsExactType(LogicalOR_MC))
 			{
 			InferenceParameterMC = SpeculativeTarget2;
