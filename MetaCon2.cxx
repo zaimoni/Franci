@@ -408,8 +408,7 @@ bool MetaConceptWithArgArray::_AddArgAtEndAndForceCorrectForm(MetaConcept* src)
 	assert(src);
 	if (!InsertSlotAt(fast_size(),src)) return false;
 
-	IdxCurrentEvalRule = None_ER;
-	IdxCurrentSelfEvalRule = None_SER;
+	ForceCheckForEvaluation();
 	_forceStdForm();
 	return true;
 }
@@ -420,8 +419,7 @@ bool MetaConceptWithArgArray::AddArgAtStartAndForceCorrectForm(MetaConcept*& src
 	if (!InsertSlotAt(0,src)) return false;
 
 	src = NULL;
-	IdxCurrentEvalRule = None_ER;
-	IdxCurrentSelfEvalRule = None_SER;
+	ForceCheckForEvaluation();
 	_forceStdForm();
 	return true;
 }

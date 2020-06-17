@@ -588,8 +588,7 @@ RetryAugmentation:
 									TempIFF->ForceCheckForEvaluation();
 									if (!static_cast<MetaConnective*>(ArgArray[0])->AddArgAtEndAndForceCorrectForm(TempIFF))
 										UnconditionalRAMFailure();
-									IdxCurrentEvalRule = None_ER;
-									IdxCurrentSelfEvalRule = None_SER;
+									ForceCheckForEvaluation();
 									return true;
 									}
 								else if ((PromoteCandidate0->IsExactType(Variable_MC) || PromoteCandidate0->IsExactType(LogicalIFF_MC)) && *PromotedHypothesis != *PromoteCandidate0)
