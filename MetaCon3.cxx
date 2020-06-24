@@ -6455,8 +6455,18 @@ RestartSpeculativeOR:
 	// If it's already drifted from OR, return false:
 	if (!SpeculativeTarget->IsExactType(LogicalOR_MC)) return false;
 
-	if (SpeculativeTarget->ForceStdForm(),SpeculativeTarget->CanEvaluate())
+	if (SpeculativeTarget->ForceStdForm(), SpeculativeTarget->CanEvaluate()) {
+		MetaConcept* SpeculativeTarget2 = SpeculativeTarget;
+		SpeculativeTarget = NULL;
+		while (DestructiveSyntacticallyEvaluateOnce(SpeculativeTarget2));
+		// discard OR here to prevent infinite-looping issues
+		if (!SpeculativeTarget2->IsExactType(TruthValue_MC) && !SpeculativeTarget2->IsExactType(LogicalOR_MC)) {
+			DELETE(SpeculativeTarget2);
+			return true;
+		}
+		DELETE(SpeculativeTarget2);
 		return false;
+	};
 
 	//	**	if arity of OR(B,C)>N-1 (or is no longer OR), drop out;
 	if (MaxArityWanted>=SpeculativeTarget->fast_size())
@@ -6472,7 +6482,6 @@ RestartSpeculativeOR:
 		//! \todo OR subarglist: comment on deleting superfluous args
 		if (Target.IsExactType(LogicalOR_MC))
 			{	// check suitable ORs for NIFF-triggering
-RetryBoostedOR:
 			size_t Idx4 = Target.fast_size();
 			while(SpeculativeTarget->FindArgRelatedToRHS(*Target.ArgArray[--Idx4],NonStrictlyImpliesLogicalNOTOf))
 				if (0==Idx4)
@@ -6501,8 +6510,7 @@ RetryBoostedOR:
 						goto RestartSpeculativeOR;
 						}
 				// IFF-booster for OR check
-				if (LogicalANDBoostORWithIFF(SpeculativeTarget,LowXORIdx,HighORIdx))	// Destructive!
-					goto RetryBoostedOR;
+				if (LogicalANDBoostORWithIFF(SpeculativeTarget,LowXORIdx,HighORIdx)) goto RestartSpeculativeOR; // Destructive!
 				}
 			}
 		}
