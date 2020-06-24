@@ -3049,18 +3049,23 @@ void MetaConnective::StrictlyModifies_IFF(MetaConcept*& rhs) const
 	rhs->UseThisAsMakeImply(*this);
 }
 
-#if 0
 //! \todo FIX:
 // IFF(A,AND(~B,~C)),
 // XOR(A,B,C)
 // 2-ary IFF is TRUE
 // n-ary IFF : delete AND
 // this is an irreversible implication
-#endif
 void MetaConnective::StrictlyModifies_XOR(MetaConcept*& rhs) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/30/2000
+{	// FORMALLY CORRECT: 2020-06-24
 	// TODO: FIX: applying XOR(A,B,C) to AND(~A,...) should cause XOR(B,C) to be applied to AND(~A,...)
-	rhs->UseThisAsMakeImply(*this);
+	auto rules = rhs->_CanUseThisAsMakeImply(*this);
+	if (rules.first) rules.first();
+	else if (rules.second) {
+		MetaConcept* dest = 0;
+		rules.second(dest);
+		delete rhs;
+		rhs = dest;
+	} else SUCCEED_OR_DIE(0 && "incorrect call of MetaConnective::StrictlyModifies_XOR");
 }
 
 void MetaConnective::StrictlyModifies_NXOR(MetaConcept*& rhs) const
