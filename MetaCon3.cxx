@@ -6501,14 +6501,41 @@ RestartSpeculativeOR:
 				&& 1<LowXORIdx-HighORIdx)			// low-level dependency: OR<IFF<XOR)
 				{	// IFF-implies use check
 				size_t Idx4 = LowXORIdx;	// IFF is an imply-inducing type
-				while(--Idx4>HighORIdx)
+				while (--Idx4 > HighORIdx) {
 					// IFF is an imply-inducing type
-					if (SpeculativeTarget->CanUseThisAsMakeImply(*ArgArray[Idx4]))
-						{	// Arity 3+: use it!
-						SUCCEED_OR_DIE(SpeculativeTarget->IsExactType(LogicalOR_MC));	// invariant check; may not actually need this
+					auto rules = SpeculativeTarget->_CanUseThisAsMakeImply(*ArgArray[Idx4]);
+					if (rules.first) {
+						rules.first();
+						if (!SpeculativeTarget->IsExactType(LogicalOR_MC)) {
+							// 2020-06-13: this heuristic is questionable
+							if (!FindArgRelatedToRHS(*SpeculativeTarget, NonStrictlyImplies)) {
+								DELETE_AND_NULL(SpeculativeTarget);
+								return true;
+							}
+							// expected to reduce further: historical behavior is to terminate exploration pre-emptively
+							return false;
+						}
 						SpeculativeTarget->ForceCheckForEvaluation();
 						goto RestartSpeculativeOR;
+					} else if (rules.second) {
+						MetaConcept* test = 0;
+						rules.second(test);
+						SUCCEED_OR_DIE(!test->IsExactType(LogicalOR_MC));	// associativity of OR should prohibit this
+						if (!FindArgRelatedToRHS(*test, NonStrictlyImplies)) {
+							DELETE_AND_NULL(SpeculativeTarget);
+							DELETE(test);
+							return true;
 						}
+						// expected to reduce further: historical behavior is to terminate exploration pre-emptively
+						return false;
+					}
+					if (SpeculativeTarget->CanUseThisAsMakeImply(*ArgArray[Idx4])) {
+						LOG("====");
+						LOG(*SpeculativeTarget);
+						LOG(*ArgArray[Idx4]);
+						SUCCEED_OR_DIE(0 && "got past std::function");
+					}
+				}
 				// IFF-booster for OR check
 				if (LogicalANDBoostORWithIFF(SpeculativeTarget,LowXORIdx,HighORIdx)) goto RestartSpeculativeOR; // Destructive!
 				}
@@ -6596,7 +6623,7 @@ RestartSpeculativeOR:
 					LOG(*SpeculativeTarget);
 					LOG("to");
 					MetaConcept* test = 0;
-					rules.second(test);	// crashes on trying to use std::function
+					rules.second(test);
 					LOG(*test);
 					SUCCEED_OR_DIE(!test->IsExactType(LogicalOR_MC));	// associativity of OR should prohibit this
 					if (!FindArgRelatedToRHS(*test, NonStrictlyImplies)) {
