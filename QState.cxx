@@ -1121,24 +1121,6 @@ RetryTarget:
 		}
 }
 
-void
-MetaConnective::SuppressNonstrictlyImpliedArgsAtLargeArity(MetaConcept**& VarList, size_t& Idx3)
-{	// FORMALLY CORRECT: Kenneth Boyd, 2/27/2003
-	while(0<Idx3 && 2<fast_size())
-		{
-		Idx3--;
-		while(FindArgRelatedToLHS(*VarList[--Idx3],NonStrictlyImplies))
-			{
-			DeleteIdx(InferenceParameter1);
-			if (2==fast_size())
-				{
-				Idx3++;
-				return;
-				}
-			}
-		}
-}
-
 static void
 DirectCreateBasisClausesToVarlist(const MetaConcept& src,MetaConcept**& VarList)
 {	// FORMALLY CORRECT: Kenneth Boyd, 4/22/2006

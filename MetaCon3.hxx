@@ -283,7 +283,6 @@ private:
 	void DiagnoseIntermediateRulesIFF2AryAux(void) const;
 
 	size_t array_index() const {return ExactType()-LogicalAND_MC;};
-	void SuppressNonstrictlyImpliedArgsAtLargeArity(MetaConcept**& VarList, size_t& Idx3);
 	void AddBasisClausesToVarList(MetaConcept**& VarList) const;
 	void LogicalIFFRemoveRedundantVariables(bool& HaveResponded, bool& LastRemoveRewriteVar);
 	// resume implementation in MetaCon3.cxx
