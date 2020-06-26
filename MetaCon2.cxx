@@ -895,19 +895,26 @@ bool MetaConceptWithArgArray::SelfEvalRuleAry2CorrectedCleanTrailingArg()
 	return SelfEvalCleanEnd();
 }
 
+bool MetaConceptWithArgArray::UnrollGeneralizedAssociativity(size_t dest)
+{	// FORMALLY CORRECT: 2020-06-25
+	assert(size() > dest);
+	assert(ArgArray[dest]);
+	assert(ArgArray[dest]->IsExactType(ExactType()));
+	MetaConceptWithArgArray* Tmp = static_cast<MetaConceptWithArgArray*>(ArgArray[dest]);
+	const size_t InsertArgCount = Tmp->fast_size();
+	if (!InsertNSlotsAtV2(InsertArgCount - 1, dest + 1)) return false;
+	memmove(&ArgArray[dest], Tmp->ArgArray, _msize(Tmp->ArgArray));
+	std::fill_n(Tmp->ArgArray.begin(), InsertArgCount, (MetaConcept*)0);
+	delete Tmp;
+	return true;
+}
+
 bool MetaConceptWithArgArray::SelfEvalRuleUnrollGeneralizedAssociativity()
-{	// FORMALLY CORRECT: Kenneth Boyd, 8/25/2003
+{	// FORMALLY CORRECT: 2020-06-25
 	assert(size()>InferenceParameter1);
 	do	{
 		assert(ArgArray[InferenceParameter1]);
-		MetaConceptWithArgArray* Tmp = static_cast<MetaConceptWithArgArray*>(ArgArray[InferenceParameter1]);
-		const size_t InsertArgCount = Tmp->fast_size();
-		if (!InsertNSlotsAtV2(InsertArgCount-1,InferenceParameter1+1))
-			return false;
-
-		memmove(&ArgArray[InferenceParameter1],Tmp->ArgArray,_msize(Tmp->ArgArray));
-		std::fill_n(Tmp->ArgArray.begin(),InsertArgCount,(MetaConcept*)NULL);
-		delete Tmp;
+		if (!UnrollGeneralizedAssociativity(InferenceParameter1)) return false;
 		}
 	// Franci: the diagnosis rule should have sorted first
 	while(   IsSymmetric() && 0<InferenceParameter1

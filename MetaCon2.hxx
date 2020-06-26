@@ -281,6 +281,7 @@ protected:
 	bool SelfEvalRuleNIFFXORCleanTrailingArg();
 	bool SelfEvalRuleAry2CorrectedCleanArg();
 	bool SelfEvalRuleAry2CorrectedCleanTrailingArg();
+	bool UnrollGeneralizedAssociativity(size_t dest);
 	bool SelfEvalRuleUnrollGeneralizedAssociativity();
 	bool SelfEvalAddArgAtEndAndForceCorrectForm();
 	bool CompatibleRetype();

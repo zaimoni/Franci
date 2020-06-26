@@ -930,6 +930,7 @@ bool MetaConnective::MakesLHSImplyRHS(const MetaConcept& lhs, const MetaConcept&
 	case LogicalIFF_MC:
 		{	// LHS => OR and AND => RHS: OK
 		// NOTE: this code can be spoofed by IFFs containing OR [LHS blinded] or AND [RHS blinded]
+		// CPU cost of full-visibility version is unacceptable
 		const_cast<MetaConnective* const>(this)->SetExactTypeV2(LogicalOR_MC);
 		const bool LHSImpliesORVariantOfIFF = NonStrictlyImplies(lhs,*this);
 		const bool NORVariantOfIFFImpliesRHS = LogicalNOTOfNonStrictlyImplies(*this,rhs);
