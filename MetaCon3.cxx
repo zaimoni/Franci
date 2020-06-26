@@ -2958,25 +2958,58 @@ void MetaConnective::StrictlyModifies_AND(MetaConcept*& rhs) const
 // if all args in OR NonStrictlyimplyLogicalNotOF some arg in IFF, turn IFF into NAND.
 void MetaConnective::StrictlyModifies_OR(MetaConcept*& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/16/2001
+	MetaConnective* VR_RHS = static_cast<MetaConnective*>(rhs);
+#if 0
+	switch (VR_RHS->InferenceParameter1) {
+	case LogicalAND_MC: VR_RHS->set<LogicalAND_MC>(); return;
+	case LogicalNOR_MC: VR_RHS->set<LogicalNOR_MC>(); return;
+	default:
+		if (2 == fast_size()) {
+			if (ValidLHSForMakesLHSImplyRHS(*VR_RHS->ArgArray[0]) && MakesLHSImplyRHS(*VR_RHS->ArgArray[0], *VR_RHS->ArgArray[1])) {
+				MetaConcept* Tmp = NULL;
+				VR_RHS->TransferOutAndNULL(1, Tmp);
+				delete rhs;
+				rhs = Tmp;
+				return;
+			} else if (ValidLHSForMakesLHSImplyRHS(*VR_RHS->ArgArray[1]) && MakesLHSImplyRHS(*VR_RHS->ArgArray[1], *VR_RHS->ArgArray[0])) {
+				MetaConcept* Tmp = NULL;
+				VR_RHS->TransferOutAndNULL(0, Tmp);
+				delete rhs;
+				rhs = Tmp;
+				return;
+			}
+			auto rules = rhs->_CanUseThisAsMakeImply(*this);
+			if (rules.first) rules.first();
+			else if (rules.second) {
+				MetaConcept* dest = 0;
+				rules.second(dest);
+				delete rhs;
+				rhs = dest;
+			} else SUCCEED_OR_DIE(0 && "incorrect call of MetaConnective::StrictlyModifies_OR");	// fails 5 tests
+			return;
+		}
+	}
+	SUCCEED_OR_DIE(0 && "incorrect call of MetaConnective::StrictlyModifies_OR");
+#else
 	if 		(2==fast_size() && rhs->CanUseThisAsMakeImply(*this))
 		{
 		if (   rhs->IsExactType(LogicalOR_MC)
-			&& 2==static_cast<MetaConnective*>(rhs)->fast_size())
+			&& 2== VR_RHS->fast_size())
 			{
-			if 		(   ValidLHSForMakesLHSImplyRHS(*static_cast<MetaConnective*>(rhs)->ArgArray[0])
-					 && MakesLHSImplyRHS(*static_cast<MetaConnective*>(rhs)->ArgArray[0],*static_cast<MetaConnective*>(rhs)->ArgArray[1]))
+			if 		(   ValidLHSForMakesLHSImplyRHS(*VR_RHS->ArgArray[0])
+					 && MakesLHSImplyRHS(*VR_RHS->ArgArray[0],*VR_RHS->ArgArray[1]))
 				{
 				MetaConcept* Tmp = NULL;
-				static_cast<MetaConnective*>(rhs)->TransferOutAndNULL(1,Tmp);
+				VR_RHS->TransferOutAndNULL(1,Tmp);
 				delete rhs;
 				rhs = Tmp;
 				return;
 				}
-			else if (   ValidLHSForMakesLHSImplyRHS(*static_cast<MetaConnective*>(rhs)->ArgArray[1])
-					 && MakesLHSImplyRHS(*static_cast<MetaConnective*>(rhs)->ArgArray[1],*static_cast<MetaConnective*>(rhs)->ArgArray[0]))
+			else if (   ValidLHSForMakesLHSImplyRHS(*VR_RHS->ArgArray[1])
+					 && MakesLHSImplyRHS(*VR_RHS->ArgArray[1],*VR_RHS->ArgArray[0]))
 				{
 				MetaConcept* Tmp = NULL;
-				static_cast<MetaConnective*>(rhs)->TransferOutAndNULL(0,Tmp);
+				VR_RHS->TransferOutAndNULL(0,Tmp);
 				delete rhs;
 				rhs = Tmp;
 				return;
@@ -2987,10 +3020,11 @@ void MetaConnective::StrictlyModifies_OR(MetaConcept*& rhs) const
 			}
 		rhs->UseThisAsMakeImply(*this);
 		}
-	else if (LogicalAND_MC==static_cast<MetaConnective*>(rhs)->InferenceParameter1)
+	else if (LogicalAND_MC== VR_RHS->InferenceParameter1)
 		static_cast<MetaConnective*>(rhs)->set<LogicalAND_MC>();
-	else	// if (LogicalNOR_MC==static_cast<MetaConnective*>(RHS)->InferenceParameter1)
+	else	// if (LogicalNOR_MC==VR_RHS->InferenceParameter1)
 		static_cast<MetaConnective*>(rhs)->set<LogicalNOR_MC>();
+#endif
 }
 
 bool
@@ -3046,7 +3080,19 @@ void MetaConnective::StrictlyModifies_IFF(MetaConcept*& rhs) const
 				return;
 			}
 		}
+#if 0
+	auto rules = rhs->_CanUseThisAsMakeImply(*this);
+	if (rules.first) rules.first();
+	else if (rules.second) {
+		MetaConcept* dest = 0;
+		rules.second(dest);
+		delete rhs;
+		rhs = dest;
+	}
+	else SUCCEED_OR_DIE(0 && "incorrect call of MetaConnective::StrictlyModifies_IFF");	// failed 2 test cases
+#else
 	rhs->UseThisAsMakeImply(*this);
+#endif
 }
 
 //! \todo FIX:
@@ -3088,8 +3134,11 @@ bool MetaConnective::CanStrictlyModify_AND(const MetaConcept& rhs) const
 
 bool MetaConnective::CanStrictlyModify_OR(const MetaConcept& rhs) const
 {	//! \todo IMPLEMENT
-	if (2==fast_size() && rhs.CanUseThisAsMakeImply(*this))
+	if (2 == fast_size() && rhs.CanUseThisAsMakeImply(*this)) {
+		const MetaConnective& VR_RHS = static_cast<const MetaConnective&>(rhs);
+		VR_RHS.InferenceParameter1 = 0;	// formal no-op but simplifies rewrite
 		return true;
+	}
 	//! \todo this is actually a specialized instance of a meta-target rule:
 	//! X implies OR-version of IFF => IFF collapses to AND-version	
 	if (rhs.IsExactType(LogicalIFF_MC))
