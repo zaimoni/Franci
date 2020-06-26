@@ -7431,7 +7431,7 @@ MetaConceptWithArgArray::LogicalANDORCondenseORANDArgHyperCubeAuxDim1(size_t Idx
 }
 
 void MetaConceptWithArgArray::LogicalORXORCompactANDArgHyperCubeAuxDim1(size_t i, size_t i2)
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/17/2004
+{	// FORMALLY CORRECT: 2020-06-26
 	SUCCEED_OR_DIE(i>i2);
 	Digraph* const WorkingGraph = static_cast<Digraph*>((MetaConcept*)InferenceParameterMC);
 	MetaConcept* Arg1 = WorkingGraph->ArgN(i);
@@ -7445,45 +7445,25 @@ void MetaConceptWithArgArray::LogicalORXORCompactANDArgHyperCubeAuxDim1(size_t i
 	LOG("Compacting");
 	LOG(*ArgArray[TargetIdx1]);
 	LOG(*ArgArray[TargetIdx2]);
-	if 		(IsExactType(LogicalAND_MC))
-		LOG("in AND-clause to");
-	else if (IsExactType(LogicalOR_MC))
-		LOG("in OR-clause to");
-	else if (IsExactType(LogicalXOR_MC))
-		LOG("in XOR-clause to");
-	else
-		UnconditionalCallAssumptionFailure();
+	if 		(IsExactType(LogicalAND_MC)) LOG("in AND-clause to");
+	else if (IsExactType(LogicalOR_MC)) LOG("in OR-clause to");
+	else if (IsExactType(LogicalXOR_MC)) LOG("in XOR-clause to");
+	else UnconditionalCallAssumptionFailure();
 
 	// AND: target is OR
 	// OR, XOR: target is AND
 	// same logic
-	if (2==ArgArray[TargetIdx1]->size())
-		{
+	if (2==ArgArray[TargetIdx1]->size()) {
 		MetaConcept* Tmp = NULL;
 		static_cast<MetaConceptWithArgArray*>(ArgArray[TargetIdx1])->FastTransferOutAndNULL(1-static_cast<MetaConceptWithArgArray*>(ArgArray[TargetIdx1])->InferenceParameter1,Tmp);
 		delete ArgArray[TargetIdx1];
 		ArgArray[TargetIdx1] = Tmp;
-		}
-	else{
+	} else {
 		static_cast<MetaConceptWithArgArray*>(ArgArray[TargetIdx1])->DeleteIdx(static_cast<MetaConceptWithArgArray*>(ArgArray[TargetIdx1])->InferenceParameter1);
-		}
+	}
 	LOG(*ArgArray[TargetIdx1]);
-	if 		(2<fast_size())
-		DeleteIdx(TargetIdx2);
-	else if (HasSameImplementationAs(*ArgArray[TargetIdx1]))
-		{
-		MetaConceptWithArgArray* Tmp = static_cast<MetaConceptWithArgArray*>(ArgArray[TargetIdx1]);
-		ArgArray[TargetIdx1] = NULL;
-		SetExactType(Tmp->ExactType());
-
-		ArgArray = Tmp->ArgArray;
-
-		InferenceParameterMC = Tmp->InferenceParameterMC;
-		InferenceParameter1 = Tmp->InferenceParameter1;
-		InferenceParameter2 = Tmp->InferenceParameter2;
-		
-		delete Tmp;
-		}
+	if (2<fast_size()) DeleteIdx(TargetIdx2);
+	else ForceArgSameImplementation(TargetIdx1);	// return value available; historical failure was no-op
 }
 
 void MetaConceptWithArgArray::HypercubeArgRelationProcessor(VertexPairSelfProcess CleanupAction)

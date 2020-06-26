@@ -816,8 +816,7 @@ bool MetaConceptWithArgArray::ForceArgSameImplementation(size_t n)
 }
 
 bool MetaConceptWithArgArray::SelfEvalRuleForceArgSameImplementation()
-{	// FORMALLY CORRECT: Kenneth Boyd, 2/8/2000
-	// InferenceParameter1 points to arg.
+{	// InferenceParameter1 points to arg.
 	assert(size()>InferenceParameter1);
 	assert(ArgArray[InferenceParameter1]);
 	assert(typeid(*this)==typeid(*ArgArray[InferenceParameter1]));
