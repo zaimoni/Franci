@@ -992,36 +992,34 @@ bool MetaConceptWithArgArray::DiagnoseEvaluatableArgs() const
 	return false;
 }
 
+size_t MetaConceptWithArgArray::HasSelfAssociativeArg() const
+{	// FORMALLY CORRECT: 2020-06-26
+	if (SelfAssociative_LITBMP1MC & VFTable1->Bitmap1) {
+		const auto my_type = ExactType();
+		size_t scan = size();
+		while (0 < scan) if (const auto x = ArgArray[--scan]; x->IsExactType(my_type) && x->NoMetaModifications()) return scan + 1;
+	};
+	return 0;
+}
+
 bool MetaConceptWithArgArray::SilentDiagnoseSelfAssociativeArgs() const
-{	// FORMALLY CORRECT: Kenneth Boyd, 8/25/2003
-	if (SelfAssociative_LITBMP1MC & VFTable1->Bitmap1)
-		{
-		InferenceParameter1 = size();
-		while(0<InferenceParameter1)
-			if (   ArgArray[--InferenceParameter1]->IsExactType(ExactType())
-				&& ArgArray[InferenceParameter1]->NoMetaModifications())
-				{
-				IdxCurrentSelfEvalRule=SelfEvalRuleUnrollGeneralizedAssociativity_SER;
-				return true;
-				}
-		};
+{	// FORMALLY CORRECT: 2020-06-26
+	if (size_t scan = HasSelfAssociativeArg()) {
+		InferenceParameter1 = scan - 1;
+		IdxCurrentSelfEvalRule = SelfEvalRuleUnrollGeneralizedAssociativity_SER;
+		return true;
+	}
 	return false;
 }
 
 bool MetaConceptWithArgArray::DiagnoseSelfAssociativeArgs() const
-{	// FORMALLY CORRECT: Kenneth Boyd, 8/25/2003
-	if (SelfAssociative_LITBMP1MC & VFTable1->Bitmap1)
-		{
-		InferenceParameter1 = size();
-		while(0<InferenceParameter1)
-			if (   ArgArray[--InferenceParameter1]->IsExactType(ExactType())
-				&& ArgArray[InferenceParameter1]->NoMetaModifications())
-				{
-				LOG("(Using generalized associativity to remove unnecessary grouping)");
-				IdxCurrentSelfEvalRule=SelfEvalRuleUnrollGeneralizedAssociativity_SER;
-				return true;
-				}
-		};
+{	// FORMALLY CORRECT: 2020-06-26
+	if (size_t scan = HasSelfAssociativeArg()) {
+		LOG("(Using generalized associativity to remove unnecessary grouping)");
+		InferenceParameter1 = scan - 1;
+		IdxCurrentSelfEvalRule = SelfEvalRuleUnrollGeneralizedAssociativity_SER;
+		return true;
+	}
 	return false;
 }
 

@@ -524,11 +524,9 @@ bool MetaConnective::OR_AmplifyThisClause(MetaConnective& rhs) const
 	NewArg->SetExactTypeV2(LogicalAND_MC);
 	rhs.ArgArray[IncomingRHSParam1] = NewArg.release();
 	// immediately normalize AND
-	if (rhs.IsExactType(LogicalAND_MC))
-		{
-		rhs.SilentDiagnoseSelfAssociativeArgs();
-		if (!rhs.DestructiveEvaluateToSameType()) FATAL(RAMFailure);
-		}
+	if (rhs.IsExactType(LogicalAND_MC)) {
+		while (rhs.SilentDiagnoseSelfAssociativeArgs()) if (!rhs.SelfEvalRuleUnrollGeneralizedAssociativity()) FATAL(RAMFailure);
+	}
 
 // Re-enable use of InferenceParameter1
 #undef InferenceParameter1
@@ -579,11 +577,9 @@ bool MetaConnective::IFF_AmplifyThisClauseV1(MetaConnective& rhs) const
 	NewArg->set<LogicalNOR_MC>();
 	rhs.ArgArray[IncomingRHSParam1] = NewArg.release();
 	// immediately normalize AND
-	if (rhs.IsExactType(LogicalAND_MC))
-		{
-		rhs.SilentDiagnoseSelfAssociativeArgs();
-		if (!rhs.DestructiveEvaluateToSameType()) FATAL(RAMFailure);
-		}
+	if (rhs.IsExactType(LogicalAND_MC)) {
+		while (rhs.SilentDiagnoseSelfAssociativeArgs()) if (!rhs.SelfEvalRuleUnrollGeneralizedAssociativity()) FATAL(RAMFailure);
+	}
 
 // Re-enable use of InferenceParameter1
 #undef InferenceParameter1
@@ -633,11 +629,9 @@ bool MetaConnective::IFF_AmplifyThisClauseV2(MetaConnective& rhs) const
 	NewArg->SetExactTypeV2(LogicalAND_MC);
 	rhs.ArgArray[IncomingRHSParam1] = NewArg.release();
 	// immediately normalize AND
-	if (rhs.IsExactType(LogicalAND_MC))
-		{
-		rhs.SilentDiagnoseSelfAssociativeArgs();
-		if (!rhs.DestructiveEvaluateToSameType()) FATAL(RAMFailure);
-		}
+	if (rhs.IsExactType(LogicalAND_MC)) {
+		while (rhs.SilentDiagnoseSelfAssociativeArgs()) if (!rhs.SelfEvalRuleUnrollGeneralizedAssociativity()) FATAL(RAMFailure);
+	}
 
 // Re-enable use of InferenceParameter1
 #undef InferenceParameter1
@@ -681,11 +675,9 @@ bool MetaConnective::XOR_AmplifyThisClause(MetaConnective& rhs) const
 	NewArg->set<LogicalNOR_MC>();
 	rhs.ArgArray[IncomingRHSParam1] = NewArg.release();
 	// immediately normalize AND
-	if (rhs.IsExactType(LogicalAND_MC))
-		{
-		rhs.SilentDiagnoseSelfAssociativeArgs();
-		if (!rhs.DestructiveEvaluateToSameType()) FATAL(RAMFailure);
-		}
+	if (rhs.IsExactType(LogicalAND_MC)) {
+		while(rhs.SilentDiagnoseSelfAssociativeArgs()) if (!rhs.SelfEvalRuleUnrollGeneralizedAssociativity()) FATAL(RAMFailure);
+	}
 
 // Re-enable use of InferenceParameter1
 #undef InferenceParameter1
@@ -919,17 +911,23 @@ bool MetaConnective::DirectCreateANDFactorIdx(size_t Idx, MetaConcept*& dest) co
 	return false;	
 }
 
-bool MetaConnective::CanMakeLHSImplyRHS() const
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/30/2000
-	return (IsExactType(LogicalIFF_MC)) || IsExactType(LogicalXOR_MC) || (IsExactType(LogicalOR_MC) && 2==fast_size());
+ExactType_MC MetaConnective::CanMakeLHSImplyRHS() const
+{	// FORMALLY CORRECT: 2020-06-25
+	switch (const ExactType_MC x = ExactType()) {
+	case LogicalIFF_MC:
+	case LogicalXOR_MC: return x;
+	case LogicalOR_MC: if (2 == fast_size()) return x;
+	default: return Unknown_MC;
+	}
 }
 
 bool MetaConnective::MakesLHSImplyRHS(const MetaConcept& lhs, const MetaConcept& rhs) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/30/2000
-	if 		(IsExactType(LogicalOR_MC) && 2==fast_size())
-		return (   (NonStrictlyImpliesLogicalNOTOf(lhs,*ArgArray[0]) && NonStrictlyImplies(*ArgArray[1],rhs))
-				|| (NonStrictlyImpliesLogicalNOTOf(lhs,*ArgArray[1]) && NonStrictlyImplies(*ArgArray[0],rhs)));
-	else if (IsExactType(LogicalIFF_MC))
+{	// FORMALLY CORRECT: 2020-06-26
+	switch (CanMakeLHSImplyRHS()) {
+	case LogicalOR_MC:
+		return ((NonStrictlyImpliesLogicalNOTOf(lhs, *ArgArray[0]) && NonStrictlyImplies(*ArgArray[1], rhs))
+			|| (NonStrictlyImpliesLogicalNOTOf(lhs, *ArgArray[1]) && NonStrictlyImplies(*ArgArray[0], rhs)));
+	case LogicalIFF_MC:
 		{	// LHS => OR and AND => RHS: OK
 		// NOTE: this code can be spoofed by IFFs containing OR [LHS blinded] or AND [RHS blinded]
 		const_cast<MetaConnective* const>(this)->SetExactTypeV2(LogicalOR_MC);
@@ -944,7 +942,7 @@ bool MetaConnective::MakesLHSImplyRHS(const MetaConcept& lhs, const MetaConcept&
 			return true;
 		return false;
 		}
-	else if (IsExactType(LogicalXOR_MC))
+	case LogicalXOR_MC:
 		{
 		size_t Arg1;
 		// XOR(A,B,C): if D=>A and ~C=>E, then XOR(A,B,C) enables D=>E
@@ -965,8 +963,11 @@ bool MetaConnective::MakesLHSImplyRHS(const MetaConcept& lhs, const MetaConcept&
 			}
 		return false;
 		}
-	FATAL(AlphaMiscallVFunction);
-	return false;
+	default: {
+		assert(0 && "invariant violation");
+		return false;
+	}
+	};
 }
 
 bool MetaConnective::ValidLHSForMakesLHSImplyRHS(const MetaConcept& lhs) const

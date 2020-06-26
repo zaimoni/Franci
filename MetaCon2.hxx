@@ -300,6 +300,7 @@ protected:
 	bool DiagnoseStandardEvalRules() const;
 	bool DiagnoseEqualArgs() const;
 	bool DiagnoseEvaluatableArgs() const;
+	size_t HasSelfAssociativeArg() const;
 	bool DiagnoseSelfAssociativeArgs() const;
 	bool SilentDiagnoseSelfAssociativeArgs() const;
 	void ForceTotalLexicalArgOrder() const;

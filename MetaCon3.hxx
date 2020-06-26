@@ -129,7 +129,7 @@ public:
 	virtual size_t ANDFactorCount() const;
 	virtual bool DirectCreateANDFactorIdx(size_t Idx, MetaConcept*& dest) const;
 	// Interaction clause support
-	virtual bool CanMakeLHSImplyRHS() const;
+	ExactType_MC CanMakeLHSImplyRHS() const override;
 	virtual bool MakesLHSImplyRHS(const MetaConcept& lhs, const MetaConcept& rhs) const;
 	virtual bool ValidLHSForMakesLHSImplyRHS(const MetaConcept& lhs) const;
 	virtual bool ValidRHSForMakesLHSImplyRHS(const MetaConcept& rhs) const;
