@@ -46,6 +46,9 @@ FlatFile::~FlatFile()
 		}
 }
 
+
+void FlatFile::_ForceArgSameImplementation(size_t n) { NARY_FORCEARGSAMEIMPLEMENTATION_BODY; }
+
 size_t FlatFile::LengthOfSelfName() const
 {	//! \todo IMPLEMENT
 	return 0;

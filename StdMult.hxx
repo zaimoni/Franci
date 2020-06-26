@@ -70,6 +70,8 @@ protected:
 	virtual bool _IsOne() const;
 	virtual bool _IsZero() const;
 private:
+	void _ForceArgSameImplementation(size_t n) override;
+
 	void CleanOnes();
 	virtual bool DelegateSelfEvaluate();
 

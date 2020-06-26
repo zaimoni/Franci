@@ -51,6 +51,8 @@ protected:
 	virtual void DiagnoseInferenceRules() const;	// This is *not* the Interface!
 	bool InvokeEqualArgRule() const override { return false; }
 private:
+	void _ForceArgSameImplementation(size_t n) override;
+
 	bool SplitLineIntoCache(char*& Buffer, const char* const Filename);
 	bool ValidateFilename(const char* const Filename) const;
 };

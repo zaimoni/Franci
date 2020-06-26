@@ -371,6 +371,8 @@ bool SeriesOperation::SyntaxOK() const
 	return false;
 }
 
+void SeriesOperation::_ForceArgSameImplementation(size_t n) { NARY_FORCEARGSAMEIMPLEMENTATION_BODY; }
+
 bool SeriesOperation::_IsOne() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/27/2002
 	if (   IsExactType(SeriesMultiplication_MC)

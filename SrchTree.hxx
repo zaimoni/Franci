@@ -71,6 +71,8 @@ public:
 protected:
 	void _forceStdForm() override {}
 private:
+	void _ForceArgSameImplementation(size_t n) override;
+
 	const MetaConcept* FindLeafLikeThis(const MetaConcept& Target) const;
 	bool getBranchedArgArray(SearchTree* const Target, MetaConcept**& NewArray) const;
 	bool FlushUnwantedChildren();

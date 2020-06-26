@@ -151,6 +151,8 @@ bool StdMultiplication::SyntaxOK() const
 	return false;
 }
 
+void StdMultiplication::_ForceArgSameImplementation(size_t n) { NARY_FORCEARGSAMEIMPLEMENTATION_BODY; }
+
 bool StdMultiplication::_IsOne() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/29/2000
 	if (ArgArray.empty()) return true;

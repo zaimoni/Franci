@@ -58,6 +58,8 @@ protected:
 //  functions specific to QuantifiedStatement
 	void AllVarsNotInThisStatement(unsigned long*& VectorBuffer) const;
 private:
+	void _ForceArgSameImplementation(size_t n) override;
+
 	// if these three succeed i.e. return true, ExperimentalArg0 is cleaned
 	bool ScreenVarList(const clock_t EvalTime0, bool DoNotExplain, MetaConcept**& VarList, const char* const FailureMessage, MetaConnective*& ExperimentalArg0);
 	virtual bool DelegateSelfEvaluate();		// same type

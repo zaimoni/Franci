@@ -422,6 +422,8 @@ bool EqualRelation::SyntaxOK() const
 	return true;
 }
 
+void EqualRelation::_ForceArgSameImplementation(size_t n) { NARY_FORCEARGSAMEIMPLEMENTATION_BODY; }
+
 void EqualRelation::SelfLogicalNOT()
 {	// FORMALLY CORRECT: Kenneth Boyd, 8/27/2002
 	// ALLEQUAL <-> NOTALLEQUAL: 

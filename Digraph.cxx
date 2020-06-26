@@ -150,6 +150,8 @@ bool Digraph::SyntaxOK() const
 	return SyntaxOKAux();
 }
 
+void Digraph::_ForceArgSameImplementation(size_t n) { NARY_FORCEARGSAMEIMPLEMENTATION_BODY; }
+
 // text I/O functions
 // NOTE: what is the textual representation of a Digraph?
 // #1: domain, matrix (requires enumerated set, matrix to parse)

@@ -141,6 +141,8 @@ bool StdAddition::SyntaxOK() const
 	return false;
 }
 
+void StdAddition::_ForceArgSameImplementation(size_t n) { NARY_FORCEARGSAMEIMPLEMENTATION_BODY; }
+
 bool StdAddition::_IsZero() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 8/12/2000
 	if (ArgArray.empty()) return true;

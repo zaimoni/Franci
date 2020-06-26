@@ -191,6 +191,7 @@ public:
 	bool FindTwoAntiIdempotentArgsSymmetric() const;
 	// LHS and RHS of TargetRelation, respectively
 	// Arg is pointed to by InferenceParameter1
+	size_t _findArgRelatedToLHS(const MetaConcept& lhs, LowLevelBinaryRelation& TargetRelation) const;
 	bool FindArgRelatedToLHS(const MetaConcept& lhs, LowLevelBinaryRelation& TargetRelation) const;
 	bool FindArgRelatedToLHSViewPoint(size_t ViewPoint, LowLevelBinaryRelation& TargetRelation) const;
 	bool FindArgRelatedToRHSViewPoint(size_t ViewPoint, LowLevelBinaryRelation& TargetRelation) const;
@@ -273,6 +274,7 @@ protected:
 	bool SelfEvalRuleEvaluateArgOneStage();
 	bool SelfEvalStrictlyModify();
 	bool VirtualStrictlyModify();
+	bool ForceArgSameImplementation(size_t n);
 	bool SelfEvalRuleForceArgSameImplementation();
 	bool SelfEvalRuleCleanArg();
 	bool SelfEvalRuleCleanTrailingArg();
@@ -316,6 +318,7 @@ private:
 	void LogicalANDORCondenseORANDArgHyperCubeAuxDim1(size_t i, size_t i2);
 	void LogicalORXORCompactANDArgHyperCubeAuxDim1(size_t Idx, size_t Idx2);
 	void HypercubeArgRelationProcessor(VertexPairSelfProcess CleanupAction);
+	virtual void _ForceArgSameImplementation(size_t n) { SUCCEED_OR_DIE(0 && "unimplemented _ForceArgSameImplementation"); }
 
 	virtual bool DelegateEvaluate(MetaConcept*& dest) {return false;};		// different type
 	virtual bool DelegateSelfEvaluate() {return false;};		// same type
@@ -327,5 +330,12 @@ template<>
 struct is_polymorphic_base<MetaConceptWithArgArray> : public std::true_type {};
 
 }
+
+#define NARY_FORCEARGSAMEIMPLEMENTATION_BODY \
+decltype(this) src = static_cast<decltype(this)>(ArgArray[n]); \
+ArgArray[n] = 0; \
+*this = std::move(*src); \
+delete src
+
 
 #endif

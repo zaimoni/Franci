@@ -806,22 +806,22 @@ bool MetaConceptWithArgArray::SelfEvalRuleEvaluateArgs()
 	return false;
 }
 
+bool MetaConceptWithArgArray::ForceArgSameImplementation(size_t n)
+{
+	assert(size() > n);
+	assert(ArgArray[n]);
+	if (!HasSameImplementationAs(*ArgArray[n])) return false;
+	_ForceArgSameImplementation(n);
+	return true;
+}
+
 bool MetaConceptWithArgArray::SelfEvalRuleForceArgSameImplementation()
 {	// FORMALLY CORRECT: Kenneth Boyd, 2/8/2000
 	// InferenceParameter1 points to arg.
 	assert(size()>InferenceParameter1);
 	assert(ArgArray[InferenceParameter1]);
 	assert(typeid(*this)==typeid(*ArgArray[InferenceParameter1]));
-	MetaConceptWithArgArray* src = static_cast<MetaConceptWithArgArray*>(ArgArray[InferenceParameter1]);
-	ArgArray[InferenceParameter1]=NULL;
-	src->ArgArray.MoveInto(ArgArray);
-	src->InferenceParameterMC.MoveInto(InferenceParameterMC);
-	VFTable1 = src->VFTable1;
-	InferenceParameter1 = src->InferenceParameter1;
-	InferenceParameter2 = src->InferenceParameter2;
-	IdxCurrentEvalRule = src->IdxCurrentEvalRule;
-	IdxCurrentSelfEvalRule = src->IdxCurrentSelfEvalRule;
-	delete src;
+	_ForceArgSameImplementation(InferenceParameter1);
 	assert(SyntaxOK());
 	return true;
 }
@@ -1343,6 +1343,13 @@ bool FindArgRelatedToLHS(const MetaConcept& lhs, LowLevelBinaryRelation& TargetR
 			return true;
 			};
 	return false;
+}
+
+size_t MetaConceptWithArgArray::_findArgRelatedToLHS(const MetaConcept& lhs, LowLevelBinaryRelation& TargetRelation) const
+{
+	size_t scan = ArgArray.size();
+	while (0 < scan) if (TargetRelation(lhs, *ArgArray[--scan])) return scan + 1;
+	return 0;
 }
 
 bool MetaConceptWithArgArray::FindArgRelatedToLHS(const MetaConcept& lhs, LowLevelBinaryRelation& TargetRelation) const

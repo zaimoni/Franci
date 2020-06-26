@@ -149,6 +149,8 @@ protected:
 	virtual void DiagnoseInferenceRules() const;
 	virtual bool InvokeEqualArgRule() const;
 private:
+	void _ForceArgSameImplementation(size_t n) override;
+
 	TVal EdgeTruthValue(const MetaConcept& From, const MetaConcept& To);
 	TVal EdgeTruthValue(size_t From, const MetaConcept& To);
 	TVal EdgeTruthValue(const MetaConcept& From, size_t To);

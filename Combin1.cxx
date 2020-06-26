@@ -137,6 +137,8 @@ bool CombinatorialLike::SyntaxOK() const
 	return false;
 }
 
+void CombinatorialLike::_ForceArgSameImplementation(size_t n) { NARY_FORCEARGSAMEIMPLEMENTATION_BODY; }
+
 // text I/O functions
 size_t
 CombinatorialLike::LengthOfSelfName(void) const

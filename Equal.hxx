@@ -114,6 +114,8 @@ protected:
 	virtual void DiagnoseInferenceRules() const;
 	virtual bool InvokeEqualArgRule() const;
 private:
+	void _ForceArgSameImplementation(size_t n) override;
+
 	size_t array_index() const {return ExactType()-ALLEQUAL_MC;};
 
 	size_t LengthOfSelfNameALLEQUAL() const;

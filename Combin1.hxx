@@ -79,6 +79,8 @@ protected:
 	virtual void DiagnoseInferenceRules() const;
 	virtual bool InvokeEqualArgRule() const;
 private:
+	void _ForceArgSameImplementation(size_t n) override;
+
 	virtual bool DelegateEvaluate(MetaConcept*& dest);		// different type
 	virtual bool DelegateSelfEvaluate();		// same type
 

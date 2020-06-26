@@ -215,6 +215,8 @@ bool ClauseNArg::SyntaxOK() const
 	return false;
 }
 
+void ClauseNArg::_ForceArgSameImplementation(size_t n) { NARY_FORCEARGSAMEIMPLEMENTATION_BODY; }
+
 bool ClauseNArg::SyntaxOKArglistTVal() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 8/14/2000
 	// we accept an argument as legal if:

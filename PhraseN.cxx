@@ -114,6 +114,8 @@ bool PhraseNArg::SyntaxOK() const
 	return false;
 }
 
+void PhraseNArg::_ForceArgSameImplementation(size_t n) { NARY_FORCEARGSAMEIMPLEMENTATION_BODY; }
+
 bool PhraseNArg::SyntaxOKAuxCommaListVarNames() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 11/27/2007
 	return and_range_n([](const MetaConcept* x) { return x->IsPotentialVarName(); }, ArgArray.begin(), fast_size());

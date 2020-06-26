@@ -115,6 +115,8 @@ bool QuantifiedStatement::SyntaxOK() const
 	return true;
 }
 
+void QuantifiedStatement::_ForceArgSameImplementation(size_t n) { NARY_FORCEARGSAMEIMPLEMENTATION_BODY; }
+
 bool QuantifiedStatement::DelegateSelfEvaluate()
 {
 	assert(MetaConceptWithArgArray::MaxSelfEvalRuleIdx_SER<IdxCurrentSelfEvalRule);

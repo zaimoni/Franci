@@ -65,6 +65,8 @@ protected:
 	virtual void DiagnoseInferenceRules() const;
 	virtual bool InvokeEqualArgRule() const;
 private:
+	void _ForceArgSameImplementation(size_t n) override;
+
 	bool SyntaxOKAuxCommaListVarNames() const;
 
 	size_t LengthOfSelfNamePrefixOrPostfixCommaListVarNames(void) const;	// start at 0 to get length

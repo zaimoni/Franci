@@ -191,6 +191,8 @@ protected:
 	virtual bool InvokeEqualArgRule() const;
 
 private:
+	void _ForceArgSameImplementation(size_t n) override;
+
 	void DoSelfDeMorgan();
 	void SetNANDNOR(ExactType_MC NewType);
 

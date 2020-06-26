@@ -67,6 +67,8 @@ protected:
 	virtual bool InvokeEqualArgRule() const;
 	bool DetermineDynamicType() const;
 private:
+	void _ForceArgSameImplementation(size_t n) override;
+
 	void CleanZeros();
 
 	virtual bool DelegateSelfEvaluate();		// same type

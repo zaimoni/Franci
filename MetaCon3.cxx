@@ -407,6 +407,8 @@ bool MetaConnective::SyntaxOK() const
 	return true;
 }
 
+void MetaConnective::_ForceArgSameImplementation(size_t n) { NARY_FORCEARGSAMEIMPLEMENTATION_BODY; }
+
 bool MetaConnective::LogicalANDOrthogonalClause() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 5/9/2000
 	assert(2<=ArgArray.size());
@@ -7436,10 +7438,8 @@ void MetaConceptWithArgArray::LogicalORXORCompactANDArgHyperCubeAuxDim1(size_t i
 	MetaConcept* Arg2 = WorkingGraph->ArgN(i2);
 	WorkingGraph->RemoveVertex(i);
 	WorkingGraph->RemoveVertex(i2);
-	FindArgRelatedToLHS(*Arg1,AreSyntacticallyEqual);
-	size_t TargetIdx1 = InferenceParameter1;
-	FindArgRelatedToLHS(*Arg2,AreSyntacticallyEqual);
-	size_t TargetIdx2 = InferenceParameter1;
+	size_t TargetIdx1 = _findArgRelatedToLHS(*Arg1, AreSyntacticallyEqual);
+	size_t TargetIdx2 = _findArgRelatedToLHS(*Arg2, AreSyntacticallyEqual);
 	SUCCEED_OR_DIE(static_cast<MetaConceptWithArgArray*>(ArgArray[TargetIdx1])->FindTwoRelatedArgs(*static_cast<MetaConceptWithArgArray*>(ArgArray[TargetIdx2]),IsAntiIdempotentTo));
 
 	LOG("Compacting");

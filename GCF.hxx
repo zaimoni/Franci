@@ -40,6 +40,8 @@ public:
 	virtual size_t LengthOfSelfName() const;
 	bool ThisIsAnnihilatorKey(size_t& ArgIdx, signed short& SelfEvalRule, unsigned short& EvalRule) const;
 protected:
+	void _ForceArgSameImplementation(size_t n) override;
+
 	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
 	void _forceStdForm() override;
 

@@ -62,6 +62,8 @@ bool SearchTree::SyntaxOK() const
 	return true;
 }
 
+void SearchTree::_ForceArgSameImplementation(size_t n) { NARY_FORCEARGSAMEIMPLEMENTATION_BODY; }
+
 // text I/O functions
 //! \todo move SearchTree::LengthOfSelfName, SearchTree::ConstructSelfNameAux to Lenname.cxx when ready
 size_t SearchTree::LengthOfSelfName() const

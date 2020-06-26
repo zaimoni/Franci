@@ -52,6 +52,8 @@ void GCF::_forceStdForm()
 		};
 }
 
+void GCF::_ForceArgSameImplementation(size_t n) { NARY_FORCEARGSAMEIMPLEMENTATION_BODY; }
+
 bool GCF::SyntaxOK() const
 {	//! \todo FIX when more interesting rings come along (all rings where primes are defined)
 	if (SyntaxOKAux())	// NOTE: this routine catches NULL entries
