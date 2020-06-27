@@ -7357,9 +7357,8 @@ bool MetaConceptWithArgArray::ReplaceThisArgWithLeadArg()
 	return SelfEvalCleanEnd();
 }
 
-void
-MetaConceptWithArgArray::LogicalANDORCondenseORANDArgHyperCubeAuxDim1(size_t Idx, size_t Idx2)
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/17/2004
+void MetaConceptWithArgArray::LogicalANDORCondenseORANDArgHyperCubeAuxDim1(size_t Idx, size_t Idx2)
+{	// FORMALLY CORRECT: 2020-06-27
 	// This may be called for AND, OR, or XOR
 	// AND wants to merge OR clauses.  The merged arg is 2-ary AND.
 	// OR wants to merge AND clauses.  The merged arg is 2-ary OR
@@ -7370,64 +7369,39 @@ MetaConceptWithArgArray::LogicalANDORCondenseORANDArgHyperCubeAuxDim1(size_t Idx
 	MetaConcept* Arg2 = WorkingGraph->ArgN(Idx2);
 	WorkingGraph->RemoveVertex(Idx);
 	WorkingGraph->RemoveVertex(Idx2);
-	FindArgRelatedToLHS(*Arg1,AreSyntacticallyEqual);
-	size_t TargetIdx1 = InferenceParameter1;
-	FindArgRelatedToLHS(*Arg2,AreSyntacticallyEqual);
-	size_t TargetIdx2 = InferenceParameter1;
-	VERIFY(!NAryAllArgsEqualExceptOne(*ArgArray[TargetIdx1],*ArgArray[TargetIdx2]),AlphaCallAssumption);
-
-	MetaConcept** NewArgArray = _new_buffer<MetaConcept*>(2);
-	SUCCEED_OR_DIE(NewArgArray);
+	size_t TargetIdx1 = _findArgRelatedToLHS(*Arg1, AreSyntacticallyEqual)-1;
+	size_t TargetIdx2 = _findArgRelatedToLHS(*Arg2, AreSyntacticallyEqual)-1;
+	MetaConceptWithArgArray& u_target = *static_cast<MetaConceptWithArgArray*>(ArgArray[TargetIdx1]);
+	MetaConceptWithArgArray& l_target = *static_cast<MetaConceptWithArgArray*>(ArgArray[TargetIdx2]);
+	VERIFY(!NAryAllArgsEqualExceptOne(u_target, l_target),AlphaCallAssumption);
 
 	LOG("Condensing");
-	LOG(*ArgArray[TargetIdx1]);
-	LOG(*ArgArray[TargetIdx2]);
-	if 		(IsExactType(LogicalAND_MC))
-		LOG("in AND-clause to");
-	else if (IsExactType(LogicalOR_MC))
+	LOG(u_target);
+	LOG(l_target);
+	MetaConnectiveModes dest_type = AND_MCM;
+	switch (ExactType()) {
+	case LogicalAND_MC: LOG("in AND-clause to"); break;
+	case LogicalOR_MC:
 		LOG("in OR-clause to");
-	else if (IsExactType(LogicalXOR_MC))
+		dest_type = OR_MCM;
+		break;
+	case LogicalXOR_MC:
 		LOG("in XOR-clause to");
-	else
-		UnconditionalCallAssumptionFailure();
-	// ....
-	static_cast<MetaConceptWithArgArray*>(ArgArray[TargetIdx1])->FastTransferOutAndNULL(static_cast<MetaConceptWithArgArray*>(ArgArray[TargetIdx1])->InferenceParameter1,NewArgArray[0]);
-	static_cast<MetaConceptWithArgArray*>(ArgArray[TargetIdx2])->FastTransferOutAndNULL(static_cast<MetaConceptWithArgArray*>(ArgArray[TargetIdx2])->InferenceParameter1,NewArgArray[1]);
-	MetaConcept* TempArg = NULL;
-	try	{
-		if 		(IsExactType(LogicalAND_MC))
-			TempArg = new MetaConnective(NewArgArray,AND_MCM);
-		else if (IsExactType(LogicalOR_MC))
-			TempArg = new MetaConnective(NewArgArray,OR_MCM);
-		else if (IsExactType(LogicalXOR_MC))
-			{
-			NewArgArray[1]->SelfLogicalNOT();
-			TempArg = new MetaConnective(NewArgArray,IFF_MCM);
-			}
-		}
-	catch(const bad_alloc&)
-		{
-		UnconditionalRAMFailure();
-		}
-	static_cast<MetaConceptWithArgArray*>(ArgArray[TargetIdx1])->TransferInAndOverwriteRaw(static_cast<MetaConceptWithArgArray*>(ArgArray[TargetIdx1])->InferenceParameter1,TempArg);
-	LOG(*ArgArray[TargetIdx1]);
+		dest_type = IFF_MCM;
+		break;
+	default: SUCCEED_OR_DIE(0 && "invalid condensing host");
+	}
 
-	if 		(2<fast_size())
-		DeleteIdx(TargetIdx2);
-	else // if (HasSameImplementationAs(*ArgArray[TargetIdx1]))	// certain
-		{
-		MetaConceptWithArgArray* Tmp = static_cast<MetaConceptWithArgArray*>(ArgArray[TargetIdx1]);
-		ArgArray[TargetIdx1] = NULL;
-		SetExactType(Tmp->ExactType());
+	zaimoni::autovalarray_ptr_throws<MetaConcept*> NewArgArray(2);
 
-		ArgArray = Tmp->ArgArray;
+	u_target.FastTransferOutAndNULL(u_target.InferenceParameter1,NewArgArray[0]);
+	l_target.FastTransferOutAndNULL(l_target.InferenceParameter1,NewArgArray[1]);
+	if (IFF_MCM == dest_type) NewArgArray[1]->SelfLogicalNOT();
+	u_target.TransferInAndOverwriteRaw(u_target.InferenceParameter1, new MetaConnective(NewArgArray, dest_type));
+	LOG(u_target);
 
-		InferenceParameterMC = Tmp->InferenceParameterMC;
-		InferenceParameter1 = Tmp->InferenceParameter1;
-		InferenceParameter2 = Tmp->InferenceParameter2;
-		
-		DELETE(Tmp);
-		}
+	if (2 < fast_size()) DeleteIdx(TargetIdx2);
+	else _ForceArgSameImplementation(TargetIdx1);	// historically assumed to be certain
 }
 
 void MetaConceptWithArgArray::LogicalORXORCompactANDArgHyperCubeAuxDim1(size_t i, size_t i2)

@@ -148,9 +148,9 @@ public:
 		return ArgArray.InsertSlotAt(i,__default);
 	}
 
-	void TransferOutAndNULL(size_t i, MetaConcept*& dest);		// NOTE: dest is simply overwritten
-	void CleanTransferOutAndNULL(size_t i, MetaConcept*& dest);
-	void TransferInAndOverwriteRaw(size_t i, MetaConcept* src);
+	void TransferOutAndNULL(size_t i, MetaConcept*& dest) noexcept;		// NOTE: dest is simply overwritten
+	void CleanTransferOutAndNULL(size_t i, MetaConcept*& dest) noexcept;
+	void TransferInAndOverwriteRaw(size_t i, MetaConcept* src) noexcept;
 	template <class T> void TransferInAndOverwrite(size_t i, _meta_auto_ptr<T>& src)
 		{	// FORMALLY CORRECT: Kenneth Boyd, 11/15/1999
 		assert(size()>i);

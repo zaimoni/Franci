@@ -351,24 +351,24 @@ bool MetaConceptWithArgArray::InsertNSlotsAtV2(size_t n, size_t i)
 	return ArgArray.InsertNSlotsAt(n,i);
 }
 
-void MetaConceptWithArgArray::TransferOutAndNULL(size_t i, MetaConcept*& dest)
+void MetaConceptWithArgArray::TransferOutAndNULL(size_t i, MetaConcept*& dest) noexcept
 {	// FORMALLY CORRECT: Kenneth Boyd, 11/15/1999
 	assert(size()>i);
 	dest = ArgArray[i];
-	ArgArray[i] = NULL;
+	ArgArray[i] = 0;
 }
 
-void MetaConceptWithArgArray::CleanTransferOutAndNULL(size_t i, MetaConcept*& dest)
+void MetaConceptWithArgArray::CleanTransferOutAndNULL(size_t i, MetaConcept*& dest) noexcept
 {	// FORMALLY CORRECT: Kenneth Boyd, 11/15/1999
 	assert(size()>i);
 	delete dest;
 	dest = ArgArray[i];
-	ArgArray[i] = NULL;
+	ArgArray[i] = 0;
 }
 
 // NOTE: semantics here are probably required by LexParse [which uses a pointer directly
 // created by new for the 2nd argument]
-void MetaConceptWithArgArray::TransferInAndOverwriteRaw(size_t i, MetaConcept* src)
+void MetaConceptWithArgArray::TransferInAndOverwriteRaw(size_t i, MetaConcept* src) noexcept
 {	// FORMALLY CORRECT: Kenneth Boyd, 11/15/1999
 	assert(size()>i);
 	delete ArgArray[i];
