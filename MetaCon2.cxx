@@ -1472,43 +1472,37 @@ bool MetaConceptWithArgArray::FindArgTypeMatch(ExactType_MC Target, const Abstra
 	return false;
 }
 
-
 bool MetaConceptWithArgArray::ArgListHasInjectionIntoRHSArgListRelatedThisWay(const MetaConceptWithArgArray& rhs, LowLevelBinaryRelation& TargetRelation) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 1/23/2000
-	// Do this by:
+{	// Do this by:
 	// 1: matching LHS-arg to a candidate RHS-arg.
 	// 2: verifying that this LHS-arg is the only LHS-arg matching that RHS-arg.
 	// 3: verifying that this LHS-arg only matches this RHS-arg.
 	// this algorithm does not use dynamic RAM allocation.
-	if (   !ArgArray.empty()
-	    && !rhs.ArgArray.empty()
-		&& fast_size()<=rhs.fast_size())
+	if (!ArgArray.empty() && !rhs.ArgArray.empty() && fast_size()<=rhs.fast_size())
 		{
 		TruthValue TmpArg(true);
 		size_t LHSArgIdx = 0;
 		do	{
+			MetaConcept*& l_target = rhs.ArgArray[LHSArgIdx];
 			// 1: matching LHS-arg to a candidate RHS-arg.
-			if (!rhs.FindArgRelatedToLHS(*ArgArray[LHSArgIdx],TargetRelation))
-				return false;
-			size_t RHSArgIdx = rhs.InferenceParameter1;
+			size_t scan = rhs._findArgRelatedToLHS(*l_target, TargetRelation);
+			if (0 >= scan) return false;
+			MetaConcept*& target = rhs.ArgArray[scan - 1];
 			// 2: verifying that this LHS-arg is the only LHS-arg matching that RHS-arg.
-			MetaConcept* Tmp = ArgArray[LHSArgIdx];
-			ArgArray[LHSArgIdx] = &TmpArg;
-			if (FindArgRelatedToRHS(*rhs.ArgArray[RHSArgIdx],TargetRelation))
+			MetaConcept* Tmp = l_target;
+			l_target = &TmpArg;
+			if (FindArgRelatedToRHS(*target,TargetRelation))
 				{
-				ArgArray[LHSArgIdx] = Tmp;
+				l_target = Tmp;
 				return false;
 				};
-			ArgArray[LHSArgIdx] = Tmp;
+			l_target = Tmp;
 			// 3: verifying that this LHS-arg only matches this RHS-arg.
-			Tmp = rhs.ArgArray[RHSArgIdx];
-			rhs.ArgArray[RHSArgIdx] = &TmpArg;
-			if (rhs.FindArgRelatedToLHS(*ArgArray[LHSArgIdx],TargetRelation))
-				{
-				rhs.ArgArray[RHSArgIdx] = Tmp;
-				return false;
-				};
-			rhs.ArgArray[RHSArgIdx] = Tmp;
+			Tmp = target;
+			target = &TmpArg;
+			scan = rhs._findArgRelatedToLHS(*l_target, TargetRelation);
+			target = Tmp;
+			if (scan) return false;
 			}
 		while(fast_size()> ++LHSArgIdx);
 		return true;
