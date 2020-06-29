@@ -2778,7 +2778,7 @@ bool MetaConnective::StrictlyImplies_OR(const MetaConcept& rhs) const
 }
 
 bool MetaConnective::StrictlyImplies_IFF(const MetaConcept& rhs) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 9/9/2003
+{	// FORMALLY CORRECT: 2020-06-28
 // IFF(A1..An) =>
 //	IFF: all RHS IFF-args are == LHS IFF args, or all RHS IFF-args are anti-idempotent to LHS IFF-args
 //	OR: 1 OR-arg == to IFF-arg, and 1 OR-arg antiidempotent to IFF-arg
@@ -2791,17 +2791,15 @@ bool MetaConnective::StrictlyImplies_IFF(const MetaConcept& rhs) const
 		const MetaConnective& VR_rhs = static_cast<const MetaConnective&>(rhs);
 
 		size_t i = VR_rhs.fast_size();
-		if (FindArgRelatedToLHS(*VR_rhs.ArgArray[--i],NonStrictlyImplies))
+		if (_findArgRelatedToLHS(*VR_rhs.ArgArray[--i],NonStrictlyImplies))
 			{
-			do	if (!FindArgRelatedToLHS(*VR_rhs.ArgArray[--i],NonStrictlyImplies))
-					return false;
+			do	if (!_findArgRelatedToLHS(*VR_rhs.ArgArray[--i],NonStrictlyImplies)) return false;
 			while(0<i);
 			return *this!=rhs;
 			}
-		else if (FindArgRelatedToLHS(*VR_rhs.ArgArray[i],NonStrictlyImpliesLogicalNOTOf))
+		else if (_findArgRelatedToLHS(*VR_rhs.ArgArray[i],NonStrictlyImpliesLogicalNOTOf))
 			{
-			do	if (!FindArgRelatedToLHS(*VR_rhs.ArgArray[--i],NonStrictlyImpliesLogicalNOTOf))
-					return false;
+			do	if (!_findArgRelatedToLHS(*VR_rhs.ArgArray[--i],NonStrictlyImpliesLogicalNOTOf)) return false;
 			while(0<i);
 			return *this!=rhs;
 			}
