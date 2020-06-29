@@ -4205,7 +4205,7 @@ bool MetaConnective::Ary2IFFToOR()
 
 // IFF(AND(A,B),IFF(A,B)) |-> OR(A,B)
 bool MetaConnective::Ary2IFFToORV2()
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/17/2004
+{	// FORMALLY CORRECT: 2020-06-28
 	// InferenceParameter1 points to AND(A,B)
 	// InferenceParameter2 points to IFF(A,B)
 	// this rewrites to OR(A,B)
@@ -4221,11 +4221,7 @@ bool MetaConnective::Ary2IFFToORV2()
 
 	LOG("Converting");
 	LOG(*this);
-	{
-	MetaConcept** tmp = NULL;
-	static_cast<MetaConnective*>(ArgArray[0])->OverwriteAndNULL(tmp);
-	ArgArray = tmp;
-	}
+	_ForceArgSameImplementation(0);
 	SetExactTypeV2(LogicalOR_MC);
 	LOG("to");
 	LOG(*this);
@@ -4234,7 +4230,7 @@ bool MetaConnective::Ary2IFFToORV2()
 }
 
 bool MetaConnective::Ary2IFFToORV3()
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/17/2004
+{	// FORMALLY CORRECT: 2020-06-28
 	// V1:
 	// InferenceParameter1 points to AND(A,B)
 	// InferenceParameter2 points to AND(A,B,C)
@@ -4268,44 +4264,38 @@ bool MetaConnective::Ary2IFFToORV3()
 	LOG("Converting");
 	LOG(*this);
 
-	if (static_cast<MetaConceptWithArgArray*>(ArgArray[InferenceParameter1])->fast_size()+1==static_cast<MetaConceptWithArgArray*>(ArgArray[InferenceParameter2])->fast_size())
+	MetaConnective& anchor = *static_cast<MetaConnective*>(ArgArray[InferenceParameter1]);
+	MetaConnective& pivot = *static_cast<MetaConnective*>(ArgArray[InferenceParameter2]);
+	if (const size_t InfParam1Arity = anchor.fast_size(); InfParam1Arity + 1 == pivot.fast_size())
 		{	// exactly one arg longer: can recycle InferenceParameter2 ArgArray
-		const size_t InfParam1Arity = static_cast<MetaConnective*>(ArgArray[InferenceParameter1])->fast_size();
-		if (ArgArray[InferenceParameter2]->IsExactType(LogicalAND_MC))
+		if (pivot.IsExactType(LogicalAND_MC))
 			{
 			size_t i = 0;
-			do	if (*static_cast<MetaConnective*>(ArgArray[InferenceParameter1])->ArgArray[i]==*static_cast<MetaConnective*>(ArgArray[InferenceParameter2])->ArgArray[i])
-					{
-					static_cast<MetaConnective*>(ArgArray[InferenceParameter2])->ArgArray[i]->SelfLogicalNOT();
-					}
-				else{
-					while(++i<=InfParam1Arity)	// Works by precondition for this block
-						static_cast<MetaConnective*>(ArgArray[InferenceParameter2])->ArgArray[i]->SelfLogicalNOT();	
-					}
+			do	if (*anchor.ArgArray[i] == *pivot.ArgArray[i]) {
+					pivot.ArgArray[i]->SelfLogicalNOT();
+				} else {
+					while(++i<=InfParam1Arity) pivot.ArgArray[i]->SelfLogicalNOT(); // Works by precondition for this block
+				}
 			while(++i<InfParam1Arity);
 			}
 		else{
 			size_t i = 0;
-			while(*static_cast<MetaConnective*>(ArgArray[InferenceParameter1])->ArgArray[i]==*static_cast<MetaConnective*>(ArgArray[InferenceParameter2])->ArgArray[i] && ++i<InfParam1Arity);
-			static_cast<MetaConnective*>(ArgArray[InferenceParameter2])->ArgArray[i]->SelfLogicalNOT();
+			while(*anchor.ArgArray[i] == *pivot.ArgArray[i] && ++i < InfParam1Arity);
+			pivot.ArgArray[i]->SelfLogicalNOT();
 			}
-		{
-		MetaConcept** tmp = NULL;
-		static_cast<MetaConnective*>(ArgArray[InferenceParameter2])->OverwriteAndNULL(tmp);
-		ArgArray = tmp;
-		}
+		_ForceArgSameImplementation(InferenceParameter2);
 		}
 	else{	// cannot recycle InferenceParameter2 argarray.
-		if (!static_cast<MetaConnective*>(ArgArray[InferenceParameter1])->InsertSlotAt(0,NULL))
-			return false;
+		if (!anchor.InsertSlotAt(0, nullptr)) return false;
 
-		size_t i = static_cast<MetaConnective*>(ArgArray[InferenceParameter1])->fast_size();
+		size_t i = anchor.fast_size();
 		// FindArgRelatedToLHS works "top-down"; this order should minimize linear search time.
 		//! \todo OPTIMIZE: a dedicated implementation would be O(n), rather than O(n^2), 
 		// for == tests.
 		do	{
-			SUCCEED_OR_DIE(static_cast<MetaConnective*>(ArgArray[InferenceParameter2])->FindArgRelatedToLHS(*static_cast<MetaConnective*>(ArgArray[InferenceParameter1])->ArgArray[--i],AreSyntacticallyEqual));
-			static_cast<MetaConnective*>(ArgArray[InferenceParameter2])->DeleteIdx(static_cast<MetaConnective*>(ArgArray[InferenceParameter2])->InferenceParameter1);
+			size_t scan = pivot._findArgRelatedToLHS(*anchor.ArgArray[--i], AreSyntacticallyEqual);
+			SUCCEED_OR_DIE(scan && "did not find argument required for subvector relation");
+			pivot.DeleteIdx(scan - 1);
 			}
 		while(1<i);
 
@@ -4313,17 +4303,12 @@ bool MetaConnective::Ary2IFFToORV3()
 		// this is thought to be dictated by RAM conservatism [we need to know if the 
 		// allocation will work before we start to discard arguments].  O(n) redundancy in 
 		// SelfLogicalNOT().
-		ArgArray[InferenceParameter2]->SelfLogicalNOT();
-		static_cast<MetaConnective*>(ArgArray[InferenceParameter1])->TransferInAndOverwriteRaw(0,ArgArray[InferenceParameter2]);
+		pivot.SelfLogicalNOT();
+		anchor.TransferInAndOverwriteRaw(0,ArgArray[InferenceParameter2]);
 		ArgArray[InferenceParameter2]=NULL;
-		if (ArgArray[InferenceParameter1]->IsExactType(LogicalAND_MC))
-			ArgArray[InferenceParameter1]->SelfLogicalNOT();
+		if (anchor.IsExactType(LogicalAND_MC)) anchor.SelfLogicalNOT();
 
-		{
-		MetaConcept** tmp = NULL;
-		static_cast<MetaConnective*>(ArgArray[InferenceParameter1])->OverwriteAndNULL(tmp);
-		ArgArray = tmp;
-		}
+		_ForceArgSameImplementation(InferenceParameter1);
 		};
 
 	SetExactTypeV2(LogicalOR_MC);
