@@ -924,7 +924,7 @@ ExactType_MC MetaConnective::CanMakeLHSImplyRHS() const
 }
 
 bool MetaConnective::MakesLHSImplyRHS(const MetaConcept& lhs, const MetaConcept& rhs) const
-{	// FORMALLY CORRECT: 2020-06-29
+{	// FORMALLY CORRECT: 2020-06-30
 	switch (CanMakeLHSImplyRHS()) {
 	case LogicalOR_MC:
 		return ((NonStrictlyImpliesLogicalNOTOf(lhs, *ArgArray[0]) && NonStrictlyImplies(*ArgArray[1], rhs))
@@ -933,16 +933,18 @@ bool MetaConnective::MakesLHSImplyRHS(const MetaConcept& lhs, const MetaConcept&
 		{	// LHS => OR and AND => RHS: OK
 		// NOTE: this code can be spoofed by IFFs containing OR [LHS blinded] or AND [RHS blinded]
 		// CPU cost of full-visibility version is unacceptable
-		const_cast<MetaConnective* const>(this)->SetExactTypeV2(LogicalOR_MC);
-		const bool LHSImpliesORVariantOfIFF = NonStrictlyImplies(lhs,*this);
-		const bool NORVariantOfIFFImpliesRHS = LogicalNOTOfNonStrictlyImplies(*this,rhs);
-		const_cast<MetaConnective* const>(this)->SetExactTypeV2(LogicalAND_MC);
-		const bool ANDVariantOfIFFImpliesRHS = NonStrictlyImplies(*this,rhs);
-		const bool LHSImpliesNANDVariantOfIFF = NonStrictlyImpliesLogicalNOTOf(lhs,*this);
-		const_cast<MetaConnective* const>(this)->SetExactTypeV2(LogicalIFF_MC);
-		if (   (LHSImpliesORVariantOfIFF && ANDVariantOfIFFImpliesRHS)
-			|| (NORVariantOfIFFImpliesRHS && LHSImpliesNANDVariantOfIFF))
-			return true;
+		if (const size_t scan = _findArgRelatedToLHS(lhs, NonStrictlyImplies)) {
+			if (FindArgRelatedToRHS(rhs, NonStrictlyImplies, [&](const MetaConcept& l) {
+				return l != *ArgArray[scan - 1];
+				}))
+				return true;
+		}
+		if (const size_t scan = _findArgRelatedToLHS(lhs, NonStrictlyImpliesLogicalNOTOf)) {
+			if (FindArgRelatedToRHS(rhs, NonStrictlyImpliesLogicalNOTOf, [&](const MetaConcept& l) {
+				return l != *ArgArray[scan - 1];
+				}))
+				return true;
+		}
 		return false;
 		}
 	case LogicalXOR_MC:
