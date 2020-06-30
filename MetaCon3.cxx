@@ -425,20 +425,23 @@ bool MetaConnective::WantToBeAmplified() const
 	return IsExactType(LogicalAND_MC) || IsExactType(LogicalOR_MC);
 }
 
-bool MetaConnective::CanAmplifyClause() const
+ExactType_MC MetaConnective::CanAmplifyClause() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 7/22/2003
-	return IsExactType(LogicalIFF_MC) || IsExactType(LogicalXOR_MC)
-		|| (IsExactType(LogicalOR_MC) && 2==fast_size());
+	switch (ExactType())
+	{
+	case LogicalIFF_MC: return LogicalIFF_MC;
+	case LogicalXOR_MC: return LogicalXOR_MC;
+	case LogicalOR_MC: if (2 == fast_size()) return LogicalOR_MC;
+	default: return Unknown_MC;
+	}
 }
 
 bool MetaConnective::Prefilter_CanAmplifyThisClause(const MetaConcept& rhs) const
 {
-	if (!rhs.IsExactType(LogicalAND_MC) && !rhs.IsExactType(LogicalOR_MC))
-		return false;
+	if (!rhs.WantToBeAmplified()) return false;
+	SUCCEED_OR_DIE(HasSameImplementationAs(rhs)); // 2020-06-30 historical limitation
 	if (NonStrictlyImplies(rhs,*this)) return false;
-	if (   rhs.IsExactType(LogicalOR_MC)
-		&& FindArgRelatedToLHS(rhs,::NonStrictlyImplies))
-		return false;
+	if (rhs.IsExactType(LogicalOR_MC) && _findArgRelatedToLHS(rhs,NonStrictlyImplies)) return false;
 #ifdef AMPLIFY_TAUTOLOGIES
 	// checks for tautology base: we don't want IFF amplifying a tautology
 	if (   rhs.IsExactType(LogicalOR_MC)
@@ -473,21 +476,26 @@ bool MetaConnective::XOR_CanAmplifyThisClause(const MetaConnective& rhs) const
 }
 
 bool MetaConnective::CanAmplifyThisClause(const MetaConcept& rhs) const
-{	// FORMALLY CORRECT: 2020-05-15
-	if (!Prefilter_CanAmplifyThisClause(rhs)) return false;
-	
-	const MetaConnective& VR_rhs = static_cast<const MetaConnective&>(rhs);
-	// SEMANTIC ERROR: FindArgRelatedToLHS doesn't work.
-	// Want FindTwoRelatedArgs for N-ary types
-	if (IsExactType(LogicalOR_MC))
+{	// FORMALLY CORRECT: 2020-06-30
+	if (const auto type = CanAmplifyClause()) {
+		if (!Prefilter_CanAmplifyThisClause(rhs)) return false;
+
+		const MetaConnective& VR_rhs = static_cast<const MetaConnective&>(rhs);
+		// SEMANTIC ERROR: FindArgRelatedToLHS doesn't work.
+		// Want FindTwoRelatedArgs for N-ary types
+		switch (type)
 		{
-		if (2==fast_size()) return OR_CanAmplifyThisClause(VR_rhs);
-		}
-	else if (IsExactType(LogicalIFF_MC))
-		return VR_rhs.FindTwoRelatedArgs(*this, NonStrictlyImpliesThisOrLogicalNOTOf, [&](const MetaConcept& l) {
+		case LogicalOR_MC: return OR_CanAmplifyThisClause(VR_rhs);
+		case LogicalIFF_MC: return VR_rhs.FindTwoRelatedArgs(*this, NonStrictlyImpliesThisOrLogicalNOTOf, [&](const MetaConcept& l) {
 			return !NonStrictlyImplies(l, *this);
 		});
-	else if (IsExactType(LogicalXOR_MC)) return XOR_CanAmplifyThisClause(VR_rhs);
+		case LogicalXOR_MC: return XOR_CanAmplifyThisClause(VR_rhs);
+		default: {
+			assert(0 && "invariant violation");
+			return false;
+		}
+		}
+	}
 	return false;
 }
 
@@ -688,32 +696,22 @@ bool MetaConnective::XOR_AmplifyThisClause(MetaConnective& rhs) const
 }
 
 bool MetaConnective::AmplifyThisClause(MetaConcept*& rhs) const
-{	// FORMALLY CORRECT: 10/17/2004
+{	// FORMALLY CORRECT: 2020-06-30
 	assert(rhs);
 	assert(typeid(MetaConnective)==typeid(*rhs));
 	MetaConnective& VR_rhs = *static_cast<MetaConnective*>(rhs);
 	// General: must recurse AND, OR finds as appropriate
-	if (IsExactType(LogicalOR_MC) && 2==fast_size())
-		{
-		if (VR_rhs.FindTwoRelatedArgs(*this,NonStrictlyImpliesLogicalNOTOf))
-			return OR_AmplifyThisClause(VR_rhs);
+	switch (CanAmplifyClause()) {
+	case LogicalOR_MC: return VR_rhs.FindTwoRelatedArgs(*this, NonStrictlyImpliesLogicalNOTOf) && OR_AmplifyThisClause(VR_rhs);
+	case LogicalIFF_MC:
+		if (VR_rhs.FindTwoRelatedArgs(*this, NonStrictlyImpliesLogicalNOTOf)) return IFF_AmplifyThisClauseV1(VR_rhs);
+		return VR_rhs.FindTwoRelatedArgs(*this, NonStrictlyImplies) && IFF_AmplifyThisClauseV2(VR_rhs);
+	case LogicalXOR_MC: return VR_rhs.FindTwoRelatedArgs(*this, NonStrictlyImplies) && XOR_AmplifyThisClause(VR_rhs);
+	default: {
+		assert(0 && "invariant violation");
 		return false;
-		}
-	if (IsExactType(LogicalIFF_MC))
-		{
-		if (VR_rhs.FindTwoRelatedArgs(*this,NonStrictlyImpliesLogicalNOTOf))
-			return IFF_AmplifyThisClauseV1(VR_rhs);
-		if (VR_rhs.FindTwoRelatedArgs(*this,NonStrictlyImplies))
-			return IFF_AmplifyThisClauseV2(VR_rhs);
-		return false;
-		}
-	if (IsExactType(LogicalXOR_MC))
-		{
-		if (VR_rhs.FindTwoRelatedArgs(*this,NonStrictlyImplies))
-			return XOR_AmplifyThisClause(VR_rhs);
-		return false;
-		}
-	return false;
+	}
+	}
 }
 
 

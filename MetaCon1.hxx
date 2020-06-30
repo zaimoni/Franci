@@ -325,7 +325,7 @@ public:
 	virtual bool LogicalANDOrthogonalClause() const {return false;};
 	// Logical Amplification support
 	virtual bool WantToBeAmplified() const {return false;};
-	virtual bool CanAmplifyClause() const {return false;};
+	virtual ExactType_MC CanAmplifyClause() const { return Unknown_MC; }
 	virtual bool CanAmplifyThisClause(const MetaConcept& rhs) const;
 	virtual bool AmplifyThisClause(MetaConcept*& rhs) const;
 	// Basis clause support

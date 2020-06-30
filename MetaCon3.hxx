@@ -119,7 +119,7 @@ public:
 	bool LogicalANDOrthogonalClause() const override;
 	// Logical Amplification support
 	bool WantToBeAmplified() const override;
-	bool CanAmplifyClause() const override;
+	ExactType_MC CanAmplifyClause() const override;
 	bool CanAmplifyThisClause(const MetaConcept& rhs) const override;
 	bool AmplifyThisClause(MetaConcept*& rhs) const override;
 	// Basis clause support
