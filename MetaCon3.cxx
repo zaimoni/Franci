@@ -924,7 +924,7 @@ ExactType_MC MetaConnective::CanMakeLHSImplyRHS() const
 }
 
 bool MetaConnective::MakesLHSImplyRHS(const MetaConcept& lhs, const MetaConcept& rhs) const
-{	// FORMALLY CORRECT: 2020-06-26
+{	// FORMALLY CORRECT: 2020-06-29
 	switch (CanMakeLHSImplyRHS()) {
 	case LogicalOR_MC:
 		return ((NonStrictlyImpliesLogicalNOTOf(lhs, *ArgArray[0]) && NonStrictlyImplies(*ArgArray[1], rhs))
@@ -947,21 +947,20 @@ bool MetaConnective::MakesLHSImplyRHS(const MetaConcept& lhs, const MetaConcept&
 		}
 	case LogicalXOR_MC:
 		{
-		size_t Arg1;
 		// XOR(A,B,C): if D=>A and ~C=>E, then XOR(A,B,C) enables D=>E
-		if (   FindArgRelatedToLHS(lhs,NonStrictlyImplies)
-			&& (Arg1 = InferenceParameter1, FindArgRelatedToRHS(rhs, LogicalNOTOfNonStrictlyImplies, [&](const MetaConcept& l) {
-					return l != *ArgArray[Arg1];
-				})))
-			return true;
+		if (const size_t scan = _findArgRelatedToLHS(lhs, NonStrictlyImplies)) {
+			if (FindArgRelatedToRHS(rhs, LogicalNOTOfNonStrictlyImplies, [&](const MetaConcept& l) {
+					return l != *ArgArray[scan -1];
+				}))
+				return true;
+		}
 		// XOR(A,B,C): if D=>~B, D=>~C, and A=>E, then XOR(A,B,C) enables D=>E
 		if (FindArgRelatedToRHS(rhs,NonStrictlyImplies))
 			{
+			const size_t Arg1 = InferenceParameter1;
 			size_t i = fast_size();
-			do	if (   InferenceParameter1!= --i
-					&& !NonStrictlyImpliesLogicalNOTOf(lhs,*ArgArray[i]))
-					return false;
-			while(0<i);
+			do	if (Arg1 != --i && !NonStrictlyImpliesLogicalNOTOf(lhs, *ArgArray[i])) return false;
+			while (0 < i);
 			return true;
 			}
 		return false;
@@ -974,17 +973,16 @@ bool MetaConnective::MakesLHSImplyRHS(const MetaConcept& lhs, const MetaConcept&
 }
 
 bool MetaConnective::ValidLHSForMakesLHSImplyRHS(const MetaConcept& lhs) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/30/2000
-	if 		(IsExactType(LogicalOR_MC) && 2==fast_size())
-		return (   NonStrictlyImpliesLogicalNOTOf(lhs,*ArgArray[0])
-				|| NonStrictlyImpliesLogicalNOTOf(lhs,*ArgArray[1]));
-	else if (IsExactType(LogicalIFF_MC))
-		return (   FindArgRelatedToLHS(lhs,NonStrictlyImplies)
-				|| FindArgRelatedToLHS(lhs,LogicalNOTOfNonStrictlyImplies));
-	else if (IsExactType(LogicalXOR_MC))
-		return FindArgRelatedToLHS(lhs,NonStrictlyImplies);
-	FATAL(AlphaMiscallVFunction);
-	return false;
+{	// FORMALLY CORRECT: 2020-06-29
+	switch (CanMakeLHSImplyRHS()) {
+	case LogicalOR_MC: return FindArgRelatedToLHS(lhs, NonStrictlyImpliesLogicalNOTOf);
+	case LogicalIFF_MC: return FindArgRelatedToLHS(lhs, NonStrictlyImplies) || FindArgRelatedToLHS(lhs, LogicalNOTOfNonStrictlyImplies);
+	case LogicalXOR_MC: return FindArgRelatedToLHS(lhs, NonStrictlyImplies);
+	default: {
+		assert(0 && "invariant violation");
+		return false;
+	}
+	}
 }
 
 bool MetaConnective::ValidRHSForMakesLHSImplyRHS(const MetaConcept& rhs) const
@@ -2768,8 +2766,7 @@ bool MetaConnective::StrictlyImplies_OR(const MetaConcept& rhs) const
 		const MetaConnective& VR_rhs = static_cast<const MetaConnective&>(rhs);
 
 		size_t i = fast_size();
-		do	if (!VR_rhs.FindArgRelatedToLHS(*ArgArray[--i],NonStrictlyImplies))
-				return false;
+		do	if (!VR_rhs._findArgRelatedToLHS(*ArgArray[--i],NonStrictlyImplies)) return false;
 		while(0<i);
 		return *this!=rhs;
 // AllArgsImpliedBySomeArgFailed: ....
@@ -3148,14 +3145,14 @@ bool MetaConnective::CanStrictlyModify_OR(const MetaConcept& rhs) const
 		// LHS => OR: convert to AND-form
 		const MetaConnective& VR_RHS = static_cast<const MetaConnective&>(rhs);
 		size_t i = fast_size();
-		while(VR_RHS.FindArgRelatedToLHS(*ArgArray[--i],NonStrictlyImplies))
+		while(VR_RHS._findArgRelatedToLHS(*ArgArray[--i],NonStrictlyImplies))
 			if (0==i)
 				{
 				VR_RHS.InferenceParameter1 = LogicalAND_MC;
 				return true;
 				};
 		i = fast_size();
-		while(VR_RHS.FindArgRelatedToLHS(*ArgArray[--i],NonStrictlyImpliesLogicalNOTOf))
+		while(VR_RHS._findArgRelatedToLHS(*ArgArray[--i],NonStrictlyImpliesLogicalNOTOf))
 			if (0==i)
 				{
 				VR_RHS.InferenceParameter1 = LogicalNOR_MC;
