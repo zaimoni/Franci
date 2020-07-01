@@ -262,52 +262,18 @@ const MetaConnective::BinaryRelationAuxFunc2 MetaConnective::CanStrictlyModifyAu
 #undef DECLARE_MCVFT
 
 static bool NAryAllArgsEqualExceptOneAntiIdempotentPair(const MetaConcept& lhs, const MetaConcept& rhs)
-{	// FORMALLY CORRECT: Kenneth Boyd, 2/22/2003
-	if (lhs.size()!=rhs.size()) return false;
-
-	// ???
+{	// FORMALLY CORRECT: 2020-07-01
 	const MetaConceptWithArgArray& VR_lhs = static_cast<const MetaConceptWithArgArray&>(lhs);
 	const MetaConceptWithArgArray& VR_rhs = static_cast<const MetaConceptWithArgArray&>(rhs);
-
-	if (!VR_lhs.FindTwoRelatedArgs(VR_rhs,IsAntiIdempotentTo)) return false;
-
-	size_t LHS_Idx1 = VR_lhs.ImageInferenceParameter1();
-	size_t i = VR_lhs.size();
-	do	if (   --i!=LHS_Idx1
-			&& !VR_rhs.FindArgRelatedToLHS(*VR_lhs.ArgN(i),AreSyntacticallyEqual))
-			return false;
-	while(0<i);
-	return true;
+	if (!VR_lhs.AllArgsExceptOneEquivalent(VR_rhs, AreSyntacticallyEqual)) return false;
+	return IsAntiIdempotentTo(*VR_lhs.ArgN(VR_lhs.ImageInferenceParameter1()), *VR_rhs.ArgN(VR_rhs.ImageInferenceParameter1()));
 }
 
 static bool NAryAllArgsEqualExceptOne(const MetaConcept& lhs, const MetaConcept& rhs)
-{	// FORMALLY CORRECT: Kenneth Boyd, 2/25/2003
-	if (lhs.size()!=rhs.size()) return false;
-
+{	// FORMALLY CORRECT: 2020-07-01
 	const MetaConceptWithArgArray& VR_lhs = static_cast<const MetaConceptWithArgArray&>(lhs);
 	const MetaConceptWithArgArray& VR_rhs = static_cast<const MetaConceptWithArgArray&>(rhs);
-
-	size_t LHSIdx = lhs.size();
-	while(VR_rhs.FindArgRelatedToLHS(*lhs.ArgN(--LHSIdx),AreSyntacticallyEqual))
-		if (0==LHSIdx)
-			return false;
-
-	if (0<LHSIdx)
-		{
-		size_t LHSIdx2 = LHSIdx;
-		do	if (!VR_rhs.FindArgRelatedToLHS(*lhs.ArgN(--LHSIdx2),AreSyntacticallyEqual))
-				return false;
-		while(0<LHSIdx2);
-		}
-
-	size_t RHSIdx = rhs.size();
-	while(VR_lhs.FindArgRelatedToLHS(*rhs.ArgN(--RHSIdx),AreSyntacticallyEqual))
-		if (0==RHSIdx)
-			return false;
-
-	VR_lhs.FindArgRelatedToLHS(*lhs.ArgN(LHSIdx),AreSyntacticallyEqual);
-	VR_rhs.FindArgRelatedToLHS(*rhs.ArgN(RHSIdx),AreSyntacticallyEqual);
-	return true;
+	return VR_lhs.AllArgsExceptOneEquivalent(VR_rhs, AreSyntacticallyEqual);
 }
 
 #if 0

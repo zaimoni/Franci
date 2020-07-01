@@ -1351,6 +1351,20 @@ size_t MetaConceptWithArgArray::_findArgRelatedToLHS(const MetaConcept& lhs, Low
 	return 0;
 }
 
+// intended interpretation of indirector: distinct indexes into ArgArray
+size_t MetaConceptWithArgArray::_findArgRelatedToLHS(const MetaConcept& lhs, LowLevelBinaryRelation& TargetRelation, std::vector<size_t>& indirector) const
+{	// FORMALLY CORRECT: 2020-07-01
+	assert(!indirector.empty());
+	size_t scan = indirector.size();
+	assert(scan <= size());
+	while (0 < scan) {
+		const auto proxy = indirector[--scan];
+		assert(proxy < size());
+		if (TargetRelation(lhs, *ArgArray[proxy])) return scan + 1;
+	}
+	return 0;
+}
+
 bool MetaConceptWithArgArray::FindArgRelatedToLHS(const MetaConcept& lhs, LowLevelBinaryRelation& TargetRelation) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 1/23/2000
 	size_t i = ArgArray.size();
@@ -1508,6 +1522,45 @@ bool MetaConceptWithArgArray::ArgListHasInjectionIntoRHSArgListRelatedThisWay(co
 		return true;
 		};
 	return false;
+}
+
+bool MetaConceptWithArgArray::AllArgsExceptOneEquivalent(const MetaConceptWithArgArray& rhs, LowLevelBinaryRelation& equivalence) const
+{	// FORMALLY CORRECT: 2020-07-01
+	const size_t ref_ub = size();
+	if (ref_ub != rhs.size()) return false;
+
+	size_t relay = -1;
+	try {
+		std::vector<size_t> candidates(ref_ub);	// XXX throwing constructor
+
+		size_t ub = ref_ub;
+		while (0 < ub) {
+			--ub;
+			candidates[ub] = ub;
+		};
+
+		ub = ref_ub;
+		while (const auto scan = rhs._findArgRelatedToLHS(*ArgArray[--ub], equivalence, candidates)) {
+			if (0 == ub) return false;
+			candidates.erase(candidates.begin() + (scan - 1));
+		}
+		relay = ub;
+
+		if (0 < ub) {
+			do {
+				if (const auto scan = rhs._findArgRelatedToLHS(*ArgArray[--ub], equivalence, candidates)) {
+					candidates.erase(candidates.begin() + (scan - 1));
+				}
+				else return false;
+			} while (0 < ub);
+		}
+		assert(1 == candidates.size());
+		rhs.InferenceParameter1 = candidates.front();
+	} catch (std::bad_alloc& e) {
+		return false;
+	}
+	InferenceParameter1 = relay;
+	return true;
 }
 
 // Verify Unary property rules.  May have to create metacode eventually.

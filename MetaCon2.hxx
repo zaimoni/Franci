@@ -192,6 +192,7 @@ public:
 	// LHS and RHS of TargetRelation, respectively
 	// Arg is pointed to by InferenceParameter1
 	size_t _findArgRelatedToLHS(const MetaConcept& lhs, LowLevelBinaryRelation& TargetRelation) const;
+	size_t _findArgRelatedToLHS(const MetaConcept& lhs, LowLevelBinaryRelation& TargetRelation, std::vector<size_t>& indirector) const;
 	bool FindArgRelatedToLHS(const MetaConcept& lhs, LowLevelBinaryRelation& TargetRelation) const;
 	bool FindArgRelatedToLHSViewPoint(size_t ViewPoint, LowLevelBinaryRelation& TargetRelation) const;
 	bool FindArgRelatedToRHSViewPoint(size_t ViewPoint, LowLevelBinaryRelation& TargetRelation) const;
@@ -203,6 +204,7 @@ public:
 	bool FindArgOfExactType(ExactType_MC Target) const;
 	bool FindArgTypeMatch(ExactType_MC Target, const AbstractClass* UltimateTarget) const;
 	bool ArgListHasInjectionIntoRHSArgListRelatedThisWay(const MetaConceptWithArgArray& rhs, LowLevelBinaryRelation& TargetRelation) const;
+	bool AllArgsExceptOneEquivalent(const MetaConceptWithArgArray& rhs, LowLevelBinaryRelation& equivalence) const;
 	// Unary property detectors.  May have to create metacode eventually.
 	bool VerifyArgsExplicitConstant(size_t lb, size_t strict_ub) const;
 	bool FindArgWithUnaryProperty(LowLevelUnaryProperty& Property) const;
