@@ -190,5 +190,19 @@ private:
 		CLEANUP(VAR);	\
 		DAMAGE_CONTROL;	\
 		}
+
+#define PROPERLY_INIT_DIGRAPH_AUTOVAL(VAR,ARGARRAY,VAR_OWNS,DECISION_RULE,ARRAYCLEANUP,DAMAGE_CONTROL)	\
+	try	{	\
+		VAR = new Digraph(ARGARRAY,VAR_OWNS,DECISION_RULE);	\
+		}	\
+	catch(const bad_alloc&)	\
+		{	\
+		ARRAYCLEANUP(ARGARRAY);	\
+		DAMAGE_CONTROL;	\
+		}	\
+	if (!VAR->SyntaxOK())	\
+		{	\
+		DAMAGE_CONTROL;	\
+		}
 #endif
 

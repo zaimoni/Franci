@@ -3418,9 +3418,8 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 		// clause.  BE SURE SEARCHTREE CAN DO THIS: Destructive extraction requires a unique leaf,
 		// so some sort of conflict resolution is required for multiple leaves of the same final rating.
 		// otherwise, remove the tested vertex, then any newly uninvolved vertices.
-
-		Digraph* TraceAmplification = NULL;
-		PROPERLY_INIT_DIGRAPH(TraceAmplification,MirrorArgList,false,LHSAmplifiesRHS,DELETE,DELETEARRAY,goto EndAmplification)
+		zaimoni::autoval_ptr<Digraph> TraceAmplification;
+		PROPERLY_INIT_DIGRAPH_AUTOVAL(TraceAmplification, MirrorArgList, false, LHSAmplifiesRHS, DELETEARRAY, goto EndAmplification)
 
 		TraceAmplification->ResetDiagonal();
 
@@ -3441,11 +3440,7 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 			size_t i = TraceAmplification->size();
 			size_t ToEdgeCount = 0;
 			while(0==(ToEdgeCount = TraceAmplification->VertexToEdgeCount(--i)))
-				if (0==i)
-					{
-					delete TraceAmplification;
-					UnconditionalDataIntegrityFailure();
-					};
+				if (0==i) UnconditionalDataIntegrityFailure();
 
 			// maximize arity of amplification list, but minimize arity of amplifyee
 			TraceAmplification->MaxMinArityForAmplication(i,ToEdgeCount);
@@ -3458,7 +3453,6 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 			if (!AmplifySource)
 				{
 				DEBUG_LOG("Mirroring of amplifiers bad");
-				delete TraceAmplification;
 				goto EndAmplification;
 				}
 			DEBUG_LOG("Mirroring of amplifiers OK");
@@ -3475,7 +3469,6 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 				{
 				DEBUG_LOG("Mirroring of targets bad");
 				free(AmplifySource);
-				delete TraceAmplification;
 				goto EndAmplification;
 				}
 			DEBUG_LOG("Mirroring of targets OK");
@@ -3483,7 +3476,6 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 				{
 				DEBUG_LOG("No targets found");
 				free(AmplifySource);
-				delete TraceAmplification;
 				UnconditionalDataIntegrityFailure();
 			}
 			// eliminate statement amplified
@@ -3507,7 +3499,6 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 				DEBUG_LOG("Diagnosis OK, false");
 				free(ApprovalTargetsImage);
 				free(AmplifySource);
-				delete TraceAmplification;
 				goto EndAmplification;
 				}
 
@@ -3533,7 +3524,6 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 				{
 				free(ApprovalTargetsImage);
 				free(AmplifySource);
-				delete TraceAmplification;
 				goto EndAmplification;
 				}			
 
@@ -3552,7 +3542,6 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 				BLOCKDELETEARRAY(NewArgArray);
 				free(ApprovalTargetsImage);
 				free(AmplifySource);
-				delete TraceAmplification;
 				goto EndAmplification;				
 				}
 
@@ -3580,14 +3569,12 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 					DEBUG_LOG("Have diagnosis");
 					size_t ApprovalIdx = 0;
 					MetaConcept* Target = NULL;
-					if (!ExploreThis->DestructiveExtractUniqueResult(Target))
-						goto SearchFailed;
+					if (!ExploreThis->DestructiveExtractUniqueResult(Target)) goto SearchFailed;
 					delete ExploreThis;
 					LOG("Amplified");
 					LOG(*Target);
 					LOG("from");
 					LOG(*TraceAmplification->ArgN(i));
-					delete TraceAmplification;
 					DEBUG_LOG("Past delete TraceAmplification");
 
 					if 		(LOGICAL_IMPLIES_ACTION==SearchResultCode)
@@ -3673,7 +3660,6 @@ SearchFailed:
 			DEBUG_LOG("Incremental TraceAmplificaton clean OK");
 			}
 
-		delete TraceAmplification;
 		DEBUG_LOG("DELETE(TraceAmplification) OK");
 		}
 
@@ -5442,8 +5428,7 @@ bool MetaConnective::DiagnoseCommonIntermediateRulesORXORAux() const
 							if (2<=SweepIdx)
 								{
 								if (CountIFFCandidateArgs>SweepIdx)
-									{
-									// Stopped early, conserve
+									{ // Stopped early, conserve
 									IFFCandidateArgList = REALLOC(IFFCandidateArgList,sizeof(MetaConcept*)*SweepIdx);
 									IFFCandidateArgs = REALLOC(IFFCandidateArgs,sizeof(MetaConcept*)*SweepIdx);
 									}
@@ -5451,9 +5436,8 @@ bool MetaConnective::DiagnoseCommonIntermediateRulesORXORAux() const
 								// We no longer need the storage for the dereferencing indexes.  However,
 								// we *do* need storage for the cached results on 
 								// StrictlyImplies/StrictlyImpliesLogicalNOTOf matches
-
-								Digraph* IFFFinderGraph = NULL;
-								PROPERLY_INIT_DIGRAPH(IFFFinderGraph,IFFCandidateArgList,true,NULL,DELETE,BLOCKDELETEARRAY,free(IFFCandidateArgs); return false);
+								zaimoni::autoval_ptr<Digraph> IFFFinderGraph;
+								PROPERLY_INIT_DIGRAPH_AUTOVAL(IFFFinderGraph, IFFCandidateArgList, true, NULL, DELETE, free(IFFCandidateArgs); return false);
 
 								// IFFFinderGraph now owns IFFCandidateArgList, and has set the external
 								// reference to NULL.  Graph is created with no known edges/not-edges
@@ -5507,11 +5491,10 @@ bool MetaConnective::DiagnoseCommonIntermediateRulesORXORAux() const
 								if (2<=IFFFinderGraph->size())
 									{	// We have a legitimate IFF candidate, of arity whatever is here.
 									free(IFFCandidateArgs);
-									InferenceParameterMC = IFFFinderGraph;
+									InferenceParameterMC = IFFFinderGraph.release();
 									IdxCurrentSelfEvalRule = LogicalXORExtractIFFFactor_SER;
 									return true;
 									}
-								delete IFFFinderGraph;
 								//! \todo XOR-finder using Digraph
 								}
 							if (NULL!=IFFCandidateArgList)
@@ -5560,16 +5543,14 @@ does not cooperate with with ALLEQUAL (including transitivity) or ALLDISTINCT.
 		{
 		DEBUG_LOG("more detailed AND scan");
 		size_t LowBoundANDIdx = 0;
-		while(LogicalAND_MC>ArgArray[LowBoundANDIdx]->ExactType())
-			LowBoundANDIdx++;
+		while(LogicalAND_MC>ArgArray[LowBoundANDIdx]->ExactType()) LowBoundANDIdx++;
 		if (   ArgArray[LowBoundANDIdx]->IsExactType(LogicalAND_MC)
 			&& LowBoundANDIdx+1<fast_size()
 			&& ArgArray[LowBoundANDIdx+1]->IsExactType(LogicalAND_MC))
 			{
 			//! \todo this isn't immediately going to be multi-threaded.  Recode to minimize RAM loading.
 			size_t HighBoundANDIdx = fast_size()-1;
-			while(LogicalAND_MC>ArgArray[HighBoundANDIdx]->ExactType())
-				HighBoundANDIdx--;
+			while(LogicalAND_MC<ArgArray[HighBoundANDIdx]->ExactType()) HighBoundANDIdx--;
 
 			// need two digraphs.  This probably could use multithreading, so set it up like
 			// Franci's going to multithread.
@@ -5580,40 +5561,36 @@ does not cooperate with with ALLEQUAL (including transitivity) or ALLDISTINCT.
 			if (MirrorArgArrayNoOwnership(HighBoundANDIdx-LowBoundANDIdx,ArgArray+LowBoundANDIdx,
 									NewArgArray1,2,NAryAllArgsEqualExceptOneAntiIdempotentPair))
 				{
-				Digraph* AntiIdempotentArgBlotter = NULL;
-				PROPERLY_INIT_DIGRAPH(AntiIdempotentArgBlotter,NewArgArray1,false,&NAryAllArgsEqualExceptOneAntiIdempotentPair,DELETE,free,return false);
+				zaimoni::autoval_ptr<Digraph> AntiIdempotentArgBlotter;
+				PROPERLY_INIT_DIGRAPH_AUTOVAL(AntiIdempotentArgBlotter, NewArgArray1, false, &NAryAllArgsEqualExceptOneAntiIdempotentPair, free, return false);
 
 				AntiIdempotentArgBlotter->ResetDiagonal();
 				const size_t HypercubeDimension = AntiIdempotentArgBlotter->FindStrictHypercubeGraphFlushIrrelevantVertices();
 				if (0<HypercubeDimension)
 					{
 					InferenceParameter1 = HypercubeDimension;
-					InferenceParameterMC = AntiIdempotentArgBlotter;
+					InferenceParameterMC = AntiIdempotentArgBlotter.release();
 					IdxCurrentSelfEvalRule = LogicalORXORCompactANDArgHyperCube_SER;
 					return true;
 					};
-				delete AntiIdempotentArgBlotter;
-//				AntiIdempotentArgBlotter = NULL;
 				}
 
 #if 0
 			if (MirrorArgArrayNoOwnership(HighBoundANDIdx-LowBoundANDIdx,ArgArray+LowBoundANDIdx,
 									NewArgArray1,2,&NAryAllArgsEqualExceptOne))
 				{
-				Digraph* DifferentArgBlotter = NULL;
-				PROPERLY_INIT_DIGRAPH(DifferentArgBlotter,NewArgArray1,false,&NAryAllArgsEqualExceptOne,DELETE,free,return false);
+				zaimoni::autoval_ptr<Digraph> DifferentArgBlotter;
+				PROPERLY_INIT_DIGRAPH_AUTOVAL(DifferentArgBlotter,NewArgArray1,false,&NAryAllArgsEqualExceptOne,free,return false);
 
 				DifferentArgBlotter->ResetDiagonal();
 				const size_t HypercubeDimension = DifferentArgBlotter->FindStrictHypercubeGraphFlushIrrelevantVertices();
 				if (0<HypercubeDimension)
 					{
 					InferenceParameter1 = HypercubeDimension;
-					InferenceParameterMC = DifferentArgBlotter;
+					InferenceParameterMC = DifferentArgBlotter.release();
 					IdxCurrentSelfEvalRule = LogicalANDORXORCondenseORANDANDArgHyperCube_SER;
 					return true;				
 					};
-				delete DifferentArgBlotter;
-//				DifferentArgBlotter = NULL;
 				}
 #endif
 
@@ -5621,8 +5598,8 @@ does not cooperate with with ALLEQUAL (including transitivity) or ALLDISTINCT.
 			if (MirrorArgArrayNoOwnership(HighBoundANDIdx-LowBoundANDIdx,ArgArray+LowBoundANDIdx,
 									NewArgArray1,2,&NAryAllArgsEqualExceptTwoAntiIdempotentPairs))
 				{
-				Digraph* XORIntegrator = NULL;
-				PROPERLY_INIT_DIGRAPH(XORIntegrator,NewArgArray1,false,&NAryAllArgsEqualExceptTwoAntiIdempotentPairs,DELETE,free,return false);
+				zaimoni::autoval_ptr<Digraph> XORIntegrator;
+				PROPERLY_INIT_DIGRAPH_AUTOVAL(XORIntegrator,NewArgArray1,false,&NAryAllArgsEqualExceptTwoAntiIdempotentPairs,free,return false);
 
 				XORIntegrator->ResetDiagonal();
 				const size_t CompleteGraphDimension = XORIntegrator->FindCompleteGraphFlushIrrelevantVertices();
@@ -5634,8 +5611,6 @@ does not cooperate with with ALLEQUAL (including transitivity) or ALLDISTINCT.
 					IdxCurrentSelfEvalRule = LogicalXORCompactANDArgsToXOR_SER;
 					return true;
 					};
-				delete XORIntegrator;
-//				XORIntegrator = NULL;
 				}
 #endif
 			}
@@ -6998,20 +6973,18 @@ MetaConnective::LogicalANDCreateSpeculativeOR(void) const
 		if (MirrorArgArrayNoOwnership(HighORIdx-LowORIdx,ArgArray+LowORIdx,
 								NewArgArray1,2,NAryAllArgsEqualExceptOneAntiIdempotentPair))
 			{
-			Digraph* AntiIdempotentArgBlotter = NULL;
-			PROPERLY_INIT_DIGRAPH(AntiIdempotentArgBlotter,NewArgArray1,false,&NAryAllArgsEqualExceptOneAntiIdempotentPair,DELETE,free,return false);
+			zaimoni::autoval_ptr<Digraph> AntiIdempotentArgBlotter;
+			PROPERLY_INIT_DIGRAPH_AUTOVAL(AntiIdempotentArgBlotter, NewArgArray1, false, &NAryAllArgsEqualExceptOneAntiIdempotentPair, free, return false);
 
 			AntiIdempotentArgBlotter->ResetDiagonal();
 			const size_t HypercubeDimension = AntiIdempotentArgBlotter->FindStrictHypercubeGraphFlushIrrelevantVertices();
 			if (0<HypercubeDimension)
 				{
 				InferenceParameter1 = HypercubeDimension;
-				InferenceParameterMC = AntiIdempotentArgBlotter;
+				InferenceParameterMC = AntiIdempotentArgBlotter.release();
 				IdxCurrentSelfEvalRule = LogicalORXORCompactANDArgHyperCube_SER;
 				return true;				
 				};
-			delete AntiIdempotentArgBlotter;
-//			AntiIdempotentArgBlotter = NULL;
 			}
 
 		NewArgArray1 = NULL;
@@ -7020,20 +6993,18 @@ MetaConnective::LogicalANDCreateSpeculativeOR(void) const
 		if (MirrorArgArrayNoOwnership(HighORIdx-LowORIdx,ArgArray+LowORIdx,
 								NewArgArray1,2,NAryAllArgsEqualExceptOne))
 			{
-			Digraph* SingleNoMatchArgBlotter = NULL;
-			PROPERLY_INIT_DIGRAPH(SingleNoMatchArgBlotter,NewArgArray1,false,&NAryAllArgsEqualExceptOne,DELETE,free,return false);
+			zaimoni::autoval_ptr<Digraph> SingleNoMatchArgBlotter;
+			PROPERLY_INIT_DIGRAPH_AUTOVAL(SingleNoMatchArgBlotter, NewArgArray1, false, &NAryAllArgsEqualExceptOne, free, return false);
 
 			SingleNoMatchArgBlotter->ResetDiagonal();
 			const size_t HypercubeDimension = SingleNoMatchArgBlotter->FindStrictHypercubeGraphFlushIrrelevantVertices();
 			if (0<HypercubeDimension)
 				{
 				InferenceParameter1 = HypercubeDimension;
-				InferenceParameterMC = SingleNoMatchArgBlotter;
+				InferenceParameterMC = SingleNoMatchArgBlotter.release();
 				IdxCurrentSelfEvalRule = LogicalANDORXORCondenseORANDANDArgHyperCube_SER;
 				return true;				
 				};
-			delete SingleNoMatchArgBlotter;
-//			SingleNoMatchArgBlotter = NULL;
 			}
 		}
 
