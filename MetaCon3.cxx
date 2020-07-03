@@ -4629,12 +4629,12 @@ bool MetaConnective::VirtualDeepLogicallyImplies()
 	// with a lot of temporary TRUE/FALSE constants (effectively StrictlyModifies)
 	// this would be a specialization of SetLHSToRHS, SetLHSToLogicalNOTOfRHS that relied 
 	// on MetaConcept support [Direct]
-	if (LogicalAND_MC<=ArgArray[InferenceParameter1]->ExactType() && LogicalNAND_MC>=ArgArray[InferenceParameter1]->ExactType())
+	if (IsType(ArgArray[InferenceParameter1]->ExactType()))
 		{
 		if (!static_cast<MetaConnective*>(ArgArray[InferenceParameter1])->HyperNonStrictlyImpliesReplacement(*InferenceParameterMC,Tmp))
 			return false;
 		CleanUpANDIFFAfterHyperNonStrictlyImpliesReplacement(ArgArray[InferenceParameter1],Tmp);
-		if (LogicalAND_MC<=ArgArray[InferenceParameter1]->ExactType() && LogicalNAND_MC>=ArgArray[InferenceParameter1]->ExactType())
+		if (IsType(ArgArray[InferenceParameter1]->ExactType()))
 			{
 			if (!static_cast<MetaConnective*>(ArgArray[InferenceParameter1])->HyperNonStrictlyImpliesLogicalNOTOfReplacement(*InferenceParameterMC,Tmp))
 				return false;
@@ -4652,12 +4652,11 @@ bool MetaConnective::VirtualDeepLogicallyImplies()
 		}
 
 	while(0<InferenceParameter1)
-		if (LogicalAND_MC<=ArgArray[--InferenceParameter1]->ExactType() && LogicalNAND_MC>=ArgArray[InferenceParameter1]->ExactType())
+		if (IsType(ArgArray[--InferenceParameter1]->ExactType()))
 			{
-			if (!static_cast<MetaConnective*>(ArgArray[InferenceParameter1])->HyperNonStrictlyImpliesReplacement(*InferenceParameterMC,Tmp))
-				return false;
+			if (!static_cast<MetaConnective*>(ArgArray[InferenceParameter1])->HyperNonStrictlyImpliesReplacement(*InferenceParameterMC,Tmp)) return false;
 			CleanUpANDIFFAfterHyperNonStrictlyImpliesReplacement(ArgArray[InferenceParameter1],Tmp);
-			if (LogicalAND_MC<=ArgArray[InferenceParameter1]->ExactType() && LogicalNAND_MC>=ArgArray[InferenceParameter1]->ExactType())
+			if (IsType(ArgArray[InferenceParameter1]->ExactType()))
 				{
 				if (!static_cast<MetaConnective*>(ArgArray[InferenceParameter1])->HyperNonStrictlyImpliesLogicalNOTOfReplacement(*InferenceParameterMC,Tmp))
 					return false;
@@ -4773,13 +4772,13 @@ bool MetaConnective::LogicalANDReplaceThisArgWithTRUE()
 	// with a lot of temporary TRUE/FALSE constants (effectively StrictlyModifies)
 	// this would be a specialization of SetLHSToRHS, SetLHSToLogicalNOTOfRHS that relied 
 	// on MetaConcept support [Direct]
-	if (LogicalAND_MC<=ArgArray[InferenceParameter2]->ExactType() && LogicalNAND_MC>=ArgArray[InferenceParameter2]->ExactType())
+	if (IsType(ArgArray[InferenceParameter2]->ExactType()))
 		{
 		if (!static_cast<MetaConnective*>(ArgArray[InferenceParameter2])->HyperNonStrictlyImpliesReplacement(*ArgArray[InferenceParameter1],Tmp))
 			return false;
 
 		CleanUpANDIFFAfterHyperNonStrictlyImpliesReplacement(ArgArray[InferenceParameter2],Tmp);
-		if (LogicalAND_MC<=ArgArray[InferenceParameter2]->ExactType() && LogicalNAND_MC>=ArgArray[InferenceParameter2]->ExactType())
+		if (IsType(ArgArray[InferenceParameter2]->ExactType()))
 			{
 			if (!static_cast<MetaConnective*>(ArgArray[InferenceParameter2])->HyperNonStrictlyImpliesLogicalNOTOfReplacement(*ArgArray[InferenceParameter1],Tmp))
 				return false;
@@ -4801,12 +4800,11 @@ bool MetaConnective::LogicalANDReplaceThisArgWithTRUE()
 		size_t i = InferenceParameter2;
 		if (i>InferenceParameter1)
 			while(--i>InferenceParameter1)
-				if (LogicalAND_MC<=ArgArray[i]->ExactType() && LogicalNAND_MC>=ArgArray[i]->ExactType())
+				if (IsType(ArgArray[i]->ExactType()))
 					{
-					if (!static_cast<MetaConnective*>(ArgArray[i])->HyperNonStrictlyImpliesReplacement(*ArgArray[InferenceParameter1],Tmp))
-						return false;
+					if (!static_cast<MetaConnective*>(ArgArray[i])->HyperNonStrictlyImpliesReplacement(*ArgArray[InferenceParameter1],Tmp)) return false;
 					CleanUpANDIFFAfterHyperNonStrictlyImpliesReplacement(ArgArray[i],Tmp);
-					if (LogicalAND_MC<=ArgArray[i]->ExactType() && LogicalNAND_MC>=ArgArray[i]->ExactType())
+					if (IsType(ArgArray[i]->ExactType()))
 						{
 						if (!static_cast<MetaConnective*>(ArgArray[i])->HyperNonStrictlyImpliesLogicalNOTOfReplacement(*ArgArray[InferenceParameter1],Tmp))
 							return false;
@@ -4823,12 +4821,11 @@ bool MetaConnective::LogicalANDReplaceThisArgWithTRUE()
 						return false;
 					}
 		while(0<i)
-			if (LogicalAND_MC<=ArgArray[--i]->ExactType() && LogicalNAND_MC>=ArgArray[i]->ExactType())
+			if (IsType(ArgArray[--i]->ExactType()))
 				{
-				if (!static_cast<MetaConnective*>(ArgArray[i])->HyperNonStrictlyImpliesReplacement(*ArgArray[InferenceParameter1],Tmp))
-					return false;
+				if (!static_cast<MetaConnective*>(ArgArray[i])->HyperNonStrictlyImpliesReplacement(*ArgArray[InferenceParameter1],Tmp)) return false;
 				CleanUpANDIFFAfterHyperNonStrictlyImpliesReplacement(ArgArray[i],Tmp);
-				if (LogicalAND_MC<=ArgArray[i]->ExactType() && LogicalNAND_MC>=ArgArray[i]->ExactType())
+				if (IsType(ArgArray[i]->ExactType()))
 					{
 					if (!static_cast<MetaConnective*>(ArgArray[i])->HyperNonStrictlyImpliesLogicalNOTOfReplacement(*ArgArray[InferenceParameter1],Tmp))
 						return false;
@@ -6089,10 +6086,9 @@ MetaConnective::HyperNonStrictlyImpliesReplacement(const MetaConcept& LHS, const
 		i = fast_size();
 		do	if (ArgArray[--i]->HasArgRelatedToThisConceptBy(LHS,::NonStrictlyImplies))
 				{
-				if (LogicalAND_MC<=ArgArray[i]->ExactType() && LogicalNAND_MC>=ArgArray[i]->ExactType())
+				if (IsType(ArgArray[i]->ExactType()))
 					{
-					if (!static_cast<MetaConnective*>(ArgArray[i])->HyperNonStrictlyImpliesReplacement(LHS,RHS))
-						return false;
+					if (!static_cast<MetaConnective*>(ArgArray[i])->HyperNonStrictlyImpliesReplacement(LHS,RHS)) return false;
 					CleanUpANDIFFAfterHyperNonStrictlyImpliesReplacement(ArgArray[i],RHS);
 					}
 				else if (!ArgArray[i]->ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(LHS,RHS,SetLHSToRHS,::NonStrictlyImplies))
@@ -6153,10 +6149,9 @@ MetaConnective::HyperNonStrictlyImpliesLogicalNOTOfReplacement(const MetaConcept
 		i = fast_size();
 		do	if (ArgArray[--i]->HasArgRelatedToThisConceptBy(LHS,::NonStrictlyImpliesLogicalNOTOf))
 				{
-				if (LogicalAND_MC<=ArgArray[i]->ExactType() && LogicalNAND_MC>=ArgArray[i]->ExactType())
+				if (IsType(ArgArray[i]->ExactType()))
 					{
-					if (!static_cast<MetaConnective*>(ArgArray[i])->HyperNonStrictlyImpliesLogicalNOTOfReplacement(LHS,RHS))
-						return false;
+					if (!static_cast<MetaConnective*>(ArgArray[i])->HyperNonStrictlyImpliesLogicalNOTOfReplacement(LHS,RHS)) return false;
 					// catch 2-ary IFF/OR aftermath here
 					CleanUpORIFFAfterHyperNonStrictlyImpliesLogicalNOTOfReplacement(ArgArray[i],RHS);
 					}

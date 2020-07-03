@@ -108,6 +108,7 @@ public:
 
 //  Type ID functions
 	const AbstractClass* UltimateType() const override;
+	constexpr static bool IsType(ExactType_MC x) { return LogicalAND_MC <= x && LogicalNAND_MC >= x; }
 //  Evaluation functions
 	evalspec canEvaluate() const override;
 	virtual bool SyntaxOK() const;
@@ -165,7 +166,7 @@ public:
 	bool WantStateDump() const;	// for LogicalAND only; inference engine helper
 
 	template<ExactType_MC dest> void set() {
-		static_assert(LogicalAND_MC <= dest && LogicalNAND_MC >= dest);
+		static_assert(IsType(dest));
 		SetExactType(dest);
 		if constexpr (LogicalNOR_MC <= dest) DoSelfDeMorgan();
 		ForceCheckForEvaluation();

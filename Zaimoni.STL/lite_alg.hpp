@@ -18,7 +18,7 @@ in_range(unsigned long test, const unsigned long LB, const unsigned long UB)
 }
 
 template<auto LB, auto UB>
-bool in_range(uintmax_t test)
+constexpr bool in_range(uintmax_t test)
 {
 	static_assert(LB < UB);
 	return test - LB <= UB - LB;

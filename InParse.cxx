@@ -300,10 +300,9 @@ static bool ResolveUnparsedText(MetaConcept**& ArgArray,size_t i)
 			if (   (VR_ArgArrayIdx.IsCharacter(']') && VR_ArgArrayIdxMinus2.IsCharacter('['))
 				|| (VR_ArgArrayIdx.IsCharacter(')') && VR_ArgArrayIdxMinus2.IsCharacter('(')))
 				{	// This cleans up those clauses/phrases that can evaluate;
-				if (in_range<MinClausePhraseIdx_MC,MaxClausePhraseIdx_MC>((unsigned long)ArgArray[i-1]->ExactType()))
+				if (in_range<MinClausePhraseIdx_MC,MaxClausePhraseIdx_MC>(ArgArray[i-1]->ExactType()))
 					{	// if this clause/phrase *doesn't* evaluate, stall this section
-					if (!ArgArray[i-1]->CanEvaluate())
-						return false;
+					if (!ArgArray[i-1]->CanEvaluate()) return false;
 
 					DestructiveSyntacticallyEvaluateOnce(ArgArray[i-1]);
 					}
