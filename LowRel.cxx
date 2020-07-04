@@ -116,9 +116,3 @@ SetLHSToStdMultiplicationInverseOfRHS(MetaConcept*& Target, const MetaConcept& I
 	else
 		throw bad_alloc();
 }
-
-void
-UseLHSToMakeImplyInRHS(MetaConcept*& Target, const MetaConcept& Inducer)
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/20/2000
-	Target->UseThisAsMakeImply(Inducer);
-}

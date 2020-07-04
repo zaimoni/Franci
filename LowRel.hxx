@@ -54,6 +54,3 @@ SetLHSToStdAdditionInverseOfRHS(MetaConcept*& Target, const MetaConcept& Inducer
 
 void
 SetLHSToStdMultiplicationInverseOfRHS(MetaConcept*& Target, const MetaConcept& Inducer);
-
-void
-UseLHSToMakeImplyInRHS(MetaConcept*& Target, const MetaConcept& Inducer);
