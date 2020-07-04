@@ -377,7 +377,6 @@ public:
 	virtual bool ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& LHS, const MetaConcept& RHS, LowLevelAction* RHSInducedActionOnArg, LowLevelBinaryRelation* TargetRelation) = 0;
 	virtual evalspec _CanUseThisAsMakeImply(const MetaConcept& Target) { return evalspec(0,0); }
 	virtual bool CanUseThisAsMakeImply(const MetaConcept& Target) const {return false;};
-	virtual void UseThisAsMakeImply(const MetaConcept& Target) {};
 // Grammar support
 // Formal properties
 	inline bool IsSymmetric() const {return (VFTable1->Bitmap1 & Symmetric_LITBMP1MC);};

@@ -1329,13 +1329,6 @@ MetaConcept::evalspec MetaConnective::_CanUseThisAsMakeImply(const MetaConcept& 
 	return evalspec();
 }
 
-void MetaConnective::UseThisAsMakeImply(const MetaConcept& Target)
-{	// FORMALLY CORRECT: Kenneth Boyd, 2/25/2001
-	// this activates iff the Target generates an implies that can be used for reduction.
-	// cf. StrictlyImplies, StrictlyImpliesLogicalNOTOf handlers
-	(this->*((2==fast_size()) ? UseThisAsMakeImply2AryTable : UseThisAsMakeImplyNAryTable)[ExactType()-LogicalAND_MC])(Target);
-}
-
 void MetaConnective::UseThisAsMakeImply2AryAND(const MetaConcept& Target)
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/27/2000
 	if (Target.ValidLHSForMakesLHSImplyRHS(*ArgArray[0]))
