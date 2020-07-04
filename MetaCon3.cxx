@@ -952,17 +952,16 @@ bool MetaConnective::ValidLHSForMakesLHSImplyRHS(const MetaConcept& lhs) const
 }
 
 bool MetaConnective::ValidRHSForMakesLHSImplyRHS(const MetaConcept& rhs) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/30/2000
-	if 		(IsExactType(LogicalOR_MC) && 2==fast_size())
-		return (   NonStrictlyImplies(*ArgArray[1],rhs)
-				|| NonStrictlyImplies(*ArgArray[0],rhs));
-	else if (IsExactType(LogicalIFF_MC))
-		return (   FindArgRelatedToRHS(rhs,NonStrictlyImplies)
-				|| FindArgRelatedToRHS(rhs,LogicalNOTOfNonStrictlyImplies));
-	else if (IsExactType(LogicalXOR_MC))
-		return FindArgRelatedToRHS(rhs,LogicalNOTOfNonStrictlyImplies);
-	FATAL(AlphaMiscallVFunction);
-	return false;
+{	// FORMALLY CORRECT: 2020-07-03
+	switch (CanMakeLHSImplyRHS()) {
+	case LogicalOR_MC: return FindArgRelatedToRHS(rhs, NonStrictlyImplies);
+	case LogicalIFF_MC: return FindArgRelatedToRHS(rhs, NonStrictlyImplies) || FindArgRelatedToRHS(rhs, LogicalNOTOfNonStrictlyImplies);
+	case LogicalXOR_MC: return FindArgRelatedToRHS(rhs, LogicalNOTOfNonStrictlyImplies);
+	default: {
+		assert(0 && "invariant violation");
+		return false;
+	}
+	}
 }
 
 #if 0
@@ -1286,7 +1285,7 @@ MetaConcept::evalspec MetaConnective::_CanUseThisAsMakeImplyXOR(const MetaConcep
 	do	if (Target.ValidLHSForMakesLHSImplyRHS(*ArgArray[--i]))
 			{
 			size_t j = ArgArray.ArraySize();
-			do	if (i!= --j && Target.MakesLHSImplyLogicalNOTOfRHS(*ArgArray[i],*ArgArray[j]))
+			do	if (i!= --j && Target.MakesLHSImplyRHS(*ArgArray[i],*ArgArray[j]))
 					{	// A=>B: force ~A AND XOR(...)
 					return evalspec([&]() mutable {
 						return TargetVariableFalse(i);
@@ -1305,7 +1304,7 @@ MetaConcept::evalspec MetaConnective::_CanUseThisAsMakeImplyNXOR(const MetaConce
 	do	if (Target.ValidLHSForMakesLHSImplyRHS(*ArgArray[--i]))
 			{
 			size_t j = ArgArray.ArraySize();
-			do	if (i!= --j && Target.MakesLHSImplyLogicalNOTOfRHS(*ArgArray[i],*ArgArray[j]))
+			do	if (i!= --j && Target.MakesLHSImplyRHS(*ArgArray[i],*ArgArray[j]))
 					{	// A=>B: force A OR NXOR(...)
 					return evalspec([&]() mutable {
 						return TargetVariableTrue(i);
@@ -2922,27 +2921,13 @@ void MetaConnective::StrictlyModifies_AND(MetaConcept*& rhs) const
 // if all args in OR NonStrictlyimply some arg in IFF, turn IFF into AND
 // if all args in OR NonStrictlyimplyLogicalNotOF some arg in IFF, turn IFF into NAND.
 void MetaConnective::StrictlyModifies_OR(MetaConcept*& rhs) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/16/2001
+{	// FORMALLY CORRECT: 2020-07-03
 	MetaConnective* VR_RHS = static_cast<MetaConnective*>(rhs);
-#if 0
 	switch (VR_RHS->InferenceParameter1) {
 	case LogicalAND_MC: VR_RHS->set<LogicalAND_MC>(); return;
 	case LogicalNOR_MC: VR_RHS->set<LogicalNOR_MC>(); return;
 	default:
 		if (2 == fast_size()) {
-			if (ValidLHSForMakesLHSImplyRHS(*VR_RHS->ArgArray[0]) && MakesLHSImplyRHS(*VR_RHS->ArgArray[0], *VR_RHS->ArgArray[1])) {
-				MetaConcept* Tmp = NULL;
-				VR_RHS->TransferOutAndNULL(1, Tmp);
-				delete rhs;
-				rhs = Tmp;
-				return;
-			} else if (ValidLHSForMakesLHSImplyRHS(*VR_RHS->ArgArray[1]) && MakesLHSImplyRHS(*VR_RHS->ArgArray[1], *VR_RHS->ArgArray[0])) {
-				MetaConcept* Tmp = NULL;
-				VR_RHS->TransferOutAndNULL(0, Tmp);
-				delete rhs;
-				rhs = Tmp;
-				return;
-			}
 			auto rules = rhs->_CanUseThisAsMakeImply(*this);
 			if (rules.first) rules.first();
 			else if (rules.second) {
@@ -2950,46 +2935,11 @@ void MetaConnective::StrictlyModifies_OR(MetaConcept*& rhs) const
 				rules.second(dest);
 				delete rhs;
 				rhs = dest;
-			} else SUCCEED_OR_DIE(0 && "incorrect call of MetaConnective::StrictlyModifies_OR");	// fails 5 tests
+			} else SUCCEED_OR_DIE(0 && "incorrect call of MetaConnective::StrictlyModifies_OR");
 			return;
 		}
 	}
 	SUCCEED_OR_DIE(0 && "incorrect call of MetaConnective::StrictlyModifies_OR");
-#else
-	if 		(2==fast_size() && rhs->CanUseThisAsMakeImply(*this))
-		{
-		if (   rhs->IsExactType(LogicalOR_MC)
-			&& 2== VR_RHS->fast_size())
-			{
-			if 		(   ValidLHSForMakesLHSImplyRHS(*VR_RHS->ArgArray[0])
-					 && MakesLHSImplyRHS(*VR_RHS->ArgArray[0],*VR_RHS->ArgArray[1]))
-				{
-				MetaConcept* Tmp = NULL;
-				VR_RHS->TransferOutAndNULL(1,Tmp);
-				delete rhs;
-				rhs = Tmp;
-				return;
-				}
-			else if (   ValidLHSForMakesLHSImplyRHS(*VR_RHS->ArgArray[1])
-					 && MakesLHSImplyRHS(*VR_RHS->ArgArray[1],*VR_RHS->ArgArray[0]))
-				{
-				MetaConcept* Tmp = NULL;
-				VR_RHS->TransferOutAndNULL(0,Tmp);
-				delete rhs;
-				rhs = Tmp;
-				return;
-				}
-			//! \todo generalize the above:
-			// OR(A_1,...,A_N,B),OR(A_1,...,A_N,~B): modify RHS to OR(A_1,...,A_N)
-			// will be handled by hypercube code in SpeculativeOR
-			}
-		rhs->UseThisAsMakeImply(*this);
-		}
-	else if (LogicalAND_MC== VR_RHS->InferenceParameter1)
-		static_cast<MetaConnective*>(rhs)->set<LogicalAND_MC>();
-	else	// if (LogicalNOR_MC==VR_RHS->InferenceParameter1)
-		static_cast<MetaConnective*>(rhs)->set<LogicalNOR_MC>();
-#endif
 }
 
 bool

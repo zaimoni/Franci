@@ -197,6 +197,7 @@ public:
 	bool FindArgRelatedToLHSViewPoint(size_t ViewPoint, LowLevelBinaryRelation& TargetRelation) const;
 	bool FindArgRelatedToRHSViewPoint(size_t ViewPoint, LowLevelBinaryRelation& TargetRelation) const;
 	bool FindArgRelatedToLHS(const MetaConcept& lhs, LowLevelBinaryRelation& TargetRelation, const size_t NonStrictLB, const size_t NonStrictUB) const;
+	size_t _FindArgRelatedToRHS(const MetaConcept& rhs, LowLevelBinaryRelation& TargetRelation) const;
 	bool FindArgRelatedToRHS(const MetaConcept& rhs, LowLevelBinaryRelation& TargetRelation) const;
 	bool FindArgRelatedToRHS(const MetaConcept& rhs, LowLevelBinaryRelation& TargetRelation, std::function<bool(const MetaConcept&)> lhs_ok) const;
 	bool FindArgRelatedToRHS(const MetaConcept& rhs, LowLevelBinaryRelation& TargetRelation, const size_t NonStrictLB, const size_t NonStrictUB) const;

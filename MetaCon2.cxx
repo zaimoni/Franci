@@ -1364,7 +1364,6 @@ size_t MetaConceptWithArgArray::_findArgRelatedToLHS(const MetaConcept& lhs, Low
 	}
 	return 0;
 }
-
 bool MetaConceptWithArgArray::FindArgRelatedToLHS(const MetaConcept& lhs, LowLevelBinaryRelation& TargetRelation) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 1/23/2000
 	size_t i = ArgArray.size();
@@ -1375,6 +1374,13 @@ bool MetaConceptWithArgArray::FindArgRelatedToLHS(const MetaConcept& lhs, LowLev
 			return true;
 			};
 	return false;
+}
+
+size_t MetaConceptWithArgArray::_FindArgRelatedToRHS(const MetaConcept& lhs, LowLevelBinaryRelation& TargetRelation) const
+{
+	size_t i = ArgArray.size();
+	while (0 < i) if (TargetRelation(lhs, *ArgArray[--i])) return i + 1;
+	return 0;
 }
 
 bool MetaConceptWithArgArray::FindArgRelatedToLHSViewPoint(size_t ViewPoint, LowLevelBinaryRelation& TargetRelation) const
