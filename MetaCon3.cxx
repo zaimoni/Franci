@@ -141,22 +141,9 @@ MetaConnective::SelfEvaluateRule MetaConnective::SelfEvaluateRuleLookup[MaxSelfE
 	};	
 	
 // reference tables V2
-#define DECLARE_CONTRADICTION(A)	EvalForceContradiction_ER
-#define DECLARE_TRUE(A)	EvalForceTrue_ER
 #define DECLARE_FALSE(A)	EvalForceFalse_ER
-#define DECLARE_UNKNOWN(A)	EvalForceUnknown_ER
 #define DECLARE_ARG(A)	EvalForceArg_ER
 #define DECLARE_NOTARG(A)	EvalForceNotArg_ER
-#define DECLARE_CLEANARG(A)	SelfEvalRuleCleanArg_SER
-#define DECLARE_CLEANARGNXOR(A)	SelfEvalRuleAry2CorrectedCleanArg_SER
-#define DECLARE_CLEANARGNIFFXOR(A)	SelfEvalRuleNIFFXORCleanArg_SER
-#define DECLARE_CONVERT_TO_NOR(A)	ConvertToNOROtherArgs_SER
-#define DECLARE_CONVERT_TO_OR(A)	CompatibleRetypeOtherArgs_SER
-#define DECLARE_CONVERT_TO_NAND(A)	ConvertToNANDOtherArgs_SER
-#define DECLARE_CONVERT_TO_AND(A)	CompatibleRetypeOtherArgs_SER
-#define DECLARE_REPLACEARGS_WITH_TRUE(A) ReplaceArgsWithTrue_SER
-#define DECLARE_TARGETVARFALSE_AND_XOR(A)	TargetVariableFalse_SER
-#define DECLARE_TARGETVARTRUE_OR_NXOR(A)	TargetVariableTrue_SER
 
 static constexpr const MetaConceptWithArgArray::EvalRuleIdx_ER truthValueFalseAry2Table[IFF_MCM+1]
   =	{	MetaConceptWithArgArray::DECLARE_FALSE(AND),
@@ -166,36 +153,11 @@ static constexpr const MetaConceptWithArgArray::EvalRuleIdx_ER truthValueFalseAr
 
 #undef DECLARE_ARG
 #undef DECLARE_NOTARG
-#undef DECLARE_CONTRADICTION
-#undef DECLARE_TRUE
 #undef DECLARE_FALSE
-#undef DECLARE_UNKNOWN
-
-const MetaConnective::UseThisAsMakeImplyAux MetaConnective::UseThisAsMakeImply2AryTable[IFF_MCM+1]
-  =	{	&MetaConnective::UseThisAsMakeImply2AryAND,
-		&MetaConnective::UseThisAsMakeImply2AryOR,
-		&MetaConnective::UseThisAsMakeImply2AryIFF
-	};
-
-const MetaConnective::UseThisAsMakeImplyAux MetaConnective::UseThisAsMakeImplyNAryTable[NXOR_MCM+1]
-  =	{	&MetaConnective::UseThisAsMakeImplyNAryAND,
-		&MetaConnective::UseThisAsMakeImplyNAryOR,
-		&MetaConnective::UseThisAsMakeImplyNAryIFF,
-		&MetaConnective::UseThisAsMakeImplyNAryXOR,
-		&MetaConnective::UseThisAsMakeImplyNAryNXOR
-	};
 
 // lookup tables
 #define StrictlyImplies_NOR NORNANDFatal
 #define StrictlyImplies_NAND NORNANDFatal
-#define StrictlyImpliesLogicalNOTOf_NOR NORNANDFatal
-#define StrictlyImpliesLogicalNOTOf_NAND NORNANDFatal
-#define LogicalNOTOfStrictlyImplies_NOR NORNANDFatal
-#define LogicalNOTOfStrictlyImplies_NAND NORNANDFatal
-#define LogicalNOTOfStrictlyImplies_NXOR StrictlyImplies_XOR
-#define LogicalNOTOfStrictlyImplies_XOR StrictlyImplies_NXOR
-#define StrictlyModifies_NOR NORNANDFatal
-#define StrictlyModifies_NAND NORNANDFatal
 #define CanStrictlyModify_NOR NORNANDFatal
 #define CanStrictlyModify_NAND NORNANDFatal
 
@@ -246,16 +208,8 @@ const MetaConnective::BinaryRelationAuxFunc2 MetaConnective::CanStrictlyModifyAu
 	&MetaConnective::CanStrictlyModify_NAND
 	};
 
-#undef StrictlyModifies_NOR
-#undef StrictlyModifies_NAND
 #undef CanStrictlyModify_NOR
 #undef CanStrictlyModify_NAND
-#undef LogicalNOTOfStrictlyImplies_NOR
-#undef LogicalNOTOfStrictlyImplies_NAND
-#undef LogicalNOTOfStrictlyImplies_NXOR
-#undef LogicalNOTOfStrictlyImplies_XOR
-#undef StrictlyImpliesLogicalNOTOf_NAND
-#undef StrictlyImpliesLogicalNOTOf_NOR
 #undef StrictlyImplies_NAND
 #undef StrictlyImplies_NOR
 
@@ -1329,175 +1283,6 @@ MetaConcept::evalspec MetaConnective::_CanUseThisAsMakeImply(const MetaConcept& 
 	return evalspec();
 }
 
-void MetaConnective::UseThisAsMakeImply2AryAND(const MetaConcept& Target)
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/27/2000
-	if (Target.ValidLHSForMakesLHSImplyRHS(*ArgArray[0]))
-		{
-		if (Target.MakesLHSImplyRHS(*ArgArray[0],*ArgArray[1]))
-			{
-			InvokeEvalForceArg(0);
-			return;
-			};
-		if (Target.MakesLHSImplyLogicalNOTOfRHS(*ArgArray[0],*ArgArray[1]))
-			{	// AND(A,B): CONTRADICTION [AND(A,B,OR(~A,~B))|->...|->FALSE]
-			InvokeEvalForceFalse();
-			return;
-			}
-		};
-	if (Target.ValidLHSForMakesLHSImplyRHS(*ArgArray[1]))
-		{
-		if (Target.MakesLHSImplyRHS(*ArgArray[1],*ArgArray[0]))
-			{
-			InvokeEvalForceArg(1);
-			return;
-			};
-		if (Target.MakesLHSImplyLogicalNOTOfRHS(*ArgArray[1],*ArgArray[0]))
-			{	// AND(A,B): CONTRADICTION [AND(A,B,OR(~A,~B))|->...|->FALSE]
-			InvokeEvalForceFalse();
-			return;
-			};
-		};
-}
-
-void MetaConnective::UseThisAsMakeImply2AryOR(const MetaConcept& Target)
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/27/2000
-	if (Target.ValidLHSForMakesLHSImplyRHS(*ArgArray[0]))
-		{
-		if 		(Target.MakesLHSImplyRHS(*ArgArray[0],*ArgArray[1]))
-			{
-			InvokeEvalForceArg(1);
-			return;
-			}
-		else if (Target.MakesLHSImplyLogicalNOTOfRHS(*ArgArray[0],*ArgArray[1]))
-			{
-			AB_ToIFF_AnotB();
-			return;
-			};
-		};
-	if (Target.ValidLHSForMakesLHSImplyRHS(*ArgArray[1]))
-		{
-		if 		(Target.MakesLHSImplyRHS(*ArgArray[1],*ArgArray[0]))
-			{
-			InvokeEvalForceArg(0);
-			return;
-			}
-		else if (Target.MakesLHSImplyLogicalNOTOfRHS(*ArgArray[1],*ArgArray[0]))
-			{
-			AB_ToIFF_AnotB();
-			return;
-			};
-		};
-}
-
-void MetaConnective::UseThisAsMakeImply2AryIFF(const MetaConcept& Target)
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/30/2000
-	if (   Target.MakesLHSImplyLogicalNOTOfRHS(*ArgArray[0],*ArgArray[1])
-		|| Target.MakesLHSImplyLogicalNOTOfRHS(*ArgArray[1],*ArgArray[0]))
-		// IFF(A,B): boost to NOR(A,B), then DeMorgan
-		toNOR();
-}
-
-void MetaConnective::UseThisAsMakeImplyNAryAND(const MetaConcept& Target)
-{	// FORMALLY CORRECT: Kenneth Boyd, 11/26/2004
-	size_t i = fast_size();
-	do	if (Target.ValidLHSForMakesLHSImplyRHS(*ArgArray[--i]))
-			{
-			bool DidDeletion = false;
-			size_t j = fast_size();
-			do	if (   i!= --j
-					&& Target.MakesLHSImplyRHS(*ArgArray[i],*ArgArray[j]))
-					{
-					FastDeleteIdx(j);
-					if (j<i) --i;
-					DidDeletion = true;
-					}
-			while(0<j);
-			j = fast_size();
-			do	if (   i!= --j
-					&& Target.MakesLHSImplyLogicalNOTOfRHS(*ArgArray[i],*ArgArray[j]))
-					{	// AND(A,B): CONTRADICTION [AND(A,B,OR(~A,~B))|->...|->FALSE]
-					InvokeEvalForceFalse();
-					return;
-					}
-			while(0<j);
-			if (DidDeletion) return;
-			}
-	while(0<i);
-}
-
-void MetaConnective::UseThisAsMakeImplyNAryOR(const MetaConcept& Target)
-{	// FORMALLY CORRECT: Kenneth Boyd, 11/26/2004
-	size_t i = fast_size();
-	do	if (Target.ValidLHSForMakesLHSImplyRHS(*ArgArray[--i]))
-			{
-			bool DidDeletion = false;
-			size_t j = fast_size();
-			do	if (   i!= --j
-					&& Target.MakesLHSImplyRHS(*ArgArray[i],*ArgArray[j]))
-					{
-					FastDeleteIdx(i);
-					if (j<i) --i;
-					DidDeletion = true;
-					}
-			while(0<j);
-			if (DidDeletion) return;
-			}
-	while(0<i);
-}
-
-void MetaConnective::UseThisAsMakeImplyNAryIFF(const MetaConcept& Target)
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/29/2000
-	size_t i = fast_size();
-	do	if (Target.ValidLHSForMakesLHSImplyRHS(*ArgArray[--i]))
-			{
-			size_t j = fast_size();
-			do	if (   i!= --j
-					&& Target.MakesLHSImplyLogicalNOTOfRHS(*ArgArray[i],*ArgArray[j]))
-					{	// IFF(A,B,...): boost to NOR(A,B,...) [AND(IFF(A,B,...),OR(~A,~B))]
-					toNOR();
-					return;
-					}
-			while(0<j);
-			}
-	while(0<i);
-}
-
-void MetaConnective::UseThisAsMakeImplyNAryXOR(const MetaConcept& Target)
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/29/2000
-	size_t i = fast_size();
-	do	if (Target.ValidLHSForMakesLHSImplyRHS(*ArgArray[--i]))
-			{
-			size_t j = fast_size();
-			do	if (   i!= --j
-					&& Target.MakesLHSImplyRHS(*ArgArray[i],*ArgArray[j]))
-					{	// A=>B: force ~A AND XOR(...)
-					InferenceParameter1 = i;
-					TargetVariableFalse();
-					return;
-					}
-			while(0<j);
-			}
-	while(0<i);
-}
-
-void MetaConnective::UseThisAsMakeImplyNAryNXOR(const MetaConcept& Target)
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/29/2000
-	size_t i = fast_size();
-	do	if (Target.ValidLHSForMakesLHSImplyRHS(*ArgArray[--i]))
-			{
-			size_t j = fast_size();
-			do	if (   i!= --j
-					&& Target.MakesLHSImplyRHS(*ArgArray[i],*ArgArray[j]))
-					{	// A=>B: force A OR NXOR(...)
-					InferenceParameter1 = i;
-					TargetVariableTrue();
-					return;
-					}
-			while(0<j);
-			}
-	while(0<i);
-}
-
 void MetaConnective::SelfLogicalNOT()
 {	// FORMALLY CORRECT: Kenneth Boyd, 2/14/1999
 	typedef void (MetaConnective::* SelfLogicalNOTFunc)();
@@ -1911,7 +1696,6 @@ bool MetaConnective::DiagnoseInferenceRulesTrueNAry() const
 		const_cast<MetaConnective*>(this)->FastDeleteIdx(0);
 		return false;
 		};
-	// NOTE: MetaConnective::DiagnoseInferenceRulesTrueNAry assumes only LogicalAND entry is DECLARE_CLEANARG
 	static constexpr const signed short TruthValueTrueAryNSelfTable[] = {
 		SelfEvalRuleCleanArg_SER,	// AND
 		None_SER,	// OR
@@ -2016,7 +1800,6 @@ bool MetaConnective::DiagnoseInferenceRulesFalseNAry() const
 		const_cast<MetaConnective*>(this)->FastDeleteIdx(0);
 		return false;
 		};
-	// NOTE: MetaConnective::DiagnoseInferenceRulesFalseNAry assumes only LogicalOR entry is DECLARE_CLEANARG
 	static constexpr const signed short TruthValueFalseAryNSelfTable[] = {
 		SelfEvalRuleCleanArg_SER,	// OR
 		ConvertToNOROtherArgs_SER,	// IFF

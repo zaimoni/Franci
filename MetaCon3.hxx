@@ -90,8 +90,6 @@ private:
 	static const BinaryRelationAuxFunc2 CanStrictlyModifyAux[StrictBound_MCM];
 	static const LogicalANDFindDetailedRuleAux ANDDetailedRuleAux[NIFF_MCM-AND_MCM+1];
 	static const StrictModifyAuxFunc StrictlyModifiesAux[NIFF_MCM-AND_MCM+1];
-	static const UseThisAsMakeImplyAux UseThisAsMakeImply2AryTable[IFF_MCM+1];
-	static const UseThisAsMakeImplyAux UseThisAsMakeImplyNAryTable[NXOR_MCM+1];
 public:
 	MetaConnective(MetaConnectiveModes LinkageType) noexcept : MetaConceptWithArgArray((ExactType_MC)(LinkageType+LogicalAND_MC)) {};
 	MetaConnective(MetaConcept**& NewArgList, MetaConnectiveModes LinkageType);
@@ -213,15 +211,6 @@ private:
 	evalspec _CanUseThisAsMakeImplyIFF(const MetaConcept& Target);
 	evalspec _CanUseThisAsMakeImplyXOR(const MetaConcept& Target);
 	evalspec _CanUseThisAsMakeImplyNXOR(const MetaConcept& Target);
-
-	void UseThisAsMakeImply2AryAND(const MetaConcept& Target);
-	void UseThisAsMakeImply2AryOR(const MetaConcept& Target);
-	void UseThisAsMakeImply2AryIFF(const MetaConcept& Target);
-	void UseThisAsMakeImplyNAryAND(const MetaConcept& Target);
-	void UseThisAsMakeImplyNAryOR(const MetaConcept& Target);
-	void UseThisAsMakeImplyNAryIFF(const MetaConcept& Target);
-	void UseThisAsMakeImplyNAryXOR(const MetaConcept& Target);
-	void UseThisAsMakeImplyNAryNXOR(const MetaConcept& Target);
 
 	void SelfLogicalNOT_Normal();
 	void SelfLogicalNOT_IFF();

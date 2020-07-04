@@ -375,7 +375,7 @@ public:
 	bool MetaConceptPtrRelatedToThisConceptBy(const MetaConcept* LHS, LowLevelBinaryRelation* TargetRelation) const;
 	// substitution implementation
 	virtual bool ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& LHS, const MetaConcept& RHS, LowLevelAction* RHSInducedActionOnArg, LowLevelBinaryRelation* TargetRelation) = 0;
-	virtual evalspec _CanUseThisAsMakeImply(const MetaConcept& Target) { return evalspec(0,0); }
+	virtual evalspec _CanUseThisAsMakeImply(const MetaConcept& Target) { return evalspec(); }
 	virtual bool CanUseThisAsMakeImply(const MetaConcept& Target) const {return false;};
 // Grammar support
 // Formal properties
