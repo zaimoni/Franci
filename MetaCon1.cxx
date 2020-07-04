@@ -204,6 +204,12 @@ bool MetaConcept::ForceUltimateType(const AbstractClass* const rhs)
 	return false;
 }
 
+bool MetaConcept::CanUseThisAsMakeImply(const MetaConcept& Target) const
+{
+	auto rules = const_cast<MetaConcept*>(this)->_CanUseThisAsMakeImply(Target);
+	return rules.first || rules.second;
+}
+
 bool operator==(const MetaConcept& lhs, const MetaConcept& rhs)
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/15/2005
 	if (lhs.IsExactType(rhs.ExactType()) && lhs.MultiPurposeBitmap==rhs.MultiPurposeBitmap)
@@ -239,10 +245,6 @@ MetaConcept::CanCommuteUnderStdMultiplicationWith(const MetaConcept& rhs) const
 		return false;
 	return CanCommuteUnderStdMultiplicationWithAux(rhs);
 }
-
-bool
-MetaConcept::CanCommuteUnderStdMultiplicationWithAux(const MetaConcept& rhs) const
-{return false;}
 
 //! \todo decide on how to use MultiPurposeBitmap for this
 //! \return true iff the internal data type is "less than" the RHS's internal data type

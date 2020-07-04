@@ -133,7 +133,6 @@ public:
 	virtual bool ValidLHSForMakesLHSImplyRHS(const MetaConcept& lhs) const;
 	virtual bool ValidRHSForMakesLHSImplyRHS(const MetaConcept& rhs) const;
 	evalspec _CanUseThisAsMakeImply(const MetaConcept& Target) override;
-	virtual bool CanUseThisAsMakeImply(const MetaConcept& Target) const;
 	// Logical operation support
 	virtual void SelfLogicalNOT();
 	virtual bool StrictlyImplies(const MetaConcept& RHS) const;

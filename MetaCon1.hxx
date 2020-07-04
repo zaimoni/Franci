@@ -376,7 +376,7 @@ public:
 	// substitution implementation
 	virtual bool ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& LHS, const MetaConcept& RHS, LowLevelAction* RHSInducedActionOnArg, LowLevelBinaryRelation* TargetRelation) = 0;
 	virtual evalspec _CanUseThisAsMakeImply(const MetaConcept& Target) { return evalspec(); }
-	virtual bool CanUseThisAsMakeImply(const MetaConcept& Target) const {return false;};
+	bool CanUseThisAsMakeImply(const MetaConcept& Target) const;
 // Grammar support
 // Formal properties
 	inline bool IsSymmetric() const {return (VFTable1->Bitmap1 & Symmetric_LITBMP1MC);};
@@ -398,7 +398,7 @@ public:
 protected:
 	void SetExactType(ExactType_MC NewType) {VFTable1=&MetaConceptLookUp[NewType];};
 	virtual bool EqualAux2(const MetaConcept& rhs) const = 0;
-	virtual bool CanCommuteUnderStdMultiplicationWithAux(const MetaConcept& rhs) const;
+	virtual bool CanCommuteUnderStdMultiplicationWithAux(const MetaConcept& rhs) const { return false; }
 	virtual bool InternalDataLTAux(const MetaConcept& rhs) const = 0;
 	virtual bool SyntacticalStandardLTAux(const MetaConcept& rhs) const {return false;};	// override for all types that have a well-defined partial ordering
 	virtual void _forceStdForm() = 0;

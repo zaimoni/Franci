@@ -1102,19 +1102,6 @@ static _canUseAsMakeImply* const canUseThisAsMakeImplyNAryTable[]
 	};
 static_assert(STATIC_SIZE(canUseThisAsMakeImplyNAryTable)==NXOR_MCM+1);
 
-bool MetaConnective::CanUseThisAsMakeImply(const MetaConcept& Target) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/21/2000
-	// this returns true iff the Target generates an implies that can be used for reduction.
-	// cf. StrictlyImplies, StrictlyImpliesLogicalNOTOf handlers
-	if (2==fast_size())
-		// AND, OR, IFF
-		return (canUseThisAsMakeImply2AryTable[array_index()])(Target,ArgArray);
-	else if (!IsExactType(LogicalNIFF_MC))
-		// AND, OR, IFF, XOR, NXOR
-		return (canUseThisAsMakeImplyNAryTable[array_index()])(Target,ArgArray);
-	return false;
-}
-
 // Clang says free function has problems with miscomplling or undefined behavior in returned lambda functions
 typedef MetaConcept::evalspec(MetaConnective::*canUseAsMakeImply)(const MetaConcept&);
 MetaConcept::evalspec MetaConnective::_CanUseThisAsMakeImplyAND(const MetaConcept& Target)
