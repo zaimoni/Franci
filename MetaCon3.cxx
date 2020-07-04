@@ -2983,7 +2983,7 @@ MetaConnective::StrictlyModifies_IFFAux(MetaConcept*& rhs,LowLevelBinaryRelation
 }
 
 void MetaConnective::StrictlyModifies_IFF(MetaConcept*& rhs) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 2/23/2003
+{	// FORMALLY CORRECT: 2020-07-03
 	if (!ArgArray[0]->IsExactType(Variable_MC))
 		{
 		if (   rhs->IsExactType(LogicalAND_MC)
@@ -2995,7 +2995,6 @@ void MetaConnective::StrictlyModifies_IFF(MetaConcept*& rhs) const
 				return;
 			}
 		}
-#if 0
 	auto rules = rhs->_CanUseThisAsMakeImply(*this);
 	if (rules.first) rules.first();
 	else if (rules.second) {
@@ -3003,11 +3002,7 @@ void MetaConnective::StrictlyModifies_IFF(MetaConcept*& rhs) const
 		rules.second(dest);
 		delete rhs;
 		rhs = dest;
-	}
-	else SUCCEED_OR_DIE(0 && "incorrect call of MetaConnective::StrictlyModifies_IFF");	// failed 2 test cases
-#else
-	rhs->UseThisAsMakeImply(*this);
-#endif
+	} else SUCCEED_OR_DIE(0 && "incorrect call of MetaConnective::StrictlyModifies_IFF");
 }
 
 //! \todo FIX:
