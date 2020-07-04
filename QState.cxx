@@ -511,7 +511,7 @@ void MetaConnective::ScreenVarList_IFFClean(void)
 // #define FREE_WILL 1
 
 bool QuantifiedStatement::ScreenVarList(const clock_t EvalTime0, bool DoNotExplain, MetaConcept**& VarList, const char* const FailureMessage, MetaConnective*& ExperimentalArg0)
-{	// FORMALLY CORRECT: Kenneth Boyd, 1/29/2016
+{	// FORMALLY CORRECT: 2020-07-04
 	// ASSUMPTION: VarList!=NULL
 	//! \todo use symmetries when applicable
 	MetaConcept* TestVarStatement = NULL;
@@ -528,13 +528,13 @@ bool QuantifiedStatement::ScreenVarList(const clock_t EvalTime0, bool DoNotExpla
 		// * VarList[Idx] not a var or MetaConnective?  Try to find its basis clause.
 		// * Intercept OR, AND-with-OR arg here: make it spawn its variants.
 		INFORM(ExperimentWithSituation);
-		while(ExperimentalArg0->FindArgRelatedToRHS(*VarList[i],NonStrictlyImpliesLogicalNOTOf))
+		while(ExperimentalArg0->_findArgRelatedToRHS(*VarList[i],NonStrictlyImpliesLogicalNOTOf))
 			{
 			_delete_idx(VarList,i);
 			if (ArraySize(VarList)>i) goto ExitFailure;
 			}
 
-		MetaConcept* TmpVarList = NULL;
+		zaimoni::autoval_ptr<MetaConcept> TmpVarList;
 		MetaConcept* PromotedHypothesis = NULL;	// initialized within try block before used
 		try	{
 			ExperimentalArg0->CopyInto(TestVarStatement);
@@ -681,16 +681,12 @@ RetryAugmentation:
 					LOG(*VarList[SweepIdx]);
 					LOG("rather than:");
 					LOG(*PromotedHypothesis);
-
-					MetaConcept* Tmp = VarList[SweepIdx];
-					VarList[SweepIdx] = PromotedHypothesis;
-					PromotedHypothesis = Tmp;
+					std::swap(VarList[SweepIdx], PromotedHypothesis);
 					}
 			}
 			if (*PromotedHypothesis!=*VarList[i])
 				{
-				TmpVarList = VarList[i];
-				VarList[i] = NULL;
+				TmpVarList.reset(VarList[i]);
 				PromotedHypothesis->CopyInto(VarList[i]);
 				};
 			{	// flush everything that's after this in the testing order,
@@ -702,18 +698,14 @@ RetryAugmentation:
 					delete VarList[SweepIdx];
 					size_t Offset = 1;
 					while(++SweepIdx<ArraySize(VarList))
-						if (NonStrictlyImplies(*PromotedHypothesis,*VarList[SweepIdx]))
-							{
+						if (NonStrictlyImplies(*PromotedHypothesis,*VarList[SweepIdx])) {
 							delete VarList[SweepIdx];
 							Offset++;
-							}
-						else
-							VarList[SweepIdx-Offset] = VarList[SweepIdx];
+						} else VarList[SweepIdx-Offset] = VarList[SweepIdx];
 					VarList = REALLOC(VarList,_msize(VarList)-Offset*sizeof(MetaConcept*));
 					};
 			}
-			if (!static_cast<MetaConceptWithArgArray*>(TestVarStatement)->InsertSlotAt(TestVarStatement->size(),NULL))
-				UnconditionalRAMFailure();			
+			if (!static_cast<MetaConceptWithArgArray*>(TestVarStatement)->InsertSlotAt(TestVarStatement->size(),0)) UnconditionalRAMFailure();
 			}
 		catch(const bad_alloc&)
 			{
@@ -737,7 +729,7 @@ RetryAugmentation:
 				free(CouldAugmentHypothesisArgs);
 				delete TestVarStatement;
 				delete ExperimentalArg0;
-				delete TmpVarList;
+				TmpVarList.reset();
 
 				MetaConcept* Tmp = VarList[i];
 				VarList[i] = NULL;
@@ -747,8 +739,7 @@ RetryAugmentation:
 				Tmp->SelfLogicalNOT();
 				INFORM(*Tmp);
 				// assumes ArgArray[0] is a LogicalAND..should be "AND-invoker"
-				if (!static_cast<MetaConnective*>(ArgArray[0])->AddArgAtEndAndForceCorrectForm(Tmp))
-					UnconditionalRAMFailure();
+				if (!static_cast<MetaConnective*>(ArgArray[0])->AddArgAtEndAndForceCorrectForm(Tmp)) UnconditionalRAMFailure();
 
 #if 0
 				// other cases
@@ -767,7 +758,7 @@ RetryAugmentation:
 				free(CouldAugmentHypothesisArgs);
 				delete TestVarStatement;
 				delete ExperimentalArg0;
-				delete TmpVarList;
+				TmpVarList.reset();
 
 				MetaConcept* Tmp = VarList[Idx];
 				VarList[Idx] = NULL;
@@ -787,11 +778,7 @@ RetryAugmentation:
 #endif
 			};
 
-		if (NULL!=TmpVarList)
-			{
-			delete VarList[i];
-			VarList[i] = TmpVarList;
-			}
+		if (TmpVarList) TmpVarList.TransferOutAndNULL(VarList[i]);
 		// NOTE: don't use TmpVarList again!
 
 		// if Franci stops on an AND-clause with more than 1 variable argument,

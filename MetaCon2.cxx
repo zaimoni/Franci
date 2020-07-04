@@ -1376,7 +1376,7 @@ bool MetaConceptWithArgArray::FindArgRelatedToLHS(const MetaConcept& lhs, LowLev
 	return false;
 }
 
-size_t MetaConceptWithArgArray::_FindArgRelatedToRHS(const MetaConcept& lhs, LowLevelBinaryRelation& TargetRelation) const
+size_t MetaConceptWithArgArray::_findArgRelatedToRHS(const MetaConcept& lhs, LowLevelBinaryRelation& TargetRelation) const
 {
 	size_t i = ArgArray.size();
 	while (0 < i) if (TargetRelation(lhs, *ArgArray[--i])) return i + 1;
