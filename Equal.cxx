@@ -439,6 +439,13 @@ void EqualRelation::SelfLogicalNOT()
 		SetExactType((ExactType_MC)((NOTALLEQUAL_MC+ALLEQUAL_MC)-ExactType()));
 }
 
+int EqualRelation::_strictlyImplies(const MetaConcept& rhs) const
+{	// \todo IMPLEMENT
+	if (StrictlyImplies(rhs)) return 2;	// stopgap
+	if (StrictlyImpliesLogicalNOTOf(*this, rhs)) return -2;	// stopgap
+	return 0;
+}
+
 //! \todo explore use of EQUALTOONEOF w/constant args as an infinity-ary DISTINCTFROMALLOF [all args constant]
 //! StrictlyImplies, StrictlyImpliesLogicalNOTOf, StrictlyModifies, LogicalANDAux are targets
 //! LogicalANDAux depends on implementation of DISTINCTFROMALLOF targets for ALLDISTINCT extraction.

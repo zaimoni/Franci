@@ -71,6 +71,13 @@ void Variable::SelfLogicalNOT()
 	MetaConcept::SelfLogicalNOT();
 }
 
+int Variable::_strictlyImplies(const MetaConcept& rhs) const
+{
+	if (!SelfLogicalNOTWorks()) return 0;
+	if (MetaConcept::TValStrictlyImpliesDefault(rhs)) return 2;
+	if (MetaConcept::TValStrictlyImpliesLogicalNOTOfDefault(rhs)) return -2;
+}
+
 bool Variable::StrictlyImplies(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/13/1999
 	if (!SelfLogicalNOTWorks()) return false;

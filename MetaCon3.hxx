@@ -135,6 +135,7 @@ public:
 	evalspec _CanUseThisAsMakeImply(const MetaConcept& Target) override;
 	// Logical operation support
 	virtual void SelfLogicalNOT();
+	int _strictlyImplies(const MetaConcept& rhs) const override;
 	virtual bool StrictlyImplies(const MetaConcept& RHS) const;
 	// QState.cxx support: Hypothesis augmentation
 	ExactType_MC CouldAugmentHypothesis() const override;
@@ -216,6 +217,13 @@ private:
 	void SelfLogicalNOT_XOR();
 	void SelfLogicalNOT_ANDOR();
 
+	int _strictlyImplies_AND(const MetaConcept& rhs) const;
+	int _strictlyImplies_AND_IFF(const MetaConnective& rhs) const;
+	int _strictlyImplies_AND_XOR(const MetaConnective& rhs) const;
+	int _strictlyImplies_OR(const MetaConcept& rhs) const;
+	int _strictlyImplies_IFF_IFF(const MetaConnective& rhs) const;
+	int _strictlyImplies_IFF(const MetaConcept& rhs) const;
+	int _strictlyImplies_XOR(const MetaConcept& rhs) const;
 	bool StrictlyImplies_AND(const MetaConcept& rhs) const;
 	bool StrictlyImplies_OR(const MetaConcept& rhs) const;
 	bool StrictlyImplies_IFF(const MetaConcept& rhs) const;

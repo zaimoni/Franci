@@ -2309,6 +2309,180 @@ bool MetaConnective::LogicalANDFindDetailedRuleForIFF(MetaConcept& rhs, size_t L
 	return false;
 }
 
+int MetaConnective::_strictlyImplies_AND_IFF(const MetaConnective& rhs) const
+{
+	assert(rhs.ExactType() == LogicalIFF_MC || rhs.ExactType() == LogicalNIFF_MC);
+	size_t implied = 0;
+	size_t implied_NOT = 0;
+	const size_t ref_ub = rhs.fast_size();
+	size_t ub = ref_ub;
+	while (0 < ub) {
+		int code = _nonStrictlyImpliesThisOrLogicalNOTOf(*this, *rhs.ArgArray[--ub]);
+		if (0 < code) {
+			implied++;
+			if (implied_NOT) return -2;
+		}
+		else if (0 > code) {
+			implied_NOT++;
+			if (implied) return -2;
+		}
+	}
+	if (ref_ub == implied || ref_ub == implied_NOT) return 2;
+	return 0;
+}
+
+int MetaConnective::_strictlyImplies_AND_XOR(const MetaConnective& rhs) const
+{
+	assert(rhs.ExactType() == LogicalXOR_MC || rhs.ExactType() == LogicalNXOR_MC);
+	size_t implied = 0;
+	size_t implied_NOT = 0;
+	const size_t ref_ub = rhs.fast_size();
+	size_t ub = ref_ub;
+	while (0 < ub) {
+		int code = _nonStrictlyImpliesThisOrLogicalNOTOf(*this, *rhs.ArgArray[--ub]);
+		if (0 < code) {
+			if (2 <= ++implied) return -2;
+		} else if (0 > code) implied_NOT++;
+	}
+	if (0 == implied) return 0;
+	if (ref_ub - 1 == implied_NOT) return 2;
+	return 0;
+}
+
+int MetaConnective::_strictlyImplies_AND(const MetaConcept& rhs) const
+{	//! \todo IMPLEMENT: NIFF: conjugate StrictlyImpliesLogicalNOTOf for IFF
+// AND(A1..An) =>
+//	AND: RHS is vector subarglist of LHS
+//	IFF: IFF arglist is vector subarglist of AND-args, or all args of IFF are anti-idempotent AND-args
+//	XOR: 1 arg is AND-arg, other n-1 XOR-args are anti-idempotent to AND-args; XOR has at most as many args as AND
+//	NIFF: conjugate StrictlyImpliesLogicalNOTOf for IFF
+//	NXOR: conjugate StrictlyImpliesLogicalNOTOf for XOR
+// DONE:
+	// Variable, and other direct quotations
+	switch (rhs.ExactType()) {
+	case LogicalAND_MC: {
+		const MetaConnective& VR_rhs = static_cast<const MetaConnective&>(rhs);
+		size_t ub = VR_rhs.fast_size();
+		while (0 < ub) {
+			if (!NonStrictlyImplies(*this, *VR_rhs.ArgArray[--ub])) {
+				if (NonStrictlyImpliesLogicalNOTOf(*this, *VR_rhs.ArgArray[ub])) return -2;
+				return 0;
+			}
+		}
+		return 2;
+	}
+	case LogicalIFF_MC: return _strictlyImplies_AND_IFF(static_cast<const MetaConnective&>(rhs));
+	case LogicalXOR_MC: return _strictlyImplies_AND_XOR(static_cast<const MetaConnective&>(rhs));
+	case LogicalNXOR_MC: return -_strictlyImplies_AND_XOR(static_cast<const MetaConnective&>(rhs));
+	case LogicalNIFF_MC: return -_strictlyImplies_AND_IFF(static_cast<const MetaConnective&>(rhs));
+	default: break;
+	}
+
+	if (_findArgRelatedToRHS(rhs, NonStrictlyImplies)) return 2;
+	if (_findArgRelatedToRHS(rhs, NonStrictlyImpliesLogicalNOTOf)) return -2;
+
+	return _tValStrictlyImpliesDefault(rhs);
+}
+
+int MetaConnective::_strictlyImplies_OR(const MetaConcept& rhs) const
+{
+	// general code
+	// NIFF and NXOR would be "very intricate"
+	size_t ub = fast_size();
+	bool implies_ok = true;
+	bool implies_not_ok = true;
+	while (0 < ub) {
+		int code = _nonStrictlyImpliesThisOrLogicalNOTOf(*ArgArray[--ub], rhs);
+		if (0 < code) {
+			implies_not_ok = false;
+			if (!implies_ok) return 0;
+		} else if (0 > code) {
+			implies_ok = false;
+			if (!implies_not_ok) return 0;
+		} else return 0;
+	};
+	if (implies_ok) return 2;
+	if (implies_not_ok) return -2;
+	return 0;
+}
+
+int MetaConnective::_strictlyImplies_IFF_IFF(const MetaConnective& rhs) const
+{
+	// OR(A1..An)=>OR(A1..An,B1..Bm): vector subarglist
+	// IFF(A1..An), IFF(B1..Bm): Each arg A1 implies some arg Bi, or implies logical not of some Bi
+	assert(rhs.ExactType() == LogicalIFF_MC || rhs.ExactType() == LogicalNIFF_MC);
+	size_t implied = 0;
+	size_t implied_NOT = 0;
+	const size_t ref_ub = rhs.fast_size();
+	size_t ub = ref_ub;
+	while (0 < ub) {
+		if (_findArgRelatedToLHS(*rhs.ArgArray[--ub], NonStrictlyImplies)) {
+			implied++;
+			if (implied_NOT) return -2;
+		} else if (_findArgRelatedToLHS(*rhs.ArgArray[ub], NonStrictlyImpliesLogicalNOTOf)) {
+			implied_NOT++;
+			if (implied) return -2;
+		}
+	}
+	if (ref_ub == implied || ref_ub == implied_NOT) return *this != rhs ? 2 : 0;
+	return _tValStrictlyImpliesDefault(rhs);
+}
+
+int MetaConnective::_strictlyImplies_IFF(const MetaConcept& rhs) const
+{	// FORMALLY CORRECT: 2020-07-05
+// IFF(A1..An) =>
+//	IFF: all RHS IFF-args are == LHS IFF args, or all RHS IFF-args are anti-idempotent to LHS IFF-args
+//	OR: 1 OR-arg == to IFF-arg, and 1 OR-arg antiidempotent to IFF-arg
+//	NIFF: conjugate StrictlyImpliesLogicalNOTOf for IFF RHS
+//	NXOR: conjugate StrictlyImpliesLogicalNOTOf for XOR RHS
+//  AND, XOR: n-ary not visible
+	switch(rhs.ExactType()) {
+	case LogicalIFF_MC: return _strictlyImplies_IFF_IFF(static_cast<const MetaConnective&>(rhs));
+	case LogicalNIFF_MC: return -_strictlyImplies_IFF_IFF(static_cast<const MetaConnective&>(rhs));
+	default: return _tValStrictlyImpliesDefault(rhs);
+	}
+}
+
+int MetaConnective::_strictlyImplies_XOR(const MetaConcept& rhs) const
+{	// FORMALLY CORRECT: 2020-07-05
+// XOR(A1..An) =>
+//	OR: XOR-args are a subset of OR-args
+//	NIFF: conjugate StrictlyImpliesLogicalNOTOf for IFF RHS
+//	NXOR: conjugate StrictlyImpliesLogicalNOTOf for XOR RHS
+//	AND, IFF, XOR: n-ary not visible
+	// 2 OR-args LogicalNOTOfNonStrictlyImplied by XOR-args
+	//! \todo OPTIMIZE: generalize this.  RHS needs to be 'functionally' OR.
+	bool implies_ok = true; // If all n XOR args imply target, target is implied
+	size_t implies_NOT = 0;
+	size_t ref_ub = fast_size();
+	size_t ub = ref_ub;
+	while (0 < ub) {
+		if (LogicalNOTOfNonStrictlyImplies(*ArgArray[--ub], rhs)) {
+			if (2 <= ++implies_NOT) return 2;
+			implies_ok = false;
+		} else if (implies_ok && !ArgArray[ub]->StrictlyImplies(rhs)) implies_ok = false;
+	};
+	if (implies_ok) return 2;
+	return _tValStrictlyImpliesDefault(rhs);
+}
+
+int MetaConnective::_strictlyImplies(const MetaConcept& rhs) const
+{
+	switch (ExactType()) {
+	case LogicalAND_MC: return _strictlyImplies_AND(rhs);
+	case LogicalOR_MC: return _strictlyImplies_OR(rhs);
+	case LogicalIFF_MC: return _strictlyImplies_IFF(rhs);
+	case LogicalXOR_MC: return _strictlyImplies_XOR(rhs);
+	case LogicalNXOR_MC: break;
+	case LogicalNIFF_MC: break;
+	default: {
+		assert(0 && "invariant failure");
+		return 0;
+	}
+	}
+	return _tValStrictlyImpliesDefault(rhs);
+}
+
 bool MetaConnective::StrictlyImplies(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 2/14/2000
 	return (this->*StrictlyImpliesAux[array_index()])(rhs);
@@ -2331,7 +2505,7 @@ bool MetaConnective::StrictlyImplies_AND(const MetaConcept& rhs) const
 		size_t i = VR_rhs.fast_size();
 		while(NonStrictlyImplies(*this,*VR_rhs.ArgArray[--i]))
 			if (0==i) return *this!=rhs;
-		return false;	// short-circuit default: requires RHS.IsExactType(LogicalOR_MC)
+		return false;
 		}
 	if (rhs.IsExactType(LogicalIFF_MC))
 		{
@@ -2347,7 +2521,7 @@ bool MetaConnective::StrictlyImplies_AND(const MetaConcept& rhs) const
 			while(NonStrictlyImpliesLogicalNOTOf(*this,*VR_rhs.ArgArray[--i]))
 				if (0==i) return true;
 			}
-		return false;	// short-circuit default: requires RHS.IsExactType(LogicalOR_MC)
+		return false;
 		}
 	if (rhs.IsExactType(LogicalXOR_MC))
 		{
@@ -2362,7 +2536,7 @@ bool MetaConnective::StrictlyImplies_AND(const MetaConcept& rhs) const
 			while(0<i);
 			return true;
 			}
-		return false;	// short-circuit default: requires RHS.IsExactType(LogicalOR_MC)
+		return false;
 		}
 	if (rhs.IsExactType(LogicalNXOR_MC))
 		{
@@ -2378,9 +2552,9 @@ bool MetaConnective::StrictlyImplies_AND(const MetaConcept& rhs) const
 			while(0<i);
 			return true;
 			}
-		return false;	// short-circuit default: requires RHS.IsExactType(LogicalOR_MC)
+		return false;
 		}
-	return TValStrictlyImpliesDefault(rhs);
+	return TValStrictlyImpliesDefault(rhs);	// this is constant-false except for LogicalOR_MC
 }
 
 bool MetaConnective::StrictlyImplies_OR(const MetaConcept& rhs) const
@@ -7196,6 +7370,15 @@ bool MetaConceptWithArgArray::RetypeToMetaConnective(MetaConcept*& dest)
 	return true;
 }
 
+int MetaConcept::_tValStrictlyImpliesDefault(const MetaConcept& rhs) const
+{	// FORMALLY CORRECT: 2020-07-05
+	switch (rhs.ExactType()) {
+	case LogicalAND_MC: return static_cast<const MetaConnective&>(rhs).FindArgRelatedToLHS(*this, NonStrictlyImpliesLogicalNOTOf) ? -2 : 0;
+	case LogicalOR_MC: return static_cast<const MetaConnective&>(rhs).FindArgRelatedToLHS(*this, NonStrictlyImplies) ? 2 : 0;
+	default: return 0;
+	}
+}
+
 bool MetaConcept::TValStrictlyImpliesDefault(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 11/6/2000
 	if (rhs.IsExactType(LogicalOR_MC))
@@ -7203,16 +7386,14 @@ bool MetaConcept::TValStrictlyImpliesDefault(const MetaConcept& rhs) const
 	return false;
 }
 
-bool
-MetaConcept::TValStrictlyImpliesLogicalNOTOfDefault(const MetaConcept& rhs) const
+bool MetaConcept::TValStrictlyImpliesLogicalNOTOfDefault(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 11/6/2000
 	if (rhs.IsExactType(LogicalAND_MC))
 		return static_cast<const MetaConnective&>(rhs).FindArgRelatedToLHS(*this,NonStrictlyImpliesLogicalNOTOf);
 	return false;
 }
 
-bool
-MetaConcept::TValLogicalNOTOfStrictlyImpliesDefault(const MetaConcept& rhs) const
+bool MetaConcept::TValLogicalNOTOfStrictlyImpliesDefault(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 11/6/2000
 	if (rhs.IsExactType(LogicalOR_MC))
 		return static_cast<const MetaConnective&>(rhs).FindArgRelatedToLHS(*this,LogicalNOTOfNonStrictlyImplies);

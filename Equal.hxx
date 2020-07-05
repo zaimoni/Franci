@@ -95,6 +95,7 @@ public:
 	virtual size_t LengthOfSelfName() const;
 
 	virtual void SelfLogicalNOT();
+	int _strictlyImplies(const MetaConcept& rhs) const override;
 	virtual bool StrictlyImplies(const MetaConcept& rhs) const;
 	virtual void StrictlyModifies(MetaConcept*& rhs) const;
 	virtual bool CanStrictlyModify(const MetaConcept& rhs) const;

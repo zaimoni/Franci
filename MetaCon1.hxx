@@ -313,7 +313,8 @@ public:
 // Formal manipulation functions
 	bool SelfLogicalNOTWorks(void) const;	// defined inline in Class.hxx
 	virtual void SelfLogicalNOT();	// instantiate when UltimateType is TruthValues
-	virtual bool StrictlyImplies(const MetaConcept& rhs) const {return false;};
+	virtual int _strictlyImplies(const MetaConcept& rhs) const { return 0; }
+	virtual bool StrictlyImplies(const MetaConcept& rhs) const {return false;}
 	virtual void StrictlyModifies(MetaConcept*& rhs) const {};	// only RHS affected
 	virtual bool CanStrictlyModify(const MetaConcept& rhs) const {return false;};	// could affect only RHS
 	virtual bool SelfInverse(const ExactType_MC Operation);
@@ -410,6 +411,7 @@ protected:
 	virtual bool isAntiIdempotentTo(const MetaConcept& rhs) const;
 
 	// Next three implemented in MetaCon3.cxx
+	int _tValStrictlyImpliesDefault(const MetaConcept& rhs) const;
 	bool TValStrictlyImpliesDefault(const MetaConcept& rhs) const;
 	bool TValStrictlyImpliesLogicalNOTOfDefault(const MetaConcept& rhs) const;
 	bool TValLogicalNOTOfStrictlyImpliesDefault(const MetaConcept& rhs) const;

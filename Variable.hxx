@@ -55,6 +55,7 @@ public:
 	// variable is of type TruthValue
 	void SelfLogicalNOT() override;	// instantiate when UltimateType is TruthValues
 	bool LogicalANDOrthogonalClause() const override { return true; }
+	int _strictlyImplies(const MetaConcept& rhs) const override;
 	bool StrictlyImplies(const MetaConcept& rhs) const override;
 	void ConvertVariableToCurrentQuantification(MetaQuantifier& src) override;
 	bool UsesQuantifierAux(const MetaQuantifier& x) const override { return x.MetaConceptPtrUsesThisQuantifier(Arg1); }

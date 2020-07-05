@@ -6,21 +6,18 @@
 
 // FORMALLY CORRECT: Kenneth Boyd, 12/11/1999
 #define DECLARE_BINARY_RELATION(A)	\
-bool	\
-A(const MetaConcept& LHS, const MetaConcept& RHS)	\
+bool A(const MetaConcept& LHS, const MetaConcept& RHS)	\
 {	\
 	return LHS.A(RHS);	\
 }
 
 // Arity 2, symmetric
-bool
-AreSyntacticallyEqual(const MetaConcept& LHS, const MetaConcept& RHS)
+bool AreSyntacticallyEqual(const MetaConcept& LHS, const MetaConcept& RHS)
 {	// FORMALLY CORRECT: Kenneth Boyd, 2/11/1999
 	return LHS==RHS;
 }
 
-bool
-AreSyntacticallyUnequal(const MetaConcept& LHS, const MetaConcept& RHS)
+bool AreSyntacticallyUnequal(const MetaConcept& LHS, const MetaConcept& RHS)
 {	// FORMALLY CORRECT: Kenneth Boyd, 3/4/2002
 	return !(LHS==RHS);
 }
@@ -30,14 +27,12 @@ bool IsSyntacticallyEqualOrAntiIdempotentTo(const MetaConcept& lhs, const MetaCo
 	return lhs==rhs || IsAntiIdempotentTo(lhs,rhs);
 }
 
-bool
-IsStdAdditionInverseTo(const MetaConcept& LHS, const MetaConcept& RHS)
+bool IsStdAdditionInverseTo(const MetaConcept& LHS, const MetaConcept& RHS)
 {	// FORMALLY CORRECT: Kenneth Boyd, 8/15/2000
 	return LHS.SelfInverseTo(RHS,StdAddition_MC);
 }
 
-bool
-IsStdMultiplicationInverseTo(const MetaConcept& LHS, const MetaConcept& RHS)
+bool IsStdMultiplicationInverseTo(const MetaConcept& LHS, const MetaConcept& RHS)
 {	// FORMALLY CORRECT: Kenneth Boyd, 1/6/2003
 	return LHS.SelfInverseTo(RHS,StdMultiplication_MC);
 }
@@ -47,6 +42,15 @@ DECLARE_BINARY_RELATION(StrictlyImplies)
 DECLARE_BINARY_RELATION(CanStrictlyModify)
 
 #undef DECLARE_BINARY_RELATION
+
+int _nonStrictlyImpliesThisOrLogicalNOTOf(const MetaConcept& lhs, const MetaConcept& rhs)
+{
+	if (lhs == rhs) return 1;
+	if (IsAntiIdempotentTo(lhs, rhs)) return -1;
+	if (lhs.StrictlyImplies(rhs)) return 2;
+	if (StrictlyImpliesLogicalNOTOf(lhs, rhs)) return -2;
+	return 0;
+}
 
 bool NonStrictlyImpliesThisOrLogicalNOTOf(const MetaConcept& lhs, const MetaConcept& rhs)
 {
@@ -72,41 +76,35 @@ bool LogicalNOTOfNonStrictlyImplies(const MetaConcept& lhs, const MetaConcept& r
 		|| LogicalNOTOfStrictlyImplies(lhs,rhs);
 }
 
-bool
-CanDeepStrictlyModify(const MetaConcept& LHS, const MetaConcept& RHS)
+bool CanDeepStrictlyModify(const MetaConcept& LHS, const MetaConcept& RHS)
 {	// FORMALLY CORRECT: Kenneth Boyd, 8/19/2003
 	return RHS.HasArgRelatedToThisConceptBy(LHS,::CanStrictlyModify);
 }
 
-bool
-DeepLogicallyImplies(const MetaConcept& LHS, const MetaConcept& RHS)
+bool DeepLogicallyImplies(const MetaConcept& LHS, const MetaConcept& RHS)
 {	// FORMALLY CORRECT: Kenneth Boyd, 8/19/2003
 	return RHS.HasArgRelatedToThisConceptBy(LHS,NonStrictlyImpliesThisOrLogicalNOTOf);
 }
 
 // Actions
-void
-SetLHSToRHS(MetaConcept*& Target, const MetaConcept& Inducer)
+void SetLHSToRHS(MetaConcept*& Target, const MetaConcept& Inducer)
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/11/1999
 	Inducer.CopyInto(Target);
 }
 
-void
-SetLHSToLogicalNOTOfRHS(MetaConcept*& Target, const MetaConcept& Inducer)
+void SetLHSToLogicalNOTOfRHS(MetaConcept*& Target, const MetaConcept& Inducer)
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/11/1999
 	Inducer.CopyInto(Target);
 	Target->SelfLogicalNOT();
 }
 
-void
-SetLHSToStdAdditionInverseOfRHS(MetaConcept*& Target, const MetaConcept& Inducer)
+void SetLHSToStdAdditionInverseOfRHS(MetaConcept*& Target, const MetaConcept& Inducer)
 {	// FORMALLY CORRECT: Kenneth Boyd, 1/6/2003
 	Inducer.CopyInto(Target);
 	Target->SelfInverse(StdAddition_MC);	// safe
 }
 
-void
-SetLHSToStdMultiplicationInverseOfRHS(MetaConcept*& Target, const MetaConcept& Inducer)
+void SetLHSToStdMultiplicationInverseOfRHS(MetaConcept*& Target, const MetaConcept& Inducer)
 {	// FORMALLY CORRECT: Kenneth Boyd, 1/6/2003
 	if (!Inducer.IsZero())
 		{
