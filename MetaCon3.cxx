@@ -156,8 +156,6 @@ static constexpr const MetaConceptWithArgArray::EvalRuleIdx_ER truthValueFalseAr
 #undef DECLARE_FALSE
 
 // lookup tables
-#define StrictlyImplies_NOR NORNANDFatal
-#define StrictlyImplies_NAND NORNANDFatal
 #define CanStrictlyModify_NOR NORNANDFatal
 #define CanStrictlyModify_NAND NORNANDFatal
 
@@ -184,18 +182,6 @@ const MetaConnective::StrictModifyAuxFunc MetaConnective::StrictlyModifiesAux[NI
 	&MetaConnective::StrictlyModifies_NIFF
 	};
 
-const MetaConnective::BinaryRelationAuxFunc2 MetaConnective::StrictlyImpliesAux[StrictBound_MCM]
-  =	{
-	&MetaConnective::StrictlyImplies_AND,
-	&MetaConnective::StrictlyImplies_OR,
-	&MetaConnective::StrictlyImplies_IFF,
-	&MetaConnective::StrictlyImplies_XOR,
-	&MetaConnective::StrictlyImplies_NXOR,
-	&MetaConnective::StrictlyImplies_NIFF,
-	&MetaConnective::StrictlyImplies_NOR,
-	&MetaConnective::StrictlyImplies_NAND
-	};
-
 const MetaConnective::BinaryRelationAuxFunc2 MetaConnective::CanStrictlyModifyAux[StrictBound_MCM]
   =	{
 	&MetaConnective::CanStrictlyModify_AND,
@@ -210,8 +196,6 @@ const MetaConnective::BinaryRelationAuxFunc2 MetaConnective::CanStrictlyModifyAu
 
 #undef CanStrictlyModify_NOR
 #undef CanStrictlyModify_NAND
-#undef StrictlyImplies_NAND
-#undef StrictlyImplies_NOR
 
 #undef DECLARE_MCVFT
 
@@ -2073,7 +2057,6 @@ bool MetaConnective::DiagnoseStrictlyImpliesNAryOR() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 5/23/2000
 	// A=>B scanner
 	// IFF(A,B,...): NO EFFECT
-	//! \todo IMPLEMENT: mirror augmentations for DiagnoseStrictlyImpliesNAryAND
 	if (DualFindTwoRelatedArgs(::StrictlyImplies) || FindTwoRelatedArgs(::StrictlyImplies))
 		{
 		IdxCurrentSelfEvalRule = LogicalORStrictlyImpliesClean_SER;
@@ -2401,7 +2384,7 @@ int MetaConnective::_strictlyImplies_OR(const MetaConcept& rhs) const
 			if (!implies_not_ok) return 0;
 		} else return 0;
 	};
-	if (implies_ok) return 2;
+	if (implies_ok) return *this!=rhs ? 2 : 0;
 	if (implies_not_ok) return -2;
 	return 0;
 }
@@ -2484,8 +2467,20 @@ int MetaConnective::_strictlyImplies(const MetaConcept& rhs) const
 }
 
 bool MetaConnective::StrictlyImplies(const MetaConcept& rhs) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 2/14/2000
-	return (this->*StrictlyImpliesAux[array_index()])(rhs);
+{	// FORMALLY CORRECT: 2020-07-05
+	switch (ExactType()) {
+	case LogicalAND_MC: return StrictlyImplies_AND(rhs);
+	case LogicalOR_MC: return StrictlyImplies_OR(rhs);
+	case LogicalIFF_MC: return StrictlyImplies_IFF(rhs);
+	case LogicalXOR_MC: return StrictlyImplies_XOR(rhs);
+	case LogicalNXOR_MC: break;
+	case LogicalNIFF_MC: break;
+	default: {
+		SUCCEED_OR_DIE(0 && "invariant failure");
+		return false;
+	}
+	}
+	return TValStrictlyImpliesDefault(rhs);
 }
 
 bool MetaConnective::StrictlyImplies_AND(const MetaConcept& rhs) const
@@ -2557,24 +2552,17 @@ bool MetaConnective::StrictlyImplies_AND(const MetaConcept& rhs) const
 	return TValStrictlyImpliesDefault(rhs);	// this is constant-false except for LogicalOR_MC
 }
 
-bool MetaConnective::StrictlyImplies_OR(const MetaConcept& rhs) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 8/24/2003
+bool MetaConnective::StrictlyImplies_OR(const MetaConcept& rhs) const // cf _strictlyImplies_OR
+{	// FORMALLY CORRECT: 2020-07-05
 	// OR(A1..An) =>
 	//	OR(A1..An,B1..Bm)
 	//	AND, IFF, XOR: n-ary not visible
 	//	NIFF, NXOR: conjugate StrictlyImpliesLogicalNOTOf for IFF, XOR RHS [n-ary not visible]
-	if (rhs.IsExactType(LogicalOR_MC))
-		{	// OR(A1..An)=>OR(A1..An,B1..Bm): vector subarglist
-		// OR(A1..An), OR(B1..Bm): Each arg A1 implies some arg Bi
-		const MetaConnective& VR_rhs = static_cast<const MetaConnective&>(rhs);
-
-		size_t i = fast_size();
-		do	if (!VR_rhs._findArgRelatedToLHS(*ArgArray[--i],NonStrictlyImplies)) return false;
-		while(0<i);
-		return *this!=rhs;
-// AllArgsImpliedBySomeArgFailed: ....
-		}
-	return false;
+	// general code
+	// NIFF and NXOR would be "very intricate"
+	size_t ub = fast_size();
+	while (0 < ub) if (0 >= _nonStrictlyImpliesThisOrLogicalNOTOf(*ArgArray[--ub], rhs)) return false;
+	return *this != rhs;
 }
 
 bool MetaConnective::StrictlyImplies_IFF(const MetaConcept& rhs) const
@@ -2608,45 +2596,20 @@ bool MetaConnective::StrictlyImplies_IFF(const MetaConcept& rhs) const
 	return TValStrictlyImpliesDefault(rhs);
 }
 
-bool MetaConnective::StrictlyImplies_XOR(const MetaConcept& rhs) const
-{	//! \todo IMPLEMENT
-// XOR(A1..An) =>
-//	OR: XOR-args are a subset of OR-args
-//	NIFF: conjugate StrictlyImpliesLogicalNOTOf for IFF RHS
-//	NXOR: conjugate StrictlyImpliesLogicalNOTOf for XOR RHS
-//	AND, IFF, XOR: n-ary not visible
-	// 2 OR-args LogicalNOTOfNonStrictlyImplied by XOR-args
-	//! \todo OPTIMIZE: generalize this.  RHS needs to be 'functionally' OR.
-	if (   FindArgRelatedToRHS(rhs,LogicalNOTOfNonStrictlyImplies,1,fast_size()-1)
-		&& FindArgRelatedToRHS(rhs,LogicalNOTOfNonStrictlyImplies,0,InferenceParameter1-1))
-		return true;
-	// If all n XOR args imply target, target is implied
-	//! \todo ALTER: this and above to iteration over n AND collapses (comprehensive)
-	size_t i = fast_size();
-	do	if (!ArgArray[--i]->StrictlyImplies(rhs))
-			goto TotalXORImplyFailed;
-	while(0<i);
-	return true;
-TotalXORImplyFailed:
-	return TValStrictlyImpliesDefault(rhs);
-}
-
-bool MetaConnective::StrictlyImplies_NXOR(const MetaConcept& rhs) const
-{	//! \todo IMPLEMENT
-// NXOR(A1..An) =>
-//	OR: [complicated]
-//	NIFF, NXOR: conjugate StrictlyImpliesLogicalNOTOf for IFF/XOR: n-ary not visible
-//	AND, IFF, XOR: n-ary not visible
-	return TValStrictlyImpliesDefault(rhs);
-}
-
-bool MetaConnective::StrictlyImplies_NIFF(const MetaConcept& rhs) const
-{	//! \todo IMPLEMENT
-// NIFF(A1..An) =>
-//	OR: [complicated]
-//	NIFF: conjugate StrictlyImpliesLogicalNOTOf for IFF RHS
-//	NXOR: conjugate StrictlyImpliesLogicalNOTOf for XOR RHS
-//	AND, IFF, XOR: n-ary not visible
+bool MetaConnective::StrictlyImplies_XOR(const MetaConcept& rhs) const // cf _strictlyImplies_XOR
+{	// FORMALLY CORRECT: 2020-07-05
+	bool implies_ok = true; // If all n XOR args imply target, target is implied
+	size_t implies_NOT = 0;
+	size_t ref_ub = fast_size();
+	size_t ub = ref_ub;
+	while (0 < ub) {
+		if (LogicalNOTOfNonStrictlyImplies(*ArgArray[--ub], rhs)) {
+			if (2 <= ++implies_NOT) return true;
+			implies_ok = false;
+		}
+		else if (implies_ok && !ArgArray[ub]->StrictlyImplies(rhs)) implies_ok = false;
+	};
+	if (implies_ok) return true;
 	return TValStrictlyImpliesDefault(rhs);
 }
 
@@ -5283,21 +5246,15 @@ bool MetaConnective::DiagnoseCommonIntermediateRulesORXORAux() const
 										size_t Idx2 = IFFFinderGraph->size();
 										do	{
 											const MetaConcept* const TmpArg = IFFFinderGraph->ArgN(--Idx2);
-											if 		(ArgArray[SweepIdx]->StrictlyImplies(*TmpArg))
-												{
-												IFFCandidateArgs[Idx2] = 1;
-												}
-											else if (StrictlyImpliesLogicalNOTOf(*ArgArray[SweepIdx],*TmpArg))
-												{
-												IFFCandidateArgs[Idx2] = 0;
-												}
-											else{	// RAM failure
+											const int code = ArgArray[SweepIdx]->_strictlyImplies(*TmpArg);
+											if (0 < code) IFFCandidateArgs[Idx2] = 1; // StrictlyImplies
+											else if (0 > code) IFFCandidateArgs[Idx2] = 0; // StrictlyImpliesLogicalNOTOf
+											else {
 												delete IFFFinderGraph;
 												free(IFFCandidateArgs);
 												return false;
-												}
 											}
-										while(0<Idx2);
+										} while(0<Idx2);
 
 										// Filter the graph
 										// Any mismatch is a not-edge.

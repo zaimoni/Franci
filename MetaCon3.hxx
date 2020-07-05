@@ -86,7 +86,6 @@ private:
 	typedef	bool (MetaConnective::*BinaryRelationAuxFunc)(const MetaConnective& Arg2) const;
 	typedef	bool (MetaConnective::*BinaryRelationAuxFunc2)(const MetaConcept& Arg2) const;
 
-	static const BinaryRelationAuxFunc2 StrictlyImpliesAux[StrictBound_MCM];
 	static const BinaryRelationAuxFunc2 CanStrictlyModifyAux[StrictBound_MCM];
 	static const LogicalANDFindDetailedRuleAux ANDDetailedRuleAux[NIFF_MCM-AND_MCM+1];
 	static const StrictModifyAuxFunc StrictlyModifiesAux[NIFF_MCM-AND_MCM+1];
@@ -228,8 +227,6 @@ private:
 	bool StrictlyImplies_OR(const MetaConcept& rhs) const;
 	bool StrictlyImplies_IFF(const MetaConcept& rhs) const;
 	bool StrictlyImplies_XOR(const MetaConcept& rhs) const;
-	bool StrictlyImplies_NXOR(const MetaConcept& rhs) const;
-	bool StrictlyImplies_NIFF(const MetaConcept& rhs) const;
 	bool NORNANDFatal(const MetaConcept& rhs) const;
 
 	void StrictlyModifies_AND(MetaConcept*& RHS) const;
