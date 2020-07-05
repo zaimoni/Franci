@@ -138,8 +138,8 @@ public:
 	virtual bool StrictlyImplies(const MetaConcept& RHS) const;
 	// QState.cxx support: Hypothesis augmentation
 	ExactType_MC CouldAugmentHypothesis() const override;
+	std::function<bool(MetaConcept*&)> _CanAugmentHypothesis(const MetaConcept& Hypothesis) const override;
 	virtual bool CanAugmentHypothesis(const MetaConcept& Hypothesis) const;
-	virtual bool AugmentHypothesis(MetaConcept*& Hypothesis) const;
 	virtual void StrictlyModifies(MetaConcept*& RHS) const;
 	virtual bool CanStrictlyModify(const MetaConcept& RHS) const;
 	bool VertexDiagnoseIntermediateRulesANDAux(void) const;

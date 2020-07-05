@@ -344,8 +344,8 @@ public:
 	size_t RadixSortIdxSourceListByRHSCompatible(MetaConcept** const IdxSourceList) const;
 	// QState.cxx support: Hypothesis augmentation
 	virtual ExactType_MC CouldAugmentHypothesis() const { return Unknown_MC; }
+	virtual std::function<bool(MetaConcept*&)> _CanAugmentHypothesis(const MetaConcept& Hypothesis) const { return nullptr; }
 	virtual bool CanAugmentHypothesis(const MetaConcept& Hypothesis) const {return false;};
-	virtual bool AugmentHypothesis(MetaConcept*& Hypothesis) const;
 	bool IsOne() const {return _IsOne();};				// meaningful with *
 	bool IsZero() const {return _IsZero();};			// meaningful with +, *
 	virtual bool IsPositive() const {return false;};	// needs total order *and* IsZero

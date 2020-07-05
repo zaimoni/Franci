@@ -544,16 +544,16 @@ bool QuantifiedStatement::ScreenVarList(const clock_t EvalTime0, bool DoNotExpla
 			if (NULL!=CouldAugmentHypothesisArgs)
 				{
 RetryAugmentation:
-				signed long Idx4 = ArraySize(CouldAugmentHypothesisArgs);
+				size_t Idx4 = ArraySize(CouldAugmentHypothesisArgs);
 				do	if (CouldAugmentHypothesisArgs[--Idx4]->CanAugmentHypothesis(*PromotedHypothesis))
 						{
 						signed long Idx5 = -1;
-						while(!CouldAugmentHypothesisArgs[++Idx5]->CanAugmentHypothesis(*PromotedHypothesis));
+						decltype(CouldAugmentHypothesisArgs[0]->_CanAugmentHypothesis(*PromotedHypothesis)) augment;
+						while (!(augment = CouldAugmentHypothesisArgs[++Idx5]->_CanAugmentHypothesis(*PromotedHypothesis)) && Idx5 < Idx4);
 						// base version
 						MetaConcept* NewIFFArg = NULL;
 						PromotedHypothesis->CopyInto(NewIFFArg);
-						if (!TempIFF->InsertSlotAt(0,NewIFFArg))
-							UnconditionalRAMFailure();
+						if (!TempIFF->InsertSlotAt(0,NewIFFArg)) UnconditionalRAMFailure();
 							
 						//! \todo IMPLEMENT: want a pseudorandom algorithm here; log the fact a pseudorandom algorithm was invoked
 						//! Franci has a bias towards 'nice' promotions.
@@ -562,17 +562,17 @@ RetryAugmentation:
 						size_t PromoteCandidate1Idx = fast_size();
 						while(Idx5<=Idx4)
 							{
-							MetaConcept* PromoteCandidate0 = NULL;
+							zaimoni::autoval_ptr<MetaConcept> PromoteCandidate0;
 							PromotedHypothesis->CopyInto(PromoteCandidate0);
-							if (CouldAugmentHypothesisArgs[Idx5]->AugmentHypothesis(PromoteCandidate0))
+							if (augment(PromoteCandidate0))
 								{
 								if (StrictlyImpliesLogicalNOTOf(*ExperimentalArg0,*PromoteCandidate0))
 									// overaugmented!  recover from IFF Arg0 and retry
-									DELETE_AND_NULL(PromoteCandidate0);
+									PromoteCandidate0.reset();
 								else if (   2<=TempIFF->size() && TempIFF->FindArgRelatedToLHS(*PromoteCandidate0,AreSyntacticallyEqual)
 										 && 0<TempIFF->ImageInferenceParameter1())	// ScreenVarList_IFFClean fails if this is 0
 									{	// Augmentation process has constructed an IFF
-									delete PromoteCandidate0;
+									PromoteCandidate0.reset();
 									delete PromoteCandidate1;
 									delete PromotedHypothesis;
 									free(CouldAugmentHypothesisArgs);
@@ -582,14 +582,13 @@ RetryAugmentation:
 									_shrink(VarList,i);
 
 									// If matched arg is not at fast_size()-1, truncate args above there to match
-									// NOTE: InfererenceParameter1 is one less than necessary to correctly invoke SelfEvalRuleCleanTrailingArg
+									// NOTE: InferenceParameter1 is one less than necessary to correctly invoke SelfEvalRuleCleanTrailingArg
 									// use ScreenVarList_IFFClean()
 									TempIFF->ScreenVarList_IFFClean();
 									INFORM("IFF statement constructed while attempting to boost hypotheses:");
 									INFORM(*TempIFF);
 									TempIFF->ForceCheckForEvaluation();
-									if (!static_cast<MetaConnective*>(ArgArray[0])->AddArgAtEndAndForceCorrectForm(TempIFF))
-										UnconditionalRAMFailure();
+									if (!static_cast<MetaConnective*>(ArgArray[0])->AddArgAtEndAndForceCorrectForm(TempIFF)) UnconditionalRAMFailure();
 									ForceCheckForEvaluation();
 									return true;
 									}
@@ -600,8 +599,7 @@ RetryAugmentation:
 									LOG(*CouldAugmentHypothesisArgs[Idx5]);
 									LOG("To change this hypothesis");
 									LOG(*PromotedHypothesis);
-									delete PromotedHypothesis;
-									PromotedHypothesis = PromoteCandidate0;
+									PromoteCandidate0.TransferOutAndNULL(PromotedHypothesis);
 									LOG("to");
 									LOG(*PromotedHypothesis);
 									goto RetryAugmentation;	// successful augment: immediate retry
@@ -618,29 +616,25 @@ RetryAugmentation:
 											{
 											if      (PromoteCandidate1->size()>PromoteCandidate0->size())
 												DELETE_AND_NULL(PromoteCandidate1);
-											else if (PromoteCandidate1->size()<PromoteCandidate0->size())
-												DELETE_AND_NULL(PromoteCandidate0);
+											else if (PromoteCandidate1->size()<PromoteCandidate0->size()) PromoteCandidate0.reset();
 											else{
 												PromoteCandidate0->SelfLogicalNOT();	// need to test OR version for usability
-												if (ExperimentalArg0->ImprovisedUsesSpeculativeOR(*static_cast<MetaConnective*>(PromoteCandidate0)))
-													{
+												if (ExperimentalArg0->ImprovisedUsesSpeculativeOR(*static_cast<MetaConnective*>((MetaConcept*)PromoteCandidate0)))
+												{
 													PromoteCandidate0->SelfLogicalNOT();
 													DELETE_AND_NULL(PromoteCandidate1);
-													}
-												else
-													DELETE_AND_NULL(PromoteCandidate0);
+												}
+												else PromoteCandidate0.reset();
 												};
 											}
 										}
 									if (NULL!=PromoteCandidate0)
 										{
 										PromoteCandidate1Idx = Idx5;
-										delete PromoteCandidate1;
-										PromoteCandidate1 = PromoteCandidate0;
-										PromoteCandidate0 = NULL;
+										PromoteCandidate0.TransferOutAndNULL(PromoteCandidate1);
 										}
 									}
-								while(++Idx5<=Idx4 && !CouldAugmentHypothesisArgs[Idx5]->CanAugmentHypothesis(*PromotedHypothesis));
+								while(++Idx5<=Idx4 && !(augment = CouldAugmentHypothesisArgs[Idx5]->_CanAugmentHypothesis(*PromotedHypothesis)));
 								}
 							}
 						if (NULL!=PromoteCandidate1 && *PromotedHypothesis != *PromoteCandidate1)
@@ -711,8 +705,10 @@ RetryAugmentation:
 			{
 			UnconditionalRAMFailure();
 			};
-		static_cast<MetaConceptWithArgArray*>(TestVarStatement)->TransferInAndOverwriteRaw(TestVarStatement->size()-1,PromotedHypothesis);
-		static_cast<MetaConceptWithArgArray*>(TestVarStatement)->ForceCheckForEvaluation();
+		if (auto n_ary = dynamic_cast<MetaConceptWithArgArray*>(TestVarStatement)) {	// presumed still logical AND
+			n_ary->TransferInAndOverwriteRaw(n_ary->size() - 1, PromotedHypothesis);
+			n_ary->ForceCheckForEvaluation();
+		}
 
 		// evaluate
 		INFORM(*TestVarStatement);

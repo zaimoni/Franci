@@ -2496,6 +2496,115 @@ ExactType_MC MetaConnective::CouldAugmentHypothesis() const
 	}
 }
 
+std::function<bool(MetaConcept*&)> MetaConnective::_CanAugmentHypothesis(const MetaConcept& Hypothesis) const
+{
+	switch (CouldAugmentHypothesis()) {
+	case LogicalOR_MC:
+		if (FindArgRelatedToRHS(Hypothesis, NonStrictlyImplies))
+			return [&](MetaConcept*& hypo) {
+				try {
+					zaimoni::autoval_ptr<MetaConcept> Tmp;
+					if (2 < fast_size()) {
+						MetaConnective* relay = new MetaConnective(*this);
+						relay->DeleteIdx(InferenceParameter1);
+						Tmp = relay;
+					}
+					else ArgArray[1 - InferenceParameter1]->CopyInto(Tmp);
+					Tmp->SelfLogicalNOT();
+					Tmp.TransferOutAndNULL(hypo);
+					return true;
+				} catch (std::bad_alloc&) {
+					return false;
+				}
+			};
+		break;
+	case LogicalIFF_MC:
+		if (ArgArray[0]->IsExactType(Variable_MC)) {
+			if (IsAntiIdempotentTo(*ArgArray[0], Hypothesis)) {
+				if (FindArgRelatedToRHS(Hypothesis, LogicalNOTOfNonStrictlyImplies)) {
+					return [&](MetaConcept*& hypo) {
+						try {
+							zaimoni::autoval_ptr<MetaConcept> Tmp;
+							ArgArray[0]->CopyInto(Tmp);
+							Tmp->SelfLogicalNOT();
+							Tmp.TransferOutAndNULL(hypo);
+							return true;
+						} catch (std::bad_alloc&) {
+							return false;
+						}
+					};
+				}
+			} else if (*ArgArray[0] != Hypothesis) {
+				if (FindArgRelatedToRHS(Hypothesis, NonStrictlyImplies)) {
+					return [&](MetaConcept*& hypo) {
+						try {
+							zaimoni::autoval_ptr<MetaConcept> Tmp;
+							ArgArray[0]->CopyInto(Tmp);
+							Tmp.TransferOutAndNULL(hypo);
+							return true;
+						} catch (std::bad_alloc&) {
+							return false;
+						}
+					};
+				}
+			}
+		}
+		break;
+	case LogicalXOR_MC:
+		if (FindArgRelatedToRHS(Hypothesis, LogicalNOTOfNonStrictlyImplies)) {
+			return [&](MetaConcept*& hypo) {
+				try {
+					zaimoni::autoval_ptr<MetaConcept> Tmp;
+					//! \todo n-ary XOR could simply tabulate which choice 'alters the most targets at once'
+					size_t TestIdx = (0 == InferenceParameter1) ? 1 : 0;
+					if (ArgArray[TestIdx]->IsExactType(Variable_MC) || ArgArray[TestIdx]->IsExactType(LogicalIFF_MC)) {
+						ArgArray[TestIdx]->CopyInto(Tmp);
+					} else {	// Don't have a nice arg in earliest slot.
+						//! \todo AI sweep for nice arg to augment to.
+						ArgArray[2]->CopyInto(Tmp);
+					}
+					Tmp.TransferOutAndNULL(hypo);
+					return true;
+				} catch (std::bad_alloc&) {
+					return false;
+				}
+			};
+		}
+		break;
+	case LogicalNIFF_MC:
+		if (FindArgRelatedToRHS(Hypothesis, LogicalNOTOfNonStrictlyImplies)) {
+			return [&](MetaConcept*& hypo) {
+				try {
+					zaimoni::autoval_ptr<MetaConnective> Tmp;
+					Tmp = new MetaConnective(*this);
+					Tmp->set<LogicalAND_MC>();
+					Tmp->DeleteIdx(InferenceParameter1);
+					Tmp.TransferOutAndNULL(hypo);
+					return true;
+				} catch (std::bad_alloc&) {
+					return false;
+				}
+			};
+		} else if (FindArgRelatedToRHS(Hypothesis, NonStrictlyImplies)) {
+			return [&](MetaConcept*& hypo) {
+				try {
+					zaimoni::autoval_ptr<MetaConnective> Tmp;
+					Tmp = new MetaConnective(*this);
+					Tmp->set<LogicalNOR_MC>();
+					Tmp->DeleteIdx(InferenceParameter1);
+					Tmp.TransferOutAndNULL(hypo);
+					return true;
+				} catch (std::bad_alloc&) {
+					return false;
+				}
+			};
+		}
+		break;
+	default: assert(0 && "invariant violated");
+	}
+	return nullptr;
+}
+
 bool MetaConnective::CanAugmentHypothesis(const MetaConcept& Hypothesis) const
 {	//! \todo IMPLEMENT: there are other structurally useful types that can occur as the first arg of an IFF.
 	if      (IsExactType(LogicalOR_MC))
@@ -2515,66 +2624,6 @@ bool MetaConnective::CanAugmentHypothesis(const MetaConcept& Hypothesis) const
 	else if (IsExactType(LogicalNIFF_MC))
 		return FindArgRelatedToRHS(Hypothesis,LogicalNOTOfNonStrictlyImplies) || FindArgRelatedToRHS(Hypothesis,NonStrictlyImplies);
 	return false;
-}
-
-bool MetaConnective::AugmentHypothesis(MetaConcept*& Hypothesis) const
-{	//! \todo IMPLEMENT
-	// NOTE: the previous member function call was CanAugmentHypothesis: InferenceParameter1 is set
-	MetaConcept* Tmp = NULL;
-	try	{
-		if (IsExactType(LogicalOR_MC))
-			{
-			if (2<fast_size())
-				{
-				CopyInto(Tmp);
-				static_cast<MetaConnective*>(Tmp)->DeleteIdx(InferenceParameter1);
-				}
-			else{
-				ArgArray[1-InferenceParameter1]->CopyInto(Tmp);
-				};
-			Tmp->SelfLogicalNOT();
-			}
-		else if (IsExactType(LogicalIFF_MC))
-			{
-			ArgArray[0]->CopyInto(Tmp);
-			if (LogicalNOTOfNonStrictlyImplies(*ArgArray[InferenceParameter1], *Hypothesis)) {
-				Tmp->SelfLogicalNOT();
-			}
-#if 0		// other case: exhaustive listing.  This one has no extra postprocessing, but is live.
-			else if (NonStrictlyImplies(*ArgArray[InferenceParameter1],*Hypothesis))
-#endif
-			}
-		else if (IsExactType(LogicalXOR_MC))
-			{	// InferenceParameter1 points to the arg that *must* not be returned.  We have
-				// some flexibility, otherwise.
-			//! \todo n-ary XOR could simply tabulate which choice 'alters the most targets at once'
-			size_t TestIdx = (0==InferenceParameter1) ? 1 : 0;
-			if (ArgArray[TestIdx]->IsExactType(Variable_MC) || ArgArray[TestIdx]->IsExactType(LogicalIFF_MC))
-				{
-				ArgArray[TestIdx]->CopyInto(Tmp);
-				}
-			else{	// Don't have a nice arg in earliest slot.
-				//! \todo AI sweep for nice arg to augment to.
-				ArgArray[2]->CopyInto(Tmp);
-				}
-			}
-		else{	// IsExactType(LogicalNIFF_MC)
-			CopyInto(Tmp);
-			if (LogicalNOTOfNonStrictlyImplies(*ArgArray[InferenceParameter1],*Hypothesis))
-				static_cast<MetaConnective*>(Tmp)->set<LogicalAND_MC>();
-			else	// if (NonStrictlyImplies(*ArgArray[InferenceParameter1],*Hypothesis))
-				static_cast<MetaConnective*>(Tmp)->set<LogicalNOR_MC>();
-			static_cast<MetaConnective*>(Tmp)->DeleteIdx(InferenceParameter1);
-			}
-		}
-	catch(const bad_alloc&)
-		{
-		delete Tmp;
-		return false;
-		}
-	delete Hypothesis;
-	Hypothesis = Tmp;
-	return true;
 }
 
 void MetaConnective::StrictlyModifies(MetaConcept*& rhs) const

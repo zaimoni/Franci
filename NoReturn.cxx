@@ -76,13 +76,6 @@ bool MetaConcept::DirectCreateANDFactorIdx(size_t Idx, MetaConcept*& dest) const
 	return false;
 }
 
-bool MetaConcept::AugmentHypothesis(MetaConcept*& Hypothesis) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 3/11/2001
-	LOG(name());
-	FATAL_CODE("AugmentHypothesis must not be defined",3);
-	return false;
-}
-
 bool
 MetaConcept::ThisIsAnnihilatorKey(size_t& ArgIdx, signed short& SelfEvalRule, unsigned short& EvalRule) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 7/13/2000
