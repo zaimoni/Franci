@@ -343,7 +343,7 @@ public:
 	bool ValidRHSForMakesLHSImplyLogicalNOTOfRHS(const MetaConcept& rhs) const;
 	size_t RadixSortIdxSourceListByRHSCompatible(MetaConcept** const IdxSourceList) const;
 	// QState.cxx support: Hypothesis augmentation
-	virtual bool CouldAugmentHypothesis() const {return false;};
+	virtual ExactType_MC CouldAugmentHypothesis() const { return Unknown_MC; }
 	virtual bool CanAugmentHypothesis(const MetaConcept& Hypothesis) const {return false;};
 	virtual bool AugmentHypothesis(MetaConcept*& Hypothesis) const;
 	bool IsOne() const {return _IsOne();};				// meaningful with *

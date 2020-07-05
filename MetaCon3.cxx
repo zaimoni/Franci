@@ -2485,11 +2485,15 @@ bool MetaConnective::NORNANDFatal(const MetaConcept& rhs) const
 // QState.cxx support
 //! \todo (?): IMPLEMENT THESE FOR: LogicalIFF, LogicalXOR, LogicalNIFF
 // NOTE: Franci wants NIFF: arg LogicalNOTOfNonStrictlyImplies => use AND of other args
-bool MetaConnective::CouldAugmentHypothesis() const
-{	//! \todo IMPLEMENT
-	if (IsExactType(LogicalOR_MC) || IsExactType(LogicalIFF_MC) || IsExactType(LogicalXOR_MC) || IsExactType(LogicalNIFF_MC))
-		return true;
-	return false;
+ExactType_MC MetaConnective::CouldAugmentHypothesis() const
+{	// \todo? private cache target, but at a top-loop level so not much predicted CPU savings for RAM cost
+	switch(const auto type = ExactType()) {
+	case LogicalOR_MC:
+	case LogicalIFF_MC:
+	case LogicalXOR_MC:
+	case LogicalNIFF_MC: return type;
+	default: return Unknown_MC;
+	}
 }
 
 bool MetaConnective::CanAugmentHypothesis(const MetaConcept& Hypothesis) const
@@ -2501,7 +2505,7 @@ bool MetaConnective::CanAugmentHypothesis(const MetaConcept& Hypothesis) const
 		if (ArgArray[0]->IsExactType(Variable_MC))
 			{
 			if 		(IsAntiIdempotentTo(*ArgArray[0],Hypothesis))
-				return FindArgRelatedToRHS(Hypothesis,LogicalNOTOfNonStrictlyImplies);		
+				return FindArgRelatedToRHS(Hypothesis,LogicalNOTOfNonStrictlyImplies);
 			else if (*ArgArray[0]!=Hypothesis)
 				return FindArgRelatedToRHS(Hypothesis,NonStrictlyImplies);
 			}
@@ -2533,9 +2537,10 @@ bool MetaConnective::AugmentHypothesis(MetaConcept*& Hypothesis) const
 		else if (IsExactType(LogicalIFF_MC))
 			{
 			ArgArray[0]->CopyInto(Tmp);
-			if (LogicalNOTOfNonStrictlyImplies(*ArgArray[InferenceParameter1],*Hypothesis))
+			if (LogicalNOTOfNonStrictlyImplies(*ArgArray[InferenceParameter1], *Hypothesis)) {
 				Tmp->SelfLogicalNOT();
-#if 0		// other case: exhaustive listing.  This one does nothing.
+			}
+#if 0		// other case: exhaustive listing.  This one has no extra postprocessing, but is live.
 			else if (NonStrictlyImplies(*ArgArray[InferenceParameter1],*Hypothesis))
 #endif
 			}

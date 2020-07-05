@@ -137,7 +137,7 @@ public:
 	virtual void SelfLogicalNOT();
 	virtual bool StrictlyImplies(const MetaConcept& RHS) const;
 	// QState.cxx support: Hypothesis augmentation
-	virtual bool CouldAugmentHypothesis(void) const;
+	ExactType_MC CouldAugmentHypothesis() const override;
 	virtual bool CanAugmentHypothesis(const MetaConcept& Hypothesis) const;
 	virtual bool AugmentHypothesis(MetaConcept*& Hypothesis) const;
 	virtual void StrictlyModifies(MetaConcept*& RHS) const;
