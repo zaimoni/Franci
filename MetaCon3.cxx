@@ -6091,7 +6091,7 @@ RestartSpeculativeOR:
 						rules.first();
 						if (!SpeculativeTarget->IsExactType(LogicalOR_MC)) {
 							// 2020-06-13: this heuristic is questionable
-							if (!FindArgRelatedToRHS(*SpeculativeTarget, NonStrictlyImplies)) {
+							if (!_findArgRelatedToRHS(*SpeculativeTarget, NonStrictlyImplies)) {
 								DELETE_AND_NULL(SpeculativeTarget);
 								return true;
 							}
@@ -6104,19 +6104,13 @@ RestartSpeculativeOR:
 						MetaConcept* test = 0;
 						rules.second(test);
 						SUCCEED_OR_DIE(!test->IsExactType(LogicalOR_MC));	// associativity of OR should prohibit this
-						if (!FindArgRelatedToRHS(*test, NonStrictlyImplies)) {
+						if (!_findArgRelatedToRHS(*test, NonStrictlyImplies)) {
 							DELETE_AND_NULL(SpeculativeTarget);
 							DELETE(test);
 							return true;
 						}
 						// expected to reduce further: historical behavior is to terminate exploration pre-emptively
 						return false;
-					}
-					if (SpeculativeTarget->CanUseThisAsMakeImply(*ArgArray[Idx4])) {
-						LOG("====");
-						LOG(*SpeculativeTarget);
-						LOG(*ArgArray[Idx4]);
-						SUCCEED_OR_DIE(0 && "got past std::function");
 					}
 				}
 				// IFF-booster for OR check
@@ -6187,7 +6181,7 @@ RestartSpeculativeOR:
 					LOG(*SpeculativeTarget);
 					if (!SpeculativeTarget->IsExactType(LogicalOR_MC)) {
 						// 2020-06-13: this heuristic is questionable
-						if (!FindArgRelatedToRHS(*SpeculativeTarget, NonStrictlyImplies)) {
+						if (!_findArgRelatedToRHS(*SpeculativeTarget, NonStrictlyImplies)) {
 							InferenceParameterMC = SpeculativeTarget;	// spawn IFF, probably
 							IdxCurrentSelfEvalRule = SelfEvalAddArgAtEndAndForceCorrectForm__SER;
 							LOG("Spawning this");
@@ -6209,7 +6203,7 @@ RestartSpeculativeOR:
 					rules.second(test);
 					LOG(*test);
 					SUCCEED_OR_DIE(!test->IsExactType(LogicalOR_MC));	// associativity of OR should prohibit this
-					if (!FindArgRelatedToRHS(*test, NonStrictlyImplies)) {
+					if (!_findArgRelatedToRHS(*test, NonStrictlyImplies)) {
 						InferenceParameterMC = test;
 						IdxCurrentSelfEvalRule = SelfEvalAddArgAtEndAndForceCorrectForm__SER;
 						LOG("Spawning this");
@@ -6219,12 +6213,6 @@ RestartSpeculativeOR:
 					}
 					// expected to reduce further: historical behavior is to terminate exploration pre-emptively
 					return false;
-				}
-				if (SpeculativeTarget->CanUseThisAsMakeImply(*ArgArray[Idx4])) {
-					LOG("====");
-					LOG(*SpeculativeTarget);
-					LOG(*ArgArray[Idx4]);
-					SUCCEED_OR_DIE(0 && "got past std::function");
 				}
 			}
 

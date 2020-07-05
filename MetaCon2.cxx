@@ -1511,12 +1511,9 @@ bool MetaConceptWithArgArray::ArgListHasInjectionIntoRHSArgListRelatedThisWay(co
 			// 2: verifying that this LHS-arg is the only LHS-arg matching that RHS-arg.
 			MetaConcept* Tmp = l_target;
 			l_target = &TmpArg;
-			if (FindArgRelatedToRHS(*target,TargetRelation))
-				{
-				l_target = Tmp;
-				return false;
-				};
+			scan = _findArgRelatedToRHS(*target, TargetRelation);
 			l_target = Tmp;
+			if (scan) return false;
 			// 3: verifying that this LHS-arg only matches this RHS-arg.
 			Tmp = target;
 			target = &TmpArg;
