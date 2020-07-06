@@ -330,7 +330,7 @@ public:
 	virtual bool CanAmplifyThisClause(const MetaConcept& rhs) const;
 	virtual bool AmplifyThisClause(MetaConcept*& rhs) const;
 	// Basis clause support
-	virtual size_t BasisClauseCount() const {return 0;};
+	virtual size_t BasisClauseCount() const { return 0; }
 	virtual bool DirectCreateBasisClauseIdx(size_t Idx, MetaConcept*& dest) const;
 	// "AND-factor" support
 	virtual size_t ANDFactorCount() const {return 0;};

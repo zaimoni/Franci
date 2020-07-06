@@ -75,9 +75,9 @@ public:
 	bool MetaConceptPtrUsesThisQuantifier(const MetaConcept* lhs) const;
 
 //  basis clause support
-	virtual size_t BasisClauseCount() const;
+	size_t BasisClauseCount() const override;
 // next implemented in Variable.cxx, may relocate further
-	virtual bool DirectCreateBasisClauseIdx(size_t Idx, MetaConcept*& dest) const;
+	bool DirectCreateBasisClauseIdx(size_t Idx, MetaConcept*& dest) const override;
 
 //	Lexical order for quantifiers: a partial order.
 //  Free vars are > all nonfree vars, and variable name order tie-breaks.

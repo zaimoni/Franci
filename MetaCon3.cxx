@@ -618,7 +618,6 @@ bool MetaConnective::AmplifyThisClause(MetaConcept*& rhs) const
 	}
 }
 
-
 // Basis clause support
 // OR: N+1: N arity-reductions, then NIFF-conversion.  Arity-reductions are normally boring, 
 // however.

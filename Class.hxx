@@ -94,8 +94,8 @@ public:
 	bool IntersectionWithIsNULLSet(const AbstractClass& rhs) const;
 
 //  basis clause support
-	virtual size_t BasisClauseCount() const;
-	virtual bool DirectCreateBasisClauseIdx(size_t Idx, MetaConcept*& dest) const;
+	size_t BasisClauseCount() const override;
+	bool DirectCreateBasisClauseIdx(size_t Idx, MetaConcept*& dest) const override;
 
 //	Operation support routines
 	bool SupportsThisOperation(ExactType_MC Operation) const { return _supportsThisOperation(Operation).is(true); };

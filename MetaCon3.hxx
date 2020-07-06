@@ -121,8 +121,8 @@ public:
 	bool CanAmplifyThisClause(const MetaConcept& rhs) const override;
 	bool AmplifyThisClause(MetaConcept*& rhs) const override;
 	// Basis clause support
-	virtual size_t BasisClauseCount() const;
-	virtual bool DirectCreateBasisClauseIdx(size_t Idx, MetaConcept*& dest) const;
+	size_t BasisClauseCount() const override;
+	bool DirectCreateBasisClauseIdx(size_t Idx, MetaConcept*& dest) const override;
 	// "AND-factor" support
 	virtual size_t ANDFactorCount() const;
 	virtual bool DirectCreateANDFactorIdx(size_t Idx, MetaConcept*& dest) const;

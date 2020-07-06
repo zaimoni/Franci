@@ -103,8 +103,8 @@ public:
 	virtual bool LogicalANDNonTrivialFindDetailedRule() const;
 	bool LogicalANDOrthogonalClause() const override;
 	// Basis clause support
-	virtual size_t BasisClauseCount() const;
-	virtual bool DirectCreateBasisClauseIdx(size_t Idx, MetaConcept*& dest) const;
+	size_t BasisClauseCount() const override;
+	bool DirectCreateBasisClauseIdx(size_t Idx, MetaConcept*& dest) const override;
 // Assistants to QStatement
 	void ImproviseDomainsALLEQUAL(bool& Target);
 	bool ImproviseDomainsEQUALTOONEOF(bool& Target);
