@@ -57,7 +57,7 @@ public:
 	virtual MetaConcept* ArgN(size_t n);
 // Syntactical equality and inequality
 //	Override this for non-commutative types, or complicated internal structure
-	virtual bool IsAbstractClassDomain() const;
+	bool IsAbstractClassDomain() const override;
 //  Evaluation functions
 	bool CanEvaluate() const final;
 	bool CanEvaluateToSameType() const final;

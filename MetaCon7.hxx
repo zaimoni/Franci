@@ -73,7 +73,7 @@ public:
 	virtual const MetaConcept* ArgN(size_t n) const {return 0;};
 	virtual MetaConcept* ArgN(size_t n) {return 0;};
 // Syntactical equality and inequality
-	virtual bool IsAbstractClassDomain() const {return true;};
+	bool IsAbstractClassDomain() const override { return true; }
 //  Evaluation functions
 	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override { return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >(); }
 	bool CanEvaluate() const override { return false; }

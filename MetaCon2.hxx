@@ -114,7 +114,7 @@ public:
 	virtual const MetaConcept* ArgN(size_t n) const;
 	virtual MetaConcept* ArgN(size_t n);
 // Syntactical equality and inequality
-	virtual bool IsAbstractClassDomain() const;
+	bool IsAbstractClassDomain() const override;
 //  Evaluation functions
 	bool CanEvaluate() const final;
 	bool CanEvaluateToSameType() const final;

@@ -139,10 +139,7 @@ bool LinearInterval::_IsExplicitConstant() const
 
 bool LinearInterval::IsAbstractClassDomain() const
 {
-	if (	LHS_Arg1->IsExplicitConstant()
-		&&	RHS_Arg2->IsExplicitConstant())
-		return true;
-	return false;
+	return LHS_Arg1->IsExplicitConstant() && RHS_Arg2->IsExplicitConstant();
 }
 
 bool LinearInterval::StdAddCanDestructiveInteract() const

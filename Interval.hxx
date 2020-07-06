@@ -98,7 +98,7 @@ public:
 //  Evaluation functions
 	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override;
 	virtual bool SyntaxOK() const;
-	virtual bool IsAbstractClassDomain() const;
+	bool IsAbstractClassDomain() const override;
 // text I/O functions
 	virtual size_t LengthOfSelfName() const;
 	virtual bool StdAddCanDestructiveInteract() const;

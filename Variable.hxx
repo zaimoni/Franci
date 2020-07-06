@@ -35,7 +35,7 @@ public:
 	void CopyInto(Variable*& dest) const;	// can throw memory failure
 	void MoveInto(MetaConcept*& dest) override { zaimoni::MoveIntoV2(std::move(*this), dest); }
 	void MoveInto(Variable*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
-	bool IsAbstractClassDomain() const override {return false;};
+	bool IsAbstractClassDomain() const override { return false; }
 //  Type ID functions
 	const AbstractClass* UltimateType() const override { return Arg1->UltimateType(); };
 	bool ForceUltimateType(const AbstractClass* const rhs) override { return Arg1->ForceUltimateType(rhs); }

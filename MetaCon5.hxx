@@ -33,7 +33,7 @@ public:
 	virtual const MetaConcept* ArgN(size_t n) const;
 	virtual MetaConcept* ArgN(size_t n);
 // Syntactical equality and inequality
-	virtual bool IsAbstractClassDomain() const {return IsExplicitConstant();};
+	bool IsAbstractClassDomain() const override { return IsExplicitConstant(); }
 //  Evaluation functions
 	virtual bool CanEvaluate() const = 0;
 	virtual bool CanEvaluateToSameType() const = 0;

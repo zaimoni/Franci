@@ -91,8 +91,7 @@ bool MetaConceptWith2Args::_IsExplicitConstant() const
 
 bool MetaConceptWith2Args::IsAbstractClassDomain() const
 {
-	return LHS_Arg1->IsAbstractClassDomain()
-        && RHS_Arg2->IsAbstractClassDomain();
+	return LHS_Arg1->IsAbstractClassDomain() && RHS_Arg2->IsAbstractClassDomain();
 }
 
 void MetaConceptWith2Args::_forceStdForm()
