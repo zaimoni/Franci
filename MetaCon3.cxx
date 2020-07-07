@@ -5180,36 +5180,29 @@ bool MetaConnective::DiagnoseCommonIntermediateRulesORXORAux() const
 // |->
 // AND(L1,
 //    XOR(AND(L1,...),AND(L1,...),AND(L1,...))
-						MetaConcept* TmpArgPtr = NULL;
-						if (ArgArray[MinANDFactorIdx]->DirectCreateANDFactorIdx(SweepIdx,TmpArgPtr))
-							{
+						zaimoni::autoval_ptr<MetaConcept> TmpArgPtr;
+						if (ArgArray[MinANDFactorIdx]->DirectCreateANDFactorIdx(SweepIdx, TmpArgPtr)) {
 							size_t Idx2 = 0;
-							while(Idx2==MinANDFactorIdx || ArgArray[Idx2]->StrictlyImplies(*TmpArgPtr))
-								if (++Idx2==fast_size())
-									{	// match!
-									delete TmpArgPtr;
+							while (Idx2 == MinANDFactorIdx || ArgArray[Idx2]->StrictlyImplies(*TmpArgPtr))
+								if (++Idx2 == fast_size()) { // match!
 									free(IFFCandidateArgs);
 									InferenceParameter1 = MinANDFactorIdx;
 									InferenceParameter2 = SweepIdx;
 									IdxCurrentSelfEvalRule = LogicalXORExtractANDFactor_SER;
 									return true;
-									};
+								};
 							// stopped early...is it compatible for probing for IFF?
-							if (   NULL!=IFFCandidateArgs
-								&& StrictlyImpliesLogicalNOTOf(*ArgArray[Idx2],*TmpArgPtr))
-								{
-								while(++Idx2<fast_size()
-									  && (   Idx2==MinANDFactorIdx
-										  || ArgArray[Idx2]->StrictlyImplies(*TmpArgPtr)
-										  || StrictlyImpliesLogicalNOTOf(*ArgArray[Idx2],*TmpArgPtr)));
-								if (Idx2==fast_size())
+							if (IFFCandidateArgs && StrictlyImpliesLogicalNOTOf(*ArgArray[Idx2], *TmpArgPtr)) {
+								while (++Idx2 < fast_size()
+									&& (Idx2 == MinANDFactorIdx
+										|| ArgArray[Idx2]->StrictlyImplies(*TmpArgPtr)
+										|| StrictlyImpliesLogicalNOTOf(*ArgArray[Idx2], *TmpArgPtr)));
+								if (Idx2 == fast_size())
 									// ok, this arg can be used to probe for IFF extraction
 									IFFCandidateArgs[CountIFFCandidateArgs++] = SweepIdx;
-								}
-							DELETE(TmpArgPtr);
 							}
 						}
-					while(++SweepIdx<MinANDFactorCount);
+					} while(++SweepIdx<MinANDFactorCount);
 
 					if (2<=CountIFFCandidateArgs)
 						{	// It actually makes sense to look for an IFF
