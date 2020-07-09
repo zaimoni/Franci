@@ -84,9 +84,6 @@ Alternatively, use this basis to create a "ring the changes" on AND clauses for 
 #include "Keyword1.hxx"
 #include <memory>
 
-// Define this if there's some reason to think amplifying tautologies is a useful heuristic
-// #define AMPLIFY_TAUTOLOGIES 1
-
 // no local gain from macroizing msz_Implies, msz_ImpliesNOT
 const char* const msz_Using = "Using";
 const char* const msz_UsingNOT = "Using the logical negation of";
@@ -346,22 +343,6 @@ bool MetaConnective::Prefilter_CanAmplifyThisClause(const MetaConcept& rhs) cons
 	SUCCEED_OR_DIE(HasSameImplementationAs(rhs)); // 2020-06-30 historical limitation
 	if (NonStrictlyImplies(rhs,*this)) return false;
 	if (rhs.IsExactType(LogicalOR_MC) && _findArgRelatedToLHS(rhs,NonStrictlyImplies)) return false;
-#ifdef AMPLIFY_TAUTOLOGIES
-	// checks for tautology base: we don't want IFF amplifying a tautology
-	if (   rhs.IsExactType(LogicalOR_MC)
-		&& 2==rhs.size()
-		&& IsExactType(LogicalIFF_MC)
-		&& (   rhs.ArgN(0)->IsAntiIdempotentTo(*rhs.ArgN(1))
-			|| (   rhs.ArgN(0)->StrictlyImpliesLogicalNOTOf(*rhs.ArgN(1))
-			    && rhs.ArgN(1)->StrictlyImpliesLogicalNOTOf(*rhs.ArgN(0)))))
-		return false;
-	// we don't want a tautology amplifying anything
-	if (   IsExactType(LogicalOR_MC) && 2==fast_size()
-		&& (   ArgArray[0]->IsAntiIdempotentTo(*ArgArray[1])
-			|| (   ArgArray[0]->StrictlyImpliesLogicalNOTOf(*ArgArray[1])
-			    && ArgArray[1]->StrictlyImpliesLogicalNOTOf(*ArgArray[0]))))
-		return false;
-#endif
 	return true;
 }
 
@@ -3090,9 +3071,6 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 
 	//! \todo start function target
 	// Preview: should we even try to allocate RAM?
-#ifdef AMPLIFY_TAUTOLOGIES
-	MetaConcept** TautologyIndex = NULL;
-#endif
 	MetaConcept** MirrorArgList = NULL;
 	size_t MayAmplify = 0;
 	size_t ShouldBeAmplified = 0;
@@ -3108,94 +3086,6 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 
 	//! \todo XOR(A,B,C),XOR(~A,D,E) => amplify OR(A,~A) [maybe check for these anyway..no,
 	// worthless IFF hookins.  IFF should not amplify OR(A,~A).]
-#ifdef AMPLIFY_TAUTOLOGIES
-	if (0==MayAmplify)
-		goto EndAmplification;
-
-	if (   LogicalXOR_MC<=ArgArray[fast_size()-1]->ExactType()
-		&& LogicalXOR_MC>=ArgArray[0]->ExactType())
-		{
-		SweepIdx = fast_size();
-		do	{
-			if (ArgArray[--SweepIdx]->IsExactType(LogicalXOR_MC))
-				{
-				size_t SweepIdx2 = SweepIdx;
-				while(0<SweepIdx2)
-					if      (ArgArray[--SweepIdx2]->IsExactType(LogicalXOR_MC))
-						{
-						if (static_cast<MetaConnective*>(ArgArray[SweepIdx])->FindTwoRelatedArgs(*static_cast<MetaConnective*>(ArgArray[SweepIdx]),IsAntiIdempotentTo))
-							{	// OK, have anti-idempotent args...are we clear to expand?
-							bool AlreadyUsing = false;
-							if (NULL!=TautologyIndex)
-								{
-								size_t AltIdx = ArraySize(TautologyIndex);
-								do	if (NonStrictlyImpliesThisOrLogicalNOTOf(*TautologyIndex[--AltIdx]->ArgN(0),*static_cast<MetaConnective*>(ArgArray[SweepIdx])->ArgArray[static_cast<MetaConnective*>(ArgArray[SweepIdx])->InferenceParameter1]))
-										{
-										AlreadyUsing = true;
-										break;
-										}
-								while(0<AltIdx);
-								}
-							if (!AlreadyUsing)
-								{	// construct OR(A,~A)
-								// realloc is malloc for NULL source pointer
-								const OldTautologyLength = SafeArraySize(TautologyIndex);
-								if (_resize(TautologyIndex,OldTautologyLength+1))
-									{
-									MetaConcept** NewArgArray = _new_buffer<MetaConcept*>(2);
-									if (NewArgArray)
-										{
-										try	{
-											static_cast<MetaConnective*>(ArgArray[SweepIdx])->ArgArray[static_cast<MetaConnective*>(ArgArray[SweepIdx])->InferenceParameter1]->CopyInto(NewArgArray[0]);
-											static_cast<MetaConnective*>(ArgArray[SweepIdx])->ArgArray[static_cast<MetaConnective*>(ArgArray[SweepIdx])->InferenceParameter1]->CopyInto(NewArgArray[1]);
-											NewArgArray[1]->SelfLogicalNOT();
-											TautologyIndex[ArraySize(TautologyIndex)-1] = new MetaConnective(NewArgArray,OR_MCM);
-											ShouldBeAmplified++;
-											}
-										catch(const bad_alloc&)
-											{
-											BLOCKDELETEARRAY_AND_NULL(NewArgArray);
-											_shrink(TautologyIndex,OldTautologyLength);
-											continue;
-											}
-										}
-									else
-										_shrink(TautologyIndex,OldTautologyLength);
-									}
-								}
-							}
-						}
-					else if (LogicalXOR_MC>ArgArray[SweepIdx2]->ExactType())
-						break;
-				}
-			else if (LogicalXOR_MC>ArgArray[SweepIdx]->ExactType())
-				break;
-			}
-		while(0<SweepIdx);
-		}
-
-	if (   0==ShouldBeAmplified
-		|| !::GrepArgList(MirrorArgList,AmplifyOrBeAmplified,ArgArray))
-		goto EndAmplification;
-
-	if (NULL!=TautologyIndex)
-		{	// Prepend the tautologies to the grep results in MirrorArgList
-		size_t OriginalMirrorSize = _msize(MirrorArgList);
-		MetaConcept** MirrorArgList2 = REALLOC(MirrorArgList,_msize(MirrorArgList)+_msize(TautologyIndex));
-		if (NULL!=MirrorArgList2)
-			{
-			MirrorArgList = MirrorArgList2;
-			memmove(&MirrorArgList[ArraySize(TautologyIndex)],MirrorArgList,OriginalMirrorSize);
-			memmove(MirrorArgList,TautologyIndex,_msize(TautologyIndex));
-			}
-		else{
-			ShouldBeAmplified -= ArraySize(TautologyIndex);
-			BLOCKDELETEARRAY_AND_NULL(TautologyIndex);
-			if (0==ShouldBeAmplified)
-				DELETEARRAY_AND_NULL(MirrorArgList);
-			}
-		}
-#else
 	if (   0==MayAmplify
 		|| 0==ShouldBeAmplified
 		|| !::GrepArgList(MirrorArgList,AmplifyOrBeAmplified,ArgArray))
@@ -3204,7 +3094,6 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 		goto EndAmplification;
 		}
 	DEBUG_LOG("GrepArgList OK, true");
-#endif
 
 	// #1: construct list of clauses that either want to be amplified, or can be amplified.
 	if (NULL!=MirrorArgList)
@@ -3464,9 +3353,6 @@ SearchFailed:
 
 EndAmplification:
 //! \todo end function target
-#ifdef AMPLIFY_TAUTOLOGIES
-	if (TautologyIndex) BLOCKDELETEARRAY(TautologyIndex);
-#endif
 
 	//! \todo MANY OTHER INFERENCE RULES
 	IdxCurrentSelfEvalRule = SelfEvalSyntaxOKNoRules_SER;
