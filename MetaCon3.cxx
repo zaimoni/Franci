@@ -2951,10 +2951,8 @@ bool MetaConnective::CanStrictlyModify_NIFF(const MetaConcept& rhs) const
 }
 
 bool AmplifyOrBeAmplified(const MetaConcept& lhs)
-{	// FORMALLY CORRECT: Kenneth Boyd, 8/17/2003
-	if (lhs.WantToBeAmplified() || lhs.CanAmplifyClause())
-		return true;
-	return false;
+{
+	return lhs.WantToBeAmplified() || lhs.CanAmplifyClause();
 }
 
 bool NotAVariable(const MetaConcept& lhs)
@@ -3061,8 +3059,7 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 	// Franci may need to spawn OR-statements to trigger the OR/XOR reduction rule.
 	// This has to fire after the standard OR-scan.  Franci should do other speculative
 	// OR generation rules here.
-	if (LogicalANDCreateSpeculativeOR())
-		return;	
+	if (LogicalANDCreateSpeculativeOR()) return;
 	DEBUG_LOG("LogicalANDCreateSpeculativeOR OK, false");
 
 	//! \todo LogicalAND could use a StrictlyImplies family augmented by a list of MetaConcepts
@@ -3070,25 +3067,11 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 	//! a second tier LogicalANDFindDetailedRule.  This would affect the test-case.
 
 	//! \todo start function target
-	// Preview: should we even try to allocate RAM?
 	MetaConcept** MirrorArgList = NULL;
-	size_t MayAmplify = 0;
-	size_t ShouldBeAmplified = 0;
-	size_t SweepIdx = fast_size();
-	do	{
-		if (ArgArray[--SweepIdx]->CanAmplifyClause())
-			MayAmplify++;
-		if (ArgArray[SweepIdx]->WantToBeAmplified())
-			ShouldBeAmplified++;
-		}
-	while(0<SweepIdx);
-	DEBUG_LOG("Amplify stats OK");
 
 	//! \todo XOR(A,B,C),XOR(~A,D,E) => amplify OR(A,~A) [maybe check for these anyway..no,
 	// worthless IFF hookins.  IFF should not amplify OR(A,~A).]
-	if (   0==MayAmplify
-		|| 0==ShouldBeAmplified
-		|| !::GrepArgList(MirrorArgList,AmplifyOrBeAmplified,ArgArray))
+	if (!::GrepArgList(MirrorArgList,AmplifyOrBeAmplified,ArgArray))
 		{
 		DEBUG_LOG("GrepArgList OK, false");
 		goto EndAmplification;
