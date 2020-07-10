@@ -3006,7 +3006,7 @@ AmplifiedStatementIsUseful(const MetaConcept& Amplified, const MetaConcept& Appr
 static bool
 DiagnoseAmplificationCapability(size_t& TargetIdx, signed int& FullyAmplifiedAnalysisMode, MetaConcept**& AmplifySource, const MetaConcept& AmplifyMe, MetaConcept** ApprovalTargetsImage)
 {
-	MetaConcept* PreviewAmplified = NULL;
+	zaimoni::autoval_ptr<MetaConcept> PreviewAmplified;
 	try	{
 		AmplifyMe.CopyInto(PreviewAmplified);
 		}
@@ -3016,12 +3016,9 @@ DiagnoseAmplificationCapability(size_t& TargetIdx, signed int& FullyAmplifiedAna
 		}
 
 	size_t i = ArraySize(AmplifySource);
-	do	if (    AmplifySource[--i]->CanAmplifyThisClause(*PreviewAmplified)
-			&& !AmplifySource[i]->AmplifyThisClause(PreviewAmplified))
-			{
-			delete PreviewAmplified;
-			return false;
-			}
+	do	if (AmplifySource[--i]->CanAmplifyThisClause(*PreviewAmplified)) {
+			if (!AmplifySource[i]->AmplifyThisClause(PreviewAmplified)) return false;
+		}
 	while(0<i);
 
 	if 		(::FindArgRelatedToLHS(*PreviewAmplified,::CanStrictlyModify,ApprovalTargetsImage,TargetIdx))
@@ -3033,7 +3030,6 @@ DiagnoseAmplificationCapability(size_t& TargetIdx, signed int& FullyAmplifiedAna
 	else if (::FindArgRelatedToLHS(*PreviewAmplified,NonStrictlyImplies,ApprovalTargetsImage,TargetIdx))
 		FullyAmplifiedAnalysisMode = LOGICAL_IMPLIES_ACTION;
 
-	delete PreviewAmplified;
 	return true;
 }
 
