@@ -155,7 +155,7 @@ protected:
 		const size_t ub = src.size();
 		if (0 >= ub) reset();
 		else {
-			reset(src._ptr, ZAIMONI_ISO_PARAM(src._size));
+			reset(src._ptr ZAIMONI_ISO_PARAM(src._size));
 			ZAIMONI_ISO_SRC(src._size = 0);
 		};
 	}
@@ -245,8 +245,8 @@ public:
 	explicit weakautovalarray_ptr() = default;
 	explicit weakautovalarray_ptr(T*& src) noexcept : _meta_weakautoarray_ptr<T>(src) {}
 	explicit weakautovalarray_ptr(size_t n) : _meta_weakautoarray_ptr<T>(std::nothrow,n) {}
-	explicit weakautovalarray_ptr(const weakautovalarray_ptr& src) : _meta_weakautoarray_ptr<T>(src) {}
-	explicit weakautovalarray_ptr(const _meta_weakautoarray_ptr<T>& src) : _meta_weakautoarray_ptr<T>(src) {}
+	weakautovalarray_ptr(const weakautovalarray_ptr& src) : _meta_weakautoarray_ptr<T>(src) {}
+	weakautovalarray_ptr(const _meta_weakautoarray_ptr<T>& src) : _meta_weakautoarray_ptr<T>(src) {}
 	~weakautovalarray_ptr() = default;
 
 #ifndef ZAIMONI_FORCE_ISO
@@ -267,7 +267,8 @@ public:
 	explicit weakautovalarray_ptr_throws() = default;
 	explicit weakautovalarray_ptr_throws(T*& src) noexcept : _meta_weakautoarray_ptr<T>(src) {}
 	explicit weakautovalarray_ptr_throws(size_t n) : _meta_weakautoarray_ptr<T>(n) {}
-	explicit weakautovalarray_ptr_throws(const weakautovalarray_ptr_throws& src) : _meta_weakautoarray_ptr<T>(src) {}
+	weakautovalarray_ptr_throws(const weakautovalarray_ptr_throws& src) : _meta_weakautoarray_ptr<T>(src) {}
+	weakautovalarray_ptr_throws(weakautovalarray_ptr_throws&& src) noexcept : _meta_weakautoarray_ptr<T>(std::move(src)) {}
 	~weakautovalarray_ptr_throws() = default;
 
 #ifndef ZAIMONI_FORCE_ISO

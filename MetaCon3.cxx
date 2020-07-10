@@ -3063,19 +3063,14 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 	//! a second tier LogicalANDFindDetailedRule.  This would affect the test-case.
 
 	//! \todo start function target
-	MetaConcept** MirrorArgList = NULL;
+	{
+	auto MirrorArgList(::GrepArgList(AmplifyOrBeAmplified, ArgArray));
 
 	//! \todo XOR(A,B,C),XOR(~A,D,E) => amplify OR(A,~A) [maybe check for these anyway..no,
 	// worthless IFF hookins.  IFF should not amplify OR(A,~A).]
-	if (!::GrepArgList(MirrorArgList,AmplifyOrBeAmplified,ArgArray))
-		{
-		DEBUG_LOG("GrepArgList OK, false");
-		goto EndAmplification;
-		}
-	DEBUG_LOG("GrepArgList OK, true");
 
 	// #1: construct list of clauses that either want to be amplified, or can be amplified.
-	if (NULL!=MirrorArgList)
+	if (!MirrorArgList.empty())
 		{
 		DEBUG_LOG("Entering Amplification for AND");
 
@@ -3086,7 +3081,7 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 		// so some sort of conflict resolution is required for multiple leaves of the same final rating.
 		// otherwise, remove the tested vertex, then any newly uninvolved vertices.
 		zaimoni::autoval_ptr<Digraph> TraceAmplification;
-		PROPERLY_INIT_DIGRAPH_AUTOVAL(TraceAmplification, MirrorArgList, false, LHSAmplifiesRHS, DELETEARRAY, goto EndAmplification)
+		PROPERLY_INIT_DIGRAPH_FULLAUTO(TraceAmplification, MirrorArgList, false, LHSAmplifiesRHS, goto EndAmplification)
 
 		TraceAmplification->ResetDiagonal();
 
@@ -3329,6 +3324,7 @@ SearchFailed:
 
 		DEBUG_LOG("DELETE(TraceAmplification) OK");
 		}
+	} // end scope: MirrorArgList
 
 EndAmplification:
 //! \todo end function target

@@ -23,6 +23,7 @@ void TotalSortByLexicalOrder(MetaConcept** const ArgArray, size_t StrictMaxIdx);
 
 // The GrepArgList functions should have their output array pointers NULL when invoked.
 bool GrepArgList(MetaConcept**& MirrorArgList,LowLevelUnaryProperty& WantThis, MetaConcept** const ArgArray);
+zaimoni::weakautovalarray_ptr_throws<MetaConcept*> GrepArgList(LowLevelUnaryProperty& WantThis, MetaConcept** const ArgArray);
 bool GrepArgList(size_t*& IndexMap,LowLevelUnaryProperty& WantThis, MetaConcept** const ArgArray);
 bool DualGrepArgList(size_t*& IndexMap, size_t*& InverseIndexMap, LowLevelUnaryProperty& WantThis, MetaConcept** const ArgArray);
 void SelfGrepArgListNoOwnership(LowLevelBinaryRelation& WantThis, const MetaConcept& rhs, MetaConcept**& ArgArray);

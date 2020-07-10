@@ -1992,6 +1992,26 @@ bool GrepArgList(MetaConcept**& MirrorArgList,LowLevelUnaryProperty& WantThis, M
 	return true;
 }
 
+zaimoni::weakautovalarray_ptr_throws<MetaConcept*> GrepArgList(LowLevelUnaryProperty& WantThis, MetaConcept** const ArgArray)
+{
+	assert(ArgArray);
+	size_t i = ArraySize(ArgArray);
+	do	if (WantThis(*ArgArray[--i])) {
+			size_t j = 0;
+			do	if (j == i || WantThis(*ArgArray[j])) {
+					size_t k = 0;
+					zaimoni::weakautovalarray_ptr_throws<MetaConcept*> ret(i - j + 1);
+					ret[k++] = ArgArray[j];
+					while (i >= ++j) if (WantThis(*ArgArray[j])) ret[k++] = ArgArray[j];
+					ret.resize(k);
+					return ret;
+				}
+			while (i >= ++j);
+		}
+	while (0 < i);
+	return zaimoni::weakautovalarray_ptr_throws<MetaConcept*>();
+}
+
 bool GrepArgList(size_t*& IndexMap,LowLevelUnaryProperty& WantThis, MetaConcept** const ArgArray)
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/2/2001
 	assert(!IndexMap);

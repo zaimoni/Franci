@@ -204,5 +204,15 @@ private:
 		{	\
 		DAMAGE_CONTROL;	\
 		}
+
+#define PROPERLY_INIT_DIGRAPH_FULLAUTO(VAR,ARGARRAY,VAR_OWNS,DECISION_RULE,DAMAGE_CONTROL)	\
+	try	{	\
+		VAR = new Digraph(ARGARRAY,VAR_OWNS,DECISION_RULE);	\
+		}	\
+	catch(const bad_alloc&)	\
+		{	\
+		DAMAGE_CONTROL;	\
+		}	\
+	if (!VAR->SyntaxOK()) { DAMAGE_CONTROL; }
 #endif
 
