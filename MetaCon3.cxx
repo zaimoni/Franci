@@ -3230,7 +3230,7 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 					{
 					DEBUG_LOG("Have diagnosis");
 					size_t ApprovalIdx = 0;
-					MetaConcept* Target = NULL;
+					zaimoni::autoval_ptr<MetaConcept> Target;
 					if (!ExploreThis->DestructiveExtractUniqueResult(Target)) goto SearchFailed;
 					delete ExploreThis;
 					LOG("Amplified");
@@ -3246,7 +3246,7 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 						SUCCEED_OR_DIE(FindArgRelatedToLHS(*ApprovalTargetsImage[ApprovalIdx],AreSyntacticallyEqual));
 						LOG(msz_Using);
 						LOG(*Target);
-						delete Target;
+						Target.reset();
 						LOG(msz_SyntaxImplies);
 						LOG(*ArgArray[InferenceParameter1]);
 						if (2==fast_size())
@@ -3264,7 +3264,7 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 						DEBUG_LOG("DEEP_LOGICAL_IMPLIES_ACTION branch");
 						SUCCEED_OR_DIE(::FindArgRelatedToLHS(*Target,DeepLogicallyImplies,ApprovalTargetsImage,ApprovalIdx));
 						SUCCEED_OR_DIE(FindArgRelatedToLHS(*ApprovalTargetsImage[ApprovalIdx],AreSyntacticallyEqual));
-						InferenceParameterMC = Target;
+						InferenceParameterMC = std::move(Target);
 						IdxCurrentSelfEvalRule = VirtualDeepLogicallyImplies_SER;
 						return;
 						}
@@ -3273,7 +3273,7 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 						DEBUG_LOG("DEEP_STRICTLY_MODIFIES_ACTION branch");
 						SUCCEED_OR_DIE(::FindArgRelatedToLHS(*Target,CanDeepStrictlyModify,ApprovalTargetsImage,ApprovalIdx));
 						SUCCEED_OR_DIE(FindArgRelatedToLHS(*ApprovalTargetsImage[ApprovalIdx],AreSyntacticallyEqual));
-						InferenceParameterMC = Target;
+						InferenceParameterMC = std::move(Target);
 						IdxCurrentSelfEvalRule = VirtualDeepStrictlyModify_SER;
 						return;
 						}
@@ -3282,7 +3282,7 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 						DEBUG_LOG("STRICTLY_MODIFIES_ACTION branch");
 						SUCCEED_OR_DIE(::FindArgRelatedToLHS(*Target,::CanStrictlyModify,ApprovalTargetsImage,ApprovalIdx));
 						SUCCEED_OR_DIE(FindArgRelatedToLHS(*ApprovalTargetsImage[ApprovalIdx],AreSyntacticallyEqual));
-						InferenceParameterMC = Target;
+						InferenceParameterMC = std::move(Target);
 						IdxCurrentSelfEvalRule = VirtualStrictlyModify_SER;
 						return;
 						}
