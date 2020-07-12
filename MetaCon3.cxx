@@ -3110,15 +3110,9 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 			DEBUG_LOG("Vertex OK");
 
 			// #2: The amplifiers (sources of the to-edges) become the NewBranchingOperationSources
-			MetaConcept** AmplifySource = NULL;
-			TraceAmplification->MirrorSourceVerticesForIdxNoLoopsNoOwnership(i,ToEdgeCount,0,TraceAmplification->size(),AmplifySource);
-			if (!AmplifySource)
-				{
-				DEBUG_LOG("Mirroring of amplifiers bad");
-				goto EndAmplification;
-				}
-			DEBUG_LOG("Mirroring of amplifiers OK");
-			size_t AmplifierCount = ArraySize(AmplifySource);
+			auto AmplifySource(TraceAmplification->MirrorSourceVerticesForIdxNoLoopsNoOwnership(i, ToEdgeCount));
+			size_t AmplifierCount = AmplifySource.size();
+			if (AmplifySource.empty()) goto EndAmplification;
 
 			// #3: branching operation: AmplifyTarget (defined above)
 			// #4: NewCanUseBranchingOperation: CanUseAmplification (defined above)
@@ -3130,23 +3124,21 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 			if (!::GrepArgList(ApprovalTargetsImage,NotAVariable,ArgArray))
 				{
 				DEBUG_LOG("Mirroring of targets bad");
-				free(AmplifySource);
 				goto EndAmplification;
 				}
 			DEBUG_LOG("Mirroring of targets OK");
 			if (!ApprovalTargetsImage)
 				{
 				DEBUG_LOG("No targets found");
-				free(AmplifySource);
 				UnconditionalDataIntegrityFailure();
-			}
+				}
 			// eliminate statement amplified
 			SelfGrepArgListNoOwnership(AreSyntacticallyUnequal,*TraceAmplification->ArgN(i),ApprovalTargetsImage);
 
 			DEBUG_LOG("Self-amplification cancelled");
 
 			// eliminate statements used to amplify
-			size_t Idx2 = ArraySize(AmplifySource);
+			size_t Idx2 = AmplifySource.size();
 			do	SelfGrepArgListNoOwnership(AreSyntacticallyUnequal,*AmplifySource[--Idx2],ApprovalTargetsImage);
 			while(0<Idx2);
 
@@ -3160,7 +3152,6 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 				{
 				DEBUG_LOG("Diagnosis OK, false");
 				free(ApprovalTargetsImage);
-				free(AmplifySource);
 				goto EndAmplification;
 				}
 
@@ -3169,7 +3160,6 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 			if (0==FullyAmplifiedAnalysisMode)
 				{	// does nothing...ignore
 				free(ApprovalTargetsImage);
-				free(AmplifySource);
 				TraceAmplification->RemoveVertex(i);
 				TraceAmplification->FlushVerticesWithDirectedEdgeCountsLTE(0,0);
 				continue;
@@ -3185,7 +3175,6 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 			if (!NewArgArray)
 				{
 				free(ApprovalTargetsImage);
-				free(AmplifySource);
 				goto EndAmplification;
 				}			
 
@@ -3196,14 +3185,13 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 											AmplifyTarget,
 											CanUseAmplification,
 											AmplifiedStatementIsUseful,
-											AmplifySource,
+											AmplifySource.release(),
 											ApprovalTargetsImage);
 				}
 			catch(const bad_alloc&)
 				{
 				BLOCKDELETEARRAY(NewArgArray);
 				free(ApprovalTargetsImage);
-				free(AmplifySource);
 				goto EndAmplification;				
 				}
 
@@ -3316,7 +3304,6 @@ SearchFailed:
 			// #9: If this SearchTree fizzles:
 			delete ExploreThis;
 			free(ApprovalTargetsImage);
-			free(AmplifySource);
 			TraceAmplification->RemoveVertex(i);
 			TraceAmplification->FlushVerticesWithDirectedEdgeCountsLTE(0,0);
 			DEBUG_LOG("Incremental TraceAmplificaton clean OK");

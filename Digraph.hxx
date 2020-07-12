@@ -126,7 +126,7 @@ public:
 
 	// allocates memory on success
 	size_t* EnumerateFromEdgesNoLoops(size_t i, size_t EdgeCount,size_t nonstrict_lb, size_t strict_ub) const;
-	void MirrorSourceVerticesForIdxNoLoopsNoOwnership(size_t i, size_t EdgeCount,size_t nonstrict_lb, size_t strict_ub, MetaConcept**& MirrorArgArray) const;
+	zaimoni::weakautovalarray_ptr_throws<MetaConcept*> MirrorSourceVerticesForIdxNoLoopsNoOwnership(size_t i, size_t EdgeCount) const;
 
 	void EnumerateHighestFromEdgesNoLoopsNoAllocation(size_t i, size_t EdgeCount,size_t nonstrict_lb, size_t strict_ub, size_t* IdxList) const;
 	bool CompleteStrictGraphSquare(size_t Idx, size_t Idx2, size_t Idx3, size_t& Idx4) const;

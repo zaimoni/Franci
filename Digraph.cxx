@@ -501,10 +501,8 @@ size_t Digraph::VertexToEdgeCountCore(size_t To)
 				else ResetEdge(i,To);
 				}
 			}
-		else if (ExplicitEdge(i,To))
-			Count++;
-		else
-			SUCCEED_OR_DIE(ExplicitNoEdge(i,To));
+		else if (ExplicitEdge(i, To)) Count++;
+		else SUCCEED_OR_DIE(ExplicitNoEdge(i,To));
 		}
 	while(0<i);
 	return Count;
@@ -826,25 +824,22 @@ Digraph::EnumerateFromEdgesNoLoops(const size_t i, const size_t EdgeCount,const 
 	return IdxList;
 }
 
-void
-Digraph::MirrorSourceVerticesForIdxNoLoopsNoOwnership(const size_t i, const size_t EdgeCount,const size_t nonstrict_lb, const size_t strict_ub, MetaConcept**& MirrorArgArray) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 3/3/2006
-	assert(!MirrorArgArray);
-	assert(nonstrict_lb<strict_ub);
-	if (0==EdgeCount) return;
-	MirrorArgArray = _new_buffer<MetaConcept*>(EdgeCount);
-	if (MirrorArgArray)
-		{
-		size_t TargetIdx = EdgeCount;
-		size_t j = strict_ub;
-		do	if (--j!=i && ExplicitEdge(j,i))
-				{
-				SUCCEED_OR_DIE(0<TargetIdx);
-				MirrorArgArray[--TargetIdx] = ArgArray[j];
-				}
-		while(nonstrict_lb<j);
-		SUCCEED_OR_DIE(0==TargetIdx);
+zaimoni::weakautovalarray_ptr_throws<MetaConcept*> Digraph::MirrorSourceVerticesForIdxNoLoopsNoOwnership(size_t i, size_t EdgeCount) const
+{
+	constexpr size_t nonstrict_lb = 0;
+	const auto strict_ub = size();
+	assert(nonstrict_lb < strict_ub);
+	if (0 == EdgeCount) return zaimoni::weakautovalarray_ptr_throws<MetaConcept*>();
+	zaimoni::weakautovalarray_ptr_throws<MetaConcept*> ret(EdgeCount);
+	size_t TargetIdx = EdgeCount;
+	size_t j = strict_ub;
+	do	if (--j != i && ExplicitEdge(j, i)) {
+			SUCCEED_OR_DIE(0 < TargetIdx);
+			ret[--TargetIdx] = ArgArray[j];
 		}
+	while (nonstrict_lb < j);
+	SUCCEED_OR_DIE(0 == TargetIdx);
+	return ret;
 }
 
 void
