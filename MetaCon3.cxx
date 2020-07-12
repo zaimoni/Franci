@@ -3111,8 +3111,8 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 
 			// #2: The amplifiers (sources of the to-edges) become the NewBranchingOperationSources
 			auto AmplifySource(TraceAmplification->MirrorSourceVerticesForIdxNoLoopsNoOwnership(i, ToEdgeCount));
-			size_t AmplifierCount = AmplifySource.size();
 			if (AmplifySource.empty()) goto EndAmplification;
+			size_t AmplifierCount = AmplifySource.size();
 
 			// #3: branching operation: AmplifyTarget (defined above)
 			// #4: NewCanUseBranchingOperation: CanUseAmplification (defined above)
@@ -3120,18 +3120,9 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 			//     NewApprovalTargets.  We may wish to weed out naked variables.
 			//     We may wish to weed out statements completely non-interacting with
 			//     all of the reserved clauses.  The variables part is easier.
-			MetaConcept** ApprovalTargetsImage = NULL;
-			if (!::GrepArgList(ApprovalTargetsImage,NotAVariable,ArgArray))
-				{
-				DEBUG_LOG("Mirroring of targets bad");
-				goto EndAmplification;
-				}
-			DEBUG_LOG("Mirroring of targets OK");
-			if (!ApprovalTargetsImage)
-				{
-				DEBUG_LOG("No targets found");
-				UnconditionalDataIntegrityFailure();
-				}
+			auto ApprovalTargetsImage(grep(NotAVariable));
+			SUCCEED_OR_DIE(!ApprovalTargetsImage.empty());
+
 			// eliminate statement amplified
 			SelfGrepArgListNoOwnership(AreSyntacticallyUnequal,*TraceAmplification->ArgN(i),ApprovalTargetsImage);
 
@@ -3151,7 +3142,6 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 			if (!DiagnoseAmplificationCapability(TargetIdx,FullyAmplifiedAnalysisMode,AmplifySource,*TraceAmplification->ArgN(i),ApprovalTargetsImage))
 				{
 				DEBUG_LOG("Diagnosis OK, false");
-				free(ApprovalTargetsImage);
 				goto EndAmplification;
 				}
 
@@ -3159,7 +3149,6 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 
 			if (0==FullyAmplifiedAnalysisMode)
 				{	// does nothing...ignore
-				free(ApprovalTargetsImage);
 				TraceAmplification->RemoveVertex(i);
 				TraceAmplification->FlushVerticesWithDirectedEdgeCountsLTE(0,0);
 				continue;
@@ -3172,11 +3161,7 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 			// #6: need a custom function for approval: AmplifiedStatementIsUseful, defined above
 			// #7: construct SearchTree
 			MetaConcept** NewArgArray = _new_buffer<MetaConcept*>(1);
-			if (!NewArgArray)
-				{
-				free(ApprovalTargetsImage);
-				goto EndAmplification;
-				}			
+			if (!NewArgArray) goto EndAmplification;
 
 			SearchTree* ExploreThis = NULL;
 			try	{
@@ -3185,13 +3170,12 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 											AmplifyTarget,
 											CanUseAmplification,
 											AmplifiedStatementIsUseful,
-											AmplifySource.release(),
+											AmplifySource /*.release()*/,
 											ApprovalTargetsImage);
 				}
 			catch(const bad_alloc&)
 				{
 				BLOCKDELETEARRAY(NewArgArray);
-				free(ApprovalTargetsImage);
 				goto EndAmplification;				
 				}
 
@@ -3303,7 +3287,6 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 SearchFailed:
 			// #9: If this SearchTree fizzles:
 			delete ExploreThis;
-			free(ApprovalTargetsImage);
 			TraceAmplification->RemoveVertex(i);
 			TraceAmplification->FlushVerticesWithDirectedEdgeCountsLTE(0,0);
 			DEBUG_LOG("Incremental TraceAmplificaton clean OK");
