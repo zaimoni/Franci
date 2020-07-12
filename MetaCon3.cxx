@@ -3064,7 +3064,7 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 
 	//! \todo start function target
 	{
-	auto MirrorArgList(::GrepArgList(AmplifyOrBeAmplified, ArgArray));
+	auto MirrorArgList(grep(AmplifyOrBeAmplified));
 
 	//! \todo XOR(A,B,C),XOR(~A,D,E) => amplify OR(A,~A) [maybe check for these anyway..no,
 	// worthless IFF hookins.  IFF should not amplify OR(A,~A).]

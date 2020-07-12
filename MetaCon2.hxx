@@ -243,6 +243,7 @@ public:
 	// as a subarglist of RHS.
 	bool SubvectorArgList(const MetaConceptWithArgArray& rhs) const;
 	bool GrepArgList(MetaConcept**& MirrorArgList,LowLevelUnaryProperty& WantThis) {return ::GrepArgList(MirrorArgList,WantThis,ArgArray);};
+	auto grep(LowLevelUnaryProperty& WantThis) const { return ::GrepArgList(WantThis, ArgArray); }
 protected:
 	void MoveIntoAux(MetaConceptWithArgArray& dest);
 //	Override this for non-commutative types, or complicated internal structure
