@@ -3035,7 +3035,7 @@ DiagnoseAmplificationCapability(size_t& TargetIdx, signed int& FullyAmplifiedAna
 
 //! \todo A comprehensive overview of evaluation rules.
 void MetaConnective::DiagnoseIntermediateRulesANDAux() const
-{	// FORMALLY CORRECT: Kenneth Boyd, 6/22/2000
+{	// FORMALLY CORRECT: 2020-07-15
 	// ASSUMPTION: the args have already been sorted by DiagnoseIntermediateRules
 	assert(2<size());
 	DEBUG_LOG(ZAIMONI_FUNCNAME);
@@ -3160,24 +3160,16 @@ void MetaConnective::DiagnoseIntermediateRulesANDAux() const
 
 			// #6: need a custom function for approval: AmplifiedStatementIsUseful, defined above
 			// #7: construct SearchTree
-			MetaConcept** NewArgArray = _new_buffer<MetaConcept*>(1);
-			if (!NewArgArray) goto EndAmplification;
+			zaimoni::autovalarray_ptr_throws<MetaConcept*> NewArgArray(1);
 
 			SearchTree* ExploreThis = NULL;
-			try	{
-				TraceAmplification->ArgN(i)->CopyInto(NewArgArray[0]);
-				ExploreThis = new SearchTree(NewArgArray,
-											AmplifyTarget,
-											CanUseAmplification,
-											AmplifiedStatementIsUseful,
-											AmplifySource /*.release()*/,
-											ApprovalTargetsImage);
-				}
-			catch(const bad_alloc&)
-				{
-				BLOCKDELETEARRAY(NewArgArray);
-				goto EndAmplification;				
-				}
+			TraceAmplification->ArgN(i)->CopyInto(NewArgArray[0]);
+			ExploreThis = new SearchTree(NewArgArray,
+										AmplifyTarget,
+										CanUseAmplification,
+										AmplifiedStatementIsUseful,
+										AmplifySource /*.release()*/,
+										ApprovalTargetsImage);
 
 			LOG("Testing amplification of");
 			LOG(*TraceAmplification->ArgN(i));
