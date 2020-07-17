@@ -79,7 +79,8 @@ public:
 	static const UnparsedText& fast_up_reference(const MetaConcept* src);
 
 //  Type ID functions
-	virtual const AbstractClass* UltimateType() const;	// untyped i.e. free
+	const AbstractClass* UltimateType() const override { return 0; }	// untyped i.e. free
+	constexpr static bool IsType(ExactType_MC x) { return UnparsedText_MC == x; }
 //  Evaluation functions
 	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override;
 	virtual bool CanEvaluate() const;

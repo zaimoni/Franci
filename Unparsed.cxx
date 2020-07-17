@@ -301,67 +301,63 @@ UnparsedText::UnparsedText(char*& src, bool Interpreted)
 
 UnparsedText* UnparsedText::up_cast(MetaConcept* src)
 {
-	if (NULL!=src && src->IsExactType(UnparsedText_MC))
-		return static_cast<UnparsedText*>(src);
-	return NULL;
+	if (src && IsType(src->ExactType())) return static_cast<UnparsedText*>(src);
+	return 0;
 }
 
 const UnparsedText* UnparsedText::up_cast(const MetaConcept* src)
 {
-	if (NULL!=src && src->IsExactType(UnparsedText_MC))
-		return static_cast<const UnparsedText*>(src);
-	return NULL;
+	if (src && IsType(src->ExactType())) return static_cast<const UnparsedText*>(src);
+	return 0;
 }
 
 UnparsedText& UnparsedText::up_reference(MetaConcept* src)
 {
-	SUCCEED_OR_DIE(NULL!=src);
-	SUCCEED_OR_DIE(src->IsExactType(UnparsedText_MC));
+	SUCCEED_OR_DIE(src);
+	SUCCEED_OR_DIE(IsType(src->ExactType()));
 	return *static_cast<UnparsedText*>(src);
 }
 
 const UnparsedText& UnparsedText::up_reference(const MetaConcept* src)
 {
-	SUCCEED_OR_DIE(NULL!=src);
-	SUCCEED_OR_DIE(src->IsExactType(UnparsedText_MC));
+	SUCCEED_OR_DIE(src);
+	SUCCEED_OR_DIE(IsType(src->ExactType()));
 	return *static_cast<const UnparsedText*>(src);
 }
 
 UnparsedText& UnparsedText::up_reference(MetaConcept& src)
 {
-	SUCCEED_OR_DIE(src.IsExactType(UnparsedText_MC));
+	SUCCEED_OR_DIE(IsType(src.ExactType()));
 	return *static_cast<UnparsedText*>(&src);
 }
 
 const UnparsedText& UnparsedText::up_reference(const MetaConcept& src)
 {
-	SUCCEED_OR_DIE(src.IsExactType(UnparsedText_MC));
+	SUCCEED_OR_DIE(IsType(src.ExactType()));
 	return *static_cast<const UnparsedText*>(&src);
 }
 
 UnparsedText* UnparsedText::fast_up_cast(MetaConcept* src)
 {
-	return (src->IsExactType(UnparsedText_MC)) ? static_cast<UnparsedText*>(src) : NULL;
+	return IsType(src->ExactType()) ? static_cast<UnparsedText*>(src) : 0;
 }
 
 const UnparsedText* UnparsedText::fast_up_cast(const MetaConcept* src)
 {
-	return (src->IsExactType(UnparsedText_MC)) ? static_cast<const UnparsedText*>(src) : NULL;
+	return IsType(src->ExactType()) ? static_cast<const UnparsedText*>(src) : 0;
 }
 
 UnparsedText& UnparsedText::fast_up_reference(MetaConcept* src)
 {
-	SUCCEED_OR_DIE(src->IsExactType(UnparsedText_MC));
+	SUCCEED_OR_DIE(IsType(src->ExactType()));
 	return *static_cast<UnparsedText*>(src);
 }
 
 const UnparsedText& UnparsedText::fast_up_reference(const MetaConcept* src)
 {
-	SUCCEED_OR_DIE(src->IsExactType(UnparsedText_MC));
+	SUCCEED_OR_DIE(IsType(src->ExactType()));
 	return *static_cast<const UnparsedText*>(src);
 }
-
-const AbstractClass* UnparsedText::UltimateType() const {return NULL;}
 
 // Syntactical equality and inequality
 bool UnparsedText::EqualAux2(const MetaConcept& rhs) const
