@@ -415,6 +415,12 @@ NewSituation_handler(char*& InputBuffer)
 	return true;
 }
 
+void ConstraintMerge(MetaConnective& host, MetaConcept* NewConstraint)
+{	// FORMALLY CORRECT: 2020-07-17
+	// Add the constraint to the AND-object
+	if (!host.AddArgAtEndAndForceCorrectForm(NewConstraint)) UnconditionalRAMFailure();
+}
+
 void
 ConstraintMerge(MetaConnective* Situation,MetaConcept* NewConstraint,MetaConcept*& Result)
 {	// FORMALLY CORRECT: Kenneth Boyd, 10/26/2005
@@ -425,24 +431,28 @@ ConstraintMerge(MetaConnective* Situation,MetaConcept* NewConstraint,MetaConcept
 	Result = Situation;
 }
 
-void
-ConstraintMerge(MetaConcept* Situation,MetaConcept* NewConstraint,MetaConcept*& Result)
-{	// FORMALLY CORRECT, 11/15/1999
+void ConstraintMerge(MetaConcept*& host, MetaConcept* NewConstraint)
+{	// FORMALLY CORRECT: 2020-07-17
 	// create AND object holding both the Situation and the constraint
-	assert(Situation);
+	assert(host);
 	assert(NewConstraint);
-	MetaConcept** NewArgList = _new_buffer_nonNULL<MetaConcept*>(2);
+	zaimoni::weakautovalarray_ptr_throws<MetaConcept*> NewArgList(2);
 
-	NewArgList[0]=Situation;
-	NewArgList[1]=NewConstraint;
-	Result = new(nothrow) MetaConnective(NewArgList,AND_MCM);
-	if (!Result)
-		{
-		delete NewArgList[0];
-		delete NewArgList[1];
-		FREE(NewArgList);
-		UnconditionalRAMFailure();
-		};
+	NewArgList[0] = host;
+	NewArgList[1] = NewConstraint;
+	host = new MetaConnective(NewArgList, AND_MCM);
+}
+
+void ConstraintMerge(QuantifiedStatement& host, MetaConcept* NewConstraint)
+{	// FORMALLY CORRECT: 2020-07-17
+	// add the constraint to the Arg(0) object
+	MetaConcept* Result2 = NULL;
+	host.TransferOutAndNULL(0, Result2);
+	if (Result2->IsExactType(LogicalAND_MC))
+		ConstraintMerge(*static_cast<MetaConnective*>(Result2), NewConstraint);
+	else
+		ConstraintMerge(Result2, NewConstraint);
+	host.TransferInAndOverwriteRaw(0, Result2);
 }
 
 void
@@ -452,15 +462,15 @@ ConstraintMerge(QuantifiedStatement* Situation,MetaConcept* NewConstraint,MetaCo
 	MetaConcept* Result2 = NULL;
 	Situation->TransferOutAndNULL(0,Result2);
 	if (Result2->IsExactType(LogicalAND_MC))
-		ConstraintMerge(static_cast<MetaConnective*>(Result2),NewConstraint,Result2);
+		ConstraintMerge(*static_cast<MetaConnective*>(Result2),NewConstraint);
 	else
-		ConstraintMerge(Result2,NewConstraint,Result2);
+		ConstraintMerge(Result2,NewConstraint);
 	Situation->TransferInAndOverwriteRaw(0,Result2);
 	Result = Situation;
 }
 
-static void ConstraintMerge(QuantifiedStatement* Situation,QuantifiedStatement* NewConstraint,MetaConcept*& Result)
-{	// FORMALLY CORRECT: Kenneth Boyd, 9/29/1999
+static void ConstraintMerge(QuantifiedStatement& host,QuantifiedStatement* NewConstraint)
+{	// FORMALLY CORRECT: 2020-07-17
 	// add the constraint to the Arg(0) object; make sure improvised variables are
 	// transferred.  Note that NewConstraint may simply be a quantified-statement without
 	// improvised variables.
@@ -468,40 +478,36 @@ static void ConstraintMerge(QuantifiedStatement* Situation,QuantifiedStatement* 
 	if (static_cast<MetaQuantifier*>(NewConstraint->ArgN(1))->IsImprovisedVar())
 		{	// we need to shift improvised variables
 		size_t VarCount = NewConstraint->size()-1;
-		if (!Situation->InsertNSlotsAtV2(VarCount,1))
-			UnconditionalRAMFailure();
+		if (!host.InsertNSlotsAtV2(VarCount,1)) UnconditionalRAMFailure();
 		do	{
 			MetaConcept* Tmp = NULL;
 			NewConstraint->TransferOutAndNULL(VarCount,Tmp);
-			Situation->TransferInAndOverwriteRaw(VarCount,Tmp);
+			host.TransferInAndOverwriteRaw(VarCount,Tmp);
 			}
 		while(0<--VarCount);
 		MetaConcept* OldArgZero = NULL;
 		NewConstraint->TransferOutAndNULL(0,OldArgZero);
 		delete NewConstraint;
-		ConstraintMerge(Situation,OldArgZero,Result);
+		ConstraintMerge(host,OldArgZero);
 		}
 	else	// we don't need to shift anything, RHS is an atomic statement
-		ConstraintMerge(Situation,static_cast<MetaConcept*>(NewConstraint),Result);
+		ConstraintMerge(host,static_cast<MetaConcept*>(NewConstraint));
 }
 
-void
-ConstraintForSituationAux1(MetaConcept* InitialResult)
-{	// FORMALLY CORRECT: Kenneth Boyd, 6/16/2000
-	if		(NULL==Situation)
-		{
+void ConstraintForSituationAux1(MetaConcept* InitialResult)
+{	// FORMALLY CORRECT: 2020-07-17
+	if (!Situation) {
 		Situation = InitialResult;
 		return;
-		}
-	else if (Situation->IsExactType(QuantifiedStatement_MC))
+	} else if (Situation->IsExactType(QuantifiedStatement_MC))
 		{
 		if		(InitialResult->IsExactType(QuantifiedStatement_MC))
 			{
-			ConstraintMerge(static_cast<QuantifiedStatement*>(Situation),static_cast<QuantifiedStatement*>(InitialResult),Situation);
+			ConstraintMerge(*static_cast<QuantifiedStatement*>(Situation),static_cast<QuantifiedStatement*>(InitialResult));
 			return;
 			}
 		else{
-			ConstraintMerge(static_cast<QuantifiedStatement*>(Situation),InitialResult,Situation);
+			ConstraintMerge(*static_cast<QuantifiedStatement*>(Situation),InitialResult);
 			return;
 			};
 		}
@@ -513,7 +519,7 @@ ConstraintForSituationAux1(MetaConcept* InitialResult)
 			return;
 			}
 		else{
-			ConstraintMerge(static_cast<MetaConnective*>(Situation),InitialResult,Situation);
+			ConstraintMerge(*static_cast<MetaConnective*>(Situation),InitialResult);
 			return;
 			};
 		}
@@ -530,7 +536,7 @@ ConstraintForSituationAux1(MetaConcept* InitialResult)
 			return;
 			}
 		else{
-			ConstraintMerge(Situation,InitialResult,Situation);
+			ConstraintMerge(Situation,InitialResult);
 			return;
 			};
 		};
@@ -946,17 +952,17 @@ WhatIf_handler(char*& InputBuffer)
 		TmpSituation->CopyInto(Situation);
 		if (Situation->IsExactType(QuantifiedStatement_MC))
 			{
-			ConstraintMerge(static_cast<QuantifiedStatement*>(Situation),InitialResult,Situation);
+			ConstraintMerge(*static_cast<QuantifiedStatement*>(Situation),InitialResult);
 			static_cast<QuantifiedStatement*>(Situation)->ResetExplicitSort();
 			}
 		else if (Situation->IsExactType(LogicalAND_MC))
-			ConstraintMerge(static_cast<MetaConnective*>(Situation),InitialResult,Situation);
+			ConstraintMerge(*static_cast<MetaConnective*>(Situation),InitialResult);
 		else{
 			assert(Situation->IsUltimateType(&TruthValues));
 			if (InitialResult->IsExactType(LogicalAND_MC))
 				ConstraintMerge(static_cast<MetaConnective*>(InitialResult),Situation,Situation);
 			else
-				ConstraintMerge(Situation,InitialResult,Situation);
+				ConstraintMerge(Situation,InitialResult);
 			};
 		}
 	catch(const bad_alloc&)
