@@ -113,7 +113,7 @@ bool Phrase1Arg::SyntaxOK_FACTORIAL() const
 
 bool Phrase1Arg::Evaluate(MetaConcept*& dest)	// same, or different type
 {	// FORMALLY CORRECT: Kenneth Boyd, 3/2/2006
-	assert(NULL==dest);
+	assert(!dest);
 	if (IsExactType(FACTORIAL_Phrase1_MC))
 		{	
 		weakautoarray_ptr<MetaConcept*> NewArgArray(1);
@@ -127,19 +127,13 @@ bool Phrase1Arg::Evaluate(MetaConcept*& dest)	// same, or different type
 	return false;
 }
 
-// FORMALLY CORRECT: Kenneth Boyd, 7/12/1999
-bool Phrase1Arg::DestructiveEvaluateToSameType() {return false;}
-
-const char* Phrase1Arg::ViewKeyword() const {return PhraseKeyword;}
-
-ExactType_MC
-Phrase1Arg::CanConstruct(const MetaConcept * const * TargetArray, size_t KeywordIdx)
-{	// FORMALLY CORRECT: Kenneth Boyd, 4/13/2003
-	assert(NULL!=TargetArray);
+ExactType_MC Phrase1Arg::CanConstruct(const MetaConcept * const * TargetArray, size_t KeywordIdx)
+{	// FORMALLY CORRECT: 2020-07-26
+	assert(TargetArray);
 	assert(ArraySize(TargetArray)>KeywordIdx);
-	assert(NULL!=TargetArray[KeywordIdx]);
-	const UnparsedText* const TargetArg = UnparsedText::up_cast(TargetArray[KeywordIdx]);
-	if (NULL==TargetArg) return Unknown_MC;
+	assert(TargetArray[KeywordIdx]);
+	const auto TargetArg = up_cast<UnparsedText>(TargetArray[KeywordIdx]);
+	if (!TargetArg) return Unknown_MC;
 
 	// This is Franci's IN ___ recognizer
 	// META: It has a theoretical problem that isn't critical right now: it cannot cope
@@ -147,11 +141,10 @@ Phrase1Arg::CanConstruct(const MetaConcept * const * TargetArray, size_t Keyword
 	// args for IN, but this recognizer cannot deal with them.
 	if (TargetArg->IsPredCalcKeyword(PredCalcKeyword_IN))
 		{
-		const MetaConcept* Arg = TargetArray[KeywordIdx+1];
-		if (NULL==Arg)
-			return (KeywordIdx+1==ArraySize(TargetArray)) ? IN_Phrase1_MC : Unknown_MC;
-		else
+		if (auto Arg = TargetArray[KeywordIdx + 1])
 			return (Arg->IsExactType(AbstractClass_MC)) ? IN_Phrase1_MC : Unknown_MC;
+		else
+			return (KeywordIdx + 1 == ArraySize(TargetArray)) ? IN_Phrase1_MC : Unknown_MC;
 		};
 	// recognize FACTORIAL
 	if (   KeywordIdx+3<ArraySize(TargetArray)

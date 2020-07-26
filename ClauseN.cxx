@@ -279,8 +279,6 @@ void ClauseNArg::DiagnoseInferenceRules() const
 	UnconditionalDataIntegrityFailure();
 }
 
-bool ClauseNArg::InvokeEqualArgRule() const {return false;}
-
 // #define FRANCI_WARY 1
 
 ExactType_MC
@@ -293,11 +291,10 @@ ClauseNArg::CanConstructNonPostfix(const MetaConcept* const * src, size_t Keywor
 	assert(src);
 	assert(ArraySize(src)>KeywordIdx);
 	assert(src[KeywordIdx]);
-	const UnparsedText* const VRKeyword = UnparsedText::fast_up_cast(src[KeywordIdx]);
-	if (NULL==VRKeyword) return Unknown_MC;
+	const auto VRKeyword = fast_up_cast<UnparsedText>(src[KeywordIdx]);
+	if (!VRKeyword) return Unknown_MC;
 
-	const ExactType_MC GuessType = VRKeyword->TypeForNAryClauseKeyword();
-	if (Unknown_MC!=GuessType)
+	if (const auto GuessType = VRKeyword->TypeForNAryClauseKeyword())
 		{
 		if (   DISTINCTFROMALLOF_ClauseN_MC==GuessType
 			|| EQUALTOONEOF_ClauseN_MC==GuessType)
@@ -331,12 +328,6 @@ ClauseNArg::CanConstructNonPostfix(const MetaConcept* const * src, size_t Keywor
 }
 
 #undef FRANCI_WARY
-
-ExactType_MC
-ClauseNArg::CanConstructPostfix(const MetaConcept* const * src, size_t KeywordIdx)
-{	// FORMALLY CORRECT: 8/11/1999
-	return Unknown_MC;
-}
 
 // must not throw, called only from constructor
 ExactType_MC

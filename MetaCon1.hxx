@@ -423,6 +423,34 @@ inline bool operator!=(const MetaConcept& lhs, const MetaConcept& rhs) {return !
 void INFORM(const MetaConcept& B);
 void LOG(const MetaConcept& B);
 
+template<class T>
+std::enable_if_t<std::is_base_of_v<MetaConcept, T>, T*> up_cast(MetaConcept* src)
+{
+	if (src && T::IsType(src->ExactType())) return static_cast<T*>(src);
+	return 0;
+}
+
+template<class T>
+std::enable_if_t<std::is_base_of_v<MetaConcept, T>, const T*> up_cast(const MetaConcept* src)
+{
+	if (src && T::IsType(src->ExactType())) return static_cast<const T*>(src);
+	return 0;
+}
+
+template<class T>
+std::enable_if_t<std::is_base_of_v<MetaConcept, T>, T*> fast_up_cast(MetaConcept* src)
+{
+	if (T::IsType(src->ExactType())) return static_cast<T*>(src);
+	return 0;
+}
+
+template<class T>
+std::enable_if_t<std::is_base_of_v<MetaConcept, T>, const T*> fast_up_cast(const MetaConcept* src)
+{
+	if (T::IsType(src->ExactType())) return static_cast<const T*>(src);
+	return 0;
+}
+
 // next is in Class.cxx
 // misnamed: properly ForceVarUltimateTypeTruthValues.  Not important enough to update.
 bool ForceUltimateTypeTruthValues(MetaConcept*& Target);

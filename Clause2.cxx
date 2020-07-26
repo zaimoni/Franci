@@ -110,8 +110,6 @@ void Clause2Arg::DiagnoseInferenceRules()
 		}
 }
 
-bool Clause2Arg::InvokeEqualArgRule() {return false;}
-
 bool Clause2Arg::DelegateEvaluate(MetaConcept*& dest)
 {
 	assert(MetaConceptWith2Args::MaxEvalRuleIdx_ER<IdxCurrentEvalRule);
@@ -120,18 +118,16 @@ bool Clause2Arg::DelegateEvaluate(MetaConcept*& dest)
 }		// same, or different type
 
 // type-specific functions
-ExactType_MC
-Clause2Arg::CanConstructNonPostfix(const MetaConcept* const * src, size_t KeywordIdx)
-{	// FORMALLY CORRECT: Kenneth Boyd, 9/27/2006
+ExactType_MC Clause2Arg::CanConstructNonPostfix(const MetaConcept* const * src, size_t KeywordIdx)
+{	// FORMALLY CORRECT: 2020-07-26
 	// infix keywords
-	assert(NULL!=src);
+	assert(src);
 	assert(ArraySize(src)>KeywordIdx);
-	assert(NULL!=src[KeywordIdx]);
-	const UnparsedText* const VRKeyword = UnparsedText::fast_up_cast(src[KeywordIdx]);
-	if (NULL==VRKeyword) return Unknown_MC;
+	assert(src[KeywordIdx]);
+	const auto VRKeyword = fast_up_cast<UnparsedText>(src[KeywordIdx]);
+	if (!VRKeyword) return Unknown_MC;
 
-	const ExactType_MC GuessType = VRKeyword->TypeFor2AryClauseInfixKeyword();
-	if (Unknown_MC!=GuessType)
+	if (const auto GuessType = VRKeyword->TypeFor2AryClauseInfixKeyword())
 		{
 		if (ArraySize(src)<=KeywordIdx+1)
 			{
@@ -221,12 +217,6 @@ Clause2Arg::CanConstructNonPostfix(const MetaConcept* const * src, size_t Keywor
 				};
 			}
 		};
-	return Unknown_MC;
-}
-
-ExactType_MC
-Clause2Arg::CanConstructPostfix(const MetaConcept* const * src, size_t KeywordIdx)
-{	// FORMALLY CORRECT: 8/21/1999
 	return Unknown_MC;
 }
 

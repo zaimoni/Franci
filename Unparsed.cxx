@@ -299,18 +299,6 @@ UnparsedText::UnparsedText(char*& src, bool Interpreted)
 	if (!SelfClassifyBitmap && !Text.empty()) SpecializeSemantics();
 }
 
-UnparsedText* UnparsedText::up_cast(MetaConcept* src)
-{
-	if (src && IsType(src->ExactType())) return static_cast<UnparsedText*>(src);
-	return 0;
-}
-
-const UnparsedText* UnparsedText::up_cast(const MetaConcept* src)
-{
-	if (src && IsType(src->ExactType())) return static_cast<const UnparsedText*>(src);
-	return 0;
-}
-
 UnparsedText& UnparsedText::up_reference(MetaConcept* src)
 {
 	SUCCEED_OR_DIE(src);
@@ -335,16 +323,6 @@ const UnparsedText& UnparsedText::up_reference(const MetaConcept& src)
 {
 	SUCCEED_OR_DIE(IsType(src.ExactType()));
 	return *static_cast<const UnparsedText*>(&src);
-}
-
-UnparsedText* UnparsedText::fast_up_cast(MetaConcept* src)
-{
-	return IsType(src->ExactType()) ? static_cast<UnparsedText*>(src) : 0;
-}
-
-const UnparsedText* UnparsedText::fast_up_cast(const MetaConcept* src)
-{
-	return IsType(src->ExactType()) ? static_cast<const UnparsedText*>(src) : 0;
 }
 
 UnparsedText& UnparsedText::fast_up_reference(MetaConcept* src)

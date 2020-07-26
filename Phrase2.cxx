@@ -188,9 +188,6 @@ bool Phrase2Arg::SyntaxOK() const
 	return false;
 }
 
-// text I/O functions
-const char* Phrase2Arg::ViewKeyword() const {return PhraseKeyword;}
-
 std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > Phrase2Arg::canEvaluate() const // \todo obviate DiagnoseInferenceRules
 {
 	return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >();
@@ -219,8 +216,6 @@ void Phrase2Arg::DiagnoseInferenceRules()
 		}
 }
 
-bool Phrase2Arg::InvokeEqualArgRule() {return false;}
-
 bool Phrase2Arg::DelegateEvaluate(MetaConcept*& dest)
 {
 	assert(MetaConceptWith2Args::MaxEvalRuleIdx_ER<IdxCurrentEvalRule);
@@ -229,18 +224,16 @@ bool Phrase2Arg::DelegateEvaluate(MetaConcept*& dest)
 }		// same, or different type
 
 // type-specific functions
-ExactType_MC
-Phrase2Arg::CanConstructNonPostfix(const MetaConcept* const * dest, size_t KeywordIdx)
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/13/2004
+ExactType_MC Phrase2Arg::CanConstructNonPostfix(const MetaConcept* const * dest, size_t KeywordIdx)
+{	// FORMALLY CORRECT: 2020-07-26
 	// SUM_Phrase2_MC: 
 	assert(dest);
 	assert(ArraySize(dest)>KeywordIdx);
 	assert(dest[KeywordIdx]);
-	const UnparsedText* const Keyword = UnparsedText::fast_up_cast(dest[KeywordIdx]);
+	const auto Keyword = fast_up_cast<UnparsedText>(dest[KeywordIdx]);
 	if (!Keyword) return Unknown_MC;
 
-	const ExactType_MC GuessType = Keyword->TypeFor2AryPhraseKeyword();
-	if (Unknown_MC!=GuessType)
+	if (const auto GuessType = Keyword->TypeFor2AryPhraseKeyword())
 		{
 		if (KeywordIdx+1>=ArraySize(dest))
 			{
@@ -331,12 +324,6 @@ Phrase2Arg::CanConstructNonPostfix(const MetaConcept* const * dest, size_t Keywo
 			return Unknown_MC;
 			}
 		}
-	return Unknown_MC;
-}
-
-ExactType_MC
-Phrase2Arg::CanConstructPostfix(const MetaConcept* const * src, size_t KeywordIdx)
-{	// FORMALLY CORRECT: 7/20/2003
 	return Unknown_MC;
 }
 

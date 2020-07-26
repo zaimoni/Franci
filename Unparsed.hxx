@@ -67,14 +67,10 @@ public:
 	void MoveInto(MetaConcept*& dest) override { zaimoni::MoveIntoV2(std::move(*this),dest); }
 	void MoveInto(UnparsedText*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
 
-	static UnparsedText* up_cast(MetaConcept* src);
-	static const UnparsedText* up_cast(const MetaConcept* src);
 	static UnparsedText& up_reference(MetaConcept* src);
 	static const UnparsedText& up_reference(const MetaConcept* src);
 	static UnparsedText& up_reference(MetaConcept& src);
 	static const UnparsedText& up_reference(const MetaConcept& src);
-	static UnparsedText* fast_up_cast(MetaConcept* src);
-	static const UnparsedText* fast_up_cast(const MetaConcept* src);
 	static UnparsedText& fast_up_reference(MetaConcept* src);
 	static const UnparsedText& fast_up_reference(const MetaConcept* src);
 

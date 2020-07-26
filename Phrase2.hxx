@@ -51,15 +51,15 @@ public:
 	virtual bool SyntaxOK() const;
 // text I/O functions
 	virtual size_t LengthOfSelfName() const;
-	virtual const char* ViewKeyword() const;
+	const char* ViewKeyword() const override { return PhraseKeyword; }
 // type-specific functions
 	static ExactType_MC CanConstructNonPostfix(const MetaConcept* const * src, size_t KeywordIdx);
-	static ExactType_MC CanConstructPostfix(const MetaConcept* const * src, size_t KeywordIdx);
+	constexpr static ExactType_MC CanConstructPostfix(const MetaConcept* const * src, size_t KeywordIdx) { return Unknown_MC; }
 protected:
 	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
 
 	virtual void DiagnoseInferenceRules();
-	virtual bool InvokeEqualArgRule();
+	bool InvokeEqualArgRule() { return false; }
 private:
 	virtual bool DelegateEvaluate(MetaConcept*& dest);		// same, or different type
 	static ExactType_MC CanConstruct(const MetaConcept* const * src, size_t KeywordIdx);

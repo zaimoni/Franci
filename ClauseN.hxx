@@ -62,13 +62,13 @@ public:
 	virtual void SelfLogicalNOT();	// instantiate when UltimateType is TruthValues
 // type-specific functions
 	static ExactType_MC CanConstructNonPostfix(const MetaConcept* const * src, size_t KeywordIdx);
-	static ExactType_MC CanConstructPostfix(const MetaConcept* const * src, size_t KeywordIdx);
+	constexpr static ExactType_MC CanConstructPostfix(const MetaConcept* const * src, size_t KeywordIdx) { return Unknown_MC; }
 protected:
 	virtual void ConstructSelfNameAux(char* Name) const;	// overwrites what is already there
 	void _forceStdForm() override { ForceStdFormAux(); }
 
 	virtual void DiagnoseInferenceRules() const;
-	virtual bool InvokeEqualArgRule() const;
+	bool InvokeEqualArgRule() const override { return false; }
 private:
 	void _ForceArgSameImplementation(size_t n) override;
 

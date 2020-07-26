@@ -53,10 +53,10 @@ public:
 	virtual bool CanEvaluateToSameType() const;
 	virtual bool SyntaxOK() const;
 	virtual bool Evaluate(MetaConcept*& dest);		// same, or different type
-	virtual bool DestructiveEvaluateToSameType();	// overwrites itself iff returns true
+	bool DestructiveEvaluateToSameType() override { return false; }
 // text I/O functions
 	virtual size_t LengthOfSelfName() const;
-	virtual const char* ViewKeyword() const;
+	const char* ViewKeyword() const override { return PhraseKeyword; }
 // NOTE: we may need this further down
 // Formal manipulation functions
 	static ExactType_MC CanConstruct(const MetaConcept * const * TargetArray, size_t KeywordIdx);

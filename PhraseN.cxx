@@ -121,8 +121,6 @@ bool PhraseNArg::SyntaxOKAuxCommaListVarNames() const
 	return and_range_n([](const MetaConcept* x) { return x->IsPotentialVarName(); }, ArgArray.begin(), fast_size());
 }
 
-const char* PhraseNArg::ViewKeyword() const {return PhraseKeyword;}
-
 std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > PhraseNArg::canEvaluate() const // \todo obviate DiagnoseInferenceRules
 {
 	return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >();
@@ -134,16 +132,14 @@ void PhraseNArg::DiagnoseInferenceRules() const
 	IdxCurrentSelfEvalRule = SelfEvalSyntaxOKNoRules_SER;
 }
 
-bool PhraseNArg::InvokeEqualArgRule() const {return false;}
-
 ExactType_MC
 PhraseNArg::CanConstructNonPostfix(const MetaConcept* const * src, size_t KeywordIdx)
-{	// FORMALLY CORRECT: Kenneth Boyd, 5/16/2006
-	assert(NULL!=src);
+{	// FORMALLY CORRECT: 2020-07-26
+	assert(src);
 	assert(ArraySize(src)>KeywordIdx);
-	assert(NULL!=src[KeywordIdx]);
-	const UnparsedText* TargetArg = UnparsedText::fast_up_cast(src[KeywordIdx]);
-	if (NULL==TargetArg) return Unknown_MC;
+	assert(src[KeywordIdx]);
+	const auto TargetArg = fast_up_cast<UnparsedText>(src[KeywordIdx]);
+	if (!TargetArg) return Unknown_MC;
 
 	// these are Franci's recognizers for
 	//	FORALL, THEREIS, NOTFORALL, THEREISNO
@@ -167,14 +163,12 @@ PhraseNArg::CanConstructNonPostfix(const MetaConcept* const * src, size_t Keywor
 }
 
 // This is just 'dominantly postfix' phrases.
-ExactType_MC
-PhraseNArg::CanConstructPostfix(const MetaConcept* const * src, size_t KeywordIdx)
-{	// FORMALLY CORRECT: Kenneth Boyd, 5/16/2006
-	assert(NULL!=src);
+ExactType_MC PhraseNArg::CanConstructPostfix(const MetaConcept* const * src, size_t KeywordIdx)
+{	// FORMALLY CORRECT: 2020-07-26
+	assert(src);
 	assert(ArraySize(src)>KeywordIdx);
-	assert(NULL!=src[KeywordIdx]);
-	const UnparsedText* TargetArg = UnparsedText::fast_up_cast(src[KeywordIdx]);
-	if (NULL!=TargetArg)
+	assert(src[KeywordIdx]);
+	if (auto TargetArg = fast_up_cast<UnparsedText>(src[KeywordIdx]))
 		{
 		// these are Franci's recognizers for
 		//  FREE: comma-ized
