@@ -1,0 +1,261 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=windows-1252"/>
+	<title></title>
+	<meta name="generator" content="LibreOffice 5.4.5.1 (Windows)"/>
+	<meta name="created" content="2020-07-26T16:24:58.240000000"/>
+	<meta name="changed" content="2020-07-27T14:02:43.219000000"/>
+	<style type="text/css">
+		@page { margin: 0.79in }
+		p { margin-bottom: 0in; line-height: 100% }
+		a:link { so-language: zxx }
+        * {
+            font-family: "Liberation Serif", serif
+        }
+	</style>
+</head>
+<body lang="en-US" dir="ltr">
+<h1 style="margin-bottom: 0in; line-height: 100%; font-size: 16px">Interpreting Kripke semantics for modal logic, in the context of physics</h1>
+<p><a href="https://en.wikipedia.org/wiki/Kripke_semantics">https://en.wikipedia.org/wiki/Kripke_semantics</a></p>
+<p>A canonical non-technical presentation of propositional modal logic is:</p>
+<ol>
+	<li style="margin-bottom: 0in; line-height: 100%"> A countably
+		infinite set of propositional variables P<sub>i</sub> (may be
+		assumed to be indexed by any convenient countably infinite set, e.g.
+		the natural numbers)
+	</li>
+	<li style="margin-bottom: 0in; line-height: 100%">
+		A set of (classical logic) truth-functional connectives (here denote logical
+		not as an unary prefix operator ~ , and logical and as a binary
+		infix operator &amp;)
+	</li>
+	<li style="margin-bottom: 0in; line-height: 100%">
+		The strong modal operator &#9633; &ldquo;necessarily&rdquo;,
+		which is a truth-valued unary prefix operator taking a truth-valued expression.
+	</li>
+</ol>
+<p>Define the weak modal operator &ldquo;possibly&rdquo; as
+	<font face="Liberation Serif, serif">&loz;</font> := ~&#9633;~ .
+	(&ldquo;If the logical negation of __ is not necessary, then __ is possible by definition&rdquo;)</p>
+<p>Note that multiple natural language terms fulfil the above formal requirements.</p>
+<p>Denote a Kripke frame i.e. modal frame as an ordered pair (<i>W</i>, R); <i>W</i> is
+a set of &ldquo;worlds&rdquo; (alternately, &ldquo;nodes&rdquo;), and
+an accessibility relation R : <i>W</i> x <i>W</i> &rarr; Truth
+Values.  We have the usual degeneracy issue with the empty set as <i>W</i>.</p>
+<p>Denote a Kripke model as an ordered triple (<i>W</i>, R, &#9567;) that extends a Kripke frame (<i>W</i>, R) with a binary
+&ldquo;evaluation relation&rdquo; (alternately, &ldquo;satisfaction
+relation&rdquo; or &ldquo;forcing relation&rdquo;)</p>
+<p align="center" style="margin-bottom: 0in; line-height: 100%">&#9567; : <i>W</i> x
+modal logical formulas &rarr; Truth Values</p>
+<ol>
+	<li style="margin-bottom: 0in; line-height: 100%">
+		&#9567; is an algebraic homomorphism for all propositional calculus logical
+		operators and inference schema.
+	</li>
+	<li style="margin-bottom: 0in; line-height: 100%">w &#9567; &#9633;A if and only if w R u &rarr;u &#9567; A</li>
+</ol>
+<p>Define validity of a
+modal logic formula A as follows:</p>
+<ol>
+	<li style="margin-bottom: 0in; line-height: 100%">For a Kripke model (<i>W</i>, R, &#9567; ) : w &#9567; A for all w in <i>W</i></li>
+	<li style="margin-bottom: 0in; line-height: 100%">For a Kripke frame (<i>W</i>, R) : A is valid for all candidate &#9567;.</li>
+	<li style="margin-bottom: 0in; line-height: 100%">For a class <i>C</i> of frames or models: A is valid for all elements of <i>C</i>.</li>
+</ol>
+<p>Define Thm(C)  to be the set(?) of all formulas valid for a class C of Kripke frames or models. (&ldquo;Theorems of <i>C</i>&rdquo;)</p>
+<p>For a set of formulas X, define Mod(X) to be the class of all frames that validate all formulas of X .  (&ldquo;Models of X&rdquo;)</p>
+<p>A modal logic L (i.e. set of formulas) is said to be sound if L is a subset of
+Thm(C); it is complete if L is a superset of Thm(C) .</p>
+<p>Before proceeding with documenting the standard &ldquo;extra axioms&rdquo; that would
+need to be parameters of a software implementation, consider how to
+&ldquo;harden&rdquo;/&rdquo;generalize&rdquo; the above:</p>
+<ul>
+	<li>
+		Replacing propositional calculus statements with predicate calculus statements
+		would materially worsen the decidability results, especially if the
+		countable restriction was dropped. (We likely want to do this for physics,
+		but as a matter of explicit modeling, a countably infinite set
+		as a &ldquo;limit&rdquo; for arbitrarily large finite set is reasonable.)
+	</li>
+	<li>
+		For a block universe philosophy of time, the desired <i>W</i> is &ldquo;all
+		whole-cosmos models&rdquo;.  Other philosophies of time will have to
+		deal with mathematical restrictions of these to &ldquo;physically
+		real domains&rdquo;.  Assume <i>W</i> is no larger than a
+		Zermelo-Frankel style proper class in &ldquo;size&rdquo;.
+		(implication: there are far fewer equivalence classes, than elements of <i>W</i>.)
+	</li>
+</ul>
+<p>We also need a
+visual on what &ldquo;all modal formulas&rdquo; means.  Following
+Bernays&rsquo; &ldquo;Axiomatic Set Theory&rdquo;, proceed as follows
+(with some duplication of the non-technical overview, above):</p>
+<ol>
+	<li style="margin-bottom: 0in; line-height: 100%">
+		Take <i>true</i> and <i>false</i> to be undefined symbols.  When using a set theory
+		with ur-elements, it is well-defined to refer to the set whose only
+		elements are <i>true</i> and <i>false</i>, as the set of truth values.
+		Abuse notation and do so even when not using such a set theory.
+	</li>
+	<li style="margin-bottom: 0in; line-height: 100%">
+		We say that a propositional calculus variable, is an undefined symbol whose &ldquo;type&rdquo;
+		is the set of truth values.  If there is only one legal truth value
+		for a propositional calculus variable Pi, that value may be
+		syntactically substituted for P<sub>i</sub>. Forward-reference the
+		buildout of indexing set; let P<sub>i</sub> be a &ldquo;collection&rdquo;
+		of propositional calculus variables indexed by some indexing set I.
+		Distinct indexing variable names are not correlated in value.
+	</li>
+	<li style="margin-bottom: 0in; line-height: 100%">
+		Forward-referencing the concept of &ldquo;constructible universe&rdquo;: let the above
+		be the primitive (propositional calculus) truth-valued expressions (of depth 0).
+	</li>
+	<li style="margin-bottom: 0in; line-height: 100%">
+		Take logical negation ~ as an undefined symbol.  Forward-referencing the usual
+		buildout of mathematical functions and relations in set theory, and
+		forward-referencing a definition of mathematical equality in terms
+		of the set element relation: ~ &ldquo;acts like&rdquo; a unary
+		prefix operator with domain and range truth values.  As typical, define
+		<ul>
+			<li style="margin-bottom: 0in; line-height: 100%">
+				For any truth-valued expression A of non-negative integer generation n, ~A
+				is a syntactically valid truth-valued expression of depth n+1
+			</li>
+			<li style="margin-bottom: 0in; line-height: 100%">~<i>true</i> := <i>false</i></li>
+			<li style="margin-bottom: 0in; line-height: 100%">~<i>false</i> := <i>true</i></li>
+		</ul>
+	</li>
+	<li style="margin-bottom: 0in; line-height: 100%">
+		Take logical and &amp; as an undefined symbol.  &amp; &ldquo;acts like&rdquo; an
+		infix binary operator whose two arguments, and range, are truth values.
+		As typical, define
+		<ul>
+			<li style="margin-bottom: 0in; line-height: 100%">
+				For any
+				truth-valued expressions A and B of depths m and n, A &amp; B is a
+				truth-valued expression of depth max(m, n)+1 .
+			</li>
+			<li style="margin-bottom: 0in; line-height: 100%"><i>true</i> &amp; <i>true</i> := <i>true</i></li>
+			<li style="margin-bottom: 0in; line-height: 100%"><i>false</i> &amp; A := <i>false</i> for any truth-valued expression A</li>
+			<li style="margin-bottom: 0in; line-height: 100%">A<i> &amp; false := false</i> for any truth-valued expression A</li>
+		</ul>
+	</li>
+	<li style="margin-bottom: 0in; line-height: 100%">
+		If we are using classical logic, define logical or || for truth-valued
+		expressions A, B with De Morgan&rsquo;s Law.
+		<ul>
+			<li style="margin-bottom: 0in; line-height: 100%">A || B := ~(~A &amp; ~B)</li>
+		</ul>
+	</li>
+	<li style="margin-bottom: 0in; line-height: 100%">
+		If we are not using classical logic, take logical or || as an undefined symbol.
+		|| &ldquo;acts like&rdquo; an infix binary operator whose two
+		arguments, and range, are truth values.  As typical, define
+		<ul>
+			<li style="margin-bottom: 0in; line-height: 100%">
+				For any truth-valued expressions A and B of depths m and n, A || B is a
+				truth-valued expression of depth max(m, n)+1 .
+			</li>
+			<li style="margin-bottom: 0in; line-height: 100%"><i>false</i> || <i>false</i> := <i>false</i><i>e</i></li>
+			<li style="margin-bottom: 0in; line-height: 100%"><i>true</i> || A := <i>true</i> for any truth-valued expression A</li>
+			<li style="margin-bottom: 0in; line-height: 100%">A <i>||</i> <i>true</i> := <i>true</i> for any truth-valued expression A</li>
+		</ul>
+	</li>
+	<li style="margin-bottom: 0in; line-height: 100%">
+		Define logical implication for truth-valued expressions A, B
+		<ul>
+			<li style="margin-bottom: 0in; line-height: 100%">A &rarr; B := ~A || B</li>
+		</ul>
+	</li>
+	<li style="margin-bottom: 0in; line-height: 100%">
+		Define logical bi-implication i.e. equivalence for truth-valued expressions A, B
+		<ul>
+			<li style="margin-bottom: 0in; line-height: 100%">A &harr; B := (A &rarr; B) &amp; (B &rarr; A)</li>
+		</ul>
+	</li>
+	<li style="margin-bottom: 0in; line-height: 100%">
+		Take the strong modal operator &#9633; as an undefined symbol.
+		&#9633; &ldquo; acts like&rdquo; a unary prefix operator
+		with domain and range truth values.
+		<ul>
+			<li style="margin-bottom: 0in; line-height: 100%">
+				For any truth-valued expression A of non-negative integer depth n, &#9633;A
+				is a syntactically value truth-valued expression of depth n+1 .
+			</li>
+		</ul>
+	</li>
+	<li style="margin-bottom: 0in; line-height: 100%">Define the weak modal operator &loz; := ~&#9633;~</li>
+	<li style="margin-bottom: 0in; line-height: 100%">If we need more pairs of modal operators, repeat the prior two steps for each of them.</li>
+</ol>
+<p>A full description (one intended to read like <i>Principia Mathematica</i>) would not
+forward-reference.  My intent here, is to outline enough to program with.</p>
+<p>It is a routine strong induction argument that the above definitions assign a &ldquo;depth
+of construction&rdquo; to each (finitely reachable) truth-valued
+expression.  We take the set of all constructible modal formulas, to
+be the union of the modal formulas of depth n for each non-negative
+integer n.  (It is a mechanical verification that this is indeed a set.)</p>
+<p>The key distinction between classical deductive logic and the non-classical logics, is
+that in classical logic the propositional calculus variables still
+have well-defined values even if the value is not known.  That is,
+any expression which is true regardless of the values of the
+variables, is true.  E.g., the law of the excluded middle A || ~A is
+a tautology in classical logic, but is not necessarily true in the
+nonclassical logics.</p>
+<p>Typical axioms that may be added to a pair of modal operators &#9633;,
+&loz; to get a closer match to plain English:</p>
+<p><b>N</b>: If a truth-valued statement A is a theorem, then &#9633;A
+.  Alternately, &#9500; A &rarr; &#9500; &#9633;A</p>
+<p>If A does not reference any possible world w in W i.e. does not use any
+modal operators, this is not an axiom, but rather a consequence of
+how &#9567; inter-relates with &#9633;.  &ldquo;Necessitation rule.&rdquo;</p>
+<p><b>K</b>: &#9633;(A&rarr;B) &rarr; (&#9633;A&rarr;&#9633;B) &ldquo;Distribution axiom&rdquo;;  &ldquo;Kripke schema&rdquo;;
+distributivity of the strong modal operator &#9633; over logical implication &rarr; .  Often inaccurate for deontic and epistemic logics.</p>
+<p>The above two axioms are sufficient to define the least-constrained
+normal modal logic <i>K</i>
+(named after Saul Kripke, who first documented this interpretation of
+modal logic.)  More precisely, we say a set L of (constructible)
+modal formulas that:</p>
+<ul>
+	<li style="margin-bottom: 0in; line-height: 100%">contains all tautologies</li>
+	<li style="margin-bottom: 0in; line-height: 100%">Is closed under the schema <i>modus ponens</i>, A &rarr; B, A &#9500; B</li>
+	<li style="margin-bottom: 0in; line-height: 100%">Is closed under <b>N</b>, the necessitation rule</li>
+	<li style="margin-bottom: 0in; line-height: 100%">contains all instances of the Kripke schema</li>
+</ul>
+<p>is a normal modal logic.  (Recall that the underlying truth-value logic
+must be one for which <i>modus ponens</i> is valid.  In
+particular, this doesn&rsquo;t work for imprecisely defined many-valued logics.)  The
+smallest such set (under the subset relation), is
+defined to be the Kripke logic <i>K</i>.</p>
+<p><b>T</b>: &#9633;A
+&rarr; A &ldquo;Reflexivity axiom&rdquo;, &ldquo;If A is necessary, then A is the case&rdquo;</p>
+<p><b>4</b>: &#9633;A &rarr; &#9633;&#9633;A	&ldquo;transitive&rdquo;</p>
+<p>&#9633;&#9633;A &rarr; &#9633;A &ldquo;dense&rdquo;</p>
+<p><b>B</b>: A &rarr; &#9633;&loz;A &ldquo;serial&rdquo;</p>
+<p><b>D</b>: &#9633;A &rarr; &loz;A &ldquo;symmetric&rdquo;</p>
+<p><b>5</b>: &loz;A &rarr; &#9633;&loz;A &ldquo;Euclidean&rdquo;</p>
+<p><b>GL</b>: &#9633;(&#9633;A &rarr; A) &rarr; &#9633;A &ldquo;R transitive, R<sup>-1</sup> well-founded&rdquo;</p>
+<p><b>Grz</b>: &#9633;(&#9633;(A &rarr; &#9633;A) &rarr; A) &rarr; A &ldquo;R transitive and reflexive, R<sup>-1</sup> well-founded&rdquo;</p>
+<p><b>H</b>: &#9633;(&#9633;A &rarr; B) || &#9633;(&#9633;B &rarr; A) &ldquo;w R u &amp; w R v &rarr; u R v || v R u&rdquo;</p>
+<p><b>M</b>: &#9633;&loz;A &rarr; &loz;&#9633;A</p>
+<p><b>G</b>: &loz;&#9633;A &rarr; &#9633;&loz;A &ldquo;convergent: w R u &amp; w R v &rarr; <font face="Symbol">&#61476;</font>x(u R x &amp; v R x)&rdquo;</p>
+<p>A &rarr; &#9633;A &ldquo;topologically discrete possible worlds: w R v &rarr; w = v&rdquo;</p>
+<p>&loz;A &rarr; &#9633;A  &ldquo;partial function: w R u &amp; w R v &rarr; u = v&rdquo;</p>
+<p>&loz;A &harr; &#9633;A  &ldquo;function: <font face="Symbol">&#61474;</font>w<font face="Symbol">&#61476;!</font>u (w R u)&rdquo;</p>
+<p>More generally, the smallest normal modal logics satisfying the following axioms are notated as follows:</p>
+<p><i>K</i>: <b>N</b> + <b>K</b></p>
+<p><i>T</i>: <i>K</i> + <b>T</b> &ldquo;reflexive&rdquo;</p>
+<p><i>S4</i>: <i>T</i> + <b>4</b> &ldquo;preorder&rdquo;</p>
+<p><i>S4.1</i>: <i>S</i> + <b>M</b>
+	&ldquo;preorder,<font face="Symbol">&#61474;</font>w<font face="Symbol">&#61476;</font>u(w R u &amp; <font face="Symbol">&#61474;</font>v(u R v &rarr; u = v))</p>
+<p><i>S4.2</i>: <i>S</i> + <b>G</b> &ldquo;directed preorder&rdquo;</p>
+<p><i>S4.3</i>: <i>S</i> + <b>H</b> &ldquo;total preorder&rdquo;</p>
+<p><i>S5</i>: <i>T</i> + <b>5</b> or <i>K</i> + <b>D</b> + <b>B</b> + <b>4</b> &ldquo;equivalence relation&rdquo;</p>
+<p><i>GL</i> i.e. <i>K4W</i>: <i>K</i> + <b>GL</b> (+ <b>4</b>) &ldquo;finite strict partial order&rdquo;</p>
+<p><i>Grz</i> i.e. <i>S4Grz</i>: <i>K</i> + <b>Grz</b> ( + <b>T</b> + <b>4</b>) &ldquo;finite partial order&rdquo;</p>
+<p><i>D</i>: <i>K</i> + <b>D</b> &ldquo;serial&rdquo;</p>
+<p><i>D45</i>: <i>D</i> + <b>4</b> + <b>5</b> &ldquo;transitive, serial, and Euclidean&rdquo;</p>
+<p style="margin-bottom: 0in; font-weight: normal; line-height: 100%">
+(Theory of canonical models: needs material verification, summary openly requires Zorn&rsquo;s
+Lemma to do anything.  Assume anything later in the summary does not document set theory requirements properly.)</p>
+</body>
+</html>
