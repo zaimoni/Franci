@@ -52,7 +52,7 @@ void NiceFormat80Cols(char*& Name);
 //! normally a trivialization: it should happen only with raw data input.
 
 // defined in LexParse.cxx
-bool ImproviseVar(MetaConcept*& Target, const AbstractClass* Domain);
+bool CoerceArgType(MetaConcept* const& Arg, const AbstractClass& ForceType);
 bool LookUpVar(MetaConcept*& Target, const AbstractClass* Domain);
 
 // temporary forward declares
@@ -196,9 +196,7 @@ static bool NOT_ForcesTruthValueVariable(MetaConcept**& ArgArray,size_t i)
 		&& static_cast<UnparsedText*>(ArgArray[i-1])->IsLogicKeyword(LogicKeyword_NOT))
 		{	// NOT ___
 		//! \todo FIX: needs to respond to NOT a whole lot of ... [NOT of a sentence]
-		if (   ArgArray[i]->IsPotentialVarName()
-			&& ArgArray[i]->IsUltimateType(NULL))
-			ImproviseVar(ArgArray[i],&TruthValues);
+		CoerceArgType(ArgArray[i], TruthValues);
 		if (ArgArray[i]->SelfLogicalNOTWorks())
 			{
 			ArgArray[i]->SelfLogicalNOT();
@@ -680,9 +678,7 @@ static bool StripAddInvSymbol(MetaConcept**& ArgArray,size_t i)
 		//! \todo FIX: Franci must be aware of shorthands like "- a dash ... "
 		//! *real* idiom clash: 9-5! [this is why parser doesn't evaluate....]
 		//! PotentialVarname followed by another PotentialVarname is suspicious
-		if (   ArgArray[i]->IsPotentialVarName()
-			&& ArgArray[i]->IsUltimateType(NULL))
-			ImproviseVar(ArgArray[i],&ClassAdditionDefined);	// this is a potential varname that is probably safe to improvise
+		CoerceArgType(ArgArray[i], ClassAdditionDefined);
 
 		if (   NULL!=ArgArray[i]->UltimateType()
 			&& ArgArray[i]->UltimateType()->SupportsThisOperation(StdAddition_MC))

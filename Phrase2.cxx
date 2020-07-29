@@ -141,14 +141,8 @@ bool Phrase2Arg::SyntaxOK() const
 						return false;
 					return true;
 					}
-				else if (RHSMultiplicationDefined)
-					{
-					return CoerceArgType(LHS_Arg1,ClassMultiplicationDefined);
-					}
-				else if (RHSAdditionDefined)
-					{
-					return CoerceArgType(LHS_Arg1,ClassAdditionMultiplicationDefined);
-					}
+				else if (RHSMultiplicationDefined) return CoerceArgType(LHS_Arg1,ClassMultiplicationDefined);
+				else if (RHSAdditionDefined) return CoerceArgType(LHS_Arg1,ClassAdditionMultiplicationDefined);
 				return false;
 				};
 			if (RHSFree)
@@ -163,14 +157,8 @@ bool Phrase2Arg::SyntaxOK() const
 						return false;
 					return true;
 					}
-				else if (LHSMultiplicationDefined)
-					{
-					return CoerceArgType(RHS_Arg2,ClassMultiplicationDefined);
-					}
-				else if (LHSAdditionDefined)
-					{
-					return CoerceArgType(RHS_Arg2,ClassAdditionMultiplicationDefined);
-					}
+				else if (LHSMultiplicationDefined) return CoerceArgType(RHS_Arg2,ClassMultiplicationDefined);
+				else if (LHSAdditionDefined) return CoerceArgType(RHS_Arg2,ClassAdditionMultiplicationDefined);
 				return false;
 				};
 			return false;

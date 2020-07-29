@@ -55,7 +55,9 @@ autoarray_ptr<MetaQuantifier*> NewVarsOnThisPass;		// new vars on this pass ... 
 // cf MetaConcept::IsPotentialVarName
 std::pair<Variable*, UnparsedText*> LooksLikeVarName(MetaConcept* x) {
 	if (auto test = up_cast<Variable>(x)) return std::pair<Variable*, UnparsedText*>(test, 0);
-	if (auto test = up_cast<UnparsedText>(x)) return std::pair<Variable*, UnparsedText*>(0, test);
+	if (auto test = up_cast<UnparsedText>(x)) {
+		if (test->IsQuasiEnglishOrVarName()) return std::pair<Variable*, UnparsedText*>(0, test);
+	}
 	return std::pair<Variable*, UnparsedText*>(0, 0);
 }
 
