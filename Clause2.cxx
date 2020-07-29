@@ -11,9 +11,6 @@
 #include "Zaimoni.STL/except/syntax_error.hpp"
 #include "Zaimoni.STL/lite_alg.hpp"
 
-// defined in LexParse.cxx
-bool ImproviseVar(MetaConcept*& Target, const AbstractClass* Domain);
-
 Clause2Arg::EvaluateToOtherRule Clause2Arg::EvaluateRuleLookup[MaxEvalRuleIdx_ER]
 	=	{
 		&Clause2Arg::ConvertToMetaConnective

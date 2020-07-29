@@ -52,6 +52,13 @@ bool DoNotExplain = false;				// turns off full explanations
 // 2-stage construction so improvisiation for evaluate-expression does not affect situation
 autoarray_ptr<MetaQuantifier*> NewVarsOnThisPass;		// new vars on this pass ... oops, this is a proper class...
 
+// cf MetaConcept::IsPotentialVarName
+std::pair<Variable*, UnparsedText*> LooksLikeVarName(MetaConcept* x) {
+	if (auto test = up_cast<Variable>(x)) return std::pair<Variable*, UnparsedText*>(test, 0);
+	if (auto test = up_cast<UnparsedText>(x)) return std::pair<Variable*, UnparsedText*>(0, test);
+	return std::pair<Variable*, UnparsedText*>(0, 0);
+}
+
 bool
 InitMetaConceptParserArray(autoarray_ptr<MetaConcept*>& ArgArray,char*& InputBuffer)
 {	//! \pre ArgArray is intended to have one slot (e.g., autoarray_ptr<MetaConcept*> ArgArray(1);
@@ -287,14 +294,13 @@ PointToImprovisedQuantifier(const UnparsedText& Target, MetaConcept*& Situation,
 
 // #define FRANCI_WARY 1
 
-bool
-ImproviseVar(MetaConcept*& Target, const AbstractClass* Domain)
-{	// FORMALLY CORRECT: Kenneth Boyd, 12/15/1999
+bool ImproviseVar(MetaConcept*& Target, const AbstractClass* Domain)
+{	// FORMALLY CORRECT: 2020-07-28
 	// 2 cases: variable, we want to change the domain
 	// UnparsedText, we want a variable
-	assert(NULL!=Target && Target->IsPotentialVarName());
-	if		(Target->IsExactType(Variable_MC))
-		{	// domain-change
+	assert(Target);
+	const auto test = LooksLikeVarName(Target);
+	if (test.first) {	// domain-change
 //		if (NULL!=Domain)	// Franci: changing to FREE loses information -- fails
 		// NOTE: we shouldn't need to do this for a while....
 		//! \todo IMPLEMENT: improvised free variable specializes instantly to improvised THEREIS
@@ -304,43 +310,60 @@ ImproviseVar(MetaConcept*& Target, const AbstractClass* Domain)
 		// all of this only works on improvised quantifiers
 //			return static_cast<Variable*>(Target)->ChangeDomain(Domain);
 		return false;
-		}
-	else{	// request-var
-		SUCCEED_OR_DIE(Target->IsExactType(UnparsedText_MC));
+	} else if (test.second) {
 		// 1) splice in an quantifier at top-level with the current var-name
 		// and domain, if necessary.  Return pointer to quantifier.
-#ifdef FRANCI_WARY
-		LOG("Attempting PointToImprovisedQuantifier");
-		MetaQuantifier* Tmp2 = PointToImprovisedQuantifier(*static_cast<UnparsedText*>(Target),Situation,Domain);
-		LOG("PointToImprovisedQuantifier OK");
-#else
-		MetaQuantifier* Tmp2 = PointToImprovisedQuantifier(*static_cast<UnparsedText*>(Target),Situation,Domain);
-#endif
-		if (NULL!=Tmp2)
-			{	// 2) create variable pointing to quantifier
-			Variable* Tmp = new(nothrow) Variable(Tmp2);
-			if (NULL!=Tmp)
-				{
+		if (MetaQuantifier* Tmp2 = PointToImprovisedQuantifier(*test.second, Situation, Domain)) {
+			// 2) create variable pointing to quantifier
+			if (Variable* Tmp = new(nothrow) Variable(Tmp2)) {
 				// 3) delete the raw name, and put in the variable.
 				delete Target;
-				Target = Tmp; 
+				Target = Tmp;
 				return true;
-				}
-			};
+			}
 		};
+	} else SUCCEED_OR_DIE(0 && "should only ImproviseVar actual variable names");
+	return false;
+}
+
+// integates if (x->IsPotentialVarName()) ImproviseVar(x,domain);
+bool _improviseVar(MetaConcept*& Target, const AbstractClass* Domain)
+{	// FORMALLY CORRECT: Kenneth Boyd, 12/15/1999
+	// 2 cases: variable, we want to change the domain
+	// UnparsedText, we want a variable
+	assert(Target);
+	const auto test = LooksLikeVarName(Target);
+	if (test.first) {	// domain-change
+//		if (NULL!=Domain)	// Franci: changing to FREE loses information -- fails
+		// NOTE: we shouldn't need to do this for a while....
+		//! \todo IMPLEMENT: improvised free variable specializes instantly to improvised THEREIS
+		// identical domain is an alpha error [no-action call]
+		// otherwise, must do domain-compatibility check: need non-empty intersection of
+		// current, requested domains.  Hard-code this for now.  All of this can be delegated.
+		// all of this only works on improvised quantifiers
+//			return static_cast<Variable*>(Target)->ChangeDomain(Domain);
+		return false;
+	} else if (test.second) {
+		// 1) splice in an quantifier at top-level with the current var-name
+		// and domain, if necessary.  Return pointer to quantifier.
+		if (MetaQuantifier* Tmp2 = PointToImprovisedQuantifier(*test.second, Situation, Domain)) {
+			// 2) create variable pointing to quantifier
+			if (Variable* Tmp = new(nothrow) Variable(Tmp2)) {
+				// 3) delete the raw name, and put in the variable.
+				delete Target;
+				Target = Tmp;
+				return true;
+			}
+		};
+	}
 	return false;
 }
 
 #undef FRANCI_WARY
 
-bool
-CoerceArgType(MetaConcept* const& Arg, const AbstractClass& ForceType)
+bool CoerceArgType(MetaConcept* const& Arg, const AbstractClass& ForceType)
 {
-	if (	!Arg->ForceUltimateType(&ForceType)
-		&& (   !Arg->IsPotentialVarName()
-			|| !ImproviseVar(*const_cast<MetaConcept**>(&Arg),&ForceType)))
-		return false;
-	return true;
+	return Arg->ForceUltimateType(&ForceType) || _improviseVar(*const_cast<MetaConcept**>(&Arg), &ForceType);
 }
 
 bool

@@ -38,6 +38,7 @@ public:
 	bool IsAbstractClassDomain() const override { return false; }
 //  Type ID functions
 	const AbstractClass* UltimateType() const override { return Arg1->UltimateType(); };
+	constexpr static bool IsType(ExactType_MC x) { return Variable_MC == x; }
 	bool ForceUltimateType(const AbstractClass* const rhs) override { return Arg1->ForceUltimateType(rhs); }
 //  Evaluation functions
 	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override { return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >(); }

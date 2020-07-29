@@ -57,7 +57,7 @@ public:
 	virtual bool SyntaxOK() const;
 // text I/O functions
 	virtual size_t LengthOfSelfName() const;
-	virtual const char* ViewKeyword() const;
+	const char* ViewKeyword() const override { return ClauseKeyword; }
 // Formal manipulation functions
 	virtual void SelfLogicalNOT();	// instantiate when UltimateType is TruthValues
 // type-specific functions

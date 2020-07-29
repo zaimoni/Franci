@@ -8,7 +8,7 @@
 #include "Interval.hxx"
 
 // defined in LexParse.cxx
-bool ImproviseVar(MetaConcept*& Target, const AbstractClass* Domain);
+bool _improviseVar(MetaConcept*& Target, const AbstractClass* Domain);
 
 // ASSUMPTION: new implemented with calloc
 
@@ -877,27 +877,17 @@ AbstractClass::Arg1IsAfterEndpointAlongVectorAB(const MetaConcept& Arg1, const M
 	return false;
 }
 
-bool
-ForceVarUltimateType(MetaConcept*& Target,const AbstractClass* TargetType)
+bool ForceVarUltimateType(MetaConcept*& Target,const AbstractClass* TargetType)
 {
 	assert(Target);
-	if (   !Target->IsUltimateType(TargetType)			// TargetType non-NULL after this
-		&& !Target->ForceUltimateType(TargetType)
-		&& (   !Target->IsPotentialVarName()
-			|| !ImproviseVar(Target,TargetType)))
-		return false;
-	return true;
+	return Target->IsUltimateType(TargetType) || /* TargetType non-NULL */ Target->ForceUltimateType(TargetType) || _improviseVar(Target, TargetType);
 }
 
 // misnamed specialization of above: force auto-fails
 bool ForceUltimateTypeTruthValues(MetaConcept*& Target)
 {
 	assert(Target);
-	if (   !Target->IsUltimateType(&TruthValues)
-		&& (   !Target->IsPotentialVarName()
-			|| !ImproviseVar(Target,&TruthValues)))
-		return false;
-	return true;
+	return Target->IsUltimateType(&TruthValues) || _improviseVar(Target, &TruthValues);
 }
 
 // default initialization -- HIGHLY MUTABLE

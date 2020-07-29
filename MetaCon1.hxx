@@ -206,6 +206,8 @@ enum LegalInternalTransformationBitmap1_MC	{
 
 class AbstractClass;
 class MetaQuantifier;
+class UnparsedText;
+class Variable;
 
 struct MetaConceptVFT	{
 						size_t MinArity;
@@ -465,9 +467,10 @@ void ForcePhraseCheckForEvaluation(const MetaConcept* Target);
 // next is in MetaCon2.cxx
 bool ValidateArgArray(const MetaConcept * const * const ArgArray);
 
-// next two in LexParse
+// next three in LexParse
 bool DestructiveSyntacticallyEvaluateOnce(MetaConcept*& dest);
 bool OneStageAnalyzeSituation(MetaConcept*& Situation, const clock_t EvalTime0);
+std::pair<Variable*, UnparsedText*> LooksLikeVarName(MetaConcept* x);
 
 /* NOTE: RHS is NULL afterwards if DestructiveStrongVarSubstitute goes off.
    returns true on success, false on no-effect */

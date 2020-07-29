@@ -16,7 +16,7 @@
 #include "Zaimoni.STL/limits"
 
 // defined in LexParse.cxx
-bool ImproviseVar(MetaConcept*& dest, const AbstractClass* Domain);
+bool _improviseVar(MetaConcept*& dest, const AbstractClass* Domain);
 
 ClauseNArg::EvaluateToOtherRule ClauseNArg::EvaluateRuleLookup[ClauseNArg::MaxEvalRuleIdx_ER]
   =	{
@@ -226,17 +226,12 @@ bool ClauseNArg::SyntaxOKArglistTVal() const
 }
 
 bool ClauseNArg::SyntaxOKNoExtraInfo() const
-{	// FORMALLY CORRECT: Kenneth Boyd, 2/8/2000
+{	// FORMALLY CORRECT: 2020-07-28
 	size_t i = fast_size();
-	do	if (   ArgArray[--i]->IsExactType(UnparsedText_MC)
-	        && ArgArray[i]->IsPotentialVarName()
-			&& !ImproviseVar(ArgArray[i],NULL))
-			return false;
+	do	if (ArgArray[--i]->IsExactType(UnparsedText_MC) && !_improviseVar(ArgArray[i], NULL)) return false;
 	while(0<i);
 	return true;
 }
-
-const char* ClauseNArg::ViewKeyword() const {return ClauseKeyword;}
 
 static ExactType_MC SelfLogicalNOTLookup_ClauseN[(MaxClauseNIdx_MC-MinClauseNIdx_MC)+1]	=
 	{	LogicalNAND_ClauseN_MC,

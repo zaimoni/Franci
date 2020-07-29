@@ -15,6 +15,7 @@
 #include "Zaimoni.STL/lite_alg.hpp"
 
 // defined in LexParse.cxx
+bool _improviseVar(MetaConcept*& Target, const AbstractClass* Domain);
 bool ImproviseVar(MetaConcept*& Target, const AbstractClass* Domain);
 bool CoerceArgType(MetaConcept* const& Arg, const AbstractClass& ForceType);
 
@@ -354,10 +355,8 @@ bool Phrase2Arg::ConvertToStdAddition(MetaConcept*& dest)
 	assert(IsExactType(SUM_Phrase2_MC));
 	weakautoarray_ptr_throws<MetaConcept*> NewArgArray(2);
 
-	if (LHS_Arg1->IsPotentialVarName())
-		ImproviseVar(LHS_Arg1,&ClassAdditionDefined);
-	if (RHS_Arg2->IsPotentialVarName())
-		ImproviseVar(RHS_Arg2,&ClassAdditionDefined);
+	_improviseVar(LHS_Arg1, &ClassAdditionDefined);
+	_improviseVar(RHS_Arg2, &ClassAdditionDefined);
 
 	NewArgArray[0]=LHS_Arg1;
 	NewArgArray[1]=RHS_Arg2;
@@ -429,10 +428,8 @@ bool Phrase2Arg::ConvertToStdMultiplication(MetaConcept*& dest)
 	assert(IsExactType(MULT_Phrase2_MC));
 	weakautoarray_ptr_throws<MetaConcept*> NewArgArray(2);
 
-	if (LHS_Arg1->IsPotentialVarName())
-		ImproviseVar(LHS_Arg1,&ClassMultiplicationDefined);
-	if (RHS_Arg2->IsPotentialVarName())
-		ImproviseVar(RHS_Arg2,&ClassMultiplicationDefined);
+	_improviseVar(LHS_Arg1, &ClassMultiplicationDefined);
+	_improviseVar(RHS_Arg2, &ClassMultiplicationDefined);
 
 	NewArgArray[0]=LHS_Arg1;
 	NewArgArray[1]=RHS_Arg2;
@@ -484,8 +481,8 @@ bool Phrase2Arg::ConvertToPermutation(MetaConcept*& dest)
 	assert(IsExactType(PERMUTATION_Phrase2_MC));
 	weakautoarray_ptr_throws<MetaConcept*> NewArgArray(2);
 
-	if (LHS_Arg1->IsPotentialVarName()) ImproviseVar(LHS_Arg1,&Integer);
-	if (RHS_Arg2->IsPotentialVarName()) ImproviseVar(RHS_Arg2,&Integer);
+	_improviseVar(LHS_Arg1, &Integer);
+	_improviseVar(RHS_Arg2, &Integer);
 	NewArgArray[0]=LHS_Arg1;
 	NewArgArray[1]=RHS_Arg2;
 
@@ -504,8 +501,8 @@ bool Phrase2Arg::ConvertToCombination(MetaConcept*& dest)
 	assert(IsExactType(COMBINATION_Phrase2_MC));
 	weakautoarray_ptr_throws<MetaConcept*> NewArgArray(2);
 
-	if (LHS_Arg1->IsPotentialVarName()) ImproviseVar(LHS_Arg1,&Integer);
-	if (RHS_Arg2->IsPotentialVarName()) ImproviseVar(RHS_Arg2,&Integer);
+	_improviseVar(LHS_Arg1, &Integer);
+	_improviseVar(RHS_Arg2, &Integer);
 	NewArgArray[0]=LHS_Arg1;
 	NewArgArray[1]=RHS_Arg2;
 
