@@ -300,7 +300,7 @@ public:
 	virtual bool CanEvaluate() const = 0;	// either same or different-type
 	virtual bool CanEvaluateToSameType() const = 0;				
 	virtual bool SyntaxOK() const = 0;							
-	virtual bool Evaluate(MetaConcept*& dest) = 0;		// same, or different type; if it succeeds, may be destructive
+	virtual bool Evaluate(MetaConcept*& dest) = 0;		// same, or different type; if it succeeds, may be destructive.  Sole call wrapped in try-catch block for std::bad_alloc
 	virtual bool DestructiveEvaluateToSameType() = 0;	// overwrites itself iff returns true
 // text I/O functions
 	virtual size_t LengthOfSelfName() const = 0;

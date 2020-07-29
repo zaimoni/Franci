@@ -801,17 +801,16 @@ Parser<MetaConcept> FranciScriptParser(NULL,Franci_o_n_rules,sizeof(Franci_o_n_r
 //! \todo META: FIX: need a more careful understanding of what may (and may not be) a valid
 //! argument for purposes of pattern recognition.  These are too ad-hoc.
 bool ArglistAry2PlusRecognize(const MetaConcept* const * ArgArray,size_t i)
-{	// FORMALLY CORRECT: Kenneth Boyd, 5/26/2002
-	assert(NULL!=ArgArray);	//! \pre NULL!=ArgArray
-	assert(i<ArraySize(ArgArray));
-#define ARITY ArraySize(ArgArray)
+{	// FORMALLY CORRECT: 2020-07-29
+	assert(ArgArray);	//! \pre NULL!=ArgArray
+	const size_t ARITY = ArraySize(ArgArray);
+	assert(i < ARITY);
 	// Style error: StartIdx is abused as a upward counter.  Its name suggests
 	// it should be constant
 	// this routine must recognize arglists, of at least length 2.
 	// the leading ( is StartIdx
 	if (   i+4<ARITY
-		&& ArgArray[i]->IsExactType(UnparsedText_MC)
-		&& static_cast<const UnparsedText*>(ArgArray[i])->IsSemanticChar('(')
+		&& IsSemanticChar<'('>(ArgArray[i])
 		&& ArgArray[i+2]->IsExactType(UnparsedText_MC)
 		&& ArgArray[i+4]->IsExactType(UnparsedText_MC)
 		&& ArgArray[i+1]->IsPotentialArg()
@@ -823,24 +822,18 @@ bool ArglistAry2PlusRecognize(const MetaConcept* const * ArgArray,size_t i)
 			{
 			i+=4;
 			do	{
-				if (static_cast<const UnparsedText*>(ArgArray[i])->IsSemanticChar(')'))
-					return true;
-				if (    i+2>=ARITY
-					|| !ArgArray[i+1]->IsPotentialArg())
-					return false;
+				if (static_cast<const UnparsedText*>(ArgArray[i])->IsSemanticChar(')')) return true;
+				if (i+2>=ARITY || !ArgArray[i+1]->IsPotentialArg()) return false;
 				PriorIsEllipsis = ThisIsEllipsis;
 				ThisIsEllipsis = static_cast<const UnparsedText*>(ArgArray[i])->IsLogicalEllipsis() && ArgArray[i-1]->IsUltimateType(&Integer) && ArgArray[i+1]->IsUltimateType(&Integer);
-				if (ThisIsEllipsis && PriorIsEllipsis)
-					return false;
-				if (!ThisIsEllipsis && !static_cast<const UnparsedText*>(ArgArray[i])->IsSemanticChar(','))
-					return false;
+				if (ThisIsEllipsis && PriorIsEllipsis) return false;
+				if (!ThisIsEllipsis && !static_cast<const UnparsedText*>(ArgArray[i])->IsSemanticChar(',')) return false;
 				i+=2;
 				}
 			while(ArgArray[i]->IsExactType(UnparsedText_MC));
 			}
 		};
 	return false;
-#undef ARITY
 }
 
 bool CommalistAry2PlusRecognize(const MetaConcept* const * ArgArray,size_t i)
@@ -893,57 +886,44 @@ bool ArgThatCannotExtendLeftRecognize(const MetaConcept* const * ArgArray,size_t
 
 
 // Franci assumes, here, that a prefix keyword is not the final symbol
-size_t
-PrefixCommaListVarNamesRecognize(const MetaConcept* const * ArgArray,size_t KeywordIdx)
-{	// FORMALLY CORRECT: Kenneth Boyd, 3/4/2006
-	// Style error: KeywordIdx is abused as an upward counter.  Its name suggests
-	// it should be constant.
-	assert(NULL!=ArgArray);	//! \pre NULL!=ArgArray
-	assert(KeywordIdx<ArraySize(ArgArray));
-#define ARITY ArraySize(ArgArray)
+size_t PrefixCommaListVarNamesRecognize(const MetaConcept* const * ArgArray,size_t KeywordIdx)
+{	// FORMALLY CORRECT: 2020-07-29
+	// Style error: KeywordIdx is abused as an upward counter.  Its name suggests it should be constant.
+	assert(ArgArray);
+	const size_t ARITY = ArraySize(ArgArray);
+	assert(KeywordIdx < ARITY);
 	KeywordIdx++;
-	if (ARITY>KeywordIdx && ArgArray[KeywordIdx]->IsPotentialVarName())
-		{
+	if (ARITY>KeywordIdx && ArgArray[KeywordIdx]->IsPotentialVarName()) {
 		size_t IdentifiedArgs = 1;
 		while(   2+KeywordIdx<ARITY
 			  && ArgArray[KeywordIdx+2]->IsPotentialVarName()
-			  && ArgArray[KeywordIdx+1]->IsExactType(UnparsedText_MC)
-			  && static_cast<const UnparsedText*>(ArgArray[KeywordIdx+1])->IsSemanticChar(','))
-			{
+			  && IsSemanticChar<','>(ArgArray[KeywordIdx+1])) {
 			IdentifiedArgs++;
 			KeywordIdx+=2;
-			};
+		};
 		return IdentifiedArgs;
-		}
+	}
 	return 0;
-#undef ARITY
 }
 
 // Franci assumes, here, that a postfix keyword is not the initial symbol
-size_t
-PostfixCommaListVarNamesRecognize(const MetaConcept* const * ArgArray,size_t KeywordIdx)
-{	// FORMALLY CORRECT: Kenneth Boyd, 3/4/2006
-	// Style error: KeywordIdx is abused as a downward counter.  Its name suggests
-	// it should be constant.
-	assert(NULL!=ArgArray);	//! \pre NULL!=ArgArray
+size_t PostfixCommaListVarNamesRecognize(const MetaConcept* const * ArgArray,size_t KeywordIdx)
+{	// FORMALLY CORRECT: 2020-07-29
+	// Style error: KeywordIdx is abused as a downward counter.  Its name suggests it should be constant.
+	assert(ArgArray);
 	assert(KeywordIdx<ArraySize(ArgArray));
-	if (0<KeywordIdx)
-		{
-		KeywordIdx--;
-		if (ArgArray[KeywordIdx]->IsPotentialVarName())
-			{
+	if (0<KeywordIdx) {
+		if (ArgArray[--KeywordIdx]->IsPotentialVarName()) {
 			size_t IdentifiedArgs = 1;
 			while(   1<KeywordIdx
 				  && ArgArray[KeywordIdx-2]->IsPotentialVarName()
-				  && ArgArray[KeywordIdx-1]->IsExactType(UnparsedText_MC)
-				  && static_cast<const UnparsedText*>(ArgArray[KeywordIdx-1])->IsSemanticChar(','))
-				{
+				  && IsSemanticChar<','>(ArgArray[KeywordIdx-1])) {
 				IdentifiedArgs++;
 				KeywordIdx-=2;
-				};
+			};
 			return IdentifiedArgs;
-			}
 		}
+	}
 	return 0;
 }
 

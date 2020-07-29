@@ -90,9 +90,6 @@ bool Phrase1Arg::CanEvaluate() const
 	return false;
 }
 
-// FORMALLY CORRECT: Kenneth Boyd, 7/12/1999
-bool Phrase1Arg::CanEvaluateToSameType() const {return false;}
-
 bool Phrase1Arg::SyntaxOK() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 7/22/1999
 	if (   NULL==PhraseKeyword || NULL==Arg1 || !Arg1->SyntaxOK())
@@ -112,12 +109,11 @@ bool Phrase1Arg::SyntaxOK_FACTORIAL() const
 }
 
 bool Phrase1Arg::Evaluate(MetaConcept*& dest)	// same, or different type
-{	// FORMALLY CORRECT: Kenneth Boyd, 3/2/2006
+{
 	assert(!dest);
 	if (IsExactType(FACTORIAL_Phrase1_MC))
 		{	
-		weakautoarray_ptr<MetaConcept*> NewArgArray(1);
-		if (NewArgArray.empty()) return false;
+		weakautoarray_ptr_throws<MetaConcept*> NewArgArray(1);
 		NewArgArray[0] = Arg1;
 		dest = new CombinatorialLike(NewArgArray,FACTORIAL_CM);
 		Arg1.NULLPtr();
@@ -128,7 +124,7 @@ bool Phrase1Arg::Evaluate(MetaConcept*& dest)	// same, or different type
 }
 
 ExactType_MC Phrase1Arg::CanConstruct(const MetaConcept * const * TargetArray, size_t KeywordIdx)
-{	// FORMALLY CORRECT: 2020-07-26
+{	// FORMALLY CORRECT: 2020-07-29
 	assert(TargetArray);
 	assert(ArraySize(TargetArray)>KeywordIdx);
 	assert(TargetArray[KeywordIdx]);
@@ -152,10 +148,7 @@ ExactType_MC Phrase1Arg::CanConstruct(const MetaConcept * const * TargetArray, s
 		{	// FACTORIAL is a 1-ary function that accepts non-negative integers.
 		const MetaConcept* LParenArg = TargetArray[KeywordIdx+1];
 		const MetaConcept* RParenArg = TargetArray[KeywordIdx+3];
-		if (    LParenArg->IsExactType(UnparsedText_MC)
-			&&  static_cast<const UnparsedText*>(LParenArg)->IsSemanticChar('(')
-			&&  RParenArg->IsExactType(UnparsedText_MC)
-			&&  static_cast<const UnparsedText*>(RParenArg)->IsSemanticChar(')'))
+		if (IsSemanticChar<'('>(LParenArg) && IsSemanticChar<')'>(RParenArg))
 			{	//! \todo argument tolerance
 				//! We (will) accept: variable-like text
 				//!  (turn it into correct domain; this requires support of intervals as abstract classes)
@@ -175,12 +168,10 @@ ExactType_MC Phrase1Arg::CanConstruct(const MetaConcept * const * TargetArray, s
 			const MetaConcept* ParameterArg = TargetArray[KeywordIdx+2];
 			if (!ParameterArg->IsNegative())
 				{
-				if (ParameterArg->IsExactType(LinearInfinity_MC))
-					return FACTORIAL_Phrase1_MC;
+				if (ParameterArg->IsExactType(LinearInfinity_MC)) return FACTORIAL_Phrase1_MC;
 				else if (ParameterArg->IsExactType(IntegerNumeral_MC))
 					{
-					if (ParameterArg->IsUltimateType(&Integer))
-						return FACTORIAL_Phrase1_MC;
+					if (ParameterArg->IsUltimateType(&Integer)) return FACTORIAL_Phrase1_MC;
 					}
 				// TODO: give variables a chance...after we can do something with them.
 				}

@@ -274,11 +274,8 @@ void ClauseNArg::DiagnoseInferenceRules() const
 	UnconditionalDataIntegrityFailure();
 }
 
-// #define FRANCI_WARY 1
-
-ExactType_MC
-ClauseNArg::CanConstructNonPostfix(const MetaConcept* const * src, size_t KeywordIdx)
-{	// FORMALLY CORRECT: 2/8/2000
+ExactType_MC ClauseNArg::CanConstructNonPostfix(const MetaConcept* const * src, size_t KeywordIdx)
+{	// FORMALLY CORRECT: 2020-07-29
 	// AND(..), OR(...), IFF(...), XOR(...), NXOR(...), NIFF(...), NOR(...), NAND(...)
 	// all of these have minarity 2, and arglists that must be ultimately TruthValues
 	// ALLEQUAL(...), ALLDISTINCT(...), NOTALLEQUAL(...), NOTALLDISTINCT(...)
@@ -289,40 +286,27 @@ ClauseNArg::CanConstructNonPostfix(const MetaConcept* const * src, size_t Keywor
 	const auto VRKeyword = fast_up_cast<UnparsedText>(src[KeywordIdx]);
 	if (!VRKeyword) return Unknown_MC;
 
-	if (const auto GuessType = VRKeyword->TypeForNAryClauseKeyword())
-		{
-		if (   DISTINCTFROMALLOF_ClauseN_MC==GuessType
-			|| EQUALTOONEOF_ClauseN_MC==GuessType)
-			{
-			if (	0==KeywordIdx
-				||	KeywordIdx+1==ArraySize(src))
-				{
+	if (const auto GuessType = VRKeyword->TypeForNAryClauseKeyword()) {
+		if (DISTINCTFROMALLOF_ClauseN_MC==GuessType || EQUALTOONEOF_ClauseN_MC==GuessType) {
+			if (0==KeywordIdx || KeywordIdx+1==ArraySize(src)) {
 				std::string error_msg("Malformed infix clause: ");
 				error_msg += VRKeyword->ViewKeyword();
 				throw syntax_error(error_msg);
-				}
-			if (   1<=KeywordIdx
-				&& CommalistAry2PlusRecognize(src,KeywordIdx+1))
-				return GuessType;
 			}
-		else{
-			if (ArglistAry2PlusRecognize(src,KeywordIdx+1))
-				return GuessType;
+			if (1<=KeywordIdx && CommalistAry2PlusRecognize(src,KeywordIdx+1)) return GuessType;
+		} else {
+			if (ArglistAry2PlusRecognize(src,KeywordIdx+1)) return GuessType;
 			if (	ALLEQUAL_ClauseN_MC<=GuessType
 				&& 	KeywordIdx+2<ArraySize(src)
-				&& (	!src[KeywordIdx+1]->IsExactType(UnparsedText_MC)
-					|| 	!static_cast<const UnparsedText*>(src[KeywordIdx+1])->IsSemanticChar('(')))
-				{
+				&& !IsSemanticChar<'('>(src[KeywordIdx+1])) {
 				std::string error_msg("Malformed prefix clause: ");
 				error_msg += VRKeyword->ViewKeyword();
 				throw syntax_error(error_msg);
-				}
 			}
-		};
+		}
+	};
 	return Unknown_MC;
 }
-
-#undef FRANCI_WARY
 
 // must not throw, called only from constructor
 ExactType_MC

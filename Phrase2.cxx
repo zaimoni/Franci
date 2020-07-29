@@ -214,7 +214,7 @@ bool Phrase2Arg::DelegateEvaluate(MetaConcept*& dest)
 
 // type-specific functions
 ExactType_MC Phrase2Arg::CanConstructNonPostfix(const MetaConcept* const * dest, size_t KeywordIdx)
-{	// FORMALLY CORRECT: 2020-07-26
+{	// FORMALLY CORRECT: 2020-07-29
 	// SUM_Phrase2_MC: 
 	assert(dest);
 	assert(ArraySize(dest)>KeywordIdx);
@@ -231,8 +231,7 @@ ExactType_MC Phrase2Arg::CanConstructNonPostfix(const MetaConcept* const * dest,
 			throw syntax_error(error_msg);
 			}
 		// infix-handlers: sum, multiplication
-		if (	SUM_Phrase2_MC==GuessType
-			||	MULT_Phrase2_MC==GuessType)
+		if (SUM_Phrase2_MC==GuessType || MULT_Phrase2_MC==GuessType)
 			{
 			if (1<=KeywordIdx)
 				{
@@ -283,16 +282,12 @@ ExactType_MC Phrase2Arg::CanConstructNonPostfix(const MetaConcept* const * dest,
 
 		// interception of PERM(M,N) and Perm(M,N)
 		// interception of COMB(M,N) and Comb(M,N)
-		if (	PERMUTATION_Phrase2_MC==GuessType
-			||	COMBINATION_Phrase2_MC==GuessType)
+		if (PERMUTATION_Phrase2_MC==GuessType || COMBINATION_Phrase2_MC==GuessType)
 			{
 			if (   KeywordIdx+5<ArraySize(dest)
-				&& dest[KeywordIdx+1]->IsExactType(UnparsedText_MC)
-				&& static_cast<const UnparsedText*>(dest[KeywordIdx+1])->IsSemanticChar('(')
-				&& dest[KeywordIdx+3]->IsExactType(UnparsedText_MC)
-				&& static_cast<const UnparsedText*>(dest[KeywordIdx+3])->IsSemanticChar(',')
-				&& dest[KeywordIdx+5]->IsExactType(UnparsedText_MC)
-				&& static_cast<const UnparsedText*>(dest[KeywordIdx+5])->IsSemanticChar(')'))
+				&& IsSemanticChar<'('>(dest[KeywordIdx + 1])
+				&& IsSemanticChar<','>(dest[KeywordIdx + 3])
+				&& IsSemanticChar<')'>(dest[KeywordIdx + 5]))
 				{	// KeywordIdx+2, KeywordIdx+4 must pass
 				if (   dest[KeywordIdx+2]->IsExactType(UnparsedText_MC)
 					&& !static_cast<const UnparsedText*>(dest[KeywordIdx+2])->IsQuasiEnglishOrVarName())
@@ -302,9 +297,7 @@ ExactType_MC Phrase2Arg::CanConstructNonPostfix(const MetaConcept* const * dest,
 					return Unknown_MC;
 				return GuessType;			
 				}
-			if (   KeywordIdx+2<ArraySize(dest)
-				&& (	!dest[KeywordIdx+1]->IsExactType(UnparsedText_MC)
-					|| 	!static_cast<const UnparsedText*>(dest[KeywordIdx+1])->IsSemanticChar('(')))
+			if (KeywordIdx+2<ArraySize(dest) && !IsSemanticChar<'('>(dest[KeywordIdx + 1]))
 				{
 				std::string error_msg("Malformed prefix phrase: ");
 				error_msg += Keyword->ViewKeyword();

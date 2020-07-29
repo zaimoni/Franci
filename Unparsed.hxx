@@ -203,4 +203,10 @@ private:
 	void SpecializeSemantics(void);
 };
 
+template<char c>
+bool IsSemanticChar(const MetaConcept* x) {
+	if (const auto src = up_cast<UnparsedText>(x)) return src->IsSemanticChar(c);
+	return false;
+}
+
 #endif
