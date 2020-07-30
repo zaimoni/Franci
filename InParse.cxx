@@ -29,7 +29,6 @@ void ConstructPrefixArgList(char* const PrefixArgListStart,const MetaConcept* co
 // defined in MetaCon.cxx
 void NiceFormat80Cols(char*& Name);
 
-
 // NOTE: Parsing extension
 // Want A...B, where A,B "will evaluate" to explicit constants of type IntegerNumeral, 
 // to expand in arglist context to the integers from A to B inclusive.
@@ -94,12 +93,6 @@ bool LookUpVar(MetaConcept*& Target, const AbstractClass* Domain);
 //	*									(PreEnglish)<=(Prevariable)<=...<=(PreEnglish)
 //	*	, [syntactical information]
 //	*	:=	(defines operator)
-
-bool InterpretOneStage(MetaConcept**& ArgArray)
-{
-	autotransform_n(ArgArray, SafeArraySize(ArgArray), [](MetaConcept* x) {return x->ForceStdForm(); });
-	return FranciScriptParser.ParseOneStep(ArgArray);
-}
 
 void Franci_SyntaxError(void)
 {	// FORMALLY CORRECT: Kenneth Boyd, 9/26/2005

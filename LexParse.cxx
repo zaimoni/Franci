@@ -13,6 +13,7 @@
 #include <ctype.h>
 
 #include "Zaimoni.STL/except/syntax_error.hpp"
+#include "Zaimoni.STL/LexParse/Parser.hpp"
 #include "Zaimoni.STL/Pure.C/logging.h"
 
 // defined in VConsole.cxx
@@ -368,8 +369,7 @@ bool CoerceArgType(MetaConcept* const& Arg, const AbstractClass& ForceType)
 	return Arg->ForceUltimateType(&ForceType) || _improviseVar(*const_cast<MetaConcept**>(&Arg), &ForceType);
 }
 
-bool
-LookUpVar(MetaConcept*& Target, const AbstractClass* Domain)
+bool LookUpVar(MetaConcept*& Target, const AbstractClass* Domain)
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/15/1999
 	// 2 cases: variable, we want to change the domain
 	// UnparsedText, we want a variable
@@ -377,11 +377,9 @@ LookUpVar(MetaConcept*& Target, const AbstractClass* Domain)
 	// request-var
 	// 1) splice in an quantifier at top-level with the current var-name
 	// and domain, if necessary.  Return pointer to quantifier.
-	MetaQuantifier* Tmp2 = PointToLookupQuantifier(*static_cast<UnparsedText*>(Target),Situation,Domain);
-	if (NULL!=Tmp2)
+	if (MetaQuantifier* Tmp2 = PointToLookupQuantifier(*static_cast<UnparsedText*>(Target), Situation, Domain))
 		{	// 2) create variable pointing to quantifier
-		Variable* Tmp = new(nothrow) Variable(Tmp2);
-		if (NULL!=Tmp)
+		if (Variable* Tmp = new(nothrow) Variable(Tmp2))
 			{	// 3) delete the raw name, and put in the variable.
 			delete Target;
 			Target = Tmp; 
@@ -391,42 +389,42 @@ LookUpVar(MetaConcept*& Target, const AbstractClass* Domain)
 	return false;
 }
 
+extern Parser<MetaConcept> FranciScriptParser;
+static bool InterpretOneStage(_meta_autoarray_ptr<MetaConcept*>& ArgArray)
+{
+	for (decltype(auto) x : ArgArray) x->ForceStdForm();
+	return FranciScriptParser.ParseOneStep(ArgArray);
+}
+
 // normal implementation
-inline bool
-NoCurrentSituation(void)
-{return NULL==Situation && NoMoreVarsForSituation;}
+static bool NoCurrentSituation() { return !Situation && NoMoreVarsForSituation; }
 
 // handlers
-bool
-StartLogfile_handler(char*& InputBuffer)
+bool StartLogfile_handler(char*& InputBuffer)
 {	// FORMALLY CORRECT: Kenneth Boyd, 4/23/1999
 	_console->StartLogFile();
 	return true;
 }
 
-bool
-EndLogfile_handler(char*& InputBuffer)
+bool EndLogfile_handler(char*& InputBuffer)
 {	// FORMALLY CORRECT: Kenneth Boyd, 4/23/1999
 	_console->EndLogFile();
 	return true;
 }
 
-bool
-CleanLogfile_handler(char*& InputBuffer)
+bool CleanLogfile_handler(char*& InputBuffer)
 {	// FORMALLY CORRECT: Kenneth Boyd, 5/16/2000
 	_console->CleanLogFile();
 	return true;
 }
 
-bool
-UseScript_handler(char*& InputBuffer)
+bool UseScript_handler(char*& InputBuffer)
 {	// FORMALLY CORRECT: Kenneth Boyd, 4/23/1999
 	_console->UseScript(InputBuffer);
 	return true;
 }
 
-bool
-NewSituation_handler(char*& InputBuffer)
+bool NewSituation_handler(char*& InputBuffer)
 {	// FORMALLY CORRECT: Kenneth Boyd, 1/9/2004
 	NoMoreVarsForSituation = false;
 	SituationTimeLimit = 0;

@@ -10,7 +10,6 @@
 class MetaConcept;
 
 // primary pattern matching
-bool InterpretOneStage(MetaConcept**& ArgArray);
 void Franci_SyntaxError(void);
 void Franci_IncompleteUnderstanding(void);
 // bool Franci_IsSyntacticalSymmetry(const MetaConcept* const *const ArgArray);
