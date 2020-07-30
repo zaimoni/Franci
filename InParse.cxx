@@ -837,39 +837,39 @@ bool ArglistAry2PlusRecognize(const MetaConcept* const * ArgArray,size_t i)
 }
 
 bool CommalistAry2PlusRecognize(const MetaConcept* const * ArgArray,size_t i)
-{	// FORMALLY CORRECT: Kenneth Boyd, 5/26/2002
-	assert(NULL!=ArgArray);	//! \pre NULL!=ArgArray
-	assert(i<ArraySize(ArgArray));
-#define ARITY ArraySize(ArgArray)
+{	// FORMALLY CORRECT: 2020-07-30
+	assert(ArgArray);
+	const size_t ARITY = ArraySize(ArgArray);
+	assert(i < ARITY);
 	// looking for A,B[,...]
 	// StartIdx is A
 	if (   2+i<ARITY
 	    && ArgArray[i]->IsPotentialArg()
-	    && ArgArray[i+2]->IsPotentialArg()
-		&& ArgArray[i+1]->IsExactType(UnparsedText_MC))
+	    && ArgArray[i+2]->IsPotentialArg())
 		{
-		bool PriorIsEllipsis = false;
-		bool ThisIsEllipsis = static_cast<const UnparsedText*>(ArgArray[i+1])->IsLogicalEllipsis() && ArgArray[i]->IsUltimateType(&Integer) && ArgArray[i+2]->IsUltimateType(&Integer);
-		if (ThisIsEllipsis || static_cast<const UnparsedText*>(ArgArray[i+1])->IsSemanticChar(','))
+		const auto pivot = up_cast<UnparsedText>(ArgArray[i + 1]);
+		if (!pivot) return false;
+		bool ThisIsEllipsis = pivot->IsLogicalEllipsis() && ArgArray[i]->IsUltimateType(&Integer) && ArgArray[i+2]->IsUltimateType(&Integer);
+		if (ThisIsEllipsis || pivot->IsSemanticChar(','))
 			{
+			bool PriorIsEllipsis = false;
 			do	{
 				i +=2;
 				if (ARITY==i+1) return true;
-				if (   !ArgArray[i+1]->IsExactType(UnparsedText_MC)
-				    || !static_cast<const UnparsedText*>(ArgArray[i+1])->ArgCannotExtendRightThroughThis())
-					return false;
+				const auto arg = up_cast<UnparsedText>(ArgArray[i + 1]);
+				if (!arg || !arg->ArgCannotExtendRightThroughThis()) return false;
 				PriorIsEllipsis = ThisIsEllipsis;
-				ThisIsEllipsis = static_cast<const UnparsedText*>(ArgArray[i+1])->IsLogicalEllipsis() && ArgArray[i]->IsUltimateType(&Integer) && ArgArray[i+2]->IsUltimateType(&Integer);
-				if (ThisIsEllipsis && PriorIsEllipsis)
-					return false;
-				if (!ThisIsEllipsis && !static_cast<const UnparsedText*>(ArgArray[i+1])->IsSemanticChar(','))
-					return true;
+				ThisIsEllipsis = arg->IsLogicalEllipsis() && ArgArray[i]->IsUltimateType(&Integer) && ArgArray[i+2]->IsUltimateType(&Integer);
+				if (ThisIsEllipsis) {
+					if (PriorIsEllipsis) return false;
+				} else {
+					if (!arg->IsSemanticChar(',')) return true;
+				}
 				}
 			while(ARITY>i+2 && ArgArray[i+2]->IsPotentialArg());
 			}
 		}
 	return false;
-#undef ARITY
 }
 
 bool ArgThatCannotExtendLeftRecognize(const MetaConcept* const * ArgArray,size_t i)
