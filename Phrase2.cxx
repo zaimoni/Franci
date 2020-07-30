@@ -235,12 +235,8 @@ ExactType_MC Phrase2Arg::CanConstructNonPostfix(const MetaConcept* const * dest,
 			{
 			if (1<=KeywordIdx)
 				{
-				if (   dest[KeywordIdx-1]->IsExactType(UnparsedText_MC)
-					&& !static_cast<const UnparsedText*>(dest[KeywordIdx-1])->IsQuasiEnglishOrVarName())
-					return Unknown_MC;
-				if (   dest[KeywordIdx+1]->IsExactType(UnparsedText_MC)
-					&& !static_cast<const UnparsedText*>(dest[KeywordIdx+1])->IsQuasiEnglishOrVarName())
-					return Unknown_MC;
+				if (RejectTextToVar(dest[KeywordIdx-1])) return Unknown_MC;
+				if (RejectTextToVar(dest[KeywordIdx+1])) return Unknown_MC;
 
 				if (SUM_Phrase2_MC==GuessType)
 					{	// want __ + __, where __ is an expression suitable for +
@@ -289,12 +285,8 @@ ExactType_MC Phrase2Arg::CanConstructNonPostfix(const MetaConcept* const * dest,
 				&& IsSemanticChar<','>(dest[KeywordIdx + 3])
 				&& IsSemanticChar<')'>(dest[KeywordIdx + 5]))
 				{	// KeywordIdx+2, KeywordIdx+4 must pass
-				if (   dest[KeywordIdx+2]->IsExactType(UnparsedText_MC)
-					&& !static_cast<const UnparsedText*>(dest[KeywordIdx+2])->IsQuasiEnglishOrVarName())
-					return Unknown_MC;
-				if (   dest[KeywordIdx+4]->IsExactType(UnparsedText_MC)
-					&& !static_cast<const UnparsedText*>(dest[KeywordIdx+4])->IsQuasiEnglishOrVarName())
-					return Unknown_MC;
+				if (RejectTextToVar(dest[KeywordIdx+2])) return Unknown_MC;
+				if (RejectTextToVar(dest[KeywordIdx+4])) return Unknown_MC;
 				return GuessType;			
 				}
 			if (KeywordIdx+2<ArraySize(dest) && !IsSemanticChar<'('>(dest[KeywordIdx + 1]))
