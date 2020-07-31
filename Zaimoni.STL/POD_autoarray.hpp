@@ -46,6 +46,17 @@ public:
 	bool empty() const { return NULL==_ptr; };
 	static size_t max_size() { return size_t(-1)/sizeof(T); };	// XXX casting -1 to an unsigned type gets the maximum of that type
 
+	void push_back(const T& src) {
+		const size_t n = size();
+		insertNSlotsAt(1, n);
+		_ptr[n] = src;
+	}
+	void push_back(T&& src) {
+		const size_t n = size();
+		insertNSlotsAt(1, n);
+		_ptr[n] = std::move(src);
+	}
+
 	void rangecheck(size_t i) const { if (i>=size()) FATAL("out-of-bounds array access"); };
 
 	// Perl grep

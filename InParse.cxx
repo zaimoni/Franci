@@ -18,6 +18,7 @@
 
 #include "Zaimoni.STL/lite_alg.hpp"
 #include "Zaimoni.STL/LexParse/Parser.hpp"
+#include "Zaimoni.STL/LexParse/Kuroda.hpp"
 #include "Zaimoni.STL/Pure.C/logging.h"
 
 extern Parser<MetaConcept> FranciScriptParser;
@@ -789,6 +790,178 @@ Franci_o_n_2_rules[] =	{	&Construct2AryPhraseNonPostfix,	// catches IN ___
 
 Parser<MetaConcept> FranciScriptParser(NULL,Franci_o_n_rules,sizeof(Franci_o_n_rules)/sizeof(Parser<MetaConcept>::ParseFunc*),
 												Franci_o_n_2_rules,sizeof(Franci_o_n_2_rules)/sizeof(Parser<MetaConcept>::ParseFunc*));
+
+static bool kuroda_ResolveUnparsedText(MetaConcept*& target)
+{
+	assert(target);
+	auto arg = up_cast<UnparsedText>(target);
+	if (!arg) return false;
+	if (_PostfilterUnparsedText(target)) return true;
+//	UnparsedText& VR_ArgArrayIdx = *static_cast<UnparsedText*>(ArgArray[i]);	// obsolete, use arg instead
+
+	if (arg->IsLogicalInfinity()) {
+		// Infinity symbol (easy form)
+		// Let autotyping promote LinearInfinity_MC to ComplexInfinity_MC
+		// then always interpreting as LinearInfinity_MC isn't a problem
+		MetaConcept* Tmp = new SymbolicConstant(LinearInfinity_SC);
+		DELETE(target);
+		target = Tmp;
+		return true;
+	}
+	return false;
+}
+
+static bool _SplitTextInTwo(kuroda::parser<MetaConcept>::sequence& symbols, size_t i)
+{
+	assert(symbols.size() > i);
+	if (symbols.InsertSlotAt(i + 1, nullptr)) {
+		if (static_cast<UnparsedText*>(symbols[i])->SplitIntoTwoTexts(symbols[i + 1])) {
+			kuroda_ResolveUnparsedText(symbols[i]);
+			kuroda_ResolveUnparsedText(symbols[i + 1]);
+			assert(ValidateArgArray(symbols));
+			return true;
+		}
+		symbols.DeleteIdx(i + 1);
+		assert(ValidateArgArray(ArgArray));
+	}
+	return false;
+}
+
+static std::vector<size_t> kuroda_ResolveUnparsedText2(kuroda::parser<MetaConcept>::sequence& symbols, size_t n) {
+	assert(symbols.size() > n);
+	std::vector<size_t> ret;
+	auto arg = up_cast<UnparsedText>(symbols[n]);
+	if (!arg) return ret;
+
+	if (arg->IsUnclassified()) {
+		if (_SplitTextInTwo(symbols, n)) {
+			ret.push_back(n);
+			ret.push_back(n + 1);
+		}
+		return ret;
+	}
+	if (arg->IsLeadingIntegerNumeral())
+	{	// if QuasiEnglishNumeric starts with a legal IntegerNumeral string,
+		// then has a mere ID character character afterwards, then split off the numeral
+		// [this is a shorthand in math, and a grammar-fixer in English]
+		size_t SplitLength = arg->LengthOfNumericIntegerToSplitOff();
+		SUCCEED_OR_DIE(0 < SplitLength);	// data integrity error otherwise
+		if (_SplitTextInTwo(symbols, n)) {
+			ret.push_back(n);
+			ret.push_back(n + 1);
+		}
+		return ret;
+	};
+
+	return ret;
+}
+
+#if 0
+static bool kuroda_ResolveUnparsedText3(MetaConcept**& ArgArray, size_t i)
+{
+	assert(ArgArray);
+	assert(i < ArraySize(ArgArray));
+	if (ArgArray[i]->IsExactType(UnparsedText_MC))
+	{
+		// ....
+
+		UnparsedText& VR_ArgArrayIdx = *static_cast<UnparsedText*>(ArgArray[i]);
+		// META: This is the complete reaction set for unclassified UnparsedText
+		// if an UnparsedText item is the ONLY entry, check to see if it's a
+		// variable name that has already been declared.  This is an inplace-rewrite.
+		if (1 == ArraySize(ArgArray)	// implies 0==Idx; "global symbol"
+			&& VR_ArgArrayIdx.IsQuasiEnglishOrVarName())
+		{
+			LookUpVar(ArgArray[0], NULL);	// requests a free variable
+			return true;
+		};
+		// if (VR_ArgArrayIdx.IsUnclassified())	...
+
+		// META: This is the complete reaction set for LeadingIntegerNumeral UnparsedText
+//		if (VR_ArgArrayIdx.IsLeadingIntegerNumeral()) ...
+//		if (VR_ArgArrayIdx.IsLogicalInfinity()) ...
+
+		// ], ) key stripper rules
+		// these rules are *not* exhaustive; they need enough space behind them to work
+		if (2 <= i && ArgArray[i - 2]->IsExactType(UnparsedText_MC))
+		{
+			// [ ] strip
+			// ( ) strip
+			const UnparsedText& VR_ArgArrayIdxMinus2 = *static_cast<UnparsedText*>(ArgArray[i - 2]);
+			if ((VR_ArgArrayIdx.IsCharacter(']') && VR_ArgArrayIdxMinus2.IsCharacter('['))
+				|| (VR_ArgArrayIdx.IsCharacter(')') && VR_ArgArrayIdxMinus2.IsCharacter('(')))
+			{	// This cleans up those clauses/phrases that can evaluate;
+				if (in_range<MinClausePhraseIdx_MC, MaxClausePhraseIdx_MC>(ArgArray[i - 1]->ExactType()))
+				{	// if this clause/phrase *doesn't* evaluate, stall this section
+					if (!ArgArray[i - 1]->CanEvaluate()) return false;
+
+					DestructiveSyntacticallyEvaluateOnce(ArgArray[i - 1]);
+				}
+
+				// What's inside is *not* a clause/phrase, it has an interpretation
+				bool NoLeftExtend = 2 == i
+					|| (ArgArray[i - 3]->IsExactType(UnparsedText_MC)
+						&& static_cast<UnparsedText*>(ArgArray[i - 3])->ArgCannotExtendLeftThroughThis());
+				bool NoRightExtend = i + 1 == ArraySize(ArgArray)
+					|| (ArgArray[i + 1]->IsExactType(UnparsedText_MC)
+						&& static_cast<UnparsedText*>(ArgArray[i + 1])->ArgCannotExtendRightThroughThis());
+				//! \todo FIX: deconflict this with integer floor function; matrices will behave via isomorphism
+				if (NoLeftExtend && NoRightExtend)
+				{
+				SaveParenBracketStrip:
+					_delete_idx(ArgArray, i);
+					_delete_idx(ArgArray, i - 2);
+					assert(ValidateArgArray(ArgArray));
+					return true;
+				};
+				// MUTABLE
+				// +/&middot;-compatible is legitimate to strip when both sides are 
+				// bounded by '+'-signs, &middot;-signs, or no-extends
+				if (NULL != ArgArray[i - 1]->UltimateType()
+					&& (ArgArray[i - 1]->UltimateType()->Subclass(ClassAdditionDefined)
+						|| ArgArray[i - 1]->UltimateType()->Subclass(ClassMultiplicationDefined)))
+				{
+					if (NoLeftExtend)
+					{
+						if (ArgArray[i + 1]->IsExactType(UnparsedText_MC)
+							&& (static_cast<UnparsedText*>(ArgArray[i + 1])->IsLogicalPlusSign()
+								|| static_cast<UnparsedText*>(ArgArray[i + 1])->IsLogicalMultiplicationSign()))
+							goto SaveParenBracketStrip;
+					}
+					else if (NoRightExtend)
+					{
+						if (ArgArray[i - 3]->IsExactType(UnparsedText_MC)
+							&& (static_cast<UnparsedText*>(ArgArray[i - 3])->IsLogicalPlusSign()
+								|| static_cast<UnparsedText*>(ArgArray[i - 3])->IsLogicalMultiplicationSign()))
+							goto SaveParenBracketStrip;
+					}
+					else {
+						if (ArgArray[i - 3]->IsExactType(UnparsedText_MC)
+							&& (static_cast<UnparsedText*>(ArgArray[i - 3])->IsLogicalPlusSign()
+								|| static_cast<UnparsedText*>(ArgArray[i - 3])->IsLogicalMultiplicationSign())
+							&& ArgArray[i + 1]->IsExactType(UnparsedText_MC)
+							&& (static_cast<UnparsedText*>(ArgArray[i + 1])->IsLogicalPlusSign()
+								|| static_cast<UnparsedText*>(ArgArray[i + 1])->IsLogicalMultiplicationSign()))
+							goto SaveParenBracketStrip;
+					};
+				};
+			};
+		};
+	};
+	return false;
+}
+#endif
+
+kuroda::parser<MetaConcept>& Franci_parser()
+{
+	static zaimoni::autoval_ptr<kuroda::parser<MetaConcept> > ooao;
+	if (!ooao) {
+		ooao = new kuroda::parser<MetaConcept>();
+		ooao->register_terminal(&kuroda_ResolveUnparsedText);
+		ooao->register_build_nonterminal(&kuroda_ResolveUnparsedText2);
+	}
+	return *ooao;
+}
 
 // aux pattern matching
 //! \todo META: FIX: need a more careful understanding of what may (and may not be) a valid

@@ -14,6 +14,7 @@
 
 #include "Zaimoni.STL/except/syntax_error.hpp"
 #include "Zaimoni.STL/LexParse/Parser.hpp"
+#include "Zaimoni.STL/LexParse/Kuroda.hpp"
 #include "Zaimoni.STL/Pure.C/logging.h"
 
 // defined in VConsole.cxx
@@ -62,8 +63,19 @@ std::pair<Variable*, UnparsedText*> LooksLikeVarName(MetaConcept* x) {
 	return std::pair<Variable*, UnparsedText*>(0, 0);
 }
 
-bool
-InitMetaConceptParserArray(autoarray_ptr<MetaConcept*>& ArgArray,char*& InputBuffer)
+kuroda::parser<MetaConcept>& Franci_parser();	// cf. InParse.cxx
+
+auto _initMetaConceptParserArray(char*& InputBuffer)
+{
+	zaimoni::autovalarray_ptr_throws<MetaConcept*> symbols;
+	auto staging = new UnparsedText(InputBuffer);
+	// below doesn't work for FORTRAN (comments are 5 spaces with & as sixth character)
+	staging->WS_Strip();
+	Franci_parser().append_to_parse(symbols, staging);
+	return symbols;
+}
+
+bool InitMetaConceptParserArray(autoarray_ptr<MetaConcept*>& ArgArray,char*& InputBuffer)
 {	//! \pre ArgArray is intended to have one slot (e.g., autoarray_ptr<MetaConcept*> ArgArray(1);
 	DEBUG_FAIL_OR_LEAVE(1!=ArgArray.size(),return false);
 	assert(NULL==ArgArray[0]);
@@ -389,7 +401,7 @@ bool LookUpVar(MetaConcept*& Target, const AbstractClass* Domain)
 	return false;
 }
 
-extern Parser<MetaConcept> FranciScriptParser;
+extern Parser<MetaConcept> FranciScriptParser;	// cf. InParse.cxx
 static bool InterpretOneStage(_meta_autoarray_ptr<MetaConcept*>& ArgArray)
 {
 	for (decltype(auto) x : ArgArray) x->ForceStdForm();
