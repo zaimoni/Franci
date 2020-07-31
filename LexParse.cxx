@@ -46,13 +46,13 @@ typedef LexParseHandler* ActiveLexParseHandler(char*& InputBuffer);
 //! This only provides support for one problem at a time, which is implicit.
 //! While building this, the problem is really a QuantifiedStatement
 //! This is a target for a C++ class; must do this before multiple-situation support
-MetaConcept* Situation = NULL;
-bool NoMoreVarsForSituation = false;	// turns on a syntax checker when true
-size_t SituationTimeLimit = 0;			// time limit in seconds; 0 is no time limit
-clock_t EvalTime0;						// start evaluation
-bool DoNotExplain = false;				// turns off full explanations
+static MetaConcept* Situation = NULL;
+static bool NoMoreVarsForSituation = false;	// turns on a syntax checker when true
+static size_t SituationTimeLimit = 0;			// time limit in seconds; 0 is no time limit
+static clock_t EvalTime0;						// start evaluation
+static bool DoNotExplain = false;				// turns off full explanations
 // 2-stage construction so improvisiation for evaluate-expression does not affect situation
-autoarray_ptr<MetaQuantifier*> NewVarsOnThisPass;		// new vars on this pass ... oops, this is a proper class...
+static autoarray_ptr<MetaQuantifier*> NewVarsOnThisPass;		// new vars on this pass ... oops, this is a proper class...
 
 // cf MetaConcept::IsPotentialVarName
 std::pair<Variable*, UnparsedText*> LooksLikeVarName(MetaConcept* x) {
@@ -65,7 +65,7 @@ std::pair<Variable*, UnparsedText*> LooksLikeVarName(MetaConcept* x) {
 
 kuroda::parser<MetaConcept>& Franci_parser();	// cf. InParse.cxx
 
-auto _initMetaConceptParserArray(char*& InputBuffer)
+static auto _initMetaConceptParserArray(char*& InputBuffer)
 {
 	zaimoni::autovalarray_ptr_throws<MetaConcept*> symbols;
 	auto staging = new UnparsedText(InputBuffer);
@@ -74,18 +74,6 @@ auto _initMetaConceptParserArray(char*& InputBuffer)
 	Franci_parser().append_to_parse(symbols, staging);
 	return symbols;
 }
-
-bool InitMetaConceptParserArray(autoarray_ptr<MetaConcept*>& ArgArray,char*& InputBuffer)
-{	//! \pre ArgArray is intended to have one slot (e.g., autoarray_ptr<MetaConcept*> ArgArray(1);
-	DEBUG_FAIL_OR_LEAVE(1!=ArgArray.size(),return false);
-	assert(NULL==ArgArray[0]);
-	ArgArray[0] = new(nothrow) UnparsedText(InputBuffer);
-	if (NULL==ArgArray[0]) return false;
-	// below doesn't work for FORTRAN (comments are 5 spaces with & as sixth character)
-	static_cast<UnparsedText*>(ArgArray[0])->WS_Strip();
-	return true;
-}
-
 
 // AbstractClass helpers -- here to permit clearing on new situation
 const AbstractClass& NonnegativeInteger()
@@ -577,8 +565,7 @@ void ConstraintForSituationAux1(MetaConcept* InitialResult)
 		};
 }
 
-void
-ConstraintForSituationAux2(autoarray_ptr<MetaConcept*>& ArgArray, MetaConcept*& InitialResult)
+void ConstraintForSituationAux2(kuroda::parser<MetaConcept>::sequence& ArgArray, MetaConcept*& InitialResult)
 {	// FORMALLY CORRECT: Kenneth Boyd, 5/19/2006
 	try	{
 		autoval_ptr<QuantifiedStatement> Tmp;
@@ -608,11 +595,9 @@ ConstraintForSituationAux2(autoarray_ptr<MetaConcept*>& ArgArray, MetaConcept*& 
 		};
 }
 
-bool
-ConstraintForSituation_handler(char*& InputBuffer)
+bool ConstraintForSituation_handler(char*& InputBuffer)
 {	// FORMALLY CORRECT: Kenneth Boyd, 5/19/2006
-	autoarray_ptr<MetaConcept*> ArgArray(1);
-	if (!InitMetaConceptParserArray(ArgArray,InputBuffer)) return false;
+	auto ArgArray(_initMetaConceptParserArray(InputBuffer));
 
 	NewVarsOnThisPass.clear();
 	try	{
@@ -671,12 +656,11 @@ ConstraintForSituation_handler(char*& InputBuffer)
 }
 
 static bool NewVarsForSituation_handler(char*& InputBuffer)
-{	// FORMALLY CORRECT: Kenneth Boyd, 5/19/2006
+{	// FORMALLY CORRECT: 2020-07-31
 	if (NoMoreVarsForSituation)
 		INFORM("But we already agreed that there would be no more variables.\n");
 	else{
-		autoarray_ptr<MetaConcept*> ArgArray(1);
-		if (!InitMetaConceptParserArray(ArgArray,InputBuffer)) return false;
+		auto ArgArray(_initMetaConceptParserArray(InputBuffer));
 
 		NewVarsOnThisPass.clear();
 		try	{
@@ -743,11 +727,9 @@ NoMoreVarsForSituation_handler(char*& InputBuffer)
 	return true;
 }
 
-bool
-DefineVarOrRelation_handler(char*& InputBuffer)
+bool DefineVarOrRelation_handler(char*& InputBuffer)
 {
-	autoarray_ptr<MetaConcept*> ArgArray(1);
-	if (!InitMetaConceptParserArray(ArgArray,InputBuffer)) return false;
+	auto ArgArray(_initMetaConceptParserArray(InputBuffer));
 
 	NewVarsOnThisPass.clear();
 	try	{
@@ -775,12 +757,10 @@ DefineVarOrRelation_handler(char*& InputBuffer)
 	return true;
 }
 
-bool
-SituationHasTimeLimit_handler(char*& InputBuffer)
+bool SituationHasTimeLimit_handler(char*& InputBuffer)
 {	// Franci must diagnose seconds/minutes/hours, and handle negative or zero correctly.
 	// Franci must also impose plausibility checks.
-	autoarray_ptr<MetaConcept*> ArgArray(1);
-	if (!InitMetaConceptParserArray(ArgArray,InputBuffer)) return false;
+	auto ArgArray(_initMetaConceptParserArray(InputBuffer));
 
 	NewVarsOnThisPass.clear();
 	try	{
@@ -825,11 +805,9 @@ EvaluateSituation_handler(char*& InputBuffer)
 	return true;
 }
 
-bool
-EvaluateExpression_handler(char*& InputBuffer)
-{	// FORMALLY CORRECT: Kenneth Boyd, 5/19/2006
-	autoarray_ptr<MetaConcept*> ArgArray(1);
-	if (!InitMetaConceptParserArray(ArgArray,InputBuffer)) return false;
+bool EvaluateExpression_handler(char*& InputBuffer)
+{	// FORMALLY CORRECT: 2020-07-31
+	auto ArgArray(_initMetaConceptParserArray(InputBuffer));
 
 	NewVarsOnThisPass.clear();
 	try	{
@@ -919,12 +897,10 @@ EvaluateExpression_handler(char*& InputBuffer)
 	return true;
 }
 
-bool
-WhatIf_handler(char*& InputBuffer)
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/17/2004
+bool WhatIf_handler(char*& InputBuffer)
+{	// FORMALLY CORRECT: 2020-07-31
 	//! \todo this handler should be blocked by a currently evaluating situation
-	autoarray_ptr<MetaConcept*> ArgArray(1);
-	if (!InitMetaConceptParserArray(ArgArray,InputBuffer)) return false;
+	auto ArgArray(_initMetaConceptParserArray(InputBuffer));
 
 	NewVarsOnThisPass.clear();
 	try	{
