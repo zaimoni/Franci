@@ -2,7 +2,7 @@
 #define PARSE_NODE_DEF 1
 
 #include "MetaCon1.hxx"
-#include "Zaimoni.STL/AutoPtr.hpp"
+#include "Zaimoni.STL/LexParse/Kuroda.hpp"
 
 class ParseNode;
 namespace zaimoni {
@@ -26,7 +26,7 @@ public:
 	};
 
 	ParseNode() noexcept : MetaConcept(ParseNode_MC) {}
-	// \todo slicing constructor
+	ParseNode(kuroda::parser<MetaConcept>::sequence& dest, size_t lb, size_t ub, slice mode);	// slicing constructor
 	// \todo anchor constructor
 	ParseNode(const ParseNode& src) = default;
 	ParseNode(ParseNode&& src) = default;
@@ -49,6 +49,8 @@ public:
 	size_t size_infix() const { return _infix.size(); }
 	size_t size_prefix() const { return _prefix.size(); }
 	size_t size_postfix() const { return _postfix.size(); }
+
+	size_t apply_all_infix(std::function<bool(MetaConcept*&)> xform);
 
 	bool IsAbstractClassDomain() const override { return false; }
 	//  Evaluation functions

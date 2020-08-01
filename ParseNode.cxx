@@ -1,5 +1,31 @@
 #include "ParseNode.hxx"
 
+ParseNode::ParseNode(kuroda::parser<MetaConcept>::sequence& dest, size_t lb, size_t ub, slice mode)
+: MetaConcept(ParseNode_MC)
+{
+	assert(lb < ub);
+	assert(dest.size() > ub);
+	switch(mode) {
+	case CLOSED: {
+		const auto audit = dest.size();	// remove before commit
+		const size_t delta = ub - lb;
+		if (2 <= delta) {
+			decltype(_infix) staging(delta - 1);
+			memmove(staging.c_array(), dest.data()+lb+1, sizeof(MetaConcept*)*delta);
+			std::fill_n(dest.c_array() + lb + 1, delta, nullptr);
+			staging.swap(_infix);
+		}
+		_anchor.reset(dest[lb]);
+		_post_anchor.reset(dest[ub]);
+		dest[lb] = this;
+		dest.DeleteNSlotsAt(delta,lb+1);
+		SUCCEED_OR_DIE(audit == dest.size() + delta);
+	}
+		break;
+	default: SUCCEED_OR_DIE(0 && "unhandled mode");
+	}
+}
+
 size_t ParseNode::size() const {
 	size_t ret = _prefix.size();
 	if (!_anchor.empty()) ret += 1;
@@ -55,4 +81,11 @@ MetaConcept* ParseNode::ArgN(size_t n) {
 		n -= _postfix.size();
 	}
 	return 0;
+}
+
+size_t ParseNode::apply_all_infix(std::function<bool(MetaConcept*&)> xform)
+{
+	size_t ret = 0;
+	for (decltype(auto) x : _infix) ret += xform(x);
+	return ret;
 }

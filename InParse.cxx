@@ -13,6 +13,7 @@
 #include "PhraseN.hxx"
 #include "Clause2.hxx"
 #include "ClauseN.hxx"
+#include "ParseNode.hxx"
 #include "LowRel.hxx"
 #include "Keyword1.hxx"
 
@@ -260,13 +261,11 @@ static bool ResolveUnparsedText(MetaConcept**& ArgArray,size_t i)
 //		if (VR_ArgArrayIdx.IsLogicalInfinity()) ...
 		// ], ) key stripper rules
 		// these rules are *not* exhaustive; they need enough space behind them to work
-		if (2<=i && ArgArray[i-2]->IsExactType(UnparsedText_MC))
-			{
-			// [ ] strip
+		const auto VR_argIdxMinus2 = (2 <= i) ? up_cast<UnparsedText>(ArgArray[i - 2]) : 0;
+		if (!VR_argIdxMinus2) return false;
+		const UnparsedText& VR_ArgArrayIdxMinus2 = *VR_argIdxMinus2;	// shim for legacy code
 			// ( ) strip
-			const UnparsedText& VR_ArgArrayIdxMinus2 = *static_cast<UnparsedText*>(ArgArray[i-2]);
-			if (   (VR_ArgArrayIdx.IsCharacter(']') && VR_ArgArrayIdxMinus2.IsCharacter('['))
-				|| (VR_ArgArrayIdx.IsCharacter(')') && VR_ArgArrayIdxMinus2.IsCharacter('(')))
+			if (VR_ArgArrayIdx.IsCharacter(')') && VR_ArgArrayIdxMinus2.IsCharacter('('))
 				{	// This cleans up those clauses/phrases that can evaluate;
 				if (in_range<MinClausePhraseIdx_MC,MaxClausePhraseIdx_MC>(ArgArray[i-1]->ExactType()))
 					{	// if this clause/phrase *doesn't* evaluate, stall this section
@@ -285,7 +284,7 @@ static bool ResolveUnparsedText(MetaConcept**& ArgArray,size_t i)
 				//! \todo FIX: deconflict this with integer floor function; matrices will behave via isomorphism
 				if (NoLeftExtend && NoRightExtend)
 					{
-SaveParenBracketStrip:
+SaveParenBracketStrip:	// brackets relocated to Kuroda parser
 					_delete_idx(ArgArray,i);
 					_delete_idx(ArgArray,i-2);
 					assert(ValidateArgArray(ArgArray));
@@ -323,7 +322,6 @@ SaveParenBracketStrip:
 						};
 					};
 				};
-			};
 		};
 	return false;
 }
@@ -798,7 +796,7 @@ static bool _SplitTextInTwo(kuroda::parser<MetaConcept>::sequence& symbols, size
 			return true;
 		}
 		symbols.DeleteIdx(i + 1);
-		assert(ValidateArgArray(ArgArray));
+		assert(ValidateArgArray(symbols));
 	}
 	return false;
 }
@@ -828,6 +826,32 @@ static std::vector<size_t> kuroda_ResolveUnparsedText2(kuroda::parser<MetaConcep
 		}
 		return ret;
 	};
+
+	return ret;
+}
+
+bool flush_ClausePhrase(MetaConcept*& target) {
+	if (in_range<MinClausePhraseIdx_MC, MaxClausePhraseIdx_MC>(target->ExactType())
+		&& target->CanEvaluate()) {
+		DestructiveSyntacticallyEvaluateOnce(target);
+		return true;
+	}
+	return false;
+}
+
+static std::vector<size_t> close_RightBracket(kuroda::parser<MetaConcept>::sequence& symbols, size_t n) {
+	assert(symbols.size() > n);
+	std::vector<size_t> ret;
+	if (!IsSemanticChar<']'>(symbols[n])) return ret;
+	// scan-down
+	size_t lb = n;
+	while (0 < lb) {
+		if (IsSemanticChar<'['>(symbols[--lb])) {
+			const auto working = new ParseNode(symbols, lb, n, ParseNode::CLOSED);
+			ret.push_back(lb);
+			if (1 == working->size_infix()) working->apply_all_infix(&flush_ClausePhrase);
+		}
+	}
 
 	return ret;
 }
@@ -935,6 +959,7 @@ kuroda::parser<MetaConcept>& Franci_parser()
 		ooao = new kuroda::parser<MetaConcept>();
 		ooao->register_terminal(&kuroda_ResolveUnparsedText);
 		ooao->register_build_nonterminal(&kuroda_ResolveUnparsedText2);
+		ooao->register_build_nonterminal(&close_RightBracket);
 	}
 	return *ooao;
 }
