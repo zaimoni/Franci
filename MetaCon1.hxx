@@ -295,8 +295,9 @@ public:
 	// NOTE: next function is in SymConst.cxx
 	bool SyntacticalStandardLT(const MetaConcept& rhs) const;
 	// resume implementation in MetaCon1.cxx
-	void ForceStdForm() {_forceStdForm();};
-	bool IsExplicitConstant() const {return _IsExplicitConstant();};
+	void ForceStdForm() { _forceStdForm(); }
+	bool IsExplicitConstant() const { return _IsExplicitConstant(); }
+	virtual bool NeverNeedsParentheses() const { return _IsExplicitConstant(); }	// expression never needs protection with parentheses from higher-priority operators
 	virtual bool IsAbstractClassDomain() const = 0;
 //  Evaluation functions
 	virtual evalspec canEvaluate() const = 0;

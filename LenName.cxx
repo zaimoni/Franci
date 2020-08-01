@@ -751,8 +751,7 @@ void StdAddition::ConstructSelfNameAux(char* Name) const
 		return;
 		};
 	char* VRName = Name;
-	if (   !ArgArray[0]->IsExplicitConstant()
-		&& !ArgArray[0]->IsExactType(Variable_MC)
+	if (   !ArgArray[0]->NeverNeedsParentheses()
 		&& !ArgArray[0]->IsExactType(StdMultiplication_MC))
 		{
 		*VRName++ ='(';
@@ -770,8 +769,7 @@ void StdAddition::ConstructSelfNameAux(char* Name) const
 		size_t i = 1;
 		do	{
 			*VRName++ = '+';
-			if (   !ArgArray[i]->IsExplicitConstant()
-				&& !ArgArray[i]->IsExactType(Variable_MC)
+			if (   !ArgArray[i]->NeverNeedsParentheses()
 				&& !ArgArray[i]->IsExactType(StdMultiplication_MC))
 				{
 				*VRName++ ='(';
@@ -796,8 +794,7 @@ void StdMultiplication::ConstructSelfNameAux(char* Name) const
 		return;
 		};
 	char* VRName = Name;
-	if (   !ArgArray[0]->IsExplicitConstant()
-		&& !ArgArray[0]->IsExactType(Variable_MC))
+	if (!ArgArray[0]->NeverNeedsParentheses())
 		{
 		*VRName++ ='(';
 		ArgArray[0]->ConstructSelfName(VRName);
@@ -814,8 +811,7 @@ void StdMultiplication::ConstructSelfNameAux(char* Name) const
 		size_t i = 1;
 		do	{
 			*VRName++ = '\xb7';
-			if (   !ArgArray[i]->IsExplicitConstant()
-				&& !ArgArray[i]->IsExactType(Variable_MC))
+			if (!ArgArray[i]->NeverNeedsParentheses())
 				{
 				*VRName++ ='(';
 				ArgArray[i]->ConstructSelfName(VRName);
