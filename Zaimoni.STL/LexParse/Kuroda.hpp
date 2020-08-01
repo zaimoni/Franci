@@ -26,6 +26,7 @@ namespace kuroda {
 //		using sequence = std::vector<zaimoni::autoval_ptr<T> >;
 		using sequence = zaimoni::_meta_autoarray_ptr<T*>;
 		using rewriter = std::function<std::vector<size_t>(sequence&, size_t)>;
+
 	private:
 		std::vector<std::function<bool(T&)> > label_terminal;
 		std::vector<std::function<bool(T*&)> > reformat_to_terminal;
@@ -34,6 +35,7 @@ namespace kuroda {
 
 		std::vector<rewriter> build_nonterminal;
 		std::vector<rewriter> rearrange_nonterminal;
+
 	public:
 		parser() = default;
 		parser(const parser& src) = default;
@@ -89,6 +91,7 @@ namespace kuroda {
 				}
 			}
 		}
+
 	private:
 		rewriter notice_terminal(T*& src) {
 			for (decltype(auto) test : label_terminal) if (test(*src)) return nullptr;

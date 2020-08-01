@@ -241,8 +241,7 @@ static bool ResolveUnparsedText(MetaConcept**& ArgArray,size_t i)
 	assert(i<ArraySize(ArgArray));
 	if (ArgArray[i]->IsExactType(UnparsedText_MC))
 		{
-		// META: This is the complete reaction set for 0-ary UnparsedText
-		if (_PostfilterUnparsedText(ArgArray[i])) return true;
+//		if (_PostfilterUnparsedText(ArgArray[i])) .... // META: This is the complete reaction set for 0-ary UnparsedText
 
 		UnparsedText& VR_ArgArrayIdx = *static_cast<UnparsedText*>(ArgArray[i]);
 		// META: This is the complete reaction set for unclassified UnparsedText
@@ -254,34 +253,11 @@ static bool ResolveUnparsedText(MetaConcept**& ArgArray,size_t i)
 			LookUpVar(ArgArray[0],NULL);	// requests a free variable
 			return true;
 			};
-		if (VR_ArgArrayIdx.IsUnclassified())	// for currently-unclassified text
-			return _SplitTextInTwo(ArgArray,i);
+//		if (VR_ArgArrayIdx.IsUnclassified()) ...
 
 		// META: This is the complete reaction set for LeadingIntegerNumeral UnparsedText
-		if (VR_ArgArrayIdx.IsLeadingIntegerNumeral())
-			{	// if QuasiEnglishNumeric starts with a legal IntegerNumeral string,
-				// then has a mere ID character character afterwards, then split off the numeral
-				// [this is a shorthand in math, and a grammar-fixer in English]
-			size_t SplitLength = VR_ArgArrayIdx.LengthOfNumericIntegerToSplitOff();
-			SUCCEED_OR_DIE(0<SplitLength);	// data integrity error otherwise
-			return _SplitTextInTwo(ArgArray,i);
-			};
-		if (VR_ArgArrayIdx.IsLogicalInfinity())
-			{	// Infinity symbol (easy form)
-			// Let autotyping promote LinearInfinity_MC to ComplexInfinity_MC
-			// then always interpreting as LinearInfinity_MC isn't a problem
-			try	{
-				MetaConcept* Tmp = new SymbolicConstant(LinearInfinity_SC);
-				DELETE(ArgArray[i]);
-				ArgArray[i] = Tmp;
-				assert(ValidateArgArray(ArgArray));
-				return true;
-				}
-			catch(const bad_alloc&)
-				{
-				return false;
-				}
-			};
+//		if (VR_ArgArrayIdx.IsLeadingIntegerNumeral()) ...
+//		if (VR_ArgArrayIdx.IsLogicalInfinity()) ...
 		// ], ) key stripper rules
 		// these rules are *not* exhaustive; they need enough space behind them to work
 		if (2<=i && ArgArray[i-2]->IsExactType(UnparsedText_MC))
