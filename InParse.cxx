@@ -22,6 +22,10 @@
 #include "Zaimoni.STL/LexParse/Kuroda.hpp"
 #include "Zaimoni.STL/Pure.C/logging.h"
 
+#include <stdexcept>
+
+// #define KURODA_GRAMMAR 1
+
 extern Parser<MetaConcept> FranciScriptParser;
 
 // defined in LenName.cxx
@@ -830,7 +834,7 @@ static std::vector<size_t> kuroda_ResolveUnparsedText2(kuroda::parser<MetaConcep
 	return ret;
 }
 
-bool flush_ClausePhrase(MetaConcept*& target) {
+static bool flush_ClausePhrase(MetaConcept*& target) {
 	if (in_range<MinClausePhraseIdx_MC, MaxClausePhraseIdx_MC>(target->ExactType())
 		&& target->CanEvaluate()) {
 		DestructiveSyntacticallyEvaluateOnce(target);
@@ -851,104 +855,28 @@ static std::vector<size_t> close_RightBracket(kuroda::parser<MetaConcept>::seque
 			ret.push_back(lb);
 			if (1 == working->size_infix()) working->apply_all_infix(&flush_ClausePhrase);
 		}
+		// \todo: half-open ray syntax
 	}
 
 	return ret;
 }
 
-#if 0
-static bool kuroda_ResolveUnparsedText3(MetaConcept**& ArgArray, size_t i)
-{
-	assert(ArgArray);
-	assert(i < ArraySize(ArgArray));
-	if (ArgArray[i]->IsExactType(UnparsedText_MC))
-	{
-		// ....
-
-		UnparsedText& VR_ArgArrayIdx = *static_cast<UnparsedText*>(ArgArray[i]);
-		// META: This is the complete reaction set for unclassified UnparsedText
-		// if an UnparsedText item is the ONLY entry, check to see if it's a
-		// variable name that has already been declared.  This is an inplace-rewrite.
-		if (1 == ArraySize(ArgArray)	// implies 0==Idx; "global symbol"
-			&& VR_ArgArrayIdx.IsQuasiEnglishOrVarName())
-		{
-			LookUpVar(ArgArray[0], NULL);	// requests a free variable
-			return true;
-		};
-		// if (VR_ArgArrayIdx.IsUnclassified())	...
-
-		// META: This is the complete reaction set for LeadingIntegerNumeral UnparsedText
-//		if (VR_ArgArrayIdx.IsLeadingIntegerNumeral()) ...
-//		if (VR_ArgArrayIdx.IsLogicalInfinity()) ...
-
-		// ], ) key stripper rules
-		// these rules are *not* exhaustive; they need enough space behind them to work
-		if (2 <= i && ArgArray[i - 2]->IsExactType(UnparsedText_MC))
-		{
-			// [ ] strip
-			// ( ) strip
-			const UnparsedText& VR_ArgArrayIdxMinus2 = *static_cast<UnparsedText*>(ArgArray[i - 2]);
-			if ((VR_ArgArrayIdx.IsCharacter(']') && VR_ArgArrayIdxMinus2.IsCharacter('['))
-				|| (VR_ArgArrayIdx.IsCharacter(')') && VR_ArgArrayIdxMinus2.IsCharacter('(')))
-			{	// This cleans up those clauses/phrases that can evaluate;
-				if (in_range<MinClausePhraseIdx_MC, MaxClausePhraseIdx_MC>(ArgArray[i - 1]->ExactType()))
-				{	// if this clause/phrase *doesn't* evaluate, stall this section
-					if (!ArgArray[i - 1]->CanEvaluate()) return false;
-
-					DestructiveSyntacticallyEvaluateOnce(ArgArray[i - 1]);
-				}
-
-				// What's inside is *not* a clause/phrase, it has an interpretation
-				bool NoLeftExtend = 2 == i
-					|| (ArgArray[i - 3]->IsExactType(UnparsedText_MC)
-						&& static_cast<UnparsedText*>(ArgArray[i - 3])->ArgCannotExtendLeftThroughThis());
-				bool NoRightExtend = i + 1 == ArraySize(ArgArray)
-					|| (ArgArray[i + 1]->IsExactType(UnparsedText_MC)
-						&& static_cast<UnparsedText*>(ArgArray[i + 1])->ArgCannotExtendRightThroughThis());
-				//! \todo FIX: deconflict this with integer floor function; matrices will behave via isomorphism
-				if (NoLeftExtend && NoRightExtend)
-				{
-				SaveParenBracketStrip:
-					_delete_idx(ArgArray, i);
-					_delete_idx(ArgArray, i - 2);
-					assert(ValidateArgArray(ArgArray));
-					return true;
-				};
-				// MUTABLE
-				// +/&middot;-compatible is legitimate to strip when both sides are 
-				// bounded by '+'-signs, &middot;-signs, or no-extends
-				if (NULL != ArgArray[i - 1]->UltimateType()
-					&& (ArgArray[i - 1]->UltimateType()->Subclass(ClassAdditionDefined)
-						|| ArgArray[i - 1]->UltimateType()->Subclass(ClassMultiplicationDefined)))
-				{
-					if (NoLeftExtend)
-					{
-						if (ArgArray[i + 1]->IsExactType(UnparsedText_MC)
-							&& (static_cast<UnparsedText*>(ArgArray[i + 1])->IsLogicalPlusSign()
-								|| static_cast<UnparsedText*>(ArgArray[i + 1])->IsLogicalMultiplicationSign()))
-							goto SaveParenBracketStrip;
-					}
-					else if (NoRightExtend)
-					{
-						if (ArgArray[i - 3]->IsExactType(UnparsedText_MC)
-							&& (static_cast<UnparsedText*>(ArgArray[i - 3])->IsLogicalPlusSign()
-								|| static_cast<UnparsedText*>(ArgArray[i - 3])->IsLogicalMultiplicationSign()))
-							goto SaveParenBracketStrip;
-					}
-					else {
-						if (ArgArray[i - 3]->IsExactType(UnparsedText_MC)
-							&& (static_cast<UnparsedText*>(ArgArray[i - 3])->IsLogicalPlusSign()
-								|| static_cast<UnparsedText*>(ArgArray[i - 3])->IsLogicalMultiplicationSign())
-							&& ArgArray[i + 1]->IsExactType(UnparsedText_MC)
-							&& (static_cast<UnparsedText*>(ArgArray[i + 1])->IsLogicalPlusSign()
-								|| static_cast<UnparsedText*>(ArgArray[i + 1])->IsLogicalMultiplicationSign()))
-							goto SaveParenBracketStrip;
-					};
-				};
-			};
-		};
-	};
-	return false;
+#ifdef KURODA_GRAMMAR
+static std::vector<size_t> close_RightParenthesis(kuroda::parser<MetaConcept>::sequence& symbols, size_t n) {
+	assert(symbols.size() > n);
+	std::vector<size_t> ret;
+	if (!IsSemanticChar<')'>(symbols[n])) return ret;
+	// scan-down
+	size_t lb = n;
+	while (0 < lb) {
+		if (IsSemanticChar<'('>(symbols[--lb])) {
+			const auto working = new ParseNode(symbols, lb, n, ParseNode::CLOSED);
+			ret.push_back(lb);
+			if (1 == working->size_infix()) working->apply_all_infix(&flush_ClausePhrase);
+		}
+		// \todo: half-open ray syntax
+	}
+	return ret;
 }
 #endif
 
@@ -960,6 +888,9 @@ kuroda::parser<MetaConcept>& Franci_parser()
 		ooao->register_terminal(&kuroda_ResolveUnparsedText);
 		ooao->register_build_nonterminal(&kuroda_ResolveUnparsedText2);
 		ooao->register_build_nonterminal(&close_RightBracket);
+#ifdef KURODA_GRAMMAR
+		ooao->register_build_nonterminal(&close_RightParenthesis);
+#endif
 	}
 	return *ooao;
 }

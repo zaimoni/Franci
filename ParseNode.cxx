@@ -11,8 +11,8 @@ ParseNode::ParseNode(kuroda::parser<MetaConcept>::sequence& dest, size_t lb, siz
 		const size_t delta = ub - lb;
 		if (2 <= delta) {
 			decltype(_infix) staging(delta - 1);
-			memmove(staging.c_array(), dest.data()+lb+1, sizeof(MetaConcept*)*delta);
-			std::fill_n(dest.c_array() + lb + 1, delta, nullptr);
+			memmove(staging.c_array(), dest.data()+lb+1, sizeof(MetaConcept*)*(delta-1));
+			std::fill_n(dest.c_array() + lb + 1, delta - 1, nullptr);
 			staging.swap(_infix);
 		}
 		_anchor.reset(dest[lb]);

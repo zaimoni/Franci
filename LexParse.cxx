@@ -821,8 +821,8 @@ bool EvaluateExpression_handler(char*& InputBuffer)
 		};
 	if (1!=ArgArray.size())
 		{
-		Franci_IncompleteUnderstanding();
 		LogThis(ArgArray);
+		Franci_IncompleteUnderstanding();
 		// clean out new variables
 		NewVarsOnThisPass.clear();
 		return true;
