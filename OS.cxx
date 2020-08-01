@@ -44,10 +44,9 @@ extern const char* MainWindowClassName = "FranciMainWindowClass";
 
 //! \todo dynamically construct OS_ID
 //! We want: Processor type, OS
-extern const char* const OS_ID = "<br>(1 GHz Cyrix III, Win2000)<br>";
+extern const char* const OS_ID = "";
 
-void 
-ExtractSystemInfo(void)
+void  ExtractSystemInfo()
 {
 	// Hardware information
 	GetSystemInfo(&InitialHardwareSetup);
@@ -56,11 +55,7 @@ ExtractSystemInfo(void)
 	GetVersionEx(&Win95Version);
 }
 
-unsigned long
-RAMPageSize(void)
-{
-	return InitialHardwareSetup.dwPageSize;
-}
+unsigned long RAMPageSize() { return InitialHardwareSetup.dwPageSize; }
 
 #define OS_IMPLEMENTED
 #endif	// _WIN32

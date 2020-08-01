@@ -13,11 +13,9 @@ extern const long NumOfMouseButtons;
 extern const char* const OS_ID;
 
 // System interrogation
-void
-ExtractSystemInfo(void);	// call this at startup; nothing else works until then
+void ExtractSystemInfo();	// call this at startup; nothing else works until then
 
-unsigned long
-RAMPageSize(void);
+unsigned long RAMPageSize();
 
 
 #ifdef _WIN32
