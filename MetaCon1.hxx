@@ -128,6 +128,7 @@ enum ExactType_MC	{
 					DISTINCTFROMALLOF_ClauseN_MC,
 					NOTALLDISTINCT_ClauseN_MC,
 					NOTALLEQUAL_ClauseN_MC,	// 67
+					ParseNode_MC,
 					// end n-ary clause block
 					// semantic indexes
 					MinSemanticIdx_MC	= 1,					// minimum index with meaning
