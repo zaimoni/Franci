@@ -28,6 +28,7 @@ bool TVal::read(const char* src)
 	return false;
 }
 
+std::string TVal::to_s() const { return Names[_x]; }
 void TVal::ConstructSelfNameAux(char* Name) const { strcpy(Name, Names[_x]); }
 size_t TVal::LengthOfSelfName() const { return strlen(Names[_x]); }
 void TVal::SelfLogicalNOT() {_x = NegatedTVal[_x];}

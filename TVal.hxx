@@ -3,6 +3,7 @@
 #define TVAL_HXX
 
 #include <stddef.h>
+#include <string>
 
 class TVal final
 {
@@ -57,6 +58,7 @@ public:
 	constexpr size_t array_index() const {return _x;}
 	constexpr size_t array_index(const TVal& rhs) const {return 4*_x+rhs._x;};
 
+	std::string to_s() const;
 	size_t LengthOfSelfName() const;
 	void ConstructSelfNameAux(char* Name) const;
 

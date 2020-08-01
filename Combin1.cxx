@@ -140,6 +140,7 @@ bool CombinatorialLike::SyntaxOK() const
 void CombinatorialLike::_ForceArgSameImplementation(size_t n) { NARY_FORCEARGSAMEIMPLEMENTATION_BODY; }
 
 // text I/O functions
+#ifndef USE_TO_S
 size_t
 CombinatorialLike::LengthOfSelfName(void) const
 {	//! \todo implement other modes
@@ -247,6 +248,38 @@ void CombinatorialLike::ConstructSelfNameAux(char* Name) const
 		Name[0]=')';
 		return;
 		}
+}
+#endif
+
+std::string CombinatorialLike::to_s_aux() const
+{
+	std::string ret;
+	switch (ExactType()) {
+	case Factorial_MC:
+		ret += PrefixKeyword_FACTORIAL;
+		ret += "(";
+		if (!ArgArray.empty() && ArgArray[0]) ret += ArgArray[0]->to_s();
+		ret += ")";
+		break;
+	case PermutationCount_MC:
+		ret += PrefixKeyword_PERMUTATION;
+		ret += "(";
+		if (!ArgArray.empty() && ArgArray[0]) ret += ArgArray[0]->to_s();
+		ret += ",";
+		if (1 < size() && ArgArray[1]) ret += ArgArray[1]->to_s();
+		ret += ")";
+		break;
+	case CombinationCount_MC:
+		ret += PrefixKeyword_COMBINATION;
+		ret += "(";
+		if (!ArgArray.empty() && ArgArray[0]) ret += ArgArray[0]->to_s();
+		ret += ",";
+		if (1 < size() && ArgArray[1]) ret += ArgArray[1]->to_s();
+		ret += ")";
+		break;
+	default: SUCCEED_OR_DIE(0 && "invariant violation");
+	}
+	return ret;
 }
 
 bool CombinatorialLike::_IsOne() const

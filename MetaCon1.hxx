@@ -8,6 +8,8 @@
 #include <functional>
 #include <utility>
 
+// #define USE_TO_S 1
+
 enum LinguisticType_LT	{
 						CommonNoun_LT	=	0x00000001,
 						ProperNoun_LT	=	0x00000002,
@@ -304,9 +306,15 @@ public:
 	virtual bool Evaluate(MetaConcept*& dest) = 0;		// same, or different type; if it succeeds, may be destructive.  Sole call wrapped in try-catch block for std::bad_alloc
 	virtual bool DestructiveEvaluateToSameType() = 0;	// overwrites itself iff returns true
 // text I/O functions
+	std::string to_s() const;
+#ifdef USE_TO_S
+	virtual std::string to_s_aux() const = 0;
+#else
+	virtual std::string to_s_aux() const { return std::string(); }
 	virtual size_t LengthOfSelfName() const = 0;
 	void ConstructSelfName(char*& Name) const;		// overwrites what is already there
 	virtual void ConstructSelfNameAux(char* Name) const = 0;		// overwrites what is already there
+#endif
 //  defaults are 0 and fatal/false
 	virtual unsigned long FunctionArity() const {return 0;};
 	virtual bool EvaluateFunction(MetaConcept** const& ArgValList, unsigned long*& ArgList, MetaConcept*& Result);

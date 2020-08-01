@@ -57,7 +57,9 @@ public:
 	virtual bool Evaluate(MetaConcept*& dest);		// same, or different type
 	virtual bool DestructiveEvaluateToSameType();	// overwrites itself iff returns true
 // text I/O functions
+#ifndef USE_TO_S
 	virtual size_t LengthOfSelfName() const;
+#endif
 	virtual const char* ViewKeyword() const;
 // Type-specific controls
 	bool SetToThis(const AbstractClass& src);	// should this be Interface?
@@ -122,7 +124,10 @@ public:
 protected:
 	virtual bool EqualAux2(const MetaConcept& rhs) const;
 	virtual bool InternalDataLTAux(const MetaConcept& rhs) const;
+	std::string to_s_aux() const override;
+#ifndef USE_TO_S
 	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
+#endif
 	virtual bool _IsExplicitConstant() const;
 private:
 //	Operation support routines

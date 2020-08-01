@@ -82,7 +82,9 @@ public:
 	virtual bool Evaluate(MetaConcept*& dest) {return false;};		// same, or different type
 	virtual bool DestructiveEvaluateToSameType() {return false;};	// overwrites itself iff returns true
 // text I/O functions
+#ifndef USE_TO_S
 	virtual size_t LengthOfSelfName() const {return MetaConcept_lookup<T>::length_of_self_name(_x);};
+#endif
 	static bool read(MetaConcept*& dest,const char* Text)
 	{
 		assert(!dest);
@@ -100,7 +102,10 @@ public:
 protected:
 	virtual bool EqualAux2(const MetaConcept& rhs) const {return _x==static_cast<const MetaConceptExternal&>(rhs)._x;};
 	virtual bool InternalDataLTAux(const MetaConcept& rhs) const {return MetaConcept_lookup<T>::lt_aux(_x,static_cast<const MetaConceptExternal<T>&>(rhs)._x);};
+	std::string to_s_aux() const override { return MetaConcept_lookup<T>::to_s_aux(_x); }
+#ifndef USE_TO_S
 	virtual void ConstructSelfNameAux(char* Name) const {return MetaConcept_lookup<T>::construct_self_name_aux(Name,_x);};		// overwrites what is already there
+#endif
 	void _forceStdForm() override {};
 	virtual bool _IsExplicitConstant() const {return true;};
 private:

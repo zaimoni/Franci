@@ -77,6 +77,24 @@ void SnipText2(char*& Name, size_t nonstrict_lb, size_t strict_ub)
 }
 
 // This has to tolerate NULL pointers: it may be called from a SyntaxOKAux failure
+std::string ConstructPrefixArgList(const MetaConcept* const* const ArgArray)
+{
+	std::string ret("(");
+	if (ArgArray) {
+		const size_t ub = ArraySize(ArgArray);
+		size_t i = 0;
+		do {
+			if (ArgArray[i]) ret += ArgArray[i]->to_s();
+			else ret += "\"\"";
+			if (++i >= ub) break;
+			ret += ",";
+		} while (true);
+	};
+	ret += ")";
+	return ret;
+}
+
+#ifndef USE_TO_S
 void
 ConstructPrefixArgList(char* const PrefixArgListStart,const MetaConcept* const * const ArgArray)
 {	// FORMALLY CORRECT: Kenneth Boyd, 11/15/1999
@@ -115,7 +133,19 @@ size_t LengthOfPrefixArgList(const MetaConcept * const * const ArgArray)
 		};
 	return 2;
 }
+#endif
 
+std::string MetaConcept::to_s() const {
+	std::string ret(to_s_aux());
+
+	if (MultiPurposeBitmap & LogicalNegated_VF) ret = "NOT " + ret;
+	else if (MultiPurposeBitmap & StdAdditionInv_VF) ret = "-" + ret;
+	if (MultiPurposeBitmap & StdMultInv_VF) ret += MULT_INV_TEXT;
+
+	return ret;
+}
+
+#ifndef USE_TO_S
 void MetaConcept::ConstructSelfName(char*& Name) const		// overwrites what is already there
 {	// FORMALLY CORRECT: Kenneth Boyd, 3/22/2000
 	bool TopLevel = true;
@@ -295,7 +325,23 @@ Restart1:
 		}
 	}
 }
+#endif
 
+std::string AbstractClass::to_s_aux() const
+{
+	if (!ClassName.empty()) return ClassName;
+	if (Arg1.empty()) return UNNAMED_CLASS;
+
+	const bool WantSetBraces = Arg1->IsExplicitConstant() || Arg1->IsTypeMatch(LinearInterval_MC, &Integer);
+	std::string ret;
+
+	if (WantSetBraces) ret += "{";
+	ret += Arg1->to_s();
+	if (WantSetBraces) ret += "}";
+	return ret;
+}
+
+#ifndef USE_TO_S
 void AbstractClass::ConstructSelfNameAux(char* Name) const		// overwrites what is already there
 {	// FORMALLY CORRECT: 12/29/2002
 	if (ClassName.empty())
@@ -320,6 +366,7 @@ void AbstractClass::ConstructSelfNameAux(char* Name) const		// overwrites what i
 	else
 		strcpy(Name,ClassName.c_str());
 }
+#endif
 
 // technically, this is just for infix 2-ary clauses
 void Clause2Arg::ConstructSelfNameAux(char* Name) const
@@ -345,12 +392,13 @@ void ClauseNArg::ConstructSelfNamePrefixArglist(char* Name) const		// overwrites
 	ConstructPrefixArgList(Name);
 }
 
+#ifndef USE_TO_S
 void GCF::ConstructSelfNameAux(char* Name) const
 {	// FORMALLY CORRECT: 8/11/2001
 	strcpy(Name,GCF_NAME);
 	ConstructPrefixArgList(Name+(sizeof(GCF_NAME)-1));
 }
-
+#endif
 
 void EqualRelation::ConstructSelfNameAux(char* Name) const		// overwrites what is already there
 {	// FORMALLY CORRECT: Kenneth Boyd, 2/3/2000
@@ -493,6 +541,10 @@ void LinearInterval::ConstructSelfNameAux(char* Name) const
 void MetaConceptWithArgArray::ConstructPrefixArgList(char* const PrefixArgListStart) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 5/19/2006
 	::ConstructPrefixArgList(PrefixArgListStart,ArgArray);
+}
+
+std::string MetaConceptWithArgArray::ConstructPrefixArgList() const
+{
 }
 
 //! \todo FIX: AESTHETIC: MetaConnective::ConstructSelfName
@@ -825,12 +877,17 @@ void UnparsedText::ConstructSelfNameAux(char* Name) const
 		}
 }
 
+std::string Variable::to_s_aux() const { return SyntaxOK() ? ViewKeyword() : BAD_VARIABLE_SYNTAX; }
+
+#ifndef USE_TO_S
 void Variable::ConstructSelfNameAux(char* Name) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 7/31/2001
 	strcpy(Name,(SyntaxOK() ? ViewKeyword() : BAD_VARIABLE_SYNTAX));
 }
+#endif
 
 // Actual implementations of LengthOfSelfName()
+#ifndef USE_TO_S
 size_t AbstractClass::LengthOfSelfName() const
 {	// FORMALLY CORRECT: 12/29/2002
 	if (!ClassName.empty()) return strlen(ClassName.c_str());
@@ -841,6 +898,7 @@ size_t AbstractClass::LengthOfSelfName() const
 		CorrectLength += 2;
 	return CorrectLength;
 }
+#endif
 
 //! \todo FIX: These hard-code infix 2-ary clauses without parentheses blocking.
 //! other paradigms will require moving the hard-coding to virtual functions.
@@ -863,10 +921,12 @@ size_t ClauseNArg::LengthOfSelfNamePrefixArglist() const
 	return LengthOfPrefixArgList()+((NULL!=ClauseKeyword) ? strlen(ClauseKeyword) : 2);
 }
 
+#ifndef USE_TO_S
 size_t GCF::LengthOfSelfName() const
 {	// FORMALLY CORRECT: 8/11/2001
 	return (sizeof(GCF_NAME)-1)+LengthOfPrefixArgList();
 }
+#endif
 
 // text I/O functions
 // ALLEQUAL: use n-1 infix == operators
@@ -994,10 +1054,12 @@ MetaConceptWithArgArray::LengthOfCommaListVarNames(size_t MinIdx, size_t StrictM
 // length of each entry; NULL is 2 [""]
 //! \todo FIX: PrefixArglist functions must react to phrase forms of EQUALTOONEOF,
 //! DISTINCTFROMALLOF by parenthesizing them.
+#ifndef USE_TO_S
 size_t MetaConceptWithArgArray::LengthOfPrefixArgList() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 11/17/1999
 	return ::LengthOfPrefixArgList(ArgArray);
 }
+#endif
 
 size_t MetaConnective::LengthOfSelfName() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 8/28/1999
@@ -1119,6 +1181,7 @@ size_t UnparsedText::LengthOfSelfName() const
 	return 2+TextLength;
 }
 
+#ifndef USE_TO_S
 // A variable's self name is merely the name of the variable as recorded in its quantification.
 size_t Variable::LengthOfSelfName() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 7/29/2001
@@ -1130,4 +1193,4 @@ size_t Variable::LengthOfSelfName() const
 				+((MultiPurposeBitmap & StdMultInv_VF) ? (sizeof(MULT_INV_TEXT)-1) : 0);
 	return Length;
 }
-
+#endif

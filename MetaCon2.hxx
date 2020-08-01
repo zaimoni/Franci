@@ -261,8 +261,11 @@ protected:
 	void SetArgNInfParam1(size_t n, size_t NewVal) const {static_cast<MetaConceptWithArgArray*>(ArgArray[n])->InferenceParameter1 = NewVal;};
 	void ForceStdFormAux() const;
 	bool SyntaxOKAux() const {return ValidateArgArray(ArgArray);};
+#ifndef USE_TO_S
 	size_t LengthOfPrefixArgList() const;
 	void ConstructPrefixArgList(char* const PrefixArgListStart) const;
+#endif
+	std::string ConstructPrefixArgList() const;
 	size_t LengthOfCommaListVarNames() const;
 	void ConstructCommaListVarNames(char*& CommaListStart) const;
 	size_t LengthOfCommaListVarNames(size_t MinIdx, size_t StrictMaxIdx) const;

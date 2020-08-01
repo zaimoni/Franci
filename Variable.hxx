@@ -49,7 +49,9 @@ public:
 	bool DestructiveEvaluateToSameType() override { return false; }
 	bool ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& lhs, const MetaConcept& rhs, LowLevelAction* RHSInducedActionOnArg, LowLevelBinaryRelation* TargetRelation) override;
 // text I/O functions
+#ifndef USE_TO_S
 	size_t LengthOfSelfName() const override;
+#endif
 	const char* ViewKeyword() const override {return Arg1->ViewKeyword();};
 // Formal manipulation functions
 	// These two must be conditionally implemented: their overrides work only when the
@@ -66,7 +68,10 @@ public:
 protected:
 	bool EqualAux2(const MetaConcept& rhs) const override;
 	bool InternalDataLTAux(const MetaConcept& rhs) const override;
+	std::string to_s_aux() const override;
+#ifndef USE_TO_S
 	void ConstructSelfNameAux(char* Name) const override; // overwrites what is already there
+#endif
 	void _forceStdForm() override {};
 	bool _IsExplicitConstant() const override {return false;};
 private:

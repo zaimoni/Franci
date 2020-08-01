@@ -55,7 +55,9 @@ public:
 	virtual bool StdAddCanDestructiveInteract() const;
 	virtual bool StdAddCanDestructiveInteract(const MetaConcept& Target,size_t& ActOnThisRule) const;
 // text I/O functions
+#ifndef USE_TO_S
 	virtual size_t LengthOfSelfName() const;
+#endif
 	virtual bool SelfInverse(const ExactType_MC Operation);
 	virtual bool SelfInverseTo(const MetaConcept& rhs, const ExactType_MC Operation) const;
 	virtual bool ThisIsAnnihilatorKey(size_t& ArgIdx, signed short& SelfEvalRule, unsigned short& EvalRule) const;
@@ -64,7 +66,9 @@ public:
 	virtual bool InvokeEqualArgRule() const;
 	bool DetermineDynamicType(void) const;
 protected:
+#ifndef USE_TO_S
 	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
+#endif
 	void _forceStdForm() override;
 	virtual bool _IsExplicitConstant() const;
 	virtual bool _IsOne() const;
