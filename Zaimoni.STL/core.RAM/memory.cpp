@@ -52,7 +52,12 @@
 #undef ZAIMONI_STL_IN_MEMORY_CPP
 
 #ifdef __cplusplus
+// #define USE_CPP_EXCEPTIONS 1
+
 #include "../OS/AIMutex.hpp"	// pulls in Windows.h
+#ifdef USE_CPP_EXCEPTIONS
+#include <stdexcept>
+#endif
 #elif defined(_WIN32)
 #include <WINDOWS.H>
 #else
@@ -586,8 +591,12 @@ static void __DetectOverwrites(void)
 #ifndef NDEBUG
 			size_t audit = _msize(CurrentOffset->_address);
 #endif
-			if (_msize(CurrentOffset->_address)!=CurrentOffset->_size)	// #1
+			if (_msize(CurrentOffset->_address) != CurrentOffset->_size)	// #1
+#ifdef USE_CPP_EXCEPTIONS
+				throw std::logic_error(PointerSizeInfoCorrupted);
+#else
 				__ReportErrorAndCrash(PointerSizeInfoCorrupted);
+#endif
 			}
 		while(0<j);
 		do	{
@@ -599,7 +608,10 @@ static void __DetectOverwrites(void)
 #else
 #define VOID_CAST (void**)
 #endif
-			if (NULL!=(VOID_CAST(Target+TargetSize))[0])
+			if (NULL != (VOID_CAST(Target + TargetSize))[0])
+#ifdef USE_CPP_EXCEPTIONS
+				throw std::logic_error(InvalidWriteDetected);
+#else
 				{	// FATAL ERROR CODE
 				char Buffer[20];
 				ReportError(InvalidWriteDetected);
@@ -610,6 +622,7 @@ static void __DetectOverwrites(void)
 				sprintf(Buffer, "%llu", (unsigned long long)(TargetSize));
 				__ReportErrorAndCrash(Buffer);
 				};
+#endif
 			}
 		while(0<i);
 		};
@@ -762,7 +775,11 @@ static void* __SlideUp(char* memblock, size_t CurrIdx, size_t size)
 	size_t HoleSize = (1==CurrIdx)	? HOLESIZE_AT_IDX1()
 									: HOLESIZE(CurrIdx-1);
 	if ((size_t)(HighBoundPtrSpace-LowBoundPtrSpace)<HoleSize+sizeof(_track_pointer))
+#ifdef USE_CPP_EXCEPTIONS
+		throw std::logic_error(PointerSizeInfoCorrupted);
+#else
 		__ReportErrorAndCrash(PointerSizeInfoCorrupted);
+#endif
 	if (0<HoleSize)
 		{
 		memmove(memblock+HoleSize-sizeof(size_t),
