@@ -39,28 +39,7 @@ EqualRelation::SelfEvaluateRule EqualRelation::SelfEvaluateRuleLookup[MaxSelfEva
 	&EqualRelation::ExtendLinearInterval
 	};
 	
-
 // reference tables
-EqualRelation::LengthAux EqualRelation::LengthOfSelfNameAux[StrictBound_EM]
-  =	{
-	&EqualRelation::LengthOfSelfNameALLEQUAL,
-	&EqualRelation::LengthOfSelfNameALLDISTINCT,
-	&EqualRelation::LengthOfSelfNameEQUALTOONEOF,
-	&EqualRelation::LengthOfSelfNameDISTINCTFROMALLOF,
-	&EqualRelation::LengthOfSelfNameNOTALLDISTINCT,
-	&EqualRelation::LengthOfSelfNameNOTALLEQUAL
-	};
-
-EqualRelation::ConstructNameAux EqualRelation::SelfNameAux[StrictBound_EM]
-  =	{
-	&EqualRelation::ConstructSelfNameAuxALLEQUAL,
-	&EqualRelation::ConstructSelfNameAuxALLDISTINCT,
-	&EqualRelation::ConstructSelfNameAuxEQUALTOONEOF,
-	&EqualRelation::ConstructSelfNameAuxDISTINCTFROMALLOF,
-	&EqualRelation::ConstructSelfNameAuxNOTALLDISTINCT,
-	&EqualRelation::ConstructSelfNameAuxNOTALLEQUAL
-	};
-
 EqualRelation::InvokeEqualArgAux EqualRelation::EqualArgAux[StrictBound_EM]
   =	{
 	&EqualRelation::InvokeEqualArgRuleALLEQUAL,

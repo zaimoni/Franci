@@ -109,8 +109,6 @@ public:
 //  Evaluation functions
 	evalspec canEvaluate() const override;
 	virtual bool SyntaxOK() const;
-// text I/O functions
-	virtual size_t LengthOfSelfName(void) const;
 // Formal manipulation functions
 	virtual bool LogicalANDFindDetailedRule(MetaConcept& RHS, size_t LHSIdx, size_t RHSIdx, size_t& Param1, size_t& Param2, signed short& SelfEvalIdx, unsigned short& EvalIdx);
 	virtual bool LogicalANDNonTrivialFindDetailedRule() const;
@@ -180,7 +178,7 @@ public:
 
 protected:
 	virtual bool EqualAux2(const MetaConcept& rhs) const;
-	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
+	std::string to_s_aux() const override;
 	void _forceStdForm() override;
 
 //  Helper functions for CanEvaluate... routines

@@ -17,22 +17,11 @@ struct is_polymorphic_final<PhraseNArg> : public std::true_type {};
 class PhraseNArg final : public MetaConceptWithArgArray
 {
 private:
-	typedef	bool (PhraseNArg::*SyntaxOKAuxFunc)(void) const;
-	typedef	size_t (PhraseNArg::*LengthOfSelfNameAuxFunc)(void) const;
-	typedef	void (PhraseNArg::*ConstructSelfNameAuxFunc)(char* const Name) const;
+	typedef	bool (PhraseNArg::*SyntaxOKAuxFunc)() const;
 
-	struct PhraseNArgVFT	{
-							SyntaxOKAuxFunc SyntaxOK;
-							LengthOfSelfNameAuxFunc LengthOfSelfName;
-							ConstructSelfNameAuxFunc ConstructSelfName;
-							};
-
-
-	const char* PhraseKeyword;	// this controls the intended semantics
-								// PhraseNArg does *NOT* own this!
-	static LengthOfSelfNameAuxFunc LengthOfSelfNameAuxArray[(MaxPhraseNIdx_MC-MinPhraseNIdx_MC)+1];
-	static ConstructSelfNameAuxFunc ConstructSelfNameAuxArray[(MaxPhraseNIdx_MC-MinPhraseNIdx_MC)+1];
+	const char* PhraseKeyword;	// this controls the intended semantics; not owned
 	static SyntaxOKAuxFunc SyntaxOKAuxArray[(MaxPhraseNIdx_MC-MinPhraseNIdx_MC)+1];
+
 public:
 	PhraseNArg() = delete;
 	PhraseNArg(MetaConcept**& src, size_t& KeywordIdx);
@@ -53,25 +42,21 @@ public:
 	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override;
 	virtual bool SyntaxOK() const;
 // text I/O functions
-	virtual size_t LengthOfSelfName() const;
 	const char* ViewKeyword() const override { return PhraseKeyword; }
 // type-specific functions
 	static ExactType_MC CanConstructNonPostfix(const MetaConcept* const * src, size_t KeywordIdx);
 	static ExactType_MC CanConstructPostfix(const MetaConcept* const * src, size_t KeywordIdx);
+
 protected:
-	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
+	std::string to_s_aux() const override;
 	void _forceStdForm() override;
 
 	virtual void DiagnoseInferenceRules() const;
 	bool InvokeEqualArgRule() const override { return false; }
+
 private:
 	void _ForceArgSameImplementation(size_t n) override;
-
 	bool SyntaxOKAuxCommaListVarNames() const;
-
-	size_t LengthOfSelfNamePrefixOrPostfixCommaListVarNames(void) const;	// start at 0 to get length
-	void ConstructSelfNamePrefixCommaListVarNames(char* const Name) const;		// overwrites what is already there
-	void ConstructSelfNamePostfixCommaListVarNames(char* const Name) const;		// overwrites what is already there
 
 	static ExactType_MC CanConstruct(const MetaConcept* const * src, size_t KeywordIdx);
 	void ExtractPrefixCommaListVarNames(MetaConcept**& Target, size_t& KeywordIdx);

@@ -24,36 +24,6 @@ ClauseNArg::EvaluateToOtherRule ClauseNArg::EvaluateRuleLookup[ClauseNArg::MaxEv
 	&ClauseNArg::ConvertToEqualRelation
 	};
 
-#define LengthOfSelfName_LogicalAND LengthOfSelfNamePrefixArglist
-#define LengthOfSelfName_LogicalOR LengthOfSelfNamePrefixArglist
-#define LengthOfSelfName_LogicalIFF LengthOfSelfNamePrefixArglist
-#define LengthOfSelfName_LogicalXOR LengthOfSelfNamePrefixArglist
-#define LengthOfSelfName_LogicalNXOR LengthOfSelfNamePrefixArglist
-#define LengthOfSelfName_LogicalNIFF LengthOfSelfNamePrefixArglist
-#define LengthOfSelfName_LogicalNOR LengthOfSelfNamePrefixArglist
-#define LengthOfSelfName_LogicalNAND LengthOfSelfNamePrefixArglist
-#define LengthOfSelfName_ALLEQUAL LengthOfSelfNamePrefixArglist
-#define LengthOfSelfName_ALLDISTINCT LengthOfSelfNamePrefixArglist
-#define LengthOfSelfName_DISTINCTFROMALLOF LengthOfSelfNamePrefixArglist
-#define LengthOfSelfName_EQUALTOONEOF LengthOfSelfNamePrefixArglist
-#define LengthOfSelfName_NOTALLDISTINCT LengthOfSelfNamePrefixArglist
-#define LengthOfSelfName_NOTALLEQUAL LengthOfSelfNamePrefixArglist
-
-#define ConstructSelfName_LogicalAND ConstructSelfNamePrefixArglist
-#define ConstructSelfName_LogicalOR ConstructSelfNamePrefixArglist
-#define ConstructSelfName_LogicalIFF ConstructSelfNamePrefixArglist
-#define ConstructSelfName_LogicalXOR ConstructSelfNamePrefixArglist
-#define ConstructSelfName_LogicalNXOR ConstructSelfNamePrefixArglist
-#define ConstructSelfName_LogicalNIFF ConstructSelfNamePrefixArglist
-#define ConstructSelfName_LogicalNOR ConstructSelfNamePrefixArglist
-#define ConstructSelfName_LogicalNAND ConstructSelfNamePrefixArglist
-#define ConstructSelfName_ALLEQUAL ConstructSelfNamePrefixArglist
-#define ConstructSelfName_ALLDISTINCT ConstructSelfNamePrefixArglist
-#define ConstructSelfName_DISTINCTFROMALLOF ConstructSelfNamePrefixArglist
-#define ConstructSelfName_EQUALTOONEOF ConstructSelfNamePrefixArglist
-#define ConstructSelfName_NOTALLDISTINCT ConstructSelfNamePrefixArglist
-#define ConstructSelfName_NOTALLEQUAL ConstructSelfNamePrefixArglist
-
 #define SyntaxOK_LogicalAND SyntaxOKArglistTVal
 #define SyntaxOK_LogicalOR SyntaxOKArglistTVal
 #define SyntaxOK_LogicalIFF SyntaxOKArglistTVal
@@ -68,42 +38,6 @@ ClauseNArg::EvaluateToOtherRule ClauseNArg::EvaluateRuleLookup[ClauseNArg::MaxEv
 #define SyntaxOK_EQUALTOONEOF SyntaxOKNoExtraInfo
 #define SyntaxOK_NOTALLDISTINCT SyntaxOKNoExtraInfo
 #define SyntaxOK_NOTALLEQUAL SyntaxOKNoExtraInfo
-
-ClauseNArg::LengthOfSelfNameAuxFunc ClauseNArg::LengthOfSelfNameAuxArray[(MaxClauseNIdx_MC-MinClauseNIdx_MC)+1]
-	=	{
-		&ClauseNArg::LengthOfSelfName_LogicalAND,
-		&ClauseNArg::LengthOfSelfName_LogicalOR,
-		&ClauseNArg::LengthOfSelfName_LogicalIFF,
-		&ClauseNArg::LengthOfSelfName_LogicalXOR,
-		&ClauseNArg::LengthOfSelfName_LogicalNXOR,
-		&ClauseNArg::LengthOfSelfName_LogicalNIFF,
-		&ClauseNArg::LengthOfSelfName_LogicalNOR,
-		&ClauseNArg::LengthOfSelfName_LogicalNAND,
-		&ClauseNArg::LengthOfSelfName_ALLEQUAL,
-		&ClauseNArg::LengthOfSelfName_ALLDISTINCT,
-		&ClauseNArg::LengthOfSelfName_DISTINCTFROMALLOF,
-		&ClauseNArg::LengthOfSelfName_EQUALTOONEOF,
-		&ClauseNArg::LengthOfSelfName_NOTALLDISTINCT,
-		&ClauseNArg::LengthOfSelfName_NOTALLEQUAL
-		};
-
-ClauseNArg::ConstructSelfNameAuxFunc ClauseNArg::ConstructSelfNameAuxArray[(MaxClauseNIdx_MC-MinClauseNIdx_MC)+1]
-	=	{
-		&ClauseNArg::ConstructSelfName_LogicalAND,
-		&ClauseNArg::ConstructSelfName_LogicalOR,
-		&ClauseNArg::ConstructSelfName_LogicalIFF,
-		&ClauseNArg::ConstructSelfName_LogicalXOR,
-		&ClauseNArg::ConstructSelfName_LogicalNXOR,
-		&ClauseNArg::ConstructSelfName_LogicalNIFF,
-		&ClauseNArg::ConstructSelfName_LogicalNOR,
-		&ClauseNArg::ConstructSelfName_LogicalNAND,
-		&ClauseNArg::ConstructSelfName_ALLEQUAL,
-		&ClauseNArg::ConstructSelfName_ALLDISTINCT,
-		&ClauseNArg::ConstructSelfName_DISTINCTFROMALLOF,
-		&ClauseNArg::ConstructSelfName_EQUALTOONEOF,
-		&ClauseNArg::ConstructSelfName_NOTALLDISTINCT,
-		&ClauseNArg::ConstructSelfName_NOTALLEQUAL
-		};
 
 ClauseNArg::SyntaxOKAuxFunc ClauseNArg::SyntaxOKAuxArray[(MaxClauseNIdx_MC-MinClauseNIdx_MC)+1]
 	=	{
@@ -137,36 +71,6 @@ ClauseNArg::SyntaxOKAuxFunc ClauseNArg::SyntaxOKAuxArray[(MaxClauseNIdx_MC-MinCl
 #undef SyntaxOK_EQUALTOONEOF
 #undef SyntaxOK_NOTALLDISTINCT
 #undef SyntaxOK_NOTALLEQUAL
-
-#undef ConstructSelfName_LogicalAND
-#undef ConstructSelfName_LogicalOR
-#undef ConstructSelfName_LogicalIFF
-#undef ConstructSelfName_LogicalXOR
-#undef ConstructSelfName_LogicalNXOR
-#undef ConstructSelfName_LogicalNIFF
-#undef ConstructSelfName_LogicalNOR
-#undef ConstructSelfName_LogicalNAND
-#undef ConstructSelfName_ALLEQUAL
-#undef ConstructSelfName_ALLDISTINCT
-#undef ConstructSelfName_DISTINCTFROMALLOF
-#undef ConstructSelfName_EQUALTOONEOF
-#undef ConstructSelfName_NOTALLDISTINCT
-#undef ConstructSelfName_NOTALLEQUAL
-
-#undef LengthOfSelfName_LogicalAND
-#undef LengthOfSelfName_LogicalOR
-#undef LengthOfSelfName_LogicalIFF
-#undef LengthOfSelfName_LogicalXOR
-#undef LengthOfSelfName_LogicalNXOR
-#undef LengthOfSelfName_LogicalNIFF
-#undef LengthOfSelfName_LogicalNOR
-#undef LengthOfSelfName_LogicalNAND
-#undef LengthOfSelfName_ALLEQUAL
-#undef LengthOfSelfName_ALLDISTINCT
-#undef LengthOfSelfName_DISTINCTFROMALLOF
-#undef LengthOfSelfName_EQUALTOONEOF
-#undef LengthOfSelfName_NOTALLDISTINCT
-#undef LengthOfSelfName_NOTALLEQUAL
 
 //! \todo infix operator support: ==, !=
 

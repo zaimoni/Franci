@@ -26,6 +26,7 @@ class QuantifiedStatement final : public MetaConceptWithArgArray
 
 	unsigned char QuantifiersExplicitlySorted;
 	QuantifiedStatement& operator=(const QuantifiedStatement& src);	// ACID
+
 public:
 	QuantifiedStatement() noexcept : MetaConceptWithArgArray(QuantifiedStatement_MC),QuantifiersExplicitlySorted('\x00') {};
 	QuantifiedStatement(const QuantifiedStatement& src);
@@ -43,20 +44,21 @@ public:
 	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override;
 	virtual bool SyntaxOK() const;
 // text I/O functions
-	virtual size_t LengthOfSelfName() const;
 	void SetExplicitSort() {QuantifiersExplicitlySorted = '\x01';};
 	void ResetExplicitSort() {QuantifiersExplicitlySorted = '\x00';};
 	bool Explore(const clock_t EvalTime0, bool DoNotExplain, MetaConcept**& PlausibleVarList);
 	bool WantStateDump() const;
+
 protected:
 	virtual bool EqualAux2(const MetaConcept& rhs) const;
-	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
+	std::string to_s_aux() const override;
 	void _forceStdForm() override;
 
 	virtual void DiagnoseInferenceRules() const;
 	virtual bool InvokeEqualArgRule() const;
 //  functions specific to QuantifiedStatement
 	void AllVarsNotInThisStatement(unsigned long*& VectorBuffer) const;
+
 private:
 	void _ForceArgSameImplementation(size_t n) override;
 

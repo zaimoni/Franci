@@ -19,6 +19,7 @@ class UnparsedText final : public MetaConceptZeroArgs
 {
 private:
 	autovalarray_ptr_throws<char> Text;
+
 public:
 	typedef bool Recognize(const char*);
 	typedef bool Parse(MetaConcept*&, const char*);
@@ -45,16 +46,20 @@ public:
 	size_t LogicalLineNumber;					// default 0, not manipulated by UnparsedText
 	size_t LogicalLineOrigin;					// default 0, not manipulated by UnparsedText
 	const char* SourceFileName;	// *NOT* owned; default NULL, not manipulated by UnparsedText
+
 private:
 	unsigned short SelfClassifyBitmap;
 
 	static zaimoni::weakautoarray_ptr<Recognize*> EvalRecognizers;
 	static zaimoni::weakautoarray_ptr<Parse*> EvalParsers;
+
 public:
 	explicit UnparsedText(char*& src);
 	UnparsedText(char*& src,bool Interpreted);
+
 protected:
 	UnparsedText(char*& src,unsigned short NewSelfClassify);
+
 public:
 	UnparsedText(const UnparsedText& src) = default;
 	UnparsedText(UnparsedText&& src) = default;
@@ -85,8 +90,7 @@ public:
 	virtual bool Evaluate(MetaConcept*& dest);		// same, or different type
 	virtual bool DestructiveEvaluateToSameType();	// overwrites itself iff returns true
 // text I/O functions
-	virtual size_t LengthOfSelfName(void) const;
-	virtual const char* ViewKeyword(void) const {return Text;};
+	const char* ViewKeyword() const override { return Text; }
 	void SwapWith(UnparsedText& Target);
 // Pattern analysis: returns true if pattern found, and then fills the bounding coordinates
 //  Quotation marks do not include leading/trailing spaces, if any
@@ -194,10 +198,12 @@ public:
 	bool ScanToChar(size_t& i,char Target) const;
 
 	static void InstallEvalRule(Recognize* new_recognizer,Parse* new_parser);
+
 protected:
 	virtual bool EqualAux2(const MetaConcept& rhs) const;
 	virtual bool InternalDataLTAux(const MetaConcept& rhs) const;
-	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
+	std::string to_s_aux() const override;
+
 private:
 	void TextSnip(const size_t Start, const size_t End);
 	void SpecializeSemantics(void);

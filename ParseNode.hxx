@@ -60,9 +60,6 @@ public:
 	bool SyntaxOK() const override { return true; }	// \todo build out
 	bool Evaluate(MetaConcept*& dest) override { return false; }
 	bool DestructiveEvaluateToSameType() override { return false; }
-// text I/O functions
-	size_t LengthOfSelfName() const override { return 0; }	// \todo build out
-	void ConstructSelfNameAux(char* Name) const {}	// \todo build out
 
 	// these may need building out
 	void ConvertVariableToCurrentQuantification(MetaQuantifier& src) override {}
@@ -75,6 +72,8 @@ public:
 	bool InternalDataLTAux(const MetaConcept& rhs) const override { return false; }
 	void _forceStdForm() override {}
 	bool _IsExplicitConstant() const override { return false; }
+protected:
+	std::string to_s_aux() const override { return nullptr; }
 };
 
 #endif

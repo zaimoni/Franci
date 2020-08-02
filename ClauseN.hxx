@@ -24,16 +24,11 @@ enum EvalRuleIdx_ER	{
 					};
 
 	typedef bool (ClauseNArg::*EvaluateToOtherRule)(MetaConcept*& dest);
-	typedef size_t (ClauseNArg::*LengthOfSelfNameAuxFunc)(void) const;
-	typedef void (ClauseNArg::*ConstructSelfNameAuxFunc)(char* Name) const;
-	typedef bool (ClauseNArg::*SyntaxOKAuxFunc)(void) const;
+	typedef bool (ClauseNArg::*SyntaxOKAuxFunc)() const;
 
 	static EvaluateToOtherRule EvaluateRuleLookup[MaxEvalRuleIdx_ER];
 
-	const char* ClauseKeyword;	// this controls the intended semantics
-								// ClauseNArg does *NOT* own this!
-	static LengthOfSelfNameAuxFunc LengthOfSelfNameAuxArray[(MaxClauseNIdx_MC-MinClauseNIdx_MC)+1];
-	static ConstructSelfNameAuxFunc ConstructSelfNameAuxArray[(MaxClauseNIdx_MC-MinClauseNIdx_MC)+1];
+	const char* ClauseKeyword;	// this controls the intended semantics; not owned
 	static SyntaxOKAuxFunc SyntaxOKAuxArray[(MaxClauseNIdx_MC-MinClauseNIdx_MC)+1];
 
 public:
@@ -56,7 +51,6 @@ public:
 	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override;
 	virtual bool SyntaxOK() const;
 // text I/O functions
-	virtual size_t LengthOfSelfName() const;
 	const char* ViewKeyword() const override { return ClauseKeyword; }
 // Formal manipulation functions
 	virtual void SelfLogicalNOT();	// instantiate when UltimateType is TruthValues
@@ -64,7 +58,7 @@ public:
 	static ExactType_MC CanConstructNonPostfix(const MetaConcept* const * src, size_t KeywordIdx);
 	constexpr static ExactType_MC CanConstructPostfix(const MetaConcept* const * src, size_t KeywordIdx) { return Unknown_MC; }
 protected:
-	virtual void ConstructSelfNameAux(char* Name) const;	// overwrites what is already there
+	std::string to_s_aux() const override;
 	void _forceStdForm() override { ForceStdFormAux(); }
 
 	virtual void DiagnoseInferenceRules() const;
@@ -74,9 +68,6 @@ private:
 
 	bool SyntaxOKArglistTVal() const;
 	bool SyntaxOKNoExtraInfo() const;
-
-	size_t LengthOfSelfNamePrefixArglist() const;
-	void ConstructSelfNamePrefixArglist(char* Name) const;	// overwrites what is already there
 
 	static ExactType_MC CanConstruct(const MetaConcept* const * src, size_t KeywordIdx);
 	void ExtractPrefixArglist(MetaConcept**& src, size_t KeywordIdx);

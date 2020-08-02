@@ -17,14 +17,10 @@ struct is_polymorphic_final<Phrase1Arg> : public std::true_type {};
 class Phrase1Arg final : public MetaConceptWith1Arg
 {
 private:
-	typedef	bool (Phrase1Arg::*SyntaxOKAuxFunc)(void) const;
-	typedef	size_t (Phrase1Arg::*LengthOfSelfNameAuxFunc)(void) const;
-	typedef	void (Phrase1Arg::*ConstructSelfNameAuxFunc)(char* Name) const;
+	typedef	bool (Phrase1Arg::*SyntaxOKAuxFunc)() const;
 
 	struct Phrase1ArgVFT	{
 							SyntaxOKAuxFunc SyntaxOK;
-							LengthOfSelfNameAuxFunc LengthOfSelfName;
-							ConstructSelfNameAuxFunc ConstructSelfName;
 							};
 
 	const char* PhraseKeyword;	// this controls the intended semantics
@@ -55,21 +51,18 @@ public:
 	virtual bool Evaluate(MetaConcept*& dest);		// same, or different type
 	bool DestructiveEvaluateToSameType() override { return false; }
 // text I/O functions
-	virtual size_t LengthOfSelfName() const;
 	const char* ViewKeyword() const override { return PhraseKeyword; }
 // NOTE: we may need this further down
 // Formal manipulation functions
 	static ExactType_MC CanConstruct(const MetaConcept * const * TargetArray, size_t KeywordIdx);
+
 protected:
 	virtual bool EqualAux2(const MetaConcept& rhs) const;
-	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
+	std::string to_s_aux() const override;
+
 private:
 	bool SyntaxOK_IN() const;
 	bool SyntaxOK_FACTORIAL() const;
-	size_t LengthOfSelfName_Prefix() const;
-	size_t LengthOfSelfName_FunctionLike() const;
-	void ConstructSelfName_Prefix(char* Name) const;
-	void ConstructSelfName_FunctionLike(char* Name) const;
 };
 
 #endif

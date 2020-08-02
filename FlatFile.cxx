@@ -49,15 +49,6 @@ FlatFile::~FlatFile()
 
 void FlatFile::_ForceArgSameImplementation(size_t n) { NARY_FORCEARGSAMEIMPLEMENTATION_BODY; }
 
-size_t FlatFile::LengthOfSelfName() const
-{	//! \todo IMPLEMENT
-	return 0;
-}
-
-void FlatFile::ConstructSelfNameAux(char* Name) const		// overwrites what is already there
-{	//! \todo IMPLEMENT
-}
-
 std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > FlatFile::canEvaluate() const // \todo obviate DiagnoseInferenceRules
 {
 	return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >();
@@ -231,19 +222,14 @@ bool FlatFile::ValidateFilename(const char* const Filename) const
 bool FlatFile::DumpASCIIFile(const char* const Filename)		// writes entire ASCII file from object
 {	// FORMALLY CORRECT: Kenneth Boyd, 4/23/2006
 	assert(Filename);
-	if (NULL==ArgArray) return false;
+	if (ArgArray.empty()) return false;
 	ofstream* TargetFile = OutfileText(Filename,"file could not be written");
 	if (!TargetFile) return false;
 
 	size_t i = 0;
 	do	{
-		char* Tmp = NULL;
-		ArgArray[i]->ConstructSelfName(Tmp);
-		if (Tmp)
-			{
-			TargetFile->write(Tmp,ArraySize(Tmp));
-			free(Tmp);
-			};
+		const auto Tmp(ArgArray[i]->to_s());
+		if (!Tmp.empty()) TargetFile->write(Tmp.data(), Tmp.size());
 		TargetFile->put('\n');
 		}
 	while(++i<fast_size());

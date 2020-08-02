@@ -29,6 +29,7 @@ private:
 									};
 	std::string ClassName;
 	unsigned long Attributes1Bitmap;
+
 public:
 	AbstractClass() : MetaConceptWith1Arg(AbstractClass_MC),Attributes1Bitmap(0) {}	// as below, but implied NULL pointer
 	AbstractClass(std::string&& src) : MetaConceptWith1Arg(AbstractClass_MC), ClassName((assert(!src.empty()),std::move(src))), Attributes1Bitmap(0) {}
@@ -57,9 +58,6 @@ public:
 	virtual bool Evaluate(MetaConcept*& dest);		// same, or different type
 	virtual bool DestructiveEvaluateToSameType();	// overwrites itself iff returns true
 // text I/O functions
-#ifndef USE_TO_S
-	virtual size_t LengthOfSelfName() const;
-#endif
 	virtual const char* ViewKeyword() const;
 // Type-specific controls
 	bool SetToThis(const AbstractClass& src);	// should this be Interface?
@@ -82,8 +80,8 @@ public:
 // The subclass relation
 	bool ProperSubclass(const AbstractClass& rhs) const { return _properSubclass(rhs).is(true); };
 	bool Subclass(const AbstractClass& rhs) const { return _subclass(rhs).is(true); };
-	inline bool ProperSuperclass(const AbstractClass& rhs) const {return rhs.ProperSubclass(*this);};
-	inline bool Superclass(const AbstractClass& rhs) const {return rhs.Subclass(*this);};
+	bool ProperSuperclass(const AbstractClass& rhs) const {return rhs.ProperSubclass(*this);};
+	bool Superclass(const AbstractClass& rhs) const {return rhs.Subclass(*this);};
 // The HasAsElement relation (easier to program than IsElementOf, which would be an Interface function)
 // First returns true if it is *certain*
 	bool HasAsElement(const MetaConcept& rhs) const { return _hasAsElement(rhs).is(true); };
@@ -121,14 +119,13 @@ public:
 	bool HasStandardPartialOrdering() const;
 	bool HasStandardTotalOrdering() const;
 	bool Arg1IsAfterEndpointAlongVectorAB(const MetaConcept& Arg1, const MetaConcept& A, const MetaConcept& B) const;
+
 protected:
 	virtual bool EqualAux2(const MetaConcept& rhs) const;
 	virtual bool InternalDataLTAux(const MetaConcept& rhs) const;
 	std::string to_s_aux() const override;
-#ifndef USE_TO_S
-	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
-#endif
 	virtual bool _IsExplicitConstant() const;
+
 private:
 //	Operation support routines
 	TVal _supportsThisOperation(ExactType_MC Operation) const;

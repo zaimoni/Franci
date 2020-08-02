@@ -36,6 +36,7 @@ private:
 	MetaConcept** ApprovalTargets;	// not owned
 	bool __OwnApprovalTargets;
 	bool __UniqueLeaves;
+
 public:
 	SearchTree(MetaConcept**& NewArgArray,							// specs new search tree
 				LowLevelAction* NewBranchingOperation,
@@ -59,17 +60,17 @@ public:
 //  Evaluation functions
 	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override { return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >(); }
 	virtual bool SyntaxOK() const;
-// text I/O functions
-	virtual size_t LengthOfSelfName() const;
-	virtual void ConstructSelfNameAux(char* Name) const;	// overwrites what is already there
 // Internal functions
 //	void HasUniqueLeaves() {__UniqueLeaves = true;};
 //	void HasNonUniqueLeaves() {__UniqueLeaves = false;};
 	int BreadthSearchOneStage(bool& RAMStalled);
 	int ApprovalScore(const MetaConcept* const Target) const;
 	bool DestructiveExtractUniqueResult(MetaConcept*& dest);
+
 protected:
 	void _forceStdForm() override {}
+	std::string to_s_aux() const override;
+
 private:
 	void _ForceArgSameImplementation(size_t n) override;
 

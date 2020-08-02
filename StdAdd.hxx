@@ -32,6 +32,7 @@ class StdAddition final : public MetaConceptWithArgArray
 
 	mutable autoval_ptr<AbstractClass> DynamicType;
 	mutable autoval_ptr<AbstractClass> DesiredType;
+
 public:
 	StdAddition() noexcept : MetaConceptWithArgArray(StdAddition_MC) {};
 	StdAddition(MetaConcept**& NewArgList);
@@ -51,10 +52,9 @@ public:
 //  Evaluation functions
 	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override;
 	virtual bool SyntaxOK() const;
-// text I/O functions
-	virtual size_t LengthOfSelfName() const;
+
 protected:
-	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
+	std::string to_s_aux() const override;
 	void _forceStdForm() override;
 	virtual bool _IsExplicitConstant() const;
 	virtual bool _IsZero() const;
@@ -66,6 +66,7 @@ protected:
 	virtual void DiagnoseInferenceRules() const;
 	virtual bool InvokeEqualArgRule() const;
 	bool DetermineDynamicType() const;
+
 private:
 	void _ForceArgSameImplementation(size_t n) override;
 

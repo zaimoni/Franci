@@ -313,120 +313,109 @@ static char* PutNCharAtIdx(char*& x, size_t& x_len, char src, size_t n, size_t i
 	return Tmp;
 }
 
-static void
-NiceFormatWithLogicalTab(char*& Name, size_t& NameLen, size_t& LogicalLineOrigin,
-						 size_t BreakOutOfThisIdx, const size_t LogicalTab)
+void PutNCharAtIdx(std::string& x, char src, size_t n, size_t i, size_t& BreakOutOfThisIdx)
+{	// FORMALLY CORRECT: Kenneth Boyd, 11/27/2007
+	assert(0 < n);
+	assert(i <= x.size());
+	x.replace(i, 0, n, src);
+	BreakOutOfThisIdx += n;
+}
+
+static void NiceFormatWithLogicalTab(std::string& Name, size_t& LogicalLineOrigin, size_t BreakOutOfThisIdx, const size_t LogicalTab)
 {	//! \todo OPTIMIZE: TIME
 Restart:
-	while(79+LogicalLineOrigin<BreakOutOfThisIdx+LogicalTab)
-		{
-		if ('\n'==Name[LogicalLineOrigin])
-			{
-			if (0<LogicalTab && !PutNCharAtIdx(Name,NameLen,' ',LogicalTab,LogicalLineOrigin+1,BreakOutOfThisIdx))
-				return;
-			LogicalLineOrigin += 1+LogicalTab;
+	while (79 + LogicalLineOrigin < BreakOutOfThisIdx + LogicalTab)
+	{
+		if ('\n' == Name[LogicalLineOrigin]) {
+			if (0 < LogicalTab) PutNCharAtIdx(Name, ' ', LogicalTab, LogicalLineOrigin + 1, BreakOutOfThisIdx);
+			LogicalLineOrigin += 1 + LogicalTab;
 			goto Restart;
-			};
+		};
 		size_t i = 1;
-		do	if ('\n'==Name[LogicalLineOrigin+i])
-				{
-				LogicalLineOrigin += i;
-				goto Restart;
-				}
-		while(79> ++i+LogicalTab);
+		do	if ('\n' == Name[LogicalLineOrigin + i]) {
+			LogicalLineOrigin += i;
+			goto Restart;
+		} while (79 > ++i + LogicalTab);
 		{
-		i = 0;
-		size_t NiceBreakPoint = 80-LogicalTab;
-		do	{
-			if (    ' '==Name[i+LogicalLineOrigin]
-				||  ','==Name[i+LogicalLineOrigin]
-				|| (')'==Name[i+LogicalLineOrigin] && ')'!=Name[i+LogicalLineOrigin+1] && ','!=Name[i+LogicalLineOrigin+1]))
-				NiceBreakPoint = i;
-			else if ('('==Name[i+LogicalLineOrigin])
+			i = 0;
+			size_t NiceBreakPoint = 80 - LogicalTab;
+			do {
+				if (' ' == Name[i + LogicalLineOrigin]
+					|| ',' == Name[i + LogicalLineOrigin]
+					|| (')' == Name[i + LogicalLineOrigin] && ')' != Name[i + LogicalLineOrigin + 1] && ',' != Name[i + LogicalLineOrigin + 1]))
+					NiceBreakPoint = i;
+				else if ('(' == Name[i + LogicalLineOrigin])
 				{	// parentheses processing
-				size_t RParensOffset = FindRParens(Name+LogicalLineOrigin+i,NameLen-LogicalLineOrigin-i);
-				if (RParensOffset)
+					size_t RParensOffset = FindRParens(Name.data() + LogicalLineOrigin + i, Name.size() - LogicalLineOrigin - i);
+					if (RParensOffset)
 					{
-					size_t ExtraOffsetFromRParens = FindExtraOffsetFromRParens(Name+LogicalLineOrigin+i+RParensOffset);
-					if (79>i+RParensOffset+ExtraOffsetFromRParens+LogicalTab)
+						size_t ExtraOffsetFromRParens = FindExtraOffsetFromRParens(Name.data() + LogicalLineOrigin + i + RParensOffset);
+						if (79 > i + RParensOffset + ExtraOffsetFromRParens + LogicalTab)
 						{
-						i += RParensOffset+ExtraOffsetFromRParens;
-						NiceBreakPoint = i;
+							i += RParensOffset + ExtraOffsetFromRParens;
+							NiceBreakPoint = i;
 						}
-					else{	// FORMAT RECURSION
-						if (80-LogicalTab>NiceBreakPoint)
-							break;	// Current, valid NiceBreakPoint will work
-						if (' '!=Name[LogicalLineOrigin+i+RParensOffset+ExtraOffsetFromRParens+1])
+						else {	// FORMAT RECURSION
+							if (80 - LogicalTab > NiceBreakPoint)
+								break;	// Current, valid NiceBreakPoint will work
+							if (' ' != Name[LogicalLineOrigin + i + RParensOffset + ExtraOffsetFromRParens + 1])
 							{	//! \todo this is *probably* math notation.  We'll have to refine this later.
-							if (   LogicalLineOrigin+i+RParensOffset+ExtraOffsetFromRParens+1<BreakOutOfThisIdx
-								// this clause prevents unwanted blank lines
-								&& '\n'!=Name[LogicalLineOrigin+i+RParensOffset+ExtraOffsetFromRParens+1]
-								&& !PutCharAtIdx(Name,NameLen,'\n',LogicalLineOrigin+i+RParensOffset+ExtraOffsetFromRParens+1,BreakOutOfThisIdx))
-								return;
-							LogicalLineOrigin += i+1;
-							size_t OldNameLen = NameLen;
-							NiceFormatWithLogicalTab(Name,NameLen,LogicalLineOrigin,
-													 LogicalLineOrigin+RParensOffset+ExtraOffsetFromRParens,LogicalTab+i+1);
-							if (OldNameLen<NameLen)
-								BreakOutOfThisIdx += (NameLen-OldNameLen);
-							goto Restart;
+								if (LogicalLineOrigin + i + RParensOffset + ExtraOffsetFromRParens + 1 < BreakOutOfThisIdx
+									// this clause prevents unwanted blank lines
+									&& '\n' != Name[LogicalLineOrigin + i + RParensOffset + ExtraOffsetFromRParens + 1])
+									PutNCharAtIdx(Name, '\n', 1, LogicalLineOrigin + i + RParensOffset + ExtraOffsetFromRParens + 1, BreakOutOfThisIdx);
+								LogicalLineOrigin += i + 1;
+								const size_t OldNameLen = Name.size();
+								NiceFormatWithLogicalTab(Name, LogicalLineOrigin, LogicalLineOrigin + RParensOffset + ExtraOffsetFromRParens, LogicalTab + i + 1);
+								if (OldNameLen < Name.size()) BreakOutOfThisIdx += (Name.size() - OldNameLen);
+								goto Restart;
 							};
 						}
 					}
 				}
-			}
-		while(79> ++i+LogicalTab);
-		
-		if (!PutCharAtIdx(Name,NameLen,'\n',NiceBreakPoint+LogicalLineOrigin+1,BreakOutOfThisIdx)) return;
-		LogicalLineOrigin+=NiceBreakPoint+1;
+			} while (79 > ++i + LogicalTab);
+
+			PutNCharAtIdx(Name, '\n', 1, NiceBreakPoint + LogicalLineOrigin + 1, BreakOutOfThisIdx);
+			LogicalLineOrigin += NiceBreakPoint + 1;
 		}
-		};
-	if ('\n'==Name[LogicalLineOrigin])
-		{
-		if (0<LogicalTab && !PutNCharAtIdx(Name,NameLen,' ',LogicalTab,LogicalLineOrigin+1,BreakOutOfThisIdx))
-			return;
-		LogicalLineOrigin += 1+LogicalTab;
-		};
+	};
+	if ('\n' == Name[LogicalLineOrigin]) {
+		if (0 < LogicalTab) PutNCharAtIdx(Name, ' ', LogicalTab, LogicalLineOrigin + 1, BreakOutOfThisIdx);
+		LogicalLineOrigin += 1 + LogicalTab;
+	};
 }
 
-void NiceFormat80Cols(char*& x)
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/15/2004
-	// This routine formats the text representation of a Franci object for her logfile.
+void NiceFormat80Cols(std::string& x)
+{	// This routine formats the text representation of a Franci object for her logfile.
 	// The intent is to provide enough whitespace for readability.
-	if (x)
+	if (!x.empty()) {
+		size_t x_len = x.size();
+		if (79 < x_len)
 		{
-		size_t x_len = strlen(x);
-		if (79<x_len)
-			{
 			size_t LogicalLineOrigin = 0;
-			NiceFormatWithLogicalTab(x,x_len,LogicalLineOrigin,x_len,0);
-			};
+			NiceFormatWithLogicalTab(x, LogicalLineOrigin, x_len, 0);
 		};
+	};
 }
+
 
 void LOG(const MetaConcept& B)
 {	// FORMALLY CORRECT: 5/19/2006
 	if (is_logfile_active())
 		{
-		autoarray_ptr<char> Tmp;
-		B.ConstructSelfName(Tmp);
+		auto Tmp(B.to_s());
 		NiceFormat80Cols(Tmp);
-		if (Tmp)
-			LOG(Tmp);
-		else
-			LOG("Attempt to log concept suffered RAM failure.\n");
+		if (!Tmp.empty()) LOG(Tmp.data());
+		else LOG("Attempt to log concept suffered RAM failure.\n");
 		};
 }
 
 void INFORM(const MetaConcept& B)
 {	// FORMALLY CORRECT: 5/19/2006
-	autoarray_ptr<char> Tmp;
-	B.ConstructSelfName(Tmp);
+	auto Tmp(B.to_s());
 	NiceFormat80Cols(Tmp);
-	if (Tmp)
-		INFORM(Tmp);
-	else
-		INFORM("Attempt to state concept suffered RAM failure.\n");
+	if (!Tmp.empty()) LOG(Tmp.data());
+	else INFORM("Attempt to state concept suffered RAM failure.\n");
 }
 
 

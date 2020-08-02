@@ -6,6 +6,7 @@
 
 #include <stddef.h>
 #include <algorithm>
+#include <string>
 #include "Zaimoni.STL/Compiler.h"
 #include "Zaimoni.STL/polymorphic.hpp"
 
@@ -54,10 +55,8 @@ public:
 //  Evaluation functions
 	bool SyntaxOK() const;
 // text I/O functions
-	size_t LengthOfSelfName() const;
-protected:
-	void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
-public:
+	std::string to_s() const;
+
 	bool IsOne() const;
 	bool IsZero() const {return 0==VFT2Idx;};
 	bool IsPositive() const {return 0<VFT2Idx;};
@@ -91,16 +90,12 @@ public:
 private:
 	typedef void (_IntegerNumeral::*FinishAssignmentAuxFunc)(const _IntegerNumeral& src);
 	typedef bool (_IntegerNumeral::*OpLT_AuxFunc)(const _IntegerNumeral& rhs) const;
-	typedef size_t (_IntegerNumeral::*LengthOfSelfNameAuxFunc)() const;
-	typedef void (_IntegerNumeral::*ConstructSelfNameAuxFunc)(char* Name) const;
 	typedef bool (_IntegerNumeral::*SyntaxOKAuxFunc)() const;
 
 #define ZeroOffset_VFT2 4
 #define MaxRepresentation_INT 3
 	static SyntaxOKAuxFunc SyntaxOKAux[MaxRepresentation_INT];
 	static FinishAssignmentAuxFunc FinishAssignmentAuxV2[MaxRepresentation_INT];
-	static ConstructSelfNameAuxFunc ConstructSelfNameAux2[2*ZeroOffset_VFT2+1];
-	static LengthOfSelfNameAuxFunc LengthOfSelfNameAux2[2*ZeroOffset_VFT2+1];
 	static OpLT_AuxFunc OpLT_SameTypeClassify[2*ZeroOffset_VFT2+1];
 #undef MaxRepresentation_INT
 #undef ZeroOffset_VFT2
@@ -113,26 +108,6 @@ private:
 	void FinishAssignmentAuxSmallInt(const _IntegerNumeral& src);
 	void FinishAssignmentAuxLargeInt(const _IntegerNumeral& src);
 	void FinishAssignmentAuxHardCodedInt(const _IntegerNumeral& src);
-
-	void ConstructSelfNamePositiveInt(char* Name) const;
-	void ConstructSelfNameSmallPositiveInt(char* Name) const;
-	void ConstructSelfNameSmallPositiveIntInv(char* Name) const;
-	void ConstructSelfNamePositiveIntInv(char* Name) const;
-	void ConstructSelfNameZeroInt(char* Name) const;
-	void ConstructSelfNameSmallNegativeIntInv(char* Name) const;
-	void ConstructSelfNameNegativeIntInv(char* Name) const;
-	void ConstructSelfNameSmallNegativeInt(char* Name) const;
-	void ConstructSelfNameNegativeInt(char* Name) const;
-
-	size_t LengthOfSelfNamePositiveInt() const;
-	size_t LengthOfSelfNameSmallPositiveInt() const;
-	size_t LengthOfSelfNameSmallPositiveIntInv() const;
-	size_t LengthOfSelfNamePositiveIntInv() const;
-	size_t LengthOfSelfNameZeroInt() const;
-	size_t LengthOfSelfNameNegativeIntInv() const;
-	size_t LengthOfSelfNameSmallNegativeIntInv() const;
-	size_t LengthOfSelfNameSmallNegativeInt() const;
-	size_t LengthOfSelfNameNegativeInt() const;
 
 	bool OpLT_TrivialFalse(const _IntegerNumeral& rhs) const;
 	bool OpLT_1st2ndPositiveInt(const _IntegerNumeral& rhs) const;

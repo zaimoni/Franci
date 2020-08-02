@@ -16,23 +16,12 @@
 //	** the arg is accessible to unary-postfix functions that do not parenthesize the arg
 
 // reference tables
-#define DECLARE_VFT(A)	\
-  { &Phrase1Arg::SyntaxOK_##A, &Phrase1Arg::LengthOfSelfName_##A, &Phrase1Arg::ConstructSelfName_##A }
-
-#define LengthOfSelfName_IN LengthOfSelfName_Prefix
-#define ConstructSelfName_IN ConstructSelfName_Prefix
-#define LengthOfSelfName_FACTORIAL LengthOfSelfName_FunctionLike
-#define ConstructSelfName_FACTORIAL ConstructSelfName_FunctionLike
+#define DECLARE_VFT(A) { &Phrase1Arg::SyntaxOK_##A }
 
 const Phrase1Arg::Phrase1ArgVFT Phrase1Arg::VFTable2Lookup[(MaxPhrase1Idx_MC-MinPhrase1Idx_MC)+1]
 	=	{	DECLARE_VFT(IN),
 			DECLARE_VFT(FACTORIAL)
 		};
-
-#undef ConstructSelfName_FACTORIAL
-#undef LengthOfSelfName_FACTORIAL
-#undef ConstructSelfName_IN
-#undef LengthOfSelfName_IN
 
 #undef DECLARE_VFT
 

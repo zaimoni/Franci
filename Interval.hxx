@@ -99,8 +99,7 @@ public:
 	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override;
 	virtual bool SyntaxOK() const;
 	bool IsAbstractClassDomain() const override;
-// text I/O functions
-	virtual size_t LengthOfSelfName() const;
+
 	virtual bool StdAddCanDestructiveInteract() const;
 	virtual bool StdAddCanDestructiveInteract(const MetaConcept& Target,size_t& ActOnThisRule) const;
 
@@ -133,7 +132,7 @@ public:
 	static bool MetaInterpretLinearInterval(MetaConcept*& Arg1, const LinearInterval& LHSArg, const MetaConcept& RHSArg, DestructiveLinearIntervalProcessV2 TargetOperation);
 protected:
 	virtual bool EqualAux2(const MetaConcept& rhs) const;
-	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
+	std::string to_s_aux() const override;
 	void _forceStdForm() override;
 	virtual bool _IsExplicitConstant() const;
 

@@ -48,22 +48,17 @@ private:
 		MaxSelfEvalRuleIdx_SER = ExtendLinearInterval_SER-MetaConceptWithArgArray::MaxSelfEvalRuleIdx_SER
 		};
 
-
 	typedef bool (EqualRelation::*EvaluateToOtherRule)(MetaConcept*& dest);
 	static EvaluateToOtherRule EvaluateRuleLookup[MaxEvalRuleIdx_ER];
 
 	typedef bool (EqualRelation::*SelfEvaluateRule)();
 	static SelfEvaluateRule SelfEvaluateRuleLookup[MaxSelfEvalRuleIdx_SER];
 
-	typedef size_t (EqualRelation::*LengthAux)(void) const;
-	typedef void (EqualRelation::*ConstructNameAux)(char* Name) const;
 	typedef bool (EqualRelation::*InvokeEqualArgAux)() const;
 	typedef bool (EqualRelation::*ImpliesAux)(const MetaConcept& rhs) const;
 	typedef void (EqualRelation::*ModifiesAux)(MetaConcept*& rhs) const;
 	typedef bool (EqualRelation::*FindDetailedRuleAux)(MetaConcept& rhs, size_t LHSIdx, size_t RHSIdx, size_t& Param1, size_t& Param2, signed short& SelfEvalIdx, unsigned short& EvalIdx);
 
-	static LengthAux LengthOfSelfNameAux[StrictBound_EM];
-	static ConstructNameAux SelfNameAux[StrictBound_EM];
 	static InvokeEqualArgAux EqualArgAux[StrictBound_EM];
 	static InvokeEqualArgAux UseConstantsAux[StrictBound_EM];
 	static InvokeEqualArgAux UseStdAdditionAux[StrictBound_EM];
@@ -91,8 +86,6 @@ public:
 //  Evaluation functions
 	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override;
 	virtual bool SyntaxOK() const;
-// text I/O functions
-	virtual size_t LengthOfSelfName() const;
 
 	virtual void SelfLogicalNOT();
 	int _strictlyImplies(const MetaConcept& rhs) const override;
@@ -109,7 +102,7 @@ public:
 	void ImproviseDomainsALLEQUAL(bool& Target);
 	bool ImproviseDomainsEQUALTOONEOF(bool& Target);
 protected:
-	virtual void ConstructSelfNameAux(char* Name) const;	// overwrites what is already there
+	std::string to_s_aux() const override;
 	void _forceStdForm() override;
 
 	virtual void DiagnoseInferenceRules() const;
@@ -118,20 +111,6 @@ private:
 	void _ForceArgSameImplementation(size_t n) override;
 
 	size_t array_index() const {return ExactType()-ALLEQUAL_MC;};
-
-	size_t LengthOfSelfNameALLEQUAL() const;
-	size_t LengthOfSelfNameALLDISTINCT() const;
-	size_t LengthOfSelfNameDISTINCTFROMALLOF() const;
-	size_t LengthOfSelfNameEQUALTOONEOF() const;
-	size_t LengthOfSelfNameNOTALLDISTINCT() const;
-	size_t LengthOfSelfNameNOTALLEQUAL() const;
-
-	void ConstructSelfNameAuxALLEQUAL(char* Name) const;
-	void ConstructSelfNameAuxALLDISTINCT(char* Name) const;
-	void ConstructSelfNameAuxDISTINCTFROMALLOF(char* Name) const;
-	void ConstructSelfNameAuxEQUALTOONEOF(char* Name) const;
-	void ConstructSelfNameAuxNOTALLDISTINCT(char* Name) const;
-	void ConstructSelfNameAuxNOTALLEQUAL(char* Name) const;
 
 	bool StrictlyImpliesALLEQUAL(const MetaConcept& rhs) const;
 	bool StrictlyImpliesALLDISTINCT(const MetaConcept& rhs) const;

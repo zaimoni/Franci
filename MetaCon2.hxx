@@ -77,6 +77,7 @@ public:
 		TranslateInterval_SER,
 		MaxSelfEvalRuleIdx_SER = TranslateInterval_SER
 		};
+
 protected:
 	typedef bool (MetaConceptWithArgArray::*EvaluateToOtherRule)(MetaConcept*& dest);
 	typedef bool (MetaConceptWithArgArray::*SelfEvaluateRule)();
@@ -101,6 +102,7 @@ protected:
 	MetaConceptWithArgArray(MetaConceptWithArgArray&& src) = default;
 	void operator=(const MetaConceptWithArgArray & src);	// default not clearly ACID
 	MetaConceptWithArgArray& operator=(MetaConceptWithArgArray&& src) = default;
+
 public:
 	virtual ~MetaConceptWithArgArray() = default;
 //	virtual void CopyInto(MetaConcept*& Target) const = 0;	// can throw memory failure
@@ -244,6 +246,7 @@ public:
 	bool SubvectorArgList(const MetaConceptWithArgArray& rhs) const;
 	bool GrepArgList(MetaConcept**& MirrorArgList,LowLevelUnaryProperty& WantThis) {return ::GrepArgList(MirrorArgList,WantThis,ArgArray);};
 	auto grep(LowLevelUnaryProperty& WantThis) const { return ::GrepArgList(WantThis, ArgArray); }
+
 protected:
 	void MoveIntoAux(MetaConceptWithArgArray& dest);
 //	Override this for non-commutative types, or complicated internal structure
@@ -261,15 +264,7 @@ protected:
 	void SetArgNInfParam1(size_t n, size_t NewVal) const {static_cast<MetaConceptWithArgArray*>(ArgArray[n])->InferenceParameter1 = NewVal;};
 	void ForceStdFormAux() const;
 	bool SyntaxOKAux() const {return ValidateArgArray(ArgArray);};
-#ifndef USE_TO_S
-	size_t LengthOfPrefixArgList() const;
-	void ConstructPrefixArgList(char* const PrefixArgListStart) const;
-#endif
 	std::string ConstructPrefixArgList() const;
-	size_t LengthOfCommaListVarNames() const;
-	void ConstructCommaListVarNames(char*& CommaListStart) const;
-	size_t LengthOfCommaListVarNames(size_t MinIdx, size_t StrictMaxIdx) const;
-	void ConstructCommaListVarNames(char*& CommaListStart, size_t MinIdx, size_t StrictMaxIdx) const;
 
 	inline void SetExactTypeV2(ExactType_MC NewType) {SetExactType(NewType); IdxCurrentSelfEvalRule = None_SER;};
 	
@@ -321,6 +316,7 @@ protected:
 	// this routine nondestructively blots the InferenceParameter1 entry in the ArgArray.
 	bool CheckForTrailingCleanArg(LowLevelBinaryRelation& TargetRelation, SelfEvalRuleIdx_SER ChangeToRule, size_t ForceArity) const;
 	void UseArg0ForPropagateAddMultInv(MetaConcept*& dest);	// leaves ArgArray[0] NULL
+
 private:
 	bool _AddArgAtEndAndForceCorrectForm(MetaConcept* src);
 	void LogicalANDORCondenseORANDArgHyperCubeAuxDim1(size_t i, size_t i2);

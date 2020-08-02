@@ -103,129 +103,51 @@ SeriesOperation::SeriesOperation(MetaConcept**& NewArgList,ExactType_MC Operatio
 // FACTORIAL(1) is range {1}
 // FACTORIAL(K) is range {1...K}, 1<K
 // Domain contains range spec
-size_t SeriesOperation::FactorialIsAppropriateRepresentation() const
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/15/2004
-//! \todo move this to LenName.cxx
-	if (    IsExactType(SeriesMultiplication_MC)
-		&&  ArgArray[EXPRESSION_IDX]->IsExactType(Variable_MC)
-		&&  ArgArray[EXPRESSION_IDX]->NoMetaModifications()
-		&& !ArgArray[EXPRESSION_IDX]->IsUltimateType(NULL)
-		&&  ArgArray[EXPRESSION_IDX]->UltimateType()->Subclass(Complex)
-		&&  static_cast<MetaQuantifier*>(ArgArray[INDEXVAR_IDX])->MetaConceptPtrUsesThisQuantifier(ArgArray[EXPRESSION_IDX]))
+bool SeriesOperation::FactorialIsAppropriateRepresentation() const
+{	// FORMALLY CORRECT: 2020-08-02
+//! \todo? move this to LenName.cxx
+	if (!IsExactType(SeriesMultiplication_MC)) return false;
+	const Variable* const var_index = up_cast<Variable>(ArgArray[EXPRESSION_IDX]);
+	if (    var_index &&  var_index->NoMetaModifications()
+		&& !var_index->IsUltimateType(NULL) && var_index->UltimateType()->Subclass(Complex)
+		&&  static_cast<MetaQuantifier*>(ArgArray[INDEXVAR_IDX])->MetaConceptPtrUsesThisQuantifier(var_index))
 		{
-		if (   *ArgArray[DOMAIN_IDX]==NULLSet
-			|| ArgArray[DOMAIN_IDX]->IsOne())
-			return 1;
+		if (*ArgArray[DOMAIN_IDX]==NULLSet || ArgArray[DOMAIN_IDX]->IsOne()) return true;
 		if (    ArgArray[DOMAIN_IDX]->IsTypeMatch(LinearInterval_MC,&Integer)
-			&&  ArgArray[DOMAIN_IDX]->ArgN(0)->IsOne()
+			&&  ArgArray[DOMAIN_IDX]->ArgN(0)->IsOne()	// \todo might want to allow 2..n as an index range
 			&& !ArgArray[DOMAIN_IDX]->ArgN(1)->IsExactType(LinearInfinity_MC))
-			return ArgArray[DOMAIN_IDX]->ArgN(1)->LengthOfSelfName();
+			return true;	// historically "non-empty" but that should be tautological
 		}
-	return 0;
+	return false;
 }
-
-#ifndef USE_TO_S
-size_t SeriesOperation::LengthOfSelfName() const
-{	//! \todo IMPLEMENT
-//! \todo move this to LenName.cxx
-	// return FACTORIAL() when this is appropriate
-	size_t FactorialArgLength = FactorialIsAppropriateRepresentation();
-	if (0<FactorialArgLength)
-		return strlen(PrefixKeyword_FACTORIAL)+2+FactorialArgLength;
-	return 12
-			+(NULL!=ArgArray[INDEXVAR_IDX]->ViewKeyword() ? strlen(ArgArray[INDEXVAR_IDX]->ViewKeyword()) : 0)
-			+ArgArray[DOMAIN_IDX]->LengthOfSelfName()
-			+ArgArray[EXPRESSION_IDX]->LengthOfSelfName();
-}
-
-void SeriesOperation::ConstructSelfNameAux(char* Name) const		// overwrites what is already there
-{	//! \todo IMPLEMENT
-//! \todo move this to LenName.cxx
-	// return FACTORIAL() when this is appropriate
-	size_t FactorialArgLength = FactorialIsAppropriateRepresentation();
-	if (0<FactorialArgLength)
-		{
-		strcpy(Name,PrefixKeyword_FACTORIAL);
-		Name += strlen(PrefixKeyword_FACTORIAL);
-		*Name++='(';
-
-		if (*ArgArray[DOMAIN_IDX]==NULLSet)
-			*Name++ = '0';
-		else if (ArgArray[DOMAIN_IDX]->IsOne())
-			*Name++ = '1';
-		else{
-			ArgArray[DOMAIN_IDX]->ArgN(1)->ConstructSelfName(Name);
-			Name += ArgArray[DOMAIN_IDX]->ArgN(1)->LengthOfSelfName();
-			}
-		Name[0]=')';
-		return;
-		};
-
-	// normal form
-	Name[0]='S';
-	Name[1]='E';
-	Name[2]='R';
-	Name[3]='I';
-	Name[4]='E';
-	Name[5]='S';
-	Name[6]='(';
-	Name+=7;
-	if (IsExactType(SeriesAddition_MC))
-		Name[0] = '+';
-	else if (IsExactType(SeriesMultiplication_MC))
-		Name[0] = SymbolMultSign[0];
-	else
-		Name[0] = '?';
-	Name[1]=',';
-	Name+=2;
-	if (NULL!=ArgArray[INDEXVAR_IDX]->ViewKeyword())
-		{
-		strcpy(Name,ArgArray[INDEXVAR_IDX]->ViewKeyword());
-		Name += strlen(ArgArray[INDEXVAR_IDX]->ViewKeyword());
-		};
-	if (   ArgArray[DOMAIN_IDX]->IsExplicitConstant()
-		|| ArgArray[DOMAIN_IDX]->IsTypeMatch(LinearInterval_MC,&Integer))
-		*Name++ = '=';
-	else
-		*Name++ = ',';
-
-	ArgArray[DOMAIN_IDX]->ConstructSelfName(Name);
-	Name += ArgArray[DOMAIN_IDX]->LengthOfSelfName();
-	*Name++ = ',';
-	ArgArray[EXPRESSION_IDX]->ConstructSelfName(Name);
-	Name += ArgArray[EXPRESSION_IDX]->LengthOfSelfName();
-	*Name++ = ')';
-}
-#endif
 
 std::string SeriesOperation::to_s_aux() const
 {
 	std::string ret;
 
-	size_t FactorialArgLength = FactorialIsAppropriateRepresentation();
-	if (0 < FactorialArgLength) {
+	if (FactorialIsAppropriateRepresentation()) {
 		ret = PrefixKeyword_FACTORIAL;
-		ret += "(";
-		if (*ArgArray[DOMAIN_IDX] == NULLSet) ret += "0";
-		else if (ArgArray[DOMAIN_IDX]->IsOne()) ret += "1";
+		ret += '(';
+		if (*ArgArray[DOMAIN_IDX] == NULLSet) ret += '0';
+		else if (ArgArray[DOMAIN_IDX]->IsOne()) ret += '1';
 		else ret += ArgArray[DOMAIN_IDX]->ArgN(1)->to_s();
-		ret += ")";
+		ret += ')';
 		return ret;
 	};
 
 	// normal form
 	ret += "SERIES(";
-	if (IsExactType(SeriesAddition_MC)) ret += "+";
+	if (IsExactType(SeriesAddition_MC)) ret += '+';
 	else if (IsExactType(SeriesMultiplication_MC)) ret += SymbolMultSign;
-	else ret += "?";
-	ret += ",";
+	else ret += '?';
+	ret += ',';
 
 	if (const auto kw = ArgArray[INDEXVAR_IDX]->ViewKeyword()) ret += kw;
 	ret += (ArgArray[DOMAIN_IDX]->IsExplicitConstant() || ArgArray[DOMAIN_IDX]->IsTypeMatch(LinearInterval_MC, &Integer)) ? "=" : ",";
 	ret += ArgArray[DOMAIN_IDX]->to_s();
-	ret += ",";
+	ret += ',';
 	ret += ArgArray[EXPRESSION_IDX]->to_s();
-	ret += ")";
+	ret += ')';
 	return ret;
 }
 

@@ -67,7 +67,6 @@ public:
 	virtual bool Evaluate(MetaConcept*& dest);		// same, or different type
 	virtual bool DestructiveEvaluateToSameType();	// overwrites itself iff returns true
 // text I/O functions
-	virtual size_t LengthOfSelfName() const {return _IntegerNumeral::LengthOfSelfName();};
 	bool IsOne() const {return _IntegerNumeral::IsOne();};
 	bool IsZero() const {return _IntegerNumeral::IsZero();};
 	virtual bool IsPositive() const {return _IntegerNumeral::IsPositive();};
@@ -88,11 +87,12 @@ public:
 
 	// this goes here because of the automatic memory management
 	bool DestructiveAddABBothZ(IntegerNumeral*& A, IntegerNumeral*& B);
+
 protected:
 	virtual bool EqualAux2(const MetaConcept& rhs) const;
 	virtual bool InternalDataLTAux(const MetaConcept& rhs) const;
 	virtual bool SyntacticalStandardLTAux(const MetaConcept& rhs) const;
-	virtual void ConstructSelfNameAux(char* Name) const {return _IntegerNumeral::ConstructSelfNameAux(Name);};		// overwrites what is already there
+	std::string to_s_aux() const override { return _IntegerNumeral::to_s(); }
 	virtual bool _IsOne() const {return _IntegerNumeral::IsOne();};
 	virtual bool _IsZero() const {return _IntegerNumeral::IsZero();};
 };

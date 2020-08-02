@@ -45,6 +45,7 @@ private:
 						None_MQ = 0x00,
 						Improvised_MQ = 0x01
 						};
+
 public:
 	MetaQuantifier(const char* Name, const AbstractClass* Domain, MetaQuantifierMode CreationMode);
 	MetaQuantifier(const char* Name, const AbstractClass* Domain, MetaQuantifierMode CreationMode, bool Improvised);
@@ -70,9 +71,11 @@ public:
 	virtual bool Evaluate(MetaConcept*& dest);		// same, or different type
 	virtual bool DestructiveEvaluateToSameType();	// overwrites itself iff returns true
 // text I/O functions
-	virtual size_t LengthOfSelfName(void) const;
-	virtual const char* ViewKeyword(void) const {return VariableName;};
+	std::string to_s_start() const;
+	std::string to_s_end() const;
+	const char* ViewKeyword() const override { return VariableName; }
 	bool MetaConceptPtrUsesThisQuantifier(const MetaConcept* lhs) const;
+	bool IsLayoutCompatible(const MetaQuantifier* rhs) const;
 
 //  basis clause support
 	size_t BasisClauseCount() const override;
@@ -84,12 +87,14 @@ public:
 //  Nonfree vars: forall-types never compare with thereis-types; within, use name to tie-break
 	bool LexicalGT(const MetaQuantifier& rhs) const;
 	bool ChangeVarNameTo(const char* NewVarName);
-	bool IsImprovisedVar(void) const {return Improvised_MQ & Bitmap1;};
+	bool IsImprovisedVar() const { return Improvised_MQ & Bitmap1; }
+
 protected:
 	virtual bool EqualAux2(const MetaConcept& rhs) const;
 	virtual bool InternalDataLTAux(const MetaConcept& rhs) const;
-	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
+	std::string to_s_aux() const override;
 	virtual bool _IsExplicitConstant() const;
+
 private:
 	// This is a weak-equality test
 	bool EqualAux(const MetaQuantifier& rhs) const;

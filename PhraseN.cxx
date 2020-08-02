@@ -19,36 +19,6 @@
 #define SyntaxOK_NOTFORALL SyntaxOKAuxCommaListVarNames
 #define SyntaxOK_THEREISNO SyntaxOKAuxCommaListVarNames
 
-#define LengthOfSelfName_FORALL LengthOfSelfNamePrefixOrPostfixCommaListVarNames
-#define LengthOfSelfName_THEREIS LengthOfSelfNamePrefixOrPostfixCommaListVarNames
-#define LengthOfSelfName_FREE LengthOfSelfNamePrefixOrPostfixCommaListVarNames
-#define LengthOfSelfName_NOTFORALL LengthOfSelfNamePrefixOrPostfixCommaListVarNames
-#define LengthOfSelfName_THEREISNO LengthOfSelfNamePrefixOrPostfixCommaListVarNames
-
-#define ConstructSelfName_FORALL ConstructSelfNamePrefixCommaListVarNames
-#define ConstructSelfName_THEREIS ConstructSelfNamePrefixCommaListVarNames
-#define ConstructSelfName_FREE ConstructSelfNamePostfixCommaListVarNames
-#define ConstructSelfName_NOTFORALL ConstructSelfNamePrefixCommaListVarNames
-#define ConstructSelfName_THEREISNO ConstructSelfNamePrefixCommaListVarNames
-
-PhraseNArg::LengthOfSelfNameAuxFunc PhraseNArg::LengthOfSelfNameAuxArray[(MaxPhraseNIdx_MC-MinPhraseNIdx_MC)+1]
-	=	{
-		&PhraseNArg::LengthOfSelfName_FORALL,
-		&PhraseNArg::LengthOfSelfName_THEREIS,
-		&PhraseNArg::LengthOfSelfName_FREE,
-		&PhraseNArg::LengthOfSelfName_NOTFORALL,
-		&PhraseNArg::LengthOfSelfName_THEREISNO
-		};
-
-PhraseNArg::ConstructSelfNameAuxFunc PhraseNArg::ConstructSelfNameAuxArray[(MaxPhraseNIdx_MC-MinPhraseNIdx_MC)+1]
-	=	{
-		&PhraseNArg::ConstructSelfName_FORALL,
-		&PhraseNArg::ConstructSelfName_THEREIS,
-		&PhraseNArg::ConstructSelfName_FREE,
-		&PhraseNArg::ConstructSelfName_NOTFORALL,
-		&PhraseNArg::ConstructSelfName_THEREISNO
-		};
-
 PhraseNArg::SyntaxOKAuxFunc PhraseNArg::SyntaxOKAuxArray[(MaxPhraseNIdx_MC-MinPhraseNIdx_MC)+1]
 	=	{
 		&PhraseNArg::SyntaxOK_FORALL,
@@ -57,18 +27,6 @@ PhraseNArg::SyntaxOKAuxFunc PhraseNArg::SyntaxOKAuxArray[(MaxPhraseNIdx_MC-MinPh
 		&PhraseNArg::SyntaxOK_NOTFORALL,
 		&PhraseNArg::SyntaxOK_THEREISNO
 		};
-
-#undef ConstructSelfName_FORALL
-#undef ConstructSelfName_THEREIS
-#undef ConstructSelfName_FREE
-#undef ConstructSelfName_NOTFORALL
-#undef ConstructSelfName_THEREISNO
-
-#undef AddLengthOfSelfName_FORALL
-#undef AddLengthOfSelfName_THEREIS
-#undef AddLengthOfSelfName_FREE
-#undef AddLengthOfSelfName_NOTFORALL
-#undef AddLengthOfSelfName_THEREISNO
 
 #undef SyntaxOK_FORALL
 #undef SyntaxOK_THEREIS

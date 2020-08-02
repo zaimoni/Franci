@@ -157,24 +157,9 @@ void Digraph::_ForceArgSameImplementation(size_t n) { NARY_FORCEARGSAMEIMPLEMENT
 // #1: domain, matrix (requires enumerated set, matrix to parse)
 // #2: list of edges (enumerated set of 2-tuples)
 //! \todo move to LenName.cxx when ready
-size_t Digraph::LengthOfSelfName() const
-{	//! \todo IMPLEMENT correctly (placeholder now)
-	return 10;
-}
 
-void Digraph::ConstructSelfNameAux(char* Name) const	// overwrites what is already there
-{	//! \todo IMPLEMENT correctly (placeholder now)
-	Name[0] = 'D';
-	Name[1] = 'I';
-	Name[2] = 'G';
-	Name[3] = 'R';
-	Name[4] = 'A';
-	Name[5] = 'P';
-	Name[6] = 'H';
-	Name[7] = '(';
-	Name[8] = ',';
-	Name[9] = ')';
-}
+//! \todo IMPLEMENT correctly (placeholder now)
+std::string Digraph::to_s_aux() const { return "DIGRAPH(,)"; }
 
 unsigned long Digraph::FunctionArity()
 {	// FORMALLY CORRECT: Kenneth Boyd, 9/6/2001

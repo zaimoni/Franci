@@ -45,8 +45,6 @@ public:
 //  Evaluation functions
 	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override;
 	virtual bool SyntaxOK() const;
-// text I/O functions
-	virtual size_t LengthOfSelfName() const;
 	const char* ViewKeyword() const override { return ClauseKeyword; }
 // Formal manipulation functions
 	virtual void SelfLogicalNOT();	// instantiate when UltimateType is TruthValues
@@ -54,7 +52,7 @@ public:
 	static ExactType_MC CanConstructNonPostfix(const MetaConcept* const * src, size_t KeywordIdx);
 	constexpr static ExactType_MC CanConstructPostfix(const MetaConcept* const * src, size_t KeywordIdx) { return Unknown_MC; }
 protected:
-	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
+	std::string to_s_aux() const override;
 
 	virtual void DiagnoseInferenceRules();
 	bool InvokeEqualArgRule() { return false; }

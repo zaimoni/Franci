@@ -140,142 +140,31 @@ bool CombinatorialLike::SyntaxOK() const
 void CombinatorialLike::_ForceArgSameImplementation(size_t n) { NARY_FORCEARGSAMEIMPLEMENTATION_BODY; }
 
 // text I/O functions
-#ifndef USE_TO_S
-size_t
-CombinatorialLike::LengthOfSelfName(void) const
-{	//! \todo implement other modes
-	//! \todo move to LenName.cxx
-	if (IsExactType(Factorial_MC))
-		{
-		const size_t BaseLen = strlen(PrefixKeyword_FACTORIAL)+2;
-		if (NULL==ArgArray || NULL==ArgArray[0]) return BaseLen;
-		return BaseLen+ArgArray[0]->LengthOfSelfName();
-		}
-	else if (IsExactType(PermutationCount_MC))
-		{
-		const size_t BaseLen = strlen(PrefixKeyword_PERMUTATION)+3;
-		if (ArgArray.empty()) return BaseLen;
-		if (1>=fast_size() || NULL==ArgArray[1])
-			{
-			if (NULL==ArgArray[0]) return BaseLen;
-			return BaseLen+ArgArray[0]->LengthOfSelfName();
-			}
-		else if (NULL==ArgArray[0])
-			{
-			return BaseLen+ArgArray[1]->LengthOfSelfName();
-			};
-		return BaseLen+ArgArray[0]->LengthOfSelfName()+ArgArray[1]->LengthOfSelfName();
-		}
-	else if (IsExactType(CombinationCount_MC))
-		{
-		const size_t BaseLen = strlen(PrefixKeyword_COMBINATION)+3;
-		if (ArgArray.empty()) return BaseLen;
-		if (1>=fast_size() || NULL==ArgArray[1])
-			{
-			if (NULL==ArgArray[0]) return BaseLen;
-			return BaseLen+ArgArray[0]->LengthOfSelfName();
-			}
-		else if (NULL==ArgArray[0])
-			{
-			return BaseLen+ArgArray[1]->LengthOfSelfName();
-			};
-		return BaseLen+ArgArray[0]->LengthOfSelfName()+ArgArray[1]->LengthOfSelfName();
-		}
-	UnconditionalDataIntegrityFailure();
-}
-
-void CombinatorialLike::ConstructSelfNameAux(char* Name) const
-{	//! \todo implement other modes
-	//! \todo move to LenName.cxx
-	if (IsExactType(Factorial_MC))
-		{
-		strcpy(Name,PrefixKeyword_FACTORIAL);
-		Name += strlen(PrefixKeyword_FACTORIAL);
-		*Name++='(';
-
-		if (!ArgArray.empty() && NULL!=ArgArray[0])
-			{
-			ArgArray[0]->ConstructSelfName(Name);
-			Name += ArgArray[0]->LengthOfSelfName();
-			}
-
-		Name[0]=')';
-		return;
-		}
-	else if (IsExactType(PermutationCount_MC))
-		{
-		strcpy(Name,PrefixKeyword_PERMUTATION);
-		Name += strlen(PrefixKeyword_PERMUTATION);
-		*Name++='(';
-
-		if (!ArgArray.empty() && NULL!=ArgArray[0])
-			{
-			ArgArray[0]->ConstructSelfName(Name);
-			Name += ArgArray[0]->LengthOfSelfName();
-			}
-
-		*Name++=',';
-
-		if (1<size() && NULL!=ArgArray[1])
-			{
-			ArgArray[1]->ConstructSelfName(Name);
-			Name += ArgArray[1]->LengthOfSelfName();
-			}
-
-		Name[0]=')';
-		return;
-		}
-	else if (IsExactType(CombinationCount_MC))
-		{
-		strcpy(Name,PrefixKeyword_COMBINATION);
-		Name += strlen(PrefixKeyword_COMBINATION);
-		*Name++='(';
-
-		if (!ArgArray.empty() && NULL!=ArgArray[0])
-			{
-			ArgArray[0]->ConstructSelfName(Name);
-			Name += ArgArray[0]->LengthOfSelfName();
-			}
-
-		*Name++=',';
-
-		if (1<size() && NULL!=ArgArray[1])
-			{
-			ArgArray[1]->ConstructSelfName(Name);
-			Name += ArgArray[1]->LengthOfSelfName();
-			}
-
-		Name[0]=')';
-		return;
-		}
-}
-#endif
-
 std::string CombinatorialLike::to_s_aux() const
 {
 	std::string ret;
 	switch (ExactType()) {
 	case Factorial_MC:
 		ret += PrefixKeyword_FACTORIAL;
-		ret += "(";
+		ret += '(';
 		if (!ArgArray.empty() && ArgArray[0]) ret += ArgArray[0]->to_s();
-		ret += ")";
+		ret += ')';
 		break;
 	case PermutationCount_MC:
 		ret += PrefixKeyword_PERMUTATION;
-		ret += "(";
+		ret += '(';
 		if (!ArgArray.empty() && ArgArray[0]) ret += ArgArray[0]->to_s();
-		ret += ",";
+		ret += ',';
 		if (1 < size() && ArgArray[1]) ret += ArgArray[1]->to_s();
-		ret += ")";
+		ret += ')';
 		break;
 	case CombinationCount_MC:
 		ret += PrefixKeyword_COMBINATION;
-		ret += "(";
+		ret += '(';
 		if (!ArgArray.empty() && ArgArray[0]) ret += ArgArray[0]->to_s();
-		ret += ",";
+		ret += ',';
 		if (1 < size() && ArgArray[1]) ret += ArgArray[1]->to_s();
-		ret += ")";
+		ret += ')';
 		break;
 	default: SUCCEED_OR_DIE(0 && "invariant violation");
 	}

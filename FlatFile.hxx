@@ -35,8 +35,6 @@ public:
 	const AbstractClass* UltimateType() const override { return 0; }
 	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override;
 	bool SyntaxOK() const override { return SyntaxOKAux(); }
-// text I/O functions
-	virtual size_t LengthOfSelfName(void) const;
 	// type-specific functions
 	bool AppendBlankLine() {return InsertSlotAt(ArgArray.size(),NULL);};
 	void RemoveLineBlock(size_t NonStrictLB, size_t NonStrictUB);
@@ -44,12 +42,14 @@ public:
 	void unshift(char*& Line,size_t& LineNumber, const char*& SourceFileName);	// named after Perl unshift
 //	void LinewiseFilter();	// unary action; must return false to preserve line, true to delete line
 	bool DumpASCIIFile(const char* const Filename);	// writes entire ASCII file from object
+
 protected:
-	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
+	std::string to_s_aux() const override { return nullptr; }	// \todo implement
 	void _forceStdForm() override {}
 
 	virtual void DiagnoseInferenceRules() const;	// This is *not* the Interface!
 	bool InvokeEqualArgRule() const override { return false; }
+
 private:
 	void _ForceArgSameImplementation(size_t n) override;
 

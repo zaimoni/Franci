@@ -79,32 +79,6 @@ _IntegerNumeral::FinishAssignmentAuxFunc _IntegerNumeral::FinishAssignmentAuxV2[
 		&_IntegerNumeral::FinishAssignmentAuxHardCodedInt
 	};
 
-_IntegerNumeral::ConstructSelfNameAuxFunc _IntegerNumeral::ConstructSelfNameAux2[2*ZeroOffset_VFT2+1]
- =	{
-	&_IntegerNumeral::ConstructSelfNameNegativeInt,
-	&_IntegerNumeral::ConstructSelfNameSmallNegativeInt,
-	&_IntegerNumeral::ConstructSelfNameSmallNegativeIntInv,
-	&_IntegerNumeral::ConstructSelfNameNegativeIntInv,
-	&_IntegerNumeral::ConstructSelfNameZeroInt,
-	&_IntegerNumeral::ConstructSelfNamePositiveIntInv,
-	&_IntegerNumeral::ConstructSelfNameSmallPositiveIntInv,
-	&_IntegerNumeral::ConstructSelfNameSmallPositiveInt,
-	&_IntegerNumeral::ConstructSelfNamePositiveInt
-	};
-
-_IntegerNumeral::LengthOfSelfNameAuxFunc _IntegerNumeral::LengthOfSelfNameAux2[2*ZeroOffset_VFT2+1]
- =	{
-	&_IntegerNumeral::LengthOfSelfNameNegativeInt,
-	&_IntegerNumeral::LengthOfSelfNameSmallNegativeInt,
-	&_IntegerNumeral::LengthOfSelfNameSmallNegativeIntInv,
-	&_IntegerNumeral::LengthOfSelfNameNegativeIntInv,
-	&_IntegerNumeral::LengthOfSelfNameZeroInt,
-	&_IntegerNumeral::LengthOfSelfNamePositiveIntInv,
-	&_IntegerNumeral::LengthOfSelfNameSmallPositiveIntInv,
-	&_IntegerNumeral::LengthOfSelfNameSmallPositiveInt,
-	&_IntegerNumeral::LengthOfSelfNamePositiveInt
-	};
-
 _IntegerNumeral::OpLT_AuxFunc _IntegerNumeral::OpLT_SameTypeClassify[2*ZeroOffset_VFT2+1]
  =	{	&_IntegerNumeral::OpLT_1st2ndNegativeInt,
 		&_IntegerNumeral::OpLT_1st2ndSmallNegativeInt,
@@ -2952,214 +2926,37 @@ _IntegerNumeral::DestructiveNormalProductFormWithRHS(_IntegerNumeral& rhs)
 		}
 }
 
-// text string I/O
-void _IntegerNumeral::ConstructSelfNameAux(char* Name) const	// overwrites what is already there
-{	// FORMALLY CORRECT: Kenneth Boyd, 8/17/2000
-	(this->*ConstructSelfNameAux2[VFT2Idx+ZeroOffset_VFT2])(Name);
-}
-
-static bool TextDigitZeroInvisible(char*& Name, unsigned short Digit)
-{	// FORMALLY CORRECT: Kenneth Boyd, 7/21/1999
-	if (0==Digit) return false;
-	assert(10>Digit);
-	*Name++ = char('0'+Digit);
-	return true;
-}
-
-static void TextDigitZeroShows(char*& Name, unsigned short Digit)
-{	// FORMALLY CORRECT: Kenneth Boyd, 7/21/1999
-	assert(10>Digit);
-	*Name++ = char('0'+Digit);
-}
-
-static void Leading10_9Place(char*& Name, unsigned long Place)
-{	// FORMALLY CORRECT: Kenneth Boyd, 6/9/1999
-	// NOTE: this has some problems with similar termination code, which justifies the use
-	// of goto.
-	if (TextDigitZeroInvisible(Name,(Place%TEN_TO_9-Place%TEN_TO_8)/TEN_TO_8))
-		goto Place10_7Visible;
-	if (TextDigitZeroInvisible(Name,(Place%TEN_TO_8-Place%TEN_TO_7)/TEN_TO_7))
-		goto Place10_6Visible;
-	if (TextDigitZeroInvisible(Name,(Place%TEN_TO_7-Place%TEN_TO_6)/TEN_TO_6))
-		goto Place10_5Visible;
-	if (TextDigitZeroInvisible(Name,(Place%TEN_TO_6-Place%TEN_TO_5)/TEN_TO_5))
-		goto Place10_4Visible;
-	if (TextDigitZeroInvisible(Name,(Place%TEN_TO_5-Place%TEN_TO_4)/TEN_TO_4))
-		goto Place10_3Visible;
-	if (TextDigitZeroInvisible(Name,(Place%TEN_TO_4-Place%TEN_TO_3)/TEN_TO_3))
-		goto Place10_2Visible;
-	if (TextDigitZeroInvisible(Name,(Place%TEN_TO_3-Place%TEN_TO_2)/TEN_TO_2))
-		goto Place10_1Visible;
-	if (TextDigitZeroInvisible(Name,(Place%TEN_TO_2-Place%TEN_TO_1)/TEN_TO_1))
-		goto Place10_0Visible;
-	SUCCEED_OR_DIE(TextDigitZeroInvisible(Name,Place%TEN_TO_1));
-	return;
-//	Final code
-Place10_7Visible:
-	TextDigitZeroShows(Name,(Place%TEN_TO_8-Place%TEN_TO_7)/TEN_TO_7);
-Place10_6Visible:
-	TextDigitZeroShows(Name,(Place%TEN_TO_7-Place%TEN_TO_6)/TEN_TO_6);
-Place10_5Visible:
-	TextDigitZeroShows(Name,(Place%TEN_TO_6-Place%TEN_TO_5)/TEN_TO_5);
-Place10_4Visible:
-	TextDigitZeroShows(Name,(Place%TEN_TO_5-Place%TEN_TO_4)/TEN_TO_4);
-Place10_3Visible:
-	TextDigitZeroShows(Name,(Place%TEN_TO_4-Place%TEN_TO_3)/TEN_TO_3);
-Place10_2Visible:
-	TextDigitZeroShows(Name,(Place%TEN_TO_3-Place%TEN_TO_2)/TEN_TO_2);
-Place10_1Visible:
-	TextDigitZeroShows(Name,(Place%TEN_TO_2-Place%TEN_TO_1)/TEN_TO_1);
-Place10_0Visible:
-	TextDigitZeroShows(Name,Place%TEN_TO_1);
-}
-
-static void NonLeading10_9Place(char*& Name, unsigned long Place)
-{	// FORMALLY CORRECT: Kenneth Boyd, 6/9/1999
-	TextDigitZeroShows(Name,(Place%TEN_TO_9-Place%TEN_TO_8)/TEN_TO_8);
-	TextDigitZeroShows(Name,(Place%TEN_TO_8-Place%TEN_TO_7)/TEN_TO_7);
-	TextDigitZeroShows(Name,(Place%TEN_TO_7-Place%TEN_TO_6)/TEN_TO_6);
-	TextDigitZeroShows(Name,(Place%TEN_TO_6-Place%TEN_TO_5)/TEN_TO_5);
-	TextDigitZeroShows(Name,(Place%TEN_TO_5-Place%TEN_TO_4)/TEN_TO_4);
-	TextDigitZeroShows(Name,(Place%TEN_TO_4-Place%TEN_TO_3)/TEN_TO_3);
-	TextDigitZeroShows(Name,(Place%TEN_TO_3-Place%TEN_TO_2)/TEN_TO_2);
-	TextDigitZeroShows(Name,(Place%TEN_TO_2-Place%TEN_TO_1)/TEN_TO_1);
-	TextDigitZeroShows(Name,Place%TEN_TO_1);
-}
-
-void _IntegerNumeral::ConstructSelfNamePositiveInt(char* Name) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 8/18/2000
-	Leading10_9Place(Name,LongInteger[ArraySize(LongInteger)-1]);
-	if (2<ArraySize(LongInteger))
-		{
-		size_t i = ArraySize(LongInteger)-2;
-		do	NonLeading10_9Place(Name,LongInteger[i]);
-		while(0< --i);
-		}
-	NonLeading10_9Place(Name,LongInteger[0]);	
-}
-
-void _IntegerNumeral::ConstructSelfNameSmallPositiveInt(char* Name) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 6/7/1999
-	Leading10_9Place(Name,ShortInteger);
-}
-
-void _IntegerNumeral::ConstructSelfNamePositiveIntInv(char* Name) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 7/30/2001
-	Leading10_9Place(Name,LongInteger[ArraySize(LongInteger)-1]);
-	if (2<ArraySize(LongInteger))
-		{
-		size_t i = ArraySize(LongInteger)-2;
-		do	NonLeading10_9Place(Name,LongInteger[i]);
-		while(0< --i);
-		}
-	NonLeading10_9Place(Name,LongInteger[0]);	
-	strcpy(Name,MULT_INV_TEXT);
-}
-
-void _IntegerNumeral::ConstructSelfNameSmallPositiveIntInv(char* Name) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 7/30/2001
-	Leading10_9Place(Name,ShortInteger);
-	strcpy(Name,MULT_INV_TEXT);
-}
-
-void _IntegerNumeral::ConstructSelfNameZeroInt(char* Name) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 6/7/1999
-	Name[0]='0';
-}
-
-void _IntegerNumeral::ConstructSelfNameSmallNegativeInt(char* Name) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 6/7/1999
-	Name[0]='-';
-	ConstructSelfNameSmallPositiveInt(Name+1);
-}
-
-void _IntegerNumeral::ConstructSelfNameNegativeInt(char* Name) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 6/7/1999
-	Name[0]='-';
-	ConstructSelfNamePositiveInt(Name+1);
-}
-
-void _IntegerNumeral::ConstructSelfNameSmallNegativeIntInv(char* Name) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 7/30/2001
-	Name[0]='-';
-	ConstructSelfNameSmallPositiveIntInv(Name+1);
-}
-
-void _IntegerNumeral::ConstructSelfNameNegativeIntInv(char* Name) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 7/30/2001
-	Name[0]='-';
-	ConstructSelfNamePositiveIntInv(Name+1);
-}
-
-// start at 0 to get length
-size_t _IntegerNumeral::LengthOfSelfName() const
-{	// FORMALLY CORRECT: Kenneth Boyd, 8/17/2000
-	return (this->*LengthOfSelfNameAux2[VFT2Idx+ZeroOffset_VFT2])();
-}
-
-size_t Leading10_9DigitLength(unsigned long Digit)
+static std::string _name_zero(uintptr_t src) { return "0"; }
+static std::string _name_smallpositive(uintptr_t src) { return std::to_string(src); }
+static std::string _name_largepositive(uintptr_t ptr)
 {
-	return 	  (TEN_TO_8<=Digit) ? 9
-			: (TEN_TO_7<=Digit) ? 8
-			: (TEN_TO_6<=Digit) ? 7
-			: (TEN_TO_5<=Digit) ? 6
-			: (TEN_TO_4<=Digit) ? 5
-			: (TEN_TO_3<=Digit) ? 4
-			: (TEN_TO_2<=Digit) ? 3
-			: (TEN_TO_1<=Digit) ? 2
-			: 1;
+	const unsigned long* src = reinterpret_cast<unsigned long*>(ptr);
+	size_t ub = ArraySize(src);
+
+	std::string ret(std::to_string(src[--ub]));
+	while (0 < ub) {
+		auto staging = std::to_string(src[--ub]);
+		const size_t len = staging.size();
+		if (9 > len) ret += std::string(9 - len, '0');
+		ret += staging;
+	}
+	return ret;
 }
 
-size_t _IntegerNumeral::LengthOfSelfNamePositiveIntInv() const
-{	// FORMALLY CORRECT: Kenneth Boyd, 7/29/2001
-	size_t Length = (ArraySize(LongInteger)-1)*9;
-	Length += Leading10_9DigitLength(LongInteger[ArraySize(LongInteger)-1])+13;
-	return Length;
+std::string _IntegerNumeral::to_s() const
+{
+	typedef std::string(*aux)(uintptr_t);
+	static const constexpr aux _to_s_aux[2 * ZeroOffset_VFT2 + 1]
+		= {
+		   [](uintptr_t src) { return "-" + _name_largepositive(src); },
+		   [](uintptr_t src) { return "-" + _name_smallpositive(src); },
+		   [](uintptr_t src) { return ("-" + _name_smallpositive(src)) += MULT_INV_TEXT; },
+		   [](uintptr_t src) { return ("-" + _name_largepositive(src)) += MULT_INV_TEXT; },
+		   & _name_zero,
+		   [](uintptr_t src) { return _name_largepositive(src) += MULT_INV_TEXT; },
+		   [](uintptr_t src) { return _name_smallpositive(src) += MULT_INV_TEXT; },
+		   & _name_smallpositive,
+		   & _name_largepositive
+	};
+	return (*_to_s_aux[VFT2Idx + ZeroOffset_VFT2])(ShortInteger);
 }
-
-size_t _IntegerNumeral::LengthOfSelfNameSmallPositiveIntInv() const
-{	// FORMALLY CORRECT: Kenneth Boyd, 7/29/2001
-	return Leading10_9DigitLength(ShortInteger)+13;
-}
-
-size_t _IntegerNumeral::LengthOfSelfNamePositiveInt() const
-{	// FORMALLY CORRECT: Kenneth Boyd, 7/29/2001
-	size_t Length = (ArraySize(LongInteger)-1)*9;
-	Length += Leading10_9DigitLength(LongInteger[ArraySize(LongInteger)-1]);
-	return Length;
-}
-
-size_t _IntegerNumeral::LengthOfSelfNameSmallPositiveInt() const
-{	// FORMALLY CORRECT: Kenneth Boyd, 7/29/2001
-	return Leading10_9DigitLength(ShortInteger);
-}
-
-size_t _IntegerNumeral::LengthOfSelfNameZeroInt() const
-{	// FORMALLY CORRECT: Kenneth Boyd, 8/28/1999
-	return 1;
-}
-
-size_t _IntegerNumeral::LengthOfSelfNameSmallNegativeInt() const
-{	// FORMALLY CORRECT: Kenneth Boyd, 7/29/2001
-	return Leading10_9DigitLength(ShortInteger)+1;
-}
-
-size_t _IntegerNumeral::LengthOfSelfNameNegativeInt() const
-{	// FORMALLY CORRECT: Kenneth Boyd, 7/29/2001
-	size_t Length = (ArraySize(LongInteger)-1)*9;
-	Length += Leading10_9DigitLength(LongInteger[ArraySize(LongInteger)-1])+1;
-	return Length;
-}
-
-size_t _IntegerNumeral::LengthOfSelfNameSmallNegativeIntInv() const
-{	// FORMALLY CORRECT: Kenneth Boyd, 7/29/2001
-	return Leading10_9DigitLength(ShortInteger)+14;
-}
-
-size_t _IntegerNumeral::LengthOfSelfNameNegativeIntInv() const
-{	// FORMALLY CORRECT: Kenneth Boyd, 7/29/2001
-	size_t Length = (ArraySize(LongInteger)-1)*9;
-	Length += Leading10_9DigitLength(LongInteger[ArraySize(LongInteger)-1])+14;
-	return Length;
-}
-

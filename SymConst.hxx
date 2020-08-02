@@ -41,8 +41,6 @@ public:
 //  Type ID functions
 	virtual const AbstractClass* UltimateType() const;
 
-// text I/O functions
-	virtual size_t LengthOfSelfName(void) const;
 //  Evaluation functions
 	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override { return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >(); }
 	virtual bool CanEvaluate() const;
@@ -57,11 +55,13 @@ public:
 
 	virtual bool IsPositive() const;	// needs total order *and* IsZero
 	virtual bool IsNegative() const;	// needs total order *and* IsZero
+
 protected:
 	bool EqualAux2(const MetaConcept& rhs) const override { return true; }
 	virtual bool InternalDataLTAux(const MetaConcept& rhs) const;
 	virtual bool SyntacticalStandardLTAux(const MetaConcept& rhs) const;
-	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
+	std::string to_s_aux() const override;
+
 private:
 	bool SymbolicConstantSyntacticalLTReal(const MetaConcept& rhs) const;
 	bool SymbolicConstantSyntacticalGTReal(const MetaConcept& rhs) const;

@@ -45,9 +45,6 @@ public:
 //  Evaluation functions
 	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override;
 	virtual bool SyntaxOK() const;
-// text I/O functions
-	virtual size_t LengthOfSelfName() const;
-	virtual void ConstructSelfNameAux(char* Name) const;	// overwrites what is already there
 //  defaults are 0 and fatal/false
 	virtual unsigned long FunctionArity();
 	virtual bool EvaluateFunction(MetaConcept** const& ArgValList, unsigned long*& ArgList, MetaConcept*& Result);
@@ -144,6 +141,7 @@ public:
 	void GenerateXORClauseList(MetaConcept**& ClauseList,const MetaConcept** const ArgArray);	// generates XOR clauses not implied by prior information
 #endif
 protected:
+	std::string to_s_aux() const override;
 	void _forceStdForm() override { ForceStdFormAux(); }
 
 	virtual void DiagnoseInferenceRules() const;

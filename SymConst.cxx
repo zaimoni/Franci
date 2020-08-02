@@ -74,24 +74,10 @@ const AbstractClass* SymbolicConstant::UltimateType() const
 }
 
 // text I/O functions
-size_t SymbolicConstant::LengthOfSelfName() const
-{	// MUTABLE
+std::string SymbolicConstant::to_s_aux() const
+{
 	// if (IsExactType(LinearInfinity_MC))
-	if (StdAdditionInv_VF & MultiPurposeBitmap) return 8;
-	return 7;
-}
-
-void
-SymbolicConstant::ConstructSelfNameAux(char* Name) const
-{	// MUTABLE
-	// if (IsExactType(LinearInfinity_MC))
-	Name[0] = '&';
-	Name[1] = 'i';
-	Name[2] = 'n';
-	Name[3] = 'f';
-	Name[4] = 'i';
-	Name[5] = 'n';
-	Name[6] = ';';
+	return "&infin;";
 }
 
 //  Evaluation functions

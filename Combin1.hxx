@@ -47,6 +47,7 @@ private:
 
 	typedef bool (CombinatorialLike::*SelfEvaluateRule)();
 	static SelfEvaluateRule SelfEvaluateRuleLookup[MaxSelfEvalRuleIdx_SER];
+
 public:
 	CombinatorialLike(CombinatorialModes LinkageType) noexcept : MetaConceptWithArgArray((ExactType_MC)(LinkageType+Factorial_MC)) {};
 	CombinatorialLike(MetaConcept**& NewArgList, CombinatorialModes LinkageType);
@@ -67,22 +68,18 @@ public:
 	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override;
 	virtual bool SyntaxOK() const;
 // text I/O functions
-#ifndef USE_TO_S
-	virtual size_t LengthOfSelfName() const;
-#endif
 	virtual bool IsPositive() const;
 	virtual bool IsNegative() const;
+
 protected:
 	std::string to_s_aux() const override;
-#ifndef USE_TO_S
-	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
-#endif
 	void _forceStdForm() override;
 	virtual bool _IsOne() const;
 
 //  Helper functions for CanEvaluate... routines
 	virtual void DiagnoseInferenceRules() const;
 	virtual bool InvokeEqualArgRule() const;
+
 private:
 	void _ForceArgSameImplementation(size_t n) override;
 

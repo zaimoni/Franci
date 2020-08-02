@@ -39,6 +39,7 @@ class SeriesOperation final : public MetaConceptWithArgArray
 	static EvaluateToOtherRule EvaluateRuleLookup[MaxEvalRuleIdx_ER];
 
 	mutable autoval_ptr<AbstractClass> DesiredType;
+
 public:
 	enum IndexCodes	{
 					INDEXVAR_IDX = 0,
@@ -67,18 +68,12 @@ public:
 //  Evaluation functions
 	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override;
 	virtual bool SyntaxOK() const;
-// text I/O functions
-#ifndef USE_TO_S
-	virtual size_t LengthOfSelfName() const;
-#endif
 // Type-specific functions
 	bool IsFiniteSeries() const;
+
 protected:
 	virtual bool EqualAux2(const MetaConcept& rhs) const;
 	std::string to_s_aux() const override;
-#ifndef USE_TO_S
-	virtual void ConstructSelfNameAux(char* Name) const;		// overwrites what is already there
-#endif
 	void _forceStdForm() override;
 	virtual bool _IsExplicitConstant() const;
 	virtual bool _IsOne() const;
@@ -87,10 +82,11 @@ protected:
 //  Helper functions for CanEvaluate... routines
 	virtual void DiagnoseInferenceRules() const;
 	virtual bool InvokeEqualArgRule() const;
+
 private:
 	void _ForceArgSameImplementation(size_t n) override;
 
-	size_t FactorialIsAppropriateRepresentation() const;
+	bool FactorialIsAppropriateRepresentation() const;
 
 	virtual bool DelegateEvaluate(MetaConcept*& dest);		// different type
 

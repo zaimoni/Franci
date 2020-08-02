@@ -28,12 +28,8 @@
 
 extern Parser<MetaConcept> FranciScriptParser;
 
-// defined in LenName.cxx
-size_t LengthOfPrefixArgList(const MetaConcept * const * const ArgArray);
-void ConstructPrefixArgList(char* const PrefixArgListStart,const MetaConcept* const * const ArgArray);
-
-// defined in MetaCon.cxx
-void NiceFormat80Cols(char*& Name);
+std::string ConstructPrefixArgList(const MetaConcept* const* const ArgArray); // defined in LenName.cxx
+void NiceFormat80Cols(std::string& x); // defined in MetaCon.cxx
 
 // NOTE: Parsing extension
 // Want A...B, where A,B "will evaluate" to explicit constants of type IntegerNumeral, 
@@ -138,31 +134,23 @@ Franci_IsSyntacticalSymmetry(const MetaConcept* const * const ArgArray)
 
 void LogThis(const MetaConcept * const * const ArgArray)
 {
-	if (is_logfile_active())
-		{
-		autoarray_ptr<char> Tmp(LengthOfPrefixArgList(ArgArray));
-		if (NULL!=Tmp)
-			{
-			ConstructPrefixArgList(Tmp,ArgArray);
+	if (is_logfile_active()) {
+		auto Tmp(ConstructPrefixArgList(ArgArray));
+		if (!Tmp.empty()) {
 			NiceFormat80Cols(Tmp);
-			LOG(Tmp);
-			}
-		else
-			LOG("Attempt to log concept suffered RAM failure.\n");
-		};
+			LOG(Tmp.data());
+		}
+		else LOG("Attempt to log concept suffered RAM failure.\n");
+	};
 }
 
 void SayThisNormally(const MetaConcept * const * const ArgArray)
 {
-	autoarray_ptr<char> Tmp(LengthOfPrefixArgList(ArgArray));
-	if (NULL!=Tmp)
-		{
-		ConstructPrefixArgList(Tmp,ArgArray);
+	auto Tmp(ConstructPrefixArgList(ArgArray));
+	if (!Tmp.empty()) {
 		NiceFormat80Cols(Tmp);
-		INFORM(Tmp);
-		}
-	else
-		INFORM("Attempt to state concept suffered RAM failure.\n");
+		INFORM(Tmp.data());
+	} else INFORM("Attempt to state concept suffered RAM failure.\n");
 }
 
 

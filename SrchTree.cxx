@@ -64,29 +64,8 @@ bool SearchTree::SyntaxOK() const
 
 void SearchTree::_ForceArgSameImplementation(size_t n) { NARY_FORCEARGSAMEIMPLEMENTATION_BODY; }
 
-// text I/O functions
-//! \todo move SearchTree::LengthOfSelfName, SearchTree::ConstructSelfNameAux to Lenname.cxx when ready
-size_t SearchTree::LengthOfSelfName() const
-{	//! \todo IMPLEMENT correctly (placeholder now)
-	return 13;
-}
-
-void SearchTree::ConstructSelfNameAux(char* Name) const	// overwrites what is already there
-{	//! \todo IMPLEMENT correctly (placeholder now)
-	Name[0] = 'S';
-	Name[1] = 'E';
-	Name[2] = 'A';
-	Name[3] = 'R';
-	Name[4] = 'C';
-	Name[5] = 'H';
-	Name[6] = 'T';
-	Name[7] = 'R';
-	Name[8] = 'E';
-	Name[9] = 'E';
-	Name[10] = '(';
-	Name[11] = ',';
-	Name[12] = ')';
-}
+//! \todo IMPLEMENT correctly (placeholder now)
+std::string SearchTree::to_s_aux() const { return "SEARCHTREE(,)"; }
 
 const MetaConcept*
 SearchTree::FindLeafLikeThis(const MetaConcept& Target) const
