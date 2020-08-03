@@ -292,14 +292,11 @@ TVal AbstractClass::_hasAsElement(const MetaConcept& rhs) const
 	// However...Franci isn't quite that knowledgeable--yet.
 	// Consider making this susceptible to array lookup.
 	if (*this==NULLSet) return false;
-	if		(rhs.IsExactType(TruthValue_MC))
-		return *this==TruthValues;
+	if		(rhs.IsExactType(TruthValue_MC)) return *this==TruthValues;
 	else if (rhs.IsExactType(AbstractClass_MC))
 		{
-		if (static_cast<const AbstractClass&>(rhs).IsProperClass())
-			return false;
-		if (*this==ClassAllSets && !rhs.IsUltimateType(NULL) && Superclass(*rhs.UltimateType()))
-			return true;
+		if (static_cast<const AbstractClass&>(rhs).IsProperClass()) return false;
+		if (*this==ClassAllSets && Superclass(rhs.UltimateType())) return true;
 		return false;
 		}
 	else if (rhs.IsExactType(Variable_MC))

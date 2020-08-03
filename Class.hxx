@@ -69,12 +69,12 @@ public:
 	void Set_IsDiscreteUnderStandardTopology();
 	void Set_TopologicalCompletesWithInfinity();
 	void Set_ContainsInfinity();
-	inline bool IsProperSet() const {return (ProperSet & Attributes1Bitmap);};
-	inline bool IsProperClass() const {return (ProperClass & Attributes1Bitmap);};
-	inline bool IsDenseUnderStandardTopology() const {return (DenseUnderStandardTopology & Attributes1Bitmap);};
-	inline bool IsDiscreteUnderStandardTopology() const {return (DiscreteUnderStandardTopology & Attributes1Bitmap);};
-	inline bool ToleratesInfinity() const {return (TopologicalCompletesWithInfinity & Attributes1Bitmap);};
-	inline bool HasInfinity() const {return (ContainsInfinity & Attributes1Bitmap);};
+	bool IsProperSet() const {return (ProperSet & Attributes1Bitmap);};
+	bool IsProperClass() const {return (ProperClass & Attributes1Bitmap);};
+	bool IsDenseUnderStandardTopology() const {return (DenseUnderStandardTopology & Attributes1Bitmap);};
+	bool IsDiscreteUnderStandardTopology() const {return (DiscreteUnderStandardTopology & Attributes1Bitmap);};
+	bool ToleratesInfinity() const {return (TopologicalCompletesWithInfinity & Attributes1Bitmap);};
+	bool HasInfinity() const {return (ContainsInfinity & Attributes1Bitmap);};
 	static bool IsReservedSetClassName(const char* Name);
 	static bool ConvertToReservedAbstractClass(MetaConcept*& Target, const char* Text);
 // The subclass relation
@@ -82,7 +82,8 @@ public:
 	bool Subclass(const AbstractClass& rhs) const { return _subclass(rhs).is(true); };
 	bool ProperSuperclass(const AbstractClass& rhs) const {return rhs.ProperSubclass(*this);};
 	bool Superclass(const AbstractClass& rhs) const {return rhs.Subclass(*this);};
-// The HasAsElement relation (easier to program than IsElementOf, which would be an Interface function)
+	bool Superclass(const AbstractClass* rhs) const { return rhs && rhs->Subclass(*this); };
+	// The HasAsElement relation (easier to program than IsElementOf, which would be an Interface function)
 // First returns true if it is *certain*
 	bool HasAsElement(const MetaConcept& rhs) const { return _hasAsElement(rhs).is(true); };
 	bool DoesNotHaveAsElement(const MetaConcept& rhs) const { return _hasAsElement(rhs).is(false); };

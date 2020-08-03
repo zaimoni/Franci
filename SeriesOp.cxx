@@ -239,6 +239,8 @@ but requires cancellations to work...Proceed.
 	return true;
 }
 
+#if OBSOLETE
+// while this does interact with +/*, it should be treated as within its own parentheses block i.e. "atomic"
 unsigned int SeriesOperation::OpPrecedence() const
 {
 	switch(ExactType())
@@ -248,6 +250,7 @@ unsigned int SeriesOperation::OpPrecedence() const
 	default: SUCCEED_OR_DIE(0 && "invariant violation"); return Precedence::None;
 	}
 }
+#endif
 
 // Syntactical equality and inequality
 bool SeriesOperation::EqualAux2(const MetaConcept& rhs) const

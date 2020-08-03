@@ -73,7 +73,7 @@ private:
 	bool LeftPointOpen;
 	bool RightPointOpen;	
 
-	LinearInterval() : MetaConceptWith2Args(LinearInterval_MC) {}
+	LinearInterval() = delete;
 public:
 	typedef bool (LinearInterval::*DestructiveLinearIntervalProcess)(LinearInterval& RHS);
 	typedef bool (LinearInterval::*DestructiveLinearIntervalProcessV2)(MetaConcept*& RHS);

@@ -38,11 +38,11 @@ protected:
 	static EvaluateToOtherRule EvaluateRuleLookup[MaxEvalRuleIdx_ER];
 	static SelfEvaluateRule SelfEvaluateRuleLookup[MaxSelfEvalRuleIdx_SER];
 
-	MetaConceptWith2Args() : IdxCurrentEvalRule(None_ER),IdxCurrentSelfEvalRule(None_SER) {};
-	explicit MetaConceptWith2Args(ExactType_MC NewType) : MetaConcept(NewType),IdxCurrentEvalRule(None_ER),IdxCurrentSelfEvalRule(None_SER) {};
-	explicit MetaConceptWith2Args(ExactType_MC NewType,unsigned char NewBitmap) : MetaConcept(NewType,NewBitmap),IdxCurrentEvalRule(None_ER),IdxCurrentSelfEvalRule(None_SER) {};
-	explicit MetaConceptWith2Args(ExactType_MC NewType,MetaConcept*& lhs,MetaConcept*& rhs) : MetaConcept(NewType),LHS_Arg1(lhs),RHS_Arg2(rhs),IdxCurrentEvalRule(None_ER),IdxCurrentSelfEvalRule(None_SER) {};
-	explicit MetaConceptWith2Args(ExactType_MC NewType,unsigned char NewBitmap,MetaConcept*& lhs,MetaConcept*& rhs) : MetaConcept(NewType,NewBitmap),LHS_Arg1(lhs),RHS_Arg2(rhs),IdxCurrentEvalRule(None_ER),IdxCurrentSelfEvalRule(None_SER) {};
+	MetaConceptWith2Args() noexcept : IdxCurrentEvalRule(None_ER),IdxCurrentSelfEvalRule(None_SER) {};
+	explicit MetaConceptWith2Args(ExactType_MC NewType) noexcept : MetaConcept(NewType),IdxCurrentEvalRule(None_ER),IdxCurrentSelfEvalRule(None_SER) {};
+	explicit MetaConceptWith2Args(ExactType_MC NewType,unsigned char NewBitmap) noexcept : MetaConcept(NewType,NewBitmap),IdxCurrentEvalRule(None_ER),IdxCurrentSelfEvalRule(None_SER) {};
+	explicit MetaConceptWith2Args(ExactType_MC NewType,MetaConcept*& lhs,MetaConcept*& rhs) noexcept : MetaConcept(NewType),LHS_Arg1(lhs),RHS_Arg2(rhs),IdxCurrentEvalRule(None_ER),IdxCurrentSelfEvalRule(None_SER) {};
+	explicit MetaConceptWith2Args(ExactType_MC NewType,unsigned char NewBitmap,MetaConcept*& lhs,MetaConcept*& rhs) noexcept : MetaConcept(NewType,NewBitmap),LHS_Arg1(lhs),RHS_Arg2(rhs),IdxCurrentEvalRule(None_ER),IdxCurrentSelfEvalRule(None_SER) {};
 	MetaConceptWith2Args(const MetaConceptWith2Args& src);
 	void operator=(const MetaConceptWith2Args& src);
 public:

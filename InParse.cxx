@@ -8,6 +8,7 @@
 #include "Quantify.hxx"
 #include "Unparsed.hxx"
 #include "Integer1.hxx"
+#include "Interval.hxx"
 #include "Phrase1.hxx"
 #include "Phrase2.hxx"
 #include "PhraseN.hxx"
@@ -864,6 +865,100 @@ static std::vector<size_t> close_RightParenthesis(kuroda::parser<MetaConcept>::s
 		}
 		// \todo: half-open ray syntax
 	}
+	return ret;
+}
+
+static std::pair<unsigned int, size_t> get_operator(const std::vector<unsigned int>& precedence_stack, 
+	kuroda::parser<MetaConcept>::sequence& symbols, size_t n)
+{
+	std::pair<unsigned int, size_t> ret(0, 0);
+	size_t i = 0;
+	for (auto x : precedence_stack) {
+		SUCCEED_OR_DIE(++i <= n);	// require effective index to be within bounds
+		if (MetaConcept::Precedence::Comma >= x) continue;
+		if (x < ret.first) continue;
+		const size_t offset = n - i;
+		if (!up_cast<UnparsedText>(symbols[offset])) continue;
+		switch(x)
+		{
+		// no priority for this...pretend left-to-right for now
+		case MetaConcept::Precedence::Ellipsis:
+		// priority for these is left to right
+		case MetaConcept::Precedence::Addition:	// priority is left to right
+		case MetaConcept::Precedence::Multiplication:	// priority is left to right
+			ret.first = x;
+			ret.second = n - i;
+			break;
+		default: SUCCEED_OR_DIE(0 && "invariant violation");
+		}
+	}
+	return ret;
+}
+
+static bool interpret_operator(const std::pair<unsigned int, size_t>& opcode, kuroda::parser<MetaConcept>::sequence& symbols, size_t lb, size_t ub)
+{
+	assert(0 <= lb);
+	assert(symbols.size() > ub);
+	assert(lb <= opcode.second);
+	assert(ub >= opcode.second);
+	switch (opcode.first) {
+	case MetaConcept::Precedence::Ellipsis:
+		// gets interesting once we start trying to parse English
+		// for now, handle closed linear interval within the integers Z
+		if (lb >= opcode.second || ub <= opcode.second) return false;
+		if (symbols[opcode.second - 1]->IsUltimateType(&Integer) && symbols[opcode.second + 1]->IsUltimateType(&Integer)) {
+			zaimoni::autoval_ptr<AbstractClass> TargetType;
+			TargetType = new AbstractClass(Integer);
+			symbols[opcode.second - 1] = new LinearInterval(symbols[opcode.second - 1], symbols[opcode.second + 1], TargetType, false, false);
+			symbols.DeleteNSlotsAt(2, opcode.second);
+			return true;
+		}
+		break;
+	case MetaConcept::Precedence::Addition:
+		// we only handle binary infix addition here
+		if (lb >= opcode.second || ub <= opcode.second) return false;
+		if (RejectTextToVar(symbols[opcode.second - 1])) return false;
+		if (RejectTextToVar(symbols[opcode.second + 1])) return false;
+		// this only works if the corresponding phrase is of a reasonable ultimate type
+		if (!ClassAdditionDefined.Superclass(symbols[opcode.second - 1]->UltimateType()) && !symbols[opcode.second - 1]->IsPotentialVarName()) return false;
+		if (!ClassAdditionDefined.Superclass(symbols[opcode.second + 1]->UltimateType()) && !symbols[opcode.second + 1]->IsPotentialVarName()) return false;
+		// ....
+//		return true;
+		return false;
+	case MetaConcept::Precedence::Multiplication:
+		if (lb >= opcode.second || ub <= opcode.second) return false;
+		if (RejectTextToVar(symbols[opcode.second - 1])) return false;
+		if (RejectTextToVar(symbols[opcode.second + 1])) return false;
+		// this only works if the corresponding phrase is of a reasonable ultimate type
+		// not quite correct...abstract-math modules over Z only need +
+		if (!ClassMultiplicationDefined.Superclass(symbols[opcode.second - 1]->UltimateType()) && !symbols[opcode.second - 1]->IsPotentialVarName()) return false;
+		if (!ClassMultiplicationDefined.Superclass(symbols[opcode.second + 1]->UltimateType()) && !symbols[opcode.second + 1]->IsPotentialVarName()) return false;
+		// ....
+//		return true;
+		return false;
+	default: SUCCEED_OR_DIE(0 && "invariant violation");
+	}
+	return false;
+}
+
+static std::vector<size_t> handle_Comma(kuroda::parser<MetaConcept>::sequence& symbols, size_t n) {
+	assert(symbols.size() > n);
+	std::vector<size_t> ret;
+	if (!IsSemanticChar<','>(symbols[n])) return ret;
+	std::vector<unsigned int> precedence_stack;
+	size_t lb = n;
+	while (0 < lb) {
+		auto prec = symbols[--lb]->OpPrecedence();
+		if (MetaConcept::Precedence::Comma == prec) break;
+		if (MetaConcept::Precedence::LParenthesis == prec) break;
+		precedence_stack.push_back(prec);
+	}
+	if (precedence_stack.empty()) return ret;
+	auto opcode = get_operator(precedence_stack, symbols, n);
+	if (!opcode.first) return ret;
+	const size_t co_n = symbols.size() - n;
+	if (!interpret_operator(opcode, symbols, n-precedence_stack.size(), n-1)) return ret;
+	ret.push_back(symbols.size() - co_n);
 	return ret;
 }
 #endif
