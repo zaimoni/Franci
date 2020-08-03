@@ -337,6 +337,19 @@ const UnparsedText& UnparsedText::fast_up_reference(const MetaConcept* src)
 	return *static_cast<const UnparsedText*>(src);
 }
 
+unsigned int UnparsedText::OpPrecedence() const
+{
+	if (IsLogicalMultiplicationSign()) return Precedence::Multiplication;
+	if (IsLogicalPlusSign()) return Precedence::Addition;
+	if (IsLogicalEllipsis()) return Precedence::Ellipsis;
+	if (IsHTMLStartTag("sup") || IsHTMLStartTag("sub")) return Precedence::LParenthesis;
+	if (IsSemanticChar()) {
+		if (strchr("([{", Text[0])) return Precedence::LParenthesis;
+		if (',' == Text[0]) return Precedence::Comma;
+	}
+	return Precedence::None;
+}
+
 // Syntactical equality and inequality
 bool UnparsedText::EqualAux2(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 2/16/2000
@@ -571,12 +584,9 @@ UnparsedText::IsJSCharEntity(const char* Target) const
 	return false;
 }
 
-bool
-UnparsedText::IsMultiplicationSymbol(void) const
-{	// FORMALLY CORRECT: 12/29/2000
-	if (IsJSEntity("middot") || IsInfixSymbol("\xb7"))
-		return true;
-	return false;
+bool UnparsedText::IsMultiplicationSymbol() const
+{
+	return IsJSEntity("middot") || IsInfixSymbol("\xb7");
 }
 
 bool
@@ -617,41 +627,22 @@ UnparsedText::ArgCannotExtendRightThroughThis(void) const
 	return false;
 }
 
-bool
-UnparsedText::IsLogicalPlusSign(void) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 7/6/2001
-	if (   IsInfixSymbol(SymbolPlusSign)
-		|| IsJSCharEntity(JSCharEntityPlusSign)
-		|| IsJSCharEntity(JSCharEntityPlusSignV2))
-		return true;
-	return false;
+bool UnparsedText::IsLogicalPlusSign() const
+{
+	return IsInfixSymbol(SymbolPlusSign) || IsJSCharEntity(JSCharEntityPlusSign) || IsJSCharEntity(JSCharEntityPlusSignV2);
 }
 
-bool
-UnparsedText::IsLogicalMultiplicationSign(void) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 5/16/2006
-	if (   IsInfixSymbol(SymbolMultSign)
-		|| IsJSEntity("middot")
-		|| IsJSCharEntity(JSCharEntityMultSign))
-		return true;
-	return false;
+bool UnparsedText::IsLogicalMultiplicationSign() const
+{
+	return IsInfixSymbol(SymbolMultSign) || IsJSEntity("middot") || IsJSCharEntity(JSCharEntityMultSign);
 }
 
-bool
-UnparsedText::IsLogicalEllipsis(void) const
+bool UnparsedText::IsLogicalEllipsis() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 5/16/2006
 	if (   IsInfixSymbol(SymbolEllipsis)	// "..."
 		|| IsInfixSymbol(SymbolEllipsis2)	// '\x75'
 		|| IsJSEntity("hellip")
 		|| IsJSCharEntity(JSCharEntityEllipsis))	// &#133;
-		return true;
-	return false;
-}
-
-bool
-UnparsedText::IsLogicalInfinity(void) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 11/15/2002
-	if (IsJSEntity("infin"))
 		return true;
 	return false;
 }

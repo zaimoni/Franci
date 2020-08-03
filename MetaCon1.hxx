@@ -255,6 +255,15 @@ protected:
 	MetaConcept& operator=(const MetaConcept & src) = default;
 	MetaConcept& operator=(MetaConcept&& src) = default;
 public:
+	enum Precedence {
+		None = 0,	// atomic term
+		Comma,
+		Ellipsis,
+		Addition,
+		Multiplication,
+		LParenthesis	// unconditional left-expression stop
+	};
+
 	using evalspec = std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >;
 
 	// detects whether lhs is hard-coded logical negation of rhs
@@ -296,6 +305,7 @@ public:
 	void ForceStdForm() { _forceStdForm(); }
 	bool IsExplicitConstant() const { return _IsExplicitConstant(); }
 	virtual bool NeverNeedsParentheses() const { return _IsExplicitConstant(); }	// expression never needs protection with parentheses from higher-priority operators
+	virtual unsigned int OpPrecedence() const { return 0; }	// operator precedence.
 	virtual bool IsAbstractClassDomain() const = 0;
 //  Evaluation functions
 	virtual evalspec canEvaluate() const = 0;

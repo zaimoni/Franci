@@ -82,6 +82,7 @@ public:
 //  Type ID functions
 	const AbstractClass* UltimateType() const override { return 0; }	// untyped i.e. free
 	constexpr static bool IsType(ExactType_MC x) { return UnparsedText_MC == x; }
+	unsigned int OpPrecedence() const override;
 //  Evaluation functions
 	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override;
 	virtual bool CanEvaluate() const;
@@ -137,7 +138,7 @@ public:
 	bool IsJSCharEntity(const char* Target) const;
 	inline bool MustBeParsedInContext(void) const {return (HTMLTerminalTag_UT | JSEntity_UT | JSCharEntity_UT) & SelfClassifyBitmap;}
 	inline bool IsUninterpreted(void) const {return (Uninterpreted_UT & SelfClassifyBitmap) ? true : false;};
-	bool IsMultiplicationSymbol(void) const;
+	bool IsMultiplicationSymbol() const; // 2020-08-03: dead function?  Cf. IsLogicalMultiplicationSign
 	inline bool IsLogicOrPredCalcKeyword(void) const {return (LogicKeyword_UT | PredCalcKeyword_UT) & SelfClassifyBitmap;};
 	inline bool IsLogic_Prefix_OrPredCalcKeyword(void) const {return (LogicKeyword_UT | PrefixKeyword_UT | PredCalcKeyword_UT) & SelfClassifyBitmap;};
 	inline bool IsSymbol(void) const {return (QuasiSymbol_UT | InfixSymbol_UT) & SelfClassifyBitmap;};
@@ -151,10 +152,10 @@ public:
 	// resume implementing in Unparsed.cxx
 	bool ArgCannotExtendLeftThroughThis(void) const;
 	bool ArgCannotExtendRightThroughThis(void) const;
-	bool IsLogicalPlusSign(void) const;
-	bool IsLogicalMultiplicationSign(void) const;
-	bool IsLogicalEllipsis(void) const;
-	bool IsLogicalInfinity(void) const;
+	bool IsLogicalPlusSign() const;
+	bool IsLogicalMultiplicationSign() const;
+	bool IsLogicalEllipsis() const;
+	bool IsLogicalInfinity() const { return IsJSEntity("infin"); }
 
 	size_t LengthOfNumericIntegerToSplitOff(void) const;
 	bool AnyNonAlphabeticChars(void) const;

@@ -239,6 +239,16 @@ but requires cancellations to work...Proceed.
 	return true;
 }
 
+unsigned int SeriesOperation::OpPrecedence() const
+{
+	switch(ExactType())
+	{
+	case SeriesAddition_MC: return Precedence::Addition;
+	case SeriesMultiplication_MC: return Precedence::Multiplication;
+	default: SUCCEED_OR_DIE(0 && "invariant violation"); return Precedence::None;
+	}
+}
+
 // Syntactical equality and inequality
 bool SeriesOperation::EqualAux2(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 1/5/2003
