@@ -3,7 +3,6 @@
 
 #include "ClauseN.hxx"
 
-#include "Class.hxx"
 #include "Unparsed.hxx"
 #include "InParse.hxx"
 #include "Interval.hxx"
@@ -11,12 +10,10 @@
 #include "LowRel.hxx"
 #include "MetaCon3.hxx"
 #include "Equal.hxx"
+#include "LexParse.hxx"
 
 #include "Zaimoni.STL/except/syntax_error.hpp"
 #include "Zaimoni.STL/limits"
-
-// defined in LexParse.cxx
-bool _improviseVar(MetaConcept*& dest, const AbstractClass* Domain);
 
 ClauseNArg::EvaluateToOtherRule ClauseNArg::EvaluateRuleLookup[ClauseNArg::MaxEvalRuleIdx_ER]
   =	{

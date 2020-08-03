@@ -2,22 +2,17 @@
 // Implementation for Phrase2Arg, the metatype for n-ary clauses
 
 #include "Phrase2.hxx"
-#include "Class.hxx"
 #include "Unparsed.hxx"
 #include "StdAdd.hxx"
 #include "StdMult.hxx"
 #include "Combin1.hxx"
-#include "Integer1.hxx"
 #include "LowRel.hxx"
 #include "Keyword1.hxx"
+#include "LexParse.hxx"
+#include "Integer1.hxx"
 
 #include "Zaimoni.STL/except/syntax_error.hpp"
 #include "Zaimoni.STL/lite_alg.hpp"
-
-// defined in LexParse.cxx
-bool _improviseVar(MetaConcept*& Target, const AbstractClass* Domain);
-bool ImproviseVar(MetaConcept*& Target, const AbstractClass* Domain);
-bool CoerceArgType(MetaConcept* const& Arg, const AbstractClass& ForceType);
 
 Phrase2Arg::EvaluateToOtherRule Phrase2Arg::EvaluateRuleLookup[MaxEvalRuleIdx_ER]
 	=	{

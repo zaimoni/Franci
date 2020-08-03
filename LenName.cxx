@@ -477,4 +477,13 @@ std::string UnparsedText::to_s_aux() const
 	return "\"" + ret + "\"";
 }
 
-std::string Variable::to_s_aux() const { return SyntaxOK() ? ViewKeyword() : BAD_VARIABLE_SYNTAX; }
+std::string Variable::to_s_aux() const {
+	if (SyntaxOK()) return ViewKeyword();
+	std::string ret("(");
+	ret += ViewKeyword();
+	if (!Arg1) ret += " is free";
+	else if (typeid(MetaQuantifier) != typeid(*Arg1)) { ret += " not quantified properly: " + Arg1->to_s(); }
+	else if (!Arg1->SyntaxOK()) { ret = +"quantifier had syntax error:" + Arg1->to_s(); }
+	ret += ')';
+	return ret;
+}

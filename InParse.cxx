@@ -4,11 +4,11 @@
 
 #include "InParse.hxx"
 #include "SymConst.hxx"
-#include "Class.hxx"
 #include "Quantify.hxx"
 #include "Unparsed.hxx"
-#include "Integer1.hxx"
 #include "Interval.hxx"
+#include "StdAdd.hxx"
+#include "StdMult.hxx"
 #include "Phrase1.hxx"
 #include "Phrase2.hxx"
 #include "PhraseN.hxx"
@@ -17,6 +17,8 @@
 #include "ParseNode.hxx"
 #include "LowRel.hxx"
 #include "Keyword1.hxx"
+#include "LexParse.hxx"
+#include "Integer1.hxx"
 
 #include "Zaimoni.STL/lite_alg.hpp"
 #include "Zaimoni.STL/LexParse/Parser.hpp"
@@ -52,12 +54,6 @@ void NiceFormat80Cols(std::string& x); // defined in MetaCon.cxx
 //! types (memory conservation).  This poses problems with arity calculations.
 //! \todo GCF also should understand LinearInterval with UltimateType _Z_.  However, this is 
 //! normally a trivialization: it should happen only with raw data input.
-
-// defined in LexParse.cxx
-bool CoerceArgType(MetaConcept* const& Arg, const AbstractClass& ForceType);
-bool LookUpVar(MetaConcept*& Target, const AbstractClass* Domain);
-
-// temporary forward declares
 
 // #define FRANCI_WARY 1
 
@@ -851,23 +847,6 @@ static std::vector<size_t> close_RightBracket(kuroda::parser<MetaConcept>::seque
 }
 
 #ifdef KURODA_GRAMMAR
-static std::vector<size_t> close_RightParenthesis(kuroda::parser<MetaConcept>::sequence& symbols, size_t n) {
-	assert(symbols.size() > n);
-	std::vector<size_t> ret;
-	if (!IsSemanticChar<')'>(symbols[n])) return ret;
-	// scan-down
-	size_t lb = n;
-	while (0 < lb) {
-		if (IsSemanticChar<'('>(symbols[--lb])) {
-			const auto working = new ParseNode(symbols, lb, n, ParseNode::CLOSED);
-			ret.push_back(lb);
-			if (1 == working->size_infix()) working->apply_all_infix(&flush_ClausePhrase);
-		}
-		// \todo: half-open ray syntax
-	}
-	return ret;
-}
-
 static std::pair<unsigned int, size_t> get_operator(const std::vector<unsigned int>& precedence_stack, 
 	kuroda::parser<MetaConcept>::sequence& symbols, size_t n)
 {
@@ -895,6 +874,11 @@ static std::pair<unsigned int, size_t> get_operator(const std::vector<unsigned i
 	return ret;
 }
 
+static bool CanCoerceArgType(const MetaConcept* const Arg, const AbstractClass& ForceType)
+{
+	return ForceType.Superclass(Arg->UltimateType()) || Arg->IsPotentialVarName();
+}
+
 static bool interpret_operator(const std::pair<unsigned int, size_t>& opcode, kuroda::parser<MetaConcept>::sequence& symbols, size_t lb, size_t ub)
 {
 	assert(0 <= lb);
@@ -920,31 +904,53 @@ static bool interpret_operator(const std::pair<unsigned int, size_t>& opcode, ku
 		if (RejectTextToVar(symbols[opcode.second - 1])) return false;
 		if (RejectTextToVar(symbols[opcode.second + 1])) return false;
 		// this only works if the corresponding phrase is of a reasonable ultimate type
-		if (!ClassAdditionDefined.Superclass(symbols[opcode.second - 1]->UltimateType()) && !symbols[opcode.second - 1]->IsPotentialVarName()) return false;
-		if (!ClassAdditionDefined.Superclass(symbols[opcode.second + 1]->UltimateType()) && !symbols[opcode.second + 1]->IsPotentialVarName()) return false;
-		// ....
-//		return true;
-		return false;
+		if (!CanCoerceArgType(symbols[opcode.second - 1], ClassAdditionDefined)) return false;
+		if (!CanCoerceArgType(symbols[opcode.second + 1], ClassAdditionDefined)) return false;
+		if (!CoerceArgType(symbols[opcode.second - 1], ClassAdditionDefined)) return false;	// \todo would like these to throw instead
+		if (!CoerceArgType(symbols[opcode.second + 1], ClassAdditionDefined)) return false;
+		{
+		zaimoni::weakautovalarray_ptr_throws<MetaConcept*> args(2);
+		args[0] = symbols[opcode.second - 1];
+		args[1] = symbols[opcode.second + 1];
+		auto staging = new StdAddition(args);
+		symbols[opcode.second + 1] = 0;
+		symbols[opcode.second - 1] = staging;
+		}
+		symbols.DeleteNSlotsAt(2, opcode.second);
+		return true;
 	case MetaConcept::Precedence::Multiplication:
 		if (lb >= opcode.second || ub <= opcode.second) return false;
 		if (RejectTextToVar(symbols[opcode.second - 1])) return false;
 		if (RejectTextToVar(symbols[opcode.second + 1])) return false;
 		// this only works if the corresponding phrase is of a reasonable ultimate type
-		// not quite correct...abstract-math modules over Z only need +
-		if (!ClassMultiplicationDefined.Superclass(symbols[opcode.second - 1]->UltimateType()) && !symbols[opcode.second - 1]->IsPotentialVarName()) return false;
-		if (!ClassMultiplicationDefined.Superclass(symbols[opcode.second + 1]->UltimateType()) && !symbols[opcode.second + 1]->IsPotentialVarName()) return false;
-		// ....
-//		return true;
-		return false;
+		// abstract-algebra modules over the integers Z only need +
+		{
+		const bool right_module_ok = Integer.Superclass(symbols[opcode.second + 1]->UltimateType()) && CanCoerceArgType(symbols[opcode.second - 1], ClassAdditionDefined);
+		if (!right_module_ok && !CanCoerceArgType(symbols[opcode.second - 1], ClassMultiplicationDefined)) return false;
+		const bool left_module_ok = Integer.Superclass(symbols[opcode.second - 1]->UltimateType()) && CanCoerceArgType(symbols[opcode.second + 1], ClassAdditionDefined);
+		if (!left_module_ok && !CanCoerceArgType(symbols[opcode.second + 1], ClassMultiplicationDefined)) return false;
+		if (!CoerceArgType(symbols[opcode.second - 1], right_module_ok ? ClassAdditionDefined : ClassMultiplicationDefined)) return false;	// \todo would like these to throw instead
+		if (!symbols[opcode.second - 1]->SyntaxOK()) throw std::runtime_error("error created");
+		if (!CoerceArgType(symbols[opcode.second + 1], left_module_ok ? ClassAdditionDefined : ClassMultiplicationDefined)) return false;
+		if (!symbols[opcode.second + 1]->SyntaxOK()) throw std::runtime_error("error created");
+		}
+		{
+		zaimoni::weakautovalarray_ptr_throws<MetaConcept*> args(2);
+		args[0] = symbols[opcode.second - 1];
+		args[1] = symbols[opcode.second + 1];
+		auto staging = new StdMultiplication(args);
+		symbols[opcode.second + 1] = 0;
+		symbols[opcode.second - 1] = staging;
+		}
+		symbols.DeleteNSlotsAt(2, opcode.second);
+		return true;
 	default: SUCCEED_OR_DIE(0 && "invariant violation");
 	}
 	return false;
 }
 
-static std::vector<size_t> handle_Comma(kuroda::parser<MetaConcept>::sequence& symbols, size_t n) {
-	assert(symbols.size() > n);
-	std::vector<size_t> ret;
-	if (!IsSemanticChar<','>(symbols[n])) return ret;
+static auto make_precedence_stack(kuroda::parser<MetaConcept>::sequence& symbols, size_t n)
+{
 	std::vector<unsigned int> precedence_stack;
 	size_t lb = n;
 	while (0 < lb) {
@@ -953,14 +959,48 @@ static std::vector<size_t> handle_Comma(kuroda::parser<MetaConcept>::sequence& s
 		if (MetaConcept::Precedence::LParenthesis == prec) break;
 		precedence_stack.push_back(prec);
 	}
-	if (precedence_stack.empty()) return ret;
-	auto opcode = get_operator(precedence_stack, symbols, n);
-	if (!opcode.first) return ret;
-	const size_t co_n = symbols.size() - n;
-	if (!interpret_operator(opcode, symbols, n-precedence_stack.size(), n-1)) return ret;
-	ret.push_back(symbols.size() - co_n);
+	return precedence_stack;
+}
+
+void operator_bulk_parse(kuroda::parser<MetaConcept>::sequence& symbols, size_t n)
+{
+	do {
+		std::vector<unsigned int> precedence_stack(make_precedence_stack(symbols, n));
+		if (precedence_stack.empty()) return;
+		auto opcode = get_operator(precedence_stack, symbols, n);
+		if (!opcode.first) return;
+		const size_t co_n = symbols.size() - n;
+		if (!interpret_operator(opcode, symbols, n - precedence_stack.size(), n - 1)) return;
+		n = symbols.size() - co_n;
+	} while(true);
+}
+
+static std::vector<size_t> handle_Comma(kuroda::parser<MetaConcept>::sequence& symbols, size_t n) {
+	assert(symbols.size() > n);
+	std::vector<size_t> ret;
+	if (!IsSemanticChar<','>(symbols[n])) return ret;
+	operator_bulk_parse(symbols, n);
 	return ret;
 }
+
+static std::vector<size_t> close_RightParenthesis(kuroda::parser<MetaConcept>::sequence& symbols, size_t n) {
+	assert(symbols.size() > n);
+	std::vector<size_t> ret;
+	if (!IsSemanticChar<')'>(symbols[n])) return ret;
+	// scan-down
+	size_t lb = n;
+	while (0 < lb) {
+		if (IsSemanticChar<'('>(symbols[--lb])) {
+			const auto working = new ParseNode(symbols, lb, n, ParseNode::CLOSED);
+			ret.push_back(lb);
+			if (1 == working->size_infix()) working->apply_all_infix(&flush_ClausePhrase);
+			working->syntax_check_infix([](kuroda::parser<MetaConcept>::sequence& src) {operator_bulk_parse(src, src.size()); return true; });
+		}
+		// \todo: half-open ray syntax
+	}
+	return ret;
+}
+
 #endif
 
 kuroda::parser<MetaConcept>& Franci_parser()
@@ -973,6 +1013,7 @@ kuroda::parser<MetaConcept>& Franci_parser()
 		ooao->register_build_nonterminal(&close_RightBracket);
 #ifdef KURODA_GRAMMAR
 		ooao->register_build_nonterminal(&close_RightParenthesis);
+		ooao->register_build_nonterminal(&handle_Comma);
 #endif
 	}
 	return *ooao;

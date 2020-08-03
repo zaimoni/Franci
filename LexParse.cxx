@@ -64,6 +64,7 @@ std::pair<Variable*, UnparsedText*> LooksLikeVarName(MetaConcept* x) {
 }
 
 kuroda::parser<MetaConcept>& Franci_parser();	// cf. InParse.cxx
+void operator_bulk_parse(kuroda::parser<MetaConcept>::sequence& symbols, size_t n); // cf InParse.cxx
 
 static auto _initMetaConceptParserArray(char*& InputBuffer)
 {
@@ -72,6 +73,7 @@ static auto _initMetaConceptParserArray(char*& InputBuffer)
 	// below doesn't work for FORTRAN (comments are 5 spaces with & as sixth character)
 	staging->WS_Strip();
 	Franci_parser().append_to_parse(symbols, staging);
+//	operator_bulk_parse(symbols, symbols.size());
 	return symbols;
 }
 
@@ -295,8 +297,6 @@ PointToImprovisedQuantifier(const UnparsedText& Target, MetaConcept*& Situation,
 		}
 }
 
-// #define FRANCI_WARY 1
-
 bool ImproviseVar(MetaConcept*& Target, const AbstractClass* Domain)
 {	// FORMALLY CORRECT: 2020-07-28
 	// 2 cases: variable, we want to change the domain
@@ -311,8 +311,7 @@ bool ImproviseVar(MetaConcept*& Target, const AbstractClass* Domain)
 		// otherwise, must do domain-compatibility check: need non-empty intersection of
 		// current, requested domains.  Hard-code this for now.  All of this can be delegated.
 		// all of this only works on improvised quantifiers
-//			return static_cast<Variable*>(Target)->ChangeDomain(Domain);
-		return false;
+		return test.first->ForceUltimateType(Domain);
 	} else if (test.second) {
 		// 1) splice in an quantifier at top-level with the current var-name
 		// and domain, if necessary.  Return pointer to quantifier.
@@ -344,8 +343,7 @@ bool _improviseVar(MetaConcept*& Target, const AbstractClass* Domain)
 		// otherwise, must do domain-compatibility check: need non-empty intersection of
 		// current, requested domains.  Hard-code this for now.  All of this can be delegated.
 		// all of this only works on improvised quantifiers
-//			return static_cast<Variable*>(Target)->ChangeDomain(Domain);
-		return false;
+		return test.first->ForceUltimateType(Domain);
 	} else if (test.second) {
 		// 1) splice in an quantifier at top-level with the current var-name
 		// and domain, if necessary.  Return pointer to quantifier.
@@ -362,11 +360,14 @@ bool _improviseVar(MetaConcept*& Target, const AbstractClass* Domain)
 	return false;
 }
 
-#undef FRANCI_WARY
-
 bool CoerceArgType(MetaConcept* const& Arg, const AbstractClass& ForceType)
 {
 	return Arg->ForceUltimateType(&ForceType) || _improviseVar(*const_cast<MetaConcept**>(&Arg), &ForceType);
+}
+
+bool CoerceArgType(MetaConcept*& Arg, const AbstractClass& ForceType)
+{
+	return Arg->ForceUltimateType(&ForceType) || _improviseVar(Arg, &ForceType);
 }
 
 bool LookUpVar(MetaConcept*& Target, const AbstractClass* Domain)

@@ -6,9 +6,7 @@
 #include "Integer1.hxx"
 #include "SymConst.hxx"
 #include "Interval.hxx"
-
-// defined in LexParse.cxx
-bool _improviseVar(MetaConcept*& Target, const AbstractClass* Domain);
+#include "LexParse.hxx"
 
 // ASSUMPTION: new implemented with calloc
 
