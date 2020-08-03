@@ -50,7 +50,11 @@ public:
 	size_t size_prefix() const { return _prefix.size(); }
 	size_t size_postfix() const { return _postfix.size(); }
 
+	const MetaConcept* c_anchor() const { return _anchor; }
+	const MetaConcept* c_post_anchor() const { return _post_anchor; }
+
 	size_t apply_all_infix(std::function<bool(MetaConcept*&)> xform);
+	bool syntax_check_infix(std::function<bool(kuroda::parser<MetaConcept>::sequence&)> xform) { return xform(_infix); }
 
 	bool IsAbstractClassDomain() const override { return false; }
 	//  Evaluation functions
@@ -73,7 +77,7 @@ public:
 	void _forceStdForm() override {}
 	bool _IsExplicitConstant() const override { return false; }
 protected:
-	std::string to_s_aux() const override { return nullptr; }
+	std::string to_s_aux() const override;
 };
 
 #endif

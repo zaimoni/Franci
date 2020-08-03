@@ -89,3 +89,39 @@ size_t ParseNode::apply_all_infix(std::function<bool(MetaConcept*&)> xform)
 	for (decltype(auto) x : _infix) ret += xform(x);
 	return ret;
 }
+
+std::string ParseNode::to_s_aux() const
+{
+	std::string ret("#");
+	bool first = true;
+	if (!_prefix.empty()) for (decltype(auto) x : _prefix) {
+		if (!first) ret += ' ';
+		if (x) ret += x->to_s();
+		else ret += "\"\"";
+		first = false;
+	}
+	if (!_anchor.empty()) {
+		if (!first) ret += ' ';
+		ret += _anchor->to_s();
+		first = false;
+	}
+	if (!_infix.empty())  for (decltype(auto) x : _infix) {
+		if (!first) ret += ' ';
+		if (x) ret += x->to_s();
+		else ret += "\"\"";
+		first = false;
+	}
+	if (!_post_anchor.empty()) {
+		if (!first) ret += ' ';
+		ret += _post_anchor->to_s();
+		first = false;
+	}
+	if (!_postfix.empty()) for (decltype(auto) x : _postfix) {
+		if (!first) ret += ' ';
+		if (x) ret += x->to_s();
+		else ret += "\"\"";
+		first = false;
+	}
+	ret += '#';
+	return ret;
+}

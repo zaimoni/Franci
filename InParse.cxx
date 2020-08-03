@@ -919,6 +919,12 @@ bool ArglistAry2PlusRecognize(const MetaConcept* const * ArgArray,size_t i)
 			while(ArgArray[i]->IsExactType(UnparsedText_MC));
 			}
 		};
+#ifdef KURODA_GRAMMAR
+	if (auto parse = up_cast<ParseNode>(ArgArray[i])) {
+		if (IsSemanticChar<'('>(parse->c_anchor()) && IsSemanticChar<')'>(parse->c_post_anchor())) {
+		}
+	}
+#endif
 	return false;
 }
 
