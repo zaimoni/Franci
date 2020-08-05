@@ -19,15 +19,13 @@
 #include "Keyword1.hxx"
 #include "LexParse.hxx"
 #include "Integer1.hxx"
+#include "InParse2.hxx"
 
 #include "Zaimoni.STL/lite_alg.hpp"
 #include "Zaimoni.STL/LexParse/Parser.hpp"
-#include "Zaimoni.STL/LexParse/Kuroda.hpp"
 #include "Zaimoni.STL/Pure.C/logging.h"
 
 #include <stdexcept>
-
-// #define KURODA_GRAMMAR 1
 
 extern Parser<MetaConcept> FranciScriptParser;
 

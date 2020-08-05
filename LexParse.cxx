@@ -10,11 +10,12 @@
 #include "Unparsed.hxx"
 #include "FlatFile.hxx"
 #include "CmdShell.hxx"
+#include "InParse2.hxx"
+
 #include <ctype.h>
 
 #include "Zaimoni.STL/except/syntax_error.hpp"
 #include "Zaimoni.STL/LexParse/Parser.hpp"
-#include "Zaimoni.STL/LexParse/Kuroda.hpp"
 #include "Zaimoni.STL/Pure.C/logging.h"
 
 // defined in VConsole.cxx

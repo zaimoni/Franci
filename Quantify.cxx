@@ -53,22 +53,18 @@ const AbstractClass* MetaQuantifier::UltimateType() const
 // #define FRANCI_WARY 1
 
 bool MetaQuantifier::ForceUltimateType(const AbstractClass* const rhs)
-{	// FORMALLY CORRECT: Kenneth Boyd, 6/27/2000
+{	// FORMALLY CORRECT: 2020-08-04
 	if (NULL==rhs) return true;
 	if (NULLSet==*rhs) return false;
-	if (NULL==Arg1)
-		{	// original is Free_MC
-			// change to ThereIs_MC with given domain
-		try	{
-			rhs->CopyInto(Arg1);
+	if (NULL==Arg1) {	// original is Free_MC
+		try	{ // change to ThereIs_MC with given domain
+			Arg1 = new AbstractClass(*rhs);
 			SetExactType((ExactType_MC)(ThereIs_MC));
 			return true;
-			}
-		catch(const bad_alloc&)
-			{
+		} catch(const bad_alloc&) {
 			return false;
-			};
 		};
+	};
 #ifdef FRANCI_WARY
 	LOG("Attempting MetaQuantifier::ForceUltimateType Subclass");
 #endif
@@ -77,10 +73,8 @@ bool MetaQuantifier::ForceUltimateType(const AbstractClass* const rhs)
 	LOG("Subclass OK");
 #endif
 	// Take intersection: if non-null, use *that* domain.
-	AbstractClass Tmp(NULL);
-	if (   Tmp.SetToIntersection(*UltimateType(),*rhs)
-		&& NULLSet!=Tmp)
-		{
+	AbstractClass Tmp;
+	if (Tmp.SetToIntersection(*UltimateType(),*rhs) && NULLSet!=Tmp) {
 #ifdef FRANCI_WARY
 		LOG("SetToIntersection OK, succeeded");
 #endif
@@ -88,12 +82,10 @@ bool MetaQuantifier::ForceUltimateType(const AbstractClass* const rhs)
 			Tmp.CopyInto(Arg1);
 			SetExactType((ExactType_MC)(ThereIs_MC));
 			return true;
-			}
-		catch(const bad_alloc&)
-			{
+		} catch(const bad_alloc&) {
 			return false;
-			};
 		};
+	};
 #ifdef FRANCI_WARY
 	LOG("SetToIntersection OK, failed");
 #endif
