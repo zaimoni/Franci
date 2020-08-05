@@ -44,21 +44,6 @@ ForcePhraseCheckForEvaluation(const MetaConcept* Target)
 }
 #endif
 
-//! \todo ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(), etc.: OPTIMIZE: TIME
-bool
-MetaConceptWith1Arg::ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& lhs, const MetaConcept& rhs, LowLevelAction* RHSInducedActionOnArg, LowLevelBinaryRelation* TargetRelation)
-{	// FORMALLY CORRECT: Kenneth Boyd, 12/11/1999
-	try	{
-		if (TargetRelation(lhs,*Arg1))
-			RHSInducedActionOnArg(Arg1,rhs);
-		return Arg1->ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(lhs,rhs,RHSInducedActionOnArg,TargetRelation);
-		}
-	catch(const bad_alloc&)
-		{
-		return false;
-		};
-}
-
 bool
 MetaConceptWithArgArray::ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& lhs, const MetaConcept& rhs, LowLevelAction* RHSInducedActionOnArg, LowLevelBinaryRelation* TargetRelation)
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/11/1999
@@ -183,13 +168,6 @@ MetaConceptWith2Args::HasArgRelatedToThisConceptBy(const MetaConcept& Target, Lo
 		   || TargetRelation(Target,*RHS_Arg2)
 		   || LHS_Arg1->HasArgRelatedToThisConceptBy(Target,TargetRelation)
 		   || RHS_Arg2->HasArgRelatedToThisConceptBy(Target,TargetRelation);
-}
-
-bool
-MetaConceptWith1Arg::HasArgRelatedToThisConceptBy(const MetaConcept& Target, LowLevelBinaryRelation* TargetRelation) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 1/21/2003
-	return    TargetRelation(Target,*Arg1)
-		   || Arg1->HasArgRelatedToThisConceptBy(Target,TargetRelation);
 }
 
 bool

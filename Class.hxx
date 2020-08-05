@@ -16,7 +16,7 @@ struct is_polymorphic_final<AbstractClass> : public std::true_type {};
 
 }
 
-class AbstractClass final : public MetaConceptWith1Arg
+class AbstractClass final : public MetaConceptWith1Arg<>
 {
 private:
 	enum AbstractClassAttributes1	{

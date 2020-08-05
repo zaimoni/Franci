@@ -14,7 +14,7 @@ struct is_polymorphic_final<Phrase1Arg> : public std::true_type {};
 
 }
 
-class Phrase1Arg final : public MetaConceptWith1Arg
+class Phrase1Arg final : public MetaConceptWith1Arg<>
 {
 private:
 	typedef	bool (Phrase1Arg::*SyntaxOKAuxFunc)() const;

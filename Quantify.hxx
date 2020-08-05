@@ -34,7 +34,7 @@ enum MetaQuantifierMode		{
 							ThereIsNot_MQM = ThereIsNot_MC-ForAll_MC
 							};
 
-class MetaQuantifier final : public MetaConceptWith1Arg
+class MetaQuantifier final : public MetaConceptWith1Arg<>
 {
 private:
 	static unsigned long NextID;
@@ -99,5 +99,8 @@ private:
 	// This is a weak-equality test
 	bool EqualAux(const MetaQuantifier& rhs) const;
 };
+
+template<class T>
+bool MetaConceptWith1Arg<T>::UsesQuantifierAux(const MetaQuantifier& x) const { return x.MetaConceptPtrUsesThisQuantifier(Arg1); }
 
 #endif
