@@ -10,40 +10,6 @@
 #include "Variable.hxx"
 #include "LowRel.hxx"
 
-#if 0
-void
-ForceCheckForEvaluation(const MetaConcept* Target)
-{
-	const ExactType_MC Tmp = Target->ExactType();
-	if (	(MinClauseNIdx_MC<=Tmp && MaxClauseNIdx_MC<=Tmp)
-		||	(MinPhraseNIdx_MC<=Tmp && MaxPhraseNIdx_MC<=Tmp))
-		static_cast<const MetaConceptWithArgArray*>(Target)->ForceCheckForEvaluation();
-	else if (	(MinClause2Idx_MC<=Tmp && MaxClause2Idx_MC<=Tmp)
-			||	(MinPhrase2Idx_MC<=Tmp && MaxPhrase2Idx_MC<=Tmp))
-		static_cast<const MetaConceptWith2Args*>(Target)->ForceCheckForEvaluation();
-}
-
-void
-ForceClauseCheckForEvaluation(const MetaConcept* Target)
-{
-	const ExactType_MC Tmp = Target->ExactType();
-	if (MinClauseNIdx_MC<=Tmp && MaxClauseNIdx_MC<=Tmp)
-		static_cast<const MetaConceptWithArgArray*>(Target)->ForceCheckForEvaluation();
-	else if (MinClause2Idx_MC<=Tmp && MaxClause2Idx_MC<=Tmp)
-		static_cast<const MetaConceptWith2Args*>(Target)->ForceCheckForEvaluation();
-}
-
-void
-ForcePhraseCheckForEvaluation(const MetaConcept* Target)
-{
-	const ExactType_MC Tmp = Target->ExactType();
-	if (MinPhraseNIdx_MC<=Tmp && MaxPhraseNIdx_MC<=Tmp)
-		static_cast<const MetaConceptWithArgArray*>(Target)->ForceCheckForEvaluation();
-	else if (MinPhrase2Idx_MC<=Tmp && MaxPhrase2Idx_MC<=Tmp)
-		static_cast<const MetaConceptWith2Args*>(Target)->ForceCheckForEvaluation();
-}
-#endif
-
 bool
 MetaConceptWithArgArray::ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& lhs, const MetaConcept& rhs, LowLevelAction* RHSInducedActionOnArg, LowLevelBinaryRelation* TargetRelation)
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/11/1999

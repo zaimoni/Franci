@@ -50,6 +50,10 @@ public:
 	size_t size_prefix() const { return _prefix.size(); }
 	size_t size_postfix() const { return _postfix.size(); }
 
+	const MetaConcept* c_infix_N(size_t n) const { return _infix.size() > n ? _infix[n] : 0; }
+	MetaConcept* infix_N(size_t n) { return _infix.size() > n ? _infix[n] : 0; }
+	void infix_reset(size_t n) { if (_infix.size() > n) _infix[n] = 0; }
+
 	const MetaConcept* c_anchor() const { return _anchor; }
 	const MetaConcept* c_post_anchor() const { return _post_anchor; }
 

@@ -34,6 +34,8 @@ enum MetaQuantifierMode		{
 							ThereIsNot_MQM = ThereIsNot_MC-ForAll_MC
 							};
 
+// would like MetaConceptWith1Arg<AbstractClass> but this fails against ModifyArgWithRHSInducedActionWhenLHSRelatedToArg
+// workaround needs virtual template function (syntax error, but could be simulated)
 class MetaQuantifier final : public MetaConceptWith1Arg<>
 {
 private:

@@ -874,7 +874,31 @@ static std::pair<unsigned int, size_t> get_operator(const std::vector<unsigned i
 
 static bool CanCoerceArgType(const MetaConcept* const Arg, const AbstractClass& ForceType)
 {
-	return ForceType.Superclass(Arg->UltimateType()) || Arg->IsPotentialVarName();
+	decltype(auto) ult_type = Arg->UltimateType();
+	if (ult_type) return !ult_type->IntersectionWithIsNULLSet(ForceType);
+	return Arg->IsPotentialVarName();
+}
+
+static ParseNode* IsParenthesesWrapped(MetaConcept* arg)
+{
+	if (decltype(auto) node = up_cast<ParseNode>(arg)) {
+		if (IsSemanticChar<'('>(node->c_anchor()) && IsSemanticChar<')'>(node->c_anchor()) && 1 == node->size_infix()) return node;
+	}
+	return 0;
+}
+
+static std::pair<MetaConcept*, ParseNode*> UnwrapParentheses(MetaConcept*& arg)
+{
+	while (decltype(auto) node = IsParenthesesWrapped(arg)) {
+		if (decltype(auto) inner_node = IsParenthesesWrapped(node->infix_N(0))) {
+			node->infix_reset(0);
+			delete arg;
+			arg = inner_node;
+			continue;
+		}
+		return std::pair(node->infix_N(0), node);
+	}
+	return std::pair(nullptr, nullptr);
 }
 
 static bool interpret_operator(const std::pair<unsigned int, size_t>& opcode, kuroda::parser<MetaConcept>::sequence& symbols, size_t lb, size_t ub)
@@ -899,14 +923,29 @@ static bool interpret_operator(const std::pair<unsigned int, size_t>& opcode, ku
 	case MetaConcept::Precedence::Addition:
 		// we only handle binary infix addition here
 		if (lb >= opcode.second || ub <= opcode.second) return false;
-		if (RejectTextToVar(symbols[opcode.second - 1])) return false;
-		if (RejectTextToVar(symbols[opcode.second + 1])) return false;
+		{
+		decltype(auto) L_proxy = UnwrapParentheses(symbols[opcode.second - 1]);
+		decltype(auto) R_proxy = UnwrapParentheses(symbols[opcode.second + 1]);
+		decltype(auto) L_test = L_proxy.first ? L_proxy.first : symbols[opcode.second - 1];
+		decltype(auto) R_test = R_proxy.first ? R_proxy.first : symbols[opcode.second + 1];
+		if (RejectTextToVar(L_test)) return false;
+		if (RejectTextToVar(R_test)) return false;
 		// this only works if the corresponding phrase is of a reasonable ultimate type
-		if (!CanCoerceArgType(symbols[opcode.second - 1], ClassAdditionDefined)) return false;
-		if (!CanCoerceArgType(symbols[opcode.second + 1], ClassAdditionDefined)) return false;
+		if (!CanCoerceArgType(L_test, ClassAdditionDefined)) return false;
+		if (!CanCoerceArgType(R_test, ClassAdditionDefined)) return false;
+		if (L_proxy.second) {
+			L_proxy.second->infix_reset(0);
+			delete symbols[opcode.second - 1];
+			symbols[opcode.second - 1] = L_proxy.first;
+		}
+		if (R_proxy.second) {
+			R_proxy.second->infix_reset(0);
+			delete symbols[opcode.second + 1];
+			symbols[opcode.second + 1] = R_proxy.first;
+		}
 		if (!CoerceArgType(symbols[opcode.second - 1], ClassAdditionDefined)) return false;	// \todo would like these to throw instead
 		if (!CoerceArgType(symbols[opcode.second + 1], ClassAdditionDefined)) return false;
-		{
+
 		zaimoni::weakautovalarray_ptr_throws<MetaConcept*> args(2);
 		args[0] = symbols[opcode.second - 1];
 		args[1] = symbols[opcode.second + 1];
@@ -918,15 +957,31 @@ static bool interpret_operator(const std::pair<unsigned int, size_t>& opcode, ku
 		return true;
 	case MetaConcept::Precedence::Multiplication:
 		if (lb >= opcode.second || ub <= opcode.second) return false;
-		if (RejectTextToVar(symbols[opcode.second - 1])) return false;
-		if (RejectTextToVar(symbols[opcode.second + 1])) return false;
+		{
+		decltype(auto) L_proxy = UnwrapParentheses(symbols[opcode.second - 1]);
+		decltype(auto) R_proxy = UnwrapParentheses(symbols[opcode.second + 1]);
+		decltype(auto) L_test = L_proxy.first ? L_proxy.first : symbols[opcode.second - 1];
+		decltype(auto) R_test = R_proxy.first ? R_proxy.first : symbols[opcode.second + 1];
+		if (RejectTextToVar(L_test)) return false;
+		if (RejectTextToVar(R_test)) return false;
+
 		// this only works if the corresponding phrase is of a reasonable ultimate type
 		// abstract-algebra modules over the integers Z only need +
-		{
-		const bool right_module_ok = Integer.Superclass(symbols[opcode.second + 1]->UltimateType()) && CanCoerceArgType(symbols[opcode.second - 1], ClassAdditionDefined);
-		if (!right_module_ok && !CanCoerceArgType(symbols[opcode.second - 1], ClassMultiplicationDefined)) return false;
-		const bool left_module_ok = Integer.Superclass(symbols[opcode.second - 1]->UltimateType()) && CanCoerceArgType(symbols[opcode.second + 1], ClassAdditionDefined);
-		if (!left_module_ok && !CanCoerceArgType(symbols[opcode.second + 1], ClassMultiplicationDefined)) return false;
+		const bool right_module_ok = Integer.Superclass(R_test->UltimateType()) && CanCoerceArgType(L_test, ClassAdditionDefined);
+		if (!right_module_ok && !CanCoerceArgType(L_test, ClassMultiplicationDefined)) return false;
+		const bool left_module_ok = Integer.Superclass(L_test->UltimateType()) && CanCoerceArgType(R_test, ClassAdditionDefined);
+		if (!left_module_ok && !CanCoerceArgType(R_test, ClassMultiplicationDefined)) return false;
+		if (L_proxy.second) {
+			L_proxy.second->infix_reset(0);
+			delete symbols[opcode.second - 1];
+			symbols[opcode.second - 1] = L_proxy.first;
+		}
+		if (R_proxy.second) {
+			R_proxy.second->infix_reset(0);
+			delete symbols[opcode.second + 1];
+			symbols[opcode.second + 1] = R_proxy.first;
+		}
+
 		if (!CoerceArgType(symbols[opcode.second - 1], right_module_ok ? ClassAdditionDefined : ClassMultiplicationDefined)) return false;	// \todo would like these to throw instead
 		if (!symbols[opcode.second - 1]->SyntaxOK()) throw std::runtime_error("error created");
 		if (!CoerceArgType(symbols[opcode.second + 1], left_module_ok ? ClassAdditionDefined : ClassMultiplicationDefined)) return false;
