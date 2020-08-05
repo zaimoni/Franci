@@ -5,12 +5,6 @@
 #include "Quantify.hxx"
 #include "LowRel.hxx"
 
-void MetaConceptWith1Arg::MoveIntoAux(MetaConceptWith1Arg& dest)
-{	// FORMALLY CORRECT: Kenneth Boyd, 12/29/2002
-	dest.MetaConcept::operator=(*this);
-	Arg1.MoveInto(dest.Arg1);
-}
-
 // FORMALLY CORRECT: Kenneth Boyd, 12/25/1998
 #define ARGN_BODY return (0 == n) ? (MetaConcept*)Arg1 : NULL;
 

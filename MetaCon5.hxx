@@ -11,21 +11,22 @@ class MetaConceptWith1Arg : public MetaConcept
 {
 protected:
 	autoval_ptr<MetaConcept> Arg1;
-	MetaConceptWith1Arg() {};
-	MetaConceptWith1Arg(const MetaConceptWith1Arg& src) : MetaConcept(src),Arg1(src.Arg1) {};
-	explicit MetaConceptWith1Arg(ExactType_MC NewType) : MetaConcept(NewType) {};
-	explicit MetaConceptWith1Arg(ExactType_MC NewType,unsigned char NewBitmap) : MetaConcept(NewType,NewBitmap) {};
-	explicit MetaConceptWith1Arg(ExactType_MC NewType,MetaConcept*& NewArg1) : MetaConcept(NewType),Arg1(NewArg1) {};
-	explicit MetaConceptWith1Arg(ExactType_MC NewType,unsigned char NewBitmap,MetaConcept*& NewArg1) : MetaConcept(NewType,NewBitmap),Arg1(NewArg1) {};
+	MetaConceptWith1Arg() = default;
+	MetaConceptWith1Arg(const MetaConceptWith1Arg& src) = default;
+	MetaConceptWith1Arg(MetaConceptWith1Arg&& src) = default;
+	explicit MetaConceptWith1Arg(ExactType_MC NewType) noexcept : MetaConcept(NewType) {};
+	explicit MetaConceptWith1Arg(ExactType_MC NewType,unsigned char NewBitmap) noexcept : MetaConcept(NewType,NewBitmap) {};
+	explicit MetaConceptWith1Arg(ExactType_MC NewType,MetaConcept*& NewArg1) noexcept : MetaConcept(NewType),Arg1(NewArg1) {};
+	explicit MetaConceptWith1Arg(ExactType_MC NewType,unsigned char NewBitmap,MetaConcept*& NewArg1) noexcept : MetaConcept(NewType,NewBitmap),Arg1(NewArg1) {};
 	void operator=(const MetaConceptWith1Arg& src)
 		{	Arg1=src.Arg1;
 			MetaConcept::operator=(src);
 		};
+	MetaConceptWith1Arg& operator=(MetaConceptWith1Arg&& src) = default;
 public:
 	virtual ~MetaConceptWith1Arg() = default;
 //	virtual void CopyInto(MetaConcept*& dest) const = 0;	// can throw memory failure
 //	virtual void MoveInto(MetaConcept*& dest) = 0;	// can throw memory failure.  If it succeeds, it destroys the source.
-	void MoveIntoAux(MetaConceptWith1Arg& dest);
 
 //  Type ID functions
 //	virtual const AbstractClass* UltimateType() const = 0;
