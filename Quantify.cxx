@@ -11,36 +11,27 @@ unsigned long MetaQuantifier::NextID = 0;
 MetaQuantifier::MetaQuantifier(const char* Name, const AbstractClass* Domain, MetaQuantifierMode CreationMode)
 :	MetaConceptWith1Arg((ExactType_MC)(CreationMode+ForAll_MC)),
 	ID(NextID++),		// should not reach ULONG_MAX, and will roll over if it does
-	VariableName((!Name || !*Name) ? 0 : ZAIMONI_LEN_WITH_NULL(strlen(Name))),
+	VariableName(Name),
 	Bitmap1(None_MQ)
-{	// FORMALLY CORRECT: Kenneth Boyd, 5/18/2006
-	if (!VariableName.empty()) strcpy(VariableName,Name);
-	if (Domain) Domain->CopyInto(Arg1);
+{
+	if (Domain) Arg1 = new AbstractClass(*Domain);
 }
 
 MetaQuantifier::MetaQuantifier(const char* Name, const AbstractClass* Domain, MetaQuantifierMode CreationMode, bool Improvised)
 :	MetaConceptWith1Arg((ExactType_MC)(CreationMode+ForAll_MC)),
 	ID(NextID++),		// should not reach ULONG_MAX, and will roll over if it does
-	VariableName((!Name || !*Name) ? 0 : ZAIMONI_LEN_WITH_NULL(strlen(Name))),
+	VariableName(Name),
 	Bitmap1((Improvised)	? Improvised_MQ
 							: None_MQ)
-{	// FORMALLY CORRECT: Kenneth Boyd, 5/18/2006
-	if (!VariableName.empty()) strcpy(VariableName,Name);
-	if (Domain) Domain->CopyInto(Arg1);
+{
+	if (Domain) Arg1 = new AbstractClass(*Domain);
 }
 
 MetaQuantifier& MetaQuantifier::operator=(const MetaQuantifier& src)
-{	// FORMALLY CORRECT: 11/26/2006
-	if (VariableName.size()>=src.VariableName.size())
-		{
-		this->MetaConceptWith1Arg::operator=(src);
-		VariableName = src.VariableName;
-		}
-	else{
-		autovalarray_ptr_throws<char> Tmp(src.VariableName);
-		this->MetaConceptWith1Arg::operator=(src);
-		Tmp.MoveInto(VariableName);
-		}
+{
+	decltype(VariableName) staging(src.VariableName);
+	this->MetaConceptWith1Arg::operator=(src);
+	VariableName = std::move(staging);
 	Bitmap1 = src.Bitmap1;
 	ID = src.ID;
 	return *this;
@@ -96,12 +87,9 @@ bool MetaQuantifier::ForceUltimateType(const AbstractClass* const rhs)
 
 // Syntactical equality and inequality
 bool MetaQuantifier::EqualAux2(const MetaConcept& rhs) const
-{	// FORMALLY CORRECT: 6/19/2000
-	if (   EqualAux(static_cast<const MetaQuantifier&>(rhs))
-		&& ID==static_cast<const MetaQuantifier&>(rhs).ID
-		&& !strcmp(VariableName,static_cast<const MetaQuantifier&>(rhs).VariableName))
-		return true;
-	return false;
+{	// FORMALLY CORRECT: 2020-08-04
+	decltype(auto) VR_rhs = static_cast<const MetaQuantifier&>(rhs);
+	return EqualAux(VR_rhs) && ID== VR_rhs.ID && !strcmp(VariableName.c_str(), VR_rhs.VariableName.c_str());
 }
 
 bool MetaQuantifier::InternalDataLTAux(const MetaConcept& rhs) const
@@ -109,9 +97,6 @@ bool MetaQuantifier::InternalDataLTAux(const MetaConcept& rhs) const
 	if (!MetaConceptWith1Arg::EqualAux2(rhs)) return MetaConceptWith1Arg::InternalDataLTAux(rhs);
 	return static_cast<const MetaQuantifier&>(rhs).LexicalGT(*this);
 }
-
-bool MetaQuantifier::_IsExplicitConstant() const
-{return false;}
 
 bool MetaQuantifier::EqualAux(const MetaQuantifier& rhs) const
 {	// FORMALLY CORRECT: 6/19/2000
@@ -124,10 +109,6 @@ bool MetaQuantifier::EqualAux(const MetaQuantifier& rhs) const
 		};
 	return false;
 }
-
-//  Evaluation functions
-bool MetaQuantifier::CanEvaluate() const {return false;}
-bool MetaQuantifier::CanEvaluateToSameType() const {return false;}
 
 bool MetaQuantifier::SyntaxOK() const
 {	// FORMALLY CORRECT: 12/31/1998
@@ -144,9 +125,6 @@ bool MetaQuantifier::SyntaxOK() const
 		}
 	return false;
 }
-
-bool MetaQuantifier::Evaluate(MetaConcept*& dest) {return false;}
-bool MetaQuantifier::DestructiveEvaluateToSameType() {return false;}
 
 bool
 MetaQuantifier::MetaConceptPtrUsesThisQuantifier(const MetaConcept* lhs) const
@@ -196,20 +174,21 @@ bool MetaQuantifier::LexicalGT(const MetaQuantifier& rhs) const
 	case 5*Free_MC+Free_MC-6*ForAll_MC:
 		// the following compares are var-name lexical:
 		// free-free
-		return 0<strcmp(VariableName,rhs.VariableName);
+		return 0<strcmp(VariableName.c_str(), rhs.VariableName.c_str());
 	default:
 		return false;
 	}
 }
 
 bool MetaQuantifier::ChangeVarNameTo(const char* NewVarName)
-{	// FORMALLY CORRECT: Kenneth Boyd, 10/30/2005
-	if (NULL==NewVarName || '\0'== *NewVarName) return false;
-	const size_t name_len = strlen(NewVarName);
-	if (!VariableName.Resize(ZAIMONI_LEN_WITH_NULL(name_len)))
+{
+	if (!NewVarName || !*NewVarName) return false;
+	try {
+		VariableName = NewVarName;
+		return true;
+	} catch (std::bad_alloc&) {
 		return false;
-	strcpy(VariableName,NewVarName);
-	return true;
+	}
 }
 
 #ifndef NDEBUG

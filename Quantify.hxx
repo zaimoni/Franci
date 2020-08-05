@@ -39,7 +39,7 @@ class MetaQuantifier final : public MetaConceptWith1Arg
 private:
 	static unsigned long NextID;
 	unsigned long ID;
-	autovalarray_ptr_throws<char> VariableName;
+	std::string VariableName;
 	unsigned char Bitmap1;
 	enum Modifiers_MQ	{
 						None_MQ = 0x00,
@@ -65,15 +65,15 @@ public:
 	virtual bool ForceUltimateType(const AbstractClass* const rhs);
 //  Evaluation functions
 	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override { return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >(); }
-	virtual bool CanEvaluate() const;
-	virtual bool CanEvaluateToSameType() const;
+	bool CanEvaluate() const override { return false; }
+	bool CanEvaluateToSameType() const override { return false; }
 	virtual bool SyntaxOK() const;
-	virtual bool Evaluate(MetaConcept*& dest);		// same, or different type
-	virtual bool DestructiveEvaluateToSameType();	// overwrites itself iff returns true
+	bool Evaluate(MetaConcept*& dest) override { return false; }
+	bool DestructiveEvaluateToSameType() override { return false; }
 // text I/O functions
 	std::string to_s_start() const;
 	std::string to_s_end() const;
-	const char* ViewKeyword() const override { return VariableName; }
+	const char* ViewKeyword() const override { return VariableName.c_str(); }
 	bool MetaConceptPtrUsesThisQuantifier(const MetaConcept* lhs) const;
 	bool IsLayoutCompatible(const MetaQuantifier* rhs) const;
 
@@ -93,7 +93,7 @@ protected:
 	virtual bool EqualAux2(const MetaConcept& rhs) const;
 	virtual bool InternalDataLTAux(const MetaConcept& rhs) const;
 	std::string to_s_aux() const override;
-	virtual bool _IsExplicitConstant() const;
+	bool _IsExplicitConstant() const override { return false; }
 
 private:
 	// This is a weak-equality test
