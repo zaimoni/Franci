@@ -64,9 +64,6 @@ std::pair<Variable*, UnparsedText*> LooksLikeVarName(MetaConcept* x) {
 	return std::pair<Variable*, UnparsedText*>(0, 0);
 }
 
-kuroda::parser<MetaConcept>& Franci_parser();	// cf. InParse.cxx
-void operator_bulk_parse(kuroda::parser<MetaConcept>::sequence& symbols, size_t n); // cf InParse.cxx
-
 static auto _initMetaConceptParserArray(char*& InputBuffer)
 {
 	zaimoni::autovalarray_ptr_throws<MetaConcept*> symbols;
@@ -74,7 +71,7 @@ static auto _initMetaConceptParserArray(char*& InputBuffer)
 	// below doesn't work for FORTRAN (comments are 5 spaces with & as sixth character)
 	staging->WS_Strip();
 	Franci_parser().append_to_parse(symbols, staging);
-//	operator_bulk_parse(symbols, symbols.size());
+	force_parse(symbols);
 	return symbols;
 }
 

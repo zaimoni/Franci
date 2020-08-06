@@ -797,24 +797,6 @@ static bool flush_ClausePhrase(MetaConcept*& target) {
 	return false;
 }
 
-static std::vector<size_t> close_RightBracket(kuroda::parser<MetaConcept>::sequence& symbols, size_t n) {
-	assert(symbols.size() > n);
-	std::vector<size_t> ret;
-	if (!IsSemanticChar<']'>(symbols[n])) return ret;
-	// scan-down
-	size_t lb = n;
-	while (0 < lb) {
-		if (IsSemanticChar<'['>(symbols[--lb])) {
-			const auto working = new ParseNode(symbols, lb, n, ParseNode::CLOSED);
-			ret.push_back(lb);
-			if (1 == working->size_infix()) working->apply_all_infix(&flush_ClausePhrase);
-		}
-		// \todo: half-open ray syntax
-	}
-
-	return ret;
-}
-
 #ifdef KURODA_GRAMMAR
 static std::pair<unsigned int, size_t> get_operator(const std::vector<unsigned int>& precedence_stack, 
 	kuroda::parser<MetaConcept>::sequence& symbols, size_t n)
@@ -1007,6 +989,20 @@ static std::vector<size_t> handle_Comma(kuroda::parser<MetaConcept>::sequence& s
 	return ret;
 }
 
+#endif
+
+static bool force_parse(kuroda::parser<MetaConcept>::sequence& symbols)
+{
+	Franci_parser().finite_parse(symbols);
+#ifdef KURODA_GRAMMAR
+	operator_bulk_parse(symbols, symbols.size());
+#endif
+	return true;
+}
+
+
+#ifdef KURODA_GRAMMAR
+
 static std::vector<size_t> close_RightParenthesis(kuroda::parser<MetaConcept>::sequence& symbols, size_t n) {
 	assert(symbols.size() > n);
 	std::vector<size_t> ret;
@@ -1018,7 +1014,7 @@ static std::vector<size_t> close_RightParenthesis(kuroda::parser<MetaConcept>::s
 			const auto working = new ParseNode(symbols, lb, n, ParseNode::CLOSED);
 			ret.push_back(lb);
 			if (1 == working->size_infix()) working->apply_all_infix(&flush_ClausePhrase);
-			working->syntax_check_infix([](kuroda::parser<MetaConcept>::sequence& src) {operator_bulk_parse(src, src.size()); return true; });
+			working->syntax_check_infix(force_parse);
 		}
 		// \todo: half-open ray syntax
 	}
@@ -1026,6 +1022,25 @@ static std::vector<size_t> close_RightParenthesis(kuroda::parser<MetaConcept>::s
 }
 
 #endif
+
+static std::vector<size_t> close_RightBracket(kuroda::parser<MetaConcept>::sequence& symbols, size_t n) {
+	assert(symbols.size() > n);
+	std::vector<size_t> ret;
+	if (!IsSemanticChar<']'>(symbols[n])) return ret;
+	// scan-down
+	size_t lb = n;
+	while (0 < lb) {
+		if (IsSemanticChar<'['>(symbols[--lb])) {
+			const auto working = new ParseNode(symbols, lb, n, ParseNode::CLOSED);
+			ret.push_back(lb);
+			if (1 == working->size_infix()) working->apply_all_infix(&flush_ClausePhrase);
+			working->syntax_check_infix(force_parse);
+		}
+		// \todo: half-open ray syntax
+	}
+
+	return ret;
+}
 
 kuroda::parser<MetaConcept>& Franci_parser()
 {

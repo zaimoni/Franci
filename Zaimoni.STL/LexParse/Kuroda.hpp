@@ -63,33 +63,39 @@ namespace kuroda {
 
 		void append_to_parse(sequence& dest, T* src) {
 			if (!src) return;
-			std::vector<size_t> mutated;
-			mutated.push_back(dest.size());
+			size_t viewpoint = dest.size();
 			{ // scoping brace
 			auto hint = notice_terminal(src);
 			dest.push_back(src);
 			if (hint) {
-				size_t viewpoint = mutated.back();
-				mutated.pop_back();
 				auto check_these = hint(dest, viewpoint);
 				if (!check_these.empty()) {
 					if (2 <= check_these.size()) std::sort(check_these.begin(), check_these.end());
-					while (!mutated.empty() && mutated.back() >= check_these.front()) mutated.pop_back();
-					for (decltype(auto) i : check_these) mutated.push_back(i);
-				}
+					viewpoint = check_these.front();
+				} else if (dest.size() <= ++viewpoint) return;
 			}
 			}	// scoping brace: force hint to destruct
-			while (!mutated.empty()) {
-				size_t viewpoint = mutated.back();
-				mutated.pop_back();
-				if (dest.size() <= viewpoint) continue;	// invalid
+			do {
 				auto check_these = refine_parse(dest, viewpoint);
 				if (!check_these.empty()) {
 					if (2 <= check_these.size()) std::sort(check_these.begin(), check_these.end());
-					while (!mutated.empty() && mutated.back() >= check_these.front()) mutated.pop_back();
-					for (decltype(auto) i : check_these) mutated.push_back(i);
+					viewpoint = check_these.front();
+					continue;
 				}
-			}
+			} while (dest.size() > ++viewpoint);
+		}
+
+		void finite_parse(sequence& dest) {
+			if (dest.empty()) return;
+			size_t viewpoint = 0;
+			do {
+				auto check_these = refine_parse(dest, viewpoint);
+				if (!check_these.empty()) {
+					if (2 <= check_these.size()) std::sort(check_these.begin(), check_these.end());
+					viewpoint = check_these.front();
+					continue;
+				}
+			} while (dest.size() > ++viewpoint);
 		}
 
 	private:
