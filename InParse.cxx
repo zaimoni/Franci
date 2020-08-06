@@ -204,25 +204,6 @@ static bool _PostfilterUnparsedText(MetaConcept*& Target)
 	return false;
 }
 
-static bool _SplitTextInTwo(MetaConcept**& ArgArray,size_t i)
-{
-	assert(ArgArray);
-	assert(i<ArraySize(ArgArray));
-	if (_insert_slot_at(ArgArray,i+1,(MetaConcept*)NULL))
-		{
-		if (static_cast<UnparsedText*>(ArgArray[i])->SplitIntoTwoTexts(ArgArray[i+1]))
-			{
-			_PostfilterUnparsedText(ArgArray[i]);
-			_PostfilterUnparsedText(ArgArray[i+1]);
-			assert(ValidateArgArray(ArgArray));
-			return true;
-			}
-		_delete_idx(ArgArray,i+1);
-		assert(ValidateArgArray(ArgArray));
-		}
-	return false;
-}
-
 static bool ResolveUnparsedText(MetaConcept**& ArgArray,size_t i)
 {
 	assert(ArgArray);
@@ -758,7 +739,6 @@ static bool kuroda_ResolveUnparsedText(MetaConcept*& target)
 	auto arg = up_cast<UnparsedText>(target);
 	if (!arg) return false;
 	if (_PostfilterUnparsedText(target)) return true;
-//	UnparsedText& VR_ArgArrayIdx = *static_cast<UnparsedText*>(ArgArray[i]);	// obsolete, use arg instead
 
 	if (arg->IsLogicalInfinity()) {
 		// Infinity symbol (easy form)
@@ -775,6 +755,13 @@ static bool kuroda_ResolveUnparsedText(MetaConcept*& target)
 static bool _SplitTextInTwo(kuroda::parser<MetaConcept>::sequence& symbols, size_t i)
 {
 	assert(symbols.size() > i);
+#ifndef NDEBUG
+	{
+	auto arg = up_cast<UnparsedText>(symbols[i]);
+	assert(arg);
+	assert(arg->CanSplitIntoTwoTexts());
+	}
+#endif
 	if (symbols.InsertSlotAt(i + 1, nullptr)) {
 		if (static_cast<UnparsedText*>(symbols[i])->SplitIntoTwoTexts(symbols[i + 1])) {
 			kuroda_ResolveUnparsedText(symbols[i]);
@@ -791,29 +778,13 @@ static bool _SplitTextInTwo(kuroda::parser<MetaConcept>::sequence& symbols, size
 static std::vector<size_t> kuroda_ResolveUnparsedText2(kuroda::parser<MetaConcept>::sequence& symbols, size_t n) {
 	assert(symbols.size() > n);
 	std::vector<size_t> ret;
-	auto arg = up_cast<UnparsedText>(symbols[n]);
-	if (!arg) return ret;
-
-	if (arg->IsUnclassified()) {
-		if (_SplitTextInTwo(symbols, n)) {
+	if (auto arg = up_cast<UnparsedText>(symbols[n])) {
+		// appears to handle both historical cases (arg->IsUnclassified() and arg->IsLeadingIntegerNumeral())
+		if (arg->CanSplitIntoTwoTexts() && _SplitTextInTwo(symbols, n)) {
 			ret.push_back(n);
 			ret.push_back(n + 1);
 		}
-		return ret;
 	}
-	if (arg->IsLeadingIntegerNumeral())
-	{	// if QuasiEnglishNumeric starts with a legal IntegerNumeral string,
-		// then has a mere ID character character afterwards, then split off the numeral
-		// [this is a shorthand in math, and a grammar-fixer in English]
-		size_t SplitLength = arg->LengthOfNumericIntegerToSplitOff();
-		SUCCEED_OR_DIE(0 < SplitLength);	// data integrity error otherwise
-		if (_SplitTextInTwo(symbols, n)) {
-			ret.push_back(n);
-			ret.push_back(n + 1);
-		}
-		return ret;
-	};
-
 	return ret;
 }
 

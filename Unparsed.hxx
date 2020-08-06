@@ -157,15 +157,16 @@ public:
 	bool IsLogicalEllipsis() const;
 	bool IsLogicalInfinity() const { return IsJSEntity("infin"); }
 
-	size_t LengthOfNumericIntegerToSplitOff(void) const;
-	bool AnyNonAlphabeticChars(void) const;
+	size_t LengthOfNumericIntegerToSplitOff(void) const;	// 2020-08-06 dead function?
+	bool AnyNonAlphabeticChars() const;	// 2020-08-06 dead function?
 
-	size_t LengthOfQuasiEnglishNumericID(void) const;
-	size_t LengthOfQuasiSymbolID(void) const;
-	size_t LengthOfHTMLStartTag(void) const;
-	size_t LengthOfHTMLTerminalTag(void) const;
+	size_t LengthOfQuasiEnglishNumericID() const;	// 2020-08-06 dead function?
+	size_t LengthOfQuasiSymbolID() const;
+	size_t LengthOfHTMLStartTag() const;	// 2020-08-06 dead function?
+	size_t LengthOfHTMLTerminalTag() const;	// 2020-08-06 dead function?
 
 	// pattern processing
+	size_t CanSplitIntoTwoTexts() const;
 	bool SplitIntoTwoTexts(MetaConcept*& Text2);
 	void ZLSTarget(char const* Target, size_t length);
 	void ZLSTarget(char const* Target);

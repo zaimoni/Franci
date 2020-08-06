@@ -653,59 +653,53 @@ UnparsedText::LengthOfNumericIntegerToSplitOff(void) const
 	return IntegerNumeral::LengthOfLegalIntegerSubstring(Text);
 }
 
-bool
-UnparsedText::AnyNonAlphabeticChars(void) const
+bool UnparsedText::AnyNonAlphabeticChars() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 12/17/2004
 	return string_nand(Text,IsAlphabeticChar);
 }
 
-size_t
-UnparsedText::LengthOfQuasiEnglishNumericID(void) const
+size_t UnparsedText::LengthOfQuasiEnglishNumericID() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 5/23/1999
-	if (IsUnclassified())
-		{
+	if (IsUnclassified()) {
 		const size_t TextLength = strlen(Text);
 		size_t i = 0;
 		while(i<TextLength && IsQuasiNumericIDChar(Text[i])) ++i;
 		return i;
-		}
-	else if (IsQuasiEnglishNumeric())
-		return strlen(Text);
+	} else if (IsQuasiEnglishNumeric()) return strlen(Text);
 	return 0;
 }
 
-size_t
-UnparsedText::LengthOfQuasiSymbolID(void) const
+size_t UnparsedText::LengthOfQuasiSymbolID() const
 {	// FORMALLY CORRECT: Kenneth Boyd, 2/7/2000
-	if (IsUnclassified())
-		{
+	if (IsUnclassified()) {
 		const size_t TextLength = strlen(Text);
 		size_t i = 0;
 		while(i<TextLength && IsQuasiSymbolIDChar(Text[i])) ++i;
 		return i;
-		}
-	else if (IsSymbol())
-		return strlen(Text);
+	} else if (IsSymbol()) return strlen(Text);
 	return 0;
 }
 
-size_t
-UnparsedText::LengthOfHTMLStartTag(void) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 8/5/2001
-	if (IsHTMLStartTag()) return strlen(Text)+2;
-	return 0;
+size_t UnparsedText::LengthOfHTMLStartTag() const
+{
+	return IsHTMLStartTag() ? strlen(Text) + 2 : 0;
 }
 
-size_t
-UnparsedText::LengthOfHTMLTerminalTag(void) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 8/10/2000
-	if (IsHTMLTerminalTag()) return strlen(Text)+3;
-	return 0;
+size_t UnparsedText::LengthOfHTMLTerminalTag() const
+{
+	return IsHTMLTerminalTag() ? strlen(Text) + 3 : 0;
 }
 
 // pattern processing
-bool
-UnparsedText::SplitIntoTwoTexts(MetaConcept*& Text2)
+size_t UnparsedText::CanSplitIntoTwoTexts() const
+{
+	if (Text.empty()) return false;
+	unsigned long Flags = 0;
+	const size_t LengthOfText1 = FranciLexer.UnfilteredNextToken(Text, Flags);
+	return (0 < LengthOfText1 && strlen(Text) > LengthOfText1) ? LengthOfText1 : 0;
+}
+
+bool UnparsedText::SplitIntoTwoTexts(MetaConcept*& Text2)
 {	// FORMALLY CORRECT: Kenneth Boyd, 5/22/2002
 	// this routine, if it returns false, leaves everything unchanged (we will lose 
 	// prior contents of Text2, regardless).
