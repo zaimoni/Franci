@@ -596,9 +596,9 @@ void ConstraintForSituationAux2(kuroda::parser<MetaConcept>::sequence& ArgArray,
 
 bool ConstraintForSituation_handler(char*& InputBuffer)
 {	// FORMALLY CORRECT: Kenneth Boyd, 5/19/2006
+	NewVarsOnThisPass.clear();
 	auto ArgArray(_initMetaConceptParserArray(InputBuffer));
 
-	NewVarsOnThisPass.clear();
 	try	{
 		while(InterpretOneStage(ArgArray));
 		}
@@ -659,9 +659,9 @@ static bool NewVarsForSituation_handler(char*& InputBuffer)
 	if (NoMoreVarsForSituation)
 		INFORM("But we already agreed that there would be no more variables.\n");
 	else{
+		NewVarsOnThisPass.clear();
 		auto ArgArray(_initMetaConceptParserArray(InputBuffer));
 
-		NewVarsOnThisPass.clear();
 		try	{
 			while(InterpretOneStage(ArgArray));
 			}
@@ -728,9 +728,9 @@ NoMoreVarsForSituation_handler(char*& InputBuffer)
 
 bool DefineVarOrRelation_handler(char*& InputBuffer)
 {
+	NewVarsOnThisPass.clear();
 	auto ArgArray(_initMetaConceptParserArray(InputBuffer));
 
-	NewVarsOnThisPass.clear();
 	try	{
 		while(InterpretOneStage(ArgArray));
 		}
@@ -759,9 +759,9 @@ bool DefineVarOrRelation_handler(char*& InputBuffer)
 bool SituationHasTimeLimit_handler(char*& InputBuffer)
 {	// Franci must diagnose seconds/minutes/hours, and handle negative or zero correctly.
 	// Franci must also impose plausibility checks.
+	NewVarsOnThisPass.clear();
 	auto ArgArray(_initMetaConceptParserArray(InputBuffer));
 
-	NewVarsOnThisPass.clear();
 	try	{
 		while(InterpretOneStage(ArgArray));
 		}
@@ -806,9 +806,9 @@ EvaluateSituation_handler(char*& InputBuffer)
 
 bool EvaluateExpression_handler(char*& InputBuffer)
 {	// FORMALLY CORRECT: 2020-07-31
+	NewVarsOnThisPass.clear();
 	auto ArgArray(_initMetaConceptParserArray(InputBuffer));
 
-	NewVarsOnThisPass.clear();
 	try	{
 		while(InterpretOneStage(ArgArray));
 		}
@@ -899,9 +899,9 @@ bool EvaluateExpression_handler(char*& InputBuffer)
 bool WhatIf_handler(char*& InputBuffer)
 {	// FORMALLY CORRECT: 2020-07-31
 	//! \todo this handler should be blocked by a currently evaluating situation
+	NewVarsOnThisPass.clear();
 	auto ArgArray(_initMetaConceptParserArray(InputBuffer));
 
-	NewVarsOnThisPass.clear();
 	try	{
 		while(InterpretOneStage(ArgArray));
 		}
