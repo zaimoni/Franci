@@ -11,7 +11,7 @@
    { MINA, MAXA, NAME##_MC, FLAGS, #NAME, (char)(GRAMMAR) }
 
 //! \todo retrofit BOOST_STATIC_ASSERT tests; e.g., only AND, OR have AnnihilatorKey set
-const MetaConceptVFT MetaConceptLookUp[MaxSemanticIdx_MC+1]
+const MetaConceptVFT MetaConceptLookUp[]
   = { DECLARE_METACONCEPT(0,0,Unknown,0,0),
 	  DECLARE_METACONCEPT(0,0,TruthValue,0,Adjective_LT),
 	  DECLARE_METACONCEPT(0,0,IntegerNumeral,0,ProperNoun_LT | Adjective_LT),
@@ -82,7 +82,9 @@ const MetaConceptVFT MetaConceptLookUp[MaxSemanticIdx_MC+1]
 	  DECLARE_METACONCEPT(2,ULONG_MAX,DISTINCTFROMALLOF_ClauseN,SimplePhraseClauseTransition_LITBMP1MC,Verb_LT),
 	  DECLARE_METACONCEPT(2,ULONG_MAX,NOTALLDISTINCT_ClauseN,Symmetric_LITBMP1MC | SimplePhraseClauseTransition_LITBMP1MC,Verb_LT),
 	  DECLARE_METACONCEPT(2,ULONG_MAX,NOTALLEQUAL_ClauseN,Symmetric_LITBMP1MC | SimplePhraseClauseTransition_LITBMP1MC,Verb_LT),	// end n-ary clause block
-	 };	// end MetaQuantifier block
+	  DECLARE_METACONCEPT(0,ULONG_MAX,ParseNode,0,0)
+};
+static_assert(sizeof(MetaConceptLookUp) / sizeof(*MetaConceptLookUp) == UB_MC);
 
 #undef DECLARE_METACONCEPT
 

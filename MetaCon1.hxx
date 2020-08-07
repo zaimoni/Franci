@@ -129,10 +129,11 @@ enum ExactType_MC	{
 					NOTALLDISTINCT_ClauseN_MC,
 					NOTALLEQUAL_ClauseN_MC,	// 67
 					ParseNode_MC,
+					UB_MC,
 					// end n-ary clause block
 					// semantic indexes
 					MinSemanticIdx_MC	= 1,					// minimum index with meaning
-					MaxSemanticIdx_MC	= NOTALLEQUAL_ClauseN_MC,	// maximum index with meaning
+					MaxSemanticIdx_MC	= UB_MC-1,	// maximum index with meaning
 					MinPhrase1Idx_MC	= IN_Phrase1_MC,	// minimum index for Phrase1Ary
 					MaxPhrase1Idx_MC	= FACTORIAL_Phrase1_MC,  // maximum index for Phrase1Ary
 					MinPhrase2Idx_MC	= SUM_Phrase2_MC,	// minimum index for Phrase2Ary

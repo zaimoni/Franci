@@ -835,7 +835,7 @@ static bool CanCoerceArgType(const MetaConcept* const Arg, const AbstractClass& 
 static ParseNode* IsParenthesesWrapped(MetaConcept* arg)
 {
 	if (decltype(auto) node = up_cast<ParseNode>(arg)) {
-		if (IsSemanticChar<'('>(node->c_anchor()) && IsSemanticChar<')'>(node->c_anchor()) && 1 == node->size_infix()) return node;
+		if (IsSemanticChar<'('>(node->c_anchor()) && IsSemanticChar<')'>(node->c_post_anchor()) && 1 == node->size_infix()) return node;
 	}
 	return 0;
 }
@@ -991,7 +991,7 @@ static std::vector<size_t> handle_Comma(kuroda::parser<MetaConcept>::sequence& s
 
 #endif
 
-static bool force_parse(kuroda::parser<MetaConcept>::sequence& symbols)
+bool force_parse(kuroda::parser<MetaConcept>::sequence& symbols)
 {
 	Franci_parser().finite_parse(symbols);
 #ifdef KURODA_GRAMMAR
