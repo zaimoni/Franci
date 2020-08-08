@@ -811,6 +811,8 @@ static std::pair<unsigned int, size_t> get_operator(const std::vector<unsigned i
 		if (!up_cast<UnparsedText>(symbols[offset])) continue;
 		switch(x)
 		{
+		// prefix unary operations: ok to handle as left-to-right
+		case MetaConcept::Precedence::UnaryAddition:
 		// no priority for this...pretend left-to-right for now
 		case MetaConcept::Precedence::Ellipsis:
 		// priority for these is left to right
@@ -873,6 +875,26 @@ static bool interpret_operator(const std::pair<unsigned int, size_t>& opcode, ku
 			return true;
 		}
 		break;
+	case MetaConcept::Precedence::UnaryAddition:
+		{	// check for unary -
+		decltype(auto) R_proxy = UnwrapParentheses(symbols[opcode.second + 1]);
+		decltype(auto) R_test = R_proxy.first ? R_proxy.first : symbols[opcode.second + 1];
+		if (RejectTextToVar(R_test)) return false;
+		if (!CanCoerceArgType(R_test, ClassAdditionDefined)) return false;
+		const auto test = up_cast<UnparsedText>(symbols[opcode.second]);
+		assert(test);	// invariant violation
+		const bool is_subtraction = test->EndsWith('-');	// STL idiom would be '=' == test->back();
+		if (R_proxy.second) {
+			R_proxy.second->infix_reset(0);
+			delete symbols[opcode.second + 1];
+			symbols[opcode.second + 1] = R_proxy.first;
+		}
+		if (!CoerceArgType(symbols[opcode.second + 1], ClassAdditionDefined)) return false;
+		if (is_subtraction) symbols[opcode.second + 1]->SelfInverse(StdAddition_MC);
+		if (1 == test->text_size()) symbols.DeleteNSlotsAt(1, opcode.second);	// possibly incorrect for chemical ions (+ discriminates between positive-ion and isotope number)
+		else test->TruncateByN(1);
+		}
+		return true;
 	case MetaConcept::Precedence::Addition:
 		// we only handle binary infix addition here
 		if (lb >= opcode.second || ub <= opcode.second) return false;
@@ -886,6 +908,9 @@ static bool interpret_operator(const std::pair<unsigned int, size_t>& opcode, ku
 		// this only works if the corresponding phrase is of a reasonable ultimate type
 		if (!CanCoerceArgType(L_test, ClassAdditionDefined)) return false;
 		if (!CanCoerceArgType(R_test, ClassAdditionDefined)) return false;
+		const auto test = up_cast<UnparsedText>(symbols[opcode.second]);
+		assert(test);	// invariant violation
+		const bool is_subtraction = test->EndsWith('-');	// STL idiom would be '=' == test->back();
 		if (L_proxy.second) {
 			L_proxy.second->infix_reset(0);
 			delete symbols[opcode.second - 1];
@@ -898,6 +923,7 @@ static bool interpret_operator(const std::pair<unsigned int, size_t>& opcode, ku
 		}
 		if (!CoerceArgType(symbols[opcode.second - 1], ClassAdditionDefined)) return false;	// \todo would like these to throw instead
 		if (!CoerceArgType(symbols[opcode.second + 1], ClassAdditionDefined)) return false;
+		if (is_subtraction) symbols[opcode.second + 1]->SelfInverse(StdAddition_MC);
 
 		zaimoni::weakautovalarray_ptr_throws<MetaConcept*> args(2);
 		args[0] = symbols[opcode.second - 1];
@@ -955,16 +981,23 @@ static bool interpret_operator(const std::pair<unsigned int, size_t>& opcode, ku
 	return false;
 }
 
-static auto make_precedence_stack(kuroda::parser<MetaConcept>::sequence& symbols, size_t n)
+static auto make_precedence_stack(const kuroda::parser<MetaConcept>::sequence& symbols, size_t n)
 {
 	std::vector<unsigned int> precedence_stack;
 	size_t lb = n;
 	while (0 < lb) {
-		auto prec = symbols[--lb]->OpPrecedence();
+		decltype(auto) text = up_cast<UnparsedText>(symbols[--lb]);
+		if (!text) {
+			precedence_stack.push_back(0);	// already parsed
+			continue;
+		}
+		auto prec = text->OpPrecedence();
 		if (MetaConcept::Precedence::Comma == prec) break;
 		if (MetaConcept::Precedence::LParenthesis == prec) break;
+		if (MetaConcept::Precedence::Addition < prec && MetaConcept::Precedence::Addition == precedence_stack.back()) precedence_stack.back() = MetaConcept::Precedence::UnaryAddition;
 		precedence_stack.push_back(prec);
 	}
+	if (MetaConcept::Precedence::Addition == precedence_stack.back()) precedence_stack.back() = MetaConcept::Precedence::UnaryAddition;
 	return precedence_stack;
 }
 
@@ -1021,6 +1054,25 @@ static std::vector<size_t> close_RightParenthesis(kuroda::parser<MetaConcept>::s
 	return ret;
 }
 
+static std::vector<size_t> close_HTMLterminal(kuroda::parser<MetaConcept>::sequence& symbols, size_t n) {
+	assert(symbols.size() > n);
+	std::vector<size_t> ret;
+	decltype(auto) kw = IsHTMLTerminalTag(symbols[n]);
+	if (!kw) return ret;
+
+	// scan-down
+	size_t lb = n;
+	while (0 < lb) {
+		if (IsHTMLStartTag(symbols[--lb], kw)) {
+			const auto working = new ParseNode(symbols, lb, n, ParseNode::CLOSED);
+			ret.push_back(lb);
+			if (1 == working->size_infix()) working->apply_all_infix(&flush_ClausePhrase);
+			working->syntax_check_infix(force_parse);
+		}
+	}
+	return ret;
+}
+
 #endif
 
 static std::vector<size_t> close_RightBracket(kuroda::parser<MetaConcept>::sequence& symbols, size_t n) {
@@ -1052,6 +1104,7 @@ kuroda::parser<MetaConcept>& Franci_parser()
 		ooao->register_build_nonterminal(&close_RightBracket);
 #ifdef KURODA_GRAMMAR
 		ooao->register_build_nonterminal(&close_RightParenthesis);
+		ooao->register_build_nonterminal(&close_HTMLterminal);
 		ooao->register_build_nonterminal(&handle_Comma);
 #endif
 	}

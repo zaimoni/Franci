@@ -339,6 +339,7 @@ const UnparsedText& UnparsedText::fast_up_reference(const MetaConcept* src)
 
 unsigned int UnparsedText::OpPrecedence() const
 {
+//	if (IsUnclassified()) return Precedence::None; // parse first
 	if (IsLogicalMultiplicationSign()) return Precedence::Multiplication;
 	if (IsLogicalPlusSign()) return Precedence::Addition;
 	if (IsLogicalEllipsis()) return Precedence::Ellipsis;
@@ -346,6 +347,10 @@ unsigned int UnparsedText::OpPrecedence() const
 	if (IsSemanticChar()) {
 		if (strchr("([{", Text[0])) return Precedence::LParenthesis;
 		if (',' == Text[0]) return Precedence::Comma;
+	}
+	// backstop: arithmetic + and -
+	if (EndsWith('+') || EndsWith('-')) {
+		return 1 == Text.size() ? Precedence::Addition : Precedence::UnaryAddition;
 	}
 	return Precedence::None;
 }
@@ -547,41 +552,30 @@ UnparsedText::IsInfixSymbol(const char* Target) const
 	return false;
 }
 
-bool
-UnparsedText::IsHTMLStartTag(const char* Target) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 8/5/2001
-	if (IsHTMLStartTag() && (char*)NULL!=Text)
-		{
-		const size_t TextLength = strlen(Text);
-		if (	!strnicmp(Text,Target,strlen(Target))
-			&& (TextLength==strlen(Target) || ' '==Text[strlen(Target)]))
+bool UnparsedText::IsHTMLStartTag(const char* Target) const
+{
+	if (IsHTMLStartTag() && !Text.empty()) {
+		const size_t targetLength = strlen(Target);
+		if (   !strnicmp(Text, Target, targetLength)
+			&& (strlen(Text) == targetLength || ' ' == Text[targetLength]))
 			return true;
-		}
+	}
 	return false;
 }
 
-bool
-UnparsedText::IsHTMLTerminalTag(const char* Target) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 8/5/2001
-	if (IsHTMLTerminalTag() && !stricmp(Text,Target))
-		return true;
-	return false;
+bool UnparsedText::IsHTMLTerminalTag(const char* Target) const
+{
+	return IsHTMLTerminalTag() && !stricmp(Text,Target);
 }
 
-bool
-UnparsedText::IsJSEntity(const char* Target) const
-{	// FORMALLY CORRECT: 12/29/2000
-	if (IsJSEntity() && !strcmp(Text,Target))
-		return true;
-	return false;
+bool UnparsedText::IsJSEntity(const char* Target) const
+{
+	return IsJSEntity() && !strcmp(Text,Target);
 }
 
-bool
-UnparsedText::IsJSCharEntity(const char* Target) const
-{	// FORMALLY CORRECT: 7/27/2001
-	if (IsJSCharEntity() && !strcmp(Text,Target))
-		return true;
-	return false;
+bool UnparsedText::IsJSCharEntity(const char* Target) const
+{
+	return IsJSCharEntity() && !strcmp(Text,Target);
 }
 
 bool UnparsedText::IsMultiplicationSymbol() const
@@ -1005,13 +999,10 @@ UnparsedText::StartsWith(const char* const Target) const
 	return 0==strncmp(Text,Target,strlen(Target));
 }
 
-bool
-UnparsedText::EndsWith(char Target) const
-{	// FORMALLY CORRECT: Kenneth Boyd, 8/1/2002
-	const size_t TextLength = (NULL==Text) ? 0 : strlen(Text);
-	if (0<TextLength && Target==Text[TextLength-1])
-		return true;
-	return false;
+bool UnparsedText::EndsWith(char Target) const
+{
+	const size_t TextLength = Text.empty() ? 0 : strlen(Text);
+	return 0<TextLength && Target==Text[TextLength-1];
 }
 
 bool

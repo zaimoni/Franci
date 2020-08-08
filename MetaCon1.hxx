@@ -262,6 +262,7 @@ public:
 		Ellipsis,
 		Addition,
 		Multiplication,
+		UnaryAddition,
 		LParenthesis	// unconditional left-expression stop
 	};
 

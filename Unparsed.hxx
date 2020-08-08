@@ -24,24 +24,24 @@ public:
 	typedef bool Recognize(const char*);
 	typedef bool Parse(MetaConcept*&, const char*);
 
-	enum SelfClassify_UT	{
-							None_UT = 0x00,					// LangConf
-							SemanticChar_UT = 0x01,			// LangConf
-							LeadingIntegerNumeral_UT = 0x02,
-							QuasiSymbol_UT = 0x04,
-							QuasiEnglish_UT = 0x08,
-							VarName_UT		= 0x10,
-							LogicKeyword_UT	= 0x20,
-							PredCalcKeyword_UT	= 0x40,
-							PrefixKeyword_UT	= 0x80,
-							InfixSymbol_UT	= 0x100,
-							HTMLTerminalTag_UT	= 0x200,
-							JSEntity_UT = 0x400,
-							JSCharEntity_UT = 0x800,
-							HTMLStartTag_UT = 0x1000,
-							XMLSelfEndTag_UT = 0x2000,
-							Uninterpreted_UT = 0x8000		// LangConf
-							};
+	enum SelfClassify_UT {
+		None_UT = 0x00,					// LangConf
+		SemanticChar_UT = 0x01,			// LangConf
+		LeadingIntegerNumeral_UT = 0x02,
+		QuasiSymbol_UT = 0x04,
+		QuasiEnglish_UT = 0x08,
+		VarName_UT = 0x10,
+		LogicKeyword_UT = 0x20,
+		PredCalcKeyword_UT = 0x40,
+		PrefixKeyword_UT = 0x80,
+		InfixSymbol_UT = 0x100,
+		HTMLTerminalTag_UT = 0x200,
+		JSEntity_UT = 0x400,
+		JSCharEntity_UT = 0x800,
+		HTMLStartTag_UT = 0x1000,
+		XMLSelfEndTag_UT = 0x2000,
+		Uninterpreted_UT = 0x8000		// LangConf
+	};
 
 	size_t LogicalLineNumber;					// default 0, not manipulated by UnparsedText
 	size_t LogicalLineOrigin;					// default 0, not manipulated by UnparsedText
@@ -55,10 +55,10 @@ private:
 
 public:
 	explicit UnparsedText(char*& src);
-	UnparsedText(char*& src,bool Interpreted);
+	UnparsedText(char*& src, bool Interpreted);
 
 protected:
-	UnparsedText(char*& src,unsigned short NewSelfClassify);
+	UnparsedText(char*& src, unsigned short NewSelfClassify);
 
 public:
 	UnparsedText(const UnparsedText& src) = default;
@@ -67,9 +67,9 @@ public:
 	UnparsedText& operator=(UnparsedText&& src) = default;
 	~UnparsedText() = default;
 
-	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
-	void CopyInto(UnparsedText*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};
-	void MoveInto(MetaConcept*& dest) override { zaimoni::MoveIntoV2(std::move(*this),dest); }
+	void CopyInto(MetaConcept*& dest) const override { CopyInto_ForceSyntaxOK(*this, dest); };	// can throw memory failure
+	void CopyInto(UnparsedText*& dest) const { CopyInto_ForceSyntaxOK(*this, dest); };
+	void MoveInto(MetaConcept*& dest) override { zaimoni::MoveIntoV2(std::move(*this), dest); }
 	void MoveInto(UnparsedText*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
 
 	static UnparsedText& up_reference(MetaConcept* src);
@@ -79,19 +79,20 @@ public:
 	static UnparsedText& fast_up_reference(MetaConcept* src);
 	static const UnparsedText& fast_up_reference(const MetaConcept* src);
 
-//  Type ID functions
+	//  Type ID functions
 	const AbstractClass* UltimateType() const override { return 0; }	// untyped i.e. free
 	constexpr static bool IsType(ExactType_MC x) { return UnparsedText_MC == x; }
 	unsigned int OpPrecedence() const override;
-//  Evaluation functions
+	//  Evaluation functions
 	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override;
 	virtual bool CanEvaluate() const;
-	virtual bool CanEvaluateToSameType() const;		
+	virtual bool CanEvaluateToSameType() const;
 	virtual bool SyntaxOK() const;
 	virtual bool Evaluate(MetaConcept*& dest);		// same, or different type
 	virtual bool DestructiveEvaluateToSameType();	// overwrites itself iff returns true
 // text I/O functions
 	const char* ViewKeyword() const override { return Text; }
+	size_t text_size() const { return Text.size(); }
 	void SwapWith(UnparsedText& Target);
 // Pattern analysis: returns true if pattern found, and then fills the bounding coordinates
 //  Quotation marks do not include leading/trailing spaces, if any
@@ -130,11 +131,11 @@ public:
 	bool IsInfixSymbol(const char* Target) const;
 	inline bool IsHTMLStartTag(void) const {return HTMLStartTag_UT==SelfClassifyBitmap;};
 	bool IsHTMLStartTag(const char* Target) const;
-	inline bool IsHTMLTerminalTag(void) const {return HTMLTerminalTag_UT==SelfClassifyBitmap;};
+	bool IsHTMLTerminalTag() const { return HTMLTerminalTag_UT == SelfClassifyBitmap; }
 	bool IsHTMLTerminalTag(const char* Target) const;
-	inline bool IsJSEntity(void) const {return JSEntity_UT==SelfClassifyBitmap;};
+	bool IsJSEntity() const { return JSEntity_UT == SelfClassifyBitmap; }
 	bool IsJSEntity(const char* Target) const;
-	inline bool IsJSCharEntity(void) const {return JSCharEntity_UT==SelfClassifyBitmap;};
+	bool IsJSCharEntity() const { return JSCharEntity_UT == SelfClassifyBitmap; }
 	bool IsJSCharEntity(const char* Target) const;
 	inline bool MustBeParsedInContext(void) const {return (HTMLTerminalTag_UT | JSEntity_UT | JSCharEntity_UT) & SelfClassifyBitmap;}
 	inline bool IsUninterpreted(void) const {return (Uninterpreted_UT & SelfClassifyBitmap) ? true : false;};
@@ -214,6 +215,20 @@ private:
 template<char c> bool IsSemanticChar(const MetaConcept* x) {
 	if (const auto src = up_cast<UnparsedText>(x)) return src->IsSemanticChar(c);
 	return false;
+}
+
+inline bool IsHTMLStartTag(const MetaConcept* x, const char* Target)
+{
+	if (const auto src = up_cast<UnparsedText>(x)) return src->IsHTMLStartTag(Target);
+	return false;
+}
+
+inline const char* IsHTMLTerminalTag(const MetaConcept* x)
+{
+	if (const auto src = up_cast<UnparsedText>(x)) {
+		if (src->IsHTMLTerminalTag()) return src->ViewKeyword();
+	}
+	return 0;
 }
 
 inline bool RejectTextToVar(const MetaConcept* x)
