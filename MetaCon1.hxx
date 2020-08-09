@@ -262,7 +262,8 @@ public:
 		Ellipsis,
 		Addition,
 		Multiplication,
-		UnaryAddition,
+		UnaryAddition,	// start unary operators
+		Power,
 		LParenthesis	// unconditional left-expression stop
 	};
 

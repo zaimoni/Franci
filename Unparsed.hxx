@@ -231,6 +231,13 @@ inline const char* IsHTMLTerminalTag(const MetaConcept* x)
 	return 0;
 }
 
+inline bool IsHTMLTerminalTag(const MetaConcept* x, const char* Target)
+{
+	if (const auto src = up_cast<UnparsedText>(x)) return src->IsHTMLTerminalTag(Target);
+	return false;
+}
+
+
 inline bool RejectTextToVar(const MetaConcept* x)
 {
 	if (const auto src = up_cast<UnparsedText>(x)) return !src->IsQuasiEnglishOrVarName();

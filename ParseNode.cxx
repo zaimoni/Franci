@@ -1,4 +1,5 @@
 #include "ParseNode.hxx"
+#include "Unparsed.hxx"
 
 ParseNode::ParseNode(kuroda::parser<MetaConcept>::sequence& dest, size_t lb, size_t ub, slice mode)
 : MetaConcept(ParseNode_MC)
@@ -80,6 +81,14 @@ MetaConcept* ParseNode::ArgN(size_t n) {
 		if (_postfix.size() > n) return _postfix[n];
 		n -= _postfix.size();
 	}
+	return 0;
+}
+
+unsigned int ParseNode::OpPrecedence() const
+{
+#ifdef ALLOW_POWER_PRECEDENCE
+	if (IsHTMLStartTag(_anchor, "sup") && IsHTMLTerminalTag(_post_anchor, "sup")) return MetaConcept::Precedence::Power;
+#endif
 	return 0;
 }
 

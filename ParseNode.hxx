@@ -61,6 +61,7 @@ public:
 	bool syntax_check_infix(std::function<bool(kuroda::parser<MetaConcept>::sequence&)> xform) { return xform(_infix); }
 
 	bool IsAbstractClassDomain() const override { return false; }
+	unsigned int OpPrecedence() const override;
 	//  Evaluation functions
 	evalspec canEvaluate() const override { return evalspec(); }
 	bool CanEvaluate() const override { return false; }
@@ -83,5 +84,7 @@ public:
 protected:
 	std::string to_s_aux() const override;
 };
+
+// #define ALLOW_POWER_PRECEDENCE 1
 
 #endif

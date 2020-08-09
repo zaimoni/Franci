@@ -811,6 +811,12 @@ static std::pair<unsigned int, size_t> get_operator(const std::vector<unsigned i
 		if (!up_cast<UnparsedText>(symbols[offset])) continue;
 		switch(x)
 		{
+		// suffix unary operations: priority is right to left
+		case MetaConcept::Precedence::Power:
+			if (x == ret.first) continue;
+			ret.first = x;
+			ret.second = n - i;
+			break;
 		// prefix unary operations: ok to handle as left-to-right
 		case MetaConcept::Precedence::UnaryAddition:
 		// no priority for this...pretend left-to-right for now
@@ -875,7 +881,29 @@ static bool interpret_operator(const std::pair<unsigned int, size_t>& opcode, ku
 			return true;
 		}
 		break;
+#ifdef ALLOW_POWER_PRECEDENCE
+	case MetaConcept::Precedence::Power:
+		if (lb >= opcode.second) return false;
+		{	// Heavily overloaded syntax.  This is the generic "superscripted to right", a postfix operator
+		decltype(auto) L_proxy = UnwrapParentheses(symbols[opcode.second - 1]);
+		decltype(auto) L_test = L_proxy.first ? L_proxy.first : symbols[opcode.second - 1];
+		if (RejectTextToVar(L_test)) return false;
+		// this only works if the corresponding phrase is of a reasonable ultimate type
+		if (!CanCoerceArgType(L_test, ClassMultiplicationDefined)) return false;	// fails for chemical elements
+		const auto test = up_cast<ParseNode>(symbols[opcode.second]);
+		assert(test);	// invariant violation
+		// ....
+		if (L_proxy.second) {
+			L_proxy.second->infix_reset(0);
+			delete symbols[opcode.second - 1];
+			symbols[opcode.second - 1] = L_proxy.first;
+		}
+		if (!CoerceArgType(symbols[opcode.second - 1], ClassMultiplicationDefined)) return false;	// \todo would like these to throw instead
+		}
+		break;
+#endif
 	case MetaConcept::Precedence::UnaryAddition:
+		if (ub <= opcode.second) return false;
 		{	// check for unary -
 		decltype(auto) R_proxy = UnwrapParentheses(symbols[opcode.second + 1]);
 		decltype(auto) R_test = R_proxy.first ? R_proxy.first : symbols[opcode.second + 1];
