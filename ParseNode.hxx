@@ -59,6 +59,7 @@ public:
 
 	size_t apply_all_infix(std::function<bool(MetaConcept*&)> xform);
 	bool syntax_check_infix(std::function<bool(kuroda::parser<MetaConcept>::sequence&)> xform) { return xform(_infix); }
+	bool is_parentheses_wrapped() const;
 
 	bool IsAbstractClassDomain() const override { return false; }
 	unsigned int OpPrecedence() const override;
@@ -84,6 +85,70 @@ public:
 protected:
 	std::string to_s_aux() const override;
 };
+
+inline const ParseNode* IsParenthesesWrapped(const MetaConcept* arg)
+{
+	if (decltype(auto) node = up_cast<ParseNode>(arg)) {
+		if (node->is_parentheses_wrapped()) return node;
+	}
+	return 0;
+}
+
+inline ParseNode* IsParenthesesWrapped(MetaConcept* arg)
+{
+	if (decltype(auto) node = up_cast<ParseNode>(arg)) {
+		if (node->is_parentheses_wrapped()) return node;
+	}
+	return 0;
+}
+
+inline std::pair<MetaConcept*, ParseNode*> UnwrapParentheses(MetaConcept*& arg)
+{
+	while (decltype(auto) node = IsParenthesesWrapped(arg)) {
+		if (decltype(auto) inner_node = IsParenthesesWrapped(node->infix_N(0))) {
+			node->infix_reset(0);
+			delete arg;
+			arg = inner_node;
+			continue;
+		}
+		return std::pair(node->infix_N(0), node);
+	}
+	return std::pair(nullptr, nullptr);
+}
+
+bool TestThroughParenthesesWrapping(const MetaConcept* arg, std::function<bool(const MetaConcept&)> test)
+{
+	while(decltype(auto) node = IsParenthesesWrapped(arg)) arg = node->c_infix_N(0);
+	return test(*arg);
+}
+
+bool ApplyThroughParenthesesWrapping(MetaConcept* arg, std::function<bool(MetaConcept&)> xform)
+{
+	while (decltype(auto) node = IsParenthesesWrapped(arg)) arg = node->infix_N(0);
+	return xform(*arg);
+}
+
+bool ApplyUnwrapAllParentheses(MetaConcept*& arg, std::function<bool(MetaConcept&)> xform)
+{
+	auto test = UnwrapParentheses(arg);
+	if (test.first) {
+		test.second->infix_reset(0);
+		delete arg;
+		arg = test.first;
+	}
+	return xform(*arg);
+}
+
+bool ApplyUnwrapAllParentheses(MetaConcept*& arg, std::function<bool(MetaConcept*&)> xform)
+{
+	auto test = UnwrapParentheses(arg);
+	if (test.first) {
+		test.second->infix_reset(0);
+		delete arg;
+		arg = test.first;
+	}
+	return xform(arg);
+}
 
 // #define ALLOW_POWER_PRECEDENCE 1
 

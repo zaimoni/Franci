@@ -92,6 +92,11 @@ unsigned int ParseNode::OpPrecedence() const
 	return 0;
 }
 
+bool ParseNode::is_parentheses_wrapped() const
+{
+	return IsSemanticChar<'('>(_anchor) && IsSemanticChar<')'>(_post_anchor) && 1 == _infix.size();
+}
+
 size_t ParseNode::apply_all_infix(std::function<bool(MetaConcept*&)> xform)
 {
 	size_t ret = 0;

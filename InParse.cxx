@@ -840,28 +840,6 @@ static bool CanCoerceArgType(const MetaConcept* const Arg, const AbstractClass& 
 	return Arg->IsPotentialVarName();
 }
 
-static ParseNode* IsParenthesesWrapped(MetaConcept* arg)
-{
-	if (decltype(auto) node = up_cast<ParseNode>(arg)) {
-		if (IsSemanticChar<'('>(node->c_anchor()) && IsSemanticChar<')'>(node->c_post_anchor()) && 1 == node->size_infix()) return node;
-	}
-	return 0;
-}
-
-static std::pair<MetaConcept*, ParseNode*> UnwrapParentheses(MetaConcept*& arg)
-{
-	while (decltype(auto) node = IsParenthesesWrapped(arg)) {
-		if (decltype(auto) inner_node = IsParenthesesWrapped(node->infix_N(0))) {
-			node->infix_reset(0);
-			delete arg;
-			arg = inner_node;
-			continue;
-		}
-		return std::pair(node->infix_N(0), node);
-	}
-	return std::pair(nullptr, nullptr);
-}
-
 static bool interpret_operator(const std::pair<unsigned int, size_t>& opcode, kuroda::parser<MetaConcept>::sequence& symbols, size_t lb, size_t ub)
 {
 	assert(0 <= lb);
@@ -883,7 +861,7 @@ static bool interpret_operator(const std::pair<unsigned int, size_t>& opcode, ku
 		break;
 #ifdef ALLOW_POWER_PRECEDENCE
 	case MetaConcept::Precedence::Power:
-		if (lb >= opcode.second) return false;
+		if (lb >= opcode.second) return false;	// doesn't work for contravariant Einstein notation
 		{	// Heavily overloaded syntax.  This is the generic "superscripted to right", a postfix operator
 		decltype(auto) L_proxy = UnwrapParentheses(symbols[opcode.second - 1]);
 		decltype(auto) L_test = L_proxy.first ? L_proxy.first : symbols[opcode.second - 1];
