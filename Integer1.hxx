@@ -59,6 +59,7 @@ public:
 
 //  Type ID functions
 	virtual const AbstractClass* UltimateType() const;
+	constexpr static bool IsType(ExactType_MC x) { return IntegerNumeral_MC == x; }
 //  Evaluation functions
 	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override { return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >(); }
 	virtual bool CanEvaluate() const;

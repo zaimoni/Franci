@@ -86,9 +86,7 @@ MetaConcept* ParseNode::ArgN(size_t n) {
 
 unsigned int ParseNode::OpPrecedence() const
 {
-#ifdef ALLOW_POWER_PRECEDENCE
 	if (IsHTMLStartTag(_anchor, "sup") && IsHTMLTerminalTag(_post_anchor, "sup")) return MetaConcept::Precedence::Power;
-#endif
 	return 0;
 }
 

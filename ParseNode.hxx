@@ -150,6 +150,4 @@ bool ApplyUnwrapAllParentheses(MetaConcept*& arg, std::function<bool(MetaConcept
 	return xform(arg);
 }
 
-// #define ALLOW_POWER_PRECEDENCE 1
-
 #endif

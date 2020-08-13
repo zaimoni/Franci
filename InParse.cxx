@@ -808,7 +808,6 @@ static std::pair<unsigned int, size_t> get_operator(const std::vector<unsigned i
 		if (MetaConcept::Precedence::Comma >= x) continue;
 		if (x < ret.first) continue;
 		const size_t offset = n - i;
-		if (!up_cast<UnparsedText>(symbols[offset])) continue;
 		switch(x)
 		{
 		// suffix unary operations: priority is right to left
@@ -859,7 +858,6 @@ static bool interpret_operator(const std::pair<unsigned int, size_t>& opcode, ku
 			return true;
 		}
 		break;
-#ifdef ALLOW_POWER_PRECEDENCE
 	case MetaConcept::Precedence::Power:
 		if (lb >= opcode.second) return false;	// doesn't work for contravariant Einstein notation
 		{	// Heavily overloaded syntax.  This is the generic "superscripted to right", a postfix operator
@@ -870,16 +868,51 @@ static bool interpret_operator(const std::pair<unsigned int, size_t>& opcode, ku
 		if (!CanCoerceArgType(L_test, ClassMultiplicationDefined)) return false;	// fails for chemical elements
 		const auto test = up_cast<ParseNode>(symbols[opcode.second]);
 		assert(test);	// invariant violation
-		// ....
+		// in general we'd want a power operator data representation
+		unsigned int code = 0;
+		if (1 == test->size_infix()) {
+			if (const auto test_int = up_cast<IntegerNumeral>(test->c_infix_N(0))) {
+				if (*test_int == (unsigned short)0) {
+					code = 1;
+				} else if (*test_int == (unsigned short)1) {
+					code = 2;
+				} else if (*test_int == (signed short)-1) {
+					code = 3;
+				} // \todo missing case: power operator
+			}
+		}
+		if (!code) return false;
 		if (L_proxy.second) {
 			L_proxy.second->infix_reset(0);
 			delete symbols[opcode.second - 1];
 			symbols[opcode.second - 1] = L_proxy.first;
 		}
 		if (!CoerceArgType(symbols[opcode.second - 1], ClassMultiplicationDefined)) return false;	// \todo would like these to throw instead
+		switch (code)
+		{
+		case 1:
+			// target becomes multiplicative identity if it is not zero
+			if (symbols[opcode.second - 1]->IsZero()) return false;	// \todo handle this as 0^0 (errors if evaluated directly but can be context-salvaged)
+			{
+			zaimoni::autoval_ptr<MetaConcept> staging;
+			if (!symbols[opcode.second - 1]->UltimateType()->CreateIdentityForOperation(staging, StdMultiplication_MC)) return false;
+			if (staging.empty()) staging = new StdMultiplication();	// omnione
+			staging.TransferOutAndNULL(symbols[opcode.second - 1]);
+			}
+			return true;
+		case 2:
+			// raising to first power is a value no-op
+			symbols.DeleteNSlotsAt(1, opcode.second);
+			return true;
+		case 3:
+			// raising to -1 is multiplicative inverse
+			SUCCEED_OR_DIE(symbols[opcode.second - 1]->SelfInverse(StdMultiplication_MC));
+			symbols.DeleteNSlotsAt(1, opcode.second);
+			return true;
+		default: SUCCEED_OR_DIE(0 && "power x<sup>y</sup> not yet implemented");	// \todo implement this
 		}
-		break;
-#endif
+		}
+		return false;
 	case MetaConcept::Precedence::UnaryAddition:
 		if (ub <= opcode.second) return false;
 		{	// check for unary -
@@ -993,14 +1026,15 @@ static auto make_precedence_stack(const kuroda::parser<MetaConcept>::sequence& s
 	size_t lb = n;
 	while (0 < lb) {
 		decltype(auto) text = up_cast<UnparsedText>(symbols[--lb]);
-		if (!text) {
+		decltype(auto) node = up_cast<ParseNode>(symbols[lb]);
+		if (!text && !node) {
 			precedence_stack.push_back(0);	// already parsed
 			continue;
 		}
-		auto prec = text->OpPrecedence();
+		auto prec = text ? text->OpPrecedence() : node->OpPrecedence();
 		if (MetaConcept::Precedence::Comma == prec) break;
 		if (MetaConcept::Precedence::LParenthesis == prec) break;
-		if (MetaConcept::Precedence::Addition < prec && MetaConcept::Precedence::Addition == precedence_stack.back()) precedence_stack.back() = MetaConcept::Precedence::UnaryAddition;
+		if (MetaConcept::Precedence::Addition < prec && !precedence_stack.empty() && MetaConcept::Precedence::Addition == precedence_stack.back()) precedence_stack.back() = MetaConcept::Precedence::UnaryAddition;
 		precedence_stack.push_back(prec);
 	}
 	if (MetaConcept::Precedence::Addition == precedence_stack.back()) precedence_stack.back() = MetaConcept::Precedence::UnaryAddition;
