@@ -19,6 +19,7 @@
 #include "Keyword1.hxx"
 #include "LexParse.hxx"
 #include "Integer1.hxx"
+#include "Combin1.hxx"
 #include "InParse2.hxx"
 
 #include "Zaimoni.STL/lite_alg.hpp"
@@ -832,12 +833,16 @@ static std::pair<unsigned int, size_t> get_operator(const std::vector<unsigned i
 	return ret;
 }
 
+#endif
+
 static bool CanCoerceArgType(const MetaConcept* const Arg, const AbstractClass& ForceType)
 {
 	decltype(auto) ult_type = Arg->UltimateType();
 	if (ult_type) return !ult_type->IntersectionWithIsNULLSet(ForceType);
 	return Arg->IsPotentialVarName();
 }
+
+#ifdef KURODA_GRAMMAR
 
 static bool interpret_operator(const std::pair<unsigned int, size_t>& opcode, kuroda::parser<MetaConcept>::sequence& symbols, size_t lb, size_t ub)
 {
@@ -1134,6 +1139,96 @@ static std::vector<size_t> close_RightBracket(kuroda::parser<MetaConcept>::seque
 	return ret;
 }
 
+ExactType_MC CombinatorialLike::prefix_keyword(const MetaConcept* x)
+{
+	if (const auto text = up_cast<UnparsedText>(x))
+		{
+		if (text->IsPrefixKeyword(PrefixKeyword_FACTORIAL)) return Factorial_MC;
+		if (   text->IsPrefixKeyword(PrefixKeyword_PERMUTATION)
+			|| text->IsPrefixKeyword(PrefixKeyword_PERMUTATION_ALT))
+			return PermutationCount_MC;
+		if (   text->IsPrefixKeyword(PrefixKeyword_COMBINATION)
+			|| text->IsPrefixKeyword(PrefixKeyword_COMBINATION_ALT))
+			return CombinationCount_MC;
+		}
+	return Unknown_MC;
+}
+
+std::vector<size_t> CombinatorialLike::parse(kuroda::parser<MetaConcept>::sequence& symbols, size_t n)
+{
+	assert(symbols.size() > n);
+	static const auto int_coerce = [](MetaConcept*& x) { return CoerceArgType(x, Integer); };
+
+	std::vector<size_t> ret;
+	if (0 >= n) return ret;
+	if (const auto node = IsArglist(symbols[n])) {
+		int is_malformed = false;
+		switch (const auto kw = prefix_keyword(symbols[n - 1])) {
+		case Factorial_MC:
+			if (1 != node->size_infix()) {
+				is_malformed = 1;
+				break;
+			}
+			node->action_at_infix(0, UnwrapAllParentheses);
+			if (!CanCoerceArgType(node->c_infix_N(0), Integer)) {
+				is_malformed = 1;
+				break;
+			}
+			SUCCEED_OR_DIE(node->apply_at_infix(0, int_coerce));
+			{
+			zaimoni::weakautovalarray_ptr_throws<MetaConcept*> args(1);
+			ret.push_back(n - 1);
+			args[0] = node->infix_N(0);
+			std::unique_ptr<CombinatorialLike> staging(new CombinatorialLike(args, FACTORIAL_CM));
+			node->infix_reset(0);
+			delete symbols[n - 1];
+			symbols[n - 1] = staging.release();
+			}
+			symbols.DeleteNSlotsAt(1, n);
+			return ret;
+		case CombinationCount_MC:
+		case PermutationCount_MC:
+			if (3 != node->size_infix() && !IsSemanticChar<','>(node->c_infix_N(1))) {
+				is_malformed = 1;
+				break;
+			}
+			// \todo: std::initializer_list<size_t> looks useful here
+			node->action_at_infix(0, UnwrapAllParentheses);
+			node->action_at_infix(2, UnwrapAllParentheses);
+			if (!CanCoerceArgType(node->c_infix_N(0), Integer) || !CanCoerceArgType(node->c_infix_N(2), Integer)) {
+				is_malformed = 1;
+				break;
+			}
+			SUCCEED_OR_DIE(node->apply_at_infix(0, int_coerce));
+			SUCCEED_OR_DIE(node->apply_at_infix(2, int_coerce));
+			{
+			zaimoni::weakautovalarray_ptr_throws<MetaConcept*> args(2);
+			ret.push_back(n - 1);
+			args[0] = node->infix_N(0);
+			args[1] = node->infix_N(2);
+			std::unique_ptr<CombinatorialLike> staging(new CombinatorialLike(args, (CombinatorialModes)(kw - Factorial_MC)));
+			node->infix_reset(0);
+			node->infix_reset(2);
+			delete symbols[n - 1];
+			symbols[n - 1] = staging.release();
+			}
+			symbols.DeleteNSlotsAt(1, n);
+			return ret;
+		default: return ret;	// something else entirely
+		}
+		if (is_malformed) {
+			ret.push_back(n - 1);
+			node->push_prefix(symbols[n - 1]);	// i.e., no longer arglist
+			symbols.DeleteNSlotsAt(1, n - 1);
+			INC_INFORM("malformed: ");
+			INFORM(*node);
+			// \todo would be useful to set ultimate type to Integer, etc. (gamma function would be reals, or infinity-extended reals)
+			return ret;
+		}
+	}
+	return ret;
+}
+
 kuroda::parser<MetaConcept>& Franci_parser()
 {
 	static zaimoni::autoval_ptr<kuroda::parser<MetaConcept> > ooao;
@@ -1144,6 +1239,7 @@ kuroda::parser<MetaConcept>& Franci_parser()
 		ooao->register_build_nonterminal(&close_RightBracket);
 #ifdef KURODA_GRAMMAR
 		ooao->register_build_nonterminal(&close_RightParenthesis);
+		ooao->register_build_nonterminal(CombinatorialLike::parse);
 		ooao->register_build_nonterminal(&close_HTMLterminal);
 		ooao->register_build_nonterminal(&handle_Comma);
 #endif

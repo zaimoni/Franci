@@ -10,6 +10,7 @@
 #define COMBINATORIAL_DEF
 
 #include "MetaCon2.hxx"
+#include "Zaimoni.STL/LexParse/Kuroda.hpp"
 
 class CombinatorialLike;
 namespace zaimoni {
@@ -56,6 +57,9 @@ public:
 	CombinatorialLike& operator=(const CombinatorialLike & src) = default;
 	CombinatorialLike& operator=(CombinatorialLike&& src) = default;
 	virtual ~CombinatorialLike() = default;
+
+	static std::vector<size_t> parse(kuroda::parser<MetaConcept>::sequence& symbols, size_t n);
+	static ExactType_MC prefix_keyword(const MetaConcept* x);
 
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(CombinatorialLike*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure

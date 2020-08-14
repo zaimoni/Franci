@@ -50,6 +50,11 @@ public:
 	size_t size_prefix() const { return _prefix.size(); }
 	size_t size_postfix() const { return _postfix.size(); }
 
+	void push_prefix(MetaConcept*& src) {
+		_prefix.push_back(src);
+		src = 0;
+	}
+
 	const MetaConcept* c_infix_N(size_t n) const { return _infix.size() > n ? _infix[n] : 0; }
 	MetaConcept* infix_N(size_t n) { return _infix.size() > n ? _infix[n] : 0; }
 	void infix_reset(size_t n) { if (_infix.size() > n) _infix[n] = 0; }
@@ -57,8 +62,11 @@ public:
 	const MetaConcept* c_anchor() const { return _anchor; }
 	const MetaConcept* c_post_anchor() const { return _post_anchor; }
 
+	void action_at_infix(size_t n, std::function<void(MetaConcept*&)> xform) { if (_infix.size() > n) xform(_infix[n]); }
+	bool apply_at_infix(size_t n, std::function<bool(MetaConcept*&)> xform) { if (_infix.size() > n) return xform(_infix[n]); }
 	size_t apply_all_infix(std::function<bool(MetaConcept*&)> xform);
 	bool syntax_check_infix(std::function<bool(kuroda::parser<MetaConcept>::sequence&)> xform) { return xform(_infix); }
+	bool is_arglist() const;
 	bool is_parentheses_wrapped() const;
 
 	bool IsAbstractClassDomain() const override { return false; }
@@ -85,6 +93,23 @@ public:
 protected:
 	std::string to_s_aux() const override;
 };
+
+inline const ParseNode* IsArglist(const MetaConcept* arg)
+{
+	if (decltype(auto) node = up_cast<ParseNode>(arg)) {
+		if (node->is_arglist()) return node;
+	}
+	return 0;
+}
+
+inline ParseNode* IsArglist(MetaConcept* arg)
+{
+	if (decltype(auto) node = up_cast<ParseNode>(arg)) {
+		if (node->is_arglist()) return node;
+	}
+	return 0;
+}
+
 
 inline const ParseNode* IsParenthesesWrapped(const MetaConcept* arg)
 {
@@ -126,6 +151,16 @@ bool ApplyThroughParenthesesWrapping(MetaConcept* arg, std::function<bool(MetaCo
 {
 	while (decltype(auto) node = IsParenthesesWrapped(arg)) arg = node->infix_N(0);
 	return xform(*arg);
+}
+
+void UnwrapAllParentheses(MetaConcept*& arg)
+{
+	auto test = UnwrapParentheses(arg);
+	if (test.first) {
+		test.second->infix_reset(0);
+		delete arg;
+		arg = test.first;
+	}
 }
 
 bool ApplyUnwrapAllParentheses(MetaConcept*& arg, std::function<bool(MetaConcept&)> xform)

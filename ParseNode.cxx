@@ -90,6 +90,11 @@ unsigned int ParseNode::OpPrecedence() const
 	return 0;
 }
 
+bool ParseNode::is_arglist() const
+{
+	return IsSemanticChar<'('>(_anchor) && IsSemanticChar<')'>(_post_anchor) && !_infix.empty() && _prefix.empty() && _postfix.empty();
+}
+
 bool ParseNode::is_parentheses_wrapped() const
 {
 	return IsSemanticChar<'('>(_anchor) && IsSemanticChar<')'>(_post_anchor) && 1 == _infix.size();
