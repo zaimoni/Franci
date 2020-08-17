@@ -67,6 +67,7 @@ public:
 	size_t apply_all_infix(std::function<bool(MetaConcept*&)> xform);
 	bool syntax_check_infix(std::function<bool(kuroda::parser<MetaConcept>::sequence&)> xform) { return xform(_infix); }
 	bool is_arglist() const;
+	size_t arglist_is_comma_separated() const;
 	bool is_parentheses_wrapped() const;
 
 	bool IsAbstractClassDomain() const override { return false; }

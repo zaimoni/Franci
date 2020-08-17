@@ -95,6 +95,16 @@ bool ParseNode::is_arglist() const
 	return IsSemanticChar<'('>(_anchor) && IsSemanticChar<')'>(_post_anchor) && !_infix.empty() && _prefix.empty() && _postfix.empty();
 }
 
+size_t ParseNode::arglist_is_comma_separated() const
+{
+	const auto raw_arglen = _infix.size();
+	if (1 != raw_arglen % 2) return 0;
+
+	size_t i = -1;
+	while (raw_arglen > (i += 2)) if (!IsSemanticChar<','>(_infix[i])) return 0;
+	return raw_arglen;
+}
+
 bool ParseNode::is_parentheses_wrapped() const
 {
 	return IsSemanticChar<'('>(_anchor) && IsSemanticChar<')'>(_post_anchor) && 1 == _infix.size();

@@ -21,6 +21,7 @@
 #include "Integer1.hxx"
 #include "Combin1.hxx"
 #include "MetaCon3.hxx"
+#include "Equal.hxx"
 #include "InParse2.hxx"
 
 #include "Zaimoni.STL/lite_alg.hpp"
@@ -1163,10 +1164,11 @@ std::vector<size_t> CombinatorialLike::parse(kuroda::parser<MetaConcept>::sequen
 	std::vector<size_t> ret;
 	if (0 >= n) return ret;
 	if (const auto node = IsArglist(symbols[n])) {
-		int is_malformed = false;
+		const auto raw_arglen = node->arglist_is_comma_separated();
+		int is_malformed = !raw_arglen;
 		switch (const auto kw = prefix_keyword(symbols[n - 1])) {
 		case Factorial_MC:
-			if (1 != node->size_infix()) {
+			if (1 != raw_arglen) {
 				is_malformed = 1;
 				break;
 			}
@@ -1189,7 +1191,7 @@ std::vector<size_t> CombinatorialLike::parse(kuroda::parser<MetaConcept>::sequen
 			return ret;
 		case CombinationCount_MC:
 		case PermutationCount_MC:
-			if (3 != node->size_infix() && !IsSemanticChar<','>(node->c_infix_N(1))) {
+			if (3 != raw_arglen) {
 				is_malformed = 1;
 				break;
 			}
@@ -1230,6 +1232,63 @@ std::vector<size_t> CombinatorialLike::parse(kuroda::parser<MetaConcept>::sequen
 	return ret;
 }
 
+ExactType_MC EqualRelation::prefix_keyword(const MetaConcept* x)
+{
+	if (const auto text = up_cast<UnparsedText>(x)) {
+		if (text->IsPrefixKeyword(EqualRelation_ALLEQUAL)) return ALLEQUAL_MC;
+		if (text->IsPrefixKeyword(EqualRelation_ALLDISTINCT)) return ALLDISTINCT_MC;
+		if (text->IsPrefixKeyword(EqualRelation_NOTALLDISTINCT)) return NOTALLDISTINCT_MC;
+		if (text->IsPrefixKeyword(EqualRelation_NOTALLEQUAL)) return NOTALLEQUAL_MC;
+	}
+	return Unknown_MC;
+}
+
+std::vector<size_t> EqualRelation::parse(kuroda::parser<MetaConcept>::sequence& symbols, size_t n)
+{
+	assert(symbols.size() > n);
+	static const auto free_coerce = [](MetaConcept*& x) { _improviseVar(x, 0); };
+
+	std::vector<size_t> ret;
+	if (0 >= n) return ret;
+	if (const auto node = IsArglist(symbols[n])) {
+		const auto kw = prefix_keyword(symbols[n - 1]);
+		if (!kw) return ret;
+		const auto raw_arglen = node->arglist_is_comma_separated();
+		bool is_malformed = !raw_arglen;
+		// type coercion doesn't work cleanly for equality...variables go to free
+		if (!is_malformed) {
+			size_t i = -2;
+			while (raw_arglen > (i += 2)) {
+				node->action_at_infix(i, UnwrapAllParentheses);
+				node->action_at_infix(i, free_coerce);
+			}
+		}
+		if (!is_malformed) {
+			zaimoni::weakautovalarray_ptr_throws<MetaConcept*> args(raw_arglen / 2 + 1);
+			ret.push_back(n - 1);
+			size_t i = -2;
+			while (raw_arglen > (i += 2)) args[i / 2] = node->infix_N(i);
+			std::unique_ptr<EqualRelation> staging(new EqualRelation(args, (EqualRelationModes)(kw - ALLEQUAL_MC)));
+			i = -2;
+			while (raw_arglen > (i += 2)) node->infix_reset(i);
+			delete symbols[n - 1];
+			symbols[n - 1] = staging.release();
+			symbols.DeleteNSlotsAt(1, n);
+			return ret;
+		}
+		/* if (is_malformed) */ {
+			ret.push_back(n - 1);
+			node->push_prefix(symbols[n - 1]);	// i.e., no longer arglist
+			symbols.DeleteNSlotsAt(1, n - 1);
+			INC_INFORM("malformed: ");
+			INFORM(*node);
+			// \todo would be useful to set ultimate type to TruthValues
+			return ret;
+		}
+	}
+	return ret;
+}
+
 ExactType_MC MetaConnective::prefix_keyword(const MetaConcept* x)
 {
 	if (const auto text = up_cast<UnparsedText>(x)) {
@@ -1254,23 +1313,9 @@ std::vector<size_t> MetaConnective::parse(kuroda::parser<MetaConcept>::sequence&
 	if (0 >= n) return ret;
 	if (const auto node = IsArglist(symbols[n])) {
 		const auto kw = prefix_keyword(symbols[n - 1]);
-		if (!kw) return INFORM(*symbols[n-1]),ret;
-		bool is_malformed = false;
-		const auto raw_arglen = node->size_infix();
-		if (1 != raw_arglen % 2) {
-			is_malformed = true;
-		} else {
-			size_t i = -1;
-			while (raw_arglen > (i += 2)) {
-				if (!IsSemanticChar<','>(node->c_infix_N(i))) {
-					INC_INFORM("not-comma");
-					INFORM(*node->c_infix_N(i));
-					INFORM(i);
-					is_malformed = true;
-					break;
-				}
-			}
-		}
+		if (!kw) return ret;
+		const auto raw_arglen = node->arglist_is_comma_separated();
+		bool is_malformed = !raw_arglen;
 		if (!is_malformed) {
 			size_t i = -2;
 			while (raw_arglen > (i += 2)) {
@@ -1323,6 +1368,7 @@ kuroda::parser<MetaConcept>& Franci_parser()
 		ooao->register_build_nonterminal(&close_RightParenthesis);
 		ooao->register_build_nonterminal(CombinatorialLike::parse);
 		ooao->register_build_nonterminal(MetaConnective::parse);
+		ooao->register_build_nonterminal(EqualRelation::parse);
 		ooao->register_build_nonterminal(&close_HTMLterminal);
 		ooao->register_build_nonterminal(&handle_Comma);
 #endif

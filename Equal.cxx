@@ -320,7 +320,7 @@ void EqualRelation::_forceStdForm()
 						{
 						size_t i = 0;
 						do	{
-							while(ArgArray[i]->IsExplicitConstant()) i++;
+							while(ArgArray[i]->IsExplicitConstant() && i<InferenceParameter2) i++;
 							if (i<InferenceParameter2)
 								{
 								SwapArgs(i,InferenceParameter2);

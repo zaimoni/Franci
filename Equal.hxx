@@ -6,6 +6,7 @@
 #define EQUAL_DEF
 
 #include "MetaCon2.hxx"
+#include "Zaimoni.STL/LexParse/Kuroda.hpp"
 
 // LOW-LEVEL DEPENDENCY: this is a shifted image of the corresponding MetaConcept IDs
 enum EqualRelationModes	{
@@ -76,6 +77,9 @@ public:
 	EqualRelation& operator=(const EqualRelation & src) = default;
 	EqualRelation& operator=(EqualRelation&& src) = default;
 	virtual ~EqualRelation() = default;
+
+	static std::vector<size_t> parse(kuroda::parser<MetaConcept>::sequence& symbols, size_t n);
+	static ExactType_MC prefix_keyword(const MetaConcept* x);
 
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(EqualRelation*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
