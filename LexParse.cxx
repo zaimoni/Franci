@@ -710,7 +710,7 @@ static bool NewVarsForSituation_handler(char*& InputBuffer)
 			}
 		while(0<i);
 		if (BootstrapQuantifiedSituation) Situation = Tmp2;
-		delete [] (MetaQuantifier**)NewVarsOnThisPass;
+		delete [] (MetaQuantifier**)NewVarsOnThisPass; // vars now owned by Situation
 		NewVarsOnThisPass.NULLPtr();
 		}
 		if (!DoNotExplain) LOG("New variables recorded.");
@@ -837,12 +837,12 @@ bool EvaluateExpression_handler(char*& InputBuffer)
 		return true;
 		};
 	// success.  Extract the lone argument and process it.
-	MetaConcept* InitialResult = NULL;
+	MetaConcept* InitialResult = 0;
 			
-	if (NULL==NewVarsOnThisPass)
+	if (NewVarsOnThisPass.empty())
 		{
 		InitialResult = ArgArray[0];
-		ArgArray[0] = NULL;
+		ArgArray[0] = 0;
 		ArgArray.clear();
 		}
 	else{
@@ -851,18 +851,19 @@ bool EvaluateExpression_handler(char*& InputBuffer)
 			Tmp = new QuantifiedStatement;
 			Tmp->insertNSlotsAt(NewVarsOnThisPass.ArraySize()+1,0);
 			InitialResult = ArgArray[0];
-			ArgArray[0] = NULL;
+			ArgArray[0] = 0;
 			ArgArray.clear();
 			Tmp->TransferInAndOverwriteRaw(0,InitialResult);
 			{
 			size_t Idx = NewVarsOnThisPass.ArraySize();
 			do	{
 				Tmp->TransferInAndOverwriteRaw(Idx,NewVarsOnThisPass[Idx-1]);
-				NewVarsOnThisPass[--Idx] = NULL;
+				NewVarsOnThisPass[--Idx] = 0;
 				}
 			while(0<Idx);
 			}
 			InitialResult = Tmp.release();
+			NewVarsOnThisPass.clear();
 			}
 		catch(const bad_alloc&)
 			{	// clean out new variables
@@ -871,9 +872,6 @@ bool EvaluateExpression_handler(char*& InputBuffer)
 			UnconditionalRAMFailure();
 			};
 		};
-
-	// clean out new variables
-	NewVarsOnThisPass.clear();
 
 	INFORM(*InitialResult);
 	INFORM("evaluates to:");

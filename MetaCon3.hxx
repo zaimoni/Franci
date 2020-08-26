@@ -101,6 +101,7 @@ public:
 
 	static std::vector<size_t> parse(kuroda::parser<MetaConcept>::sequence& symbols, size_t n);
 	static ExactType_MC prefix_keyword(const MetaConcept* x);
+	static ExactType_MC infix_keyword(const MetaConcept* x);
 
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(MetaConnective*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
