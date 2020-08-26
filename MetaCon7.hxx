@@ -56,10 +56,12 @@ public:
 	MetaConceptExternal& operator=(const MetaConceptExternal& src) noexcept(std::is_nothrow_copy_assignable_v<T>) {
 		_x = src._x;	// presumably this is ACID
 		MetaConcept::operator=(src);
+		return *this;
 	};
 	MetaConceptExternal& operator=(MetaConceptExternal&& src) = default;
 	MetaConceptExternal& operator=(const T& src) noexcept(std::is_nothrow_copy_assignable_v<T>) {
 		_x = src;	// presumably this is ACID
+		return *this;
 	};
 
 	void CopyInto(MetaConcept*& dest) const override {zaimoni::CopyInto(*this,dest);};	// can throw memory failure

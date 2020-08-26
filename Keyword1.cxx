@@ -5,7 +5,7 @@
 //! replace all references to strlen(keyword) with this enumeration.
 //! Do an initialization check to verify that the enumeration is correct.
 
-#include "keyword1.hxx"
+#include "Keyword1.hxx"
 
 const char* const LogicKeyword_NXOR = "NXOR";
 const char* const LogicKeyword_NIFF = "NIFF";

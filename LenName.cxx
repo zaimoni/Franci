@@ -270,6 +270,7 @@ std::string LinearInterval::to_s_aux() const
 		else
 			ret += ']';
 	}
+	return ret;
 }
 
 std::string MetaConceptWithArgArray::ConstructPrefixArgList() const

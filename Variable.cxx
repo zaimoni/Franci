@@ -76,6 +76,7 @@ int Variable::_strictlyImplies(const MetaConcept& rhs) const
 	if (!SelfLogicalNOTWorks()) return 0;
 	if (MetaConcept::TValStrictlyImpliesDefault(rhs)) return 2;
 	if (MetaConcept::TValStrictlyImpliesLogicalNOTOfDefault(rhs)) return -2;
+	return 0;
 }
 
 bool Variable::StrictlyImplies(const MetaConcept& rhs) const

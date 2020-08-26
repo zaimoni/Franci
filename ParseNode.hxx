@@ -63,7 +63,7 @@ public:
 	const MetaConcept* c_post_anchor() const { return _post_anchor; }
 
 	void action_at_infix(size_t n, std::function<void(MetaConcept*&)> xform) { if (_infix.size() > n) xform(_infix[n]); }
-	bool apply_at_infix(size_t n, std::function<bool(MetaConcept*&)> xform) { if (_infix.size() > n) return xform(_infix[n]); }
+	bool apply_at_infix(size_t n, std::function<bool(MetaConcept*&)> xform) { return (_infix.size() > n) ? xform(_infix[n]) : false; }
 	size_t apply_all_infix(std::function<bool(MetaConcept*&)> xform);
 	bool syntax_check_infix(std::function<bool(kuroda::parser<MetaConcept>::sequence&)> xform) { return xform(_infix); }
 	bool is_arglist() const;
@@ -142,19 +142,19 @@ inline std::pair<MetaConcept*, ParseNode*> UnwrapParentheses(MetaConcept*& arg)
 	return std::pair(nullptr, nullptr);
 }
 
-bool TestThroughParenthesesWrapping(const MetaConcept* arg, std::function<bool(const MetaConcept&)> test)
+inline bool TestThroughParenthesesWrapping(const MetaConcept* arg, std::function<bool(const MetaConcept&)> test)
 {
 	while(decltype(auto) node = IsParenthesesWrapped(arg)) arg = node->c_infix_N(0);
 	return test(*arg);
 }
 
-bool ApplyThroughParenthesesWrapping(MetaConcept* arg, std::function<bool(MetaConcept&)> xform)
+inline bool ApplyThroughParenthesesWrapping(MetaConcept* arg, std::function<bool(MetaConcept&)> xform)
 {
 	while (decltype(auto) node = IsParenthesesWrapped(arg)) arg = node->infix_N(0);
 	return xform(*arg);
 }
 
-void UnwrapAllParentheses(MetaConcept*& arg)
+inline void UnwrapAllParentheses(MetaConcept*& arg)
 {
 	auto test = UnwrapParentheses(arg);
 	if (test.first) {
@@ -164,7 +164,7 @@ void UnwrapAllParentheses(MetaConcept*& arg)
 	}
 }
 
-bool ApplyUnwrapAllParentheses(MetaConcept*& arg, std::function<bool(MetaConcept&)> xform)
+inline bool ApplyUnwrapAllParentheses(MetaConcept*& arg, std::function<bool(MetaConcept&)> xform)
 {
 	auto test = UnwrapParentheses(arg);
 	if (test.first) {
@@ -175,7 +175,7 @@ bool ApplyUnwrapAllParentheses(MetaConcept*& arg, std::function<bool(MetaConcept
 	return xform(*arg);
 }
 
-bool ApplyUnwrapAllParentheses(MetaConcept*& arg, std::function<bool(MetaConcept*&)> xform)
+inline bool ApplyUnwrapAllParentheses(MetaConcept*& arg, std::function<bool(MetaConcept*&)> xform)
 {
 	auto test = UnwrapParentheses(arg);
 	if (test.first) {

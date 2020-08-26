@@ -44,6 +44,6 @@ add_custom_command(TARGET Franci POST_BUILD
 add_custom_command(TARGET Franci_console POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         $<TARGET_FILE:z_memory>
-        $<TARGET_FILE_DIR:Franci>)
+        $<TARGET_FILE_DIR:Franci_console>)
 
 # EXCLUDE_FROM_ALL means "can't test"
