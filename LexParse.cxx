@@ -837,22 +837,17 @@ bool EvaluateExpression_handler(char*& InputBuffer)
 		return true;
 		};
 	// success.  Extract the lone argument and process it.
-	MetaConcept* InitialResult = 0;
-			
-	if (NewVarsOnThisPass.empty())
-		{
-		InitialResult = ArgArray[0];
-		ArgArray[0] = 0;
-		ArgArray.clear();
-		}
-	else{
+	MetaConcept* InitialResult = ArgArray[0];
+	ArgArray[0] = 0;
+	ArgArray.clear();
+
+	if (!NewVarsOnThisPass.empty()) {
+//		INFORM(*InitialResult); // ok here 2020-08-27 zaimoni
 		try	{
 			autoval_ptr<QuantifiedStatement> Tmp;
 			Tmp = new QuantifiedStatement;
 			Tmp->insertNSlotsAt(NewVarsOnThisPass.ArraySize()+1,0);
-			InitialResult = ArgArray[0];
-			ArgArray[0] = 0;
-			ArgArray.clear();
+//			INFORM(*InitialResult);	// C invalid RAM access crash here for Kuroda grammar build 2020-08-27 zaimoni
 			Tmp->TransferInAndOverwriteRaw(0,InitialResult);
 			{
 			size_t Idx = NewVarsOnThisPass.ArraySize();
