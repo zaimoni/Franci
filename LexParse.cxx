@@ -844,8 +844,8 @@ bool EvaluateExpression_handler(char*& InputBuffer)
 	if (!NewVarsOnThisPass.empty()) {
 //		INFORM(*InitialResult); // ok here 2020-08-27 zaimoni
 		try	{
-			autoval_ptr<QuantifiedStatement> Tmp;
-			Tmp = new QuantifiedStatement;
+			std::unique_ptr<QuantifiedStatement> Tmp(new QuantifiedStatement);
+//			INFORM(*InitialResult); // ok here 2020-08-28 zaimoni
 			Tmp->insertNSlotsAt(NewVarsOnThisPass.ArraySize()+1,0);
 //			INFORM(*InitialResult);	// C invalid RAM access crash here for Kuroda grammar build 2020-08-27 zaimoni
 			Tmp->TransferInAndOverwriteRaw(0,InitialResult);
@@ -863,7 +863,6 @@ bool EvaluateExpression_handler(char*& InputBuffer)
 		catch(const bad_alloc&)
 			{	// clean out new variables
 			NewVarsOnThisPass.clear();
-			ArgArray.clear();
 			UnconditionalRAMFailure();
 			};
 		};
