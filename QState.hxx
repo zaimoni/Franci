@@ -29,6 +29,7 @@ class QuantifiedStatement final : public MetaConceptWithArgArray
 
 public:
 	QuantifiedStatement() noexcept : MetaConceptWithArgArray(QuantifiedStatement_MC),QuantifiersExplicitlySorted('\x00') {};
+	QuantifiedStatement(MetaConcept**& src) : MetaConceptWithArgArray(QuantifiedStatement_MC, src), QuantifiersExplicitlySorted('\x00') {};
 	QuantifiedStatement(const QuantifiedStatement& src);
 	QuantifiedStatement(QuantifiedStatement&& src) = default;
 	QuantifiedStatement& operator=(QuantifiedStatement&& src) = default;

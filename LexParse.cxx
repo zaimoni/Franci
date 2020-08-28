@@ -842,21 +842,14 @@ bool EvaluateExpression_handler(char*& InputBuffer)
 	ArgArray.clear();
 
 	if (!NewVarsOnThisPass.empty()) {
-//		INFORM(*InitialResult); // ok here 2020-08-27 zaimoni
+		const size_t vars_count = NewVarsOnThisPass.size();
 		try	{
-			std::unique_ptr<QuantifiedStatement> Tmp(new QuantifiedStatement);
-//			INFORM(*InitialResult); // ok here 2020-08-28 zaimoni
-			Tmp->insertNSlotsAt(NewVarsOnThisPass.ArraySize()+1,0);
-//			INFORM(*InitialResult);	// C invalid RAM access crash here for Kuroda grammar build 2020-08-27 zaimoni
-			Tmp->TransferInAndOverwriteRaw(0,InitialResult);
-			{
-			size_t Idx = NewVarsOnThisPass.ArraySize();
-			do	{
-				Tmp->TransferInAndOverwriteRaw(Idx,NewVarsOnThisPass[Idx-1]);
-				NewVarsOnThisPass[--Idx] = 0;
-				}
-			while(0<Idx);
-			}
+			zaimoni::weakautovalarray_ptr_throws<MetaConcept*> args(vars_count + 1);
+			args[0] = InitialResult;
+			size_t i = 0;
+			for (decltype(auto) x : NewVarsOnThisPass) args[++i] = x;
+			std::unique_ptr<QuantifiedStatement> Tmp(new QuantifiedStatement(args)); // failure visible for Kuroda grammar
+			for (decltype(auto) x : NewVarsOnThisPass) x = 0;
 			InitialResult = Tmp.release();
 			NewVarsOnThisPass.clear();
 			}
