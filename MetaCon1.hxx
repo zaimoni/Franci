@@ -412,6 +412,8 @@ public:
 	inline bool CouldBeAtomicGrammatical(LinguisticType_LT Target) const {return (VFTable1->GrammarInfo) & Target;};
 // Functional versions
 	virtual bool CouldBeGrammatical(LinguisticType_LT Target) const {return CouldBeAtomicGrammatical(Target);};
+
+	void _syntax_ok() const;
 protected:
 	void SetExactType(ExactType_MC NewType) {VFTable1=&MetaConceptLookUp[NewType];};
 	virtual bool EqualAux2(const MetaConcept& rhs) const = 0;

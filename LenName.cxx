@@ -95,6 +95,7 @@ std::string ConstructPrefixArgList(const MetaConcept* const* const ArgArray)
 }
 
 std::string MetaConcept::to_s() const {
+	_syntax_ok();
 	std::string ret(to_s_aux());
 
 	if (MultiPurposeBitmap & LogicalNegated_VF) ret = "NOT " + ret;

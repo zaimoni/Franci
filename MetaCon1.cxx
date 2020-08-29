@@ -7,6 +7,8 @@
 
 #include "Zaimoni.STL/Pure.C/logging.h"
 
+#include <stdexcept>
+
 #define DECLARE_METACONCEPT(MINA,MAXA,NAME,FLAGS,GRAMMAR)	\
    { MINA, MAXA, NAME##_MC, FLAGS, #NAME, (char)(GRAMMAR) }
 
@@ -170,6 +172,20 @@ void DiagnoseMetaConceptVFT()
 		}
 	while(MaxSemanticIdx_MC>= ++i);
 }
+
+void MetaConcept::_syntax_ok() const
+{
+	int fail = 0;
+	if ((LogicalNegated_VF |StdAdditionInv_VF | StdMultInv_VF) < MultiPurposeBitmap) fail |= 1;
+	if (VFTable1 && (MetaConceptLookUp + TruthValue_MC > VFTable1 || MetaConceptLookUp + MaxSemanticIdx_MC < VFTable1)) fail |= 2;
+	if (fail) {
+		std::string err("C invalid memory error: ");
+		err += std::to_string(fail) + "; " + std::to_string(VFTable1-MetaConceptLookUp);
+		INFORM(err.c_str());
+		throw std::logic_error(err);
+	}
+}
+
 
 bool MetaConcept::IsInfinite() const
 {	//! \todo: augment when other infinities introduced
