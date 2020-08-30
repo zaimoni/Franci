@@ -1409,7 +1409,6 @@ std::vector<size_t> MetaConnective::parse(kuroda::parser<MetaConcept>::sequence&
 				symbols[sweep] = 0;
 				sweep += 2;
 			}
-			delete symbols[scandown];
 			symbols[scandown] = staging.release();
 			symbols.DeleteNSlotsAt(n-scandown, scandown+1);
 			return ret;

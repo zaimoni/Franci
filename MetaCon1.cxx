@@ -178,6 +178,7 @@ void MetaConcept::_syntax_ok() const
 	int fail = 0;
 	if ((LogicalNegated_VF |StdAdditionInv_VF | StdMultInv_VF) < MultiPurposeBitmap) fail |= 1;
 	if (VFTable1 && (MetaConceptLookUp + TruthValue_MC > VFTable1 || MetaConceptLookUp + MaxSemanticIdx_MC < VFTable1)) fail |= 2;
+	if (!_memory_block_start_valid(this)) fail |= 4;
 	if (fail) {
 		std::string err("C invalid memory error: ");
 		err += std::to_string(fail) + "; " + std::to_string(VFTable1-MetaConceptLookUp);
