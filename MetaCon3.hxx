@@ -100,6 +100,7 @@ public:
 	virtual ~MetaConnective() = default;
 
 	static std::vector<size_t> parse(kuroda::parser<MetaConcept>::sequence& symbols, size_t n);
+	static ExactType_MC parse_infix_ok(const kuroda::parser<MetaConcept>::sequence& symbols, size_t n);
 	static ExactType_MC prefix_keyword(const MetaConcept* x);
 	static ExactType_MC infix_keyword(const MetaConcept* x);
 

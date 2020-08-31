@@ -1319,6 +1319,22 @@ ExactType_MC MetaConnective::infix_keyword(const MetaConcept* x)
 	return Unknown_MC;
 }
 
+ExactType_MC MetaConnective::parse_infix_ok(const kuroda::parser<MetaConcept>::sequence& symbols, size_t n)
+{
+	if (2 >= symbols.size()) return Unknown_MC;
+	const auto kw = infix_keyword(symbols[n - 1]);
+	if (!kw) return Unknown_MC;
+	if (symbols.size() - 1 > n) {
+		if (const auto kw2 = infix_keyword(symbols[n + 1])) {
+			if (kw != kw2) return Unknown_MC;	// hold off, don't want to mess with precedence
+			// associative ok
+			// transitive would be ok but we want to back-propagate that
+			if (!(MetaConceptLookUp[kw].Bitmap1 & SelfAssociative_LITBMP1MC)) return Unknown_MC;
+		}
+	}
+	return kw;
+}
+
 std::vector<size_t> MetaConnective::parse(kuroda::parser<MetaConcept>::sequence& symbols, size_t n)
 {
 	assert(symbols.size() > n);
@@ -1326,6 +1342,43 @@ std::vector<size_t> MetaConnective::parse(kuroda::parser<MetaConcept>::sequence&
 
 	std::vector<size_t> ret;
 	if (0 >= n) return ret;
+	if (const auto kw = parse_infix_ok(symbols, n)) {
+		UnwrapAllParentheses(symbols[n]);
+		if (!CanCoerceArgType(symbols[n], TruthValues)) return ret;
+		UnwrapAllParentheses(symbols[n - 2]);
+		if (!CanCoerceArgType(symbols[n - 2], TruthValues)) return ret;
+		SUCCEED_OR_DIE(tval_coerce(symbols[n]));
+		SUCCEED_OR_DIE(tval_coerce(symbols[n - 2]));
+		size_t scandown = n - 2;
+		if (MetaConceptLookUp[kw].Bitmap1 & Transitive_LITBMP1MC) {	// respecify IFF parsing to be idiomatic equivalence relation 2020-08-25 zaimoni
+			while (2 <= scandown) {
+				const auto kw2 = infix_keyword(symbols[scandown - 1]);
+				if (kw2 != kw) break;
+				UnwrapAllParentheses(symbols[scandown - 2]);
+				if (!CanCoerceArgType(symbols[scandown - 2], TruthValues)) break;
+				scandown -= 2;
+				SUCCEED_OR_DIE(tval_coerce(symbols[scandown]));
+			}
+		}
+		zaimoni::weakautovalarray_ptr_throws<MetaConcept*> args((n - scandown) / 2 + 1);
+		ret.push_back(scandown);
+		size_t i = -1;
+		size_t sweep = scandown;
+		while (sweep <= n) {
+			args[++i] = symbols[sweep];
+			sweep += 2;
+		}
+		std::unique_ptr<MetaConnective> staging(new MetaConnective(args, (MetaConnectiveModes)(kw - LogicalAND_MC)));
+		sweep = scandown + 2;
+		while (sweep <= n) {
+			symbols[sweep] = 0;
+			sweep += 2;
+		}
+		symbols[scandown] = staging.release();
+		symbols.DeleteNSlotsAt(n - scandown, scandown + 1);
+		return ret;
+	}
+
 	if (const auto node = IsArglist(symbols[n])) {
 		const auto kw = prefix_keyword(symbols[n - 1]);
 		if (!kw) return ret;
@@ -1365,52 +1418,6 @@ std::vector<size_t> MetaConnective::parse(kuroda::parser<MetaConcept>::sequence&
 			INC_INFORM("malformed: ");
 			INFORM(*node);
 			// \todo would be useful to set ultimate type to TruthValues
-			return ret;
-		}
-	}
-	if (2 < symbols.size()) {
-		if (const auto kw = infix_keyword(symbols[n - 1])) {
-			if (symbols.size() - 1 > n) {
-				if (const auto kw2 = infix_keyword(symbols[n + 1])) {
-					if (kw != kw2) return ret;	// hold off, don't want to mess with precedence
-					// associative ok
-					// transitive would be ok but we want to back-propagate that
-					if (!(MetaConceptLookUp[kw].Bitmap1 & SelfAssociative_LITBMP1MC)) return ret;
-				}
-			}
-			UnwrapAllParentheses(symbols[n]);
-			if (!CanCoerceArgType(symbols[n], TruthValues)) return ret;
-			UnwrapAllParentheses(symbols[n - 2]);
-			if (!CanCoerceArgType(symbols[n - 2], TruthValues)) return ret;
-			SUCCEED_OR_DIE(tval_coerce(symbols[n]));
-			SUCCEED_OR_DIE(tval_coerce(symbols[n - 2]));
-			size_t scandown = n - 2;
-			if (MetaConceptLookUp[kw].Bitmap1 & Transitive_LITBMP1MC) {	// respecify IFF parsing to be idiomatic equivalence relation 2020-08-25 zaimoni
-				while (2 <= scandown) {
-					const auto kw2 = infix_keyword(symbols[scandown - 1]);
-					if (kw2 != kw) break;
-					UnwrapAllParentheses(symbols[scandown - 2]);
-					if (!CanCoerceArgType(symbols[scandown - 2], TruthValues)) break;
-					scandown -= 2;
-					SUCCEED_OR_DIE(tval_coerce(symbols[scandown]));
-				}
-			}
-			zaimoni::weakautovalarray_ptr_throws<MetaConcept*> args((n-scandown)/2+1);
-			ret.push_back(scandown);
-			size_t i = -1;
-			size_t sweep = scandown;
-			while (sweep <= n) {
-				args[++i] = symbols[sweep];
-				sweep += 2;
-			}
-			std::unique_ptr<MetaConnective> staging(new MetaConnective(args, (MetaConnectiveModes)(kw - LogicalAND_MC)));
-			sweep = scandown + 2;
-			while (sweep <= n) {
-				symbols[sweep] = 0;
-				sweep += 2;
-			}
-			symbols[scandown] = staging.release();
-			symbols.DeleteNSlotsAt(n-scandown, scandown+1);
 			return ret;
 		}
 	}

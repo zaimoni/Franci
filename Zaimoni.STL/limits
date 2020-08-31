@@ -7,7 +7,7 @@
 #include <limits>
 #include "Logging.h"
 #include "lite_alg.hpp"
-#include "pure.C/native.h"
+#include "Pure.C/native.h"
 #include <type_traits>
 
 // key structures defined here:

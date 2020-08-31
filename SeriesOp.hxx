@@ -14,7 +14,7 @@
 // consume the presented ArgList
 
 #ifndef SERIES_OPERATION_DEF
-#define STD_SERIES_OPERATION_DEF
+#define SERIES_OPERATION_DEF
 
 #include "MetaCon2.hxx"
 
