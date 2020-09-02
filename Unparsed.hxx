@@ -237,6 +237,11 @@ inline bool IsHTMLTerminalTag(const MetaConcept* x, const char* Target)
 	return false;
 }
 
+inline bool IsLogicKeyword(const MetaConcept* x, const char* Target)
+{
+	if (const auto src = up_cast<UnparsedText>(x)) return src->IsLogicKeyword(Target);
+	return false;
+}
 
 inline bool RejectTextToVar(const MetaConcept* x)
 {

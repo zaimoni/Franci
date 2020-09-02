@@ -1120,6 +1120,20 @@ static std::vector<size_t> close_HTMLterminal(kuroda::parser<MetaConcept>::seque
 	return ret;
 }
 
+static std::vector<size_t> NOT_ForcesTruthValueVariable_kuroda(kuroda::parser<MetaConcept>::sequence& symbols, size_t n)
+{
+	assert(symbols.size() > n);
+	std::vector<size_t> ret;
+	if (1 <= n && IsLogicKeyword(symbols[n - 1], LogicKeyword_NOT) && CanCoerceArgType(symbols[n], TruthValues)) {
+		ret.push_back(n - 1);
+		SUCCEED_OR_DIE(CoerceArgType(symbols[n], TruthValues));
+		symbols[n]->SelfLogicalNOT();
+		symbols.DeleteIdx(n - 1);
+		return ret;
+	}
+	return ret;
+}
+
 #endif
 
 static std::vector<size_t> close_RightBracket(kuroda::parser<MetaConcept>::sequence& symbols, size_t n) {
@@ -1433,12 +1447,13 @@ kuroda::parser<MetaConcept>& Franci_parser()
 		ooao->register_build_nonterminal(&kuroda_ResolveUnparsedText2);
 		ooao->register_build_nonterminal(&close_RightBracket);
 #ifdef KURODA_GRAMMAR
-		ooao->register_build_nonterminal(&close_RightParenthesis);
+		ooao->register_build_nonterminal(close_RightParenthesis);
 		ooao->register_build_nonterminal(CombinatorialLike::parse);
+		ooao->register_build_nonterminal(NOT_ForcesTruthValueVariable_kuroda);
 		ooao->register_build_nonterminal(MetaConnective::parse);
 		ooao->register_build_nonterminal(EqualRelation::parse);
-		ooao->register_build_nonterminal(&close_HTMLterminal);
-		ooao->register_build_nonterminal(&handle_Comma);
+		ooao->register_build_nonterminal(close_HTMLterminal);
+		ooao->register_build_nonterminal(handle_Comma);
 #endif
 	}
 	return *ooao;
