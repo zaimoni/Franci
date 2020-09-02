@@ -437,7 +437,8 @@ static void __ReleaseNextPtrPages(size_t PageCount)
 }
 
 static void __CompactPtrRAM(void)
-{	// FORMALLY CORRECT: Kenneth Boyd, 9/15/1999
+{
+	if (0 >= CountPointersAllocated) return;
 	size_t SparePtrRAM = RawBlock.records[CountPointersAllocated-1]._address-LowBoundPtrSpace;
 	if (2*PageSize<=SparePtrRAM)
 		{
@@ -452,7 +453,8 @@ static void __CompactPtrRAM(void)
 }
 
 static void __DesperateCompactPtrRAM(void)
-{	// FORMALLY CORRECT: Kenneth Boyd, 9/16/1999
+{
+	if (0 >= CountPointersAllocated) return;
 	size_t SparePtrRAM = RawBlock.records[CountPointersAllocated-1]._address-LowBoundPtrSpace;
 	if (PageSize<=SparePtrRAM)
 		{
