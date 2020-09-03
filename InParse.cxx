@@ -1095,6 +1095,9 @@ static std::vector<size_t> close_RightParenthesis(kuroda::parser<MetaConcept>::s
 			ret.push_back(lb);
 			if (1 == working->size_infix()) working->apply_all_infix(&flush_ClausePhrase);
 			working->syntax_check_infix(force_parse);
+			break;
+		} else if (IsSemanticChar<')'>(symbols[lb])) {
+			n = lb;
 		}
 		// \todo: half-open ray syntax
 	}
@@ -1115,6 +1118,9 @@ static std::vector<size_t> close_HTMLterminal(kuroda::parser<MetaConcept>::seque
 			ret.push_back(lb);
 			if (1 == working->size_infix()) working->apply_all_infix(&flush_ClausePhrase);
 			working->syntax_check_infix(force_parse);
+			break;
+		} else if (IsHTMLTerminalTag(symbols[lb], kw)) {
+			n = lb;
 		}
 	}
 	return ret;
@@ -1148,6 +1154,8 @@ static std::vector<size_t> close_RightBracket(kuroda::parser<MetaConcept>::seque
 			ret.push_back(lb);
 			if (1 == working->size_infix()) working->apply_all_infix(&flush_ClausePhrase);
 			working->syntax_check_infix(force_parse);
+		} else if (IsSemanticChar<']'>(symbols[lb])) {
+			n = lb;
 		}
 		// \todo: half-open ray syntax
 	}
@@ -1346,6 +1354,10 @@ ExactType_MC MetaConnective::parse_infix_ok(const kuroda::parser<MetaConcept>::s
 			if (!(MetaConceptLookUp[kw].Bitmap1 & SelfAssociative_LITBMP1MC)) return Unknown_MC;
 		}
 	}
+	UnwrapAllParentheses(symbols[n]);
+	if (!CanCoerceArgType(symbols[n], TruthValues)) return Unknown_MC;
+	UnwrapAllParentheses(symbols[n - 2]);
+	if (!CanCoerceArgType(symbols[n - 2], TruthValues)) return Unknown_MC;
 	return kw;
 }
 
@@ -1357,10 +1369,6 @@ std::vector<size_t> MetaConnective::parse(kuroda::parser<MetaConcept>::sequence&
 	std::vector<size_t> ret;
 	if (0 >= n) return ret;
 	if (const auto kw = parse_infix_ok(symbols, n)) {
-		UnwrapAllParentheses(symbols[n]);
-		if (!CanCoerceArgType(symbols[n], TruthValues)) return ret;
-		UnwrapAllParentheses(symbols[n - 2]);
-		if (!CanCoerceArgType(symbols[n - 2], TruthValues)) return ret;
 		SUCCEED_OR_DIE(tval_coerce(symbols[n]));
 		SUCCEED_OR_DIE(tval_coerce(symbols[n - 2]));
 		size_t scandown = n - 2;
