@@ -62,14 +62,6 @@ const MetaConceptVFT MetaConceptLookUp[]
 	  DECLARE_METACONCEPT(1,ULONG_MAX,FREE_PhraseN,Symmetric_LITBMP1MC,CommonNoun_LT),
 	  DECLARE_METACONCEPT(1,ULONG_MAX,NOTFORALL_PhraseN,Symmetric_LITBMP1MC,CommonNoun_LT),
 	  DECLARE_METACONCEPT(1,ULONG_MAX,THEREISNO_PhraseN,Symmetric_LITBMP1MC,CommonNoun_LT),	// end n-ary phrase block
-	  DECLARE_METACONCEPT(2,2,LogicalAND_Clause2,Symmetric_LITBMP1MC | SelfAssociative_LITBMP1MC | SimplePhraseClauseTransition_LITBMP1MC,Connective_LT),	// begin 2-ary clause block
-	  DECLARE_METACONCEPT(2,2,LogicalOR_Clause2,Symmetric_LITBMP1MC | SelfAssociative_LITBMP1MC | SimplePhraseClauseTransition_LITBMP1MC,Connective_LT),
-	  DECLARE_METACONCEPT(2,2,LogicalIFF_Clause2,Symmetric_LITBMP1MC | Transitive_LITBMP1MC | SimplePhraseClauseTransition_LITBMP1MC,Connective_LT),
-	  DECLARE_METACONCEPT(2,2,LogicalXOR_Clause2,Symmetric_LITBMP1MC | SimplePhraseClauseTransition_LITBMP1MC,Connective_LT),
-	  DECLARE_METACONCEPT(2,2,LogicalIMPLIES_Clause2,0,Connective_LT),
-	  DECLARE_METACONCEPT(2,2,LogicalNIMPLIES_Clause2,0,Connective_LT),
-	  DECLARE_METACONCEPT(2,2,LogicalNOR_Clause2,Symmetric_LITBMP1MC,Connective_LT),
-	  DECLARE_METACONCEPT(2,2,LogicalNAND_Clause2,Symmetric_LITBMP1MC,Connective_LT),	// end 2-ary clause block
 	  DECLARE_METACONCEPT(2,ULONG_MAX,LogicalAND_ClauseN,Symmetric_LITBMP1MC | SelfAssociative_LITBMP1MC | SimplePhraseClauseTransition_LITBMP1MC,Connective_LT),	// begin n-ary clause block
 	  DECLARE_METACONCEPT(2,ULONG_MAX,LogicalOR_ClauseN,Symmetric_LITBMP1MC | SelfAssociative_LITBMP1MC | SimplePhraseClauseTransition_LITBMP1MC,Connective_LT),
 	  DECLARE_METACONCEPT(2,ULONG_MAX,LogicalIFF_ClauseN,Symmetric_LITBMP1MC | Transitive_LITBMP1MC | SimplePhraseClauseTransition_LITBMP1MC,Connective_LT),
