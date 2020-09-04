@@ -39,11 +39,9 @@ what if	Usage	what if [expression]
 		'What if [expression]' causes terse logging.
 what is	AliasFor	evaluate
 auxilliary connectives	Usage	A IMPLIES B
-		A NIMPLIES B
 	Arity	2
 	Description	Franci automatically rewrites these reserved words to their definitions.
 		A IMPLIES B is defined as NOT A OR B
-		A NIMPLIES B is defined as A AND NOT B
 NOT	Usage	NOT A
 	Arity	1
 	Description	Reserved word denoting logical negation.
@@ -52,13 +50,10 @@ NOT	Usage	NOT A
 		NOT UNKNOWN is UNKNOWN
 		NOT CONTRADICTION is CONTRADICTION
 IMPLIES	AliasFor	auxilliary connectives
-NIMPLIES	AliasFor	auxilliary connectives
 infix connectives	Usage	A AND B
 		A OR B
 		A IFF B
 		A XOR B
-		A NXOR B
-		A NIFF B
 		A NOR B
 		A NAND B
 	Arity	2
