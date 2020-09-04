@@ -41,8 +41,6 @@ evaluate X AND Y
 evaluate X OR Y
 evaluate X IFF Y
 evaluate X XOR Y
-evaluate X NXOR Y
-evaluate X NIFF Y
 evaluate X NOR Y
 evaluate X NAND Y
 evaluate X IFF Y IFF Z

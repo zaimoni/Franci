@@ -92,7 +92,7 @@ namespace kuroda {
 				auto check_these = refine_parse(dest, viewpoint);
 				if (!check_these.empty()) {
 					if (2 <= check_these.size()) std::sort(check_these.begin(), check_these.end());
-					viewpoint = check_these.front();
+					viewpoint = check_these.front() - 1; // will be correct after end-of-loop increment
 					continue;
 				}
 			} while (dest.size() > ++viewpoint);

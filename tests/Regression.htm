@@ -70,27 +70,27 @@ evaluates to:
 (THEREIS X,Y IN TruthValues)(IFF(X,Y))
 </pre>User:<b><pre>
 evaluate 0&middot;X
-</pre></b><p>Franci:<br><pre>(THEREIS X IN _ADD_DEF_)(0·X)
+</pre></b><p>Franci:<br><pre>(THEREIS X IN _ADD_DEF_)(0&middot;X)
 evaluates to:
 0
 </pre>User:<b><pre>
 evaluate 1+1&middot;2
-</pre></b><p>Franci:<br><pre>1+2
+</pre></b><p>Franci:<br><pre>1+(2)
 evaluates to:
 3
 </pre>User:<b><pre>
 evaluate 1+(1&middot;2)
-</pre></b><p>Franci:<br><pre>1+2
+</pre></b><p>Franci:<br><pre>1+(2)
 evaluates to:
 3
 </pre>User:<b><pre>
 evaluate 1+1&middot;2<sup>-1</sup>
-</pre></b><p>Franci:<br><pre>1+2<sup>-1</sup>
+</pre></b><p>Franci:<br><pre>1+(2<sup>-1</sup>)
 evaluates to:
 2<sup>-1</sup>+1
 </pre>User:<b><pre>
 evaluate 1+(1&middot;2<sup>-1</sup>)
-</pre></b><p>Franci:<br><pre>1+2<sup>-1</sup>
+</pre></b><p>Franci:<br><pre>1+(2<sup>-1</sup>)
 evaluates to:
 2<sup>-1</sup>+1
 </pre>User:<b><pre>
@@ -120,9 +120,8 @@ evaluates to:
 120
 </pre>User:<b><pre>
 evaluate X IMPLIES Y
-</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(X IMPLIES Y)
+</pre></b><p>Franci:<br><pre>(THEREIS X,Y IN TruthValues)(OR(NOT X,Y))
 evaluates to:
-(by sorting quantifiers)
 (THEREIS X,Y IN TruthValues)(OR(NOT X,Y))
 </pre>User:<b><pre>
 evaluate X NIMPLIES Y
@@ -132,65 +131,49 @@ evaluates to:
 (THEREIS X,Y IN TruthValues)(AND(X,NOT Y))
 </pre>User:<b><pre>
 evaluate X AND Y
-</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(AND(X,Y))
+</pre></b><p>Franci:<br><pre>(THEREIS X,Y IN TruthValues)(AND(X,Y))
 evaluates to:
-(by sorting quantifiers)
 (THEREIS X,Y IN TruthValues)(AND(X,Y))
 </pre>User:<b><pre>
 evaluate X OR Y
-</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(OR(X,Y))
+</pre></b><p>Franci:<br><pre>(THEREIS X,Y IN TruthValues)(OR(X,Y))
 evaluates to:
-(by sorting quantifiers)
 (THEREIS X,Y IN TruthValues)(OR(X,Y))
 </pre>User:<b><pre>
 evaluate X IFF Y
-</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(IFF(X,Y))
+</pre></b><p>Franci:<br><pre>(THEREIS X,Y IN TruthValues)(IFF(X,Y))
 evaluates to:
-(by sorting quantifiers)
 (THEREIS X,Y IN TruthValues)(IFF(X,Y))
 </pre>User:<b><pre>
 evaluate X XOR Y
-</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(IFF(X,NOT Y))
+</pre></b><p>Franci:<br><pre>(THEREIS X,Y IN TruthValues)(IFF(X,NOT Y))
 evaluates to:
-(by sorting quantifiers)
 (THEREIS X,Y IN TruthValues)(IFF(X,NOT Y))
 </pre>User:<b><pre>
-evaluate X NXOR Y
-</pre></b><p>Franci:<br><pre>I don't completely understand that.
-("X",'NXOR',"Y")
-</pre>User:<b><pre>
-evaluate X NIFF Y
-</pre></b><p>Franci:<br><pre>I don't completely understand that.
-("X",'NIFF',"Y")
-</pre>User:<b><pre>
 evaluate X NOR Y
-</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(X NOR Y)
+</pre></b><p>Franci:<br><pre>(THEREIS X,Y IN TruthValues)(AND(NOT X,NOT Y))
 evaluates to:
-(by sorting quantifiers)
 (THEREIS X,Y IN TruthValues)(AND(NOT X,NOT Y))
 </pre>User:<b><pre>
 evaluate X NAND Y
-</pre></b><p>Franci:<br><pre>(THEREIS Y,X IN TruthValues)(X NAND Y)
+</pre></b><p>Franci:<br><pre>(THEREIS X,Y IN TruthValues)(OR(NOT X,NOT Y))
 evaluates to:
-(by sorting quantifiers)
 (THEREIS X,Y IN TruthValues)(OR(NOT X,NOT Y))
 </pre>User:<b><pre>
 evaluate X IFF Y IFF Z
-</pre></b><p>Franci:<br><pre>(THEREIS X,Z,Y IN TruthValues)(IFF(X,IFF(Y,Z)))
+</pre></b><p>Franci:<br><pre>(THEREIS X,Y,Z IN TruthValues)(IFF(X,Y,Z))
 evaluates to:
-(by sorting quantifiers)
-(THEREIS X,Y,Z IN TruthValues)(IFF(X,IFF(Y,Z)))
+(THEREIS X,Y,Z IN TruthValues)(IFF(X,Y,Z))
 </pre>User:<b><pre>
 evaluate (X IFF Y) IFF Z
-</pre></b><p>Franci:<br><pre>(THEREIS Z,Y,X IN TruthValues)(IFF(Z,IFF(X,Y)))
+</pre></b><p>Franci:<br><pre>(THEREIS Z,X,Y IN TruthValues)(IFF(Z,IFF(X,Y)))
 evaluates to:
 (by sorting quantifiers)
 (THEREIS X,Y,Z IN TruthValues)(IFF(Z,IFF(X,Y)))
 </pre>User:<b><pre>
 evaluate X IFF (Y IFF Z)
-</pre></b><p>Franci:<br><pre>(THEREIS X,Z,Y IN TruthValues)(IFF(X,IFF(Y,Z)))
+</pre></b><p>Franci:<br><pre>(THEREIS X,Y,Z IN TruthValues)(IFF(X,IFF(Y,Z)))
 evaluates to:
-(by sorting quantifiers)
 (THEREIS X,Y,Z IN TruthValues)(IFF(X,IFF(Y,Z)))
 </pre>User:<b><pre>
 end logfile
