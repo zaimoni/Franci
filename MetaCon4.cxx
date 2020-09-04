@@ -288,3 +288,44 @@ bool MetaConceptWith2Args::ForceRHSArg2(MetaConcept*& dest)
 	return true;
 }
 
+void MetaConceptWith2Args::ExtractInfixArglist(MetaConcept**& Target, size_t& KeywordIdx)
+{	// FORMALLY CORRECT: Kenneth Boyd, 6/19/2001
+	// This is only supposed to be called from the constructor.
+	RHS_Arg2 = Target[KeywordIdx + 1];
+	Target[KeywordIdx + 1] = NULL;
+	_delete_n_slots_at(Target, 2, KeywordIdx);
+	LHS_Arg1 = Target[KeywordIdx - 1];
+	Target[KeywordIdx - 1] = this;
+
+	if (LHS_Arg1->HasSimpleTransition() && !LHS_Arg1->IsExactType(ExactType()))
+		DestructiveSyntacticallyEvaluateOnce(LHS_Arg1);
+	if (RHS_Arg2->HasSimpleTransition() && !RHS_Arg2->IsExactType(ExactType()))
+		DestructiveSyntacticallyEvaluateOnce(RHS_Arg2);
+
+	SUCCEED_OR_DIE(SyntaxOK());
+
+	ForceStdForm();
+
+	--KeywordIdx;
+}
+
+void MetaConceptWith2Args::ExtractPrefixArglist(MetaConcept**& Target, size_t KeywordIdx)
+{	// FORMALLY CORRECT: Kenneth Boyd, 7/22/2003
+	// This is only supposed to be called from the constructor.
+	RHS_Arg2 = Target[KeywordIdx + 4];
+	Target[KeywordIdx + 4] = NULL;
+	LHS_Arg1 = Target[KeywordIdx + 2];
+	Target[KeywordIdx + 2] = NULL;
+	_delete_n_slots_at(Target, 5, KeywordIdx + 1);
+	DELETE(Target[KeywordIdx]);
+	Target[KeywordIdx] = this;
+	if (LHS_Arg1->HasSimpleTransition() && !LHS_Arg1->IsExactType(ExactType()))
+		DestructiveSyntacticallyEvaluateOnce(LHS_Arg1);
+	if (RHS_Arg2->HasSimpleTransition() && !RHS_Arg2->IsExactType(ExactType()))
+		DestructiveSyntacticallyEvaluateOnce(RHS_Arg2);
+
+	SUCCEED_OR_DIE(SyntaxOK());
+
+	ForceStdForm();
+}
+

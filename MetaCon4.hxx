@@ -94,7 +94,6 @@ protected:
 	bool EvaluateBothArgs();
 	bool ForceLHSArg1(MetaConcept*& dest);
 	bool ForceRHSArg2(MetaConcept*& dest);
-	// implemented in Clause2.cxx
 	void ExtractInfixArglist(MetaConcept**& Target, size_t& KeywordIdx);
 	void ExtractPrefixArglist(MetaConcept**& Target, size_t KeywordIdx);
 private:

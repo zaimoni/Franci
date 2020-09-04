@@ -36,7 +36,6 @@ evaluate FACTORIAL(5)
 
 // Exercise Clause2.cxx
 evaluate X IMPLIES Y
-evaluate X NIMPLIES Y
 evaluate X AND Y
 evaluate X OR Y
 evaluate X IFF Y
