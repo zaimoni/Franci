@@ -800,7 +800,6 @@ static bool flush_ClausePhrase(MetaConcept*& target) {
 	return false;
 }
 
-#ifdef KURODA_GRAMMAR
 static std::pair<unsigned int, size_t> get_operator(const std::vector<unsigned int>& precedence_stack, 
 	kuroda::parser<MetaConcept>::sequence& symbols, size_t n)
 {
@@ -835,16 +834,12 @@ static std::pair<unsigned int, size_t> get_operator(const std::vector<unsigned i
 	return ret;
 }
 
-#endif
-
 static bool CanCoerceArgType(const MetaConcept* const Arg, const AbstractClass& ForceType)
 {
 	decltype(auto) ult_type = Arg->UltimateType();
 	if (ult_type) return !ult_type->IntersectionWithIsNULLSet(ForceType);
 	return Arg->IsPotentialVarName();
 }
-
-#ifdef KURODA_GRAMMAR
 
 static bool interpret_operator(const std::pair<unsigned int, size_t>& opcode, kuroda::parser<MetaConcept>::sequence& symbols, size_t lb, size_t ub)
 {
@@ -1069,19 +1064,12 @@ static std::vector<size_t> handle_Comma(kuroda::parser<MetaConcept>::sequence& s
 	return ret;
 }
 
-#endif
-
 bool force_parse(kuroda::parser<MetaConcept>::sequence& symbols)
 {
 	Franci_parser().finite_parse(symbols);
-#ifdef KURODA_GRAMMAR
 	operator_bulk_parse(symbols, symbols.size());
-#endif
 	return true;
 }
-
-
-#ifdef KURODA_GRAMMAR
 
 static std::vector<size_t> close_RightParenthesis(kuroda::parser<MetaConcept>::sequence& symbols, size_t n) {
 	assert(symbols.size() > n);
@@ -1139,8 +1127,6 @@ static std::vector<size_t> NOT_ForcesTruthValueVariable_kuroda(kuroda::parser<Me
 	}
 	return ret;
 }
-
-#endif
 
 static std::vector<size_t> close_RightBracket(kuroda::parser<MetaConcept>::sequence& symbols, size_t n) {
 	assert(symbols.size() > n);
@@ -1518,7 +1504,6 @@ kuroda::parser<MetaConcept>& Franci_parser()
 		ooao->register_terminal(&kuroda_ResolveUnparsedText);
 		ooao->register_build_nonterminal(&kuroda_ResolveUnparsedText2);
 		ooao->register_build_nonterminal(&close_RightBracket);
-#ifdef KURODA_GRAMMAR
 		ooao->register_build_nonterminal(close_RightParenthesis);
 		ooao->register_build_nonterminal(CombinatorialLike::parse);
 		ooao->register_build_nonterminal(NOT_ForcesTruthValueVariable_kuroda);
@@ -1526,7 +1511,6 @@ kuroda::parser<MetaConcept>& Franci_parser()
 		ooao->register_build_nonterminal(EqualRelation::parse);
 		ooao->register_build_nonterminal(close_HTMLterminal);
 		ooao->register_build_nonterminal(handle_Comma);
-#endif
 	}
 	return *ooao;
 }
@@ -1567,12 +1551,6 @@ bool ArglistAry2PlusRecognize(const MetaConcept* const * ArgArray,size_t i)
 			while(ArgArray[i]->IsExactType(UnparsedText_MC));
 			}
 		};
-#ifdef KURODA_GRAMMAR
-	if (auto parse = up_cast<ParseNode>(ArgArray[i])) {
-		if (IsSemanticChar<'('>(parse->c_anchor()) && IsSemanticChar<')'>(parse->c_post_anchor())) {
-		}
-	}
-#endif
 	return false;
 }
 
