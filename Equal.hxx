@@ -80,6 +80,8 @@ public:
 
 	static std::vector<size_t> parse(kuroda::parser<MetaConcept>::sequence& symbols, size_t n);
 	static ExactType_MC prefix_keyword(const MetaConcept* x);
+	static std::vector<size_t> rightmost_parse(kuroda::parser<MetaConcept>::sequence& symbols, size_t n);
+	static ExactType_MC infix_keyword(const MetaConcept* x);
 
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure
 	void CopyInto(EqualRelation*& dest) const {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure

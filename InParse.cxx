@@ -1254,6 +1254,50 @@ std::vector<size_t> EqualRelation::parse(kuroda::parser<MetaConcept>::sequence& 
 	return ret;
 }
 
+ExactType_MC EqualRelation::infix_keyword(const MetaConcept* x)
+{
+	if (const auto text = up_cast<UnparsedText>(x)) {
+		if (text->IsPrefixKeyword(EqualRelation_EQUALTOONEOF)) return EQUALTOONEOF_MC;
+		if (text->IsPrefixKeyword(EqualRelation_DISTINCTFROMALLOF)) return DISTINCTFROMALLOF_MC;
+	}
+	return Unknown_MC;
+}
+
+std::vector<size_t> EqualRelation::rightmost_parse(kuroda::parser<MetaConcept>::sequence& symbols, size_t n)
+{
+	assert(symbols.size() > n);
+	static const auto free_coerce = [](MetaConcept*& x) { _improviseVar(x, 0); };
+
+	std::vector<size_t> ret;
+	if (IsSemanticChar<','>(symbols[n]) || infix_keyword(symbols[n])) return ret;	// \todo harden callers of _initMetaConceptParserArray to be syntax error competent
+	size_t scandown = n;
+	ExactType_MC kw = Unknown_MC;
+	while (2 <= scandown) {
+		scandown -= 2;
+		if (IsSemanticChar<','>(symbols[scandown]) || infix_keyword(symbols[scandown])) return ret;
+		if (IsSemanticChar<','>(symbols[scandown + 1])) continue;
+		if (kw = infix_keyword(symbols[scandown + 1])) break;
+		return ret;
+	}
+	if (!kw) return ret;
+	zaimoni::weakautovalarray_ptr_throws<MetaConcept*> args((n - scandown) / 2 + 1);
+	ret.push_back(scandown);
+	size_t i = 0;
+	size_t sweep = scandown;
+	while (sweep <= n) {
+		UnwrapAllParentheses(symbols[sweep]);
+		free_coerce(symbols[sweep]);
+		args[i++] = symbols[sweep];
+		sweep += 2;
+	}
+	std::unique_ptr<EqualRelation> staging(new EqualRelation(args, (EqualRelationModes)(kw - ALLEQUAL_MC)));
+	sweep = scandown;
+	while (sweep < n) symbols[sweep += 2] = 0;
+	symbols[scandown] = staging.release();
+	symbols.DeleteNSlotsAt(n - scandown, scandown+1);
+	return ret;
+}
+
 ExactType_MC MetaConnective::prefix_keyword(const MetaConcept* x)
 {
 	if (const auto text = up_cast<UnparsedText>(x)) {
@@ -1468,6 +1512,8 @@ kuroda::parser<MetaConcept>& Franci_parser()
 		ooao->register_build_nonterminal(EqualRelation::parse);
 		ooao->register_build_nonterminal(close_HTMLterminal);
 		ooao->register_build_nonterminal(handle_Comma);
+
+		ooao->register_right_edge_build_nonterminal(EqualRelation::rightmost_parse);
 	}
 	return *ooao;
 }
