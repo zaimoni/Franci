@@ -6,7 +6,6 @@
 #include "StdAdd.hxx"
 #include "StdMult.hxx"
 #include "GCF.hxx"
-#include "ClauseN.hxx"
 #include "PhraseN.hxx"
 #include "QState.hxx"
 
@@ -116,11 +115,6 @@ std::string AbstractClass::to_s_aux() const
 	ret += Arg1->to_s();
 	if (WantSetBraces) ret += '}';
 	return ret;
-}
-
-std::string ClauseNArg::to_s_aux() const
-{
-	return (ClauseKeyword ? ClauseKeyword : "\"\"") + ConstructPrefixArgList();
 }
 
 static std::string ConstructCommaListVarNames(const zaimoni::_meta_autoarray_ptr<MetaConcept*>& args, const size_t origin = 0)

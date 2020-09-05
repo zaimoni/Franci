@@ -12,7 +12,6 @@
 #include "Phrase1.hxx"
 #include "Phrase2.hxx"
 #include "PhraseN.hxx"
-#include "ClauseN.hxx"
 #include "ParseNode.hxx"
 #include "LowRel.hxx"
 #include "Keyword1.hxx"
@@ -476,46 +475,6 @@ static bool ConstructNAryPhraseNonPostfix(MetaConcept**& ArgArray,size_t i)
 	return false;
 }
 
-static bool ConstructNAryClausePostfix(MetaConcept**& ArgArray,size_t i)
-{
-	assert(ArgArray);
-	assert(i<ArraySize(ArgArray));
-	if (ClauseNArg::CanConstructPostfix(ArgArray,i))
-		{
-		try	{
-			new ClauseNArg(ArgArray,i);
-			_PostFilterPhraseClause(ArgArray[i]);
-			assert(ValidateArgArray(ArgArray));
-			return true;
-			}
-		catch(const bad_alloc&)
-			{
-			UnconditionalRAMFailure();
-			}
-		}
-	return false;
-}
-
-static bool ConstructNAryClauseNonPostfix(MetaConcept**& ArgArray,size_t i)
-{
-	assert(ArgArray);
-	assert(i<ArraySize(ArgArray));
-	if (ClauseNArg::CanConstructNonPostfix(ArgArray,i))
-		{
-		try	{
-			new ClauseNArg(ArgArray,i);
-			_PostFilterPhraseClause(ArgArray[i]);
-			assert(ValidateArgArray(ArgArray));
-			return true;
-			}
-		catch(const bad_alloc&)
-			{
-			UnconditionalRAMFailure();
-			}
-		}
-	return false;
-}
-
 static void _StripAddInvSymbolOffOntoArgument(MetaConcept**& ArgArray,size_t i)
 {
 	assert(ArgArray);
@@ -677,15 +636,13 @@ Franci_o_n_rules[] =		{	&NOT_ForcesTruthValueVariable,
 								&Construct1AryPhrase,
 								&Construct2AryPhrasePostfix,
 								&ConstructNAryPhrasePostfix,
-								&ConstructNAryClausePostfix,
 								&StripAddInvSymbol,
 								&HTMLSuperScript
 							};
 
 static Parser<MetaConcept>::ParseFunc*
 Franci_o_n_2_rules[] =	{	&Construct2AryPhraseNonPostfix,	// catches IN ___
-							&ConstructNAryPhraseNonPostfix,	// others other quantifier phrases
-							&ConstructNAryClauseNonPostfix
+							&ConstructNAryPhraseNonPostfix	// others other quantifier phrases
 						};
 
 #undef FRANCI_WARY
