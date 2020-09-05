@@ -9,7 +9,6 @@
 #include "PhraseN.hxx"
 #include "QState.hxx"
 
-#include "Phrase2.hxx"
 #include "Interval.hxx"
 
 #include "Phrase1.hxx"
@@ -295,19 +294,6 @@ std::string Phrase1Arg::to_s_aux() const
 		&Complete_UnaryFunctionLike
 	};
 	return (PhraseKeyword ? PhraseKeyword : "\"\"")+(*_s_aux[ExactType() - MinPhrase1Idx_MC])(Arg1);
-}
-
-// technically, this is just for infix 2-ary phrases
-std::string Phrase2Arg::to_s_aux() const
-{
-	std::string ret(LHS_Arg1->to_s());
-
-	ret += ' ';
-	ret += PhraseKeyword ? PhraseKeyword : "\"\"";
-	ret += ' ';
-
-	ret += RHS_Arg2->to_s();
-	return ret;
 }
 
 std::string PhraseNArg::to_s_aux() const

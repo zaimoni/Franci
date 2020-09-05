@@ -10,7 +10,6 @@
 #include "StdAdd.hxx"
 #include "StdMult.hxx"
 #include "Phrase1.hxx"
-#include "Phrase2.hxx"
 #include "PhraseN.hxx"
 #include "ParseNode.hxx"
 #include "LowRel.hxx"
@@ -395,46 +394,6 @@ static bool Construct1AryPhrase(MetaConcept**& ArgArray,size_t i)
 	return false;
 }
 
-static bool Construct2AryPhrasePostfix(MetaConcept**& ArgArray,size_t i)
-{
-	assert(ArgArray);
-	assert(i<ArraySize(ArgArray));
-	if (Phrase2Arg::CanConstructPostfix(ArgArray,i))
-		{
-		try	{
-			new Phrase2Arg(ArgArray,i);
-			_PostFilterPhraseClause(ArgArray[i]);
-			assert(ValidateArgArray(ArgArray));
-			return true;
-			}
-		catch(const bad_alloc&)
-			{
-			UnconditionalRAMFailure();
-			}
-		}
-	return false;
-}
-
-static bool Construct2AryPhraseNonPostfix(MetaConcept**& ArgArray,size_t i)
-{
-	assert(ArgArray);
-	assert(i<ArraySize(ArgArray));
-	if (Phrase2Arg::CanConstructNonPostfix(ArgArray,i))
-		{
-		try	{
-			new Phrase2Arg(ArgArray,i);
-			_PostFilterPhraseClause(ArgArray[i]);
-			assert(ValidateArgArray(ArgArray));
-			return true;
-			}
-		catch(const bad_alloc&)
-			{
-			UnconditionalRAMFailure();
-			}
-		}
-	return false;
-}
-
 static bool ConstructNAryPhrasePostfix(MetaConcept**& ArgArray,size_t i)
 {
 	assert(ArgArray);
@@ -612,6 +571,7 @@ static bool HTMLSuperScript(MetaConcept**& ArgArray,size_t i)
 	return false;
 }
 
+//! following notes are for the legacy parser
 //! \todo comma-list recognizer [cannot be in recognizer-1: it could inflict O(n^2) performance there]
 //!		Comma-lists are n-ary types.  They are semantically sublists of InParse,
 //!		with inferred comma suppression.  If they are in an arg-like context,
@@ -633,16 +593,14 @@ static Parser<MetaConcept>::ParseFunc*
 Franci_o_n_rules[] =		{	&NOT_ForcesTruthValueVariable,
 								&ResolveUnparsedText,
 								&ConstructQuantifierList,
-								&Construct1AryPhrase,
-								&Construct2AryPhrasePostfix,
+								&Construct1AryPhrase, // catches IN ___
 								&ConstructNAryPhrasePostfix,
 								&StripAddInvSymbol,
 								&HTMLSuperScript
 							};
 
 static Parser<MetaConcept>::ParseFunc*
-Franci_o_n_2_rules[] =	{	&Construct2AryPhraseNonPostfix,	// catches IN ___
-							&ConstructNAryPhraseNonPostfix	// others other quantifier phrases
+Franci_o_n_2_rules[] =	{	&ConstructNAryPhraseNonPostfix	// catches other quantifier phrases
 						};
 
 #undef FRANCI_WARY
@@ -1473,6 +1431,12 @@ kuroda::parser<MetaConcept>& Franci_parser()
 		ooao->register_right_edge_build_nonterminal(EqualRelation::rightmost_parse);
 	}
 	return *ooao;
+}
+
+bool MetaConcept::IsPotentialArg() const
+{	// Detection metaphor: we want to allow phrases that eventually evaluate to acceptable args.
+	// this does *not* include IN __, or any of the quantifier phrases
+	return !IsUltimateType(NULL) || IsPotentialVarName();
 }
 
 // aux pattern matching

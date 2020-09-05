@@ -1438,15 +1438,3 @@ MetaConcept::IsPotentialVarName() const
 	return false;
 }
 
-bool
-MetaConcept::IsPotentialArg() const
-{	// FORMALLY CORRECT: Kenneth Boyd, 8/28/2001
-	// Detection metaphor: we want to allow phrases that eventually evaluate to acceptable args.
-	// this does *not* include IN __, or any of the quantifier phrases
-	// right now, it suffices to detect 2-ary phrases
-	if (   !IsUltimateType(NULL) || IsPotentialVarName()
-		|| (MinPhrase2Idx_MC<=ExactType() && MaxPhrase2Idx_MC>=ExactType()))
-		return true;
-	return false;
-}
-

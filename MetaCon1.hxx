@@ -80,24 +80,16 @@ enum ExactType_MC	{
 					FACTORIAL_Phrase1_MC,	// 38
 					// end 1-ary phrase block
 					// LOW-LEVEL DEPENDENCIES:
-					// * Phrase2Ary IDs are a block
-					// start 2-ary phrase block
-					SUM_Phrase2_MC,	// 39
-					MULT_Phrase2_MC,
-					PERMUTATION_Phrase2_MC,
-					COMBINATION_Phrase2_MC,	// 42
-					// end 2-ary phrase block
-					// LOW-LEVEL DEPENDENCIES:
 					// * PhraseNAry IDs are a block
 					// * 1st 5 have linear map to Metaquantifier block
 					// start n-ary phrase block
-					FORALL_PhraseN_MC,	// 43
+					FORALL_PhraseN_MC, // 39
 					THEREIS_PhraseN_MC,
 					FREE_PhraseN_MC,
 					NOTFORALL_PhraseN_MC,
-					THEREISNO_PhraseN_MC,	// 47
+					THEREISNO_PhraseN_MC, // 43
 					// end n-ary phrase block
-					ParseNode_MC, // 48
+					ParseNode_MC, // 44
 					UB_MC,
 					// end n-ary clause block
 					// semantic indexes
@@ -105,8 +97,6 @@ enum ExactType_MC	{
 					MaxSemanticIdx_MC	= UB_MC-1,	// maximum index with meaning
 					MinPhrase1Idx_MC	= IN_Phrase1_MC,	// minimum index for Phrase1Ary
 					MaxPhrase1Idx_MC	= FACTORIAL_Phrase1_MC,  // maximum index for Phrase1Ary
-					MinPhrase2Idx_MC	= SUM_Phrase2_MC,	// minimum index for Phrase2Ary
-					MaxPhrase2Idx_MC	= COMBINATION_Phrase2_MC,  // maximum index for Phrase2Ary
 					MinPhraseNIdx_MC	= FORALL_PhraseN_MC,	// minimum index for PhraseNAry
 					MaxPhraseNIdx_MC	= THEREISNO_PhraseN_MC,	// maximum index for PhraseNAry
 					MinZeroAryIdx_MC	= TruthValue_MC,		// minimum index for 0-ary type
@@ -242,19 +232,18 @@ public:
 	virtual void MoveInto(MetaConcept*& dest) = 0;	// can throw memory failure.  If it succeeds, it destroys the source.
 
 //  Type ID functions
-	ExactType_MC ExactType() const {return VFTable1->ExactType;};
-	const char* name() const {return VFTable1->name;};
-	bool IsExactType(ExactType_MC rhs) const {return VFTable1->ExactType==rhs;};
+	ExactType_MC ExactType() const { return VFTable1->ExactType; }
+	const char* name() const { return VFTable1->name; }
+	bool IsExactType(ExactType_MC rhs) const { return VFTable1->ExactType == rhs; }
 	bool IsInfinite() const;
 	bool IsFinite() const;
 	virtual const AbstractClass* UltimateType() const = 0;
 	bool IsUltimateType(const AbstractClass* rhs) const;
-	bool IsTypeMatch(ExactType_MC rhs1,const AbstractClass* rhs2) const {return IsExactType(rhs1) && IsUltimateType(rhs2);};
-	bool HasSameImplementationAs(const MetaConcept& rhs) const {return typeid(*this)==typeid(rhs);};
+	bool IsTypeMatch(ExactType_MC rhs1,const AbstractClass* rhs2) const { return IsExactType(rhs1) && IsUltimateType(rhs2); }
+	bool HasSameImplementationAs(const MetaConcept& rhs) const { return typeid(*this) == typeid(rhs); }
 	virtual bool ForceUltimateType(const AbstractClass* const rhs);
-// these are implemented in Unparsed.cxx
-	bool IsPotentialVarName() const;
-	bool IsPotentialArg() const;	
+	bool IsPotentialVarName() const; // Unparsed.cxx
+	bool IsPotentialArg() const; // InParse.cxx; \todo convert to static free function
 //	Arity functions
 	size_t min_size() const {return VFTable1->MinArity;};
 	size_t max_size() const {return VFTable1->MaxArity;};
@@ -286,18 +275,18 @@ public:
 	std::string to_s() const;
 	virtual std::string to_s_aux() const = 0;
 //  defaults are 0 and fatal/false
-	virtual unsigned long FunctionArity() const {return 0;};
+	virtual unsigned long FunctionArity() const { return 0; }
 	virtual bool EvaluateFunction(MetaConcept** const& ArgValList, unsigned long*& ArgList, MetaConcept*& Result);
-	virtual const char* ViewKeyword() const {return NULL;};
+	virtual const char* ViewKeyword() const { return 0; }
 
 	void LogThis(const char* const Header) const;
 // Formal manipulation functions
 	bool SelfLogicalNOTWorks(void) const;	// defined inline in Class.hxx
 	virtual void SelfLogicalNOT();	// instantiate when UltimateType is TruthValues
 	virtual int _strictlyImplies(const MetaConcept& rhs) const { return 0; }
-	virtual bool StrictlyImplies(const MetaConcept& rhs) const {return false;}
-	virtual void StrictlyModifies(MetaConcept*& rhs) const {};	// only RHS affected
-	virtual bool CanStrictlyModify(const MetaConcept& rhs) const {return false;};	// could affect only RHS
+	virtual bool StrictlyImplies(const MetaConcept& rhs) const { return false; }
+	virtual void StrictlyModifies(MetaConcept*& rhs) const {} // only RHS affected
+	virtual bool CanStrictlyModify(const MetaConcept& rhs) const { return false; } // could affect only RHS
 	virtual bool SelfInverse(const ExactType_MC Operation);
 	virtual bool SelfInverseTo(const MetaConcept& rhs, const ExactType_MC Operation) const;
 	virtual bool LogicalANDFindDetailedRule(MetaConcept& rhs, size_t LHSIdx, size_t RHSIdx, size_t& Param1, size_t& Param2, signed short& SelfEvalIdx, unsigned short& EvalIdx) {return false;};
