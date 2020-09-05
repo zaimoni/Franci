@@ -1177,7 +1177,7 @@ size_t Detect_InfixSymbol(const char* Target)
 	return 0;
 }
 
-#define LOGIC_KEYWORD_MAXSIZE 8
+#define LOGIC_KEYWORD_MAXSIZE 7
 // Franci recognizes the following logic keywords:
 // AND OR IFF XOR NAND NOR NIFF NXOR NOT IMPLIES
 static const char* const LogicKeywordTable[11]
@@ -1191,8 +1191,7 @@ static const char* const LogicKeywordTable[11]
 	LogicKeyword_NAND,		// length 4
 	LogicKeyword_NIFF,
 	LogicKeyword_NXOR,
-	LogicKeyword_IMPLIES,	// length 7
-	LogicKeyword_NIMPLIES	// length 8
+	LogicKeyword_IMPLIES	// length 7
 	};
 
 static const signed short LogicKeywordLowIndex[LOGIC_KEYWORD_MAXSIZE]
@@ -1203,8 +1202,7 @@ static const signed short LogicKeywordLowIndex[LOGIC_KEYWORD_MAXSIZE]
 	6,
 	-1,
 	-1,
-	9,
-	10
+	9
 	};
 
 static const signed short LogicKeywordHighIndex[LOGIC_KEYWORD_MAXSIZE]
@@ -1215,8 +1213,7 @@ static const signed short LogicKeywordHighIndex[LOGIC_KEYWORD_MAXSIZE]
 	8,
 	-1,
 	-1,
-	9,
-	10
+	9
 	};
 
 size_t

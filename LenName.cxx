@@ -36,7 +36,7 @@
 #define MULT_INV_TEXT "<sup>-1</sup>"
 
 // MetaConnective
-const char* const MetaConnectiveNames[8] =	{
+static const char* const MetaConnectiveNames[8] =	{
 											LogicKeyword_AND,	// AND
 											LogicKeyword_OR,	// OR
 											LogicKeyword_IFF,	// IFF

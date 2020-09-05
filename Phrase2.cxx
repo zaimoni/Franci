@@ -22,10 +22,6 @@ Phrase2Arg::EvaluateToOtherRule Phrase2Arg::EvaluateRuleLookup[MaxEvalRuleIdx_ER
 		&Phrase2Arg::ConvertToCombination
 		};
 
-// Infix keywords AND, OR, IFF, XOR, IMPLIES
-// Duals: NAND, NOR, NIFF, NXOR, NIMPLIES
-// NIFF==XOR, NXOR==IFF [but not for associativity/transitivity purposes!]
-
 static const char* const Phrase2AryKeywordLookup[MaxPhrase2Idx_MC-MinPhrase2Idx_MC+1]
   =	{
 	SymbolPlusSign,
@@ -33,7 +29,6 @@ static const char* const Phrase2AryKeywordLookup[MaxPhrase2Idx_MC-MinPhrase2Idx_
 	PrefixKeyword_PERMUTATION,
 	PrefixKeyword_COMBINATION
 	};
-
 
 // rest of implementation
 Phrase2Arg::Phrase2Arg(MetaConcept**& src, size_t& KeywordIdx)
