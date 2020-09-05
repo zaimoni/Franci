@@ -62,20 +62,6 @@ const MetaConceptVFT MetaConceptLookUp[]
 	  DECLARE_METACONCEPT(1,ULONG_MAX,FREE_PhraseN,Symmetric_LITBMP1MC,CommonNoun_LT),
 	  DECLARE_METACONCEPT(1,ULONG_MAX,NOTFORALL_PhraseN,Symmetric_LITBMP1MC,CommonNoun_LT),
 	  DECLARE_METACONCEPT(1,ULONG_MAX,THEREISNO_PhraseN,Symmetric_LITBMP1MC,CommonNoun_LT),	// end n-ary phrase block
-	  DECLARE_METACONCEPT(2,ULONG_MAX,LogicalAND_ClauseN,Symmetric_LITBMP1MC | SelfAssociative_LITBMP1MC | SimplePhraseClauseTransition_LITBMP1MC,Connective_LT),	// begin n-ary clause block
-	  DECLARE_METACONCEPT(2,ULONG_MAX,LogicalOR_ClauseN,Symmetric_LITBMP1MC | SelfAssociative_LITBMP1MC | SimplePhraseClauseTransition_LITBMP1MC,Connective_LT),
-	  DECLARE_METACONCEPT(2,ULONG_MAX,LogicalIFF_ClauseN,Symmetric_LITBMP1MC | Transitive_LITBMP1MC | SimplePhraseClauseTransition_LITBMP1MC,Connective_LT),
-	  DECLARE_METACONCEPT(2,ULONG_MAX,LogicalXOR_ClauseN,Symmetric_LITBMP1MC | SimplePhraseClauseTransition_LITBMP1MC,Connective_LT),
-	  DECLARE_METACONCEPT(2,ULONG_MAX,LogicalNXOR_ClauseN,Symmetric_LITBMP1MC | SimplePhraseClauseTransition_LITBMP1MC,Connective_LT),
-	  DECLARE_METACONCEPT(2,ULONG_MAX,LogicalNIFF_ClauseN,Symmetric_LITBMP1MC | SimplePhraseClauseTransition_LITBMP1MC,Connective_LT),
-	  DECLARE_METACONCEPT(2,ULONG_MAX,LogicalNOR_ClauseN,Symmetric_LITBMP1MC,Connective_LT),
-	  DECLARE_METACONCEPT(2,ULONG_MAX,LogicalNAND_ClauseN,Symmetric_LITBMP1MC,Connective_LT),
-	  DECLARE_METACONCEPT(2,ULONG_MAX,ALLEQUAL_ClauseN,Symmetric_LITBMP1MC | Transitive_LITBMP1MC | SimplePhraseClauseTransition_LITBMP1MC,Verb_LT),
-	  DECLARE_METACONCEPT(2,ULONG_MAX,ALLDISTINCT_ClauseN,Symmetric_LITBMP1MC | SimplePhraseClauseTransition_LITBMP1MC,Verb_LT),
-	  DECLARE_METACONCEPT(2,ULONG_MAX,EQUALTOONEOF_ClauseN,SimplePhraseClauseTransition_LITBMP1MC,Verb_LT),
-	  DECLARE_METACONCEPT(2,ULONG_MAX,DISTINCTFROMALLOF_ClauseN,SimplePhraseClauseTransition_LITBMP1MC,Verb_LT),
-	  DECLARE_METACONCEPT(2,ULONG_MAX,NOTALLDISTINCT_ClauseN,Symmetric_LITBMP1MC | SimplePhraseClauseTransition_LITBMP1MC,Verb_LT),
-	  DECLARE_METACONCEPT(2,ULONG_MAX,NOTALLEQUAL_ClauseN,Symmetric_LITBMP1MC | SimplePhraseClauseTransition_LITBMP1MC,Verb_LT),	// end n-ary clause block
 	  DECLARE_METACONCEPT(0,ULONG_MAX,ParseNode,0,0)
 };
 static_assert(sizeof(MetaConceptLookUp) / sizeof(*MetaConceptLookUp) == UB_MC);

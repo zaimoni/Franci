@@ -97,25 +97,7 @@ enum ExactType_MC	{
 					NOTFORALL_PhraseN_MC,
 					THEREISNO_PhraseN_MC,	// 47
 					// end n-ary phrase block
-					// LOW-LEVEL DEPENDENCIES:
-					// * ClauseNAry IDs are a block
-					// * 1st 8 have linear map to MetaConnective block
-					// start n-ary clause block
-					LogicalAND_ClauseN_MC,	// 48
-					LogicalOR_ClauseN_MC,
-					LogicalIFF_ClauseN_MC,
-					LogicalXOR_ClauseN_MC,
-					LogicalNXOR_ClauseN_MC,
-					LogicalNIFF_ClauseN_MC,
-					LogicalNOR_ClauseN_MC,
-					LogicalNAND_ClauseN_MC,
-					ALLEQUAL_ClauseN_MC,
-					ALLDISTINCT_ClauseN_MC,
-					EQUALTOONEOF_ClauseN_MC,
-					DISTINCTFROMALLOF_ClauseN_MC,
-					NOTALLDISTINCT_ClauseN_MC,
-					NOTALLEQUAL_ClauseN_MC,	// 61
-					ParseNode_MC,
+					ParseNode_MC, // 48
 					UB_MC,
 					// end n-ary clause block
 					// semantic indexes
@@ -127,12 +109,10 @@ enum ExactType_MC	{
 					MaxPhrase2Idx_MC	= COMBINATION_Phrase2_MC,  // maximum index for Phrase2Ary
 					MinPhraseNIdx_MC	= FORALL_PhraseN_MC,	// minimum index for PhraseNAry
 					MaxPhraseNIdx_MC	= THEREISNO_PhraseN_MC,	// maximum index for PhraseNAry
-					MinClauseNIdx_MC	= LogicalAND_ClauseN_MC,	// minimum index for ClauseNAry
-					MaxClauseNIdx_MC	= NOTALLEQUAL_ClauseN_MC,	// maximum index for ClauseNAry
 					MinZeroAryIdx_MC	= TruthValue_MC,		// minimum index for 0-ary type
 					MaxZeroAryIdx_MC	= IntegerNumeral_MC,	// maximum index for 0-ary type
 					MinClausePhraseIdx_MC = MinPhrase1Idx_MC,	// minimum index for internal phrase/clause
-					MaxClausePhraseIdx_MC = MaxClauseNIdx_MC,	// maximum index for internal phrase/clause
+					MaxClausePhraseIdx_MC = MaxPhraseNIdx_MC,	// maximum index for internal phrase/clause
 					MinSymbolicConstant_MC = LinearInfinity_MC,	// minimum index for symbolic constants
 					MaxSymbolicConstant_MC = LinearInfinity_MC,	// maximum index for symbolic constants
 					MinNonTrivialLogicalANDDetailedRule_MC = LogicalOR_MC,	// minimum index with nontrivial LogicalANDDetailedRule implementation
