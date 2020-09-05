@@ -77,26 +77,25 @@ enum ExactType_MC	{
 					// * all phrases, clauses are a block
 					// start 1-ary phrase block
 					IN_Phrase1_MC,	// 37
-					FACTORIAL_Phrase1_MC,	// 38
 					// end 1-ary phrase block
 					// LOW-LEVEL DEPENDENCIES:
 					// * PhraseNAry IDs are a block
 					// * 1st 5 have linear map to Metaquantifier block
 					// start n-ary phrase block
-					FORALL_PhraseN_MC, // 39
+					FORALL_PhraseN_MC, // 38
 					THEREIS_PhraseN_MC,
 					FREE_PhraseN_MC,
 					NOTFORALL_PhraseN_MC,
-					THEREISNO_PhraseN_MC, // 43
+					THEREISNO_PhraseN_MC, // 42
 					// end n-ary phrase block
-					ParseNode_MC, // 44
+					ParseNode_MC, // 43
 					UB_MC,
 					// end n-ary clause block
 					// semantic indexes
 					MinSemanticIdx_MC	= 1,					// minimum index with meaning
 					MaxSemanticIdx_MC	= UB_MC-1,	// maximum index with meaning
 					MinPhrase1Idx_MC	= IN_Phrase1_MC,	// minimum index for Phrase1Ary
-					MaxPhrase1Idx_MC	= FACTORIAL_Phrase1_MC,  // maximum index for Phrase1Ary
+					MaxPhrase1Idx_MC	= IN_Phrase1_MC,  // maximum index for Phrase1Ary
 					MinPhraseNIdx_MC	= FORALL_PhraseN_MC,	// minimum index for PhraseNAry
 					MaxPhraseNIdx_MC	= THEREISNO_PhraseN_MC,	// maximum index for PhraseNAry
 					MinZeroAryIdx_MC	= TruthValue_MC,		// minimum index for 0-ary type

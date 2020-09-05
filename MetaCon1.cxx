@@ -51,8 +51,7 @@ const MetaConceptVFT MetaConceptLookUp[]
 	  DECLARE_METACONCEPT(1,1,Factorial,0,ProperNoun_LT | Adjective_LT),
 	  DECLARE_METACONCEPT(2,2,PermutationCount,0,ProperNoun_LT | Adjective_LT),
 	  DECLARE_METACONCEPT(2,2,CombinationCount,0,ProperNoun_LT | Adjective_LT),
-	  DECLARE_METACONCEPT(1,1,IN_Phrase1,0,Adjective_LT),		// begin 1-ary phrase block
-	  DECLARE_METACONCEPT(1,1,FACTORIAL_Phrase1,SimplePhraseClauseTransition_LITBMP1MC,Adjective_LT),		// end 1-ary phrase block
+	  DECLARE_METACONCEPT(1,1,IN_Phrase1,0,Adjective_LT),		// begin/end 1-ary phrase block
 	  DECLARE_METACONCEPT(1,ULONG_MAX,FORALL_PhraseN,Symmetric_LITBMP1MC,CommonNoun_LT),		// begin n-ary phrase block
 	  DECLARE_METACONCEPT(1,ULONG_MAX,THEREIS_PhraseN,Symmetric_LITBMP1MC,CommonNoun_LT),
 	  DECLARE_METACONCEPT(1,ULONG_MAX,FREE_PhraseN,Symmetric_LITBMP1MC,CommonNoun_LT),

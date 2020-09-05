@@ -44,11 +44,11 @@ public:
 //  Type ID functions
 	const AbstractClass* UltimateType() const override { return 0; }
 //  Evaluation functions
-	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override;
-	virtual bool CanEvaluate() const;
+	evalspec canEvaluate() const override { return evalspec(); }
+	bool CanEvaluate() const override { return false; }
 	bool CanEvaluateToSameType() const override { return false; }
 	virtual bool SyntaxOK() const;
-	virtual bool Evaluate(MetaConcept*& dest);		// same, or different type
+	bool Evaluate(MetaConcept*& dest) override { return false; }
 	bool DestructiveEvaluateToSameType() override { return false; }
 // text I/O functions
 	const char* ViewKeyword() const override { return PhraseKeyword; }
@@ -62,7 +62,6 @@ protected:
 
 private:
 	bool SyntaxOK_IN() const;
-	bool SyntaxOK_FACTORIAL() const;
 };
 
 #endif
