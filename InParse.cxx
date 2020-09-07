@@ -169,27 +169,6 @@ static void _PostFilterPhraseClause(MetaConcept*& dest)
 		};
 }
 
-static bool NOT_ForcesTruthValueVariable(MetaConcept**& ArgArray,size_t i)
-{
-	assert(ArgArray);
-	assert(i<ArraySize(ArgArray));
-	if (   1<=i
-		&& ArgArray[i-1]->IsExactType(UnparsedText_MC)
-		&& static_cast<UnparsedText*>(ArgArray[i-1])->IsLogicKeyword(LogicKeyword_NOT))
-		{	// NOT ___
-		//! \todo FIX: needs to respond to NOT a whole lot of ... [NOT of a sentence]
-		CoerceArgType(ArgArray[i], TruthValues);
-		if (ArgArray[i]->SelfLogicalNOTWorks())
-			{
-			ArgArray[i]->SelfLogicalNOT();
-			_delete_idx(ArgArray,i-1);
-			assert(ValidateArgArray(ArgArray));
-			return true;
-			};
-		};
-	return false;
-}
-
 static bool _PostfilterUnparsedText(MetaConcept*& Target)
 {
 	assert(Target);
@@ -208,88 +187,17 @@ static bool ResolveUnparsedText(MetaConcept**& ArgArray,size_t i)
 {
 	assert(ArgArray);
 	assert(i<ArraySize(ArgArray));
-	if (ArgArray[i]->IsExactType(UnparsedText_MC))
+	if (auto pivot = up_cast<UnparsedText>(ArgArray[i]))
 		{
-//		if (_PostfilterUnparsedText(ArgArray[i])) .... // META: This is the complete reaction set for 0-ary UnparsedText
-
-		UnparsedText& VR_ArgArrayIdx = *static_cast<UnparsedText*>(ArgArray[i]);
 		// META: This is the complete reaction set for unclassified UnparsedText
 		// if an UnparsedText item is the ONLY entry, check to see if it's a
 		// variable name that has already been declared.  This is an inplace-rewrite.
-		if (   1==ArraySize(ArgArray)	// implies 0==Idx
-			&& VR_ArgArrayIdx.IsQuasiEnglishOrVarName())
+		if (   1==ArraySize(ArgArray)	// implies 0==i
+			&& pivot->IsQuasiEnglishOrVarName())
 			{
-			LookUpVar(ArgArray[0],NULL);	// requests a free variable
+			LookUpVar(ArgArray[0],0);	// requests a free variable
 			return true;
 			};
-//		if (VR_ArgArrayIdx.IsUnclassified()) ...
-
-		// META: This is the complete reaction set for LeadingIntegerNumeral UnparsedText
-//		if (VR_ArgArrayIdx.IsLeadingIntegerNumeral()) ...
-//		if (VR_ArgArrayIdx.IsLogicalInfinity()) ...
-		// ], ) key stripper rules
-		// these rules are *not* exhaustive; they need enough space behind them to work
-		const auto VR_argIdxMinus2 = (2 <= i) ? up_cast<UnparsedText>(ArgArray[i - 2]) : 0;
-		if (!VR_argIdxMinus2) return false;
-		const UnparsedText& VR_ArgArrayIdxMinus2 = *VR_argIdxMinus2;	// shim for legacy code
-			// ( ) strip
-			if (VR_ArgArrayIdx.IsCharacter(')') && VR_ArgArrayIdxMinus2.IsCharacter('('))
-				{	// This cleans up those clauses/phrases that can evaluate;
-				if (in_range<MinClausePhraseIdx_MC,MaxClausePhraseIdx_MC>(ArgArray[i-1]->ExactType()))
-					{	// if this clause/phrase *doesn't* evaluate, stall this section
-					if (!ArgArray[i-1]->CanEvaluate()) return false;
-
-					DestructiveSyntacticallyEvaluateOnce(ArgArray[i-1]);
-					}
-
-				// What's inside is *not* a clause/phrase, it has an interpretation
-				bool NoLeftExtend = 	2==i
-									|| (   ArgArray[i-3]->IsExactType(UnparsedText_MC)
-				    					&& static_cast<UnparsedText*>(ArgArray[i-3])->ArgCannotExtendLeftThroughThis());
-				bool NoRightExtend =	i+1==ArraySize(ArgArray)
-									|| (   ArgArray[i+1]->IsExactType(UnparsedText_MC)
-										&& static_cast<UnparsedText*>(ArgArray[i+1])->ArgCannotExtendRightThroughThis());
-				//! \todo FIX: deconflict this with integer floor function; matrices will behave via isomorphism
-				if (NoLeftExtend && NoRightExtend)
-					{
-SaveParenBracketStrip:	// brackets relocated to Kuroda parser
-					_delete_idx(ArgArray,i);
-					_delete_idx(ArgArray,i-2);
-					assert(ValidateArgArray(ArgArray));
-					return true;
-					};
-				// MUTABLE
-				// +/&middot;-compatible is legitimate to strip when both sides are 
-				// bounded by '+'-signs, &middot;-signs, or no-extends
-				if (   NULL!=ArgArray[i-1]->UltimateType()
-					&& (	ArgArray[i-1]->UltimateType()->Subclass(ClassAdditionDefined)
-						||	ArgArray[i-1]->UltimateType()->Subclass(ClassMultiplicationDefined)))
-					{
-					if 		(NoLeftExtend)
-						{
-						if (   ArgArray[i+1]->IsExactType(UnparsedText_MC)
-				    		&& (	static_cast<UnparsedText*>(ArgArray[i+1])->IsLogicalPlusSign()
-								|| 	static_cast<UnparsedText*>(ArgArray[i+1])->IsLogicalMultiplicationSign()))
-							goto SaveParenBracketStrip;
-						}
-					else if (NoRightExtend)
-						{
-						if (   ArgArray[i-3]->IsExactType(UnparsedText_MC)
-				    		&& (	static_cast<UnparsedText*>(ArgArray[i-3])->IsLogicalPlusSign()
-								||	static_cast<UnparsedText*>(ArgArray[i-3])->IsLogicalMultiplicationSign()))
-							goto SaveParenBracketStrip;
-						}
-					else{
-						if (   ArgArray[i-3]->IsExactType(UnparsedText_MC)
-				    		&& (	static_cast<UnparsedText*>(ArgArray[i-3])->IsLogicalPlusSign()
-								||	static_cast<UnparsedText*>(ArgArray[i-3])->IsLogicalMultiplicationSign())
-							&& ArgArray[i+1]->IsExactType(UnparsedText_MC)
-				    		&& (	static_cast<UnparsedText*>(ArgArray[i+1])->IsLogicalPlusSign()
-								||	static_cast<UnparsedText*>(ArgArray[i+1])->IsLogicalMultiplicationSign()))
-							goto SaveParenBracketStrip;									
-						};
-					};
-				};
 		};
 	return false;
 }
@@ -590,8 +498,7 @@ static bool HTMLSuperScript(MetaConcept**& ArgArray,size_t i)
 //		Franci cannot improvise abstract class names.
 
 static Parser<MetaConcept>::ParseFunc*
-Franci_o_n_rules[] =		{	&NOT_ForcesTruthValueVariable,
-								&ResolveUnparsedText,
+Franci_o_n_rules[] =		{	&ResolveUnparsedText,
 								&ConstructQuantifierList,
 								&Construct1AryPhrase, // catches IN ___
 								&ConstructNAryPhrasePostfix,
