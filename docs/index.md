@@ -1,4 +1,3 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=windows-1252"/>
@@ -16,6 +15,7 @@
 Pending proper documentation: Franci's trunk should be passing all test drivers without error.  The deductive logic and hypothesis-speculating should have 
 implicit complete coverage.  (That is, all inference rules are exercised by at least one of the test driver files and are needed for correct results as
 measured by the *NIX cmp utility.)  The arithmetic support was parked at an early stage back in 2003 or so.
+
 
 Some preliminary working notes on <a href="KripkeFrames.html">Kripke semantics</a>.
 </body>
