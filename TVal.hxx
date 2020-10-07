@@ -5,6 +5,9 @@
 #include <stddef.h>
 #include <string>
 
+// This appears to be a re-invention of Belnap's four-valued logic.
+// Cf. http://comet.lehman.cuny.edu/fitting/bookspapers/pdf/papers/KleeneThree.pdf 2020-10-07 zaimoni
+
 class TVal final
 {
 private:
