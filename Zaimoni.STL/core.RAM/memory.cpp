@@ -617,7 +617,7 @@ static void __DetectOverwrites(void)
 				{	// FATAL ERROR CODE
 				char Buffer[20];
 				ReportError(InvalidWriteDetected);
-				sprintf(Buffer, "%llu", (unsigned long long)((VOID_CAST(Target + TargetSize))[0]), Buffer, 16);
+				sprintf(Buffer, "%llu", (unsigned long long)((VOID_CAST(Target + TargetSize))[0]));
 				ReportError(Buffer);
 //				ReportError(z_umaxtoa((size_t)((VOID_CAST(Target+TargetSize))[0]),Buffer,16));
 #undef VOID_CAST

@@ -990,7 +990,7 @@ _IntegerNumeral::SmallDifference(const _IntegerNumeral& rhs, signed long& Result
 					{
 					if (   2==ArraySize(rhs.LongInteger)
 						&& 3>=rhs.LongInteger[1]
-						&& LONG_MAX-(rhs.LongInteger[1]-1)*WRAPLB>=rhs.LongInteger[0]+(WRAPLB-ShortInteger));
+						&& LONG_MAX-(rhs.LongInteger[1]-1)*WRAPLB>=rhs.LongInteger[0]+(WRAPLB-ShortInteger))
 						{
 						Result = rhs.LongInteger[1]*WRAPLB+rhs.LongInteger[0]-ShortInteger;
 						return true;
@@ -1026,7 +1026,7 @@ _IntegerNumeral::SmallDifference(const _IntegerNumeral& rhs, signed long& Result
 					{
 					if (   2==ArraySize(rhs.LongInteger)
 						&& 3>=rhs.LongInteger[1]
-						&& LONG_MAX-(rhs.LongInteger[1]-1)*WRAPLB>=rhs.LongInteger[0]+(WRAPLB-ShortInteger));
+						&& LONG_MAX-(rhs.LongInteger[1]-1)*WRAPLB>=rhs.LongInteger[0]+(WRAPLB-ShortInteger))
 						{
 						Result = -(signed long)(rhs.LongInteger[1]*WRAPLB+rhs.LongInteger[0]-ShortInteger);
 						return true;
@@ -1052,7 +1052,7 @@ _IntegerNumeral::SmallDifference(const _IntegerNumeral& rhs, signed long& Result
 					{
 					if (   2==ArraySize(LongInteger)
 						&& 3>=LongInteger[1]
-						&& LONG_MAX-(LongInteger[1]-1)*WRAPLB>=LongInteger[0]+(WRAPLB-ShortInteger));
+						&& LONG_MAX-(LongInteger[1]-1)*WRAPLB>=LongInteger[0]+(WRAPLB-ShortInteger))
 						{
 						Result = -(signed long)(LongInteger[1]*WRAPLB+LongInteger[0]-ShortInteger);
 						return true;
@@ -1078,7 +1078,7 @@ _IntegerNumeral::SmallDifference(const _IntegerNumeral& rhs, signed long& Result
 					{
 					if (   2==ArraySize(LongInteger)
 						&& 3>=LongInteger[1]
-						&& LONG_MAX-(LongInteger[1]-1)*WRAPLB>=LongInteger[0]+(WRAPLB-ShortInteger));
+						&& LONG_MAX-(LongInteger[1]-1)*WRAPLB>=LongInteger[0]+(WRAPLB-ShortInteger))
 						{
 						Result = LongInteger[1]*WRAPLB+LongInteger[0]-ShortInteger;
 						return true;
