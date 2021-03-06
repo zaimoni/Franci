@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=windows-1252"/>
+	<title>Overview of descibing formal systems in plain English</title>
+	<style type="text/css">
+		@page { margin: 0.79in }
+		p { margin-bottom: 0.1in; line-height: 120% }
+		a:link { so-language: zxx }
+		* {
+            font-family: "Liberation Serif", serif
+        }
+	</style>
+</head>
+<body lang="en-US" dir="ltr">
+<h1 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 16px">Overview of descibing formal systems in plain English,
+<br/>i.e. Context for Godel&rsquo;s Completeness and Incompleteness theorems</h1>
+<p><a href="https://en.wikipedia.org/wiki/Formal_system">https://en.wikipedia.org/wiki/Formal_system</a></p>
+<p>A formal system can be denoted by:</p>
+<ul>
+	<li>A finite set of symbols, i.e. alphabet.</li>
+	<li>A grammar specifying rules for forming well-formed finite sequences
+		(formulas) from simpler well-formed finite sequences of symbols
+		from the alphabet.  It is very useful (and often required) to have
+		a decision procedure for whether a finite sequence,
+		is a well-formed formula.</li>
+	<li>A set of axioms, or axiom schemata,
+		consisting of well-formed formulas.</li>
+	<li>A set of inference rules.  Theorems are defined
+		as well-formed formulas, that are inferrable from the axioms.</li>
+</ul>
+<p>A formal system is said to be:</p>
+<ul>
+	<li>recursive (alternately, effective) if the set of axioms and
+		the set of inference rules are decidable (the algorithm recognizing
+		the axioms, and the algorithm recognizing the inference rules,
+		both terminate in finite time both when the proposed finite sequence
+		does, and does not, match)</li>
+	<li>recursively enumerable if the set of axioms and
+		the set of inference rules are semidecidable (the algorithm recognizing
+		the axioms, and the algorithm recognizing the inference rules,
+		both terminate in finite time both when the proposed finite sequence
+		does match; does not have to terminate when it does not match.)</li>
+</ul>
+<p>Typical logical symbols for an alphabet include</p>
+<ul>
+	<li>The universal and existential quantifiers.</li>
+	<li>Logical symbols for &ldquo;and&rdquo;, &ldquo;inclusive or&rdquo;,
+		&ldquo;not&rdquo;, &ldquo;implies&rdquo;, and
+		&ldquo;if and only if&rdquo;.</li>
+	<li>Various kinds of punctuation.</li>
+	<li>An infinite set of variables; suffixing (e.g, with integers)
+		is an option.  Their values are in the domain of discourse.</li>
+	<li>Equality = may be considered either a logical symbol, or
+		a non-logical predicate symbol.</li>
+	<li>Truth values.</li>
+</ul>
+<p>Typical non-logical symbols are generally either</p>
+<ul>
+	<li>n-ary predicates, that evaluate to truth values.  A 0-ary predicate is
+		a propositional variable that can be substituted out for any statement.</li>
+	<li>n-ary functions, that evaluate to objects in the domain of discourse.
+		A 0-ary function is a constant symbol.</li>
+</ul>
+<p><a href="https://en.wikipedia.org/wiki/G%C3%B6del%27s_completeness_theorem">https://en.wikipedia.org/wiki/G%C3%B6del%27s_completeness_theorem</a></p>
+<p>Fixing a deductive system (e.g., classical logic):</p>
+<p>We say that a sentence s of a theory T:</p>
+<ul>
+	<li>Is a syntactic consequence T&#9500; s , if and only if
+		s is provable from T .</li>
+	<li>Is a semantic consequence T&#9566; s, if and only if s holds
+		in every model i.e. interpretation M of T .</li>
+</ul>
+<p><a href="https://en.wikipedia.org/wiki/First-order_logic">https://en.wikipedia.org/wiki/First-order_logic</a></p>
+<p>Terms (symbols that evaluate to an object in the universe of discourse)
+	and formulas (symbols that evaluate to a truth value)
+	may be recursively defined as follows:</p>
+<ul>
+	<li>Any variable, is a term.</li>
+	<li>Any n-ary predicate, taking a non-negative integer n terms,
+		is a formula.</li>
+	<li>Any n-ary logical connective, taking a positive integer n formulas,
+		is a formula.</li>
+	<li>For any formula &phi; and variable x, the quantified statements
+		<font face="Symbol">&#61474;</font>x &phi; and
+		<font face="Symbol">&#61476;</font>x &phi; are formulas.</li>
+	<li>Any n-ary function symbol f, taking a non-negative integer n number
+		of formulas or terms as arguments, is a term.
+		<ul>
+			<li>This is atypical, but needed to be able to denote
+				a step function in first-order logic.</li>
+		</ul>
+	</li>
+</ul>
+<p>Bound and free variables in formulas are defined as follows:</p>
+<ul>
+	<li>There are no bound variables in any atomic formula;
+		a variable x is free in an atomic formula &phi;,
+		if and only if x occurs in &phi;</li>
+	<li>For any n-ary logical connective, a variable x is free or bound
+		in that connective, if and only if x is free or bound
+		in at least one formula of that connective.</li>
+	<li>For formulas <font face="Symbol">&#61474;</font>x &phi; and
+		<font face="Symbol">&#61476;</font>x &phi;, a variable
+	<ul>
+		<li>y is free if and only if y&lt;&gt;x and y is free in &phi;</li>
+		<li>y is bound if and only if y=x or y is bound in &phi;
+		<ul>
+			<li>We do not mention free variables in the definition of bound
+				variables, and vice versa, so that the definitions work as
+				expected in nonclassical logics.</li>
+		</ul></li>
+	</ul></li>
+</ul>
+<p>A formula in first-order logic, that contains no free variables,
+	is called a first order sentence.  These are the formulas for which
+	it is reasonable to expect them to evaluate to truth values.</p>
+<p>If a sentence &phi; evaluates to true for a given interpretation M
+	of a theory T, we say M satisfies &phi; ; symbolic denotation is
+	M&#9566; &phi; .  A sentence &phi; is satisfiable if there is
+	at least one interpretation i.e. model M for which &phi; is true.</p>
+<p>A formula that does contain at least one free variable, may be defined
+	to be satisfiable if it is true when any element of
+	the universe of discourse is substituted for the free variable.
+	Whether this definition is useful, is context-sensitive.</p>
+<p>A formula &phi; is said to be (logically) valid, if it is true
+	in every interpretation i.e. model M.  (This is closely related
+	to semantic consequence T&#9566; &phi; .)</p>
+<p>A formula &phi; is said to be a logical consequence of a formula &psi;,
+	if every interpretation that makes &psi; true also makes &phi; true.</p>
+<p>&hellip;.</p>
+<p><a href="https://en.wikipedia.org/wiki/Second-order_logic">https://en.wikipedia.org/wiki/Second-order_logic</a></p>
+<p>In (full) second-order logic, we allow variables that range over
+	k-ary relations (where k is a positive integer).  Monadic second-order
+	logic only uses variables that range over 1-ary relations, i.e. sets.</p>
+<p>Standard semantics is the &ldquo;naive&rdquo; generalization of
+	first order logic to second order logic; Henkin semantics involves
+	domain restrictions for the second-order logic specific variables,
+	compared to standard semantics.</p>
+</body>
+</html>
