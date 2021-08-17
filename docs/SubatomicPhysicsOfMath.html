@@ -1,0 +1,360 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=windows-1252"/>
+	<title>The subatomic physics of math: set theory</title>
+	<style type="text/css">
+		@page { margin: 0.79in }
+		p { margin-bottom: 0.1in; line-height: 120% }
+		a:link { so-language: zxx }
+		* {
+            font-family: "Liberation Serif", serif
+        }
+		.classical {
+			background-color: white;
+		}
+		.three-valued {
+			background-color: #FEE;
+		}
+		.four-valued {
+			background-color: #EEF;
+		}
+	</style>
+</head>
+<body lang="en-US" dir="ltr">
+<div style="position:fixed; top:0.5em; left:0.5em; background:white"><a href="/">Home</a></div>
+<h1 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 16px; margin-left: 3em; margin-right: 3em"><nobr>The subatomic physics of math:</nobr> <nobr>rationale and parameters of set theory</nobr></h1>
+<p align="center"><i>For everything that can be shaken, will be shaken.</i></p>
+<p>Back in 1910, Russell and Whitehead's <i>Principia Mathematica</i> made it credible that all of mathematics
+	could be defined in terms of two undefined parts: logic, and a single infix binary predicate
+	&#x03F5; generally interpreted as <nobr>"is a member of"</nobr>.  This was about twenty years after untrained thinking
+	about collections of mathematical items was found to be logic-paradoxed.  Details have changed
+	since then; the modern formalism for this task is only traceable to the 1960's.</p>
+
+<p>That is, set theory (a non-uniquely sufficient foundation for all of mathematics:
+	the study of mathematical collections) has two parameters: logic itself,
+	and how to define sets in terms of said predicate &#x03F5; .
+	Here, notation is our lens; any assignment of notation that <nobr>"behaves identically"</nobr>,
+	describes the same mathematics.</p>	
+
+<span style="border: 1px solid black; display:block; float:right">
+<ol type="I">
+<li>Parameters<ol type="i">
+	<li><a href="#logic">Logic</a></li>
+	<li><a href="#def-is-member-of">Definition of &#x03F5;, <nobr>"is a member of"</nobr></a></li>
+	<li><a href="#ur-element">ur-elements, i.e. not-set elements of sets</a></li>
+</ol></li>
+<li>Worked Exercises in Logic<ol type="i">
+	<li><a href="#def-not">Description of ~, "not"</a></li>
+	<li><a href="#def-and">Description of &, "and"</a></li>
+	<li><a href="#def-or">Description of ||, "or"</a></li>
+	<li><a href="#den-law-of-excluded-middle">Law of the Excluded Middle</a></li>
+	<li><a href="#belnap-structural-inconsistency">Belnap: structural formal inconsistency</a></li>
+	<li><a href="#def-ns-implies">Definition of &rArr;, "nonstrictly implies"</a></li>
+	<li><a href="#def-quantify">Description of quantifiers <span style="transform:rotate(180deg);display:inline-block">A</span> and <span style="transform:rotate(180deg);display:inline-block">E</span></a></li>
+</ol></li>
+</ol>
+</span>
+
+<h2 id="logic" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Parameter: logic</h2>
+
+<p>Following Bernays' <a href="https://archive.org/details/axiomaticsettheo0000bern">Axiomatic Set Theory</a> (Ch.1 Sect. 1), we may describe classical (first-order) logic as follows (using our <a href="./FormalSystems.html">working notes</a> for describing formal systems in plain English):</p>
+<ul>
+	<li>Undefined symbols for truth values:
+		<ul>
+			<li>true, intended (English) interpretation "true"</li>
+			<li>false, intended interpretation "false"</li>
+		</ul></li>
+	<li>Undefined logical operators
+		<ul>
+			<li>&, intended interpretation "and"; infix binary syntax.</li>
+			<li>~, intended interpretation "not"; prefix unary syntax.</li>
+		</ul></li>
+	<li>Undefined quantifiers
+		<ul>
+			<li><span style="transform:rotate(180deg);display:inline-block">A</span>, intended interpretation <nobr>"for all"</nobr></li>
+		</ul>
+	<li>Undefined relations between statements
+		<ul>
+			<li>&#9500;, intended interpretation <nobr>"syntactically entails"</nobr></li>
+			<li>:=, intended interpretation <nobr>"defined as"</nobr></li>
+		</ul></li>
+	<li>Definitions
+		<ul>
+			<li>An (unbounded) supply of symbols for logical variables, i.e. variables whose values are truth values.</li>
+			<li>An (unbounded) supply of symbols for terms, i.e. variables whose values are not truth values.</li>
+			<li><span style="transform:rotate(180deg);display:inline-block">E</span>, intended interpretation <nobr>"there is"</nobr></li>
+			<li>Other infix binary operators, as required.  The ones we will rely on are:
+				<ul>
+					<li>||, intended interpretation "or" (usual definition in terms of "and" and "not")</li>
+					<li>&rArr;, intended interpretation "nonstrictly implies" (usual definition in terms of "or" and "not")</li>
+					<li>&hArr;, intended interpretation "if and only if" (usual definition in terms of <nobr>"nonstrictly implies"</nobr> and "and")</li>
+				</ul></li>
+		</ul></li>
+</ul>
+<p>One might think one could replace the undefined symbols & and ~ with a single undefined symbol for a universal logic gate (say, NAND or NOR) but this is less readable. We still need one unary predicate and one binary predicate, even if they have the same symbol.</p>
+<p>However, there are two non-classical truth values of interest:
+	contradiction (from Kripke's strong three-valued logic, also used by Bernap's 4-valued logic), and
+	unknown (from Bernap's 4-valued logic).  So that is the first of three parameters for set theory: which logic to use.</p>
+
+<h2 id="def-is-member-of" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Parameter: definition of &#x03F5;</h2>
+
+<p>The main systems, in chronological order, are:</p>
+<ul>
+	<li>Type-theoretic (prototype <i><a href="https://en.wikipedia.org/wiki/Principia_Mathematica">Principia</a> <a href="https://plato.stanford.edu/entries/principia-mathematica/">Mathematica</a></i>)</li>
+	<li>Zermelo-Frankel</li>
+	<li>Von Neumann-G&ouml;del-Bernays</li>
+</ul>
+<p>The above is also in decreasing order of technical difficulty.  This draft will primarily survey the Von Neumann-Bernays-G&ouml;del approach.</p>
+<h2 id="ur-element" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Parameter: ur-elements, i.e. not-set elements of sets</h2>
+<p>This parameter has the following rationales:</p>
+<ul>
+	<li>Truth values, are a good choice for non-set elements of sets.  Once functions are built out, this allows functions with domain truth values.  It also allows "cloning" logical operators, as functions.</li>
+	<li>It allows having physical objects, etc. as elements of sets.</li>
+</ul>
+<p>The simple case, is no ur-elements.</p>
+
+<h2 id="def-not" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Worked exercise: Describing the logical operator ~ "not"</h2>
+<table align="right" border="0" cellspacing="0" cellpadding="2" style="margin-left: 1em; border: 1px solid black">
+	<tr><th colspan="3">A</th></tr>
+	<tr align="center"><td>&nbsp;</td><td class="four-valued">unknown</td><td>&nbsp;</td></tr>
+	<tr align="center"><td>true</td><td>&nbsp;</td><td>false</td></tr>
+	<tr align="center"><td>&nbsp;</td><td class="three-valued">contradiction</td><td>&nbsp;</td></tr>
+</table>
+<table align="left" border="0" cellspacing="0" cellpadding="2" style="margin-right: 1em; border: 1px solid black">
+<tr align="center"><th>A</th><th>~A</th></tr>
+<tr align="right"><td>true</td><td>false</td></tr>
+<tr align="right"><td>false</td><td>true</td></tr>
+<tr align="right" class="three-valued"><td>contradiction</td><td>contradiction</td></tr>
+<tr align="right" class="four-valued"><td>unknown</td><td>unknown</td></tr>
+</table>
+<p>Here, I am using capital latin letters as <i>propositional variables</i>.  The meaning of the underlying statement has
+been abstracted away.  Lacking context, all we know is that the statement has a truth value.</p>
+<p>The classical truth values <i>true</i> and <i>false</i> have a very long history.  In the Western tradition,
+	they were systematically described by Aristotle.  The lack of progress in philosophically defining what truth is over the past
+	two and half millenia, is empirical evidence that taking truth values to be formally undefined, is
+	justified.  See Standard Encylopedia of Philosophy and Internet Encyclopedia of Philosophy for details.</p>
+<p>While <i>contradiction</i> and <i>unknown</i> have a long history in natural language, their interpretation as 
+	non-classical truth values only reached the literature in the 1890's or so; the names of the major nonclassical logics to be named, are from the 1960's and 1970's.
+	This table, and diagram pair, is for a 4-valued logic.  That is, rather than defining <i>unknown</i> as "unwillingness to assign a truth value", we can take it
+	as an undefined truth value.  Likewise, rather than trying to define <i>contradiction</i> (there are several
+incompatible English interpretations), we can take it as an undefined truth value.</p>
+<p>Suppose we wanted to substitute in "The sky is blue" for the propositional variable A.  This would be true on a clear day near noon, and false at sunrise (or during a thunderstorm).
+	The corresponding interpretation of ~A in English would be "The sky is not blue".  All three logics agree here: Kripke's strong 3-valued logic is a conservative extension of classical logic,
+	and Bernap's 4-valued logic is a conservative extension of Kripke's 3-valued logic.  The background tinting is intentional: white is for classical logic,
+	light green is for 3-valued logic, and light blue is for 4-valued logic</p>
+<p>If I didn't know either the time of day or the weather outside (e.g., just released from a medically induced coma), I would not
+	be able to say whether "the sky is blue" at the time.  This is where the 4-valued logic differs from the other two.
+	in classical logic, it is axiomatic that the sentence is either true or false; the formal representation would be in terms of
+	a "belief predicate-like on statements" (which would be <b>very difficult</b> to formalize: jargon "doxastic logic").  
+	In 4-valued logic, <i>unknown</i> is an undefined term, so we use it directly.  As a matter of meaning, 
+	3-valued logic agrees with classical logic here.  (It it not a grammatical error, and there are possible worlds where "the sky is blue".)</p>
+<p>Now, suppose we wanted to substitute "This sentence is false" for the propositional variable A (the archetypical Liar Paradox).
+	In classical logic, we cannot assign a truth value to this English sentence even though it appears grammatically correct.  The other two
+	logics have no such issue; the undefined truth value <i>contradiction</i> does not logic-paradox.  (We even say that
+	"This sentence is false" is self-contradictory.)  If we want a formal system as capable as natural language reasoning,
+	we definitely could use some sort of non-classical logic.</p>
+<h2 id="def-and" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Worked exercise: Describing the logical operator & "and"</h2>
+<span style="float:right">
+<table align="right" border="0" cellspacing="0" cellpadding="2" style="margin-right: 1em; border: 1px solid black">
+	<tr align="center"><th colspan=6><a href="https://en.wikipedia.org/wiki/Four-valued_logic">Belnap</a></th></tr>
+	<tr align="center"><th colspan=2>A & B</th><th colspan=4>B</th></tr>
+	<tr align="right"><td colspan=2>&nbsp;</td><th>unknown</th><th>false</th><th>true</th><th>contradiction</th></tr>
+	<tr align="right"><th rowspan=4>A</th><th>unknown</th><td>unknown</td><td>false</td><td>unknown</td><td>false</td></tr>
+	<tr align="right"><th>false</th><td>false</td><td>false</td><td>false</td><td>false</td></tr>
+	<tr align="right"><th>true</th><td>unknown</td><td>false</td><td>true</td><td>contradiction</td></tr>
+	<tr align="right"><th>contradiction</th><td>false</td><td>false</td><td>contradiction</td><td>contradiction</td></tr>
+</table><br>
+<table align="right" border="0" cellspacing="0" cellpadding="2" style="margin-right: 1em; border: 1px solid black">
+	<tr align="center"><th colspan=6><a href="http://builds.openlogicproject.org/content/many-valued-logic/three-valued-logics/kleene.pdf">Kleene, weak</a></th></tr>
+	<tr align="center"><th colspan=2>A & B</th><th colspan=3>B</th></tr>
+	<tr align="right"><td colspan=2>&nbsp;</td><th>unknown</th><th>false</th><th>true</th></tr>
+	<tr align="right"><th rowspan=4>A</th><th>unknown</th><td>unknown</td><td>unknown</td><td>unknown</td></tr>
+	<tr align="right"><th>false</th><td>unknown</td><td>false</td><td>false</td></tr>
+	<tr align="right"><th>true</th><td>unknown</td><td>false</td><td>true</td></tr>
+</table><br>
+<table align="right" border="0" cellspacing="0" cellpadding="2" style="margin-right: 1em; border: 1px solid black">
+	<tr align="center"><th colspan=6><a href="http://comet.lehman.cuny.edu/fitting/bookspapers/pdf/papers/KleeneThree.pdf">Lisp/Prolog</a></th></tr>
+	<tr align="center"><th colspan=2>A & B</th><th colspan=3>B</th></tr>
+	<tr align="right"><td colspan=2>&nbsp;</td><th>unknown</th><th>false</th><th>true</th></tr>
+	<tr align="right"><th rowspan=4>A</th><th>unknown</th><td>unknown</td><td>unknown</td><td>unknown</td></tr>
+	<tr align="right"><th>false</th><td>false</td><td>false</td><td>false</td></tr>
+	<tr align="right"><th>true</th><td>unknown</td><td>false</td><td>true</td></tr>
+</table>	
+</span>
+<span style="float:left">
+<table align="left" border="0" cellspacing="0" cellpadding="2" style="margin-right: 1em; border: 1px solid black">
+	<tr align="center"><th colspan=6>Franci</th></tr>
+	<tr align="center"><th colspan=2>A & B</th><th colspan=4>B</th></tr>
+	<tr align="right"><td colspan=2>&nbsp;</td><th>unknown</th><th>false</th><th>true</th><th>contradiction</th></tr>
+	<tr align="right"><th rowspan=4>A</th><th>unknown</th><td>unknown</td><td>false</td><td>unknown</td><td>contradiction</td></tr>
+	<tr align="right"><th>false</th><td>false</td><td>false</td><td>false</td><td>contradiction</td></tr>
+	<tr align="right"><th>true</th><td>unknown</td><td>false</td><td>true</td><td>contradiction</td></tr>
+	<tr align="right"><th>contradiction</th><td>contradiction</td><td>contradiction</td><td>contradiction</td><td>contradiction</td></tr>
+</table><br>
+<table align="left" border="0" cellspacing="0" cellpadding="2" style="margin-right: 1em; border: 1px solid black">
+	<tr align="center"><th colspan=6><a href="http://builds.openlogicproject.org/content/many-valued-logic/three-valued-logics/kleene.pdf">Kleene, strong</a></th></tr>
+	<tr align="center"><th colspan=2>A & B</th><th colspan=3>B</th></tr>
+	<tr align="right"><td colspan=2>&nbsp;</td><th>unknown</th><th>false</th><th>true</th></tr>
+	<tr align="right"><th rowspan=4>A</th><th>unknown</th><td>unknown</td><td>false</td><td>unknown</td></tr>
+	<tr align="right"><th>false</th><td>false</td><td>false</td><td>false</td></tr>
+	<tr align="right"><th>true</th><td>unknown</td><td>false</td><td>true</td></tr>
+</table><br>
+<table align="left" border="0" cellspacing="0" cellpadding="2" style="margin-right: 1em; border: 1px solid black">
+	<tr align="center"><th colspan=6><a href="https://en.wikipedia.org/wiki/Classical_logic">Classical</a> <a href="https://plato.stanford.edu/entries/logic-classical/">Logic</a></th></tr>
+	<tr align="center"><th colspan=2>A & B</th><th colspan=2>B</th></tr>
+	<tr align="right"><td colspan=2>&nbsp;</td><th>false</th><th>true</th></tr>
+	<tr align="right"><th rowspan=4>A</th><th>false</th><td>false</td><td>false</td></tr>
+	<tr align="right"><th>true</th><td>false</td><td>true</td></tr>
+</table>	
+</span>
+<p>The intended interpretation of <i>A & B</i> is "A, and B" where A and B are propositional variables that themselves are to be replaced with specific sentences, or formulas with 
+	truth values.  We have several accepted ways of generalizing classical logic, which only has the truth values <i>true</i> and <i>false</i></p>
+<p>Belnap designed his four-valued logic to interpret <i>unknown</i> as "no data", and <i>contradiction</i> as "different sources assert true, and false."
+	This lends itself to two partial orderings.  One is an information ordering where <i>unknown</i> is minimal, and <i>contradiction</i> is maximal.
+	The other partial ordering has <i>true</i> maximal, and <i>false</i> minimal.</p>
+<p>I designed Franci's four-valued logic to interpret <i>unknown</i> as "possibly true, possibly false", and <i>contradiction</i> as "cannot be true, cannot be false".
+	The difference between the two descriptions of &, is from the difference in intended interpretation.</p>
+<p>The two definitions agree on the truth values for <a href="http://www.youdemon.com/files/Simon%20Marcus%20-%20Kleene%20Strong%203-Valued%20Modal%20Logic.pdf">Kleene's strong three-valued logic</a>: <i>true</i>, <i>false</i>, <i>unknown</i>.  None of these three
+	agree with Kleene's weak three-valued logic.  The intended interpretation for <i>unknown</i>, in both of the Kleene logics, is "computation does not terminate".
+	Both weak and strong Kleene logics interpret parallel processing.  The weak logic interprets waiting on all subprocesses to evaluate; 
+	the strong logic interprets evaluating on getting a decisive answer from any single subprocess.</p>
+<p>If you interpret the logical connectives as sequential processing with the Kleene logic intended interpretation of <i>unknown</i>,
+	you get the asymmetric logic implemented in the programming languages Lisp and Prolog.</p>
+	<h2 id="def-or" align="center" style="clear:both; margin-bottom: 0in; line-height: 100%; font-size: 14px">Worked exercise: Describing the logical operator || "or"</h2>
+	<span style="float:right">
+	<table align="right" border="0" cellspacing="0" cellpadding="2" style="margin-right: 1em; border: 1px solid black">
+		<tr align="center"><th colspan=6><a href="https://en.wikipedia.org/wiki/Four-valued_logic">Belnap</a></th></tr>
+		<tr align="center"><th colspan=2>A || B</th><th colspan=4>B</th></tr>
+		<tr align="right"><td colspan=2>&nbsp;</td><th>unknown</th><th>false</th><th>true</th><th>contradiction</th></tr>
+		<tr align="right"><th rowspan=4>A</th><th>unknown</th><td>unknown</td><td>unknown</td><td>true</td><td>true</td></tr>
+		<tr align="right"><th>false</th><td>unknown</td><td>false</td><td>true</td><td>contradiction</td></tr>
+		<tr align="right"><th>true</th><td>true</td><td>true</td><td>true</td><td>true</td></tr>
+		<tr align="right"><th>contradiction</th><td>true</td><td>contradiction</td><td>true</td><td>contradiction</td></tr>
+	</table><br>
+	<table align="right" border="0" cellspacing="0" cellpadding="2" style="margin-right: 1em; border: 1px solid black">
+		<tr align="center"><th colspan=6><a href="http://builds.openlogicproject.org/content/many-valued-logic/three-valued-logics/kleene.pdf">Kleene, weak</a></th></tr>
+		<tr align="center"><th colspan=2>A || B</th><th colspan=3>B</th></tr>
+		<tr align="right"><td colspan=2>&nbsp;</td><th>unknown</th><th>false</th><th>true</th></tr>
+		<tr align="right"><th rowspan=4>A</th><th>unknown</th><td>unknown</td><td>unknown</td><td>unknown</td></tr>
+		<tr align="right"><th>false</th><td>unknown</td><td>false</td><td>true</td></tr>
+		<tr align="right"><th>true</th><td>unknown</td><td>true</td><td>true</td></tr>
+	</table><br>
+	<table align="right" border="0" cellspacing="0" cellpadding="2" style="margin-right: 1em; border: 1px solid black">
+		<tr align="center"><th colspan=6><a href="http://comet.lehman.cuny.edu/fitting/bookspapers/pdf/papers/KleeneThree.pdf">Lisp/Prolog</a></th></tr>
+		<tr align="center"><th colspan=2>A || B</th><th colspan=3>B</th></tr>
+		<tr align="right"><td colspan=2>&nbsp;</td><th>unknown</th><th>false</th><th>true</th></tr>
+		<tr align="right"><th rowspan=4>A</th><th>unknown</th><td>unknown</td><td>unknown</td><td>unknown</td></tr>
+		<tr align="right"><th>false</th><td>unknown</td><td>false</td><td>true</td></tr>
+		<tr align="right"><th>true</th><td>true</td><td>true</td><td>true</td></tr>
+	</table>	
+	</span>
+	<span style="float:left">
+	<table align="left" border="0" cellspacing="0" cellpadding="2" style="margin-right: 1em; border: 1px solid black">
+		<tr align="center"><th colspan=6>Franci</th></tr>
+		<tr align="center"><th colspan=2>A || B</th><th colspan=4>B</th></tr>
+		<tr align="right"><td colspan=2>&nbsp;</td><th>unknown</th><th>false</th><th>true</th><th>contradiction</th></tr>
+		<tr align="right"><th rowspan=4>A</th><th>unknown</th><td>unknown</td><td>unknown</td><td>true</td><td>unknown</td></tr>
+		<tr align="right"><th>false</th><td>unknown</td><td>false</td><td>true</td><td>false</td></tr>
+		<tr align="right"><th>true</th><td>true</td><td>true</td><td>true</td><td>true</td></tr>
+		<tr align="right"><th>contradiction</th><td>unknown</td><td>false</td><td>true</td><td>contradiction</td></tr>
+	</table><br>
+	<table align="left" border="0" cellspacing="0" cellpadding="2" style="margin-right: 1em; border: 1px solid black">
+		<tr align="center"><th colspan=6><a href="http://builds.openlogicproject.org/content/many-valued-logic/three-valued-logics/kleene.pdf">Kleene, strong</a></th></tr>
+		<tr align="center"><th colspan=2>A || B</th><th colspan=3>B</th></tr>
+		<tr align="right"><td colspan=2>&nbsp;</td><th>unknown</th><th>false</th><th>true</th></tr>
+		<tr align="right"><th rowspan=4>A</th><th>unknown</th><td>unknown</td><td>unknown</td><td>true</td></tr>
+		<tr align="right"><th>false</th><td>unknown</td><td>false</td><td>true</td></tr>
+		<tr align="right"><th>true</th><td>true</td><td>true</td><td>true</td></tr>
+	</table><br>
+	<table align="left" border="0" cellspacing="0" cellpadding="2" style="margin-right: 1em; border: 1px solid black">
+		<tr align="center"><th colspan=6><a href="https://en.wikipedia.org/wiki/Classical_logic">Classical</a> <a href="https://plato.stanford.edu/entries/logic-classical/">Logic</a></th></tr>
+		<tr align="center"><th colspan=2>A || B</th><th colspan=2>B</th></tr>
+		<tr align="right"><td colspan=2>&nbsp;</td><th>false</th><th>true</th></tr>
+		<tr align="right"><th rowspan=4>A</th><th>false</th><td>false</td><td>true</td></tr>
+		<tr align="right"><th>true</th><td>true</td><td>true</td></tr>
+	</table>	
+</span>
+<p>The intended interpretation of <i>A || B</i> is "A, or B" where A and B are propositional variables that themselves are to be replaced with specific sentences, or formulas with 
+	truth values.  Grammatically, this is "inclusive or" rather than "exclusive or", that is A and B both <i>true</i> is allowed when <i>A || B</i> is <i>true</i></p>
+<p>We have the same intended interpretations for the truth values and logical connectives of each of the six logics, as before.</p>
+<p>Belnap's four-valued logic does not appear to be implementing plain English, instead going for an abstract algebraic structural feature.
+	(jargon: bilattice).  Exercise: verify the other four non-classical logics' tables (Franci's, Kleene strong three-valued logic, Kleene's weak three-valued logic,
+	and the logic implemented by Lisp and Prolog) from their intended interpretations in plain English.</p>
+<p>Note: for classical logic, it is traditional to <b>define</b> rather than <b>describe</b> <i>A || B</i>:</p>
+<p align="center">A || B := ~(~A & ~B)</p>
+That is, defining <i>A || B</i> does not cause a circular definition -- everything used to define classical logic's <i>A || B</i> , is itself formally undefined.  Exercise: this definition gives the 
+table-described behavior for all of Belnap's four-valued logic, Kleene's strong three-valued logic, Kleene's weak three-valued logic, and the logic implemented by Lisp and Prolog.
+<h2 id="den-law-of-excluded-middle" align="center" style="clear:both; margin-bottom: 0in; line-height: 100%; font-size: 14px">Worked exercise: Law of the Excluded Middle, A || ~A</h2>
+<p><a href="https://en.wikipedia.org/wiki/Law_of_excluded_middle">This</a> is very specifically dependent on how many truth values there are -- it is specific to classical logic, and has a long history of
+	being philosophically problematic even before the modern notation for nonclassical logics.  Exercises:</p>
+<ul>
+<li>For classical logic, <i>A || ~A</i> never is <i>false</i> no matter what truth value A has; both A <i>true</i> and A <i>false</i> result in <i>A || ~A</i> being <i>true</i>.</li>
+<li>When A has truth value <i>unknown</i> or <i>contradiction</i> in one of the five non-classical logics named above, <i>A || ~A</i> has the same truth value as A.</li>
+</ul>
+<p>That said, it is unclear that natural-language statements about the future <b>have</b> truth values; this was unclear as far back as Aristotle.</p>
+<p>In classical logic, <i>A || ~A</i> and its normalized definition <i>~(~A & A)</i> are the simplest tautologies -- formal statements, i.e. truth-valued expressions, that reduce to the constant truth value <i>true</i>.
+	The third exercise suggests that most non-classical logics have no tautologies, including the above.  (We do not yet have the notation to formally prove Kleene's strong and weak
+	three-valued logics have no tautologies, as opposed to conclude this in natural language reasoning.)</p>
+<p>That said: does it actually reflect natural-language reasoning that we don't need to know <b>what</b> the propositional variable A expands to, (e.g., is being substituted with), to say that if we know that A is either true or false, that 
+	we then know that the natural-language expansion of <i>A || ~A</i> is true?  Perhaps we need enough syntax (i.e., notation) or semantics (i.e., meaning) in the substitution to have confidence
+	the substitution is valid?  Or, following Kronecker, Brouwer, and Weyl -- do we need some sense of "constructive verifiability" to impute a truth value to a sentence, i.e. there is more to a 
+	propositional variable than the post-1960's typical conventions for describing formal systems in a natural language, such as English?</p>
+<p>Also, the logic I implemented for Franci is counterintuitive here.  If we interpret <i>unknown</i> as "could be true, and could be false",
+	then for propositional variables A, B that are both <i>unknown</i>, we would expect <i>A || B</i> to evaluate to <i>unknown</i>, but <i>A || ~A</i>
+	to evaluate to <i>true</i> rather than <i>unknown</i>.  That is, the intended interpretation for Franci's logic
+	isn't completely amenable to truth-tables.  This is not a problem for either Belnap's 4-valued logic (interpreting <i>unknown</i> as "no data"),
+	or the three logics interpreting <i>unknown</i> as "computation does not terminate".</p>
+<h2 id="belnap-structural-inconsistency" align="center" style="clear:both; margin-bottom: 0in; line-height: 100%; font-size: 14px">Worked exercise: Structural inconsistency of Belnap's 4-valued logic</h2>
+<p>Recall that Belnap's 4-valued logic was devised in the context of reconciling lookups from reference works, etc.  That is, it is meant to handle expanding <i>A || B</i> to
+sentences describing what other sources say about something.  E.g., suppose A expands to "The U.K. Royal Medical College says that ___" and B expands to "The U.S. Center for Disease Control says that ___".  Furthermore, suppose
+that there are no relevant public relations statements on ___ from the U.K. Royal Medical, but that due to changes in the state of the art, that <b>contradictory</b> public relations statements with reasonably current timestamps are available
+from the U.S. Center for Disease Control.</p>
+<p>That is, we are translating the above to <i>A || B</i> and substituting to <i>unknown || contradiction</i>.  Belnap's 4-valued logic evaluates this as <i>true</i>.
+	Does it make sense in plain English to conclude ___ is true?</p>
+<p>If we were already biased to believe ___, then it would be reasonable to continue to believe ___.  (Depending on context, this might be an example of confirmation bias.)
+	However, we could have sent in a natural language negation of ___ instead.  This would translate to <i>~A || ~B</i> which <b>still</b> substitutes to
+	<i>unknown || contradiction</i>.</p>
+<p>So Belnap's 4-valued logic does what is constructed to do: it is a logic that favors credibility, over formal correctness.  As a parameter choice for set theory,
+	it may go inconsistent far faster than the other choices of logic named here.</p>
+<h2 id="def-ns-implies" align="center" style="clear:both; margin-bottom: 0in; line-height: 100%; font-size: 14px">Definition of &rArr;, "nonstrictly implies"</h2>
+<p align=center>A &rArr; B := ~A || B</p>
+<p>This definition is closely related both to the syntactical rule <i>modus ponens</i>, and the undefined &#9500;, "syntactically entails".  "Nonstrictly implies" is the weakest of the three concepts of
+entailment i.e. consequence, in mathematics.  Philosophically, this corresponds to a brute fact consequence &mdash; all that matters is the truth values of the statements A and B represent.</p>
+<p>The other two concepts of entailment in mathematics are the undefined &#9500;, "syntactically entails" or "syntactical consequence", and the definable &#9566;, "semantically entails" or "semantic consequence".  We need something 
+	like Kripke's possible worlds formal machinery to define &#9566;, so will not attempt that at this time.</p>
+<p>Our first illustration of the undefined &#9500;, is to notate <i>modus ponens</i>:</p>
+<p align=center>A, A &rArr; B &#9500; B</p>
+<p>The intended interpretation is "If <i>A</i>, and <i>A &rArr; B</i>, then syntactically <i>B</i>".  For classical logic, this can be verified by restricting the tabular representation of
+	<i>A &rArr; B</i> to just the <i>true</i> entries, then furthermore restricting to the unique row for which <i>A</i> is <i>true</i>; for that row, <i>B</i> is <i>true</i>.  (Exercise: <i>modus ponens</i> is valid
+	for all six logics we have described, above.)</p>
+<p>The key here is "syntactically" -- the inference is valid without regard to meaning, simply from syntax alone.  A syntactically entailed consequence will be true no matter <b>what</b> the 
+	interpretation of the formal notation is, in natural language.</p>
+<p>In contrast, semantic entailment is "in between" syntactical entailment, and nonstrict implication.	A semantically entailed consequence is not a brute fact (there is a describable inference
+	chain why it is true), but the formal notation is not guaranteed to be adequate to describe the inference chain.  Most natural-language reasoning formalizes as using semantic entailment.</p>
+<p>In practice, both "syntactical entailment" and "semantic entailment" are used to infer "nonstrictly implies", without actually trying to evaluate truth values.</p>
+<p>We can also notate <i>modus tollens</i>:</p>
+<p align=center>~B, A &rArr; B &#9500; ~A</p>
+<p>(Exercise: <i>modus tollens</i> is valid for all six logics we have described, above.)</p>
+<p>Note that we have two logics with a truth value of <i>contradiction</i>: Belnap's 4-valued logic, and the one I implemented for Franci.  If B has truth value <i>contradiction</i>, 
+	that does <b>not</b> qualify as matching ~B for <i>modus tollens</i>.</p>
+<p>We also have a definition for &hArr;:</p>
+<p align=center>A &hArr; B := (A &hArr; B) & (B &hArr; A)</p>
+<p>The intended interpretation is "A, if and only if, B".  For classical logic, this says the two propositional variables A, B have the same truth value.</p>
+<h2 id="def-quantify" align="center" style="clear:both; margin-bottom: 0in; line-height: 100%; font-size: 14px">Worked exercise: quantifiers <span style="transform:rotate(180deg);display:inline-block">A</span> and <span style="transform:rotate(180deg);display:inline-block">E</span></h2>
+<p>Here, we have to consider truth-valued expressions that, when expanded, actually use predicates and terms that are not truth-valued.  E.g., let Z(a) be a truth-valued expression that explicitly
+uses the non-truth-value term variable a, and let t be a term constant not used by the expansion of Z(a).  Taking <span style="transform:rotate(180deg);display:inline-block">A</span> as undefined, define <span style="transform:rotate(180deg);display:inline-block">E</span> as:</p>
+<p align=center>(<span style="transform:rotate(180deg);display:inline-block">E</span>a)Z(a) := ~((<span style="transform:rotate(180deg);display:inline-block">A</span>a)~Z(a))</p>
+<p>Following <a href="https://archive.org/details/axiomaticsettheo0000bern">Bernays</a> p.47, we can take the following syntactical implications as axiomatic:</p>
+<p align=center>(<span style="transform:rotate(180deg);display:inline-block">A</span>a)Z(a) &#9500; Z(t)</p>
+<p>with intended interpretation "'For all a, Z(a)' syntactically entails Z(t)", and</p>
+<p align=center>Z(t) &#9500; (<span style="transform:rotate(180deg);display:inline-block">E</span>a)Z(a)</p>
+<p>with intended interpretation "Z(t) syntactically entails 'There is an a such that Z(a)'".  In these two schemata, a is a bound variable.</p>
+<p>This is the usual usage of &#9500; , "syntactically implies" -- to introduce axioms, or axiom schemata, that describe how undefined symbols behave.  Technically, these two are axiom schemata
+	rather than axioms -- there is nothing special about the symbols Z, t, or a other than their formal-language typing.  For these axiom schemata,
+	Z(t) is the expression resulting from substituting the term constant t for the term variable a everywhere in Z(a).  In particular, Z(t) does not use the term variable a.</p>
+<p>Bernays also recommends the following axiom schemata, where the propositional variable A's expansion does not use either the term variable a or the term constant t:</p>
+<p align=center>A &rArr; Z(t) &#9500; A &rArr; (<span style="transform:rotate(180deg);display:inline-block">A</span>a)Z(a)</p>
+<p align=center>Z(t) &rArr; A &#9500; (<span style="transform:rotate(180deg);display:inline-block">E</span>a)Z(a) &rArr; A</p>
+</body>
+</html>

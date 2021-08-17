@@ -16,5 +16,6 @@
 results as measured by the *NIX cmp utility.)  The arithmetic support was parked at an early stage back in 2003 or so.</p>
 <p><a href="FormalSystems.html">Overview</a> of descibing formal systems in plain English.</p>
 <p>Some preliminary working notes on <a href="KripkeFrames.html">Kripke semantics</a>.</p>
+<p>Some preliminary working notes on <a href="SubatomicPhysicsOfMath.html">set theory</a>.</p>
 </body>
 </html>
