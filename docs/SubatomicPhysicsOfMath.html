@@ -27,13 +27,13 @@
 <p align="center"><i>For everything that can be shaken, will be shaken.</i></p>
 <p>Back in 1910, Russell and Whitehead's <i>Principia Mathematica</i> made it credible that all of mathematics
 	could be defined in terms of two undefined parts: logic, and a single infix binary predicate
-	&#x03F5; generally interpreted as <nobr>"is a member of"</nobr>.  This was about twenty years after untrained thinking
+	&#x2208; generally interpreted as <nobr>"is a member of"</nobr>.  This was about twenty years after untrained thinking
 	about collections of mathematical items was found to be logic-paradoxed.  Details have changed
 	since then; the modern formalism for this task is only traceable to the 1960's.</p>
 
 <p>That is, set theory (a non-uniquely sufficient foundation for all of mathematics:
 	the study of mathematical collections) has two parameters: logic itself,
-	and how to define sets in terms of said predicate &#x03F5; .
+	and how to define sets in terms of said predicate &#x2208; .
 	Here, notation is our lens; any assignment of notation that <nobr>"behaves identically"</nobr>,
 	describes the same mathematics.</p>	
 
@@ -41,7 +41,7 @@
 <ol type="I">
 <li>Parameters<ol type="i">
 	<li><a href="#logic">Logic</a></li>
-	<li><a href="#def-is-member-of">Definition of &#x03F5;, <nobr>"is a member of"</nobr></a></li>
+	<li><a href="#def-is-member-of">Definition of &#x2208;, <nobr>"is a member of"</nobr></a></li>
 	<li><a href="#ur-element">ur-elements, i.e. not-set elements of sets</a></li>
 </ol></li>
 <li>Worked Exercises in Logic<ol type="i">
@@ -51,6 +51,7 @@
 	<li><a href="#den-law-of-excluded-middle">Law of the Excluded Middle</a></li>
 	<li><a href="#belnap-structural-inconsistency">Belnap: structural formal inconsistency</a></li>
 	<li><a href="#def-ns-implies">Definition of &rArr;, "nonstrictly implies"</a></li>
+	<li><a href="#desc-syntax-entailment">Description of &#9500;</a></li>
 	<li><a href="#def-quantify">Description of quantifiers <span style="transform:rotate(180deg);display:inline-block">A</span> and <span style="transform:rotate(180deg);display:inline-block">E</span></a></li>
 </ol></li>
 </ol>
@@ -86,7 +87,7 @@
 			<li><span style="transform:rotate(180deg);display:inline-block">E</span>, intended interpretation <nobr>"there is"</nobr></li>
 			<li>Other infix binary operators, as required.  The ones we will rely on are:
 				<ul>
-					<li>||, intended interpretation "or" (usual definition in terms of "and" and "not")</li>
+					<li>|| i.e. &#x2228;, intended interpretation "or" (usual definition in terms of "and" and "not")</li>
 					<li>&rArr;, intended interpretation "nonstrictly implies" (usual definition in terms of "or" and "not")</li>
 					<li>&hArr;, intended interpretation "if and only if" (usual definition in terms of <nobr>"nonstrictly implies"</nobr> and "and")</li>
 				</ul></li>
@@ -97,7 +98,7 @@
 	contradiction (from Kripke's strong three-valued logic, also used by Bernap's 4-valued logic), and
 	unknown (from Bernap's 4-valued logic).  So that is the first of three parameters for set theory: which logic to use.</p>
 
-<h2 id="def-is-member-of" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Parameter: definition of &#x03F5;</h2>
+<h2 id="def-is-member-of" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Parameter: definition of &#x2208;</h2>
 
 <p>The main systems, in chronological order, are:</p>
 <ul>
@@ -221,11 +222,16 @@ incompatible English interpretations), we can take it as an undefined truth valu
 	the strong logic interprets evaluating on getting a decisive answer from any single subprocess.</p>
 <p>If you interpret the logical connectives as sequential processing with the Kleene logic intended interpretation of <i>unknown</i>,
 	you get the asymmetric logic implemented in the programming languages Lisp and Prolog.</p>
+<p>Of the six logics described here, only classical logic implements the <i>principle of bivalence</i>: that there are only two possible truth values, 
+	and that all statements with truth values, have exactly one of these truth values.</p>
+<p>That we can describe the six logics we are considering here with a table, is evidence that they have a <a href="https://en.wikipedia.org/wiki/Truth_function">truth functional</a> description.  That is, building 
+	out a set theory with truth values as ur-elements, would let us represent the logical connectives with functions directly, rather than through an
+	intended interpretation.</p>
 	<h2 id="def-or" align="center" style="clear:both; margin-bottom: 0in; line-height: 100%; font-size: 14px">Worked exercise: Describing the logical operator || "or"</h2>
 	<span style="float:right">
 	<table align="right" border="0" cellspacing="0" cellpadding="2" style="margin-right: 1em; border: 1px solid black">
 		<tr align="center"><th colspan=6><a href="https://en.wikipedia.org/wiki/Four-valued_logic">Belnap</a></th></tr>
-		<tr align="center"><th colspan=2>A || B</th><th colspan=4>B</th></tr>
+		<tr align="center"><th colspan=2>A || B i.e. A &#x2228; B</th><th colspan=4>B</th></tr>
 		<tr align="right"><td colspan=2>&nbsp;</td><th>unknown</th><th>false</th><th>true</th><th>contradiction</th></tr>
 		<tr align="right"><th rowspan=4>A</th><th>unknown</th><td>unknown</td><td>unknown</td><td>true</td><td>true</td></tr>
 		<tr align="right"><th>false</th><td>unknown</td><td>false</td><td>true</td><td>contradiction</td></tr>
@@ -234,7 +240,7 @@ incompatible English interpretations), we can take it as an undefined truth valu
 	</table><br>
 	<table align="right" border="0" cellspacing="0" cellpadding="2" style="margin-right: 1em; border: 1px solid black">
 		<tr align="center"><th colspan=6><a href="http://builds.openlogicproject.org/content/many-valued-logic/three-valued-logics/kleene.pdf">Kleene, weak</a></th></tr>
-		<tr align="center"><th colspan=2>A || B</th><th colspan=3>B</th></tr>
+		<tr align="center"><th colspan=2>A || B i.e. A &#x2228; B</th><th colspan=3>B</th></tr>
 		<tr align="right"><td colspan=2>&nbsp;</td><th>unknown</th><th>false</th><th>true</th></tr>
 		<tr align="right"><th rowspan=4>A</th><th>unknown</th><td>unknown</td><td>unknown</td><td>unknown</td></tr>
 		<tr align="right"><th>false</th><td>unknown</td><td>false</td><td>true</td></tr>
@@ -242,7 +248,7 @@ incompatible English interpretations), we can take it as an undefined truth valu
 	</table><br>
 	<table align="right" border="0" cellspacing="0" cellpadding="2" style="margin-right: 1em; border: 1px solid black">
 		<tr align="center"><th colspan=6><a href="http://comet.lehman.cuny.edu/fitting/bookspapers/pdf/papers/KleeneThree.pdf">Lisp/Prolog</a></th></tr>
-		<tr align="center"><th colspan=2>A || B</th><th colspan=3>B</th></tr>
+		<tr align="center"><th colspan=2>A || B i.e. A &#x2228; B</th><th colspan=3>B</th></tr>
 		<tr align="right"><td colspan=2>&nbsp;</td><th>unknown</th><th>false</th><th>true</th></tr>
 		<tr align="right"><th rowspan=4>A</th><th>unknown</th><td>unknown</td><td>unknown</td><td>unknown</td></tr>
 		<tr align="right"><th>false</th><td>unknown</td><td>false</td><td>true</td></tr>
@@ -252,7 +258,7 @@ incompatible English interpretations), we can take it as an undefined truth valu
 	<span style="float:left">
 	<table align="left" border="0" cellspacing="0" cellpadding="2" style="margin-right: 1em; border: 1px solid black">
 		<tr align="center"><th colspan=6>Franci</th></tr>
-		<tr align="center"><th colspan=2>A || B</th><th colspan=4>B</th></tr>
+		<tr align="center"><th colspan=2>A || B i.e. A &#x2228; B</th><th colspan=4>B</th></tr>
 		<tr align="right"><td colspan=2>&nbsp;</td><th>unknown</th><th>false</th><th>true</th><th>contradiction</th></tr>
 		<tr align="right"><th rowspan=4>A</th><th>unknown</th><td>unknown</td><td>unknown</td><td>true</td><td>unknown</td></tr>
 		<tr align="right"><th>false</th><td>unknown</td><td>false</td><td>true</td><td>false</td></tr>
@@ -261,7 +267,7 @@ incompatible English interpretations), we can take it as an undefined truth valu
 	</table><br>
 	<table align="left" border="0" cellspacing="0" cellpadding="2" style="margin-right: 1em; border: 1px solid black">
 		<tr align="center"><th colspan=6><a href="http://builds.openlogicproject.org/content/many-valued-logic/three-valued-logics/kleene.pdf">Kleene, strong</a></th></tr>
-		<tr align="center"><th colspan=2>A || B</th><th colspan=3>B</th></tr>
+		<tr align="center"><th colspan=2>A || B i.e. A &#x2228; B</th><th colspan=3>B</th></tr>
 		<tr align="right"><td colspan=2>&nbsp;</td><th>unknown</th><th>false</th><th>true</th></tr>
 		<tr align="right"><th rowspan=4>A</th><th>unknown</th><td>unknown</td><td>unknown</td><td>true</td></tr>
 		<tr align="right"><th>false</th><td>unknown</td><td>false</td><td>true</td></tr>
@@ -269,22 +275,23 @@ incompatible English interpretations), we can take it as an undefined truth valu
 	</table><br>
 	<table align="left" border="0" cellspacing="0" cellpadding="2" style="margin-right: 1em; border: 1px solid black">
 		<tr align="center"><th colspan=6><a href="https://en.wikipedia.org/wiki/Classical_logic">Classical</a> <a href="https://plato.stanford.edu/entries/logic-classical/">Logic</a></th></tr>
-		<tr align="center"><th colspan=2>A || B</th><th colspan=2>B</th></tr>
+		<tr align="center"><th colspan=2>A || B i.e. A &#x2228; B</th><th colspan=2>B</th></tr>
 		<tr align="right"><td colspan=2>&nbsp;</td><th>false</th><th>true</th></tr>
 		<tr align="right"><th rowspan=4>A</th><th>false</th><td>false</td><td>true</td></tr>
 		<tr align="right"><th>true</th><td>true</td><td>true</td></tr>
 	</table>	
 </span>
-<p>The intended interpretation of <i>A || B</i> is "A, or B" where A and B are propositional variables that themselves are to be replaced with specific sentences, or formulas with 
+<p>The intended interpretation of <i>A || B</i> i.e. <i>A &#x2228; B</i> is "A, or B" where A and B are propositional variables that themselves are to be replaced with specific sentences, or formulas with 
 	truth values.  Grammatically, this is "inclusive or" rather than "exclusive or", that is A and B both <i>true</i> is allowed when <i>A || B</i> is <i>true</i></p>
 <p>We have the same intended interpretations for the truth values and logical connectives of each of the six logics, as before.</p>
 <p>Belnap's four-valued logic does not appear to be implementing plain English, instead going for an abstract algebraic structural feature.
 	(jargon: bilattice).  Exercise: verify the other four non-classical logics' tables (Franci's, Kleene strong three-valued logic, Kleene's weak three-valued logic,
 	and the logic implemented by Lisp and Prolog) from their intended interpretations in plain English.</p>
-<p>Note: for classical logic, it is traditional to <b>define</b> rather than <b>describe</b> <i>A || B</i>:</p>
+<p>Note: for classical logic, we can choose which one of logical and & or logical or || to <b>define</b> rather than <b>describe</b> <i>A || B</i>:</p>
 <p align="center">A || B := ~(~A & ~B)</p>
-That is, defining <i>A || B</i> does not cause a circular definition -- everything used to define classical logic's <i>A || B</i> , is itself formally undefined.  Exercise: this definition gives the 
-table-described behavior for all of Belnap's four-valued logic, Kleene's strong three-valued logic, Kleene's weak three-valued logic, and the logic implemented by Lisp and Prolog.
+<p align="center">A & B := ~(~A || ~B)</p>
+That is, defining exactly one of <i>A & B</i> or <i>A || B</i> does not cause a circular definition -- the other logical connective, is still formally undefined.</p>
+<p>Exercise: each of these definition gives the  table-described behavior for all of Belnap's four-valued logic, Kleene's strong three-valued logic, Kleene's weak three-valued logic, and the logic implemented by Lisp and Prolog.
 <h2 id="den-law-of-excluded-middle" align="center" style="clear:both; margin-bottom: 0in; line-height: 100%; font-size: 14px">Worked exercise: Law of the Excluded Middle, A || ~A</h2>
 <p><a href="https://en.wikipedia.org/wiki/Law_of_excluded_middle">This</a> is very specifically dependent on how many truth values there are -- it is specific to classical logic, and has a long history of
 	being philosophically problematic even before the modern notation for nonclassical logics.  Exercises:</p>
@@ -329,7 +336,7 @@ entailment i.e. consequence, in mathematics.  Philosophically, this corresponds 
 	<i>A &rArr; B</i> to just the <i>true</i> entries, then furthermore restricting to the unique row for which <i>A</i> is <i>true</i>; for that row, <i>B</i> is <i>true</i>.  (Exercise: <i>modus ponens</i> is valid
 	for all six logics we have described, above.)</p>
 <p>The key here is "syntactically" -- the inference is valid without regard to meaning, simply from syntax alone.  A syntactically entailed consequence will be true no matter <b>what</b> the 
-	interpretation of the formal notation is, in natural language.</p>
+	interpretation of the formal notation is, in natural language.  An axiom could be said to be syntactically entailed with no premises at all.</p>
 <p>In contrast, semantic entailment is "in between" syntactical entailment, and nonstrict implication.	A semantically entailed consequence is not a brute fact (there is a describable inference
 	chain why it is true), but the formal notation is not guaranteed to be adequate to describe the inference chain.  Most natural-language reasoning formalizes as using semantic entailment.</p>
 <p>In practice, both "syntactical entailment" and "semantic entailment" are used to infer "nonstrictly implies", without actually trying to evaluate truth values.</p>
@@ -341,6 +348,29 @@ entailment i.e. consequence, in mathematics.  Philosophically, this corresponds 
 <p>We also have a definition for &hArr;:</p>
 <p align=center>A &hArr; B := (A &hArr; B) & (B &hArr; A)</p>
 <p>The intended interpretation is "A, if and only if, B".  For classical logic, this says the two propositional variables A, B have the same truth value.</p>
+<h2 id="desc-syntax-entailment" align="center" style="clear:both; margin-bottom: 0in; line-height: 100%; font-size: 14px">Worked exercise: Description of &#9500;</h2>
+<p>More explicitly, after 1960 or so the typical <a href="https://en.wikipedia.org/wiki/Sequent_calculus">intended interpretation</a> of &#9500; is as follows:</p>
+<ul>
+<li>We have zero or more truth-valued expressions to the left of &#9500;.  The inference rule applies, only when all of these expressions evaluate to <i>true</i>.</li>
+<li>We have zero or more truth-valued expressions to the right of &#9500;.  At least one of these expressions is assumed to evaluate to <i>true</i>, when the inference
+rule applies.</li>
+<li>If there are no truth-valued expressions to the left of &#9500;, the inference rule is considered unconditionally applicable.  The right hand side then would denote a tautology,
+	a statement that is unconditionally <i>true</i>.</li>
+<li>If there is exactly one truth-valued expressions to the right of &#9500;, we say the inference rule is a natural deduction inference rule.</li>
+<li>If there is at least one truth-valued expressions to the right of &#9500;, we say the inference rule is a sequent calculus inference rule.</li>
+<li>If there are zero truth-valued expressions to the right of &#9500;, we say the inference rule is unsatisfiable.</li>
+</ul>
+<p>When compared against the logical connectives already described, the above intended interpretation yields for classical logic, as examples:</p>
+<ul>
+<li><i>A &#9500; B</i> nonstrictly implies <i>&#9500; A &rArr; B</i>.</li>
+<li><i>A, B &#9500; C</i> nonstrictly implies <i>&#9500; (A & B) &rArr; C</i>.</li>
+<li><i>A &#9500; B, C</i> nonstrictly implies <i>&#9500; A &rArr; (B &#x2228; C)</i>.</li>
+</ul>
+<p>None of these examples are valid for the other five logics we are considering here: the non-classical truth values <i>unknown</i> and <i>contradiction</i> can occur.</p>
+<p>Historically, &#9500; was originally defined in terms of &rArr; .  However, even with only two truth values G&ouml;del's Second Incompleteness Theorem states that
+	syntactical entailment and nonstrict implication, are different concepts.</p>
+<p>In general, when a truth-valued expression A is defined as a distinct truth-valued expression B, <i>A := B</i>, the intended interpretation is that we have a syntactical equivalence: both <i>A &#9500; B</i>
+	and <i>B &#9500; A</i> are usable syntactical inference rules.  We can define A &#x27DB; B, with intended interpretation "A and B are syntactically equivalent", as the preceding pair of syntactical entailments.</p>
 <h2 id="def-quantify" align="center" style="clear:both; margin-bottom: 0in; line-height: 100%; font-size: 14px">Worked exercise: quantifiers <span style="transform:rotate(180deg);display:inline-block">A</span> and <span style="transform:rotate(180deg);display:inline-block">E</span></h2>
 <p>Here, we have to consider truth-valued expressions that, when expanded, actually use predicates and terms that are not truth-valued.  E.g., let Z(a) be a truth-valued expression that explicitly
 uses the non-truth-value term variable a, and let t be a term constant not used by the expansion of Z(a).  Taking <span style="transform:rotate(180deg);display:inline-block">A</span> as undefined, define <span style="transform:rotate(180deg);display:inline-block">E</span> as:</p>
@@ -356,5 +386,7 @@ uses the non-truth-value term variable a, and let t be a term constant not used 
 <p>Bernays also recommends the following axiom schemata, where the propositional variable A's expansion does not use either the term variable a or the term constant t:</p>
 <p align=center>A &rArr; Z(t) &#9500; A &rArr; (<span style="transform:rotate(180deg);display:inline-block">A</span>a)Z(a)</p>
 <p align=center>Z(t) &rArr; A &#9500; (<span style="transform:rotate(180deg);display:inline-block">E</span>a)Z(a) &rArr; A</p>
+<p>&nbsp;</p>
+<p align="left"><a href="./SubatomicPhysicsOfMath_Logic.html">(Non)Classical Logic</a></p>
 </body>
 </html>
