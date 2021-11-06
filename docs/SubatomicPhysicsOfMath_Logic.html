@@ -22,22 +22,25 @@
 		<li><a href="#uniform-substitution">Uniform substitution</a></li>
 		<li><a href="#relevance-roadmap-nonstrictly-implies">Relevance roadmap for &rArr;</a></li>
 		<li><a href="#analogies-and-or">Analogies for &, and &#x2228;</a></li>
-		<li><a href="#principle-of-explosion">Principle of explosion</a></li>
-		<li><a href="#absorption">Absorption</a></li>
-		<li><a href="#exportation">Exportation</a></li>
 		<li><a href="#reductio-ad-absurdum">Proof by contradiction</a></li>
-		<li><a href="#de-morgan">De Morgan's Laws</a></li>
-		<li><a href="#excluded-middle">Law of Excluded Middle</a></li>
-		<li><a href="#commutativity-or-lisp">Repairing commutativity of &#x2228; for Lisp/Prolog logic</a></li>
-		<li><a href="#transitivity-of-iff">Transitivity of &hArr;</a></li>
+		<li><a href="#or-elimination">Or elimination</a></li>
 		<li><a href="#contrapositive-1">Taking the contrapositive</a></li>
 		<li><a href="#modus-tollens"><i>Modus Tollens</i></a></li>
-		<li><a href="#or-elimination">Or elimination</a></li>
 		<li><a href="#classical-law-of-contradiction">Classical Law of Contradiction</a></li>
+		<li><a href="#exportation">Exportation</a></li>
+		<li><a href="#de-morgan">De Morgan's Laws</a></li>
+		<li><a href="associativity-or">Associativity of &#x2228;</a></li>
 		<li><a href="#modus-ponendo-tollens"><i>modus ponendo tollens</i></a></li>
+		<li><a href="#distribuvity-or-and">Distributivity of &#x2228; with respect to &</a></li>
+		<li><a href="#proof-by-cases">Proof by cases</a></li>
+		<li><a href="#excluded-middle">Law of Excluded Middle</a></li>
+		<li><a href="#translating-truth-tables">Translating to and from truth tables</a></li>
+		<li><a href="#principle-of-explosion">Principle of explosion</a></li>
+		<li><a href="#commutativity-or-lisp">Repairing commutativity of &#x2228; for Lisp/Prolog logic</a></li>
+		<li><a href="#absorption">Absorption</a></li>
+		<li><a href="#transitivity-of-iff">Transitivity of &hArr;</a></li>
 		<li><a href="#commutativity-of-implication">Commutativity of Implication</a></li>
 		<li><a href="#constructive-dilemma">Constructive Dilemma</a></li>
-		<li><a href="#proof-by-cases">Proof by cases</a></li>
 		<li><a href="#destructive-dilemma">Destructive Dilemma</a></li>
 	</ol>
 </span>	
@@ -109,30 +112,29 @@ of the inference schemas of predicate calculus are derivable from the usual unde
 		results in a syntactically reasonable yet invalid formal calculation.  This is critical for Implication Introduction to work
 		for the truth table describable non-classical logics we are considering.</li>
 	<li>The remaining table rows, are roughly in reverse order of how one would do the formal calculation by textual substitions.</li>
-	<li>The validity of Implication Introduction for the truth table-based nonclassical logics we are considering, requires .</li>
 </ul>
 <p>Other names for <i>transitivity of implication</i> are "hypothetical syllogism" (abbreviated HS), "chain argument", or the exceedingly generic "chain rule".</p>
 <p>The hypotheses to be tested for the conditional proof technique, can be read off of <i>modus ponens</i>: they're
 	the missing hypotheses of the <i>modus ponens</i> instances.  We had two candidate hypotheses, A and B.  However, B was
 	the result of one of the <i>modus ponens</i> instances, while A could not be obtained that way.</p>
 <p>Also, we could replace the given <i>P &rArr; Q</i> and its matching <i>modus ponens</i> use, with the syntactical entailment rule <i>P &#9500; Q</i> .  Likewise, we could replace the given <i>Q &rArr; R</i> and its matching <i>modus ponens</i> use, with the syntactical entailment rule <i>Q &#9500; R</i> .  Notating this 
-is tricky, as syntactical entailment rules are not truth-valued.  In the absence of a proper authority, I'll extend the syntactical entailment notation by semi-colon separating
-the entailment rules, to the left of the comma-separated truth-valued expressions for &#9500; .  The non-standard parts of the following table, have background color yellow.</p>
+is tricky, as syntactical entailment rules are not truth-valued.  In the absence of a proper authority, I'll extend the syntactical entailment notation by wrapping entailment rules 
+in parentheses.  The non-standard parts of the following table, have background color yellow.</p>
 
 <p>The above proof, is invalid for Belnap's four-valued logic(!).  To verify this, let <i>P</i> and <i>R</i> have truth value <i>contradiction</i> and <i>Q</i> have truth value <i>unknown</i>.  It is
 	then a mechanical exercise that <i>P &rArr; Q</i> and <i>Q &rArr; R</i> both evaluate to <i>true</i>, yet <i>P &rArr; R</i> evaluates to their common truth value <i>contradiction</i>.
-	It seems that for implication introduction to be valid, the hypothesis must be known to not
-	have a non-classical truth value.  (This choice of phrasing, is to allow for Intuitionistic logic.)</p>
+	It seems that for <i>implication introduction</i> to be valid, the hypothesis must be known to not
+	have a non-classical truth value.  (This choice of phrasing, is to allow for Intuitionistic logic.)  We will cover some rules for this, later in this review.</p>
 
 <p>Let us introduce some terminology.  For a nonstrict implication <i>A &rArr; B</i>, we say:</p>
 <ul>
-<li><i>A</i> is the hypothesis of <i>A &rArr; B</i></li>
-<li><i>B</i> is the conclusion of <i>A &rArr; B</i></li>
+<li><i>A</i> is the hypothesis of <i>A &rArr; B</i>.  Alternately, <i>A</i> is the antecedent of <i>A &rArr; B</i>.</li>
+<li><i>B</i> is the conclusion of <i>A &rArr; B</i>.  Alternately, <i>A</i> is the consequence of <i>A &rArr; B</i>.</li>
 </ul>
 <p>Likewise, for a syntactical entailment <i>A &#9500; B</i>, we say:</p>
 <ul>
-<li><i>A</i> is the hypothesis of <i>A &#9500; B</i></li>
-<li><i>B</i> is the conclusion of <i>A &#9500; B</i></li>
+<li><i>A</i> is the hypothesis of <i>A &#9500; B</i>.</li>
+<li><i>B</i> is the conclusion of <i>A &#9500; B</i>.</li>
 </ul>
 
 <table align="center">
@@ -150,7 +152,6 @@ with <i>modus ponens</i> itself, or the conditional proof formalism as a justifi
 think of an inference rule as a function, with domain and range statements.  (None of "function", "domain", or "range" have been formally defined, at this point.)  That is, if we were to 
 consider a standard inference rule using &#9500; to be "first order with domain of discourse statements", then the extended notation inference rules in
 the above table would be "second order with domain of discourse statements": these use variables that range over inference rules, rather than statements i.e. truth-valued expressions.</p>
-
 <p>We also have transitivity of syntactical equivalence, as follows:</p>
 <table align="center">
 	<tr><th></th><th>Inference Rule</th><th>Rationale</th></tr>
@@ -187,45 +188,100 @@ rather than define how uniform substitutions work.</p>
 	<li>For any two truth-valued expressions A, B, we expect B[A/A] to be B.</li>
 	<li>For any non-truth-valued expression b in a given universe of discourse, we expect A[b/b] to be A regardless of whether A is a truth-valued expression, or an expression 
 		in a (possibly different) universe of discourse.</li>
-	<li>For a propositional variable A and truth-valued expression B, we expect A[B/A] to be B.  If B does not use A, we expect B[A/B] to be A.</li>
+	<li>For a propositional variable A and truth-valued expression B, we expect A[B/A] to be B.  If B does not use A, we expect B[A/B] to be A.  If in addition, 
+		the truth valued expression C does not use either A or B, we expect C[B/A][A/B] to be C.</li>
 	<li>For a variable b in a universe of discourse, and an expression c with a value in the same universe of discourse, we expect b[c/b] to be c.  If c does not use the variable b, we expect c[b/c] to be b.</li>
 	<li>For truth-valued expressions A, B: we expect (~A)[B/~A] to be B.  We expect (~A)[B/A] to be ~B.  When a truth-valued expression C is known to not be either A or ~A,
 		we expect (~C)[B/A] to be ~(C[B/A]).</li>
 	<li>For truth-valued expressions A, B, C, D: we expect (C & D)[B/C & D] to be B.  If A is known not to be C & D, we expect (C & D)[B/A] to be C[B/A] & D[B/A].</li>
 	<li>For truth-valued expressions A, B, C, D: we expect (C &#x2228; D)[B/C &#x2228; D] to be B.  If A is known not to be C &#x2228; D, we expect (C &#x2228; D)[B/A] to be C[B/A] &#x2228; D[B/A].</li>
-	<li>For truth-valued expressions A, B, C, D: we expect (C &#9500; D)[B/A] to be C[B/A] &#9500; D[B/A]</li>
+	<li>For truth-valued expressions A, B, C, D: we expect (C &#9500; D)[B/A] to be C[B/A] &#9500; D[B/A] .  If (C &#9500; D) is a valid inference rule and [B/A] a uniform substitution replacing a propositional variable A, we 
+		expect (C &#9500; D)[B/A] to be a valid inference rule.</li>
 	<li>We have similar expectations for predicates taking terms as parameters, as for the undefined logical connectives ~, &, &#x2228; above.</li>
 	<li>In general, a uniform substitution that replaces a term, term variable or propositional variable with an expression, leaves all instances of <b>other</b> terms, term variables, and propositional variables unchanged.
 		This is key to describing simultaneous uniform substitutions C[B/A,E/D, ...] correctly.</li>
 </ul>
-<p>For example, we can transform the <i>transitivity of implication</i> syntactical inference rule as follows, applying the definition of &rArr; twice:</p>
-<p align="center">(P &rArr; Q, Q &rArr; R &#9500; P &rArr; R)[~P &#x2228; Q/P &rArr; Q][~P &#x2228; R/P &rArr; R]</p>
-<p>evaluates to</p>
-<p align="center">~P &#x2228; Q, Q &rArr; R &#9500; ~P &#x2228; R</p>
-<p>This is suspiciously similar to the right half of a constructive dilemma.  We can make it look exactly like that with another substitution.  If we define the propositional variable S := ~P, then</p>
-<p align="center">(~P &#x2228; Q, Q &rArr; R &#9500; ~P &#x2228; R)[S/~P]</p>
-<p>evaluates to</p>
-<p align="center">S &#x2228; Q, Q &rArr; R &#9500; S &#x2228; R</p>
-<p>We'll see later why this definition <i>S := ~P</i> may be problematic for Intuitionistic logic.</p>
-<table align="center">
-	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
-	<tr><td align="center">S &#x2228; Q, Q &rArr; R &#9500; S &#x2228; R</td><td align="left" style="background: yellow">Right half of constructive dilemma</td><td align="left">Belnap</td><td>Defeasible logics; Intuitionistic?</td></tr>
-</table>
+<p>A definition A := B is enough to justify either [A/B] or [B/A] as valid uniform substitutions, or as an entry in a simultaneous substitution.</p>
 <p>If A evaluates to a given truth value B, then it is very tempting to say, for a truth-valued expression C, that applying A &#x21A6; B to C partially evaluates C.  In particular,
-	If we allow the following expressions to have truth values, for the logics in which the given truth values are used:</p>
+	if we allow the following expressions to have truth values, for the logics in which the given truth values are used:</p>
 <ul>
 	<li>A &#x21A6; <i>true</i>, with intended interpretation "A evaluates to <i>true</i>", or "A is <i>true</i>".</li>
 	<li>A &#x21A6; <i>false</i>, with intended interpretation "A evaluates to <i>false</i>", or "A is <i>false</i>".</li>
 	<li>A &#x21A6; <i>unknown</i>, with intended interpretation "A evaluates to <i>unknown</i>".</li>
 	<li>A &#x21A6; <i>contradiction</i>, with intended interpretation "A evaluates to <i>contradiction</i>".</li>
 </ul>
-<p>We then can translate the truth-table descriptions of the logics we are considering, into (classical) logic.  In particular, we would have the syntactical equivalences</p>
-<p align="center">A &#x21A6; <i>true</i> &#x27DB; A<br>A &#x21A6; <i>false</i> &#x27DB; ~A</p>
-<p>Rather than taking the identity semantic entailment <i>A &#9500; A</i> as an axiom, we could take <i>true &#9500; true</i> as an axiom, and conclude from <i>(A &#9500; A)[true/A]</i> evaluating to
-	<i>true &#9500; true</i>, that identity semantic entailment <i>A &#9500; A</i> was an unconditionally valid inference rule.  (That is, the inverse of a valid substitution whose result is
-	the trivial syntactical inference rule <i>true &#9500; true</i>, is itself a syntactical inference rule.)</p>
+<p>We then can translate the truth-table descriptions of the logics we are considering, into (classical) logic.  In particular, the intended interpretations semantically entail the syntactical equivalences</p>
+<table align="center">
+	<tr><th colspan="2"></th><th>Name</th></tr>
+	<tr><td align="right">A &#x21A6; <i>true</i> &#x27DB;&nbsp;</td><td>A</td><td rowspan="2"><span style="background:yellow">Intended interpretation of &#x21A6;</span></td></tr>
+	<tr><td align="right">A &#x21A6; <i>false</i> &#x27DB;&nbsp;</td><td>~A</td></tr>
+</table>
+<p>These syntactical equivalences in general do <b>not</b> justify uniform substitutions.  This will be more evident, when we use this notation to translate truth table descriptions into 
+	symbolic logic descriptions of the logical connectives.  We expect, from the intended interpretation, the following syntactical entailments:</p>
+<table align="center">
+	<tr><th colspan="2"></th><th>Name</th></tr>
+	<tr><td align="right">A &#x21A6; <i>true</i>, B &#9500;&nbsp;</td><td>B[<i>true</i>/A]</td><td rowspan="4"><span style="background:yellow">Partial evaluation of B</span></td></tr>
+	<tr><td align="right">A &#x21A6; <i>false</i>, B &#9500;&nbsp;</td><td>B[<i>false</i>/A]</td></tr>
+	<tr><td align="right">A &#x21A6; <i>unknown</i>, B &#9500;&nbsp;</td><td>B[<i>unknown</i>/A]</td></tr>
+	<tr><td align="right">A &#x21A6; <i>contradiction</i>, B &#9500;&nbsp;</td><td>B[<i>contradiction</i>/A]</td></tr>
+</table>
+<table align="left">
+<tr><th colspan="3">Principle of non-contradiction</th>
+<tr><th rowspan="2" style="background: #DDFFDD">Classical</th><td align="right">(A &#x21A6; <i>true</i>) &#9500;&nbsp;</td><td>~(A &#x21A6; <i>false</i>)</td></tr>
+<tr><td align="right">(A &#x21A6; <i>false</i>) &#9500;&nbsp;</td><td>~(A &#x21A6; <i>true</i>)</td></tr>
+<tr><th rowspan="3" style="background: #DDDDFF">Kleene weak<br>Kleene strong<br>Lisp/Prolog</th><td align="right">(A &#x21A6; <i>true</i>) &#9500;&nbsp;</td><td>~(A &#x21A6; <i>false</i>) & ~(A &#x21A6; <i>unknown</i>)</td></tr>
+<tr><td align="right">(A &#x21A6; <i>false</i>) &#9500;&nbsp;</td><td>~(A &#x21A6; <i>true</i>) & ~(A &#x21A6; <i>unknown</i>)</td></tr>
+<tr><td align="right">(A &#x21A6; <i>unknown</i>) &#9500;&nbsp;</td><td>~(A &#x21A6; <i>true</i>) & ~(A &#x21A6; <i>false</i>)</td></tr>
+<tr><th rowspan="4" style="background: #FFDDDD">Belnap<br>Franci</th><td align="right">(A &#x21A6; <i>true</i>) &#9500;&nbsp;</td><td>~(A &#x21A6; <i>false</i>) & ~(A &#x21A6; <i>unknown</i>) & ~(A &#x21A6; <i>contradiction</i>)</td></tr>
+<tr><td align="right">(A &#x21A6; <i>false</i>) &#9500;&nbsp;</td><td>~(A &#x21A6; <i>true</i>) & ~(A &#x21A6; <i>unknown</i>) & ~(A &#x21A6; <i>contradiction</i>)</td></tr>
+<tr><td align="right">(A &#x21A6; <i>unknown</i>) &#9500;&nbsp;</td><td>~(A &#x21A6; <i>true</i>) & ~(A &#x21A6; <i>false</i>) & ~(A &#x21A6; <i>contradiction</i>)</td></tr>
+<tr><td align="right">(A &#x21A6; <i>contradiction</i>) &#9500;&nbsp;</td><td>~(A &#x21A6; <i>true</i>) & ~(A &#x21A6; <i>false</i>) & ~(A &#x21A6; <i>unknown</i>)</td></tr>
+</td></tr>
+</table>
+<table align="right">
+	<tr><th colspan="3">Principle of ...</th>
+	<tr><th style="background: #DDFFDD">Classical</th><th>bivalence</th><td>&#9500; (A &#x21A6; <i>false</i>) &#x2228; (A &#x21A6; <i>true</i>)</td></tr>
+	<tr><th style="background: #DDDDFF">Kleene weak<br>Kleene strong<br>Lisp/Prolog</th><th>trivalence</th><td>&#9500; (A &#x21A6; <i>false</i>) &#x2228; (A &#x21A6; <i>true</i>) &#x2228; (A &#x21A6; <i>unknown</i>)</td></tr>
+	<tr><th rowspan="4" style="background: #FFDDDD">Belnap<br>Franci</th><th>tetravalence</th><td>&#9500; (A &#x21A6; <i>false</i>) &#x2228; (A &#x21A6; <i>true</i>) &#x2228; (A &#x21A6; <i>unknown</i>) &#x2228; (A &#x21A6; <i>contradiction</i>)</td></tr>
+</table>
+<p>The principle of non-contradiction (that no truth-valued expression may evaluate to two truth values at once) and the classical logic principle of bivalence (that all truth valued expressions do have a value) also have translations 
+	into this extended notation.  (Natural language reasoning doesn't fully implement the principle of bivalence: otherwise, the liar paradox could not be stated.)</p>
+<p>The other five truth table describable logics we are considering, all have analogous expressions.  The <i>principle of non-contradiction</i> looks like it has two consequences:</p>
+<ul style="clear:left">
+	<li>If a propositional variable evaluates to a given truth value (truth value of A &#x21A6;  ... <i>true</i>), then it does not evaluate to any of the other truth values (A &#x21A6; ___ <i>false</i>).</li>
+	<li>If any of the A &#x21A6;  ... expressions has a classical truth value, all of them do.</li>
+</ul>
+<table align="right">
+	<tr><th colspan="4">Classical logic</th></tr>
+	<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>A &#9500; B</td><td></td><td>Given</td></tr>
+	<tr><td>2.</td><td></td><td>A</td><td>Hypothesis</td></tr>
+	<tr><td>3.</td><td></td><td>B</td><td></td><td>syntactical inference on (1),(2)</td></tr>
+	<tr><td>4.</td><td></td><td>A &rArr; B</td><td></td><td>implication introduction on (2),(3)</td></tr>
+</table>
+<table align="left">
+	<tr><th colspan="4">Classical logic</th></tr>
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>A &rArr; B</td><td></td><td>Given</td></tr>
+	<tr><td>2.</td><td>A</td><td></td><td>Hypothesis</td></tr>
+	<tr><td>3.</td><td>B</td><td></td><td><i>modus ponens</i> on (1), (2)</td></tr>
+</table>
+<p>For classical logic <b>only</b>, we have a downgrade procedure from &#9500; to &rArr; .  The upgrade procedure is more reliable.  Proving the &hArr; versions from the &rArr; versions is 
+left as an exercise.</p>
+<table align="center" style="clear:both">
+	<tr><th></th><th>Name</th><th>Works for which logics?</th></tr>
+	<tr><td align="center">(A &#9500; B) &#9500; (&#9500; A &rArr; B)</td><td><span style="background:yellow">Downgrade &#9500; to &rArr;</span></td><td>Classical</td></tr>
+	<tr><td align="center">(A &#x27DB; B) &#9500; (&#9500; A &hArr; B)</td><td><span style="background:yellow">Downgrade &#x27DB; to &hArr;</span></td><td>Classical</td></tr>
+	<tr><td align="center">A &rArr; B &#9500; (A &#9500; B)</td><td><span style="background:yellow">Upgrade &rArr; to &#9500;</span></td><td>All six</td></tr>
+	<tr><td align="center">A &hArr; B &#9500; (A &#x27DB; B)</td><td><span style="background:yellow">Upgrade &hArr; to &#x27DB;</span></td><td>All six</td></tr>
+</table>
+
+<p>It will also be convenient to say that the equality operator = is defined for any pair of truth values (but <b>not</b> arbitrary truth-valued expressions), with the usual properties expected (reflexivity, symmetry, transitivity).
+For two truth-valued expressions A and B, if whenever A evaluates to a truth value, B evaluates to the same truth value as A, that justifies [B/A] as a valid uniform substitution, or as an entry in a non-uniform substitution.</p>
+<p>However, a syntactic equivalence C &#x27DB; D only guarantees that (classically) (C &#x21A6; <i>true</i>) &hArr; (D &#x21A6; <i>true</i>); this is not enough to justify a substitution in general.  However, this is sufficient to justify a substitution for classical logic.</p>
 <p>We also have a concept of non-uniform substitution, where different instances of the same syntactical expression are replaced by different substitutions.  The trivial 
 	syntactical equivalence <i>A</i> &#x27DB; <i>A</i>, will be of some use with non-uniform substitutions.</p>
+<p>We now have enough notation to <a href="./Reference_Logic.html">translate</a> truth tables into symbolic notation.</p>
 
 <h2 id="relevance-roadmap-nonstrictly-implies" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Relevance roadmap for &rArr;</h2>
 <table align="left">
@@ -248,19 +304,19 @@ rather than define how uniform substitutions work.</p>
 <h2 id="analogies-and-or" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Analogies for "logical and" &, and "logical or" &#x2228;</h2>
 <p>Classical logic's "logical and" & is closely related to the semantic entailment listing of hypotheses.  The five non-classical logics
 	we are considering, all act like classical logic in that "logical and" & is defined so that the only way to get <i>P & Q</i> to be <i>true</i>, is for both
-	<i>P</i> and <i>Q</i> to be <i>true</i>.  So we would expect the single propositional calculus statement <i>P & (P &rArr; Q) &#9500; Q</i> to allow using
-	<i>modus ponens</i> to conclude <i>B</i> by syntactical entailment.</p>
+	<i>P</i> and <i>Q</i> to be <i>true</i>.  So we would expect to be able to prove that the single propositional calculus statement <i>P & (P &rArr; Q)</i>, allows using
+	<i>modus ponens</i> to conclude <i>Q</i> by syntactical entailment.</p>
 <p>Likewise, classical logic's "logical or" &#x2228; looks like the sort of statement we would not want to unnecessarily
-	retain in a minimum collection or listing of statements to be retained in long-term memory.  That is, we would expect knowing the single 
-	propositional calculus statement <i>P</i>, to allow concluding <i>P &#x2228; Q</i> for an arbitary propositional variable <i>Q</i>.</p>
+	retain in a minimum collection or listing of statements to be retained in long-term memory.  That is, we would expect to be able to prove that knowing the single 
+	propositional calculus statement <i>P</i>, allows concluding <i>P &#x2228; Q</i> for an arbitary propositional variable <i>Q</i>.</p>
 <p>All six of the truth-functional logics we are considering, have only one combination, i.e. ordered pair, of truth values for which logical and & evaluates to <i>true</i>:</p>
 <p align="center"><i>true</i> & <i>true</i> &#x21A6; <i>true</i></p>
 <p>Which we expect, by intended interpretations of &#x21A6; and &#9500;, to translate to</p>
-<p align="center">(P &#x21A6; <i>true</i>), (Q &#x21A6; <i>true</i>) &#x27DB; (P & Q &#x21A6; <i>true</i>)</p>
+<p align="center">(P &#x21A6; <i>true</i>) & (Q &#x21A6; <i>true</i>) &#x27DB; (P & Q &#x21A6; <i>true</i>)</p>
 <p>We are using syntactical equivalence &#x27DB; rather than syntactical entailment &#9500;, as there was exactly one row in the truth table 
-	where P & Q evaluated to <i>true</i>.  In general, each row generates its own "forward" &#9500; rule, and the "reverse" rule is a proper 
+	where P & Q evaluated to <i>true</i>.  In general, each row has its its own "forward" &#9500; rule, and the "reverse" rule can be a proper 
 	sequent calculus rule, with one clause on the right hand side for each row.  The intended interpretation of A &#x21A6; <i>true</i>
-	then gives the syntactically equivalent</p>
+	then gives the syntactical equivalence</p>
 <p align="center">P, Q &#x27DB; P & Q</p>
 <p>This is known as <i>conjunction introduction</i>.  We can think of the truth-table description as authorizing the following non-uniform substitution:</p>
 <p align="center">(<i>true</i> & <i>true</i> &#x21A6; <i>true</i>)[(P, Q, P & Q),(<i>true</i>, <i>true</i>, <i>true</i>)]</p>
@@ -287,9 +343,20 @@ rather than define how uniform substitutions work.</p>
 	<p align="center">(<i>true</i> & <i>true</i> &#x21A6; <i>true</i>)[(Q, P, P & Q),(<i>true</i>, <i>true</i>, <i>true</i>)]</p>
 <p>to be an equally "authorized" non-uniform substitution into the truth-table based inference rule.  The intended interpretation of &#9500; then gives <i>commutativity of &</i>.  The corresponding 
 structural rule for &#9500;, is that the labeling order of statements used in a derivation rule doesn't matter.</p>
+<p>The above, however, does not justify the substitution [Q & P/P & Q] by itself: we only verified that this is valid when <i>P</i> & <i>Q</i> evaluates to <i>true</i>.  To be confident
+	that [Q & P/P & Q] is a valid substitution, we expect the values of <b>all</b> truth table rows to be unchanged by interchanging the columns labeled P and Q.
+	We expect the equivalent symbolic notation, is that the order of using &#9500; and [Q & P/P & Q] does not matter.</p>
+<ul>
+	<li>Exercise: [Q & P/P & Q] is a valid substitution for five of the logics we are interested in.  This fails for Lisp/Prolog.</li>
+	<li>Exercise: [Q &#x2228; P/P &#x2228; Q] is a valid substitution for five of the logics we are interested in.  This also fails for Lisp/Prolog.  
+		We have an explicit counter-example for syntactical entailment for Lisp/Prolog logic: <i>true</i> &#x2228; <i>unknown</i> &#x21A6; <i>true</i>, but <i>unknown</i> &#x2228; <i>true</i> &#x21A6; <i>unknown</i>.
+	</li>
+</ul>
 <table align="center">
 	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
 	<tr><td align="center">P & Q &#x27DB; Q & P</td><td>Commutativity of &</td><td>None</td><td>None</td></tr>
+	<tr><td align="center">A &#x27DB; A[Q & P/P & Q]</td><td>Commutativity of &</td><td>Lisp/Prolog</td><td>None</td></tr>
+	<tr><td align="center">A &#x27DB; A[Q &#x2228; P/P &#x2228; Q]</td><td>Commutativity of &#x2228;</td><td>Lisp/Prolog</td><td>None</td></tr>
 </table>
 
 <table align="left">
@@ -306,7 +373,7 @@ structural rule for &#9500;, is that the labeling order of statements used in a 
 	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
 	<tr><td>1.</td><td>P & (Q & R)</td><td>Given</td></tr>
 	<tr><td>2.</td><td>Q & R</td><td>Conjunction elimination on (1)</td></tr>
-	<tr><td>3.</td><td>P</td><td>Conjunction elimination on (1)</td></tr>
+	<tr><td>3.</td><td>P</td><td>Conjunction elimination on (1)0</td></tr>
 	<tr><td>4.</td><td>Q</td><td>Conjunction elimination on (2)</td></tr>
 	<tr><td>5.</td><td>R</td><td>Conjunction elimination on (2)</td></tr>
 	<tr><td>6.</td><td>P & Q</td><td>Conjunction introduction on (3),(4)</td></tr>
@@ -317,8 +384,9 @@ structural rule for &#9500;, is that the labeling order of statements used in a 
 <i>commutativity of &</i> as well, to justify ignoring the relative order of preceding statements when using inference rules.</p>
 <table align="center" style="clear:both">
 	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
-	<tr><td align="center">((P & Q) & R) &#x27DB; (P & (Q & R))</td><td align="left" valign="top" rowspan="2">Associativity of &</td><td align="left" valign="top" rowspan="2">None</td><td align="left" valign="top" rowspan="2">None</td></tr>
+	<tr><td align="center">(P & Q) & R &#x27DB; P & (Q & R)</td><td align="left" valign="top" rowspan="2">Associativity of &</td><td align="left" valign="top" rowspan="2">None</td><td align="left" valign="top" rowspan="2">None</td></tr>
 </table>
+<p>In general, an associativity principle allows notation to omit internal grouping parentheses: <i>P & Q & R</i> is now unambiguous.</p>
 <p>We next consider the truth-table description of logical not ~.  The inference rules corresponding to the tabular description (for those truth values that exist in a given logic) are:</p>
 <p align="center">(P &#x21A6; <i>true</i>) &#9500; (~P &#x21A6; <i>false</i>)
 	<br>(P &#x21A6; <i>false</i>) &#9500; (~P &#x21A6; <i>true</i>)
@@ -329,31 +397,507 @@ structural rule for &#9500;, is that the labeling order of statements used in a 
 	then ~~P evaluates to that same truth value.  In particular, we have:</p>
 <table align="center">
 	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
+	<tr><td align="center">A &#9500; A[~~P/P]</td><td>Introduce double negation</td><td>None</td><td>None</td></tr>
+	<tr><td align="center">A &#9500; A[P/~~P]</td><td>Remove double negation</td><td>None</td><td><a href="https://plato.stanford.edu/entries/disjunction/">Intuitionistic</a></td></tr>
 	<tr><td align="center">P &#9500; ~~P</td><td>Introduce double negation</td><td>None</td><td>None</td></tr>
-	<tr><td align="center">~~P &#9500; P</td><td align="left">Remove double negation</td><td>None</td><td><a href="https://plato.stanford.edu/entries/disjunction/">Intuitionistic</a></td></tr>
+	<tr><td align="center">~~P &#9500; P</td><td>Remove double negation</td><td>None</td><td><a href="https://plato.stanford.edu/entries/disjunction/">Intuitionistic</a></td></tr>
 </table>
-<p>Five of our logics (Kleene weak three-valued logic is the exception) have their logical or &#x2228; described with a whole row constant <i>true</i> (and often the matching column).
-	Verifying the following for propositional variables P, Q is left as an exercise:</p>
+<p>Non-uniform substitutions are also allowed.  The third and fourth rows are for emphasis; they are special cases of the first two rows.</p>
+<table align="right">
+	<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td></td><td>(A &#x21A6; <i>false</i>) &#x2228; (A &#x21A6; <i>true</i>)</td><td>Principle of bivalence</td></tr>
+	<tr><td>2.</td><td></td><td>~~(A &#x21A6; <i>false</i>) &#x2228; (A &#x21A6; <i>true</i>)</td><td>Introduce double negation on (1)</td></tr>
+	<tr><td>3.</td><td></td><td>~(A &#x21A6; <i>false</i>) &rArr; (A &#x21A6; <i>true</i>)</td><td>Definition of &rArr; on (2)</td></tr>
+	<tr><td>4.</td><td>~(A &#x21A6; <i>false</i>) &#9500; (A &#x21A6; <i>true</i>)</td><td></td><td><span style="background:yellow">Upgrade &rArr; to &#9500;</span> on (3)</td></tr>
+	<tr><td>5.</td><td>(A &#x21A6; <i>true</i>) &#x27DB; ~(A &#x21A6; <i>false</i>)</td><td></td><td>Defintion of &#x27DB; on law of non-contradiction, (4)</td></tr>
+	<tr><td>6.</td><td></td><td>(A &#x21A6; <i>true</i>) &#x2228; (A &#x21A6; <i>false</i>)</td><td>Commutativity of &#x2228; on (1)</td></tr>
+	<tr><td>7.</td><td></td><td>~~(A &#x21A6; <i>true</i>) &#x2228; (A &#x21A6; <i>false</i>)</td><td>Introduce double negation on (6)</td></tr>
+	<tr><td>8.</td><td></td><td>~(A &#x21A6; <i>true</i>) &rArr; (A &#x21A6; <i>false</i>)</td><td>Definition of &rArr; on (7)</td></tr>
+	<tr><td>9.</td><td>~(A &#x21A6; <i>true</i>) &#9500; (A &#x21A6; <i>false</i>)</td><td></td><td><span style="background:yellow">Upgrade &rArr; to &#9500;</span> on (8)</td></tr>
+	<tr><td>10.</td><td>(A &#x21A6; <i>false</i>) &#x27DB; ~(A &#x21A6; <i>true</i>)</td><td></td><td>Defintion of &#x27DB; on law of non-contradiction, (9)</td></tr>
+</table>
+<p>For classical logic only, this allows upgrading the principle of non-contradiction to a syntactical equivalence, from a syntactical entailment.  This in 
+	turn enables <b>any</b> syntactical equivalence &#x27DB; to justify the corresponding substitutions, for classical logic only.</p>
+
+<p>All six of our logics, agree that the only truth table row for which <i>P & P</i> evaluates to <i>true</i> is <i>true</i> & <i>true</i> &#x21A6; <i>true</i>.  Likewise, they agree that the only truth table row for 
+	which <i>P &#x2228; P</i> evaluates to <i>true</i>, is <i>true</i> &#x2228; <i>true</i> &#x21A6; <i>true</i>.  Furthermore, this is also the case for the other relevant truth values of <i>false</i>, <i>unknown</i>, <i>contradiction</i>: we have valid 
+	substitutions [P & P/P], [P/P & P], [P &#x2228; P/P], [P/P &#x2228; P]. Translating this gives us the idempotence inference rules for  logical and &, and logical or &#x2228;. (We already had seen <i>idempotence of &</i>; this is a distinct motivation.)</p>
+<p>These have corresponding structural rules for &#9500; .</p>
 <table align="center">
 	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
-	<tr><td align="center">P &#9500; P &#x2228; Q</td><td>Disjunction introduction</td><td>Kleene weak</td><td>some paraconsistent</td></tr>
-	<tr><td align="center">P &#x2228; Q &#9500; Q &#x2228; P</td><td>Commutativity of &#x2228;</td><td>Lisp/Prolog</td><td>None</td></tr>
-	<tr><td align="center">P &#x2228; P &#9500; P</td><td>Idempotence of &#x2228;</td><td>None</td><td>None</td></tr>
+	<tr><td align="center">A &#x27DB; A[P/P & P]</td><td>Idempotence of &</td><td>None</td><td>None</td></tr>
+	<tr><td align="center">A &#x27DB; A[P/P &#x2228; P]</td><td>Idempotence of &#x2228;</td><td>None</td><td>None</td></tr>
+	<tr><td align="center">P & P &#x27DB; P</td><td>Idempotence of &</td><td>None</td><td>None</td></tr>
+	<tr><td align="center">P &#x2228; P &#x27DB; P</td><td>Idempotence of &#x2228;</td><td>None</td><td>None</td></tr>
 </table>
-<p>If we had a predicate Classical(Z) that, for a truth-valued expression Z, evaluated to <i>true</i> if and only if when A evaluated to either <i>true</i> or <i>false</i>,
-	then we could salvage <i>Commutativity of &#x2228;</i> for the Lisp/Prolog logic by adding an extra hypothesis Classical(B).  We will get to this later, in this overview.</p>
-<p>There is another variant of disjunction introduction, that follows from the first variant and <i>commutativity of &#x2228;</i>:</p>
+
+<h2 id="reductio-ad-absurdum" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Proof by contradiction</h2>
+<p>Following <a href="https://archive.org/details/principiamathema01anwh/page/n125/mode/2up"><i>Principia Mathematica</i></a> (hardcopy page 104, Vol. I; *2&middot;01), we consider the following:</p>
 <table align="center">
 	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
-	<tr><td>1.</td><td>Q</td><td>Given</td></tr>
-	<tr><td>2.</td><td>Q &#x2228; P</td><td>Disjunction introduction</td></tr>
-	<tr><td>3.</td><td>P &#x2228; Q</td><td>Commutativity of &#x2228;</td></tr>
-</table>	
+	<tr><td>1.</td><td>P &rArr; ~P</td><td>Given</td></tr>
+	<tr><td>2.</td><td>~P &#x2228; ~P</td><td>Definition of &rArr;</td></tr>
+	<tr><td>3.</td><td>~P</td><td>Idempotence of &#x2228;</td></tr>
+</table>
+In classical logic, this is known as <i>proof by contradiction</i>; other names include the Latin <i>reductio ad absurdum</i>.
 <table align="center">
 	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
-	<tr><td align="center">Q &#9500; P &#x2228; Q</td><td>Disjunction introduction</td><td>Kleene weak, Lisp/Prolog</td><td>some paraconsistent</td></tr>
+	<tr><td align="center">P &rArr; ~P &#9500; ~P</td><td align="left">proof by contradiction</td><td align="left">None</td><td>None</td></tr>
 </table>
-<p id="principle-of-explosion">Disjunction introduction, i.e. introducing a "logical or" statement as a temporary statement, is behind a number of paradoxes.  As a brute fact, the expansion of B need have nothing to do with the expansion of A.
+<p>That is: unlike labeling a never-true statement "Given" in our tabular notation, labeling a never <i>true</i> statement "Hypothesis" is 
+	one way of finding out a statement evaluates to the truth value <i>false</i>.  As mentioned earlier, the assumed statement must not have a non-classical truth value.</p>
+
+<h2 id="or-elimination" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Or elimination</h2>
+<table align="left">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>P &#x2228; Q</td><td>Given</td></tr>
+	<tr><td>2.</td><td>~P</td><td>Given</td></tr>
+	<tr><td>3.</td><td>~~P &#x2228; Q</td><td>[~~P/P] Introduce double negation on (1)</td></tr>
+	<tr><td>4.</td><td>~P &rArr; Q</td><td>Definition of &rArr; on (3)</td></tr>
+	<tr><td>5.</td><td>Q</td><td><i>modus ponens</i> on (4),(2)</td></tr>
+</table>
+<table align="right">
+	<tr><th colspan="3">Typical proof</th></tr>
+	<tr><th></th><th>Inference rule</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>P &#x2228; Q, ~P, &#9500; Q</td><td><span style="background:yellow">(left)</span> Or elimination</td></td></tr>
+	<tr><td>2.</td><td>Q &#x2228; P, ~Q, &#9500; P</td><td>apply [Q/P,P/Q] to (1)</td></tr>
+	<tr><td>3.</td><td>P &#x2228; Q, ~Q, &#9500; P</td><td>apply [P &#x2228; Q/Q &#x2228; P] to (2)</td></tr>
+</table>
+<p>This is also known as disjunctive syllogism, and sometimes abbreviated as &#x2228;E.</p>
+<p>The third step on the right is not valid for Lisp/Prolog logic.  We'll return to this later.</p>
+<table align="center" style="clear:both">
+	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
+	<tr><td align="center">P &#x2228; Q, ~P, &#9500; Q</td><td align="left"><span style="background:yellow">(left)</span> Or elimination</td><td align="left">None</td><td>Intuitionistic</td></tr>
+	<tr><td align="center">P &#x2228; Q, ~Q, &#9500; P</td><td align="left"><span style="background:yellow">(right)</span> Or elimination</td><td align="left">None; expect proof for Lisp/Prolog later</td><td>Intuitionistic</td></tr>
+</table>	
+
+<h2 id="contrapositive-1" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Contrapositive</h2>
+<p><i>Principia Mathematica</i> also suggests considering the following (*2&middot;03):</p>
+<table align="center">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>P &rArr; ~Q</td><td>Given</td></tr>
+	<tr><td>2.</td><td>~P &#x2228; ~Q</td><td>Definition of &rArr;</td></tr>
+	<tr><td>3.</td><td>~Q &#x2228; ~P</td><td>Commutativity of &#x2228;</td></tr>
+	<tr><td>4.</td><td>Q &rArr; ~P</td><td>Definition of &rArr;</td></tr>
+</table>
+<p>In classical logic: this is one, of four versions, of taking the contrapositive of a nonstrict implication.  Another version 
+	is *2.16 in <i>Principia Mathematica</i>.</p>
+<table align="center">
+	<tr><td>1.</td><td>P &rArr; Q</td><td>Given</td></tr>
+	<tr><td>2.</td><td>P &rArr; ~~Q</td><td style="background: yellow">Introduce double negation on the conclusion of (1)</td></tr>
+	<tr><td>3.</td><td>~P &#x2228; ~~Q</td><td>Definition of &rArr;</td></tr>
+	<tr><td>4.</td><td>~~Q &#x2228; ~P</td><td>Commutativity of &#x2228;</td></tr>
+	<tr><td>5.</td><td>~Q &rArr; ~P</td><td>Definition of &rArr;</td></tr>
+</table>
+<table align="center">
+	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
+	<tr><td align="center">P &rArr; ~Q &#9500; Q &rArr; ~P</td><td align="left">taking contrapositive</td><td align="left">Lisp/Prolog</td><td>None</td></tr>
+	<tr><td align="center">P &rArr; Q &#9500; ~Q &rArr; ~P</td><td align="left">taking contrapositive</td><td align="left">Lisp/Prolog</td><td>None</td></tr>
+</table>
+<table align="left">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>~P &rArr; Q</td><td>Given</td></tr>
+	<tr><td>2.</td><td>~Q &rArr; ~~P</td><td>Take contrapositive</td></tr>
+	<tr><td>3.</td><td>~Q &rArr; P</td><td style="background: yellow">Remove double negation from the conclusion of (2)</td></tr>
+</table>
+<table align="right">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>~P &rArr; ~Q</td><td>Given</td></tr>
+	<tr><td>2.</td><td>~~Q &rArr; ~~P</td><td>Take contrapositive</td></tr>
+	<tr><td>3.</td><td>~~Q &rArr; P</td><td style="background: yellow">Remove double negation from the conclusion of (2)</td></tr>
+	<tr><td>4.</td><td>Q &rArr; P</td><td style="background: yellow">Invert adding double negation to the hypothesis of (3)</td></tr>
+</table>
+<p>There are two other versions of taking the contrapositive.  They involve removing double negation, so do not work for Intuitionistic logic.  We will review how to 
+	identify the extra hypotheses required for this to work for Lisp/Prolog logic.</p>
+<table align="center" style="clear:both">
+	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
+	<tr><td align="center">~P &rArr; Q &#9500; ~Q &rArr; P</td><td align="left">taking contrapositive</td><td align="left">Lisp/Prolog</td><td>None</td></tr>
+	<tr><td align="center">~P &rArr; ~Q &#9500; Q &rArr; P</td><td align="left">taking contrapositive</td><td align="left">Lisp/Prolog</td><td>Intuitionistic</td></tr>
+</table>
+<table align="left">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>P &hArr; Q</td><td>Given</td></tr>
+	<tr><td>2.</td><td>(P &rArr; Q) & (Q &rArr; P)</td><td>Definition of &hArr; on (1)</td></tr>
+	<tr><td>3.</td><td>P &rArr; Q</td><td>Conjunction elimination on (2)</td></tr>
+	<tr><td>4.</td><td>Q &rArr; P</td><td>Conjunction elimination on (2)</td></tr>
+	<tr><td>5.</td><td>~Q &rArr; ~P</td><td>Take contrapositive of (3)</td></tr>
+	<tr><td>6.</td><td>~P &rArr; ~Q</td><td>Take contrapositive of (4)</td></tr>
+	<tr><td>7.</td><td>~P &hArr; ~Q</td><td>Definition of &hArr; on (6),(5)</td></tr>
+</table>
+<table align="right">
+	<tr><th colspan="4">Classical logic</th></tr>
+	<tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>A &#x27DB; B</td><td></td><td>Given</td></tr>
+	<tr><td>2.</td><td></td><td>A &hArr; B</td><td>Downgrade &#x27DB; to &hArr; on (1)</td></tr>
+	<tr><td>3.</td><td></td><td>~A &hArr; ~B</td><td>Apply negation to both sides of &hArr; on (2)</td></tr>
+	<tr><td>4.</td><td>~A &#x27DB; ~B</td><td></td><td>Upgrade &hArr; to &#x27DB; on (3)</td></tr>
+</table>
+<p>The other direction, removing negation from both sides of &hArr;, or from both sides of &#x27DB;, is left as an exercise.</p>
+<table align="center" style="clear:both">
+	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
+	<tr><td align="center">P &hArr; Q &#9500; ~P &hArr; ~Q</td><td align="left"><span style="background:yellow">Apply ~ to both sides of &hArr;</span></td><td align="left">Lisp/Prolog</td><td>None</td></tr>
+	<tr><td align="center">~P &rArr; ~Q &#9500; P &rArr; Q</td><td align="left"><span style="background:yellow">Remove ~ from both sides of &hArr;</span></td><td align="left">Lisp/Prolog</td><td>Intuitionistic</td></tr>
+</table>
+<table align="center" style="clear:both">
+	<tr><th colspan="2">Classical logic</th></tr>
+	<tr><th></th><th>Name</th></tr>
+	<tr><td align="center">(A &#x27DB; B) &#9500; (~A &#x27DB; ~B)</td><td align="left"><span style="background:yellow">Apply ~ to both sides of &#x27DB;</span></td></tr>
+	<tr><td align="center">(~A &#x27DB; ~B) &#9500; (A &#x27DB; B)</td><td align="left"><span style="background:yellow">Remove ~ from both sides of &#x27DB;</span></td></tr>
+</table>
+
+<h2 id="modus-tollens" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px"><i>Modus Tollens</i></h2>
+<table align="right">
+	<tr><th colspan=3>Typical proof</th></tr>
+	<tr><td>1.</td><td>P &rArr; Q</td><td>Given</td></tr>
+	<tr><td>2.</td><td>~Q</td><td>Given</td></tr>
+	<tr><td>3.</td><td>~Q &rArr; ~P</td><td>Taking contrapositive of (1)</td></tr>
+	<tr><td>4.</td><td>~P</td><td><i>modus ponens</i> on (3), (2)</td></tr>
+</table>
+<p>It would make sense that it should be possible to run <i>modus ponens</i> in reverse, when the negation <i>~Q</i> of the conclusion of <i>P &rArr; Q</i> is known.</p>
+<p>This is known as (Latin) <i>modus tollens</i>, or "denying the consequent"; abbreviation MT.</p>
+<p>This proof is not valid for Lisp/Prolog logic; an extra step is required, that we will cover later.</p>
+<table align="center" style="clear:both">
+	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
+	<tr><td align="center">P &rArr; Q, ~Q &#9500; ~P</td><td align="left"><i>modus tollens</i></td><td align="left">None; expect to repair proof for Lisp/Prolog</td><td>None</td></tr>
+</table>
+
+<h2 id="classical-law-of-contradiction" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Classical Law of Contradiction</h2>
+<p>One way of introducing relevance between two nonstrict implications is as follows:</p>
+<table align="center">
+	<tr><td>1.</td><td>P &rArr; Q</td><td>Given</td></tr>
+	<tr><td>2.</td><td>P &rArr; ~Q</td><td>Given</td></tr>
+	<tr><td>3.</td><td>P</td><td>Hypothesis (for implication introduction)</td></tr>
+	<tr><td>4.</td><td>~Q</td><td><i>modus ponens</i> on (2),(3)</td></tr>
+	<tr><td>5.</td><td>~P</td><td><i>modus tollens</i> on (1),(4)</td></tr>
+	<tr><td>6.</td><td>P &rArr; ~P</td><td>Implication introduction on (3), (5)</td></tr>
+	<tr><td>7.</td><td>~P</td><td>Proof by contradiction [on (6)]</td></tr>
+</table>
+<p>This is known as the classical law of contradiction.</p>
+<p>This does not work for Belnap's four-valued logic, as a semantic consequence of <i>unknown</i> &rArr; <i>contradiction</i> evaluating to <i>true</i>.</p>
+<p>Replacing one of givens with a corresponding syntactical inference rule, is a mechanical alteration.</p>
+<table align="center">
+	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
+	<tr><td align="center">P &rArr; Q, P &rArr; ~Q &#9500; ~P</td><td align="left">Classical law of contradiction</td><td align="left">Belnap</td><td>Defeasible logics</td></tr>
+	<tr><td align="center">(P &#9500; Q), P &rArr; ~Q &#9500; ~P</td><td align="left">Classical law of contradiction</td><td align="left">Belnap</td><td>Defeasible logics</td></tr>
+	<tr><td align="center">P &rArr; Q, (P &#9500; ~Q) &#9500; ~P</td><td align="left">Classical law of contradiction</td><td align="left">Belnap</td><td>Defeasible logics</td></tr>
+</table>
+
+<h2 id="exportation" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Exportation</h2>
+<table align="left">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>(P & Q) &rArr; R</td><td>Given</td></tr>
+	<tr><td>2.</td><td>P</td><td>Hypothesis (for implication introduction)</td></tr>
+	<tr><td>3.</td><td>Q</td><td>Hypothesis (for implication introduction)</td></tr>
+	<tr><td>4.</td><td>P & Q</td><td>Conjunction introduction on (2),</td></tr>
+	<tr><td>5.</td><td>R</td><td><i>modus ponens</i> on (1), (4)</td></tr>
+	<tr><td>6.</td><td>Q &rArr; R</td><td>Implication introduction on (3), (5)</td></tr>
+	<tr><td>7.</td><td>P &rArr; (Q &rArr; R)</td><td>Implication introduction on (2), (6)</td></tr>
+</table>
+<table align="right">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>P &rArr; (Q &rArr; R)</td><td>Given</td></tr>
+	<tr><td>2.</td><td>P & Q</td><td>Hypothesis (for implication introduction)</td></tr>
+	<tr><td>3.</td><td>P</td><td>Conjunction elimination on (2)</td></tr>
+	<tr><td>4.</td><td>Q &rArr; R</td><td><i>modus ponens</i> on (1), (3)</td></tr>
+	<tr><td>5.</td><td>Q</td><td>Conjunction elimination on (2)</td></tr>
+	<tr><td>6.</td><td>R</td><td><i>modus ponens</i> on (4), (5)</td></tr>
+	<tr><td>7.</td><td>(P & Q) &rArr; R</td><td>Implication introduction on (2),(6)</td></tr>
+</table>
+<p>This is a sort of a packing/unpacking operation for nonstrict implication.  The "imported syntax" (using logical and & in the hypothesis) is the usual format for long-term 
+	learning, while the "exported" syntax (using nonstrict implication &rArr; in the consequence) is more likely to be immediately usable.</p>
+<p>These proofs are for classical logic.  We'll sketch how to repair them for the non-classical logics we are considering, later.</p>
+<table align="center" style="clear:both">
+	<tr><th colspan="4">Proven for: Classical logic</th></tr>
+	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
+	<tr><td align="center">(P & Q) &rArr; R &#9500; P &rArr; (Q &rArr; R)</td><td align="left">Exportation from & to &rArr;</td><td align="left">None</td><td>Defeasible logics</td></tr>
+	<tr><td align="center">P &rArr; (Q &rArr; R) &#9500; (P & Q) &rArr; R</td><td align="left">Importation from &rArr; to &</td><td align="left">None</td><td>Defeasible logics</td></tr>
+	<tr><td align="center">(P & Q) &rArr; R &#x27DB; P &rArr; (Q &rArr; R)</td><td align="left" style="background:yellow">equivalence of exportation and importation</td><td align="left">None</td><td>Defeasible logics</td></tr>
+</table>
+
+<h2 id="de-morgan" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">De Morgan's Laws</h2>
+<p>One of the truth table rows for logical or &#x2228; , translates to <i>false</i> &#x2228; <i>false</i> &#x21A6; <i>false</i>.  A corresponding Gentzen-style notation is</p>
+<p align=center>(P &#x21A6; <i>false</i>) & (Q &#x21A6; <i>false</i>) &#9500; (P &#x2228; Q &#x21A6; <i>false</i>)</p>
+<p>which, according our extended notation, rewrites to one of De Morgan's Laws.</p>
+<table align="center">
+	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
+	<tr><td align="center">~P & ~Q &#9500; ~(P &#x2228; Q)</td><td align="left">De Morgan's Law <span style="background: yellow">-- wrap to not-or</span></td><td align="left">None</td><td valign="top" rowspan="3">None</td></tr>
+	<tr><td align="center">~(P &#x2228; Q) &#9500; ~P & ~Q</td><td align="left">De Morgan's Law <span style="background: yellow">-- unwrap from not-or</span></td><td align="left">Franci</td></tr>
+	<tr><td align="center">~(P &#x2228; Q) &#x27DB; ~P & ~Q</td><td align="left">De Morgan's Law</td><td align="left">Franci</td></tr>
+</table>
+<p>Franci fails the "unwrap from not or" half because, unlike the major truth-functional logics, she thinks <i>false</i> &#x2228; <i>contradiction</i> &#x21A6; <i>false</i>.  (The other logic with 
+<i>contradiction</i>, Belnap's four-valued logic, has <i>false</i> &#x2228; <i>contradiction</i> &#x21A6; <i>contradiction</i>; thus, like the others, it has only <b>one</b> truth table row for logical or &#x2228; that evaluates to <i>false</i>.</p>
+<table align="left">
+	<tr><th colspan="3">Typical</th></tr>
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>~P &#x2228; ~Q</td><td>Given</td></tr>
+	<tr><td>2.</td><td>P & Q</td><td>Hypothesis</td></tr>
+	<tr><td>3.</td><td>P</td><td>Conjunction elimination on (2)</td></tr>
+	<tr><td>4.</td><td>~~P</td><td>Introduce double negation on (4)</td></tr>
+	<tr><td>5.</td><td>~Q</td><td>(left) Or elimination on (1),(5)</td></tr>
+	<tr><td>6.</td><td>(P & Q) &rArr; ~Q</td><td>Implication introduction on (2),(6)</td></tr>
+	<tr><td>7.</td><td>~(P & Q)</td><td>Classical law of contradiction on (6), conjunction elimination on (2)</td></tr>
+</table>
+<table align="right">
+	<tr><th colspan="3">Typical</th></tr>
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>~(P & Q)</td><td>Given</td></tr>
+	<tr><td>2.</td><td>~(~P &#x2228; ~Q)</td><td>Hypothesis</td></tr>
+	<tr><td>3.</td><td>~~P & ~~Q</td><td>De Morgan's Law <span style="background: yellow">-- unwrap from not-or</span> on (2)</td></tr>
+	<tr><td>4.</td><td>P & Q</td><td>Remove double negation on (3)</td></tr>
+	<tr><td>5.</td><td>~(~P &#x2228; ~Q) &rArr; (P & Q)</td><td>Implication introduction on (2),(4)</td></tr>
+	<tr><td>6.</td><td>~~(~P &#x2228; ~Q)</td><td><i>modus tollens</i> on (5),(1)</td></tr>
+	<tr><td>7.</td><td>~P &#x2228; ~Q</td><td>Remove double negation on (6)</td></tr>
+</table>
+
+<p>The given proof for the "wrap to not-and" version is also invalid for Franci.  We will want a different technique for Belnap's four-valued logic.</p>
+<p>Generally, working with truth table-formatted calculations involving multiple rows,
+	relies heavily on both associativity and distributivity rules for logical and & and logical or &#x2228; .  We'll need the distributivity laws, to get 
+	alternate proofs for the nonclassical logics.</p>
+<p>The intended interpretation of Intuitionistic logic, suggests that <i>~(P & Q) &#9500; ~P &#x2228; ~Q</i> should be invalid: a direct proof of 
+	~(P & Q), would not be expected to give a proof of either ~P or ~Q.  One of our authoritative sources (Stanford Encylopedia of Philosophy) confirms both this, and that 
+	the other three syntactical entailments do work for Intuitionistic logic.</p>
+<table align="center" style="clear:both">
+	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
+	<tr><td align="center">~P &#x2228; ~Q &#9500; ~(P & Q)</td><td align="left">De Morgan's Law <span style="background: yellow">-- wrap to not-and</span></td><td align="left">Franci; expecting alternate proof for Belnap</td><td>None</td></tr>
+	<tr><td align="center">~(P & Q) &#9500; ~P &#x2228; ~Q</td><td align="left">De Morgan's Law <span style="background: yellow">-- unwrap from not-and</span></td><td align="left">None; expecting alternate proof for Franci,Belnap</td><td>None</td></tr>
+</table>
+	
+<h2 id="associativity-or" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Associativity of &#x2228;</h2>
+<table align="right">
+	<tr><th colspan="3">Classical logic</th></tr>
+	<tr><th></th><th>Inference Rule</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>~(P & Q) &#x2228; R &#x27DB; ~P &#x2228; (Q &rArr; R)</td><td>Definition of &rArr; on equivalence of exportation and importation</td></tr>
+	<tr><td>2.</td><td>~(P & Q) &#x2228; R &#x27DB; ~P &#x2228; (~Q &#x2228; R)</td><td>Definition of &rArr; on (1)</td></tr>
+	<tr><td>3.</td><td>(~P &#x2228; ~Q) &#x2228; R &#x27DB; ~P &#x2228; (~Q &#x2228; R)</td><td>De Morgan's Law on (2)</td></tr>
+	<tr><td>4.</td><td>(~~P &#x2228; ~~Q) &#x2228; R &#x27DB; ~~P &#x2228; (~~Q &#x2228; R)</td><td>Apply [~P/P, ~Q/Q] to (3)</td></tr>
+	<tr><td>5.</td><td>(P &#x2228; Q) &#x2228; R &#x27DB; P &#x2228; (Q &#x2228; R)</td><td>Remove double negation</td></tr>
+</table>
+<p>We'll return to this later, for the non-classical logics.</p>
+<table align="center" style="clear:both">
+	<tr><th colspan="4">Proven for: Classical logic</th></tr>
+	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
+	<tr><td align="center">P &#x2228; (Q &#x2228; R) &#x27DB; (P &#x2228; Q) &#x2228; R</td><td align="left">Associativity of &#x2228;</td><td align="left">None</td><td>None</td></tr>
+</table>
+<p>In particular, <i>P &#x2228; Q &#x2228; R</i> is now unambiguous for classical logic, and we expect it to be unambiguous for all of the non-classical logics we are considering.</p>
+
+<h2 id="modus-ponendo-tollens" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px"><i>modus ponendo tollens</i></h2>
+<table align="left">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>~(P & Q)</td><td>Given</td></tr>
+	<tr><td>2.</td><td>P</td><td>Given</td></tr>
+	<tr><td>3.</td><td>~P &#x2228; ~Q</td><td>De Morgan's Law <span style="background:yellow">-- unwrap from not-and</span> on (1)</td></tr>
+	<tr><td>4.</td><td>P &rArr; ~Q</td><td>Definition of &rArr;</td></tr>
+	<tr><td>5.</td><td>~Q</td><td><i>modus ponens</i> on (4),(2)</td></tr>
+</table>	
+<table align="right">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>~(P & Q)</td><td>Given</td></tr>
+	<tr><td>2.</td><td>Q</td><td>Given</td></tr>
+	<tr><td>3.</td><td>~P &#x2228; ~Q</td><td>De Morgan's Law <span style="background:yellow">-- unwrap from not-and</span> on (1)</td></tr>
+	<tr><td>4.</td><td>P &rArr; ~Q</td><td>Definition of &rArr;</td></tr>
+	<tr><td>5.</td><td>~~Q</td><td>introduce double negation on (2)</td></tr>
+	<tr><td>6.</td><td>~P</td><td><i>modus tollens</i> on (4),(5)</td></tr>
+</table>
+<p>Latin for "mode that denies by affirming".</p>
+<table align="center" style="clear:both">
+	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
+	<tr><td align="center">~(P & Q), P &#9500; ~Q</td><td align="left" rowspan="2"><i>modus ponendo tollens</i></td><td align="left">None</td><td>Intuitionistic</td></tr>
+	<tr><td align="center">~(P & Q), Q &#9500; ~P</td><td align="left">None</td><td>Intuitionistic</td></tr>
+</table>
+
+<h2 id="distribuvity-or-and" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Distributivity of &#x2228; with respect to &</h2>
+<table align="left">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>P &#x2228; (Q & R)</td><td>Given</td></tr>
+	<tr><td>2.</td><td>~~P &#x2228; (Q & R)</td><td>Introduce double negation on (2)</td></tr>
+	<tr><td>3.</td><td>~P &rArr; (Q & R)</td><td>Definition of &rArr;</td></tr>
+	<tr><td>4.</td><td>~P &rArr; Q</td><td style="background:yellow">Use conjunction elimination on the consequence of (3)</td></tr>
+	<tr><td>5.</td><td>~P &rArr; R</td><td style="background:yellow">Use conjunction elimination on the consequence of (3)</td></tr>
+	<tr><td>6.</td><td>~~P &#x2228; Q</td><td>Definition of &rArr; on (4)</td></tr>
+	<tr><td>7.</td><td>~~P &#x2228; R</td><td>Definition of &rArr; on (5)</td></tr>
+	<tr><td>8.</td><td>(~~P &#x2228; Q) & (~~P &#x2228; R)</td><td>Conjunction introduction on (6),(7)</td></tr>
+	<tr><td>9.</td><td>(P &#x2228; Q) & (P &#x2228; R)</td><td>Remove double negation on (8)</td></tr>
+</table>
+<table align="right">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>(P &#x2228; Q) & (P &#x2228; R)</td><td>Given</td></tr>
+	<tr><td>2.</td><td>(~~P &#x2228; Q) & (~~P &#x2228; R)</td><td>Introduce double negation on (2)</td></tr>
+	<tr><td>3.</td><td>~~P &#x2228; Q</td><td>Conjunction elimination on (2)</td></tr>
+	<tr><td>4.</td><td>~~P &#x2228; R</td><td>Conjunction elimination on (2)</td></tr>
+	<tr><td>5.</td><td>~P &rArr; Q</td><td>Definition of &rArr; on (3)</td></tr>
+	<tr><td>6.</td><td>~P &rArr; R</td><td>Definition of &rArr; on (4)</td></tr>
+	<tr><td>7.</td><td>~P</td><td>Hypothesis</td></tr>
+	<tr><td>8.</td><td>Q</td><td><i>modus ponens</i> on (5),(7)</td></tr>
+	<tr><td>9.</td><td>R</td><td><i>modus ponens</i> on (6),(7)</td></tr>
+	<tr><td>10.</td><td>Q & R</td><td>conjunction introduction on (8),(9)</td></tr>
+	<tr><td>11.</td><td>~P &rArr; (Q & R)</td><td>Implication introduction on (7),(11)</td></tr>
+	<tr><td>12.</td><td>~~P &#x2228; (Q & R)</td><td>Definition of &rArr; on (11)</td></tr>
+	<tr><td>13.</td><td>P &#x2228; (Q & R)</td><td>Remove double negation on (12)</td></tr>
+</table>
+<p>The proof on the left works for all of the logics we are considering.  The proof on the right is for classical logic; as usual, the hypothesis step needs some assurance
+	that P has a classical truth value, to be valid.</p>
+<table align="center" style="clear:both">
+	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
+	<tr><td align="center">P &#x2228; (Q & R) &#x27DB; (P &#x2228; Q) & (P &#x2228; R)</td><td align="left">Left distributivity of &#x2228; over &</td><td align="left">None</td><td>None</td></tr>
+</table>
+<table align="left">
+	<tr><th colspan="3">Typical</th></tr>
+	<tr><th></th><th>Inference rule</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>P &#x2228; (R & Q) &#x27DB; (P &#x2228; R) & (P &#x2228; Q)</td><td>Commutativity of & on Left distributivity of &#x2228; over &</td></tr>
+	<tr><td>2.</td><td>(R & Q) &#x2228; P &#x27DB; (R &#x2228; P) & (Q &#x2228; P)</td><td>Commutativity of &#x2228; on (1)</td></tr>
+</table>
+<p>We will need a different technique for Lisp/Prolog logic.</p>
+<table align="center" style="clear:both">
+	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
+	<tr><td align="center">(Q & R) &#x2228; P &#x27DB; (Q &#x2228; P) & (R &#x2228; P)</td><td align="left">Right distributivity of &#x2228; over &</td><td align="left">None; expecting to prove for Lisp/Prolog</td><td>None</td></tr>
+</table>
+
+<table align="right">
+	<tr><th colspan="3">Classical logic</th></tr>
+	<tr><th></th><th>Inference rule</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>~(P &#x2228; (Q & R)) &#x27DB; ~((P &#x2228; Q) & (P &#x2228; R))</td><td style="background:yellow">Apply ~ to both sides of left distributivity of &#x2228; over &</td></tr>
+	<tr><td>2.</td><td>~P & ~(Q & R) &#x27DB; ~((P &#x2228; Q) & (P &#x2228; R))</td><td>De Morgan's Law <span style="background:yellow">-- unwrap from not-or</span></td></tr>
+	<tr><td>3.</td><td>~P & (~Q &#x2228; ~R) &#x27DB; ~(P &#x2228; Q) &#x2228; ~(P &#x2228; R)</td><td>De Morgan's Law <span style="background:yellow">-- unwrap from not-and</span></td></tr>
+	<tr><td>4.</td><td>~P & (~Q &#x2228; ~R) &#x27DB; (~P & ~Q) &#x2228; (~P & ~R)</td><td>De Morgan's Law <span style="background:yellow">-- unwrap from not-or</span></td></tr>
+	<tr><td>5.</td><td>~~P & (~~Q &#x2228; ~~R) &#x27DB; (~~P & ~~Q) &#x2228; (~~P & ~~R)</td><td>Apply [~P/P,~Q/Q,~R/R] to (4)</td></tr>
+	<tr><td>6.</td><td>P & (Q &#x2228; R) &#x27DB; (P & Q) &#x2228; (P & R)</td><td>Remove double negation</td></tr>
+	<tr><td>7.</td><td>(Q &#x2228; R) & P &#x27DB; (Q & P) &#x2228; (R & P)</td><td>Commutativity of &</td></tr>
+</table>
+<p>For classical logic, we can get left distributivity of & over &#x2228; with De Morgan's Law.  Right distributivity of & over &#x2228; then is an application of commutativity of &.  This critically 
+	depends on classical logic's unique ability to use &#x27DB; to justify substitutions.</p>
+<table align="center" style="clear:both">
+	<tr><th colspan="4">Proven for: Classical logic</th></tr>
+	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
+	<tr><td align="center">P & (Q &#x2228; R) &#x27DB; (P & Q) &#x2228; (P & R)</td><td align="left">Left distributivity of & over &#x2228;</td><td align="left">None</td><td>None</td></tr>
+	<tr><td align="center">(Q &#x2228; R) & P &#x27DB; (Q & P) &#x2228; (R & P)</td><td align="left">Right distributivity of & over &#x2228;</td><td align="left">None</td><td>None</td></tr>
+</table>
+
+<h2 id="proof-by-cases" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Proof by cases</h2>
+<table align="right">
+	<tr><th colspan="3">Typical</th></tr>
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>P &rArr; Q</td><td>Given</td></tr>
+	<tr><td>2.</td><td>R &rArr; Q</td><td>Given</td></tr>
+	<tr><td>3.</td><td>P &#x2228; R</td><td>Given</td></tr>
+	<tr><td>4.</td><td>~P &#x2228; Q</td><td>Definition of &rArr; on (1)</td></tr>
+	<tr><td>5.</td><td>~R &#x2228; Q</td><td>Definition of &rArr; on (2)</td></tr>
+	<tr><td>6.</td><td>(~P &#x2228; Q) & (~R &#x2228; Q)</td><td>Conjunction introduction on (4),(5)</td></tr>
+	<tr><td>7.</td><td>(~P & ~R) &#x2228; Q</td><td>Right distributivity of &#x2228; over &</td></tr>
+	<tr><td>8.</td><td>~(~P & ~R) &rArr; Q</td><td>Definition of &rArr;</td></tr>
+	<tr><td>9.</td><td>(~~P &#x2228; ~~R) &rArr; Q</td><td style="background:yellow">Inverting using De Morgan's Law -- wrap to not-and on hypothesis of (8)</td></tr>
+	<tr><td>10.</td><td>(P &#x2228; R) &rArr; Q</td><td>Remove double negation</td></tr>
+	<tr><td>11.</td><td>Q</td><td><i>modus ponens</i> on (10),(3)</td></tr>
+</table>
+<p>We will need to prove <i>Right distributivity of &#x2228; over &</i> for non-classical logics, before this proof is valid for them.  Both Belnap's, and Franci's, logic will require a different strategy.</p>
+<table align="center" style="clear:both">
+	<tr><th colspan="4">Proven for: Classical logic</th></tr>
+	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
+	<tr><td align="center">P &rArr; Q, R &rArr; Q, P &#x2228; R  &#9500; Q</td><td align="left">Proof by cases</td><td align="left">None</td><td>Defeasible logics</td></tr>
+</table>
+
+<h2 id="excluded-middle" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Law of Excluded Middle</h2>
+<p>This classical logic tautology (always-true statement) degrades to a never-false statement in many other logics.  Key steps are incorrect for all of the non-classical logics we
+	are considering.</p>
+<p>For classical logic, we can downgrade a syntactical entailment &#9500; to a nonstrict logical implication &rArr;, by
+	choosing any one hypothesis of the syntactical entailment and converting it to a single hypothesis
+	that nonstrictly implies &rArr; the conclusion of the syntactical entailment.  (With sufficient infrastructure built out
+	to mathematically model notation, this would be a deduction metatheorem.)  This fails for all of our truth table describable non-classical logics.</p>
+<p>I will structure this to look like using the procedure of condensed detachment, developed by Carew Arthur Meredith in the 1950's, against <i>modus ponens</i>.  <i>Principia Mathematica</i>
+	proceeds as follows:</p>
+<table align="center">
+	<tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>P &#9500; P &#x2228; P</td><td></td><td>Apply Q &#x21A6; P to disjunction introduction</td></tr>
+	<tr><td>2.</td><td></td><td>P &rArr; (P &#x2228; P)</td><td><span style="background:yellow">Downgrade &#9500; to &rArr;</span> in (1)</td></tr>
+	<tr><td>3.</td><td>P &rArr; Q, Q &rArr; P &#9500; P &rArr; P</td><td></td><td>apply R &#x21A6; P to Transitivity of implication</td></tr>
+	<tr><td>4.</td><td>P &rArr; (P &#x2228; P), (P &#x2228; P) &rArr; P &#9500; P &rArr; P</td><td></td><td>apply Q &#x21A6; P &#x2228; P to (3)</td></tr>
+	<tr><td>5.</td><td>(P &#x2228; P) &rArr; P &#9500; (P &rArr; (P &#x2228; P)) &rArr; (P &rArr; P)</td><td></td><td><span style="background:yellow">Downgrade &#9500; to &rArr;</span> in (4)</td></tr>
+	<tr><td>6.</td><td></td><td>((P &#x2228; P) &rArr; P) &rArr; ((P &rArr; (P &#x2228; P)) &rArr; (P &rArr; P))</td><td><span style="background:yellow">Downgrade &#9500; to &rArr;</span> in (5)</td></tr>
+	<tr><td>7.</td><td></td><td>(P &#x2228; P) &rArr; P</td><td><span style="background:yellow">Downgrade &#9500; to &rArr;</span> in Idempotence of &#x2228;</td></tr>
+	<tr><td>8.</td><td></td><td>(P &rArr; (P &#x2228; P)) &rArr; (P &rArr; P)</td><td><i>modus ponens</i> on (6) and (7)</td></tr>
+	<tr><td>9.</td><td></td><td>P &rArr; P</td><td><i>modus ponens</i> on (2) and (8)</td></tr>
+	<tr><td>10.</td><td></td><td>~P &#x2228; P</td><td>Definition of &rArr;</td></tr>
+</table>
+<p>The above is not remotely intuitive.  We <b>could</b> have done this like the earlier exercises documenting the 
+	semantic consequences of the descriptions of logical not ~, logical and &, and logical or &#x2228; for the various logics.
+	The object, however, is to minimize the semantic consequences we need to "get started".</p>
+<table align="center">
+	<tr><th colspan=2>Classical logic</th></tr>
+	<tr><th></th><th>Name</th></tr>
+	<tr><td align="center">&#9500; ~P &#x2228; P</td><td align="left">Law of the Excluded Middle</td></tr>
+	<tr><td align="center">&#9500; P &rArr; P</td><td align="left"></td></tr>
+	<tr><td align="center">&#9500; P &hArr; P</td><td align="left">Reflexivity of &hArr;</td></tr>
+</table>
+<p>The classical logic proof of the reflexivity of &hArr;, is left as an exercise.</p>
+<p>Recall that the intended interpretation of <i>true</i> and <i>false</i> for Intuitionistic logic is proof existence.
+	That is, the intended interpretation of <i>true</i> a truth-valued statement P is that P is provable,
+	and the intended interpretation of <i>false</i> for P, is that ~P is provable.
+	While G&ouml;del's Second Incompleteness Theorem post-dates Intuitionistic logic by decades, 
+	it confirms that <i>~P &#x2228; P</i> is <b>not</b> a tautology for Intuitionistic logic,
+	even though it does not use nonclassical truth values.  The possibility of not having a proof for either
+	P or ~P, looks like Kleene's strong three-valued logic's intended interpretation of <i>unknown</i>.</p>
+<p>The rationale for Intuitionistic logic rejecting removing double negations, is that allows proving the Law of the Excluded Middle by proof by contradiction.  Generally speaking,
+	if a truth-valued expression A is provable in classical logic, then ~~A is provable in Intuitionistic logic.</p>
+<p><i>Principia Mathematica</i> uses the law of the excluded middle, to derive both double negation addition and removal syntactically (for classical logic),
+	rather than the natural language rationale I referenced.</p>
+<blockquote>Intuitionistic logic can be described as classical logic without [Law of Excluded Middle] (or the principle of double negation (~~&phi; &rArr; &phi;)),
+	but with the classical law of contradiction ((&phi; &rArr; &psi;) &rArr; ((&phi; &rArr; ~&psi;) &rArr; ~&phi;))
+	 and <i>ex falso quodlibet</i> (~&phi; &rArr; (&phi; &rArr; &psi;)) <nobr>&mdash; <a href="https://plato.stanford.edu/entries/disjunction/">Stanford Encyclopedia of Philosophy</a></nobr></blockquote>
+<p>So while Intuitionistic logic does not have a truth-functional description, it is close enough to classical logic that we can use it as an option for building out set theory.</p>	
+
+<h2 id="translating-truth-tables" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Translating to and from truth tables</h2>
+<p>We are now in a position to translate between the truth table descriptions of the logics we are considering, and the symbolic notation.  The Law of the Excluded Middle looks
+	suspiciously like the principle of bivalence for classical logic.</p>
+<p>According to the intended interpretation for <i>A</i> &#x21A6; <i>true</i>, etc., it appears that once a non-classical truth-valued expression <i>A</i> is known to evaluate to 
+	any given truth value, that all of the logic-relevant <i>A</i> &#x21A6; <i>true</i>, etc. have classical truth values (exactly one <i>true</i>).  That suggests 
+	we should take the principle of trivalence/tetravalence to be a <b>classical</b> logic statement, even though it is about a nonclassical logic.  We also see that we need the 
+	A &#x21A6; <i>unknown</i>, etc. notation to even represent the non-classical logics enough to proceed with the (nearly) minimal undefined terms buildout.</p>
+<table align="left" border="0" cellspacing="0" cellpadding="2" style="margin-right: 1em; clear:left">
+	<tr align="center"><th colspan=3>Classical logic</th></tr>
+	<tr align="center"><th>A</th><th>B</th><th>A &#x2228; B</th></tr>
+	<tr align="center" style="background:#FFDDDD"><td><i>false</i></td><td><i>false</i></td><td><i>false</i></td></tr>
+	<tr align="center" style="background:#DDFFDD"><td><i>false</i></td><td><i>true</i></td><td><i>true</i></td></tr>
+	<tr align="center" style="background:#DDFFDD"><td><i>true</i></td><td><i>false</i></td><td><i>true</i></td></tr>
+	<tr align="center" style="background:#DDDDFF"><td><i>true</i></td><td><i>true</i></td><td><i>true</i></td></tr>
+</table>
+<table align="right" border="0" cellspacing="0" cellpadding="2" style="margin-right: 1em; clear:right">
+	<tr><th colspan="2">Classical logic</th></tr>
+	<tr><td align="right">(A &#x21A6; <i>false</i>),(B &#x21A6; <i>false</i>) &#9500;&nbsp;</td><td>(A &#x2228; B) &#x21A6; <i>false</i></td></tr>
+	<tr><td align="right">(A &#x21A6; <i>false</i>),(B &#x21A6; <i>true</i>) &#9500;&nbsp;</td><td>(A &#x2228; B) &#x21A6; <i>true</i></td></tr>
+	<tr><td align="right">(A &#x21A6; <i>true</i>),(B &#x21A6; <i>false</i>) &#9500;&nbsp;</td><td>(A &#x2228; B) &#x21A6; <i>true</i></td></tr>
+	<tr><td align="right">(A &#x21A6; <i>true</i>),(B &#x21A6; <i>true</i>) &#9500;&nbsp;</td><td>(A &#x2228; B) &#x21A6; <i>true</i></td></tr>
+	<tr><td align="right">(A &#x2228; B) &#x21A6; <i>false</i> &#9500;&nbsp;</td><td>(A &#x21A6; <i>false</i>) & (B &#x21A6; <i>false</i>)</td></tr>
+	<tr><td align="right">(A &#x2228; B) &#x21A6; <i>true</i> &#9500;&nbsp;</td><td>((A &#x21A6; <i>false</i>) & (B &#x21A6; <i>true</i>)) &#x2228; ((A &#x21A6; <i>true</i>) & (B &#x21A6; <i>false</i>)) &#x2228; ((A &#x21A6; <i>true</i>) & (B &#x21A6; <i>true</i>))</td></tr>
+</table>
+<p>To check that we understand how to translate between the truth table and the symbolic notations, we are going to derive (left) disjunction introduction, for classical logic.  Both the left side truth table, and the right side Gentzen-style notation, describe classical logical or 
+	&#x2228; .  To verify using the truth table, we just visually check that for all rows with  <i>A true</i>, <i>A</i> &#x2228; <i>B</i> is <i>true</i>.  Of the six logics we are interested in, 
+	the only one which fails the truth table inspection is Kleene's weak three-valued logic.</p>
+<table align="right" style="clear:right">
+	<tr><th colspan="3">Classical logic</th></tr>
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>P</td><td>Given</td></tr>
+	<tr><td>2.</td><td>~Q &#x2228; Q</td><td>Law of the Excluded Middle</td></tr>
+	<tr><td>3.</td><td>P & (~Q &#x2228; Q)</td><td>Conjunction introduction on (1),(2)</td></tr>
+	<tr><td>4.</td><td>(P & ~Q) &#x2228; (P & Q)</td><td>Left distributivity of & over &#x2228;</td></tr>
+	<tr><td>5.</td><td>(P & ~Q) &rArr; (P &#x2228; Q)</td><td>Downgrade definition of &#x2228; from &#9500; to &rArr;</td></tr>
+	<tr><td>6.</td><td>(P & Q) &rArr; (P &#x2228; Q)</td><td>Downgrade definition of &#x2228; from &#9500; to &rArr;</td></tr>
+	<tr><td>7.</td><td>P &#x2228; Q</td><td>Proof by cases on (5),(6),(4)</td></tr>
+</table><p>The derivation of right disjunction introduction for classical logic, is very similar and left as an exercise.  The truth table inspection is failed for both Kleene's weak three-valued logic, 
+	and Lisp/Prolog logic.  The derivations for the non-classical logics we are interested in, are also left as exercises.</p>
+<table align="center" style="clear:both">
+	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
+	<tr><td align="center">P &#9500; P &#x2228; Q</td><td>(left) Disjunction introduction</td><td>Kleene weak</td><td>some paraconsistent</td></tr>
+	<tr><td align="center">Q &#9500; P &#x2228; Q</td><td>(right) Disjunction introduction</td><td>Kleene weak, Lisp/Prolog</td><td>some paraconsistent</td></tr>
+</table>
+<table align="right">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>Q</td><td>Given</td></tr>
+	<tr><td>2.</td><td>Q &#x2228; P</td><td>(left) disjunction introduction</td></tr>
+	<tr><td>3.</td><td>P &#x2228; Q</td><td>Commutativity of &#x2228;</td></tr>
+</table>
+<p>An alternate derivation of right disjunction introduction, uses both left disjunction introduction and commutativity of &#x2228;.  This explains its failure in 
+	both Kleene's weak three-valued logic (like left disjunction introduction), and in Lisp/Prolog logic (like commutativity of &#x2228;). </p>
+
+<p id="principle-of-explosion">Disjunction introduction, i.e. introducing a "logical or" statement as a temporary statement, is behind a number of paradoxes.  As a brute fact, the expansion of Q need have nothing to do with the expansion of P.
 	A closely related rewrite gives a semantic paradox of classical logic, the principle of explosion: a false statement nonstrictly implies any statement (regardless of relevance).  Also known as (Latin)
 	 <i>ex falso quodlibet</i>.</p>
 <table align="center">
@@ -366,40 +910,57 @@ structural rule for &#9500;, is that the labeling order of statements used in a 
 	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
 	<tr><td align="center">~P &#9500; P &rArr; Q</td><td align="left">Principle of explosion</td><td align="left">Kleene weak</td><td>some paraconsistent</td></tr>
 </table>
-			
-	<!-- next: associativity of logical and &; multiple inverse substitutions; also commutativity of &  -->
 
-<p>Exercise: verify the first and third columns of the following table of semantic consequences, for propositional variables P, Q, R).  That is: first, enumerate a 
-	truth table in the variables P, Q, R for all cases where the hypothesis of the syntactical entailment rule is true, then verify that for 
-	each row the consequence of the syntactical entailment rule holds.  (This can be re-done formally, once we have defined functions that "copy" 
-	logical connectives.)</p>
-<table align="center">
-	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
-	<tr><td align="center">((P &#x2228; Q) &#x2228; R) &#9500; (P &#x2228; (Q &#x2228; R))</td><td align="left" valign="top" rowspan="2">Associativity of &#x2228;</td><td align="left" valign="top" rowspan="2">None</td><td align="left" valign="top" rowspan="2">None</td></tr>
-	<tr><td align="center">(P &#x2228; (Q &#x2228; R)) &#9500; ((P &#x2228; Q) &#x2228; R)</td></tr>
-</table>
-<p>Exercise: verify the first and third columns of the following table of semantic consequences, for propositional variables P, Q, R.</p>
-<table align="center">
-	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
-	<tr><td align="center">P & (Q &#x2228; R) &#9500; (P & Q) &#x2228; (P & R)</td><td valign="top" rowspan="2">left-distributivity of & over &#x2228;</td><td>None</td></tr>
-	<tr><td align="center">(P & Q) &#x2228; (P & R) &#9500; P & (Q &#x2228; R)</td><td>None</td></tr>
-	<tr><td align="center">P &#x2228; (Q & R) &#9500; (P &#x2228; Q) & (P &#x2228; R)</td><td valign="top" rowspan="2">left-distributivity of &#x2228; over &</td><td>None</td></tr>
-	<tr><td align="center">(P &#x2228; Q) & (P &#x2228; R) &#9500; P &#x2228; (Q & R)</td><td>None</td></tr>
-	<tr><td align="center">(Q &#x2228; R) & P &#9500; (Q & P) &#x2228; (R & P)</td><td valign="top" rowspan="2">right-distributivity of & over &#x2228;</td><td>None</td></tr>
-	<tr><td align="center">(Q & P) &#x2228; (R & P) &#9500; (Q &#x2228; R) & P</td><td>None</td></tr>
-	<tr><td align="center">(Q & R) &#x2228; P &#9500; (Q &#x2228; P) & (R &#x2228; P)</td><td valign="top" rowspan="2">right-distributivity of &#x2228; over &</td><td>None</td></tr>
-	<tr><td align="center">(Q &#x2228; P) & (R &#x2228; P) &#9500; (Q & R) &#x2228; P</td><td>None</td></tr>
-</table>
-<p>The corresponding syntactical equivalences, are left as an exercise.</p>
-<p>Right now, we have to use natural language to do these exercises.  In order to <b>formally</b> do the above verification, rather than rely on plain English:
-	first, we need mathematical functions that replicate the logical connectives ~, &, and &#x2228;.  We then can do
-	the verification with the functions.</p>
-<p>The instructions we will be following for building out set theory, will tell us how to
-	define functions.  But if we do not allow truth values as ur-elements, the resulting
-	set theory will be incapable of directly representing this exercise -- <b>by construction</b>.
-	We would have to use an intended interpretation (in natural language) to establish
-	the relevance.</p>
+<!-- restart editing -->
 
+	<h2 id="commutativity-or-lisp" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Repairing commutativity of &#x2228; for Lisp/Prolog logic</h2>
+	<p>While the Law of the Excluded Middle, ~P &#x2228; P, is not itself a tautology for the other five truth-table describable logics we are considering,
+		it is still important: it passes through the non-classical truth values <i>unknown</i> and <i>contradiction</i> unchanged.  That is, we can use it 
+		to formally detect whether a truth value is classical.  Visually checking that all rows for which a statement A is true, have a classical truth value for the propositional variable P or Q, 
+		corresponds to using proof by cases, where the nonstrict implications are formed by conjunction elimination followed by disjunction introduction.</p>
+	<p>For the following exercise, assume that the logic used to manipulate the A <i>true</i>, etc. statements is classical logic, regardless of the non-classical logic 
+	   being analyzed.  This is how we are going to complete the missing proofs for the non-classical truth table described logics.</p>
+	<table align="center">
+		<tr><th></th><th>Name</th><th>Useful for which of our logics?</th><th>Fails for which of our logics?</th></tr>
+		<tr><td align="center">P &#x2228; Q &#9500; ~P &#x2228; P</td><td style="background: yellow">Left classical truth value of &#x2228;</td><td>Lisp/Prolog, Weak Kleene</td><td>Belnap, Strong Kleene, Franci</td></tr>
+		<tr><td align="center">~P &#x2228; Q &#9500; ~P &#x2228; P</td><td style="background: yellow">Left classical truth value of &#x2228;</td><td>Lisp/Prolog, Weak Kleene</td><td>Belnap, Strong Kleene, Franci</td></tr>
+		<tr><td align="center">P &#x2228; Q &#9500; ~Q &#x2228; Q</td><td style="background: yellow">Right classical truth value of &#x2228;</td><td>Weak Kleene</td><td>Lisp/Prolog</td></tr>
+		<tr><td align="center">~P &#x2228; Q &#9500; ~Q &#x2228; Q</td><td style="background: yellow">Right classical truth value of &#x2228;</td><td>Weak Kleene</td><td>Lisp/Prolog</td></tr>
+		<tr><td align="center">P &#x2228; Q, ~P &#9500; ~Q &#x2228; Q</td><td style="background: yellow">Right classical truth value of &#x2228;</td><td>Lisp/Prolog</td><td></td></tr>
+		<tr><td align="center">~P &#x2228; Q, P &#9500; ~Q &#x2228; Q</td><td style="background: yellow">Right classical truth value of &#x2228;</td><td>Lisp/Prolog</td><td></td></tr>
+		<tr><td align="center">~(P & Q) &#9500; ~P &#x2228; P</td><td style="background: yellow">Left classical truth value of ~(&)</td><td>Lisp/Prolog, Weak Kleene</td><td>Belnap, Strong Kleene, Franci</td></tr>
+		<tr><td align="center">~(~P & Q) &#9500; ~P &#x2228; P</td><td style="background: yellow">Left classical truth value of ~(&)</td><td>Lisp/Prolog, Weak Kleene</td><td>Belnap, Strong Kleene, Franci</td></tr>
+		<tr><td align="center">~(P & Q) &#9500; ~Q &#x2228; Q</td><td style="background: yellow">Right classical truth value of ~(&)</td><td>Weak Kleene</td><td>Lisp/Prolog</td></tr>
+		<tr><td align="center">~(~P & Q) &#9500; ~Q &#x2228; Q</td><td style="background: yellow">Right classical truth value of ~(&)</td><td>Weak Kleene</td><td>Lisp/Prolog</td></tr>
+		<tr><td align="center">~(P & Q), ~P &#9500; ~Q &#x2228; Q</td><td style="background: yellow">Right classical truth value of ~(&)</td><td>Lisp/Prolog</td><td></td></tr>
+		<tr><td align="center">~(~P & Q), P &#9500; ~Q &#x2228; Q</td><td style="background: yellow">Right classical truth value of ~(&)</td><td>Lisp/Prolog</td><td></td></tr>
+	</table>
+	<p>Other inference rules of this kind can be obtained by using the definition of &rArr;, and applying the uniform substitution [~Q/Q].  We are 
+		not using De Morgan's law to derive the not-and rules, as that is one of the key inference rules we want to find alternate proofs for.</p>
+	<p>Our immediate use, is the following, left as an exercise. Informally, if we know that in Lisp/Prolog logic that the propositional variables 
+		P, Q both have classical truth values (<i>true</i>, or <i>false</i>), then the substitutions [Q & P/P & Q] and [Q &#x2228; P/P &#x2228; Q] 
+		are valid because they are actually classical logic substituions.</p>
+	</p>
+	<table align="center">
+		<tr><th colspan="2">Lisp/Prolog</th></tr>
+		<tr><th></th><th>Name</th></tr>
+		<tr><td align="center">~P &#x2228; P, ~Q &#x2228; Q &#9500; (A &#x27DB; A[Q & P/P & Q])</td><td>Commutativity of &, Lisp/Prolog</td></tr>
+		<tr><td align="center">~P &#x2228; P, ~Q &#x2228; Q &#9500; (A &#x27DB; A[P & Q/Q & P])</td><td>Commutativity of &, Lisp/Prolog</td></tr>
+		<tr><td align="center">~P &#x2228; P, ~Q &#x2228; Q &#9500; (A &#x27DB; A[Q &#x2228; P/P &#x2228; Q])</td><td>Commutativity of &#x2228;, Lisp/Prolog</td></tr>
+		<tr><td align="center">~P &#x2228; P, ~Q &#x2228; Q &#9500; (A &#x27DB; A[P &#x2228; Q/Q &#x2228; P])</td><td>Commutativity of &#x2228;, Lisp/Prolog</td></tr>
+	</table>
+	<p>We also have:</p>
+	<table align="center">
+		<tr><th></th><th>Inference Rule</th><th>Rationale</th></tr>
+		<tr><td>1.</td><td>~P &#x2228; P</td><td>Given</td></tr>
+		<tr><td>2.</td><td>~P &#x2228; P, ~P &#x2228; P &#9500; (A &#x27DB; A[P &#x2228; ~P/~P &#x2228; P])</td><td>apply [~P/Q] to commutativity of &#x2228;, Lisp/Prolog</td></tr>
+		<tr><td>3.</td><td>~P &#x2228; P &#9500; (A &#x27DB; A[P &#x2228; ~P/~P &#x2228; P])</td><td>Idempotence of hypotheses of &#9500; on (1)</td></tr>
+		<tr><td>4.</td><td>~P &#x2228; P &#x27DB; (~P &#x2228; P)[P &#x2228; ~P/~P &#x2228; P]</td><td>syntactical entailment on (3), (1)</td></tr>
+		<tr><td>3.</td><td>~P &#x2228; P &#x27DB; P &#x2228; ~P</td><td>evaluate substitution in (4)</td></tr>
+	</table>
+	<p>That is, the Law of the Excluded Middle <i>~P &#x2228; P</i> is self-sufficient for using <i>commutativity of &#x2228;</i> on itself, for Lisp/Prolog logic, to its more 
+		usual representation in the literature, <i>P &#x2228; ~P</i></p>
+	
 <h2 id="absorption" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Absorption</h2>
 <table align="left">
 	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
@@ -425,156 +986,6 @@ structural rule for &#9500;, is that the labeling order of statements used in a 
 	<tr><td align="center">P &rArr; Q &#9500; P &rArr; (P & Q)</td><td align="left">Absorption</td><td align="left">Belnap</td><td>Defeasible logics</td></tr>
 	<tr><td align="center">P &rArr; (P & Q) &#9500; P &rArr; Q</td><td align="left"></td><td align="left">Belnap</td><td>Defeasible logics</td></tr>
 </table>
-
-<h2 id="exportation" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Exportation</h2>
-<table align="left">
-	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
-	<tr><td>1.</td><td>(P & Q) &rArr; R</td><td>Given</td></tr>
-	<tr><td>2.</td><td>P</td><td>Hypothesis (for implication introduction)</td></tr>
-	<tr><td>3.</td><td>Q</td><td>Hypothesis (for implication introduction)</td></tr>
-	<tr><td>4.</td><td>P & Q</td><td>Conjunction introduction on (2),</td></tr>
-	<tr><td>5.</td><td>R</td><td><i>modus ponens</i> on (1), (4)</td></tr>
-	<tr><td>6.</td><td>Q &rArr; R</td><td>Implication introduction on (3), (5)</td></tr>
-	<tr><td>7.</td><td>P &rArr; (Q &rArr; R)</td><td>Implication introduction on (2), (6)</td></tr>
-</table>
-<table align="right">
-	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
-	<tr><td>1.</td><td>P &rArr; (Q &rArr; R)</td><td>Given</td></tr>
-	<tr><td>2.</td><td>P & Q</td><td>Hypothesis (for implication introduction)</td></tr>
-	<tr><td>3.</td><td>P</td><td>Conjunction elimination on (2)</td></tr>
-	<tr><td>4.</td><td>Q &rArr; R</td><td><i>modus ponens</i> on (1), (3)</td></tr>
-	<tr><td>5.</td><td>Q</td><td>Conjunction elimination on (2)</td></tr>
-	<tr><td>6.</td><td>R</td><td><i>modus ponens</i> on (4), (5)</td></tr>
-	<tr><td>7.</td><td>(P & Q) &rArr; R</td><td>Implication introduction on (2),(6)</td></tr>
-</table>
-<p>This is a sort of a packing/unpacking operation for nonstrict implication.  The "imported syntax" (using logical and & in the hypothesis) is the usual format for long-term 
-	learning, while the "exported" syntax (using nonstrict implication &rArr; in the consequence) is more likely to be immediately usable.</p>
-<p>While the proofs are not valid for Belnap's four-valued logic, these inference rules are a semantic consequence.</p>
-<table align="center" style="clear:both">
-	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
-	<tr><td align="center">(P & Q) &rArr; R &#9500; P &rArr; (Q &rArr; R) </td><td align="left">Exportation from & to &rArr;</td><td align="left">None</td><td>Defeasible logics</td></tr>
-	<tr><td align="center">P &rArr; (Q &rArr; R) &#9500; (P & Q) &rArr; R </td><td align="left">Importation from &rArr; to &</td><td align="left">None</td><td>Defeasible logics</td></tr>
-</table>
-
-<h2 id="reductio-ad-absurdum" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Proof by contradiction</h2>
-<p>Following <a href="https://archive.org/details/principiamathema01anwh/page/n125/mode/2up"><i>Principia Mathematica</i></a> (hardcopy page 104, Vol. I; *2&middot;01), we consider the following:</p>
-<table align="center">
-	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
-	<tr><td>1.</td><td>P &rArr; ~P</td><td>Given</td></tr>
-	<tr><td>2.</td><td>~P &#x2228; ~P</td><td>Definition of &rArr;</td></tr>
-	<tr><td>3.</td><td>~P</td><td>Idempotence of &#x2228;</td></tr>
-</table>
-In classical logic, this is known as <i>proof by contradiction</i>; other names include the Latin <i>reductio ad absurdum</i>.
-<table align="center">
-	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
-	<tr><td align="center">P &rArr; ~P &#9500; ~P</td><td align="left">proof by contradiction</td><td align="left">None</td><td>None</td></tr>
-</table>
-<p>That is: unlike labeling a never-true statement "Given" in our tabular notation, labeling a never <i>true</i> statement "Hypothesis" is 
-	one way of finding out a statement evaluates to the truth value <i>false</i>.  As mentioned earlier, the assumed statement must not have a non-classical truth value.</p>
-
-<h2 id="de-morgan" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">De Morgan's Laws</h2>
-<p>These laws say that for the candidate definitions of logical & and logical or &#x2228;, that we can transfer one of the negations in the definition
-	to the other side.  The ones based on the candidate definition of &#x2228; in terms of &, is more robust.  For propositional variables P, Q we have:</p>
-<table align="center">
-	<tr><th></th><th>Inference rule</th><th>Rationale</th></tr>
-	<tr><td>1.</td><td>A &#x27DB; A</td><td>Trivial syntactical equivalence</td></tr>
-	<tr><td>2.</td><td>~B &#x27DB; ~B</td><td>Apply A &#x21A6; ~B on (1)</td></tr>
-	<tr><td>3.</td><td>~(P & Q) &#x27DB; ~~(~P &#x2228; ~Q)</td><td>Non-uniform substitution of candidate definition P & Q := ~(~P &#x2228; ~Q) for B in (2); remove redundant parentheses</td></tr>
-	<tr><td>4.</td><td>~(P &#x2228; Q) &#x27DB; ~~(~P & ~Q)</td><td>Non-uniform substitution of candidate definition P &#x2228; Q := ~(~P & ~Q) for B in (2); remove redundant parentheses</td></tr>
-	<tr><td>5.</td><td>~(P & Q) &#x27DB; ~P &#x2228; ~Q</td><td>(P &#x27DB; ~~P)[~P &#x2228; ~Q/P]</td></tr>
-	<tr><td>6.</td><td>~(P &#x2228; Q) &#x27DB; ~P & ~Q</td><td>(P &#x27DB; ~~P)[~P &#x2228; ~Q/P]</td></tr>
-</table>
-<p>While the candidate definitions are not valid for Franci's truth value tables, the corresponding syntactical entailment pairs are still valid, as a semantic consequence 
-	of the truth value table description.  Intuitionistic logic only allows adding double negation, so we don't have the syntactical equivalence for the last two steps.</p>
-<p>The intended interpretation of Intuitionistic logic, suggests that <i>~(P & Q) &#9500; ~P &#x2228; ~Q</i> should be invalid: a direct proof of 
-	~(P & Q), would not be expected to give a proof of either ~P or ~Q.  One of our authoritative sources (Stanford Encylopedia of Philosophy) confirms both this, and that 
-	the other three syntactical entailments do work for Intuitionistic logic.</p>
-<table align="center">
-	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
-	<tr><td align="center">~(P & Q) &#9500; ~P &#x2228; ~Q</td><td align="left">De Morgan's Law <span style="background: yellow">-- unwrap from not-and</span></td><td align="left">None</td><td>Intuitionistic</td></tr>
-	<tr><td align="center">~P &#x2228; ~Q &#9500; ~(P & Q)</td><td align="left">De Morgan's Law <span style="background: yellow">-- wrap to not-and</span></td><td align="left">None</td><td></td></tr>
-	<tr><td align="center">~(P &#x2228; Q) &#9500; ~P & ~Q</td><td align="left">De Morgan's Law <span style="background: yellow">-- unwrap from not-or</span></td><td align="left">None</td><td></td></tr>
-	<tr><td align="center">~P & ~Q &#9500; ~(P &#x2228; Q)</td><td align="left">De Morgan's Law <span style="background: yellow">-- wrap to not-or</span></td><td align="left">None</td><td></td></tr>
-</table>
-
-<h2 id="excluded-middle" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Law of Excluded Middle</h2>
-<p>This classical logic tautology (always-true statement) degrades to a never-false statement in many other logics.  Key steps are incorrect for all of the non-classical logics we
-	are considering.</p>
-<p>For classical logic, we can downgrade a syntactical entailment &#9500; to a nonstrict logical implication &rArr;, by
-	choosing any one hypothesis of the syntactical entailment and converting it to a single hypothesis
-	that nonstrictly implies &rArr; the conclusion of the syntactical entailment.  (With sufficient infrastructure built out
-	to mathematically model notation, this would be a deduction metatheorem.)  This fails for all of our truth table describable non-classical logics.</p>
-<p>I will structure this to look like using the procedure of condensed detachment, developed by Carew Arthur Meredith in the 1950's, against <i>modus ponens</i>.  <i>Principia Mathematica</i>
-	proceeds as follows:</p>
-<table align="center">
-	<tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
-	<tr><td>1.</td><td>P &#9500; P &#x2228; P</td><td></td><td>apply Q &#x21A6; P to disjunction introduction</td></tr>
-	<tr><td>2.</td><td></td><td>P &rArr; (P &#x2228; P)</td><td>downgrade &#9500; to &rArr; in (1)</td></tr>
-	<tr><td>3.</td><td>P &rArr; Q, Q &rArr; P &#9500; P &rArr; P</td><td></td><td>apply R &#x21A6; P to Transitivity of implication</td></tr>
-	<tr><td>4.</td><td>P &rArr; (P &#x2228; P), (P &#x2228; P) &rArr; P &#9500; P &rArr; P</td><td></td><td>apply Q &#x21A6; P &#x2228; P to (3)</td></tr>
-	<tr><td>5.</td><td>(P &#x2228; P) &rArr; P &#9500; (P &rArr; (P &#x2228; P)) &rArr; (P &rArr; P)</td><td></td><td>downgrade &#9500; to &rArr; in (4)</td></tr>
-	<tr><td>6.</td><td></td><td>((P &#x2228; P) &rArr; P) &rArr; ((P &rArr; (P &#x2228; P)) &rArr; (P &rArr; P))</td><td>downgrade &#9500; to &rArr; in (5)</td></tr>
-	<tr><td>7.</td><td></td><td>(P &#x2228; P) &rArr; P</td><td>downgrade &#9500; to &rArr; in Idempotence of &#x2228;</td></tr>
-	<tr><td>8.</td><td></td><td>(P &rArr; (P &#x2228; P)) &rArr; (P &rArr; P)</td><td><i>modus ponens</i> on (6) and (7)</td></tr>
-	<tr><td>9.</td><td></td><td>P &rArr; P</td><td><i>modus ponens</i> on (2) and (8)</td></tr>
-	<tr><td>10.</td><td></td><td>~P &#x2228; P</td><td>Definition of &rArr;</td></tr>
-</table>
-<p>The above is not remotely intuitive.  We <b>could</b> have done this like the earlier exercises documenting the 
-	semantic consequences of the descriptions of logical not ~, logical and &, and logical or &#x2228; for the various logics.
-	The object, however, is to minimize the semantic consequences we need to "get started".</p>
-<table align="center">
-	<tr><th colspan=2>Classical logic</th></tr>
-	<tr><th></th><th>Name</th></tr>
-	<tr><td align="center">&#9500; ~P &#x2228; P</td><td align="left">Law of the Excluded Middle</td></tr>
-	<tr><td align="center">&#9500; P &rArr; P</td><td align="left"></td></tr>
-	<tr><td align="center">&#9500; P &hArr; P</td><td align="left">Reflexivity of &hArr;</td></tr>
-</table>
-<p>The classical logic proof of the reflexivity of &hArr;, is left as an exercise.</p>
-<p>Recall that the intended interpretation of <i>true</i> and <i>false</i> for Intuitionistic logic is proof existence.
-	That is, the intended interpretation of <i>true</i> a truth-valued statement P is that P is provable,
-	and the intended interpretation of <i>false</i> for P, is that ~P is provable.
-	While G&ouml;del's Second Incompleteness Theorem post-dates Intuitionistic logic by decades, 
-	it confirms that <i>~P &#x2228; P</i> is <b>not</b> a tautology for Intuitionistic logic,
-	even though it does not use nonclassical truth values.  The possibility of not having a proof for either
-	P or ~P, looks like Kleene's strong three-valued logic's intended interpretation of <i>unknown</i>.</p>
-<p>The rationale for Intuitionistic logic rejecting removing double negations, is that allows proving the Law of the Excluded Middle by proof by contradiction.  Generally speaking,
-	if a truth-valued expression A is provable in classical logic, then ~~A is provable in Intuitionistic logic.</p>
-<p>My snap impression is that the downgrade procedure from syntactical entailment &#9500; to nonstrict implication &rArr;,
-	is also invalid for Intuitionistic logic.</p>
-<p><i>Principia Mathematica</i> uses the law of the excluded middle, to derive both double negation addition and removal syntactically (for classical logic),
-	rather than the natural language rationale I referenced.</p>
-<blockquote>Intuitionistic logic can be described as classical logic without [Law of Excluded Middle] (or the principle of double negation (~~&phi; &rArr; &phi;)),
-	but with the classical law of contradiction ((&phi; &rArr; &psi;) &rArr; ((&phi; &rArr; ~&psi;) &rArr; ~&phi;))
-	 and <i>ex falso quodlibet</i> (~&phi; &rArr; (&phi; &rArr; &psi;)) <nobr>&mdash; <a href="https://plato.stanford.edu/entries/disjunction/">Stanford Encyclopedia of Philosophy</a></nobr></blockquote>
-<p>So while Intuitionistic logic does not have a truth-functional description, it is close enough to classical logic that we can use it as an option for building out set theory.</p>	
-
-<h2 id="commutativity-or-lisp" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Repairing commutativity of &#x2228; for Lisp/Prolog logic</h2>
-<p>While the Law of the Excluded Middle, ~P &#x2228; P, is not itself a tautology for the other five truth-table describable logics we are considering,
-	it is still important: it passes through the non-classical truth values <i>unknown</i> and <i>contradiction</i> unchanged.  That is, we can use it 
-	to formally detect whether a truth value is classical.  We have the following as semantic consequences:</p> 
-<table align="center">
-	<tr><th></th><th>Name</th><th>Useful for which of our logics?</th><th>Fails for which of our logics?</th></tr>
-	<tr><td align="center">P &#x2228; Q, ~Q &#x2228; Q &#9500; Q &#x2228; P</td><td>Commutativity of &#x2228; &mdash; Lisp/Prolog</td><td>None</td></tr>
-	<tr><td align="center">P &#x2228; Q &#9500; ~P &#x2228; P</td><td style="background: yellow">Left classical truth value of &#x2228;</td><td>Lisp/Prolog, Weak Kleene</td><td>Belnap, Strong Kleene, Franci</td></tr>
-	<tr><td align="center">~P &#x2228; Q &#9500; ~P &#x2228; P</td><td style="background: yellow">Left classical truth value of &#x2228;</td><td>Lisp/Prolog, Weak Kleene</td><td>Belnap, Strong Kleene, Franci</td></tr>
-	<tr><td align="center">P &#x2228; Q, ~P &#9500; ~Q &#x2228; Q</td><td style="background: yellow">Right classical truth value of &#x2228;</td><td>Lisp/Prolog, Weak Kleene</td><td></td></tr>
-	<tr><td align="center">~P &#x2228; Q, P &#9500; ~Q &#x2228; Q</td><td style="background: yellow">Right classical truth value of &#x2228;</td><td>Lisp/Prolog, Weak Kleene</td><td></td></tr>
-	<tr><td align="center">~(P & Q) &#9500; ~P &#x2228; P</td><td style="background: yellow">Left classical truth value of ~(&)</td><td>Lisp/Prolog, Weak Kleene</td><td>Belnap, Strong Kleene, Franci</td></tr>
-	<tr><td align="center">~(~P & Q) &#9500; ~P &#x2228; P</td><td style="background: yellow">Left classical truth value of ~(&)</td><td>Lisp/Prolog, Weak Kleene</td><td>Belnap, Strong Kleene, Franci</td></tr>
-	<tr><td align="center">~(P & Q), ~P &#9500; ~Q &#x2228; Q</td><td style="background: yellow">Right classical truth value of ~(&)</td><td>Lisp/Prolog, Weak Kleene</td><td></td></tr>
-	<tr><td align="center">~(~P & Q), P &#9500; ~Q &#x2228; Q</td><td style="background: yellow">Right classical truth value of ~(&)</td><td>Lisp/Prolog, Weak Kleene</td><td></td></tr>
-	<tr><td align="center">P &rArr; Q &#9500; ~P &#x2228; P</td><td style="background: yellow">Left classical truth value of &rArr;</td><td>Lisp/Prolog, Weak Kleene</td><td>Belnap, Strong Kleene, Franci</td></tr>
-	<tr><td align="center">~P &rArr; Q &#9500; ~P &#x2228; P</td><td style="background: yellow">Left classical truth value of &rArr;</td><td>Lisp/Prolog, Weak Kleene</td><td>Belnap, Strong Kleene, Franci</td></tr>
-</table>
-<p>It is reasonable to expect that most of these rows are closely related.  We also have:</p>
-<table align="center">
-	<tr><th></th><th>Inference Rule</th><th>Rationale</th></tr>
-	<tr><td>1.</td><td>P &#x2228; Q, ~Q &#x2228; Q &#9500; Q &#x2228; P</td><td>Commutativity of &#x2228; &mdash; Lisp/Prolog</td></tr>
-	<tr><td>2.</td><td>~Q &#x2228; Q, ~Q &#x2228; Q &#9500; Q &#x2228; ~Q</td><td>apply P &#x21A6; ~Q to (1)</td></tr>
-	<tr><td>3.</td><td>~Q &#x2228; Q &#9500; Q &#x2228; ~Q</td><td>Idempotence of hypotheses of &#9500;</td></tr>
-</table>
-<p>That is, the Law of the Excluded Middle <i>~Q &#x2228; Q</i> is self-sufficient for using <i>commutativity of &#x2228;</i> on itself, for Lisp/Prolog logic, to its more 
-	usual representation in the literature, <i>Q &#x2228; ~Q</i> </p>
 
 <h2 id="transitivity-of-iff" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Transitivity of &hArr;</h2>
 <table align="right">
@@ -624,160 +1035,6 @@ In classical logic, this is known as <i>proof by contradiction</i>; other names 
 	<tr><td align="center">~R &#x2228; R, P &hArr; Q, Q &hArr; R &#9500; P &hArr; R</td><td align="left">Transitivity of &hArr;, Belnap</td><td align="left">Belnap</td></tr>
 </table>
 
-<h2 id="contrapositive-1" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Contrapositive</h2>
-<p><i>Principia Mathematica</i> also suggests considering the following (*2&middot;03):</p>
-<table align="center">
-	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
-	<tr><td>1.</td><td>P &rArr; ~Q</td><td>Given</td></tr>
-	<tr><td>2.</td><td>~P &#x2228; ~Q</td><td>Definition of &rArr;</td></tr>
-	<tr><td>3.</td><td>~Q &#x2228; ~P</td><td>Commutativity of &#x2228;</td></tr>
-	<tr><td>4.</td><td>Q &rArr; ~P</td><td>Definition of &rArr;</td></tr>
-</table>
-<p>In classical logic: this is one, of four versions, of taking the contrapositive of a nonstrict implication.  Another version 
-	is *2.16 in <i>Principia Mathematica</i>.</p>
-<table align="center">
-	<tr><td>1.</td><td>P &rArr; Q</td><td>Given</td></tr>
-	<tr><td>2.</td><td>P &rArr; ~~Q</td><td style="background: yellow">Introduce double negation on the conclusion of (1)</td></tr>
-	<tr><td>3.</td><td>~P &#x2228; ~~Q</td><td>Definition of &rArr;</td></tr>
-	<tr><td>4.</td><td>~~Q &#x2228; ~P</td><td>Commutativity of &#x2228;</td></tr>
-	<tr><td>5.</td><td>~Q &rArr; ~P</td><td>Definition of &rArr;</td></tr>
-</table>
-<table align="center">
-	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
-	<tr><td align="center">P &rArr; ~Q &#9500; Q &rArr; ~P</td><td align="left">taking contrapositive</td><td align="left">Lisp/Prolog</td><td>None</td></tr>
-	<tr><td align="center">P &rArr; Q &#9500; ~Q &rArr; ~P</td><td align="left">taking contrapositive</td><td align="left">Lisp/Prolog</td><td>None</td></tr>
-</table>
-<p>In both cases, if we use the Law of the Excluded Middle as an extra given we can take the contrapositive in Lisp/Prolog logic.  Amending the tabular representation is left as an exercise:</p>
-<table align="center">
-	<tr><th></th><th>Name</th><th>Extra hypothesis required for which of our logics?</th></tr>
-	<tr><td align="center">P &rArr; ~Q, ~Q &#x2228; Q &#9500; Q &rArr; ~P</td><td align="left">taking contrapositive</td><td align="left">Lisp/Prolog</td></tr>
-	<tr><td align="center">P &rArr; Q, ~Q &#x2228; Q &#9500; ~Q &rArr; ~P</td><td align="left">taking contrapositive</td><td align="left">Lisp/Prolog</td></tr>
-</table>
-<table align="left">
-	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
-	<tr><td>1.</td><td>~P &rArr; Q</td><td>Given</td></tr>
-	<tr><td>2.</td><td>~Q &rArr; ~~P</td><td>Take contrapositive</td></tr>
-	<tr><td>3.</td><td>~Q &rArr; P</td><td style="background: yellow">Remove double negation from the conclusion of (2)</td></tr>
-</table>
-<table align="right">
-	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
-	<tr><td>1.</td><td>~P &rArr; ~Q</td><td>Given</td></tr>
-	<tr><td>2.</td><td>~~Q &rArr; ~~P</td><td>Take contrapositive</td></tr>
-	<tr><td>3.</td><td>~~Q &rArr; P</td><td style="background: yellow">Remove double negation from the conclusion of (2)</td></tr>
-	<tr><td>4.</td><td>Q &rArr; P</td><td style="background: yellow">Invert adding double negation to the hypothesis of (3)</td></tr>
-</table>
-<p>There are two other versions of taking the contrapositive.  They involve removing double negation, so do not work for Intuitionistic logic.  The same Law of Excluded middle auxillary hypothesis
-	allows these to work for Lisp/Prolog logic.</p>
-<table align="center" style="clear:both">
-	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
-	<tr><td align="center">~P &rArr; Q &#9500; ~Q &rArr; P</td><td align="left">taking contrapositive</td><td align="left">Lisp/Prolog</td><td>None</td></tr>
-	<tr><td align="center">~P &rArr; ~Q &#9500; Q &rArr; P</td><td align="left">taking contrapositive</td><td align="left">Lisp/Prolog</td><td>Intuitionistic</td></tr>
-</table>
-<table align="center">
-	<tr><th></th><th>Name</th><th>Extra hypothesis required for which of our logics?</th></tr>
-	<tr><td align="center">~P &rArr; Q, ~Q &#x2228; Q &#9500; ~Q &rArr; P</td><td align="left">taking contrapositive</td><td align="left">Lisp/Prolog</td></tr>
-	<tr><td align="center">~P &rArr; ~Q, ~Q &#x2228; Q &#9500; Q &rArr; P</td><td align="left">taking contrapositive</td><td align="left">Lisp/Prolog</td></tr>
-</table>
-
-<h2 id="modus-tollens" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px"><i>Modus Tollens</i></h2>
-<table align="left">
-	<tr><th colspan=3>Typical proof</th></tr>
-	<tr><td>1.</td><td>P &rArr; Q</td><td>Given</td></tr>
-	<tr><td>2.</td><td>~Q</td><td>Given</td></tr>
-	<tr><td>3.</td><td>~Q &rArr; ~P</td><td>Taking contrapositive of (1)</td></tr>
-	<tr><td>4.</td><td>~P</td><td><i>modus ponens</i> on (3), (2)</td></tr>
-</table>
-<table align="right">
-	<tr><th colspan=3>Lisp/Prolog proof</th></tr>
-	<tr><td>1.</td><td>P &rArr; Q</td><td>Given</td></tr>
-	<tr><td>2.</td><td>~Q</td><td>Given</td></tr>
-	<tr><td>2a.</td><td>~Q &#x2228; Q</td><td>Disjunction introduction on (2)</td></tr>
-	<tr><td>3.</td><td>~Q &rArr; ~P</td><td>Taking contrapositive of (1) with (2a)</td></tr>
-	<tr><td>4.</td><td>~P</td><td><i>modus ponens</i> on (3), (2)</td></tr>
-</table>
-<p>It would make sense that it should be possible to run <i>modus ponens</i> in reverse, when the negation <i>~Q</i> of the conclusion of <i>P &rArr; Q</i> is known.</p>
-<p>This is known as (Latin) <i>modus tollens</i>, or "denying the consequent"; abbreviation MT.</p>
-<p>The choice of labeling for the extra step needed for Lisp/Prolog logic, is to emphasize how similar the two proofs are.</p>
-<table align="center" style="clear:both">
-	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
-	<tr><td align="center">P &rArr; Q, ~Q &#9500; ~P</td><td align="left"><i>modus tollens</i></td><td align="left">None</td><td>None</td></tr>
-</table>
-
-<h2 id="law-of-contradiction" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Classical Law of Contradiction</h2>
-<p>One way of introducing relevance between two nonstrict implications is as follows:</p>
-<table align="center">
-	<tr><td>1.</td><td>P &rArr; Q</td><td>Given</td></tr>
-	<tr><td>2.</td><td>P &rArr; ~Q</td><td>Given</td></tr>
-	<tr><td>3.</td><td>P</td><td>Hypothesis (for implication introduction)</td></tr>
-	<tr><td>4.</td><td>~Q</td><td><i>modus ponens</i> on (2),(3)</td></tr>
-	<tr><td>5.</td><td>~P</td><td><i>modus tollens</i> on (1),(4)</td></tr>
-	<tr><td>6.</td><td>P &rArr; ~P</td><td>Implication introduction on (3), (5)</td></tr>
-	<tr><td>7.</td><td>~P</td><td>Proof by contradiction [on (6)]</td></tr>
-</table>
-<p>This is known as the classical law of contradiction.  We could get a slightly shorter proof, that doesn't work for Lisp/Prolog logic, by <i>taking the contrapositive</i> of 
-	<i>P &rArr; Q</i> for use in <i>transitivity of implication</i>.</p>
-<p>This does not work for Belnap's four-valued logic, as a semantic consequence of <i>unknown</i> &rArr; <i>contradiction</i> evaluating to <i>true</i>.</p>
-<table align="center">
-	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
-	<tr><td align="center">P &rArr; Q, P &rArr; ~Q &#9500; ~P</td><td align="left">Classical law of contradiction</td><td align="left">Belnap</td><td>Defeasible logics</td></tr>
-</table>
-
-<h2 id="or-elimination" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Or elimination</h2>
-<table align="left">
-	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
-	<tr><td>1.</td><td>P &#x2228; Q</td><td>Given</td></tr>
-	<tr><td>2.</td><td>~P</td><td>Given</td></tr>
-	<tr><td>3.</td><td>~(~P & ~Q)</td><td>candidate definition of &#x2228; on (1)</td></tr>
-	<tr><td>4.</td><td>~Q</td><td>Hypothesis</td></tr>
-	<tr><td>5.</td><td>~P & ~Q</td><td>Conjunction introduction on (2),(4)</td></tr>
-	<tr><td>6.</td><td>~Q &rArr; (~P & ~Q)</td><td>Implication introduction on (4),(5)</td></tr>
-	<tr><td>7.</td><td>~~Q</td><td><i>modus tollens</i> on (6),(3)</td></tr>
-	<tr><td>8.</td><td>Q</td><td>double negation removal on (7)</td></tr>
-</table>
-<table align="right">
-	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
-	<tr><td>1.</td><td>P &#x2228; Q</td><td>Given</td></tr>
-	<tr><td>2.</td><td>~Q</td><td>Given</td></tr>
-	<tr><td>3.</td><td>~(~P & ~Q)</td><td>candidate definition of &#x2228; on (1)</td></tr>
-	<tr><td>4.</td><td>~P</td><td>Hypothesis</td></tr>
-	<tr><td>5.</td><td>~P & ~Q</td><td>Conjunction introduction on (4),(2)</td></tr>
-	<tr><td>6.</td><td>~P &rArr; (~P & ~Q)</td><td>Implication introduction on (4),(5)</td></tr>
-	<tr><td>7.</td><td>~~P</td><td><i>modus tollens</i> on (6),(3)</td></tr>
-	<tr><td>8.</td><td>P</td><td>double negation removal on (7)</td></tr>
-</table>
-<p>This is also known as disjunctive syllogism, and sometimes abbreviated as &#x2228;E.  The two proofs are transposed into each other by commutativity of &#x2228;.  We do not use this symmetry, to verify both versions are valid for the Lisp/Prolog logic.</p>
-<p>While these proofs are not valid for Belnap's four-valued logic, both versions of or elimination are semantic consequences for that logic.</p>
-<table align="center" style="clear:both">
-	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
-	<tr><td align="center">P &#x2228; Q, ~P, &#9500; Q</td><td align="left">Or elimination</td><td align="left">None</td><td>Intuitionistic</td></tr>
-	<tr><td align="center">P &#x2228; Q, ~Q, &#9500; P</td><td align="left">Or elimination</td><td align="left">None</td><td>Intuitionistic</td></tr>
-</table>
-
-<h2 id="modus-ponendo-tollens" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px"><i>modus ponendo tollens</i></h2>
-<table align="left">
-	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
-	<tr><td>1.</td><td>~(P & Q)</td><td>Given</td></tr>
-	<tr><td>2.</td><td>P</td><td>Given</td></tr>
-	<tr><td>3.</td><td>~P &#x2228; ~Q</td><td>De Morgan's Law on (1)</td></tr>
-	<tr><td>4.</td><td>P &rArr; ~Q</td><td>Definition of &rArr;</td></tr>
-	<tr><td>5.</td><td>~Q</td><td><i>modus ponens</i> on (4),(2)</td></tr>
-</table>	
-<table align="right">
-	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
-	<tr><td>1.</td><td>~(P & Q)</td><td>Given</td></tr>
-	<tr><td>2.</td><td>Q</td><td>Given</td></tr>
-	<tr><td>3.</td><td>~P &#x2228; ~Q</td><td>De Morgan's Law on (1)</td></tr>
-	<tr><td>4.</td><td>P &rArr; ~Q</td><td>Definition of &rArr;</td></tr>
-	<tr><td>5.</td><td>~~Q</td><td>introduce double negation on (2)</td></tr>
-	<tr><td>5.</td><td>~P</td><td><i>modus tollens</i> on (4),(2)</td></tr>
-</table>
-<p>Latin for "mode that denies by affirming".  The De Morgan's Law variant used here, is the one that unwraps not-and i.e. is invalid for Intuitionistic logic.</p>
-<table align="center" style="clear:both">
-	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
-	<tr><td align="center">~(P & Q), P &#9500; ~Q</td><td align="left" rowspan="2"><i>modus ponendo tollens</i></td><td align="left">None</td><td>Intuitionistic</td></tr>
-	<tr><td align="center">~(P & Q), Q &#9500; ~P</td><td align="left">None</td><td>Intuitionistic</td></tr>
-</table>
-
 <h2 id="commutativity-of-implication" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Commutativity of Implication [sic]</h2>
 <p><i>Principia Mathematica</i> also suggests considering the following (*2&middot;04):</p>
 <table align="center">
@@ -812,9 +1069,19 @@ In classical logic, this is known as <i>proof by contradiction</i>; other names 
 	<tr><td>6.</td><td>S &#x2228; Q</td><td style="background: yellow">Right half of constructive dilemma on (5),(1)</td></tr>
 	<tr><td>7.</td><td>Q &#x2228; S</td><td>Commutativity of &#x2228; on (6)</td></tr>
 </table>
+<table align="left">
+	<tr><th colspan="3">Classical, Strong Kleene, Weak Kleene, Lisp/Prolog, or Franci</th></tr>
+	<tr><th></th><th>Inference rule</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>~P &#x2228; Q, Q &rArr; R &#9500; ~P &#x2228; R</td><td>apply [~P &#x2228; Q/P &rArr; Q][~P &#x2228; R/P &rArr; R] to <i>transitivity of implication</i></td></tr>
+	<tr><td>2.</td><td>~~P &#x2228; Q, Q &rArr; R &#9500; ~~P &#x2228; R</td><td>apply [~P/P] to (1)</td></tr>
+	<tr><td>3.</td><td>P &#x2228; Q, Q &rArr; R &#9500; P &#x2228; R</td><td>remove double negation</td></tr>
+	<th colspan="3" style="background:yellow">Right half of constructive dilemma</th>
+	<tr><td colspan="3">Also fails for: defeasible logics; Intuitionistic logic</td>
+</table>
 <p>For propositional variables P, Q, R, S: <i>P &rArr; Q</i> and <i>R &rArr; S</i> do not share any variables in common.  One way to introduce relevance,
 	i.e. shared propositional variables, is <i>P &#x2228; R</i>.  We would expect the following:</p>
 <p align="center">P &rArr; Q, R &rArr; S, P &#x2228; R &#9500; Q &#x2228; S</p>
+<p>One way to proceed, is to first prove a lemma for the right half.  It is simplest to start by transforming <i>transitivity of implication</i>.
 <p>We have a counterexample for Lisp/Prolog logic: if P is <i>false</i> while R and S are both <i>true</i>, the truth value imputed to Q is unconstrained.  This is 
 	not a material issue for our other truth-table described logics, but for Lisp/Prolog assigning Q a truth value of <i>unknown</i> causes Q &#x2228; S to be 
 	<i>unknown</i>.  Our givens only guarantee that P and R have classical truth values.</p>
@@ -822,29 +1089,6 @@ In classical logic, this is known as <i>proof by contradiction</i>; other names 
 <table align="center" style="clear:both">
 	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
 	<tr><td align="center">P &rArr; Q, R &rArr; S, P &#x2228; R &#9500; Q &#x2228; S</td><td align="left">Constructive dilemma</td><td align="left">Lisp/Prolog</td><td>Defeasible logics; Intuitionistic?</td></tr>
-</table>
-
-<h2 id="proof-by-cases" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Proof by cases</h2>
-<table align="left">
-	<tr><th></th><th>Inference rule</th><th>Rationale</th></tr>
-	<tr><td>1.</td><td>P &rArr; Q, R &rArr; S, P &#x2228; R &#9500; Q &#x2228; S</td><td>Given (constructive dilemma)</td></tr>
-	<tr><td>2.</td><td>P &rArr; Q, R &rArr; Q, P &#x2228; R &#9500; Q &#x2228; Q</td><td>Apply S &#x21A6; Q to (1)</td></tr>
-	<tr><td>3.</td><td>P &rArr; Q, R &rArr; Q, P &#x2228; R &#9500; Q</td><td>Transitivity of syntactical entailment, (2) and idempotence of &#x2228;</td></tr>
-</table>
-<table align="right">
-	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
-	<tr><td>1.</td><td>P &rArr; Q</td><td>Given</td></tr>
-	<tr><td>2.</td><td>R &rArr; Q</td><td>Given</td></tr>
-	<tr><td>3.</td><td>P &#x2228; R</td><td>Given</td></tr>
-	<tr><td>4.</td><td>Q &#x2228; Q</td><td>Constructive dilemma on (1), (2), (3)</td></tr>
-	<tr><td>5.</td><td>Q</td><td>Idempotence of &#x2228;</td></tr>
-</table>
-
-<p>This may be viewed as a special case of <i>constructive dilemma</i>, after applying the substitution S &#x21A6; Q.</p>
-<p>While the given proofs are not valid for Lisp/Prolog logic, this inference rule is a semantic consequence for that logic.</p>
-<table align="center" style="clear:both">
-	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
-	<tr><td align="center">P &rArr; Q, R &rArr; Q, P &#x2228; R  &#9500; Q</td><td align="left">Proof by cases</td><td align="left">None</td><td>Defeasible logics</td></tr>
 </table>
 
 <h2 id="destructive-dilemma" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Destructive Dilemma</h2>
