@@ -1,0 +1,235 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=windows-1252"/>
+	<title>Subatomic Physics of Math: description of "is element of"</title>
+	<style type="text/css">
+		@page { margin: 0.79in }
+		p { margin-bottom: 0.1in; line-height: 120% }
+		a:link { so-language: zxx }
+		* {
+            font-family: "Liberation Serif", serif
+        }
+	</style>
+</head>
+<body lang="en-US" dir="ltr">
+<div style="position:fixed; top:0.5em; left:0.5em; background:white"><a href="./">Home</a> &gt; <a href="./SubatomicPhysicsOfMath.html">Set theory: notation</a></div>
+<h1 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 16px">Subatomic Physics of Math: description of &#x2208;, "is member of"</h1>
+
+<span style="border: 1px solid black; display:block; float:right">
+	<ol type="I">
+		<li>Common features</a></li>
+		<li>Catalog of &#x2208;<ol type="i">
+			<li><a href="#ZF">Zermelo-Frankel</a></li>
+			<li><a href="#NBG">Von Neumman-Bernays-G&ouml;del</a></li>
+			<li><a href="#ZF-ur">Zermelo-Frankel with ur-elements</a></li>
+			<li><a href="#NBG-ur">Von Neumman-Bernays-G&ouml;del with ur-elements</a></li>
+		</ol></li>
+		<li><a href="#roadmap-equality">Roadmap: verifying equality =</a></li>
+		<li>Catalog of Axiom of Extensionality<ol type="i">
+			<li><a href="#extensionality-ZF">Zermelo-Frankel</a></li>
+			<li><a href="#extensionality-ZF-ur">Zermelo-Frankel with ur-elements</a></li>
+			<li><a href="#extensionality-NBG">Von Neumman-Bernays-G&ouml;del</a></li>
+			<li><a href="#NBG-ur">Von Neumman-Bernays-G&ouml;del with ur-elements</a></li>
+		</ol></li>
+	</ol>
+</span>
+	
+<h2 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Common features of describing &#x2208;</h2>
+<p>The various approaches are not very effective at tracking domains of discourse.  I will reserve the following:</p>
+<ul>
+	<li>The intended interpretation of <b>Set</b>, is the domain of discourse of all sets.</li>
+	<li>The intended interpretation of <b>Class</b>, is the domain of discourse of all classes.</li>
+	<li>The intended interpretation of <b>Ur</b>, is the domain of discourse of all ur-elements.</li>
+	<li>To denotate that a term a or variable x is in a domain of discourse, we will abuse the to-be-described &#x2208; notation.  E.g., for a term a, a &#x2208; <b>Set</b> has intended interpretation
+		"a is a set term".  For a variable x, x &#x2208; <b>Class</b> would have intended interpretation "x is a class variable".</li>
+</ul>
+<p>All of our approaches have the domain of discourse of all sets.  As we are taking the axiomatic description of &#x2208; as a parameter, many descriptions will not 
+	use all of the domains of discourse above.  Following our <a href="https://en.wikipedia.org/wiki/Zermelo%E2%80%93Fraenkel_set_theory">non-technical overview</a> of Zermelo-Frankel set theory,</p>
+<p align="center">a &#x2208; A</p>
+<p>with intended interpretation "a is an element of A", where a and A are both <i>set</i> terms i.e. a and A are both <i>set</i>s, is
+ a primitive truth-valued formula.</p>
+<ul>
+	<li>If a given set theory has a domain of discourse of ur-elements, a may be an ur-element term for the primitive formula a &#x2208; A.  Ur-element terms are 
+		explicitly disallowed for A.</li>
+	<li>If a given set theory has a domain of discourse of classes, A may be a class term for the primitive formula a &#x2208; A.</li>
+</ul>
+	
+<p>It is traditional to introduce a shorthand for logical negation of the infix predicate &#x2208;, regardless of how &#x2208; is axiomatically described:</p>
+<p align="center">a &#x2209; A := ~(a &#x2208; A)</p>
+<p>Our background logic does not have equality, so each set theory needs to define equality for its top-level domain of discourse.</p>
+<p>In practice, we will want variables constrained to range over a given mathematical collection, rather than an entire domain of discourse.  We introduce the syntax as:</p>
+<p align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>a &#x2208; A)</p>
+<p>with intended interpretation "for all a in A" or "for all a that are elements of A", a universal quantifier over either the mathematical collection A, or a domain of discourse A.</p>
+<p align="center">(<span style="transform:rotate(180deg);display:inline-block">E</span>a &#x2208; A)</p>
+<p>with intended interpretation "there is a in A" or "there is a element of A", an existential quantifier over the mathematical collection A, or a domain of discourse A</p>
+<p>For the quantified usages, the domain of discourse must be one recognized by the given set theory.</p>
+<p align="center">{a &#x2208; A : Z(a)}</p>
+<p>with intended interpretation "the mathematical collection of a in the mathematical collection A such that Z(a)", a term in the same domain of discourse as A; i.e., set-builder notation.</p>
+
+<p>The most important alternatives we are not considering here, are type-theoretic i.e. New Foundations, and Morse-Kelley.</p>
+
+<h2 id="ZF" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Zermelo-Frankel &#x2208;</h2>
+<p>There is only one universe of discourse for Zermelo-Frankel set theory: sets.</p>
+
+<p>The typical definition of equality = for <i>set</i>s a, b is</p>
+<p align="center">a = b := (<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b) & (<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; <b>Set</b>)(a &#x2208; y &hArr; b &#x2208; y)</p>
+<p>We are going to be very careful that <b>Set</b> is not a <i>set</i>.</p>
+
+<h2 id="NBG" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Von Neumann-Bernays-G&ouml;del &#x2208;</h2>
+<p>In the earlier expositions of Von Neumann-Bernays-G&ouml;del; set theory, there are two domains of discourse: sets, and classes.
+	<i>Class</i> terms are disallowed for a in the primitive formula</p>
+	<p align="center">a &#x2208; A</p>
+<p>, so we have two syntaxes with the intended interpretation "a is an element of A".  A may be either a <i>set</i> term or a <i>class</i> term, while a is a <i>set</i> term.</p>
+<p>(As for "Why stop at class?": for most purposes in mathematics, there is no use in going further.  The most notable exception is [abstract algebraic] category theory, i.e. the study of the trivially trivial.)</p>
+<p>We then introduce the class term operator</p>
+<p align="center">{a | Z(a)}</p>
+<p>with intended interpretation "the class of a such that Z(a)", where Z(a) is a truth-valued expression using the bound <i>set</i> variable a.
+	We then use the Church schema to translate this interpretation into a definition of {a | Z(a)}:</p>
+	<p align="center">c &#x2208; {a | Z(a)} := Z(c)</p>
+<p>where c is a term not used in Z(a).</p>
+<p>Next, define <i>class</i> equality as follows:</p>
+<p align="center">A = B := (<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; A &hArr; x &#x2208; B)</p>
+<p>where A and B are <i>class</i> terms i.e. A and B are <i>class</i>es.</p>
+<p>Our text is using classical logic.  The above definition does not act like classical logic for Belnap's 4-valued logic because <i>contradiction || unknown</i> evaluates to <i>true</i>.  
+	We expect the other non-classical logics under consideration to act like classical logic, in that for any given <i>set</i> x, the defining expression should not allow <i>unknown</i> or <i>contradiction</i> for 
+	<i>x &#x2208; A</i> to happen when the defining sub-expression <i>x &#x2208; A &hArr; x &#x2208; B</i> is <i>true</i>.</p>
+
+<p>We then introduce the description operator i.e. description function symbol</p>
+<p align="center">&iota;<sub>c</sub>(Z(c), a)</p>
+<p>with intended interpretation, "the set c such that Z(c), or else a".  Our text spends about three quarters of a hardcopy page (p. 49) on the technical advantages gained from the apparently
+	unnecessary parameter a.  It turns out the parameter a is what allows notating that the given <i>class</i> c is not a <i>set</i>.  Let Z(C) be a truth-valued expression taking a <i>class</i> C as a parameter. 
+We then introduce the syntactical entailment:</p>
+<p align="center">Z(C),(<span style="transform:rotate(180deg);display:inline-block">A</span>X &#x2208; <b>Class</b>)(Z(X) &rArr; X=C) &#9500; (<span style="transform:rotate(180deg);display:inline-block">A</span>a)(C=&iota;<sub>c</sub>(Z(c), a))</p>
+<p>with intended interpretation "if we have a truth-valued statement Z(C) about a given class C, and for all classes X, Z(X) nonstrictly implies X=C, then C is actually a set", and the axiom</p>
+<p align="center">&#9500; (<span style="transform:rotate(180deg);display:inline-block">E</span>C &#x2208; <b>Class</b>)(Z(C) & (<span style="transform:rotate(180deg);display:inline-block">A</span>X &#x2208; <b>Class</b>)(Z(X) &rArr; X=C)) || (<span style="transform:rotate(180deg);display:inline-block">A</span>a)(&iota;<sub>c</sub>(Z(c), a)=a)</p>
+<p>with intended interpretation "for any truth-valued expression Z with a class X as a parameter: there is a class C such that Z(C) is true and C is actually a set, or Z(X) does not describe a set.".  Strictly speaking we should be thinking of
+	a as a <i>class</i> rather than a <i>set</i> (as we have directly defined = for <i>class</i>es), contrary to our usual notational conventions here.  If the <i>class</i> C is not a <i>set</i>, we say C is a <i>proper class</i>.</p>
+<p>In particular, with the notation abuse previously mentioned, with this intended interpretation we have</p>
+<p align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>a)(C=&iota;<sub>c</sub>(Z(c), a)) &#x27DB; C &#x2208; <b>Set</b></p>
+<p>We are going to be very careful, that <b>Class</b> is not a <i>class</i>, and that <b>Set</b> is not a <i>set</i>.</p>
+<p>This definition of equality, looks incomplete compared to the Zermelo-Frankel definition of equality.  This reflects a different strategy when implementing the effect of an Axiom of Extensionality.</p>
+
+<h2 id="ZF-ur" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Zermelo-Frankel &#x2208; with ur-elements</h2>
+<p>Here, we will have two universes of discourse: sets, and ur-elements. We thus have two syntaxes for the primitive truth-valued formula<p>
+<p align="center">a &#x2208; A</p>
+<p>with intended interpretation "a is an element of A".  a may be an <i>ur-element</i> term or a <i>set</i> term, while A is a <i>set</i> term.</p>
+
+<p>We then adapt our definition of equality = for <i>set</i>s a, b to</p>
+<p align="center">a = b := (<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b) & (<span style="transform:rotate(180deg);display:inline-block">A</span>z &#x2208; <b>Ur</b>)(z &#x2208; a &hArr; z &#x2208; b) & (<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; <b>Set</b>)(a &#x2208; y &hArr; b &#x2208; y)</p>
+
+<h2 id="NBG-ur" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Von Neumann-Bernays-G&ouml;del &#x2208; with ur-elements</h2>
+<p>Here, we will have three universes of discourse: sets, classes, and ur-elements. We will have four syntaxes for the primitive truth-valued formula<p>
+<p align="center">a &#x2208; A</p>
+<p>with intended interpretation "a is an element of A".  a may be an <i>ur-element</i> term or a <i>set</i> term, while A may be a <i>set</i> term or a <i>class</i> term.</p>
+<p>We adjust our definition of class equality to:</p>
+<p align="center">A = B := (<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; A &hArr; x &#x2208; B) & (<span style="transform:rotate(180deg);display:inline-block">A</span>z &#x2208; <b>Ur</b>)(z &#x2208; A &hArr; z &#x2208; B)</p>
+<p>Other strategic features (the class term operator and description operator) are as for the reference set theory Von Neumann-Bernays-G&ouml;del .</p>
+
+<h2 id="roadmap-equality" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Roadmap: verifying equality =</h2>
+<table align="right">
+	<tr align="center"><th colspan="3">Expected properties of equality =</th></tr>
+	<tr align="center"><th>as syntactical entailment</th><th>Name</th><th>as nonstrict implication</th></tr>
+	<tr align="center"><td>&#9500; A = A</td><td>Reflexivity</td><td>A = A</td></tr>
+	<tr align="center"><td>A = B &#x27DB; B = A</td><td>Symmetry</td><td>A = B &hArr; B = A</td></tr>
+	<tr align="center"><td>A = B, B = C &#9500; A = C</td><td>Transitivity</td><td>(A = B & B = C) &rArr; A = C</td></tr>
+	<tr align="center" valign="top"><td>A = B &#9500; Z(A) &rArr; Z(A)<br><span style="background:yellow">A = B &#9500; (Z(A) &#9500; Z(B))</span></td><td style="background:yellow">Uniform substitution given equality</td><td>A = B &rArr; (Z(A) &rArr; Z(B))</td></tr>
+</table>
+
+<p>For A,B,C for which the infix binary predicate equality = is defined, we have the following expectations for a working definition:</p>
+<ul>
+	<li>A = A : Reflexivity</li>
+	<li>A = B &hArr; B = A : Symmetry</li>
+	<li>(A = B & B = C) &rArr; A = C : Transitivity</li>
+	<li>A binary predicate satisfying the above three properties, is said to be an equivalence relation.  For equality, we want to go further: when A = B,
+		we want there to be no imaginable or measurable difference whatsoever.</li>
+</ul>
+<p>The definitions were chosen so that reflexivity can be checked very easily (by uniform substitution into the definition); both symmetry and transitivity can be checked easily.  However, checking
+	"no imaginable or measurable difference whatsoever" is empirically infeasible.  We shall follow the usual practice, introducing an Axiom of Extensionality
+	whose translation into English is that if two mathematical collections have the same elements, then they are the same mathematical collection.
+	In particular, both uniform and non-uniform notational substitutions are valid.</p>
+<p>In particular, we will want the following equality schema (either as an axiom, or provable from axioms): for any truth-valued expression Z taking a parameter, from a domain for which = is defined,</p>
+<p align="center">a = b &#9500; Z(a) &rArr; Z(b)</p>
+<p>This schema corresponds to validity of uniform substitution of b for a, when a equals b.</p>
+<p>If we were using a logic with equality =, then all four of these expectations would be axiomatic.  Unfortunately, IEEE-754 floating point numerals do 
+	not respect reflexivity of = for Not-A-Number.</p>
+<p>We generally want the "strongest notation" for these properties available.  It is sufficient, to say that one of these properties holds, that the nonstrict implication version be true.
+	We would rather have syntactical entailment, when that is feasible.</p>
+<p>We have already reviewed two equivalence relations over <b>statements</b>, i.e. truth-valued expressions:</p>
+<ul>
+	<li>For classical logic, the "if and only if" logical connective &hArr; is an equivalence relation.  This is not the case for any of the 
+		non-classical logics using <i>unknown</i> and/or <i>contradiction</i> as truth values, since these do not have unconditional reflexivity of &hArr; . 
+		Belnap's four-valued logic <b>also</b> does not have unconditional transitivity of &hArr; .</li>
+	<li>For all of the logics we are considering, syntactical equivalence &#x27DB; is an equivalence relation over statements.  (This is not the case for defeasible logics &mdash; again, due to 
+		not having transitivity of &#x27DB;.)
+	</li>
+</ul>
+<p>Whenever equality <i>a</i> = <i>b</i> is a truth-valued expression, we shall follow standard practice, defining <i>a</i> &#x2260; <i>b</i> := ~(<i>a</i> = <i>b</i>).</p>
+<!-- Yes, syntactical equivalence is key to defining Lindenbaum-Tarski algebras.  We're not going anywhere near that, before
+	being able to mathematically model notation. -->
+
+<h2 id="extensionality-ZF" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Axiom of Extensionality: Zermelo-Frankel</h2>
+<p>For Zermelo-Frankel set theory, replacing logical and & in the definition of =, by nonstrict implication &rArr; in a key place suffices:</p>
+<p align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b) &rArr; (<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; <b>Set</b>)(a &#x2208; y &hArr; b &#x2208; y)</p>
+<p>This respects our intuition about physical containers.  We axiomatically conclude that two collections are equal, if the much easier half (same elements) is verified.</p>
+<p>We don't yet have the machinery to prove <i style="background:yellow">uniform substitution given equality</i>.
+
+<h2 id="extensionality-ZF-ur" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Axiom of Extensionality: Zermelo-Frankel with ur-elements</h2>
+<p>We use the same heuristic, replacing logical and & with nonstrict implication &rArr;</p>
+<p align="center">((<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b) & (<span style="transform:rotate(180deg);display:inline-block">A</span>z &#x2208; <b>Ur</b>)(z &#x2208; a &hArr; z &#x2208; b)) &rArr; (<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; <b>Set</b>)(a &#x2208; y &hArr; b &#x2208; y)</p>
+<p>Technically, we have six choices here of where to place the &rArr; .  This is the only one that respects the plain English, in our roadmap.</p>
+
+<h2 id="extensionality-NBG" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Derivation of Extensionality: Von Neumann-Bernays-G&ouml;del</h2>
+<p>Cf. hardcopy page 52 and following of <a href="https://archive.org/details/axiomaticsettheo0000bern">Axiomatic Set Theory</a>.  Bernays takes <i style="background:yellow">uniform substitution given equality</i>,</p>
+<p align="center">a = b &#9500; Z(a) &rArr; Z(b)</p>
+<p>as an axiom, then substitutes Z(c) := (<span style="transform:rotate(180deg);display:inline-block">A</span>Y &#x2208; <b>Class</b>)(c &#x2208; Y) .</p>
+<p>This does <b>not</b> work for <i>proper class</i> terms, since those are not syntactically allowed to be elements of classes.</p>
+<p>More explicitly:</p>
+<table align="center">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>a = b</td><td>Hypothesis</td></tr>
+	<tr><td>2.</td><td>b = a</td><td>Symmetry of =</td></tr>
+	<tr><td>3.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>Y &#x2208; <b>Class</b>)(a &#x2208; Y) &rArr; (<span style="transform:rotate(180deg);display:inline-block">A</span>Y &#x2208; <b>Class</b>)(b &#x2208; Y)</td><td>uniform substitution given equality on (1); Z(c) &#x21A6; (<span style="transform:rotate(180deg);display:inline-block">A</span>Y &#x2208; <b>Class</b>)(c &#x2208; Y)</td></tr>
+	<tr><td>4.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>Y &#x2208; <b>Class</b>)(b &#x2208; Y) &rArr; (<span style="transform:rotate(180deg);display:inline-block">A</span>Y &#x2208; <b>Class</b>)(a &#x2208; Y)</td><td>uniform substitution given equality on (2); Z(c) &#x21A6; (<span style="transform:rotate(180deg);display:inline-block">A</span>Y &#x2208; <b>Class</b>)(c &#x2208; Y)</td></tr>
+	<tr><td>5.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>Y &#x2208; <b>Class</b>)(a &#x2208; Y) &hArr; (<span style="transform:rotate(180deg);display:inline-block">A</span>Y &#x2208; <b>Class</b>)(b &#x2208; Y)</td><td>Definition of &hArr; on (3),(4)</td></tr>
+	<tr><td>6.</td><td>(a = b) &rArr; ((<span style="transform:rotate(180deg);display:inline-block">A</span>Y &#x2208; <b>Class</b>)(a &#x2208; Y) &hArr; (<span style="transform:rotate(180deg);display:inline-block">A</span>Y &#x2208; <b>Class</b>)(b &#x2208; Y))</td><td>Implication introduction on (1), (5)</td></tr>
+</table>
+<p>We then expand the Von Neumann-Bernays-G&ouml;del definition of a = b, to get something that looks like the Zermelo-Frankel extensionality axiom:
+<p align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b) &rArr; (<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; <b>Class</b>)(a &#x2208; y &hArr; b &#x2208; y)</p>
+<p>More explicitly: The Von Neumann-Bernays-G&ouml;del definition of a = b introduces a syntactical equivalence</p>
+<p align=center>a = b &#x27DB; (<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b)</p>
+<p>which itself is built from two syntactical entailment (sub)rules.  Expanding the definition of a = b in the hypothesis of (6), corresponds to using the inference rule, <span style="background:yellow">invert using P &#9500; Q on the hypothesis of Q &rArr; R</span>, 
+with the syntactical entailment subrule</p>
+<p align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b) &#9500; a = b</p>
+<h2 id="extensionality-NBG-ur" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Derivation of Extensionality: Von Neumann-Bernays-G&ouml;del with ur-elements</h2>
+<p>Extensionality for <i>set</i> terms a, b has a closely comparable derivation, as for the no ur-elements case.  Expanding the definition of a = b yields</p>
+<p align="center">((<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b) & (<span style="transform:rotate(180deg);display:inline-block">A</span>z &#x2208; <b>Ur</b>)(z &#x2208; a &hArr; z &#x2208; b)) &rArr; (<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; <b>Class</b>)(a &#x2208; y &hArr; b &#x2208; y)</p>
+<p>Since <i>ur-elements</i> are not mathematical objects, any notion of equality = for <i>ur-elements</i> is an undefined binary predicate.  If we take the usual technique of logic with equality as 
+	axiomatic for <i>ur-elements</i>, then the six-line tabular demonstration for set terms is also valid for <i>ur-element</i> terms a, b,
+	giving an Extensionality result similar to that for <i>set</i> terms:</p>
+	<p align="center">a = b &rArr; (<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; <b>Class</b>)(a &#x2208; y &hArr; b &#x2208; y)</p>
+
+<h2 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Roadmap: Shadows of Logic</h2>
+<table align="left">
+	<tr><th>Logical connective</th><th></th><th>Typical symbolic notation (without ur-elements)</th><th>Intended interpretation</th></tr>
+	<tr><td rowspan="2">nonstrict implication &rArr;</td><td>A &#x2286; B :=&nbsp;</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; A &rArr; x &#x2208; B)</td><td>"A is a subset of B" (more generally, whatever mathematical collection type B is, A is a subcollection of)</td></tr>
+	<tr><td>B &#x2287; A :=&nbsp;</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; B &rArr; x &#x2208; A)</td><td>"A contains B"</td></tr>
+	<tr><td>logical negation ~</td><td><span style="text-decoration: overline">A</span></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2209; A)</td><td>"the complement of A"</td></tr>
+	<tr><td>logical and &</td><td>A &#x2229; B</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; A & x &#x2208; B)</td><td>"A intersect B", "intersection of A with B"</td></tr>
+	<tr><td>logical or &#x2228;</td><td>A &#x222A; B</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; A &#x2228; x &#x2208; B)</td><td>"A union B", "union of A with B"</td></tr>
+	<tr><td></td><td>&#x2205;</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2209; &#x2205;)</td><td>"the empty set" or "the null set"</td></tr>
+	<tr><td></td><td><b>Set</b></td><td>{x | x=x }</td><td>Zermelo-Frankel set theory: the domain of discourse of <i>sets</i>, not a nameable mathematical collection.  Proper class for Von Neumann-Bernays-G&ouml;del.</td></tr>
+</table>
+<table align="right">
+<tr><th colspan="2">Definition</th><th>Intended interpretation</th></tr>
+<tr><td>A &#x228A; B :=&nbsp;</td><td>A &#x2286; B & A &#x2260; B</td><td>"A is a proper subset of B"</td></tr>
+<tr><td>B &#x228B; A :=&nbsp;</td><td>B &#x2287; A & A &#x2260; B</td><td>"B properly contains A" or "B strictly contains A"</td></tr>
+<tr><td>A &#x2288; B :=&nbsp;</td><td>~(A &#x2286; B)</td><td>"A is a not a subset of B"</td></tr>
+<tr><td>B &#x2289; A :=&nbsp;</td><td>~(B &#x2287; A)</td><td>"B properly contains A" or "B strictly contains A"</td></tr>
+</table>
+<p><nobr>The strategies</nobr> we are following instructions for, agree on the definition of <i>A</i> &#x2286; <i>B</i> and <i>B</i> &#x2287; <i>A</i>, but take different approaches regarding the other entries. Defining one operation for 
+	each logical connective, is reasonable for any predicate.</p>
+<p>It is common, in the literature, to define <i>A</i> &#x2282; <i>B</i>, <i>B</i> &#x2283; <i>A</i>, <i>A</i> &#x2284; <i>B</i>, and <i>B</i> &#x2285; <i>A</i>, but there is no consistency whether
+	<i>A</i> &#x2282; <i>B</i> is defined like A &#x2286; B, or like A &#x228A; B.  Our choice of notation, only has one usage in the literature.</p>
+</body>
+</html>

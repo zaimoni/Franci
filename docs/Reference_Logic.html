@@ -18,6 +18,7 @@
 <span style="border: 1px solid black; display:block; float:right">
 	<ol type="I">
 		<li><a href="#representation-eval">Truth table representation with &#x21A6;</a></li>
+		<li><a href="#inverting-and">syntactical rules for inverting &</a></li>
 	</ol>
 </span>
 <p>These are reference tables that would clutter the flow of the main overview, but are needed for completeness.  They use the extended notation introduced 
@@ -184,7 +185,7 @@
 	<tr><td align="right">~<i>contradiction</i> &#x21A6;</td><td><i>contradiction</i></td></tr>
 </table>
 
-<h2 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">syntactical rules for inverting &</h2>
+<h2 id="inverting-and" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">syntactical rules for inverting &</h2>
 <p>The &#9500; syntactical inference rules are actually &#x27DB; syntactical equivalence rules, but this requires the proof by cases inference rule to upgrade.</p>
 <table align="center">
 	<tr><th colspan="2">All</th></tr>
@@ -210,12 +211,14 @@
 	<tr><td align="right"><nobr>(P & Q &#x21A6; <i>contradiction</i>) &#9500;&nbsp;</nobr></td><td>((P &#x21A6; <i>unknown</i>) & (Q &#x21A6; <i>contradiction</i>)) &#x2228; ((P &#x21A6; <i>false</i>) & (Q &#x21A6; <i>contradiction</i>)) &#x2228; ((P &#x21A6; <i>true</i>) & (Q &#x21A6; <i>contradiction</i>)) &#x2228; ((P &#x21A6; <i>contradiction</i>) & (Q &#x21A6; <i>contradiction</i>)) &#x2228; ((P &#x21A6; <i>contradiction</i>) & (Q &#x21A6; <i>true</i>)) &#x2228; ((P &#x21A6; <i>contradiction</i>) & (Q &#x21A6; <i>false</i>)) &#x2228; ((P &#x21A6; <i>contradiction</i>) & (Q &#x21A6; <i>unknown</i>))</td></tr>
 </table>
 
+<!--
 <h2 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Classical logic</h2>
 <h2 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Kleene's strong three-valued logic</h2>
 <h2 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Kleene's weak three-valued logic</h2>
 <h2 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Lisp/Prolog</h2>
 <h2 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Belnap</h2>
 <h2 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Franci</h2>
+-->
 
 </body>
 </html>

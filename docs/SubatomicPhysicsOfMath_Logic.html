@@ -806,7 +806,7 @@ In classical logic, this is known as <i>proof by contradiction</i>; other names 
 	proceeds as follows:</p>
 <table align="center">
 	<tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
-	<tr><td>1.</td><td>P &#9500; P &#x2228; P</td><td></td><td>Apply Q &#x21A6; P to disjunction introduction</td></tr>
+	<tr><td>1.</td><td>P &#9500; P &#x2228; P</td><td></td><td>Idempotence of &#x2228;</td></tr>
 	<tr><td>2.</td><td></td><td>P &rArr; (P &#x2228; P)</td><td><span style="background:yellow">Downgrade &#9500; to &rArr;</span> in (1)</td></tr>
 	<tr><td>3.</td><td>P &rArr; Q, Q &rArr; P &#9500; P &rArr; P</td><td></td><td>apply R &#x21A6; P to Transitivity of implication</td></tr>
 	<tr><td>4.</td><td>P &rArr; (P &#x2228; P), (P &#x2228; P) &rArr; P &#9500; P &rArr; P</td><td></td><td>apply Q &#x21A6; P &#x2228; P to (3)</td></tr>
@@ -817,7 +817,7 @@ In classical logic, this is known as <i>proof by contradiction</i>; other names 
 	<tr><td>9.</td><td></td><td>P &rArr; P</td><td><i>modus ponens</i> on (2) and (8)</td></tr>
 	<tr><td>10.</td><td></td><td>~P &#x2228; P</td><td>Definition of &rArr;</td></tr>
 </table>
-<p>The above is not remotely intuitive.  We <b>could</b> have done this like the earlier exercises documenting the 
+<p>The above <b>proof</b> of the principle of bivalence, is not remotely intuitive.  We <b>could</b> have done this like the earlier exercises documenting the 
 	semantic consequences of the descriptions of logical not ~, logical and &, and logical or &#x2228; for the various logics.
 	The object, however, is to minimize the semantic consequences we need to "get started".</p>
 <table align="center">
@@ -1135,5 +1135,6 @@ In classical logic, this is known as <i>proof by contradiction</i>; other names 
 	<tr><td align="center">P &rArr; Q, R &rArr; S, ~Q &#x2228; ~S &#9500; ~P &#x2228; ~R</td><td align="left">Destructive dilemma</td><td align="left">None</td><td>Defeasible logics; Intuitionistic?</td></tr>
 </table>
 
+<p align="right">Next: <a href="./SubatomicPhysicsOfMath_IsMemberOf.html">description of &#x2208;, "is member of"</a></p>
 </body>
 </html>
