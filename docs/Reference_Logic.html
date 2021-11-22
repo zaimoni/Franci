@@ -18,7 +18,9 @@
 <span style="border: 1px solid black; display:block; float:right">
 	<ol type="I">
 		<li><a href="#representation-eval">Truth table representation with &#x21A6;</a></li>
-		<li><a href="#inverting-and">syntactical rules for inverting &</a></li>
+		<li><a href="#inverting-and">Syntactical rules for inverting &</a></li>
+		<li><a href="#inverting-or">Syntactical rules for inverting &#x2228;</a></li>
+		<li><a href="#combined-noncontradiction-valence">Combined principles of noncontradiction and valence</a></li>
 	</ol>
 </span>
 <p>These are reference tables that would clutter the flow of the main overview, but are needed for completeness.  They use the extended notation introduced 
@@ -40,6 +42,10 @@
 	<tr><td align="right"><i>true</i> &rArr; <i>false</i> &#x21A6;</td><td><i>false</i></td></tr>
 	<tr><td align="right"><i>false</i> &rArr; <i>true</i> &#x21A6;</td><td><i>true</i></td></tr>
 	<tr><td align="right"><i>false</i> &rArr; <i>false</i> &#x21A6;</td><td><i>true</i></td></tr>
+	<tr><td align="right"><i>true</i> &hArr; <i>true</i> &#x21A6;</td><td><i>true</i></td></tr>
+	<tr><td align="right"><i>true</i> &hArr; <i>false</i> &#x21A6;</td><td><i>false</i></td></tr>
+	<tr><td align="right"><i>false</i> &hArr; <i>true</i> &#x21A6;</td><td><i>false</i></td></tr>
+	<tr><td align="right"><i>false</i> &hArr; <i>false</i> &#x21A6;</td><td><i>true</i></td></tr>
 </table>
 <table align="right" style="clear:right">
 	<tr><th colspan="2">Lisp/Prolog</th></tr>
@@ -58,6 +64,11 @@
 	<tr><td align="right"><i>false</i> &rArr; <i>unknown</i> &#x21A6;</td><td><i>true</i></td></tr>
 	<tr><td align="right"><i>unknown</i> &rArr; <i>false</i> &#x21A6;</td><td><i>unknown</i></td></tr>
 	<tr><td align="right"><i>unknown</i> &rArr; <i>unknown</i> &#x21A6;</td><td><i>unknown</i></td></tr>
+	<tr><td align="right"><i>true</i> &hArr; <i>unknown</i> &#x21A6;</td><td><i>unknown</i></td></tr>
+	<tr><td align="right"><i>unknown</i> &hArr; <i>true</i> &#x21A6;</td><td><i>unknown</i></td></tr>
+	<tr><td align="right"><i>false</i> &hArr; <i>unknown</i> &#x21A6;</td><td><i>unknown</i></td></tr>
+	<tr><td align="right"><i>unknown</i> &hArr; <i>false</i> &#x21A6;</td><td><i>unknown</i></td></tr>
+	<tr><td align="right"><i>unknown</i> &hArr; <i>unknown</i> &#x21A6;</td><td><i>unknown</i></td></tr>
 </table>
 <table align="left" style="clear:both">
 	<tr><th colspan="2">Kleene's strong three-valued logic</th></tr>
@@ -76,6 +87,11 @@
 	<tr><td align="right"><i>false</i> &rArr; <i>unknown</i> &#x21A6;</td><td><i>true</i></td></tr>
 	<tr><td align="right"><i>unknown</i> &rArr; <i>false</i> &#x21A6;</td><td><i>unknown</i></td></tr>
 	<tr><td align="right"><i>unknown</i> &rArr; <i>unknown</i> &#x21A6;</td><td><i>unknown</i></td></tr>
+	<tr><td align="right"><i>true</i> &hArr; <i>unknown</i> &#x21A6;</td><td><i>unknown</i></td></tr>
+	<tr><td align="right"><i>unknown</i> &hArr; <i>true</i> &#x21A6;</td><td><i>unknown</i></td></tr>
+	<tr><td align="right"><i>false</i> &hArr; <i>unknown</i> &#x21A6;</td><td><i>unknown</i></td></tr>
+	<tr><td align="right"><i>unknown</i> &hArr; <i>false</i> &#x21A6;</td><td><i>unknown</i></td></tr>
+	<tr><td align="right"><i>unknown</i> &hArr; <i>unknown</i> &#x21A6;</td><td><i>unknown</i></td></tr>
 </table>
 <table align="right" style="clear:right">
 	<tr><th colspan="2">Kleene's weak three-valued logic</th></tr>
@@ -94,6 +110,11 @@
 	<tr><td align="right"><i>false</i> &rArr; <i>unknown</i> &#x21A6;</td><td><i>unknown</i></td></tr>
 	<tr><td align="right"><i>unknown</i> &rArr; <i>false</i> &#x21A6;</td><td><i>unknown</i></td></tr>
 	<tr><td align="right"><i>unknown</i> &rArr; <i>unknown</i> &#x21A6;</td><td><i>unknown</i></td></tr>
+	<tr><td align="right"><i>true</i> &hArr; <i>unknown</i> &#x21A6;</td><td><i>unknown</i></td></tr>
+	<tr><td align="right"><i>unknown</i> &hArr; <i>true</i> &#x21A6;</td><td><i>unknown</i></td></tr>
+	<tr><td align="right"><i>false</i> &hArr; <i>unknown</i> &#x21A6;</td><td><i>unknown</i></td></tr>
+	<tr><td align="right"><i>unknown</i> &hArr; <i>false</i> &#x21A6;</td><td><i>unknown</i></td></tr>
+	<tr><td align="right"><i>unknown</i> &hArr; <i>unknown</i> &#x21A6;</td><td><i>unknown</i></td></tr>
 </table>
 <table align="right" style="clear:right">
 	<tr><th colspan="2">Belnap</th></tr>
@@ -133,6 +154,18 @@
 	<tr><td align="right"><i>unknown</i> &rArr; <i>contradiction</i> &#x21A6;</td><td><i>true</i></td></tr>
 	<tr><td align="right"><i>contradiction</i> &rArr; <i>unknown</i> &#x21A6;</td><td><i>true</i></td></tr>
 	<tr><td align="right"><i>contradiction</i> &rArr; <i>contradiction</i> &#x21A6;</td><td><i>contradiction</i></td></tr>
+	<tr><td align="right"><i>true</i> &hArr; <i>unknown</i> &#x21A6;</td><td><i>unknown</i></td></tr>
+	<tr><td align="right"><i>true</i> &hArr; <i>contradiction</i> &#x21A6;</td><td><i>contradiction</i></td></tr>
+	<tr><td align="right"><i>unknown</i> &hArr; <i>true</i> &#x21A6;</td><td><i>unknown</i></td></tr>
+	<tr><td align="right"><i>contradiction</i> &hArr; <i>true</i> &#x21A6;</td><td><i>contradiction</i></td></tr>
+	<tr><td align="right"><i>false</i> &hArr; <i>unknown</i> &#x21A6;</td><td><i>unknown</i></td></tr>
+	<tr><td align="right"><i>false</i> &hArr; <i>contradiction</i> &#x21A6;</td><td><i>contradiction</i></td></tr>
+	<tr><td align="right"><i>unknown</i> &hArr; <i>false</i> &#x21A6;</td><td><i>unknown</i></td></tr>
+	<tr><td align="right"><i>contradiction</i> &hArr; <i>false</i> &#x21A6;</td><td><i>contradiction</i></td></tr>
+	<tr><td align="right"><i>unknown</i> &hArr; <i>unknown</i> &#x21A6;</td><td><i>unknown</i></td></tr>
+	<tr><td align="right"><i>unknown</i> &hArr; <i>contradiction</i> &#x21A6;</td><td><i>true</i></td></tr>
+	<tr><td align="right"><i>contradiction</i> &hArr; <i>unknown</i> &#x21A6;</td><td><i>true</i></td></tr>
+	<tr><td align="right"><i>contradiction</i> &hArr; <i>contradiction</i> &#x21A6;</td><td><i>contradiction</i></td></tr>
 </table>
 <table align="left" style="clear:left">
 	<tr><th colspan="2">Franci</th></tr>
@@ -172,9 +205,19 @@
 	<tr><td align="right"><i>unknown</i> &rArr; <i>contradiction</i> &#x21A6;</td><td><i>unknown</i></td></tr>
 	<tr><td align="right"><i>contradiction</i> &rArr; <i>unknown</i> &#x21A6;</td><td><i>unknown</i></td></tr>
 	<tr><td align="right"><i>contradiction</i> &rArr; <i>contradiction</i> &#x21A6;</td><td><i>contradiction</i></td></tr>
+	<tr><td align="right"><i>true</i> &hArr; <i>unknown</i> &#x21A6;</td><td><i>unknown</i></td></tr>
+	<tr><td align="right"><i>true</i> &hArr; <i>contradiction</i> &#x21A6;</td><td><i>false</i></td></tr>
+	<tr><td align="right"><i>unknown</i> &hArr; <i>true</i> &#x21A6;</td><td><i>unknown</i></td></tr>
+	<tr><td align="right"><i>contradiction</i> &hArr; <i>true</i> &#x21A6;</td><td><i>false</i></td></tr>
+	<tr><td align="right"><i>false</i> &hArr; <i>unknown</i> &#x21A6;</td><td><i>unknown</i></td></tr>
+	<tr><td align="right"><i>false</i> &hArr; <i>contradiction</i> &#x21A6;</td><td><i>false</i></td></tr>
+	<tr><td align="right"><i>unknown</i> &hArr; <i>false</i> &#x21A6;</td><td><i>unknown</i></td></tr>
+	<tr><td align="right"><i>contradiction</i> &hArr; <i>false</i> &#x21A6;</td><td><i>false</i></td></tr>
+	<tr><td align="right"><i>unknown</i> &hArr; <i>unknown</i> &#x21A6;</td><td><i>unknown</i></td></tr>
+	<tr><td align="right"><i>unknown</i> &hArr; <i>contradiction</i> &#x21A6;</td><td><i>unknown</i></td></tr>
+	<tr><td align="right"><i>contradiction</i> &hArr; <i>unknown</i> &#x21A6;</td><td><i>unknown</i></td></tr>
+	<tr><td align="right"><i>contradiction</i> &hArr; <i>contradiction</i> &#x21A6;</td><td><i>contradiction</i></td></tr>
 </table>
-
-
 <p>All five of the non-classical truth table described logics we are interested in, are extensions of classical logic.  For the logical not ~ reference table,
 	any truth values not used by a given logic are omitted for that logic.</p>
 <table align="center">
@@ -184,8 +227,10 @@
 	<tr><td align="right">~<i>unknown</i> &#x21A6;</td><td><i>unknown</i></td></tr>
 	<tr><td align="right">~<i>contradiction</i> &#x21A6;</td><td><i>contradiction</i></td></tr>
 </table>
+<p>The &hArr; table entries are computed from the definition of &hArr; .  The interpretation of these into English is surprising for both Belnap's four-valued logic, and Franci's, 
+	handling of <nobr><i>unknown</i> &hArr; <i>contradiction</i></nobr>.</p>
 
-<h2 id="inverting-and" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">syntactical rules for inverting &</h2>
+<h2 id="inverting-and" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Syntactical rules for inverting &</h2>
 <p>The &#9500; syntactical inference rules are actually &#x27DB; syntactical equivalence rules, but this requires the proof by cases inference rule to upgrade.</p>
 <table align="center">
 	<tr><th colspan="2">All</th></tr>
@@ -211,14 +256,44 @@
 	<tr><td align="right"><nobr>(P & Q &#x21A6; <i>contradiction</i>) &#9500;&nbsp;</nobr></td><td>((P &#x21A6; <i>unknown</i>) & (Q &#x21A6; <i>contradiction</i>)) &#x2228; ((P &#x21A6; <i>false</i>) & (Q &#x21A6; <i>contradiction</i>)) &#x2228; ((P &#x21A6; <i>true</i>) & (Q &#x21A6; <i>contradiction</i>)) &#x2228; ((P &#x21A6; <i>contradiction</i>) & (Q &#x21A6; <i>contradiction</i>)) &#x2228; ((P &#x21A6; <i>contradiction</i>) & (Q &#x21A6; <i>true</i>)) &#x2228; ((P &#x21A6; <i>contradiction</i>) & (Q &#x21A6; <i>false</i>)) &#x2228; ((P &#x21A6; <i>contradiction</i>) & (Q &#x21A6; <i>unknown</i>))</td></tr>
 </table>
 
-<!--
-<h2 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Classical logic</h2>
-<h2 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Kleene's strong three-valued logic</h2>
-<h2 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Kleene's weak three-valued logic</h2>
-<h2 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Lisp/Prolog</h2>
-<h2 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Belnap</h2>
-<h2 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Franci</h2>
--->
+<h2 id="inverting-or" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Syntactical rules for inverting &#x2228;</h2>
+<p>Again, the &#9500; syntactical inference rules are actually &#x27DB; syntactical equivalence rules, but this requires the proof by cases inference rule to upgrade.</p>
+<p>The corresponding rules for &rArr; are obtained by cleaning up using the uniform substitution, authorized by the definition of &rArr;.</p>
+<table align="center">
+	<tr><th colspan="2">All except Franci</th></tr>
+	<tr><td align="right">(P &#x2228; Q &#x21A6; <i>false</i>) &#x27DB;&nbsp;</td><td>(P &#x21A6; <i>false</i>) & (Q &#x21A6; <i>false</i>)</td></tr>
+	<tr><th colspan="2">Classical</th></tr>
+	<tr><td align="right">(P &#x2228; Q &#x21A6; <i>true</i>) &#9500;&nbsp;</td><td>((P &#x21A6; <i>false</i>) & (Q &#x21A6; <i>true</i>)) &#x2228; ((P &#x21A6; <i>true</i>) & (Q &#x21A6; <i>true</i>)) &#x2228; ((P &#x21A6; <i>true</i>) & (Q &#x21A6; <i>false</i>))</td></tr>
+	<tr><th colspan="2">Kleene's strong three-valued logic</th></tr>
+	<tr><td align="right">(P &#x2228; Q &#x21A6; <i>true</i>) &#9500;&nbsp;</td><td>((P &#x21A6; <i>unknown</i>) & (Q &#x21A6; <i>true</i>)) &#x2228; ((P &#x21A6; <i>false</i>) & (Q &#x21A6; <i>true</i>)) &#x2228; ((P &#x21A6; <i>true</i>) & (Q &#x21A6; <i>true</i>)) &#x2228; ((P &#x21A6; <i>true</i>) & (Q &#x21A6; <i>false</i>)) &#x2228; ((P &#x21A6; <i>true</i>) & (Q &#x21A6; <i>unknown</i>))</td></tr>
+	<tr><td align="right">(P &#x2228; Q &#x21A6; <i>unknown</i>) &#9500;&nbsp;</td><td>((P &#x21A6; <i>false</i>) & (Q &#x21A6; <i>unknown</i>)) &#x2228; ((P &#x21A6; <i>unknown</i>) & (Q &#x21A6; <i>unknown</i>)) &#x2228; ((P &#x21A6; <i>unknown</i>) & (Q &#x21A6; <i>false</i>))</td></tr>
+	<tr><th colspan="2">Kleene's weak three-valued logic</th></tr>
+	<tr><td align="right">(P &#x2228; Q &#x21A6; <i>true</i>) &#9500;&nbsp;</td><td>((P &#x21A6; <i>false</i>) & (Q &#x21A6; <i>true</i>)) &#x2228; ((P &#x21A6; <i>true</i>) & (Q &#x21A6; <i>true</i>)) &#x2228; ((P &#x21A6; <i>true</i>) & (Q &#x21A6; <i>false</i>))</td></tr>
+	<tr><td align="right">(P &#x2228; Q &#x21A6; <i>unknown</i>) &#9500;&nbsp;</td><td>((P &#x21A6; <i>unknown</i>) & (Q &#x21A6; <i>true</i>)) &#x2228; ((P &#x21A6; <i>false</i>) & (Q &#x21A6; <i>unknown</i>)) &#x2228; ((P &#x21A6; <i>unknown</i>) & (Q &#x21A6; <i>unknown</i>)) &#x2228; ((P &#x21A6; <i>unknown</i>) & (Q &#x21A6; <i>false</i>)) &#x2228; ((P &#x21A6; <i>true</i>) & (Q &#x21A6; <i>unknown</i>))</td></tr>
+	<tr><th colspan="2">Lisp/Prolog</th></tr>
+	<tr><td align="right">(P &#x2228; Q &#x21A6; <i>true</i>) &#9500;&nbsp;</td><td>((P &#x21A6; <i>false</i>) & (Q &#x21A6; <i>true</i>)) &#x2228; ((P &#x21A6; <i>true</i>) & (Q &#x21A6; <i>true</i>)) &#x2228; ((P &#x21A6; <i>true</i>) & (Q &#x21A6; <i>false</i>)) &#x2228; ((P &#x21A6; <i>true</i>) & (Q &#x21A6; <i>unknown</i>))</td></tr>
+	<tr><td align="right">(P &#x2228; Q &#x21A6; <i>unknown</i>) &#9500;&nbsp;</td><td>((P &#x21A6; <i>false</i>) & (Q &#x21A6; <i>unknown</i>)) &#x2228; ((P &#x21A6; <i>unknown</i>) & (Q &#x21A6; <i>unknown</i>)) &#x2228; ((P &#x21A6; <i>unknown</i>) & (Q &#x21A6; <i>false</i>)) &#x2228; ((P &#x21A6; <i>unknown</i>) & (Q &#x21A6; <i>true</i>))</td></tr>
+	<tr><th colspan="2">Belnap's four-valued logic</th></tr>
+	<tr><td align="right">(P &#x2228; Q &#x21A6; <i>true</i>) &#9500;&nbsp;</td><td>((P &#x21A6; <i>contradiction</i>) & (Q &#x21A6; <i>unknown</i>)) &#x2228; ((P &#x21A6; <i>contradiction</i>) & (Q &#x21A6; <i>true</i>)) &#x2228; ((P &#x21A6; <i>unknown</i>) & (Q &#x21A6; <i>true</i>)) &#x2228; ((P &#x21A6; <i>false</i>) & (Q &#x21A6; <i>true</i>)) &#x2228; ((P &#x21A6; <i>true</i>) & (Q &#x21A6; <i>true</i>)) &#x2228; ((P &#x21A6; <i>true</i>) & (Q &#x21A6; <i>false</i>)) &#x2228; ((P &#x21A6; <i>true</i>) & (Q &#x21A6; <i>unknown</i>)) &#x2228; ((P &#x21A6; <i>true</i>) & (Q &#x21A6; <i>contradiction</i>)) &#x2228; ((P &#x21A6; <i>unknown</i>) & (Q &#x21A6; <i>contradiction</i>))</td></tr>
+	<tr><td align="right">(P &#x2228; Q &#x21A6; <i>unknown</i>) &#9500;&nbsp;</td><td>((P &#x21A6; <i>false</i>) & (Q &#x21A6; <i>unknown</i>)) &#x2228; ((P &#x21A6; <i>unknown</i>) & (Q &#x21A6; <i>unknown</i>)) &#x2228; ((P &#x21A6; <i>unknown</i>) & (Q &#x21A6; <i>false</i>))</td></tr>
+	<tr><td align="right"><nobr>(P &#x2228; Q &#x21A6; <i>contradiction</i>) &#9500;&nbsp;</nobr></td><td>((P &#x21A6; <i>false</i>) & (Q &#x21A6; <i>contradiction</i>)) &#x2228; ((P &#x21A6; <i>contradiction</i>) & (Q &#x21A6; <i>contradiction</i>)) &#x2228; ((P &#x21A6; <i>contradiction</i>) & (Q &#x21A6; <i>false</i>))</td></tr>
+	<tr><th colspan="2">Franci</th></tr>
+	<tr><td align="right">(P &#x2228; Q &#x21A6; <i>true</i>) &#9500;&nbsp;</td><td>((P &#x21A6; <i>false</i>) & (Q &#x21A6; <i>true</i>)) &#x2228; ((P &#x21A6; <i>true</i>) & (Q &#x21A6; <i>true</i>)) &#x2228; ((P &#x21A6; <i>true</i>) & (Q &#x21A6; <i>false</i>))</td></tr>
+	<tr><td align="right">(P &#x2228; Q &#x21A6; <i>false</i>) &#9500;&nbsp;</td><td>((P &#x21A6; <i>false</i>) & (Q &#x21A6; <i>contradiction</i>)) &#x2228; ((P &#x21A6; <i>false</i>) & (Q &#x21A6; <i>false</i>)) &#x2228; ((P &#x21A6; <i>contradiction</i>) & (Q &#x21A6; <i>false</i>))</td></tr>
+	<tr><td align="right">(P &#x2228; Q &#x21A6; <i>unknown</i>) &#9500;&nbsp;</td><td>((P &#x21A6; <i>contradiction</i>) & (Q &#x21A6; <i>unknown</i>)) &#x2228; ((P &#x21A6; <i>false</i>) & (Q &#x21A6; <i>unknown</i>)) &#x2228; ((P &#x21A6; <i>unknown</i>) & (Q &#x21A6; <i>unknown</i>)) &#x2228; ((P &#x21A6; <i>unknown</i>) & (Q &#x21A6; <i>false</i>)) &#x2228; ((P &#x21A6; <i>unknown</i>) & (Q &#x21A6; <i>contradiction</i>))</td></tr>
+	<tr><td align="right"><nobr>(P &#x2228; Q &#x21A6; <i>contradiction</i>) &#9500;&nbsp;</nobr></td><td>(P &#x21A6; <i>contradiction</i>) & (Q &#x21A6; <i>contradiction</i>)</td></tr>
+</table>
 
+<!-- \todo inverting iff -->
+
+<h2 id="combined-noncontradiction-valence" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Combined principles of noncontradiction and valence</h2>
+<table align="left">
+	<tr><th colspan="3">Principle of non-contradiction merged into Principle of ...</th>
+	<tr><th style="background: #DDFFDD">Classical</th><th>bivalence</th><td>&#9500; ((A &#x21A6; <i>false</i>) & ~(A &#x21A6; <i>true</i>)) &#x2228; ((A &#x21A6; <i>true</i>) & ~(A &#x21A6; <i>false</i>))</td></tr>
+	<tr><th style="background: #DDDDFF">Kleene weak<br>Kleene strong<br>Lisp/Prolog</th><th>trivalence</th><td>&#9500; ((A &#x21A6; <i>false</i>) & ~(A &#x21A6; <i>true</i>) & ~(A &#x21A6; <i>unknown</i>)) &#x2228; ((A &#x21A6; <i>true</i>) & ~(A &#x21A6; <i>false</i>) & ~(A &#x21A6; <i>unknown</i>)) &#x2228; ((A &#x21A6; <i>unknown</i>) & ~(A &#x21A6; <i>true</i>) & ~(A &#x21A6; <i>false</i>))</td></tr>
+	<tr><th rowspan="4" style="background: #FFDDDD">Belnap<br>Franci</th><th>tetravalence</th><td>&#9500; ((A &#x21A6; <i>false</i>) & ~(A &#x21A6; <i>true</i>) & ~(A &#x21A6; <i>unknown</i>) & ~(A &#x21A6; <i>contradiction</i>)) &#x2228; ((A &#x21A6; <i>true</i>) & ~(A &#x21A6; <i>false</i>) & ~(A &#x21A6; <i>unknown</i>) & ~(A &#x21A6; <i>contradiction</i>)) &#x2228; ((A &#x21A6; <i>unknown</i>) & ~(A &#x21A6; <i>true</i>) & ~(A &#x21A6; <i>false</i>) & ~(A &#x21A6; <i>contradiction</i>)) &#x2228; ((A &#x21A6; <i>contradiction</i>) & ~(A &#x21A6; <i>true</i>) & ~(A &#x21A6; <i>false</i>) & ~(A &#x21A6; <i>unknown</i>))</td></tr>
+</table>
+<p>These are obtained by applying the inference rules of <i>constructive dilemma</i>, <i>commutativity of</i> &#x2228;, and <i>associativity of</i> &#x2228;.  We start by assuming 
+	these principles are classical logic statements about the target logic.  [This is how we translate truth table formatted calculations, to symbolic logic.]</p>
 </body>
 </html>
