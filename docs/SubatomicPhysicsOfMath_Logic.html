@@ -31,7 +31,7 @@
 		<li><a href="#classical-law-of-contradiction">Classical Law of Contradiction</a></li>
 		<li><a href="#exportation">Exportation</a></li>
 		<li><a href="#de-morgan">De Morgan's Laws</a></li>
-		<li><a href="associativity-or">Associativity of &#x2228;</a></li>
+		<li><a href="#associativity-or">Associativity of &#x2228;</a></li>
 		<li><a href="#modus-ponendo-tollens"><i>modus ponendo tollens</i></a></li>
 		<li><a href="#distribuvity-or-and">Distributivity of &#x2228; with respect to &</a></li>
 		<li><a href="#proof-by-cases">Proof by cases</a></li>
@@ -89,6 +89,7 @@ of the inference schemas of predicate calculus are derivable from the usual unde
 	the various approaches to paraconsistent logic, the various approaches to defeasible logic, and the various approaches to relevance logic.
 	I will include some commentary about what parts of classical logic fail for these.  However, I am using close to the <b>minimum known possible</b>
 	undefined terminology here. I'm expecting everything needed for these, to be formally definable in terms of what we're looking at here.</p>
+<a href="./LogicFormalization.dot.svg" target="_blank"><img src="./LogicFormalization.dot.svg" width="100%" alt="map of logic"></a>
 <h2 id="transitivity-of-implication" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Transitivity of implication</h2>
 <p>As our first example of a conditional proof, let's formally calculate <i>transitivity of implication</i> for three propositional variables P, Q, R:</p>
 <p align="center">P &rArr; Q, Q &rArr; R &#9500; P &rArr; R</p>
@@ -413,11 +414,12 @@ structural rule for &#9500;, is that the labeling order of statements used in a 
 
 <p>Here we use <i>conjunction introduction</i> and <i>conjunction elimination</i> to derive <i>associativity of &</i>.  We are arguably implicitly using
 <i>commutativity of &</i> as well, to justify ignoring the relative order of preceding statements when using inference rules.</p>
+<p>In general, an associativity principle allows notation to omit internal grouping parentheses. We now consider <i>P & Q & R</i> unambiguous as a top-level statement, 
+	syntactically equivalent to both choices of parenthesization.</p>
 <table align="center" style="clear:both">
 	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
-	<tr><td align="center">(P & Q) & R &#x27DB; P & (Q & R)</td><td align="left" valign="top" rowspan="2">Associativity of &</td><td align="left" valign="top" rowspan="2">None</td><td align="left" valign="top" rowspan="2">None</td></tr>
+	<tr><td align="center">P & Q & R &#x27DB; (P & Q) & R &#x27DB; P & (Q & R)</td><td align="left" valign="top"><span style="background:yellow">(syntactical)</span> Associativity of &</td><td align="left" valign="top" rowspan="2">None</td><td align="left" valign="top" rowspan="2">None</td></tr>
 </table>
-<p>In general, an associativity principle allows notation to omit internal grouping parentheses: <i>P & Q & R</i> is now unambiguous.</p>
 <p>We next consider the truth-table description of logical not ~.  The inference rules corresponding to the tabular description (for those truth values that exist in a given logic) are:</p>
 <p align="center">(P &#x21A6; <i>true</i>) &#9500; (~P &#x21A6; <i>false</i>)
 	<br>(P &#x21A6; <i>false</i>) &#9500; (~P &#x21A6; <i>true</i>)
@@ -470,23 +472,26 @@ structural rule for &#9500;, is that the labeling order of statements used in a 
 	<tr><td>2.</td><td>R &rArr; S</td><td>Given</td></tr>
 	<tr><td>3.</td><td>P &#x2228; R</td><td>Given</td></tr>	
 	<tr><td>4.</td><td>P &#x2228; S</td><td style="background: yellow">Right half of constructive dilemma on (3),(2)</td></tr>
-	<tr><td>5.</td><td>S &#x2228; P</td><td>Commutativity of &#x2228; on (4)</td></tr>
-	<tr><td>6.</td><td>S &#x2228; Q</td><td style="background: yellow">Right half of constructive dilemma on (5),(1)</td></tr>
-	<tr><td>7.</td><td>Q &#x2228; S</td><td>Commutativity of &#x2228; on (6)</td></tr>
+	<tr><td>5.</td><td>Q &#x2228; S</td><td style="background: yellow">Left half of constructive dilemma on (5),(1)</td></tr>
 </table>
 <table align="left">
 	<tr><th></th><th>Inference rule</th><th>Rationale</th></tr>
-	<tr><td>1.</td><td>~P &#x2228; Q, Q &rArr; R &#9500; ~P &#x2228; R</td><td>apply [~P &#x2228; Q/P &rArr; Q][~P &#x2228; R/P &rArr; R] to <i>transitivity of implication</i></td></tr>
-	<tr><td>2.</td><td>~~P &#x2228; Q, Q &rArr; R &#9500; ~~P &#x2228; R</td><td>apply [~P/P] to (1)</td></tr>
-	<tr><td>3.</td><td>P &#x2228; Q, Q &rArr; R &#9500; P &#x2228; R</td><td>remove double negation</td></tr>
+	<tr><td>1.</td><td>~P &#x2228; Q, Q &rArr; R &#9500; ~P &#x2228; R</td><td>Apply [~P &#x2228; Q/P &rArr; Q][~P &#x2228; R/P &rArr; R] to <i>transitivity of implication</i></td></tr>
+	<tr><td>2.</td><td>~~P &#x2228; Q, Q &rArr; R &#9500; ~~P &#x2228; R</td><td>Apply [~P/P] to (1)</td></tr>
+	<tr><td>3.</td><td>P &#x2228; Q, Q &rArr; R &#9500; P &#x2228; R</td><td>Remove double negation</td></tr>
+	<tr><td>4.</td><td>P &#x2228; R, R &rArr; S &#9500; P &#x2228; S</td><td>Apply [R/Q,S/R] to (3)</td></tr>
 	<th colspan="3" style="background:yellow">Right half of constructive dilemma</th>
-	<tr><td colspan="3">Also fails for: defeasible logics; Intuitionistic logic</td>
+	<tr><td>5.</td><td>Q &#x2228; P, Q &rArr; R &#9500; P &#x2228; R</td><td>Commutativity of &#x2228;</td></tr>
+	<tr><td>6.</td><td>P &#x2228; R, P &rArr; Q &#9500; R &#x2228; Q</td><td>Apply [P/Q,R/P,Q/R] to (5)</td></tr>
+	<th colspan="3" style="background:yellow">Left half of constructive dilemma</th>
 </table>
 <p>For propositional variables P, Q, R, S: <i>P &rArr; Q</i> and <i>R &rArr; S</i> do not share any variables in common.  One way to introduce relevance,
 	i.e. shared propositional variables, is <i>P &#x2228; R</i>.  We would expect the following:</p>
 <p align="center">P &rArr; Q, R &rArr; S, P &#x2228; R &#9500; Q &#x2228; S</p>
 <p>One way to proceed, is to first prove a lemma for the right half.  It is simplest to start by transforming <i>transitivity of implication</i>.  The given proofs are for 
 classical logic, since we have so far only derived <i>transitivity of implication</i> for classical logic.</p>
+<p>The same steps work when transforming <i style="background:yellow">Using Q &#9500; R on the conclusion of P &rArr; Q</i>, as <i>transitivity of implication</i>.  This 
+	gives three more inference rules.</p>
 <p>We have a counterexample for Lisp/Prolog logic: if P is <i>false</i> while R and S are both <i>true</i>, the truth value imputed to Q is unconstrained.  This is 
 	not a material issue for our other truth-table described logics, but for Lisp/Prolog assigning Q a truth value of <i>unknown</i> causes Q &#x2228; S to be 
 	<i>unknown</i>.  Our givens only guarantee that P and R have classical truth values.</p>
@@ -494,7 +499,10 @@ classical logic, since we have so far only derived <i>transitivity of implicatio
 	this inference rule is a semantic consequence for that logic.</p>
 <table align="center" style="clear:both">
 	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
-	<tr><td align="center">P &rArr; Q, R &rArr; S, P &#x2228; R &#9500; Q &#x2228; S</td><td align="left">Constructive dilemma</td><td align="left">Lisp/Prolog</td><td>Defeasible logics; Intuitionistic?</td></tr>
+	<tr><td align="center">P &rArr; Q, R &rArr; S, P &#x2228; R &#9500; Q &#x2228; S</td><td align="left" rowspan="4">Constructive dilemma</td><td align="left" rowspan="4">Lisp/Prolog</td><td rowspan="4">Defeasible logics; Intuitionistic?</td></tr>
+	<tr><td align="center" style="background:yellow">P &rArr; Q, (R &#9500; S), P &#x2228; R &#9500; Q &#x2228; S</td></tr>
+	<tr><td align="center" style="background:yellow">(P &#9500; Q), R &rArr; S, P &#x2228; R &#9500; Q &#x2228; S</td></tr>
+	<tr><td align="center" style="background:yellow">(P &#9500; Q), (R &#9500; S), P &#x2228; R &#9500; Q &#x2228; S</td></tr>
 </table>
 
 <h2 id="reductio-ad-absurdum" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Proof by contradiction</h2>
@@ -525,9 +533,9 @@ In classical logic, this is known as <i>proof by contradiction</i>; other names 
 <table align="right">
 	<tr><th colspan="3">Typical proof</th></tr>
 	<tr><th></th><th>Inference rule</th><th>Rationale</th></tr>
-	<tr><td>1.</td><td>P &#x2228; Q, ~P, &#9500; Q</td><td><span style="background:yellow">(left)</span> Or elimination</td></td></tr>
-	<tr><td>2.</td><td>Q &#x2228; P, ~Q, &#9500; P</td><td>apply [Q/P,P/Q] to (1)</td></tr>
-	<tr><td>3.</td><td>P &#x2228; Q, ~Q, &#9500; P</td><td>apply [P &#x2228; Q/Q &#x2228; P] to (2)</td></tr>
+	<tr><td>1.</td><td>P &#x2228; Q, ~P &#9500; Q</td><td><span style="background:yellow">(left)</span> Or elimination</td></td></tr>
+	<tr><td>2.</td><td>Q &#x2228; P, ~Q &#9500; P</td><td>apply [Q/P,P/Q] to (1)</td></tr>
+	<tr><td>3.</td><td>P &#x2228; Q, ~Q &#9500; P</td><td>Commutativity of &#x2228; on (2)</td></tr>
 </table>
 <p>This is also known as disjunctive syllogism, and sometimes abbreviated as &#x2228;E.</p>
 <p>The third step on the right is not valid for Lisp/Prolog logic.  We'll return to this later.</p>
@@ -787,17 +795,17 @@ In classical logic, this is known as <i>proof by contradiction</i>; other names 
 	<tr><th></th><th>Inference Rule</th><th>Rationale</th></tr>
 	<tr><td>1.</td><td>~(P & Q) &#x2228; R &#x27DB; ~P &#x2228; (Q &rArr; R)</td><td>Definition of &rArr; on equivalence of exportation and importation</td></tr>
 	<tr><td>2.</td><td>~(P & Q) &#x2228; R &#x27DB; ~P &#x2228; (~Q &#x2228; R)</td><td>Definition of &rArr; on (1)</td></tr>
-	<tr><td>3.</td><td>(~P &#x2228; ~Q) &#x2228; R &#x27DB; ~P &#x2228; (~Q &#x2228; R)</td><td>De Morgan's Law on (2)</td></tr>
+	<tr><td>3.</td><td>(~P &#x2228; ~Q) &#x2228; R &#x27DB; ~P &#x2228; (~Q &#x2228; R)</td><td>De Morgan's Law on (2) [substitution rather than syntactical equivalence]</td></tr>
 	<tr><td>4.</td><td>(~~P &#x2228; ~~Q) &#x2228; R &#x27DB; ~~P &#x2228; (~~Q &#x2228; R)</td><td>Apply [~P/P, ~Q/Q] to (3)</td></tr>
 	<tr><td>5.</td><td>(P &#x2228; Q) &#x2228; R &#x27DB; P &#x2228; (Q &#x2228; R)</td><td>Remove double negation</td></tr>
 </table>
-<p>We'll return to this later, for the non-classical logics.</p>
+<p>We'll return to this later, for the non-classical logics.  As with logical and &, when we have <i>associativity of</i> &#x2228; we consider 
+	<nobr><i>P &#x2228; Q &#x2228; R</i></nobr> unambiguous, syntactically equivalent to both sides of <i>associativity of</i> &#x2228;.</p>
 <table align="center" style="clear:both">
 	<tr><th colspan="4">Proven for: Classical logic</th></tr>
 	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
-	<tr><td align="center">P &#x2228; (Q &#x2228; R) &#x27DB; (P &#x2228; Q) &#x2228; R</td><td align="left">Associativity of &#x2228;</td><td align="left">None</td><td>None</td></tr>
+	<tr><td align="center">P &#x2228; Q &#x2228; R &#x27DB; P &#x2228; (Q &#x2228; R) &#x27DB; (P &#x2228; Q) &#x2228; R</td><td align="left">Associativity of &#x2228;</td><td align="left">None</td><td>None</td></tr>
 </table>
-<p>In particular, <i>P &#x2228; Q &#x2228; R</i> is now unambiguous for classical logic, and we expect it to be unambiguous for all of the non-classical logics we are considering.</p>
 
 <h2 id="modus-ponendo-tollens" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px"><i>modus ponendo tollens</i></h2>
 <table align="left">
@@ -892,6 +900,11 @@ In classical logic, this is known as <i>proof by contradiction</i>; other names 
 </table>
 
 <h2 id="proof-by-cases" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Proof by cases</h2>
+<table align="left">
+	<tr><th></th><th>Inference Rule</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>P &rArr; Q, R &rArr; Q, P &#x2228; R &#9500; Q &#x2228; Q</td><td>Apply [Q/S] to constructive dilemma</td></tr>
+	<tr><td>2.</td><td>P &rArr; Q, R &rArr; Q, P &#x2228; R &#9500; Q</td><td>Transivity of syntactical entailment, (1) and idempotence of &#x2228;</td></tr>
+</table>
 <table align="right">
 	<tr><th colspan="3">Typical</th></tr>
 	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
@@ -907,9 +920,8 @@ In classical logic, this is known as <i>proof by contradiction</i>; other names 
 	<tr><td>10.</td><td>(P &#x2228; R) &rArr; Q</td><td>Remove double negation</td></tr>
 	<tr><td>11.</td><td>Q</td><td><i>modus ponens</i> on (10),(3)</td></tr>
 </table>
-<p>We will need to prove <i>Right distributivity of &#x2228; over &</i> for non-classical logics, before this proof is valid for them.  Both Belnap's, and Franci's, logic will require a different strategy.</p>
+<p>Two distinct proofs (the left one goes through <i>transitivity of implication</i>, the right one through <i>Right distributivity of &#x2228; over &</i>).  Currently for classical logic.</p>
 <table align="center" style="clear:both">
-	<tr><th colspan="4">Proven for: Classical logic</th></tr>
 	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
 	<tr><td align="center">P &rArr; Q, R &rArr; Q, P &#x2228; R  &#9500; Q</td><td align="left">Proof by cases</td><td align="left">None</td><td>Defeasible logics</td></tr>
 </table>
@@ -1085,6 +1097,7 @@ In classical logic, this is known as <i>proof by contradiction</i>; other names 
 		<tr><td align="center">~P &rArr; Q, ~Q &#x2228; Q &#9500; ~Q &rArr; P</td><td align="left">taking contrapositive, Lisp/Prolog</td></tr>
 		<tr><td align="center">~P &rArr; ~Q, ~Q &#x2228; Q &#9500; Q &rArr; P</td><td align="left">taking contrapositive, Lisp/Prolog</td></tr>
 		<tr><td align="center">P &rArr; Q, ~Q &#9500; ~P</td><td align="left"><i>modus tollens</i></td></tr>
+		<tr><td align="center">P &#x2228; Q, ~Q, &#9500; P</td><td align="left"><span style="background:yellow">(right)</span> Or elimination</td></tr>
 	</table>
 	<p>We also have:</p>
 	<table align="center">
@@ -1110,6 +1123,8 @@ In classical logic, this is known as <i>proof by contradiction</i>; other names 
 <!-- restart editing -->
 
 <h2 id="destructive-dilemma" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Destructive Dilemma</h2>
+<!--
+implication introduction is classical logic only	
 <table align="right">
 	<tr><th colspan="3">Weak Kleene, Lisp/Prolog</th></tr>
 	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
@@ -1134,6 +1149,7 @@ In classical logic, this is known as <i>proof by contradiction</i>; other names 
 	<tr><td>15.</td><td>~(P & R)</td><td><i>modus tollens</i> on (12), (14)</td></tr>	
 	<tr><td>16.</td><td>~P &#x2228; ~R</td><td>De Morgan's Law <span style="background:yellow">-- unwrap from not-and</span></td></tr>
 </table>
+-->
 <table align="left">
 	<tr><th colspan="3">Logics other than Lisp/Prolog</th></tr>
 	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>

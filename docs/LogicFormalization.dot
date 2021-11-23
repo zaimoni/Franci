@@ -1,0 +1,302 @@
+strict digraph {
+    undefined [label="Undefined terms"]
+    logical_and [label="logical and &"]
+    logical_or [label="logical or &#x2228;"]
+    logical_not [label="logical not ~"]
+    nonstrict_implication [label="nonstrict implication &rArr;"]
+    truth_values [label=<Truth values: <I>true</I>, <I>false</I>, <I>unknown</I>, <I>contradiction</I>>]
+    syntactical_entailment [label="syntactical entailment &#9500;"]
+    undefined -> {logical_and logical_or logical_not nonstrict_implication syntactical_entailment truth_values}
+    iff [label="if and only if &hArr;"]
+    {nonstrict_implication logical_and} -> iff [headlabel=":="]
+
+    natural_language [label="Natural Language"]
+    truth_tables [label="Truth tables"]
+    {natural_language truth_values} -> truth_tables -> {logical_and logical_or logical_not nonstrict_implication}
+
+    subgraph clusterLogicalConnectives {
+        truth_tables logical_and logical_or logical_not nonstrict_implication
+    }
+
+    Axioms [style=filled fillcolor=darkgreen fontcolor=white]
+    natural_language -> Axioms
+    Classical [style=filled fillcolor=silver]
+    Kleene_weak [label="Kleene's weak"]
+    Kleene_strong [label="Kleene's strong"]
+    Lisp_Prolog [label="Lisp/Prolog"]
+    Belnap
+    Franci
+    {natural_language} -> {Classical Kleene_weak Kleene_strong Lisp_Prolog Belnap Franci} -> {logical_and logical_or logical_not nonstrict_implication}
+    Substitution
+    evaluates_to [label="&#x21A6; \"evaluates to\""]
+    defined_as [label=":= \"defined as\""]
+    natural_language -> {syntactical_entailment Substitution evaluates_to defined_as}
+    substitution_uniform [label="Uniform substitution: [B/A] or A &#x21A6; B"]
+    substitution_nonuniform [label="Non-uniform substitution: [(d,e,f)/(a,b,c)]"]
+    Substitution -> {substitution_uniform substitution_nonuniform}
+    syntactical_equivalence [label="syntactical equivalence &#x27DB;"]
+    {logical_and syntactical_entailment} -> syntactical_equivalence [headlabel=":="]
+
+    subgraph clusterSyntacticalEntailment {
+        syntactical_entailment syntactical_equivalence
+    }
+
+    equality_for_truth_values [label="= for truth values"]
+    truth_values -> equality_for_truth_values [headlabel="semantic"]
+
+    modus_ponens [label=<<I>modus ponens</I> &rArr;/&#9500;> style=filled fillcolor=darkgreen fontcolor=white]
+    {Axioms nonstrict_implication syntactical_entailment} -> modus_ponens
+
+    syntactical_entailment_introduction [label="&#9500; Introduction" style=filled fillcolor=darkgreen fontcolor=white]
+    {Axioms syntactical_entailment} -> syntactical_entailment_introduction
+
+    transitivity_of_syntactical_entailment [label="Transitivity of &#9500;"]
+    transitivity_of_syntactical_equivalence [label="Transitivity of &#x27DB;"]
+    {modus_ponens syntactical_entailment_introduction} -> transitivity_of_syntactical_entailment -> transitivity_of_syntactical_equivalence
+
+    transitivity_of_syntactical_equivalence [label="Transitivity of &#x27DB;"]
+    identity_entailment [label="A &#9500; A" style=filled fillcolor=darkgreen fontcolor=white]
+    {Axioms syntactical_entailment} -> identity_entailment
+    reflexivity_of_syntactical_equivalence [label="Reflexivity of &#x27DB;"]
+    commutativity_of_syntactical_equivalence [label="Commutativity of &#x27DB;"]
+    identity_entailment -> {reflexivity_of_syntactical_equivalence commutativity_of_syntactical_equivalence}
+
+    principle_of_noncontradiction [label="Principle of non-contradiction" style=filled fillcolor=darkgreen fontcolor=white]
+    {Axioms evaluates_to logical_not logical_and} -> principle_of_noncontradiction
+
+    principle_of_n_valence [label="Principle of n-valence" style=filled fillcolor=darkgreen fontcolor=white]
+    {Axioms evaluates_to logical_or} -> principle_of_n_valence
+    principle_of_bivalence [label="Principle of bivalence" style=filled fillcolor=darkgreen fontcolor=white]
+    principle_of_trivalence [label="Principle of trivalence" style=filled fillcolor=darkgreen fontcolor=white]
+    principle_of_tetravalence [label="Principle of tetravalence" style=filled fillcolor=darkgreen fontcolor=white]
+    principle_of_n_valence -> {principle_of_bivalence principle_of_trivalence principle_of_tetravalence}
+    Classical -> principle_of_bivalence
+    {Kleene_weak Kleene_strong Lisp_Prolog} -> principle_of_trivalence
+    {Belnap Franci} -> principle_of_tetravalence
+
+    upgrade_implication_to_syntactical_entailment [label="Upgrade &rArr; to &#9500;"]
+    upgrade_iff_to_syntactical_equivalence [label="Upgrade &hArr; to &#x27DB;"]
+    modus_ponens -> upgrade_implication_to_syntactical_entailment -> upgrade_iff_to_syntactical_equivalence
+
+    downgrade_syntactical_entailment_to_implication [label="Downgrade &#9500; to &rArr;" style=filled fillcolor=silver tooltip="Classical only"]
+    downgrade_syntactical_equivalence_to_iff [label="Downgrade &#x27DB; to &hArr;" style=filled fillcolor=silver tooltip="Classical only"]
+    Classical -> downgrade_syntactical_entailment_to_implication [headlabel=semantic]
+    downgrade_syntactical_entailment_to_implication -> downgrade_syntactical_equivalence_to_iff
+
+    implication_introduction [label="Implication Introduction"]
+    transitivity_of_implication [label="Transitivity of &rArr;" style="filled" fillcolor=magenta4 fontcolor=white tooltip="~Belnap"]
+    {syntactical_entailment_introduction downgrade_syntactical_entailment_to_implication } -> implication_introduction
+    { modus_ponens implication_introduction } -> transitivity_of_implication
+
+    unique_truthtable_row_syntactical_entailment [label="unique truth table row translates to/from &#9500;"]
+    {truth_tables syntactical_entailment} -> unique_truthtable_row_syntactical_entailment [headlabel="semantic"]
+
+    conjunction_introduction [label="& introduction"]
+    conjunction_elimination [label="& elimination"]
+    idempotence_of_and [label="Syntactical Idempotence of &"]
+
+    unique_truthtable_row_syntactical_entailment -> {conjunction_introduction conjunction_elimination}
+    conjunction_elimination -> idempotence_of_and
+
+    substitution_changing_no_truthvalues [label="substitution that changes no truth value evaluations, is valid"]
+    {equality_for_truth_values truth_tables} -> substitution_changing_no_truthvalues [headlabel="semantic"]
+
+    syntactical_commutativity_of_and [label="Syntactical commutativity of &"]
+    substitution_commutativity_of_and [label="Substitution commutativity of &" style=filled fillcolor=darkred fontcolor=white tooltip="~Lisp/Prolog"]
+    substitution_commutativity_of_or [label="Substitution commutativity of &#x2228;" style=filled fillcolor=darkred fontcolor=white tooltip="~Lisp/Prolog"]
+
+    substitution_changing_no_truthvalues -> {syntactical_commutativity_of_and substitution_commutativity_of_and substitution_commutativity_of_or}
+
+    syntactical_associativity_of_and [label="Syntactical associativity of &"]
+    {conjunction_introduction conjunction_elimination syntactical_commutativity_of_and} -> syntactical_associativity_of_and
+
+    introduce_double_negation [label="Introduce double negation"]
+    remove_double_negation [label="Remove double negation"]
+    substitution_changing_no_truthvalues -> introduce_double_negation
+    {substitution_changing_no_truthvalues principle_of_n_valence} -> remove_double_negation
+
+    subgraph clusterDoubleNegation {
+        introduce_double_negation remove_double_negation
+    }
+
+    upgrade_syntactical_equivalence_to_substitution [label="upgrade syntactical equivalence to substitution" style=filled fillcolor=silver tooltip="Classical only"]
+    {principle_of_bivalence principle_of_noncontradiction introduce_double_negation substitution_commutativity_of_or upgrade_implication_to_syntactical_entailment} -> upgrade_syntactical_equivalence_to_substitution
+
+    substitution_idempotence_of_and [label="Substitution idempotence of &"]
+    substitution_idempotence_of_or [label="Substitution idempotence of &#x2228;"]
+    substitution_changing_no_truthvalues -> {substitution_idempotence_of_and substitution_idempotence_of_or}
+
+    constructive_dilemma [label="Constructive dilemma" style=filled fillcolor=darkred fontcolor=white tooltip="~Lisp/Prolog"]
+    {transitivity_of_implication remove_double_negation substitution_commutativity_of_or } -> constructive_dilemma
+
+    proof_by_contradiction [label="Proof by contradiction"]
+    substitution_idempotence_of_or -> proof_by_contradiction
+
+    subgraph clusterSubstitutionIdempotence {
+        substitution_idempotence_of_and substitution_idempotence_of_or proof_by_contradiction
+    }
+
+    left_or_elimination [label="(left) &#x2228; elimination"]
+    right_or_elimination [label="(right) &#x2228; elimination"]
+    {introduce_double_negation modus_ponens} -> left_or_elimination
+    { left_or_elimination substitution_commutativity_of_or } -> right_or_elimination
+
+    taking_contrapositive [label="taking contrapositive" style=filled fillcolor=darkred fontcolor=white  tooltip="~Lisp/Prolog"]
+    substitution_commutativity_of_or -> taking_contrapositive
+    {introduce_double_negation remove_double_negation} -> taking_contrapositive
+
+    apply_negation_to_both_sides_of_iff [label="Apply ~ to both sides of &hArr;"]
+    remove_negation_from_both_sides_of_iff [label="Remove ~ from both sides of &hArr;"]
+    {conjunction_elimination conjunction_introduction} -> apply_negation_to_both_sides_of_iff
+    taking_contrapositive -> apply_negation_to_both_sides_of_iff [headlabel="~Lisp/Prolog"]
+    {apply_negation_to_both_sides_of_iff remove_double_negation} -> remove_negation_from_both_sides_of_iff
+
+    apply_negation_to_both_sides_of_syntactical_equivalence [label="Apply ~ to both sides of &#x27DB;" style=filled fillcolor=silver tooltip="Classical only"]
+    remove_negation_from_both_sides_of_syntactical_equivalence [label="Remove ~ from both sides of &#x27DB;" style=filled fillcolor=silver tooltip="Classical only"]
+    {downgrade_syntactical_equivalence_to_iff apply_negation_to_both_sides_of_iff upgrade_iff_to_syntactical_equivalence} -> apply_negation_to_both_sides_of_syntactical_equivalence
+    {downgrade_syntactical_equivalence_to_iff remove_negation_from_both_sides_of_iff upgrade_iff_to_syntactical_equivalence} -> remove_negation_from_both_sides_of_syntactical_equivalence
+
+    subgraph clusterApplyRemoveIffSyntacticalEquivalence {
+        apply_negation_to_both_sides_of_iff remove_negation_from_both_sides_of_iff apply_negation_to_both_sides_of_syntactical_equivalence remove_negation_from_both_sides_of_syntactical_equivalence
+    }
+
+    modus_tollens [label=<<I>modus tollens</I>>]
+    modus_tollens_for_syntactical_entailment [label=<<I>modus tollens</I> for &#9500;>]
+    taking_contrapositive -> modus_tollens
+    { evaluates_to principle_of_noncontradiction  modus_tollens } -> modus_tollens_for_syntactical_entailment
+
+    equivalence_not_A_not_evaluating_to_true [label=<Equivalence of ~A, and A not evaluating to <I>true</I>>  style=filled fillcolor=silver tooltip="Classical only"]
+    equivalence_A_not_evaluating_to_false [label=<Equivalence of A, and A not evaluating to <I>false</I>>  style=filled fillcolor=silver tooltip="Classical only"]
+    { principle_of_bivalence left_or_elimination } -> equivalence_not_A_not_evaluating_to_true
+    { principle_of_bivalence right_or_elimination } -> equivalence_A_not_evaluating_to_false
+
+    subgraph clusterClassicalEvalution {
+        equivalence_not_A_not_evaluating_to_true equivalence_A_not_evaluating_to_false
+    }
+
+    subgraph clusterSubstitutionCommutativity {
+        substitution_commutativity_of_and substitution_commutativity_of_or taking_contrapositive modus_tollens modus_tollens_for_syntactical_entailment
+    }
+
+    classical_law_of_contradiction [label="Classical law of contradiction" style="filled" fillcolor=magenta4 fontcolor=white]
+    {modus_ponens modus_tollens proof_by_contradiction} -> classical_law_of_contradiction
+    implication_introduction -> classical_law_of_contradiction [headlabel="~Belnap"]
+
+    exportation_and_to_implication [label="exportation from & to &rArr;"]
+    importation_implication_to_and [label="importation from &rArr; to &"]
+    {conjunction_introduction modus_ponens} -> exportation_and_to_implication
+    implication_introduction -> exportation_and_to_implication [headlabel="~Belnap"]
+    {conjunction_elimination modus_ponens} -> importation_implication_to_and
+    implication_introduction -> importation_implication_to_and [headlabel="~Belnap"]
+
+    de_morgan_wrap_to_not_or [label="De Morgan's Law -- wrap to not-or"]
+    de_morgan_unwrap_from_not_or [label="De Morgan's Law -- unwrap from not-or" style="filled" fillcolor=red tooltip="~Franci"]
+    unique_truthtable_row_syntactical_entailment -> de_morgan_wrap_to_not_or
+    unique_truthtable_row_syntactical_entailment -> de_morgan_unwrap_from_not_or
+
+    de_morgan_wrap_to_not_and [label="De Morgan's Law -- wrap to not-and" style="filled" fillcolor=red tooltip="~Belnap, ~Franci"]
+    de_morgan_unwrap_from_not_and [label="De Morgan's Law -- unwrap from not-and"]
+    { de_morgan_wrap_to_not_or remove_double_negation modus_tollens_for_syntactical_entailment equivalence_not_A_not_evaluating_to_true } -> de_morgan_wrap_to_not_and
+    { de_morgan_unwrap_from_not_or remove_double_negation modus_tollens_for_syntactical_entailment equivalence_not_A_not_evaluating_to_true } -> de_morgan_unwrap_from_not_and
+
+    subgraph clusterDeMorgan {
+        de_morgan_wrap_to_not_or de_morgan_unwrap_from_not_or de_morgan_wrap_to_not_and de_morgan_unwrap_from_not_and
+    }
+
+    syntactical_associativity_of_or [label="Syntactical associativity of &#x2228;"]
+    {exportation_and_to_implication importation_implication_to_and upgrade_syntactical_equivalence_to_substitution de_morgan_unwrap_from_not_and remove_double_negation} -> syntactical_associativity_of_or
+
+    left_modus_ponendo_tollens [label=<left <I>modus ponendo tollens</I>>]
+    right_modus_ponendo_tollens [label=<right <I>modus ponendo tollens</I>>]
+    {de_morgan_unwrap_from_not_and modus_ponens} -> left_modus_ponendo_tollens
+    {de_morgan_unwrap_from_not_and introduce_double_negation modus_tollens} -> right_modus_ponendo_tollens
+
+    left_distributivity_or_over_and [label="Left distributivity of &#x2228; over &"]
+    left_distributivity_or_over_and_inverse [label="inverse Left distributivity of &#x2228; over &"]
+    { introduce_double_negation conjunction_elimination conjunction_introduction remove_double_negation } -> left_distributivity_or_over_and
+    { introduce_double_negation conjunction_elimination modus_ponens implication_introduction conjunction_introduction remove_double_negation } -> left_distributivity_or_over_and_inverse
+
+    right_distributivity_or_over_and [label="Right distributivity of &#x2228; over &"]
+    right_distributivity_or_over_and_inverse [label="inverse Right distributivity of &#x2228; over &"]
+    {left_distributivity_or_over_and substitution_commutativity_of_and substitution_commutativity_of_or} -> right_distributivity_or_over_and
+    {left_distributivity_or_over_and_inverse substitution_commutativity_of_and substitution_commutativity_of_or} -> right_distributivity_or_over_and_inverse
+
+    left_distributivity_and_over_or [label="Left distributivity of & over &#x2228;"]
+    left_distributivity_and_over_or_inverse [label="inverse Left distributivity of & over &#x2228;"]
+    { left_distributivity_or_over_and apply_negation_to_both_sides_of_syntactical_equivalence upgrade_syntactical_equivalence_to_substitution de_morgan_unwrap_from_not_and de_morgan_unwrap_from_not_or remove_double_negation substitution_commutativity_of_and } -> left_distributivity_and_over_or
+    { left_distributivity_or_over_and_inverse apply_negation_to_both_sides_of_syntactical_equivalence upgrade_syntactical_equivalence_to_substitution de_morgan_unwrap_from_not_and de_morgan_unwrap_from_not_or remove_double_negation substitution_commutativity_of_and } -> left_distributivity_and_over_or_inverse
+
+    right_distributivity_and_over_or [label="Right distributivity of & over &#x2228;"]
+    right_distributivity_and_over_or_inverse [label="inverse Right distributivity of & over &#x2228;"]
+    {left_distributivity_and_over_or substitution_commutativity_of_and substitution_commutativity_of_or} -> right_distributivity_and_over_or
+    {left_distributivity_and_over_or_inverse substitution_commutativity_of_and substitution_commutativity_of_or} -> right_distributivity_and_over_or_inverse
+
+    proof_by_cases [label="Proof by cases"]
+    proof_by_cases2 [label="Proof by cases"]
+    { conjunction_introduction right_distributivity_or_over_and de_morgan_wrap_to_not_and remove_double_negation modus_ponens } -> proof_by_cases
+    { constructive_dilemma transitivity_of_syntactical_entailment substitution_idempotence_of_or} -> proof_by_cases2
+    proof_by_cases -> proof_by_cases2
+    proof_by_cases2 -> proof_by_cases
+
+    subgraph clusterProofByCases {
+        proof_by_cases proof_by_cases2
+    }
+
+    law_of_excluded_middle [label="Law of Excluded Middle" style="filled" fillcolor=silver tooltip="Classical only"]
+    {substitution_idempotence_of_or downgrade_syntactical_entailment_to_implication transitivity_of_implication modus_ponens} -> law_of_excluded_middle
+    {law_of_excluded_middle substitution_commutativity_of_or} -> principle_of_bivalence
+
+    translation_of_truth_tables_to_from_symbolic_logic [label="translation of truth tables to/from symbolic logic"]
+    { principle_of_n_valence principle_of_noncontradiction proof_by_cases downgrade_syntactical_entailment_to_implication substitution_commutativity_of_or substitution_commutativity_of_and left_distributivity_and_over_or left_distributivity_and_over_or_inverse left_distributivity_or_over_and left_distributivity_or_over_and_inverse right_distributivity_and_over_or right_distributivity_and_over_or_inverse right_distributivity_or_over_and right_distributivity_or_over_and_inverse } -> translation_of_truth_tables_to_from_symbolic_logic
+
+    left_disjunction_introduction [label="Left &#x2228; introduction" style=filled fillcolor=goldenrod4 fontcolor=white tooltip="~Weak Kleene"]
+    right_disjunction_introduction [label="Right &#x2228; introduction" style=filled fillcolor=darkred fontcolor=white tooltip="~Weak Kleene, ~Lisp/Prolog"]
+    principle_of_explosion [label="Principle of explosion" style=filled fillcolor=goldenrod4 fontcolor=white tooltip="~Weak Kleene"] 
+    left_disjunction_introduction -> principle_of_explosion
+    {left_disjunction_introduction substitution_commutativity_of_or} -> right_disjunction_introduction
+
+    {translation_of_truth_tables_to_from_symbolic_logic conjunction_introduction} -> left_disjunction_introduction
+
+    left_classical_truth_value_of_or [label="Left classical truth value of &#x2228;" style=filled fillcolor=darkolivegreen1 tooltip="Useful for Weak Kleene, Lisp/Prolog; ~Strong Kleene, ~Belnap, ~Franci"]
+    left_classical_truth_value_of_not_and [label="Left classical truth value of ~(&)" style=filled fillcolor=darkolivegreen1 tooltip="Useful for Weak Kleene, Lisp/Prolog; ~Strong Kleene, ~Belnap, ~Franci"]
+    right_classical_truth_value_of_or [label="Right classical truth value of &#x2228;" style=filled fillcolor=darkolivegreen1 tooltip="Useful for Weak Kleene, Lisp/Prolog"]
+    right_classical_truth_value_of_not_and [label="Right classical truth value of ~(&)" style=filled fillcolor=darkolivegreen1 tooltip="Useful for Weak Kleene, Lisp/Prolog"]
+
+    translation_of_truth_tables_to_from_symbolic_logic -> {left_classical_truth_value_of_or left_classical_truth_value_of_not_and right_classical_truth_value_of_or right_classical_truth_value_of_not_and }
+
+    substitution_commutativity_of_and_lisp [label="Substitution commutativity of &, Lisp/Prolog" style=filled fillcolor=darkolivegreen1 tooltip="Lisp/Prolog only"]
+    substitution_commutativity_of_or_lisp [label="Substitution commutativity of &#x2228;, Lisp/Prolog" style=filled fillcolor=darkolivegreen1 tooltip="Lisp/Prolog only"]
+    taking_contrapositive_lisp [label="taking contrapositive, Lisp/Prolog" style=filled fillcolor=darkolivegreen1 tooltip="Lisp/Prolog only"]
+    translation_of_truth_tables_to_from_symbolic_logic -> {substitution_commutativity_of_and_lisp substitution_commutativity_of_or_lisp}
+    substitution_commutativity_of_or_lisp -> taking_contrapositive_lisp
+    taking_contrapositive_lisp -> modus_tollens
+    substitution_commutativity_of_or_lisp -> right_or_elimination
+
+
+    subgraph clusterSubstitutionCommutativityLisp {
+        substitution_commutativity_of_and_lisp substitution_commutativity_of_or_lisp taking_contrapositive_lisp
+    }
+
+    subgraph clusterDistributivity {
+        left_distributivity_or_over_and left_distributivity_or_over_and_inverse right_distributivity_or_over_and right_distributivity_or_over_and_inverse
+        left_distributivity_and_over_or left_distributivity_and_over_or_inverse right_distributivity_and_over_or right_distributivity_and_over_or_inverse
+    }
+
+    subgraph clusterClassical {
+        Classical downgrade_syntactical_entailment_to_implication downgrade_syntactical_equivalence_to_iff
+    }
+
+    subgraph clusterAxioms {
+        Axioms modus_ponens identity_entailment principle_of_noncontradiction principle_of_n_valence syntactical_entailment_introduction
+        subgraph clusterTransitivitySyntacticalEntailment {
+            transitivity_of_syntactical_entailment transitivity_of_syntactical_equivalence
+        }
+        subgraph clusterNValence {
+            principle_of_bivalence principle_of_trivalence principle_of_tetravalence
+        }
+        subgraph clusterSyntacticalEntailmentIdentity {
+            reflexivity_of_syntactical_equivalence commutativity_of_syntactical_equivalence
+        }
+    }
+
+}
