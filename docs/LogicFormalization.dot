@@ -84,9 +84,10 @@ strict digraph {
     downgrade_syntactical_entailment_to_implication -> downgrade_syntactical_equivalence_to_iff
 
     implication_introduction [label="Implication Introduction"]
-    transitivity_of_implication [label="Transitivity of &rArr;" style="filled" fillcolor=magenta4 fontcolor=white tooltip="~Belnap"]
+    transitivity_of_implication [label="Transitivity of &rArr;" style=filled fillcolor=magenta4 fontcolor=white tooltip="~Belnap"]
+    transitivity_of_implication_classical [label="Transitivity of &rArr;" style=filled fillcolor=silver tooltip="Classical only"]
     {syntactical_entailment_introduction downgrade_syntactical_entailment_to_implication } -> implication_introduction
-    { modus_ponens implication_introduction } -> transitivity_of_implication
+    { modus_ponens implication_introduction } -> transitivity_of_implication_classical -> transitivity_of_implication
 
     unique_truthtable_row_syntactical_entailment [label="unique truth table row translates to/from &#9500;"]
     {truth_tables syntactical_entailment} -> unique_truthtable_row_syntactical_entailment [headlabel="semantic"]
@@ -272,6 +273,12 @@ strict digraph {
     taking_contrapositive_lisp -> modus_tollens
     substitution_commutativity_of_or_lisp -> right_or_elimination
 
+    transitivity_of_implication_nonclassical [label="Transitivity of &rArr;" style="filled" fillcolor=magenta4 fontcolor=white tooltip="Kleene weak, Kleene strong, Lisp/Prolog, Franci"]
+    translation_of_truth_tables_to_from_symbolic_logic -> transitivity_of_implication_nonclassical -> transitivity_of_implication
+
+    subgraph clusterTransitivityImplication {
+        transitivity_of_implication_classical transitivity_of_implication_nonclassical transitivity_of_implication
+    }
 
     subgraph clusterSubstitutionCommutativityLisp {
         substitution_commutativity_of_and_lisp substitution_commutativity_of_or_lisp taking_contrapositive_lisp

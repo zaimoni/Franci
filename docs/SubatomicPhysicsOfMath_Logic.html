@@ -23,6 +23,7 @@
 		<li><a href="#relevance-roadmap-nonstrictly-implies">Relevance roadmap for &rArr;</a></li>
 		<li><a href="#analogies-and-or">Analogies for &, and &#x2228;</a></li>
 		<li><a href="#constructive-dilemma">Constructive Dilemma</a></li>
+		<li><a href="#absorption">Absorption</a></li>
 		<li><a href="#reductio-ad-absurdum">Proof by contradiction</a></li>
 		<li><a href="#or-elimination">Or elimination</a></li>
 		<li><a href="#contrapositive-1">Taking the contrapositive</a></li>
@@ -40,7 +41,6 @@
 		<li><a href="#principle-of-explosion">Principle of explosion</a></li>
 		<li><a href="#commutativity-or-lisp">Repairing commutativity of &#x2228; for Lisp/Prolog logic</a></li>
 		<li><a href="#destructive-dilemma">Destructive Dilemma</a></li>
-		<li><a href="#absorption">Absorption</a></li>
 		<li><a href="#transitivity-of-iff">Transitivity of &hArr;</a></li>
 		<li><a href="#commutativity-of-implication">Commutativity of Implication</a></li>
 	</ol>
@@ -135,10 +135,13 @@ in parentheses.  The non-standard parts of the following table, have background 
 <li><i>A</i> is the hypothesis of <i>A &#9500; B</i>.</li>
 <li><i>B</i> is the conclusion of <i>A &#9500; B</i>.</li>
 </ul>
-<p>From the truth table description of &rArr;, it appears the problem is that we don't actually know that, for the non-classical logics,
-	that the Hypothesis step does not have a non-classical truth value. (This choice of phrasing, is to allow for Intuitionistic logic.)  There may be other 
-	problems as well.  For now, we will treat <i>implication introduction</i> as valid for classical logic, but not any of the truth table described non-classical logics
-	we are considering.</p>
+<p>From the truth table description of &rArr;, it appears the problem is that for the non-classical logics, we don't actually know that
+	the Hypothesis step, and the reached Conclusion step, do not have non-classical truth values. (This choice of phrasing, is to allow for Intuitionistic logic.)
+	There may be other problems as well.  For now, we will treat <i>implication introduction</i> as valid for classical logic,
+	but not any of the truth table described non-classical logics we are considering.</p>
+<p>Once we have verified the analogies that allow translating a truth table verification of a propositional calculus inference rule, to a symbolic logic verification of said 
+	inference rule, the exercise of verifying <i>transitivity of implication</i> (or lack thereof) for all five truth table-described nonclassical logics 
+	can be done.  (This verification will be classical logic reasoning about non-classical logics.)</p>
 <table align="center">
 	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
 	<tr><td align="center">P &rArr; Q, Q &rArr; R &#9500; P &rArr; R</td><td align="left">Transitivity of implication</td><td align="left">Belnap</td><td>Defeasible logics</td></tr>
@@ -196,7 +199,7 @@ The corresponding proof would then be:
 <p>Exercise: demonstrate the following.  (Both of these follow from the axiomatic identity inference rule <i>A &#9500; A</i>.)</p>
 <table align="center">
 	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
-	<tr><td align="center" style="background: yellow">A &#x27DB; A</td><td align="left">Reflexivity of syntactical equivalence</td><td align="left">None</td><td>None</td></tr>
+	<tr><td align="center">A &#x27DB; A</td><td align="left">Reflexivity of syntactical equivalence</td><td align="left">None</td><td>None</td></tr>
 	<tr><td align="center" style="background: yellow">(A &#x27DB; B) &#x27DB; (B &#x27DB; A)</td><td align="left">Commutativity of syntactical equivalence</td><td align="left">None</td><td>None</td></tr>
 </table>
 
@@ -287,14 +290,15 @@ rather than define how uniform substitutions work.</p>
 	<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
 	<tr><td>1.</td><td>A &#9500; B</td><td></td><td>Given</td></tr>
 	<tr><td>2.</td><td></td><td>A</td><td>Hypothesis</td></tr>
-	<tr><td>3.</td><td></td><td>B</td><td></td><td>syntactical inference on (1),(2)</td></tr>
-	<tr><td>4.</td><td></td><td>A &rArr; B</td><td></td><td>implication introduction on (2),(3)</td></tr>
+	<tr><td>3.</td><td></td><td>B</td><td>syntactical inference on (1),(2)</td></tr>
+	<tr><td>4.</td><td></td><td>A &rArr; B</td><td>implication introduction on (2),(3)</td></tr>
 </table>
 <table align="left">
-	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
-	<tr><td>1.</td><td>A &rArr; B</td><td>Given</td></tr>
-	<tr><td>2.</td><td>A</td><td>Hypothesis</td></tr>
-	<tr><td>3.</td><td>B</td><td><i>modus ponens</i> on (1), (2)</td></tr>
+	<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td></td><td>A &rArr; B</td><td>Given</td></tr>
+	<tr><td>2.</td><td></td><td>A</td><td>Hypothesis</td></tr>
+	<tr><td>3.</td><td></td><td>B</td><td><i>modus ponens</i> on (1), (2)</td></tr>
+	<tr><td>4.</td><td>A &#9500; B</td><td></td><td><span style="background:yellow">Syntactical entailment introduction</span>, (2) and (3)</td></tr>
 </table>
 <p>For classical logic <b>only</b>, we have a downgrade procedure from &#9500; to &rArr; .  The upgrade procedure is more reliable; it uses <i>syntactical entailment introduction</i>.  Proving the &hArr; versions from the &rArr; versions is 
 left as an exercise.</p>
@@ -475,6 +479,7 @@ structural rule for &#9500;, is that the labeling order of statements used in a 
 	<tr><td>5.</td><td>Q &#x2228; S</td><td style="background: yellow">Left half of constructive dilemma on (5),(1)</td></tr>
 </table>
 <table align="left">
+	<tr><th colspan="3">Typical proof</th></tr>
 	<tr><th></th><th>Inference rule</th><th>Rationale</th></tr>
 	<tr><td>1.</td><td>~P &#x2228; Q, Q &rArr; R &#9500; ~P &#x2228; R</td><td>Apply [~P &#x2228; Q/P &rArr; Q][~P &#x2228; R/P &rArr; R] to <i>transitivity of implication</i></td></tr>
 	<tr><td>2.</td><td>~~P &#x2228; Q, Q &rArr; R &#9500; ~~P &#x2228; R</td><td>Apply [~P/P] to (1)</td></tr>
@@ -495,14 +500,49 @@ classical logic, since we have so far only derived <i>transitivity of implicatio
 <p>We have a counterexample for Lisp/Prolog logic: if P is <i>false</i> while R and S are both <i>true</i>, the truth value imputed to Q is unconstrained.  This is 
 	not a material issue for our other truth-table described logics, but for Lisp/Prolog assigning Q a truth value of <i>unknown</i> causes Q &#x2228; S to be 
 	<i>unknown</i>.  Our givens only guarantee that P and R have classical truth values.</p>
-<p>While this proof will remain invalid for Belnap's four-valued logic even after we can verify <i>transitivity of implication</i> for non-classical logics,
-	this inference rule is a semantic consequence for that logic.</p>
+<p>Once we have verified that truth table calculations and (classical) symbolic logic calculations are equivalent, the exercise that <i>constructive dilemma</i> holds for Belnap's four-valued logic is doable.</p>
 <table align="center" style="clear:both">
 	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
 	<tr><td align="center">P &rArr; Q, R &rArr; S, P &#x2228; R &#9500; Q &#x2228; S</td><td align="left" rowspan="4">Constructive dilemma</td><td align="left" rowspan="4">Lisp/Prolog</td><td rowspan="4">Defeasible logics; Intuitionistic?</td></tr>
 	<tr><td align="center" style="background:yellow">P &rArr; Q, (R &#9500; S), P &#x2228; R &#9500; Q &#x2228; S</td></tr>
 	<tr><td align="center" style="background:yellow">(P &#9500; Q), R &rArr; S, P &#x2228; R &#9500; Q &#x2228; S</td></tr>
 	<tr><td align="center" style="background:yellow">(P &#9500; Q), (R &#9500; S), P &#x2228; R &#9500; Q &#x2228; S</td></tr>
+</table>
+
+<h2 id="absorption" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Absorption</h2>
+<table align="left">
+	<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td></td><td>P &rArr; Q</td><td>Given</td></tr>
+	<tr><td>2.</td><td></td><td>P</td><td>Hypothesis</td></tr>
+	<tr><td>3.</td><td></td><td>Q</td><td><i>modus ponens</i> on (1), (2)</td></tr>
+	<tr><td>4.</td><td></td><td>P & Q</td><td>Conjunction introduction on (2), (3)</td></tr>
+	<tr><td>5.</td><td>P &#9500; (P & Q)</td><td></td><td>Syntactical entailment introduction on (2), (4)</td></tr>
+	<tr><th colspan="4">Classical logic</th></tr>
+	<tr><td>5a.</td><td></td><td>P &rArr; (P & Q)</td><td>Implication introduction on (2), (4)</td></tr>
+</table>
+<table align="right">
+	<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td></td><td>P &rArr; (P & Q)</td><td>Given</td></tr>
+	<tr><td>2.</td><td></td><td>P</td><td>Hypothesis</td></tr>
+	<tr><td>3.</td><td></td><td>P & Q</td><td><i>modus ponens</i> on (1), (2)</td></tr>
+	<tr><td>4.</td><td></td><td>Q</td><td>Conjunction elimination on (3)</td></tr>
+	<tr><td>5.</td><td>P &#9500; Q</td><td></td><td>Syntactical entailment introduction on (2), (4)</td></tr>
+	<tr><th colspan="4">Classical logic</th></tr>
+	<tr><td>5.</td><td>P &rArr; Q</td><td>Implication introduction on (2), (4)</td></tr>
+</table>
+<p>This technical manuever, is the rationale for "updating which statements are known".  The inverse direction does not have even a terse technical name.</p>
+<p>The failure for Belnap's four-valued logic, is a semantic consequence of <i>unknown &rArr; contradiction</i> and <i>contradiction &rArr; unknown</i>, both 
+	evaluating to <i>true</i>.</p>
+<p>The forward direction is generally useful in machine proofs.  The inverse direction is useful for preparing statements for long-term memorization.</p>
+<p>The direct use of <i>modus ponens</i>, means we have analogs for syntactical entailment rules.  One of the inverse rules, suppresses the axiomatic identity entailment rule.</p>
+<table align="center" style="clear:both">
+	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
+	<tr><td align="center" style="background:yellow">(P &#9500; Q) &#9500; (P &#9500; P & Q)</td><td align="left">Absorption</td><td align="left">None</td><td>Defeasible logics</td></tr>
+	<tr><td align="center" style="background:yellow">P &rArr; Q &#9500; (P &#9500; P & Q)</td><td align="left">Absorption</td><td align="left">None</td><td>Defeasible logics</td></tr>
+	<tr><td align="center">P &rArr; Q &#9500; P &rArr; (P & Q)</td><td align="left">Absorption</td><td align="left">Belnap</td><td>Defeasible logics</td></tr>
+	<tr><td align="center" style="background:yellow">(P &#9500; P & Q) &#9500; (P &#9500; Q)</td><td align="left" style="background:yellow">Suppress identity entailment</td><td align="left">None</td><td>Defeasible logics</td></tr>
+	<tr><td align="center" style="background:yellow">P &rArr; (P & Q) &#9500; (P &#9500; Q)</td><td align="left"></td><td align="left">None</td><td>Defeasible logics</td></tr>
+	<tr><td align="center">P &rArr; (P & Q) &#9500; P &rArr; Q</td><td align="left"></td><td align="left">Belnap</td><td>Defeasible logics</td></tr>
 </table>
 
 <h2 id="reductio-ad-absurdum" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Proof by contradiction</h2>
@@ -1111,14 +1151,63 @@ In classical logic, this is known as <i>proof by contradiction</i>; other names 
 	<p>That is, the Law of the Excluded Middle <i>~P &#x2228; P</i> is self-sufficient for using <i>commutativity of &#x2228;</i> on itself, for Lisp/Prolog logic, to its more 
 		usual representation in the literature, <i>P &#x2228; ~P</i></p>
 
-<!-- 		
 <h2 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Revisiting transitivity of implication</h2>
 <p>We are now in a position to re-implement, with symbolic logic, the truth-table calculations about <i>transitivity of implication</i> for our 
-	non-classical logics of interest.  To do this check with symbolic logic, would be circular reasoning -- we used <i>transitivity of implication</i> to 
-	derive the <i>Law of the Excluded Middle</i> i.e. <i>principle of bivalence</i>.</p>
+	non-classical logics of interest.  To do this check for classical logic, would be circular reasoning -- we used <i>transitivity of implication</i> to 
+	derive <i>constructive dilemma</i>.</p>
+<table align="left">
+	<tr><th colspan="3">Classical logic</th></tr>
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>P &rArr; Q</td><td>Given</td></tr>
+	<tr><td>2.</td><td>Q &rArr; R</td><td>Given</td></tr>
+	<tr><td>3.</td><td>~P &#x2228; Q</td><td>Definition of &rArr;</td></tr>
+	<tr><td>4.</td><td>~Q &#x2228; R</td><td>Definition of &rArr;</td></tr>
+	<tr><td>5.</td><td>((~P &#x21A6; <i>false</i>) & (Q &#x21A6; <i>true</i>)) &#x2228; ((~P &#x21A6; <i>true</i>) & (Q &#x21A6; <i>true</i>)) &#x2228; ((~P &#x21A6; <i>true</i>) & (Q &#x21A6; <i>false</i>))</td><td>Apply [~P/P] to Invert (P &#x2228; Q) &#x21A6; <i>true</i> (Kleene's weak three-valued logic)</td></tr>
+	<tr><td>6.</td><td>((~Q &#x21A6; <i>false</i>) & (R &#x21A6; <i>true</i>)) &#x2228; ((~Q &#x21A6; <i>true</i>) & (R &#x21A6; <i>true</i>)) &#x2228; ((~Q &#x21A6; <i>true</i>) & (R &#x21A6; <i>false</i>))</td><td>Apply [~Q/P,R/Q] to Invert (P &#x2228; Q) &#x21A6; <i>true</i> (Kleene's weak three-valued logic)</td></tr>
+	<tr><td>7.</td><td>(((~P &#x21A6; <i>false</i>) & (Q &#x21A6; <i>true</i>)) &#x2228; ((~P &#x21A6; <i>true</i>) & (Q &#x21A6; <i>true</i>)) &#x2228; ((~P &#x21A6; <i>true</i>)& (Q &#x21A6; <i>false</i>)))<br>& (((~Q &#x21A6; <i>false</i>) & (R &#x21A6; <i>true</i>)) &#x2228; ((~Q &#x21A6; <i>true</i>) & (R &#x21A6; <i>true</i>)) &#x2228; ((~Q &#x21A6; <i>true</i>) & (R &#x21A6; <i>false</i>)))</td><td>Conjunction introduction on (5),(6)</td></tr>
+</table>
 <p>The general strategy, is to start with the translations of the truth table descriptions for the givens, then rearrange into a very large logical or of 
-	logical and clauses, then apply proof by cases to verify the conclusion holds.</p>
--->
+	logical and clauses, then apply proof by cases to verify the conclusion holds.  As an example, let's start to work this for Kleene's weak three-valued logic. (This will also
+	represent the circular reasoning, for checking classical logic.)</p>
+<table align="right">
+	<tr><th colspan="2">(P &rArr; Q) &#x21A6; <i>true</i></th></tr>
+	<tr><th>P</th><th>Q</th></tr>
+	<tr><td><i>true</i></td><td><i>true</i></td></tr>
+	<tr><td><i>false</i></td><td><i>true</i></td></tr>
+	<tr><td><i>false</i></td><td><i>false</i></td></tr>
+</table>	
+<table align="right" style="clear:right">
+	<tr><th colspan="4">((P &rArr; Q) & (Q &rArr; R)) &#x21A6; <i>true</i></th></tr>
+	<tr><th>P</th><th>Q</th><th>R</th><th>P &rArr; R</th></tr>
+	<tr><td><i>true</i></td><td><i>true</i></td><td><i>true</i></td><td><i>true</i></td></tr>
+	<tr><td><i>false</i></td><td><i>true</i></td><td><i>true</i></td><td><i>true</i></td></tr>
+	<tr><td><i>false</i></td><td><i>false</i></td><td><i>true</i></td><td><i>true</i></td></tr>
+	<tr><td><i>false</i></td><td><i>false</i></td><td><i>false</i></td><td><i>true</i></td></tr>
+</table>	
+<p>After the sixth step, the full details needed for an explicit symbolic logic proof are very verbose.  If we did not have the shorter truth table formatted 
+	calculation, our strategy would be:</p>
+<ul style="clear:left">
+<li>Rearrange the seventh step, with distributivity and associativity inference rules, to a logical or &#x2228; 
+	of nine propositions that are themselves each a logical and & of four propositions.  (There are generalized associativity principles that 
+	allow suppressing the parentheses as "unimportant", but we have not proven them.)</li>
+<li>For each of the nine propositions, use them as hypotheses to either:
+	<ul>
+		<li>Prove that the case is actually false, which enables removal by or-elimination, or</li>
+		<li>Introduce a syntactical entailment for use in constructive dilemma, to reduce the syntactical complexity of the case.  It is this reduction 
+			that will <i>transitivity of implication</i>, causing circular reasoning for classical logic.</li>
+	</ul>
+</li>
+<li>For each surviving case, verify what the truth value of ~P &#x2228; R i.e. P &rArr; R, is.  If all surviving cases have this <i>true</i>, 
+	then we have <i>transitivity of implication</i> for that logic.</li>
+</ul>
+<p>For emphasis:</p>
+<ul>
+	<li>The process of copying only consistent rows (where Q is equal in both the P &rArr; Q and Q &rArr; R reference table copies),
+		has eliminated five of the nine cases as false, and also applied the required syntactical complexity reduction.</li>
+	<li>Each row corresponds to a proposition that is a logical and & of three propositions representing the truth values 
+		of the propositional variables.</li>
+	<li>The enumeration of the rows, corresponds to a logical or &#x2228; of the propositions represented by each row.</li>
+</ul>
 
 <!-- restart editing -->
 
@@ -1167,32 +1256,6 @@ implication introduction is classical logic only
 <table align="center" style="clear:both">
 	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
 	<tr><td align="center">P &rArr; Q, R &rArr; S, ~Q &#x2228; ~S &#9500; ~P &#x2228; ~R</td><td align="left">Destructive dilemma</td><td align="left">None</td><td>Defeasible logics; Intuitionistic?</td></tr>
-</table>
-
-<h2 id="absorption" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Absorption</h2>
-<table align="left">
-	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
-	<tr><td>1.</td><td>P &rArr; Q</td><td>Given</td></tr>
-	<tr><td>2.</td><td>P</td><td>Hypothesis (for implication introduction)</td></tr>
-	<tr><td>3.</td><td>Q</td><td><i>modus ponens</i> on (1), (2)</td></tr>
-	<tr><td>4.</td><td>P & Q</td><td>Conjunction introduction on (2), (3)</td></tr>
-	<tr><td>5.</td><td>P &rArr; (P & Q)</td><td>Implication introduction on (2), (4)</td></tr>
-</table>
-<table align="right">
-	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
-	<tr><td>1.</td><td>P &rArr; (P & Q)</td><td>Given</td></tr>
-	<tr><td>2.</td><td>P</td><td>Hypothesis (for implication introduction)</td></tr>
-	<tr><td>3.</td><td>P & Q</td><td><i>modus ponens</i> on (1), (2)</td></tr>
-	<tr><td>4.</td><td>Q</td><td>Conjunction elimination on (3)</td></tr>
-	<tr><td>5.</td><td>P &rArr; Q</td><td>Implication introduction on (2), (4)</td></tr>
-</table>
-<p>This technical manuever, is the rationale for "updating which statements are known".  The inverse direction does not have even a terse technical name.</p>
-<p>The failure for Belnap's four-valued logic, is a semantic consequence of <i>unknown &rArr; contradiction</i> and <i>contradiction &rArr; unknown</i>, both 
-	evaluating to <i>true</i>.</p>
-<table align="center" style="clear:both">
-	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
-	<tr><td align="center">P &rArr; Q &#9500; P &rArr; (P & Q)</td><td align="left">Absorption</td><td align="left">Belnap</td><td>Defeasible logics</td></tr>
-	<tr><td align="center">P &rArr; (P & Q) &#9500; P &rArr; Q</td><td align="left"></td><td align="left">Belnap</td><td>Defeasible logics</td></tr>
 </table>
 
 <h2 id="transitivity-of-iff" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Transitivity of &hArr;</h2>
