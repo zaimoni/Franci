@@ -96,6 +96,9 @@ strict digraph {
     conjunction_elimination [label="& elimination"]
     idempotence_of_and [label="Syntactical Idempotence of &"]
 
+    absorption [label="Absoprtion" style=filled fillcolor=magenta4 fontcolor=white tooltip="~Belnap"]
+    { modus_ponens conjunction_introduction implication_introduction } -> absorption
+
     unique_truthtable_row_syntactical_entailment -> {conjunction_introduction conjunction_elimination}
     conjunction_elimination -> idempotence_of_and
 
@@ -146,6 +149,9 @@ strict digraph {
     substitution_commutativity_of_or -> taking_contrapositive
     {introduce_double_negation remove_double_negation} -> taking_contrapositive
 
+    destructive_dilemma [label="Destructive dilemma" style=filled fillcolor=darkred fontcolor=white tooltip="~Lisp/Prolog"]
+    { taking_contrapositive constructive_dilemma} -> destructive_dilemma
+
     apply_negation_to_both_sides_of_iff [label="Apply ~ to both sides of &hArr;"]
     remove_negation_from_both_sides_of_iff [label="Remove ~ from both sides of &hArr;"]
     {conjunction_elimination conjunction_introduction} -> apply_negation_to_both_sides_of_iff
@@ -179,9 +185,9 @@ strict digraph {
         substitution_commutativity_of_and substitution_commutativity_of_or taking_contrapositive modus_tollens modus_tollens_for_syntactical_entailment
     }
 
-    classical_law_of_contradiction [label="Classical law of contradiction" style="filled" fillcolor=magenta4 fontcolor=white]
+    classical_law_of_contradiction [label="Classical law of contradiction" style="filled" fillcolor=magenta4 fontcolor=white tooltip="~Belnap"]
     {modus_ponens modus_tollens proof_by_contradiction} -> classical_law_of_contradiction
-    implication_introduction -> classical_law_of_contradiction [headlabel="~Belnap"]
+    implication_introduction -> classical_law_of_contradiction
 
     exportation_and_to_implication [label="exportation from & to &rArr;"]
     importation_implication_to_and [label="importation from &rArr; to &"]
@@ -275,6 +281,9 @@ strict digraph {
 
     transitivity_of_implication_nonclassical [label="Transitivity of &rArr;" style="filled" fillcolor=magenta4 fontcolor=white tooltip="Kleene weak, Kleene strong, Lisp/Prolog, Franci"]
     translation_of_truth_tables_to_from_symbolic_logic -> transitivity_of_implication_nonclassical -> transitivity_of_implication
+
+    translation_of_truth_tables_to_from_symbolic_logic -> constructive_dilemma [headlabel=Belnap]
+    translation_of_truth_tables_to_from_symbolic_logic -> absorption [headlabel=Belnap]
 
     subgraph clusterTransitivityImplication {
         transitivity_of_implication_classical transitivity_of_implication_nonclassical transitivity_of_implication

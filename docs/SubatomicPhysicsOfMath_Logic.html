@@ -29,6 +29,7 @@
 		<li><a href="#contrapositive-1">Taking the contrapositive</a></li>
 		<li><a href="#modus-tollens"><i>Modus Tollens</i></a></li>
 		<li><a href="#modus-tollens-syntactical-entailment"><i>modus tollens</i> for &#9500;</a></li>
+		<li><a href="#destructive-dilemma">Destructive Dilemma</a></li>
 		<li><a href="#classical-law-of-contradiction">Classical Law of Contradiction</a></li>
 		<li><a href="#exportation">Exportation</a></li>
 		<li><a href="#de-morgan">De Morgan's Laws</a></li>
@@ -40,7 +41,6 @@
 		<li><a href="#translating-truth-tables">Translating to and from truth tables</a></li>
 		<li><a href="#principle-of-explosion">Principle of explosion</a></li>
 		<li><a href="#commutativity-or-lisp">Repairing commutativity of &#x2228; for Lisp/Prolog logic</a></li>
-		<li><a href="#destructive-dilemma">Destructive Dilemma</a></li>
 		<li><a href="#transitivity-of-iff">Transitivity of &hArr;</a></li>
 		<li><a href="#commutativity-of-implication">Commutativity of Implication</a></li>
 	</ol>
@@ -141,7 +141,7 @@ in parentheses.  The non-standard parts of the following table, have background 
 	but not any of the truth table described non-classical logics we are considering.</p>
 <p>Once we have verified the analogies that allow translating a truth table verification of a propositional calculus inference rule, to a symbolic logic verification of said 
 	inference rule, the exercise of verifying <i>transitivity of implication</i> (or lack thereof) for all five truth table-described nonclassical logics 
-	can be done.  (This verification will be classical logic reasoning about non-classical logics.)</p>
+	can be done.  (This verification will be classical logic reasoning about a given non-classical logic.)</p>
 <table align="center">
 	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
 	<tr><td align="center">P &rArr; Q, Q &rArr; R &#9500; P &rArr; R</td><td align="left">Transitivity of implication</td><td align="left">Belnap</td><td>Defeasible logics</td></tr>
@@ -532,7 +532,7 @@ classical logic, since we have so far only derived <i>transitivity of implicatio
 </table>
 <p>This technical manuever, is the rationale for "updating which statements are known".  The inverse direction does not have even a terse technical name.</p>
 <p>The failure for Belnap's four-valued logic, is a semantic consequence of <i>unknown &rArr; contradiction</i> and <i>contradiction &rArr; unknown</i>, both 
-	evaluating to <i>true</i>.</p>
+	evaluating to <i>true</i>.  The other four non-classical logics have truth-table calculations as classical logic proofs, for the version that fails Belnap's four-valued logic.</p>
 <p>The forward direction is generally useful in machine proofs.  The inverse direction is useful for preparing statements for long-term memorization.</p>
 <p>The direct use of <i>modus ponens</i>, means we have analogs for syntactical entailment rules.  One of the inverse rules, suppresses the axiomatic identity entailment rule.</p>
 <table align="center" style="clear:both">
@@ -708,7 +708,26 @@ In classical logic, this is known as <i>proof by contradiction</i>; other names 
 	<tr><td align="center">~(A &#x21A6; <i>true</i>) &#x27DB; ~A</td><td align="left"><span style="background:yellow">Equivalence of ~A, and A not evaluating to <i>true</i></span></td><td align="left">Classical</td></tr>
 	<tr><td align="center">~(A &#x21A6; <i>false</i>) &#x27DB; A</td><td align="left"><span style="background:yellow">Equivalence of A, and A not evaluating to <i>false</i></span></td><td align="left">Classical</td></tr>
 </table>
-	
+
+<h2 id="destructive-dilemma" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Destructive Dilemma</h2>
+<table align="left">
+	<tr><th colspan="3">Logics other than Lisp/Prolog</th></tr>
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>P &rArr; Q</td><td>Given</td></tr>
+	<tr><td>2.</td><td>R &rArr; S</td><td>Given</td></tr>
+	<tr><td>3.</td><td>~Q &#x2228; ~S</td><td>Given</td></tr>	
+	<tr><td>4.</td><td>~Q &rArr; ~P</td><td>Take contrapositive of (1)</td></tr>
+	<tr><td>5.</td><td>~S &rArr; ~R</td><td>Take contrapositive of (2)</td></tr>
+	<tr><td>6.</td><td>~P &#x2228; ~R</td><td>Constructive dilemma on (4),(5),(3)</td></tr>
+</table>
+<p>By analogy with <i>constructive dilemma</i> and <i>modus tollens</i>,  we would expect the following:</p>
+<p align="center">P &rArr; Q, R &rArr; S, ~Q &#x2228; ~S &#9500; ~P &#x2228; ~R</p>
+<p>Lisp/Prolog logic has a comparable counter-example, to its counter-example for <i>constructive dilemma</i>.</p>
+<table align="center" style="clear:both">
+	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
+	<tr><td align="center">P &rArr; Q, R &rArr; S, ~Q &#x2228; ~S &#9500; ~P &#x2228; ~R</td><td align="left">Destructive dilemma</td><td align="left">Lisp/Prolog</td><td>Defeasible logics; Intuitionistic?</td></tr>
+</table>
+
 <h2 id="classical-law-of-contradiction" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Classical Law of Contradiction</h2>
 <table align="right">
 	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
@@ -721,7 +740,8 @@ In classical logic, this is known as <i>proof by contradiction</i>; other names 
 	<tr><td>7.</td><td>~P</td><td>Proof by contradiction [on (6)]</td></tr>
 </table>
 <p>This way of introducing relevance between two nonstrict implications, is known as the classical law of contradiction.  The given proof is for classical logic, due to the use of <i>implication introduction</i>.</p>
-<p>This does not work for Belnap's four-valued logic, as a semantic consequence of <i>unknown</i> &rArr; <i>contradiction</i> evaluating to <i>true</i>.</p>
+<p>This does not work for Belnap's four-valued logic, as a semantic consequence of <i>unknown</i> &rArr; <i>contradiction</i> evaluating to <i>true</i>.  The other non-classical logics 
+   will have classical logic proofs using the truth table formalism, as exercises once that is established.</p>
 <p>Replacing one of givens with a corresponding syntactical inference rule, is a mechanical alteration.</p>
 <table align="center" style="clear:both">
 	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
@@ -774,7 +794,7 @@ In classical logic, this is known as <i>proof by contradiction</i>; other names 
 </table>
 <p>This is a sort of a packing/unpacking operation for nonstrict implication.  The "imported syntax" (using logical and & in the hypothesis) is the usual format for long-term 
 	learning, while the "exported" syntax (using nonstrict implication &rArr; in the consequence) is more likely to be immediately usable.</p>
-<p>These proofs are for classical logic.  We'll sketch how to repair them for the non-classical logics we are considering, later.</p>
+<p>These proofs are for classical logic.  All five non-classical logics we are considering, will have truth table calculations for this.</p>
 <table align="center" style="clear:both">
 	<tr><th colspan="4">Proven for: Classical logic</th></tr>
 	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
@@ -1210,53 +1230,6 @@ In classical logic, this is known as <i>proof by contradiction</i>; other names 
 </ul>
 
 <!-- restart editing -->
-
-<h2 id="destructive-dilemma" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Destructive Dilemma</h2>
-<!--
-implication introduction is classical logic only	
-<table align="right">
-	<tr><th colspan="3">Weak Kleene, Lisp/Prolog</th></tr>
-	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
-	<tr><td>1.</td><td>P &rArr; Q</td><td>Given</td></tr>
-	<tr><td>2.</td><td>R &rArr; S</td><td>Given</td></tr>
-	<tr><td>3.</td><td>~Q &#x2228; ~S</td><td>Given</td></tr>	
-
-	<tr><td>3a.</td><td>~P &#x2228; P</td><td><span style="background:yellow">Classical left truth value of &#x2228; on (1)</span></td></tr>
-	<tr><td>3b.</td><td>~R &#x2228; R</td><td><span style="background:yellow">Classical left truth value of &#x2228; on (2)</span></td></tr>
-
-	<tr><td>4.</td><td>P & R</td><td>Hypothesis (this expression has a classical truth value: (3a),(3b))</td></tr>	
-	<tr><td>5.</td><td>P</td><td>Conjunction elimination on (4)</td></tr>	
-	<tr><td>6.</td><td>R</td><td>Conjunction elimination on (4)</td></tr>	
-	<tr><td>7.</td><td>Q</td><td><i>modus ponens</i> on (1),(6)</td></tr>	
-	<tr><td>8.</td><td>S</td><td><i>modus ponens</i> on (2),(6)</td></tr>	
-	<tr><td>9.</td><td>~~Q</td><td>Introduce double negation on (7)</td></tr>	
-	<tr><td>10.</td><td>~~S</td><td>Introduce double negation on (8)</td></tr>	
-	<tr><td>11.</td><td>~~Q & ~~S</td><td>conjunction introduction on (9),(10)</td></tr>	
-	<tr><td>12.</td><td>(P & R) &rArr; ~~Q & ~~S</td><td>Implication introduction on (4),(11)</td></tr>	
-	<tr><td>13.</td><td>~~(~Q &#x2228; ~S)</td><td>Introduce double negation on (3)</td></tr>	
-	<tr><td>14.</td><td>~(~~Q & ~~S)</td><td>De Morgan's Law <span style="background:yellow">-- unwrap from not-or</span></td></tr>
-	<tr><td>15.</td><td>~(P & R)</td><td><i>modus tollens</i> on (12), (14)</td></tr>	
-	<tr><td>16.</td><td>~P &#x2228; ~R</td><td>De Morgan's Law <span style="background:yellow">-- unwrap from not-and</span></td></tr>
-</table>
--->
-<table align="left">
-	<tr><th colspan="3">Logics other than Lisp/Prolog</th></tr>
-	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
-	<tr><td>1.</td><td>P &rArr; Q</td><td>Given</td></tr>
-	<tr><td>2.</td><td>R &rArr; S</td><td>Given</td></tr>
-	<tr><td>3.</td><td>~Q &#x2228; ~S</td><td>Given</td></tr>	
-	<tr><td>4.</td><td>~Q &rArr; ~P</td><td>Take contrapositive of (1)</td></tr>
-	<tr><td>5.</td><td>~S &rArr; ~R</td><td>Take contrapositive of (2)</td></tr>
-	<tr><td>6.</td><td>~P &#x2228; ~R</td><td>Constructive dilemma on (4),(5),(3)</td></tr>
-</table>
-<p>By analogy with <i>constructive dilemma</i> and <i>modus tollens</i>,  we would expect the following:</p>
-<p align="center">P &rArr; Q, R &rArr; S, ~Q &#x2228; ~S &#9500; ~P &#x2228; ~R</p>
-<p>The proof for weak Kleene three-valued logic, and Lisp/Prolog logic, may be converted to a classical logic proof by omitting 
-	steps 3a and 3b.  Recall that the hypothesis step, needs no legality check for classical logic.</p>
-<table align="center" style="clear:both">
-	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
-	<tr><td align="center">P &rArr; Q, R &rArr; S, ~Q &#x2228; ~S &#9500; ~P &#x2228; ~R</td><td align="left">Destructive dilemma</td><td align="left">None</td><td>Defeasible logics; Intuitionistic?</td></tr>
-</table>
 
 <h2 id="transitivity-of-iff" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Transitivity of &hArr;</h2>
 <table align="right">
