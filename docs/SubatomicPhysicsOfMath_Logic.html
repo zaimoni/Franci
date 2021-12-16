@@ -370,7 +370,7 @@ For two truth-valued expressions A and B, if whenever A evaluates to a truth val
 	<tr><th>Rationale</th><th></th><th>Name</th></tr>
 	<tr><td align="center">P,Q &#9500; P</td><td align="left" valign="top" rowspan="2"></td></tr>
 	<tr><td align="center">P,Q &#9500; Q</td></tr>
-	<tr><td align="center" style="background: yellow">(A, A &#9500; B) &#9500; (A &#9500; B)</td><td style="background: yellow">Idempotence of hypotheses of &#9500; (example of schema)</td></tr>
+	<tr><td align="center" style="background: yellow">A, (A &#9500; B) &#9500; (A &#9500; B)</td><td style="background: yellow">Idempotence of hypotheses of &#9500; (example of schema)</td></tr>
 </table>
 <p>Of the above, only <i>idempotence of &</i> can be said to be formally derivable (by evaluating either of the uniform substitutions, named in the rationale).  The others are meaning-based, i.e. semantic, translations 
 	between different descriptions of logical and &.</p>
@@ -390,7 +390,7 @@ structural rule for &#9500;, is that the labeling order of statements used in a 
 </ul>
 <table align="center">
 	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
-	<tr><td align="center">P & Q &#x27DB; Q & P</td><td>Commutativity of &</td><td>None</td><td>None</td></tr>
+	<tr><td align="center">P & Q &#x27DB; Q & P</td><td><span style="background:yellow">(syntactical)</span> Commutativity of &</td><td>None</td><td>None</td></tr>
 	<tr><td align="center">A &#x27DB; A[Q & P/P & Q]</td><td>Commutativity of &</td><td>Lisp/Prolog</td><td>None</td></tr>
 	<tr><td align="center">A &#x27DB; A[Q &#x2228; P/P &#x2228; Q]</td><td>Commutativity of &#x2228;</td><td>Lisp/Prolog</td><td>None</td></tr>
 </table>
@@ -420,6 +420,11 @@ structural rule for &#9500;, is that the labeling order of statements used in a 
 <i>commutativity of &</i> as well, to justify ignoring the relative order of preceding statements when using inference rules.</p>
 <p>In general, an associativity principle allows notation to omit internal grouping parentheses. We now consider <i>P & Q & R</i> unambiguous as a top-level statement, 
 	syntactically equivalent to both choices of parenthesization.</p>
+<p>There is a corresponding principle of generalized associativity of &, but we do not yet have the formal notation to prove it. It is credible, that
+	enough uses of conjunction elimination, followed by enough uses of conjunction introduction, would allow syntactical equivalence between any two fixed parenthesizations 
+	of an arbitrary (finite) number of clauses.  Likewise, there is a corresponding rearrangement principle of & that requires both associativity of & and 
+	commutativity of &, but we don't have the notation to prove that either.  I will use these principles in the reference tables supporting 
+	this summary.</p>
 <table align="center" style="clear:both">
 	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
 	<tr><td align="center">P & Q & R &#x27DB; (P & Q) & R &#x27DB; P & (Q & R)</td><td align="left" valign="top"><span style="background:yellow">(syntactical)</span> Associativity of &</td><td align="left" valign="top" rowspan="2">None</td><td align="left" valign="top" rowspan="2">None</td></tr>
@@ -861,6 +866,8 @@ In classical logic, this is known as <i>proof by contradiction</i>; other names 
 </table>
 <p>We'll return to this later, for the non-classical logics.  As with logical and &, when we have <i>associativity of</i> &#x2228; we consider 
 	<nobr><i>P &#x2228; Q &#x2228; R</i></nobr> unambiguous, syntactically equivalent to both sides of <i>associativity of</i> &#x2228;.</p>
+<p>Like logical and &, we have principles of generalized associativity of &#x2228;, and rearrangement of &#x2228;.  As before, we do 
+	not yet have the notation to prove them.</p>
 <table align="center" style="clear:both">
 	<tr><th colspan="4">Proven for: Classical logic</th></tr>
 	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
@@ -985,8 +992,221 @@ In classical logic, this is known as <i>proof by contradiction</i>; other names 
 	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
 	<tr><td align="center">P &rArr; Q, R &rArr; Q, P &#x2228; R  &#9500; Q</td><td align="left">Proof by cases</td><td align="left">None</td><td>Defeasible logics</td></tr>
 </table>
+<p>At this point, I considered introducing a proof of generalized associativity of &.  This did not work out, because we do not yet have a way of
+	counting how many clauses are being subject to generalized associtivity.
 
-<h2 id="excluded-middle" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Law of Excluded Middle</h2>
+<!--
+<h2 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; background:orange">Generalized Associativity</h2>
+<p>To simplify our notation, we would like to have a notion of generalized associativity for logical and & and logical or &#x2228;.  That is, we would like the exact 
+	parenthesization to not matter for <i>A1</i> & <i>A2</i> & ... & <i>An</i> or <i>A1</i> &#x2228; <i>A2</i> &#x2228; ... &#x2228; <i>An</i>.</p>
+<p>Traditionally, this is proven <b>after</b> we have natural numbers 0, 1, ... , using strong induction.  But for this exercise, we do not have, formally, 
+	(a model of) natural numbers.  That is, we do not have the notation to count the number of clauses, so we cannot just describe the algorithm: 
+	"use conjunction elimination n times, then use conjunction introduction n-1 times".</p>
+<p>We say an inductive proof, i.e. proof by induction, is a proof whose formalism is a proof by cases, such that we have:</p>
+<ul>
+	<li>At least one basis step i.e. case B, that is either axiomatically or provably true.</li>
+	<li>At least one induction step i.e. case Q, that is provably true from a premise P that is (usually constructively) nameable from the induction step itself.  We say that:
+		<ul>
+			<li>The statement to be proven by induction Q, is a successor statement of the premise P named from the induction step.  There may be many successor statements Q for 
+				a specific premise P</li>
+			<li>The premise P named from the induction step, is a predecessor statement of the statement to be proven by induction Q.  There can be only one predecessor statement 
+				P for a given induction step Q.</li>
+		</ul></li>
+</ul>
+<p>Taking statements to be first order, the predecessor statement and successor statement "relations" are similar to syntactical entailment &#9500; .  We thus expect these 
+	proof-specific "relations" to be second order on the domain of discourse truth-valued expressions.  We consider the induction step Q proven for all instances that are 
+	reachable from any of the basis steps B by repeatedly applying the proof-specific successor statement "relation".  When reasoning about inference rules (which are second 
+	order on domain of discourse truth-valued expressions), these proof-specific "relations" are third order on domain of discourse truth-valued expressions.</p>
+<p>The effect is to prove the induction step Q, for all instances that are reachable from the basis step(s) B, by repeated use of the successor statement "relation".  My intention is 
+	that this improvised definition, has all of weak natural induction, strong natural induction, finite induction, and transfinite induction as specializations.  That is, 
+	the intent is to allow proving a logical and & statement with potentially unbounded clauses(!).  This behavior is similar to the universal quantifier <span style="transform:rotate(180deg);display:inline-block">A</span>.</p>
+<ul>
+	<li>The intended interpretation of <b>TruthValued</b>, is the domain of discourse of all syntactically truth-valued expressions.  (Whether these actually <b>have</b> truth values, i.e. are statements, depends on the logic applied to them.)</li>
+	<li>The intended interpretation of <b>TruthValues</b>, is the domain of discourse of all truth values for a given logic.</li>
+	<li>To denotate that a term a or variable x is in a domain of discourse, we will abuse the to-be-described &#x2208; notation.  E.g., for a propositional variable P, 
+		we have P &#x2208; <b>TruthValued</b> with intended interpretation
+		"P is a truth-valued expression".  Likewise, we have <i>true</i> &#x2208; <b>TruthValues</b> for all of the logics we are considering.</li>
+	<li>The axiomatic identity inference rule <i>A</i> &#9500; <i>A</i>, may be thought of as evaluating all statements <i>A</i> to themselves.  Since we have a structural rule 
+		that de-duplicates the hypotheses of an inference rule, this never infers any new statements not already present.</li>
+	<li>As an example of an inference rule that takes a single hypothesis, consider the syntactical equivalence <i>idempotence of &</i>, which summarizes a pair of inference rules.  In the reverse direction, 
+		this takes an arbitrary statement P and infers P & P.  The forward direction is only applicable to statements interpretable as instances of P & P, and infers P.</li>
+	<li>The notation <i>A</i> &#x21A6; <i>true</i>, etc., we introduced, can be thought of as stating that a statement A evaluates to the truth value <i>true</i>, etc.  That suggests &#x21A6; should 
+		have a domain contained within the domain of discourse all truth valued expressions, and range truth values.  Technically, &#x21A6; is taking the logic as an 
+		implicit parameter.  These are predicates on the domain of discourse of syntactically truth-valued expressions.</li>
+</ul>
+<p>In particular, it is tempting to abuse notation yet to be defined and say that:</p>
+<ul>
+	<li>For domains of discourse D,E we say f:D <span style="position:relative; top: -2px">&#x2192;</span> E has domain D and range E.  We say f has type D <span style="position:relative; top: -2px">&#x2192;</span> E.  
+		If we have an explicit definition f(x) := y, we have f(x) &#x21A6; y with intended interpretation "f of x evaluates to y".  Alternately,
+		we have x &#x21A6;<sub>f</sub> y with intended interpretation "f of x evaluates to y".</li>
+	<li>The syntactical inference rules summarized by <i>idempotence of &</i> both have type <b>TruthValued</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValued</b>.</li>
+	<li>The notation <i>A</i> &#x21A6; <i>true</i>, etc., we introduced, has type <b>TruthValued</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b>.</li>
+</ul>
+<p>With this notational extension, we see that the procedure for naming the predecessor statement P of the induction step Q for 
+	an induction proof, has type <b>TruthValued</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValued</b> restricted to "when it works".</p>
+<p>Now, we have presumed that all statements either are, or are not, interpretable as having a "top-level" logical connective such as logical not ~,
+	logical and &, or logical or &#x2228;.  Our rationale for wanting a generalized associativity principle, is that uniform substitution
+	into <i>associativity of &</i>, etc. can replace a propositional variable (say, Q) that does <b>not</b> have a top-level logical connective &, with 
+	a formal statement S & T that <b>does</b> have a top-level logical connective &.</p>
+<p>Let's see if we have what we need to prove syntactical generalized associativity of &.  [Uniform substitution generalized associativity will need more work, for the non-classical logics.]  Let Connective<sub>&</sub>:<b>TruthValued</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b> have 
+intended interpretation "this statement has a top-level logical connective of &".  We expect that:</p>
+<table align="center">
+<tr><td>~Connective<sub>&</sub>(T) for all truth values T</td><td rowspan="4"><span style="background:yellow">intended interpretation of Connective<sub>&</sub></span></td></tr>
+<tr><td>~Connective<sub>&</sub>(~P) for all truth-valued expressions P.  We have a similar schema for all predicates p, taking arguments from any domain of discourse.</td></tr>
+<tr><td>Connective<sub>&</sub>(P & Q) for all truth-valued expressions P, Q</td></tr>
+<tr><td>~Connective<sub>&</sub>(P &#x2228; Q) for all truth-valued expressions P, Q.  We have a similar schema for all binary logical connectives other than &.</td></tr>
+</table>
+<table align="right">
+<tr><th colspan="3">Classical Logic</th></tr>
+<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+<tr><td>1.</td><td>Connective<sub>&</sub>((P & Q) & R)</td><td><span style="background:yellow">intended interpretation of Connective<sub>&</sub></span></td></tr>
+<tr><td>2.</td><td>Connective<sub>&</sub>(P & Q & R)</td><td>Associativity of & [uniform substitution]</td></tr>
+</table>
+<p>All of our expectations are unconditional, i.e. axiomatic.  The lack of expectation of a truth value for Connective<sub>&</sub>(P), where P is a 
+	propositional variable, is intentional: what we actually want there, is the value after (uniform) substitution [.../P].</p>
+<p><i>A priori</i>, the obvious ways to introduce the non-classical truth values <i>unknown</i> or <i>contradiction</i> are:</p>
+<ul>
+	<li>Be unable to translate a truth-valued expression into formal notation at all (which could happen with natural language sentences as 
+		truth valued expressions).</li>
+	<li>A self-referential truth-valued expression, such as the liar paradox sentence "This sentence is false."</li>
+	<li>For an un-substituted propositional variable, Connective<sub>&</sub>(P) &#x21A6; <i>unknown</i> may be appropriate.  However, this is not a typical usage of 
+		propositional variables.  We can consider this an example of "inability to translate".</li>
+</ul>
+<p>None of these should be a problem in practice.  The self-referential case can look at the logical connectives that wrap the self-references.
+	Likewise, a truth-valued expression that cannot be translated into formal notation at all, would be expected to not be well-formed 
+	in the first place.  That is, it is reasonable to treat Connective<sub>&</sub> as having range, classical logic truth values.</p>
+<p>An axiomatic inference rule that gives us the desired intended interpretation is</p>
+<table align="center">
+	<tr><td>Connective<sub>&</sub>(P) := (<span style="transform:rotate(180deg);display:inline-block">E</span>Q &#x2208; <b>TruthValued</b>)(<span style="transform:rotate(180deg);display:inline-block">E</span>R &#x2208; <b>TruthValued</b>)([Q & R/P] is a valid (uniform) substitution)</td><td rowspan="5"><span style="background:yellow">intended interpretation of Connective<sub>&</sub></span></td></tr>
+</table>		
+<p>Analogous definitions are adequate to define a predicate on <b>TruthValued</b>, that detects whether the top-most logical connective is logical not ~, or
+	any other unary logical connective or unary predicate.  Binary logical connectives, such as logical and &, need more work.</p>
+<p>Next, we would like a system of predicates on the domain of discourse of truth-valued expressions, that can be interpreted as "parsing" statements for logical and &.   In particular, we would like the left-most and right-most clauses 
+	i.e. sub-statements P and R of a statement Q whose top-most logical connective is &, such 
+	that P and R do not have a top-most logical connective of &.  Let Left<sub>&</sub> and Right<sub>&</sub> be of type <b>TruthValued</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValued</b>.  We define:</p>
+<table align="center">
+	<tr><td align="right">Left<sub>&</sub>(P & Q)&nbsp;</td><td>:= P for all statements P, Q</td><td rowspan="3"><span style="background:yellow">Intended interpretation of Left<sub>&</sub>, "left argument of &"</span></td></tr>
+	<tr><td align="right">~Connective<sub>&</sub>(P)&nbsp;</td><td>&#9500; Left<sub>&</sub>(P) is not well-formed</td></tr>
+	<tr><td align="right">Right<sub>&</sub>(P & Q)&nbsp;</td><td>:= Q for all statements P, Q</td><td rowspan="3"><span style="background:yellow">Intended interpretation of Right<sub>&</sub>, , "right argument of &"</span></td></tr>
+	<tr><td align="right">~Connective<sub>&</sub>(P)&nbsp;</td><td>&#9500; Right<sub>&</sub>(P) is not well-formed</td></tr>
+</table>
+<p>Note that Left<sub>&</sub>(P & Q & R) and Right<sub>&</sub>(P & Q & R) are not definable without the concept of mathematical collection &mdash; each of these has 
+	two possible results, according to the uniform substitutions authorized by <i>associativity of &</i>.</p>
+<p>We now have sufficient notation to define a predicate on <b>TruthValued</b>, for any inference rule seen so far, that evaluates to <i>true</i> for a statement P if and only if P matches the hypothesis of the inference rule.  For a syntactical 
+	equivalance, we have two such predicates.  We expect these predicates to be typically distinct.</p>
+<p>Let Leftmost<sub>&</sub> and Rightmost<sub>&</sub> be of type <b>TruthValued</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValued</b>.  We define:</p>
+<table align="center">
+	<tr><td>~Connective<sub>&</sub>(P) &#9500; Leftmost<sub>&</sub>(P) := P</td></tr>
+	<tr><td>Leftmost<sub>&</sub>(P & Q) := Leftmost<sub>&</sub>(P)</td></tr>
+	<tr><td>~Connective<sub>&</sub>(P) &#9500; Rightmost<sub>&</sub>(P) := P</td></tr>
+	<tr><td>Rightmost<sub>&</sub>(P & Q) := Rightmost<sub>&</sub>(Q)</td></tr>
+</table><p>The above looks like an attempt at a recursive definition, suitable for use in a proof by induction.  The first two lines correspond to basis cases of an inductive proof.
+	The second two lines are intended to eventually reach one of the basis cases.  We are, however, assuming that P & Q is not self-referential 
+	when fully expanded.  (That is, in some sense we want P & Q to be a "well-founded" statement.  Statements constructed according to the rules sketched in our 
+	overview of formal systems, will be "well-founded", but we do not have the notation to prove that.)</p>
+<table align="right">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>Leftmost<sub>&</sub>((P & Q) & R)</td><td>Given</td></tr>
+	<tr><td>2.</td><td>Leftmost<sub>&</sub>(P & Q)</td><td>Definition of Leftmost<sub>&</sub></td></tr>
+	<tr><td>3.</td><td>Leftmost<sub>&</sub>(P)</td><td>Definition of Leftmost<sub>&</sub></td></tr>
+	<tr><th colspan="3">Leftmost<sub>&</sub>((P & Q) & R) &#x21A6;<sub>Leftmost<sub>&</sub></sub> Leftmost<sub>&</sub>(P & Q) &#x21A6;<sub>Leftmost<sub>&</sub></sub> Leftmost<sub>&</sub>(P)</th></tr>
+</table>
+<table align="left">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>Leftmost<sub>&</sub>(P & (Q & R))</td><td>Given</td></tr>
+	<tr><td>2.</td><td>Leftmost<sub>&</sub>(P)</td><td>Definition of Leftmost<sub>&</sub></td></tr>
+	<tr><th colspan="3">Leftmost<sub>&</sub>(P & (Q & R)) &#x21A6;<sub>Leftmost<sub>&</sub></sub> Leftmost<sub>&</sub>(P)</th></tr>
+</table>
+<p>This is promising: no matter which of uniform substitutions authorized by <i>associativity of &</i> is used, evaluating Leftmost<sub>&</sub>(P & Q & R) will 
+end up evaluating Leftmost<sub>&</sub>(P).  We have structurally similar calculations for Rightmost<sub>&</sub>.  This is a rationale for defining</p>
+<table align="center">
+	<tr><td>Leftmost<sub>&</sub>(P & Q & R) := Leftmost<sub>&</sub>(P)</td></tr>
+	<tr><td>Rightmost<sub>&</sub>(P & Q & R) := Rightmost<sub>&</sub>(R)</td></tr>
+</table>
+
+<p>Next, let NotLeftmost<sub>&</sub> and NotRightmost<sub>&</sub> be of type <b>TruthValued</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValued</b>.  We define:</p>
+<table align="center">
+	<tr><td>~Connective<sub>&</sub>(P) &#9500; NotLeftmost<sub>&</sub> is not well-formed</td><td rowspan="3"><span style="background:yellow">Intended interpretation of NotLeftmost<sub>&</sub></span>, "all clauses other than the left-most one of a conjunction"</td></tr>
+	<tr><td>~Connective<sub>&</sub>(P) &#9500; NotLeftmost<sub>&</sub>(P & Q) := Q</td></tr>
+	<tr><td>Connective<sub>&</sub>(P) &#9500; NotLeftmost<sub>&</sub>(P & Q) := NotLeftmost<sub>&</sub>(P) & Q</td></tr>
+	<tr><td>~Connective<sub>&</sub>(P) &#9500; NotRightmost<sub>&</sub> is not well-formed</td><td rowspan="3"><span style="background:yellow">Intended interpretation of NotRightmost<sub>&</sub></span>, "all clauses other than the right-most one of a conjunction"</td></tr>
+	<tr><td>~Connective<sub>&</sub>(Q) &#9500; NotRightmost<sub>&</sub>(P & Q) := P</td></tr>
+	<tr><td>Connective<sub>&</sub>(Q) &#9500; NotRightmost<sub>&</sub>(P & Q) := P & NotRightmost<sub>&</sub>(Q)</td></tr>
+</table>
+<p>Again, the above looks like a recursive definition, with the same caveats as the prior one.  We presume we can use similar definitions for any other binary logical connective.</p>
+
+<table align="right">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>Connective<sub>&</sub>(P)</td><td>Given</td></tr>
+	<tr><td>2.</td><td>NotLeftmost<sub>&</sub>((P & Q) & R)</td><td>Given</td></tr>
+	<tr><td>3.</td><td>NotLeftmost<sub>&</sub>(P & Q) & R</td><td><span style="background:yellow">Intended interpretation of NotLeftmost<sub>&</sub></span></td></tr>
+	<tr><td>4.</td><td>(NotLeftmost<sub>&</sub>(P) & Q) & R</td><td><span style="background:yellow">Intended interpretation of NotLeftmost<sub>&</sub></span></td></tr>
+	<tr><td>5.</td><td>NotLeftmost<sub>&</sub>(P) & (Q & R)</td><td>Associativity of &</td></tr>
+
+</table>
+<table align="left">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>Connective<sub>&</sub>(P)</td><td>Given</td></tr>
+	<tr><td>2.</td><td>NotLeftmost<sub>&</sub>(P & (Q & R))</td><td>Given</td></tr>
+	<tr><td>3.</td><td>NotLeftmost<sub>&</sub>(P) & (Q & R)</td><td><span style="background:yellow">Intended interpretation of NotLeftmost<sub>&</sub></span></td></tr>
+
+</table>
+
+<table align="right" style="clear:right">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>~Connective<sub>&</sub>(P)</td><td>Given</td></tr>
+	<tr><td>2.</td><td>NotLeftmost<sub>&</sub>((P & Q) & R)</td><td>Given</td></tr>
+	<tr><td>3.</td><td>NotLeftmost<sub>&</sub>(P & Q) & R</td><td><span style="background:yellow">Intended interpretation of NotLeftmost<sub>&</sub></span></td></tr>
+	<tr><td>4.</td><td>Q & R</td><td><span style="background:yellow">Intended interpretation of NotLeftmost<sub>&</sub></span></td></tr>
+
+</table>
+<table align="left" style="clear:left">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>~Connective<sub>&</sub>(P)</td><td>Given</td></tr>
+	<tr><td>2.</td><td>NotLeftmost<sub>&</sub>(P & (Q & R))</td><td>Given</td></tr>
+	<tr><td>3.</td><td>Q & R</td><td><span style="background:yellow">Intended interpretation of NotLeftmost<sub>&</sub></span></td></tr>
+
+</table>
+<p>We have similar calculations for NotRightmost<sub>&</sub>.  Again, after confirming we get the same expression regardless of our choice of parenthesization for P & Q & R, we may define</p>
+<table align="center" style="clear:both">
+	<tr><td>Connective<sub>&</sub>(P) &#9500; NotLeftmost<sub>&</sub>(P & Q & R) := NotLeftmost<sub>&</sub>(P) & (Q & R)</td></tr>
+	<tr><td>~Connective<sub>&</sub>(P) &#9500; NotLeftmost<sub>&</sub>(P & Q & R) := Q & R</td></tr>
+	<tr><td>Connective<sub>&</sub>(R) &#9500; NotRightmost<sub>&</sub>(P & Q & R) := (P & Q) & NotRightmost<sub>&</sub>(R)</td></tr>
+	<tr><td>~Connective<sub>&</sub>(R) &#9500; NotRightmost<sub>&</sub>(P & Q & R) := P & Q</td></tr>
+</table>
+
+<p>Now, let us consider what a predicate GeneralizedAssociativity<sub>&</sub>:<b>TruthValued</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b>, with intended 
+	interpretation "syntactical generalized associativity applies" would have
+	to satisfy, to both allow an inductive proof, and be true for our intended base case <i>associativity of &</i>.</p>
+<table align="center">
+	<tr><td>~Connective<sub>&</sub>(P) &#9500; ~GeneralizedAssociativity<sub>&</sub>(P)</td><td rowspan="5">Associativity of & [interpretation as predicate]</td></tr>
+	<tr><td>~Connective<sub>&</sub>(P),~Connective<sub>&</sub>(Q) &#9500; ~GeneralizedAssociativity<sub>&</sub>(P & Q)</td></tr>
+	<tr><td>~Connective<sub>&</sub>(P),~Connective<sub>&</sub>(Q),~Connective<sub>&</sub>(R) &#9500; GeneralizedAssociativity<sub>&</sub>(P & Q & R)</td></tr>
+	<tr><th colspan="2">Want to derive</th></tr>
+	<tr><td>GeneralizedAssociativity<sub>&</sub>(P & Q & R) &#9500; (P & Q & R &#x27DB; Leftmost<sub>&</sub>(P & Q & R) & NotLeftmost<sub>&</sub>(P & Q & R))</td><td rowspan="3">Expectation for generalized associativity of & [interpretation as predicate]</td></tr>
+	<tr><td>GeneralizedAssociativity<sub>&</sub>(P & Q & R) &#9500; (P & Q & R &#x27DB; NotRightmost<sub>&</sub>(P & Q & R) & Rightmost<sub>&</sub>(P & Q & R))</td></tr>
+	<tr><td>&#9500; GeneralizedAssociativity<sub>&</sub>(P & Q & R)</td></tr>
+</table>
+<table align="right">
+	<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td></td><td>~Connective<sub>&</sub>(P)</td><td>Given</td></tr>
+	<tr><td>2.</td><td></td><td>P & Q & R</td><td>Hypothesis</td></tr>
+	<tr><td>3.</td><td></td><td>P & (Q & R)</td><td>Associativity of &</td></tr>
+	<tr><td>4.</td><td></td><td>Leftmost<sub>&</sub>(P) & NotLeftmost<sub>&</sub>(P & (Q & R))</td><td>[Leftmost<sub>&</sub>(P)/P,NotLeftmost<sub>&</sub>(P & (Q & R))/Q & R] on (3) by (1)</td></tr>
+	<tr><td>5.</td><td></td><td>Leftmost<sub>&</sub>(P & (Q & R)) & NotLeftmost<sub>&</sub>(P & (Q & R))</td><td>[Leftmost<sub>&</sub>(P & (Q & R))/Leftmost<sub>&</sub>(P)] on (4) by (1)</td></tr>
+	<tr><td>6.</td><td>P & Q & R &#9500; Leftmost<sub>&</sub>(P & (Q & R)) & NotLeftmost<sub>&</sub>(P & (Q & R))</td><td></td><td>syntactical inference rule introduction (2),(5)</td></tr>
+	<tr><th colspan="4">But the rationales for linking steps 2-6 are all syntactical or substitution equivalences, so</th></tr>
+	<tr><td>6a.</td><td>P & Q & R &#x27DB; Leftmost<sub>&</sub>(P & (Q & R)) & NotLeftmost<sub>&</sub>(P & (Q & R))</td><td></td><td>syntactical inference rule introduction (2),(5)</td></tr>
+</table>
+<p>So we have two special cases of the generalized associativity conclusion (the other one has a very similar proof to the one sketched):</p>
+<table>
+	<tr><td>~Connective<sub>&</sub>(P) &#9500; (P & Q & R &#x27DB; Leftmost<sub>&</sub>(P & (Q & R)) & NotLeftmost<sub>&</sub>(P & (Q & R)))</td></tr>
+	<tr><td>~Connective<sub>&</sub>(R) &#9500; (P & Q & R &#x27DB; NotRightmost<sub>&</sub>((P & Q) & R)) & Rightmost<sub>&</sub>((P & Q) & R)))</td></tr>
+</table>
+....
+-->
+
+<h2 id="excluded-middle" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Law of Excluded Middle</h2>
 <p>This classical logic tautology (always-true statement) degrades to a never-false statement in many other logics.  Key steps are incorrect for all of the non-classical logics we
 	are considering.</p>
 <p>For classical logic, we can downgrade a syntactical entailment &#9500; to a nonstrict logical implication &rArr;, by

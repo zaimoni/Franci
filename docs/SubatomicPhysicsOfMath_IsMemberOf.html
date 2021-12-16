@@ -134,7 +134,7 @@ We then introduce the syntactical entailment:</p>
 	<tr align="center"><td>&#9500; A = A</td><td>Reflexivity</td><td>A = A</td></tr>
 	<tr align="center"><td>A = B &#x27DB; B = A</td><td>Symmetry</td><td>A = B &hArr; B = A</td></tr>
 	<tr align="center"><td>A = B, B = C &#9500; A = C</td><td>Transitivity</td><td>(A = B & B = C) &rArr; A = C</td></tr>
-	<tr align="center" valign="top"><td>A = B &#9500; Z(A) &rArr; Z(A)<br><span style="background:yellow">A = B &#9500; (Z(A) &#9500; Z(B))</span></td><td style="background:yellow">Uniform substitution given equality</td><td>A = B &rArr; (Z(A) &rArr; Z(B))</td></tr>
+	<tr align="center" valign="top"><td>A = B &#9500; Z(A) &rArr; Z(B)<br><span style="background:yellow">A = B &#9500; (Z(A) &#9500; Z(B))</span></td><td style="background:yellow">Uniform substitution given equality</td><td>A = B &rArr; (Z(A) &rArr; Z(B))</td></tr>
 </table>
 
 <p>For A,B,C for which the infix binary predicate equality = is defined, we have the following expectations for a working definition:</p>
@@ -143,7 +143,8 @@ We then introduce the syntactical entailment:</p>
 	<li>A = B &hArr; B = A : Symmetry</li>
 	<li>(A = B & B = C) &rArr; A = C : Transitivity</li>
 	<li>A binary predicate satisfying the above three properties, is said to be an equivalence relation.  For equality, we want to go further: when A = B,
-		we want there to be no imaginable or measurable difference whatsoever.</li>
+		we want there to be no imaginable or measurable difference whatsoever.  In particular A = B justifies both [B/A] and [A/B] as 
+		uniform substitutions, or as a component of a simultaneous or non-uniform substitution.</li>
 </ul>
 <p>The definitions were chosen so that reflexivity can be checked very easily (by uniform substitution into the definition); both symmetry and transitivity can be checked easily.  However, checking
 	"no imaginable or measurable difference whatsoever" is empirically infeasible.  We shall follow the usual practice, introducing an Axiom of Extensionality
