@@ -1,0 +1,184 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=windows-1252"/>
+	<title>Subatomic Physics of Math: retrying defining equality =</title>
+	<style type="text/css">
+		@page { margin: 0.79in }
+		p { margin-bottom: 0.1in; line-height: 120% }
+		a:link { so-language: zxx }
+		* {
+            font-family: "Liberation Serif", serif
+        }
+	</style>
+</head>
+<body lang="en-US" dir="ltr">
+<div style="position:fixed; top:0.5em; left:0.5em; background:white"><a href="./">Home</a> &gt; <a href="./SubatomicPhysicsOfMath_IsMemberOf.html">description of &#x2208;, "is member of"</a></div>
+<h1 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 16px">Subatomic Physics of Math: another attempt at defining equality =</h1>
+
+<span style="border: 1px solid black; display:block; float:right">
+	<ol type="I">
+		<li><a href="#theory-of-truth">Towards a theory of truth</a></li>
+		<li><a href="#rewriting-equality-def">Classical logic: rewriting the definition of =</a></li>
+	</ol>
+</span>
+
+<p>Recall that we found that the standard definitions of mathematical collection equality, only fully work for classical logic: reflexivity of equality = does not hold for 
+	<b>any</b> of the truth-table describable non-classical logics we are considering.  We would like alternate definitions for the non-classical logics that:</p>
+<ul>
+	<li>Are equivalent to the standard definition for classical logic;</li>
+	<li>Respect the intended interpretations of the non-classical logics we are considering; and</li>
+	<li>Fail less, i.e. they evaluate to <i>true</i> or <i>false</i> more than the standard definition does.</li>
+</ul>
+<p>I will be explicitly flagging standard terminology here, not non-standard terminology.</p>
+
+<h2 id="theory-of-truth" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Towards a theory of truth</h2>
+<p>I strongly recommend watching Carnaedes.org's videos on Tarski's <a href="https://www.youtube.com/watch?v=qKNVoAJ7VSc&list=PLz0n_SjOttTeAWHg3rgjzYFs1b0z1mRlv">theory of truth</a>, and its <a href="https://www.youtube.com/watch?v=fg0zmuqL-_4">refinement</a> by Saul Kripke.  I'm interpreting these, for the instructions 
+	I will be following.</p>
+<ul>
+	<li>The intended interpretation of <b>TruthValued</b>, is the domain of discourse of all syntactically truth-valued expressions.  (Whether these actually <b>have</b> truth values, i.e. are statements, depends on the logic applied to them.)</li>
+	<li>The intended interpretation of <b>TruthValues</b>, is the domain of discourse of all truth values for a given logic.</li>
+	<li>The axiomatic identity inference rule <i>A</i> &#9500; <i>A</i>, may be thought of as evaluating all statements <i>A</i> to themselves.  Since we have a structural rule 
+		that de-duplicates the hypotheses of an inference rule, this never infers any new statements not already present.</li>
+	<li>As an example of an inference rule that takes a single hypothesis, consider the syntactical equivalence <i>idempotence of &</i>, which summarizes a pair of inference rules.  In the reverse direction, 
+		this takes an arbitrary statement P and infers P & P.  The forward direction is only applicable to statements interpretable as instances of P & P, and infers P.</li>
+	<li>The notation <i>A</i> &#x21A6; <i>true</i>, etc., we introduced, can be thought of as stating that a statement A evaluates to the truth value <i>true</i>, etc.  That suggests &#x21A6; should 
+		have a domain contained within the domain of discourse all truth valued expressions, and range truth values.  Technically, &#x21A6; is taking the logic as an 
+		implicit parameter.  These are predicates on the domain of discourse of syntactically truth-valued expressions.</li>
+</ul>
+<p><b>TruthValued</b> is not formally describable.  It includes things like English sentences, indeed sentences in any natural language.</p>
+<table align="right">
+	<tr><td align="center" colspan="3">(<span style="transform:rotate(180deg);display:inline-block">A</span>P &#x2208; <b>TruthValued</b>)(<span style="transform:rotate(180deg);display:inline-block">E</span>t &#x2208; <b>TruthValues</b>)(P &#x21A6; t)</th>
+	<tr><th colspan="3">Principle of ...</th>
+	<tr><th style="background: #DDFFDD">Classical</th><th>bivalence</th><td><b>TruthValues</b> := {<i>false</i>, <i>true</i>}</td></tr>
+	<tr><th style="background: #DDDDFF">Kleene weak<br>Kleene strong<br>Lisp/Prolog</th><th>trivalence</th><td><b>TruthValues</b> := {<i>false</i>, <i>true</i>, <i>unknown</i>}</td></tr>
+	<tr><th style="background: #FFDDDD">Belnap<br>Franci</th><th>tetravalence</th><td><b>TruthValues</b> := {<i>false</i>, <i>true</i>, <i>unknown</i>, <i>contradiction</i>}</td></tr>
+</table>
+<table align="left">
+	<tr><th></th><th>Rationale</th></tr>
+	<tr><td><b>TruthValues</b> &#x2286; <b>TruthValued</b></td><td>Intended interpretation of <b>TruthValues</b> and <b>TruthValued</b>; "all truth values, are truth-valued expressions"</td></tr>
+</table>
+<p><nobr>In contrast, <b>TruthValues</b> is formally describable:</nobr> the truth values <i>true</i>, <i>false</i>, <i>unknown</i>, and <i>contradiction</i> are unequivocally <i>ur-elements</i>, 
+	rather than mathematical objects.  For the set theories with <i>ur-elements</i>, we can interpret the principle of bivalence/trivalence/tetravalence, into this new notation.</p>
+<p>Replacing logical or &#x2228; with the existence quantifier <span style="transform:rotate(180deg);display:inline-block">E</span>, is stronger for
+	Belnap's four-valued logic: it requires (P &#x21A6; t) &#x21A6; <i>true</i> for at least one of the truth values t directly, regardless of the logic applied.  (This already was 
+	inferable, for the other five truth table describable logics we are considering.)  The principle of non-contradiction then ensures that non-classical truth values are never allowed when evaluating P &#x21A6; t .
+	(Recall that truth-table calculations are an alternate notation, for classical logic reasoning about truth-table describable logics.)</p>
+<p>If we need to explicitly track which logic <b>TruthValues</b> is from, we can subscript it; e.g., <b>TruthValues<sub>classical</sub></b>.</p>
+<p>As a matter of notation, for an explicitly enumerated mathematical collection such as those mentioned in the table: any term named in the 
+	enumeration is in the collection, while any term not listed, is not in the collection.  That is, all explicitly enumerated mathematical collections, whose 
+	enumeration only has terms (i.e., no variables) are <i>sets</i>, regardless of choice of set theory.</p>
+
+<p>It is tempting to abuse notation yet to be defined and say that:</p>
+<ul>
+	<li>For domains of discourse D,E we say f:D <span style="position:relative; top: -2px">&#x2192;</span> E has domain D and range E.  We say f has type D <span style="position:relative; top: -2px">&#x2192;</span> E.  
+		If we have an explicit definition f(x) := y, we have f(x) &#x21A6; y with intended interpretation "f of x evaluates to y".  Alternately,
+		we have x &#x21A6;<sub>f</sub> y with intended interpretation "f of x evaluates to y".</li>
+	<li>The syntactical inference rules summarized by <i>idempotence of &</i> both have type <b>TruthValued</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValued</b>.  The one that removes logical and &, 
+		has an implicit domain restriction; we only define it when the inference rule is applicable.</li>
+	<li>The notation <i>A</i> &#x21A6; <i>true</i>, etc., we introduced, has type <b>TruthValued</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b>.</li>
+</ul>
+<p>That is, in our overview of logic we have a default f:<b>TruthValued</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b>, not mentioned at the time.</p>
+<ul>
+	<li>The intended interpretation of <b>Truth</b>:<b>TruthValued</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b>, is a summary of the process that evaluates truth values for syntactically truth-valued statements.  There is one of these for each 
+		logic we are considering.  If we need to track the exact logic, we can subscript; e.g., <b>Truth</b><sub>classical</sub>.</li>
+	<li>For a truth-valued expression <i>P</i> and truth value t, the notations <i>P</i> &#x21A6; t and  <i>P</i> &#x21A6;<sub><b>Truth</b></sub> t have the same 
+		intended interpretation.</li>
+</ul>
+<p>I intend <b>Truth</b> to be closely related to Saul Kripke's theory of truth.  As such, it does have an implicit domain restriction. 
+	It is undefined for any truth-valued expression, for which an in-logic truth value cannot be assigned.</p>
+
+<h2 id="rewriting-equality-def" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Classical logic: rewriting the definition of =</h2>
+<table align="left">
+	<tr><th colspan="4">Logics other than Belnap</th></tr>
+	<tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td></td><td>P &hArr; Q</td><td>Given</td></tr>
+	<tr><td>2.</td><td></td><td>P &hArr; Q &#x21A6; <i>true</i></td><td>Intended interpretation of &#x21A6;</td></tr>
+	<tr><td>3.</td><td></td><td>((P &#x21A6; <i>true</i>) & (Q &#x21A6; <i>true</i>)) &#x2228; ((P &#x21A6; <i>false</i>) & (Q &#x21A6; <i>false</i>))</td><td>Inverting evaluation of &hArr; (~Belnap)</td></tr>
+
+	<tr><td>4.</td><td></td><td>(P &#x21A6; <i>true</i>) & (Q &#x21A6; <i>true</i>)</td><td>Hypothesis</td></tr>
+	<tr><td>5.</td><td></td><td>P &#x21A6; <i>true</i></td><td>Conjunction elimination on (4)</td></tr>
+	<tr><td>6.</td><td></td><td>Q &#x21A6; <i>true</i></td><td>Conjunction elimination on (4)</td></tr>
+	<tr><td>7.</td><td></td><td><b>Truth</b>(P)=<i>true</i></td><td>Intended interpretation of <b>Truth</b> on (5)</td></tr>
+	<tr><td>8.</td><td></td><td><b>Truth</b>(Q)=<i>true</i></td><td>Intended interpretation of <b>Truth</b> on (6)</td></tr>
+	<tr><td>8a.</td><td></td><td><i>true</i>=<b>Truth</b>(Q)</td><td>Symmetry of = on (8)</td></tr>
+	<tr><td>9.</td><td></td><td><b>Truth</b>(P)=<b>Truth</b>(Q)</td><td>Transitivity of = on (7),(8a)</td></tr>
+	<tr><td>10.</td><td>(P &#x21A6; <i>true</i>) & (Q &#x21A6; <i>true</i>) &#9500; <b>Truth</b>(P)=<b>Truth</b>(Q)</td><td></td><td>Syntactical entailment introduction on (4),(9)</td></tr>
+
+	<tr><td>11.</td><td></td><td>(P &#x21A6; <i>false</i>) & (Q &#x21A6; <i>false</i>)</td><td>Hypothesis</td></tr>
+	<tr><td>12.</td><td></td><td>P &#x21A6; <i>false</i></td><td>Conjunction elimination on (11)</td></tr>
+	<tr><td>13.</td><td></td><td>Q &#x21A6; <i>false</i></td><td>Conjunction elimination on (11)</td></tr>
+	<tr><td>14.</td><td></td><td><b>Truth</b>(P)=<i>false</i></td><td>Intended interpretation of <b>Truth</b> on (12)</td></tr>
+	<tr><td>15.</td><td></td><td><b>Truth</b>(Q)=<i>false</i></td><td>Intended interpretation of <b>Truth</b> on (13)</td></tr>
+	<tr><td>15a.</td><td></td><td><i>false</i>=<b>Truth</b>(Q)</td><td>Symmetry of = on (15)</td></tr>
+	<tr><td>16.</td><td></td><td><b>Truth</b>(P)=<b>Truth</b>(Q)</td><td>Transitivity of = on (14),(15a)</td></tr>
+	<tr><td>17.</td><td>(P &#x21A6; <i>false</i>) & (Q &#x21A6; <i>false</i>) &#9500; <b>Truth</b>(P)=<b>Truth</b>(Q)</td><td></td><td>Syntactical entailment introduction on (11),(16)</td></tr>
+	<tr><td>18.</td><td></td><td><b>Truth</b>(P)=<b>Truth</b>(Q)</td><td>Proof by cases on (3),(10),(17)</td></tr>
+	<tr><th colspan="4">P &hArr; Q &#9500; Truth</b>(P)=<b>Truth</b>(Q)</th></tr>
+</table>
+<table align="left" style="clear:left">
+	<tr><th colspan="4">Classical logic</th></tr>
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td><b>Truth</b>(P)=<b>Truth</b>(Q)</td><td>Given</td></tr>
+	<tr><td>2.</td><td>(P &#x21A6; <i>false</i>) &#x2228; (P &#x21A6; <i>true</i>)</td><td>Principle of bivalence</td></tr>
+
+	<tr><td>3.</td><td>P &#x21A6; <i>false</i></td><td>Hypothesis</td></tr>
+	<tr><td>4.</td><td><b>Truth</b>(P)=<i>false</i></td><td>Intended interpretation of <b>Truth</b> on (3)</td></tr>
+	<tr><td>5.</td><td><b>Truth</b>(Q)=<i>false</i></td><td>[<b>Truth</b>(Q)/<b>Truth</b>(P)] by (1) on (4)</td></tr>
+	<tr><td>6.</td><td>Q &#x21A6; <i>false</i></td><td>Intended interpretation of <b>Truth</b> on (5)</td></tr>
+	<tr><td>7.</td><td>(P &#x21A6; <i>false</i>) & (Q &#x21A6; <i>false</i>)</td><td>Conjunction introduction on (3),(6)</td></tr>
+	<tr><td>8.</td><td>P &hArr; Q &#x21A6; <i>true</i></td><td>Evaluation of &hArr; on (7)</td></tr>
+	<tr><td>9.</td><td>P &hArr; Q</td><td>Intended interpretation of &#x21A6; on (8)</td></tr>
+	<tr><td>10.</td><td>(P &#x21A6; <i>false</i>) &rArr; (P &hArr; Q)</td><td>Implication introduction on (3),(9)</td></tr>
+
+	<tr><td>11.</td><td>P &#x21A6; <i>true</i></td><td>Hypothesis</td></tr>
+	<tr><td>12.</td><td><b>Truth</b>(P)=<i>true</i></td><td>Intended interpretation of <b>Truth</b> on (11)</td></tr>
+	<tr><td>13.</td><td><b>Truth</b>(Q)=<i>true</i></td><td>[<b>Truth</b>(Q)/<b>Truth</b>(P)] by (1) on (12)</td></tr>
+	<tr><td>14.</td><td>Q &#x21A6; <i>true</i></td><td>Intended interpretation of <b>Truth</b> on (13)</td></tr>
+	<tr><td>15.</td><td>(P &#x21A6; <i>true</i>) & (Q &#x21A6; <i>true</i>)</td><td>Conjunction introduction on (13),(14)</td></tr>
+	<tr><td>16.</td><td>P &hArr; Q &#x21A6; <i>true</i></td><td>Evaluation of &hArr; on (15)</td></tr>
+	<tr><td>17.</td><td>P &hArr; Q</td><td>Intended interpretation of &#x21A6; on (16)</td></tr>
+	<tr><td>18.</td><td>(P &#x21A6; <i>true</i>) &rArr; (P &hArr; Q)</td><td>Implication introduction on (11),(17)</td></tr>
+	<tr><td>19.</td><td>P &hArr; Q</td><td>Proof by cases on (2),(10),(18)</td></tr>
+
+	<tr><th colspan="4">Truth</b>(P)=<b>Truth</b>(Q) &#9500; P &hArr; Q</th></tr>
+</table>
+<p>We start with trying to rewrite &hArr; in terms of the new <b>Truth</b> predicate.  This requires taking the properties of equality as 
+	axioms for truth values. The forward direction works for all of the logics we are interested in, except Belnap's.  The reverse 
+	direction fails for the non-classical logics on the extra cases introduced by non-classical truth values for the principle of trivalence or tetravalence.  (That is, evaluating 
+	P &hArr; Q is no longer constant <i>true</i> when the non-classical truth values are introduced.)  The overall result is a classical logic only syntactical equivalence:</p>
+<p align="center"><b>Truth</b>(P)=<b>Truth</b>(Q) &#x27DB; P &hArr; Q</p>
+<p>Recall that for classical logic only, syntactical equivalences justify substitutions.  So we can apply this substitution to any of the four definitions 
+	of equality for mathematical collections, to get an alternative definition that is operationally identical, for classical logic only.  Since the standard 
+	definitions only worked for classical logic, this is a reasonable strategy to get a better definition.</p>
+<p>As an alternate definition for the non-classical logics, the classical logic rewrite is <b>not</b> circular: it defines <i>class</i>/<i>set</i> equality in terms of 
+	axiomatic equality whose validity is restricted to truth values (that is, we have no axiomatic equality of truth-valued expressions, only of truth values.)</p>
+<p>Exercises: This rewrite does make reflexivity of <i>class</i>/<i>set</i> equality unconditional for all five the non-classical, truth table describable, logics 
+	we are considering.  It also gets us transitivity of equality for Belnap's four-valued logic.</p>
+<p>There are some issues when back-translating the alternate definitions into English.  This will be more evident when defining the empty set &#x2205;.</p>
+<table align="center" style="clear:both">
+	<tr><th></th><th colspan="2">a = b :=</th></tr>
+	<tr><th></th><th>Canonical</th><th>Rewritten with [<b>Truth</b>(A)=<b>Truth</b>(B)/A&hArr;B]</th></tr>
+	<tr valign="top"><td>Zermelo-Frankel</td><td>
+		(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b) & (<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; <b>Set</b>)(a &#x2208; y &hArr; b &#x2208; y)
+	</td><td>
+		(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(<b>Truth</b>(x &#x2208; a)=<b>Truth</b>(x &#x2208; b)) & (<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; <b>Set</b>)(<b>Truth</b>(a &#x2208; y)=<b>Truth</b>(b &#x2208; y))
+	</td></tr>
+	<tr valign="top"><td><nobr>Von Neumann-Bernays-G&ouml;del</nobr></td><td>
+		(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; A &hArr; x &#x2208; B)
+	</td><td>
+		(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(<b>Truth</b>(x &#x2208; A)=<b>Truth</b>(x &#x2208; B))
+	</td></tr>
+	<tr valign="top"><td>Zermelo-Frankel <nobr>with ur-elements</nobr></td><td>
+		<nobr>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b)</nobr> & <nobr>(<span style="transform:rotate(180deg);display:inline-block">A</span>z &#x2208; <b>Ur</b>)(z &#x2208; a &hArr; z &#x2208; b)</nobr> & <nobr>(<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; <b>Set</b>)(a &#x2208; y &hArr; b &#x2208; y)</nobr>
+	</td><td>
+		<nobr>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(<b>Truth</b>(x &#x2208; a)=<b>Truth</b>(x &#x2208; b))</nobr> & <nobr>(<span style="transform:rotate(180deg);display:inline-block">A</span>z &#x2208; <b>Ur</b>)(<b>Truth</b>(z &#x2208; a)=<b>Truth</b>(z &#x2208; b))</nobr> & <nobr>(<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; <b>Set</b>)(<b>Truth</b>(a &#x2208; y)=<b>Truth</b>(b &#x2208; y))</nobr>
+	</td></tr>
+	<tr valign="top"><td><nobr>Von Neumann-Bernays-G&ouml;del</nobr> <nobr>with ur-elements</nobr></td><td>
+		(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; A &hArr; x &#x2208; B) & (<span style="transform:rotate(180deg);display:inline-block">A</span>z &#x2208; <b>Ur</b>)(z &#x2208; A &hArr; z &#x2208; B)
+	</td><td>
+		(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(<b>Truth</b>(x &#x2208; A)=<b>Truth</b>(x &#x2208; B)) & (<span style="transform:rotate(180deg);display:inline-block">A</span>z &#x2208; <b>Ur</b>)(<b>Truth</b>(z &#x2208; A)=<b>Truth</b>(z &#x2208; B))
+	</td></tr>
+</table>
+</body>
+</html>

@@ -276,7 +276,7 @@ rather than define how uniform substitutions work.</p>
 	<tr><th colspan="3">Principle of ...</th>
 	<tr><th style="background: #DDFFDD">Classical</th><th>bivalence</th><td>&#9500; (A &#x21A6; <i>false</i>) &#x2228; (A &#x21A6; <i>true</i>)</td></tr>
 	<tr><th style="background: #DDDDFF">Kleene weak<br>Kleene strong<br>Lisp/Prolog</th><th>trivalence</th><td>&#9500; (A &#x21A6; <i>false</i>) &#x2228; (A &#x21A6; <i>true</i>) &#x2228; (A &#x21A6; <i>unknown</i>)</td></tr>
-	<tr><th rowspan="4" style="background: #FFDDDD">Belnap<br>Franci</th><th>tetravalence</th><td>&#9500; (A &#x21A6; <i>false</i>) &#x2228; (A &#x21A6; <i>true</i>) &#x2228; (A &#x21A6; <i>unknown</i>) &#x2228; (A &#x21A6; <i>contradiction</i>)</td></tr>
+	<tr><th style="background: #FFDDDD">Belnap<br>Franci</th><th>tetravalence</th><td>&#9500; (A &#x21A6; <i>false</i>) &#x2228; (A &#x21A6; <i>true</i>) &#x2228; (A &#x21A6; <i>unknown</i>) &#x2228; (A &#x21A6; <i>contradiction</i>)</td></tr>
 </table>
 <p>The principle of non-contradiction (that no truth-valued expression may evaluate to two truth values at once) and the classical logic principle of bivalence (that all truth valued expressions do have a value) also have translations 
 	into this extended notation.  (Natural language reasoning doesn't fully implement the principle of bivalence: otherwise, the liar paradox could not be stated.)</p>
@@ -928,8 +928,8 @@ In classical logic, this is known as <i>proof by contradiction</i>; other names 
 	<tr><td>12.</td><td>~~P &#x2228; (Q & R)</td><td>Definition of &rArr; on (11)</td></tr>
 	<tr><td>13.</td><td>P &#x2228; (Q & R)</td><td>Remove double negation on (12)</td></tr>
 </table>
-<p>The proof on the left works for all of the logics we are considering.  The proof on the right is for classical logic; as usual, the hypothesis step needs some assurance
-	that P has a classical truth value, to be valid.</p>
+<p>The proof on the left works for all of the logics we are considering.  The proof on the right is for classical logic, due to the use of <i>implication introduction</i>.  The non-classical logics can use truth-table calculations instead, once
+	their equivalence to classical logic reasoning about non-classical logic has a rationale.</p>
 <table align="center" style="clear:both">
 	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
 	<tr><td align="center">P &#x2228; (Q & R) &#x27DB; (P &#x2228; Q) & (P &#x2228; R)</td><td align="left">Left distributivity of &#x2228; over &</td><td align="left">None</td><td>None</td></tr>
@@ -1521,6 +1521,6 @@ end up evaluating Leftmost<sub>&</sub>(P).  We have structurally similar calcula
 	<tr><td align="center">P &rArr; (Q &rArr; R) &#9500; Q &rArr; (P &rArr; R)</td><td align="left">Commutativity of implication</td><td align="left">Lisp/Prolog</td><td>None</td></tr>
 </table>
 
-<p align="right">Next: <a href="./SubatomicPhysicsOfMath_IsMemberOf.html">description of &#x2208;, "is member of"</a></p>
+<p align="right">Next: <a href="./SubatomicPhysicsOfMath_IsMemberOf.html">retrying defining equality =</a></p>
 </body>
 </html>
