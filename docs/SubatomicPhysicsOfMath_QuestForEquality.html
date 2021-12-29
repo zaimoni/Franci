@@ -84,6 +84,7 @@
 		logic we are considering.  If we need to track the exact logic, we can subscript; e.g., <b>Truth</b><sub>classical</sub>.</li>
 	<li>For a truth-valued expression <i>P</i> and truth value t, the notations <i>P</i> &#x21A6; t and  <i>P</i> &#x21A6;<sub><b>Truth</b></sub> t have the same 
 		intended interpretation.</li>
+	<li>We expect that if [Q/P] is a valid uniform substitution, then <b>Truth</b>(A)=<b>Truth</b>(A[Q/P]) for any syntactically truth-valued expression A.</li>
 </ul>
 <p>I intend <b>Truth</b> to be closely related to Saul Kripke's theory of truth.  As such, it does have an implicit domain restriction. 
 	It is undefined for any truth-valued expression, for which an in-logic truth value cannot be assigned.</p>
@@ -154,8 +155,8 @@
 <p>As an alternate definition for the non-classical logics, the classical logic rewrite is <b>not</b> circular: it defines <i>class</i>/<i>set</i> equality in terms of 
 	axiomatic equality whose validity is restricted to truth values (that is, we have no axiomatic equality of truth-valued expressions, only of truth values.)</p>
 <p>Exercises: This rewrite does make reflexivity of <i>class</i>/<i>set</i> equality unconditional for all five the non-classical, truth table describable, logics 
-	we are considering.  It also gets us transitivity of equality for Belnap's four-valued logic.</p>
-<p>There are some issues when back-translating the alternate definitions into English.  This will be more evident when defining the empty set &#x2205;.</p>
+	we are considering.  It also gets us transitivity of equality for Belnap's four-valued logic.  Both of these depend on the principle of bivalence/trivalence/tetravalence (i.e., if we have a truth-valued expression that does not have a truth-value, 
+	then either the evaluation outright fails, or we extend the evaluation. if that extension uses a non-classical truth value then we can get a non-classical truth value for equality =.)</p>
 <table align="center" style="clear:both">
 	<tr><th></th><th colspan="2">a = b :=</th></tr>
 	<tr><th></th><th>Canonical</th><th>Rewritten with [<b>Truth</b>(A)=<b>Truth</b>(B)/A&hArr;B]</th></tr>

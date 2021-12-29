@@ -41,8 +41,13 @@
 		<li><a href="#translating-truth-tables">Translating to and from truth tables</a></li>
 		<li><a href="#principle-of-explosion">Principle of explosion</a></li>
 		<li><a href="#commutativity-or-lisp">Repairing commutativity of &#x2228; for Lisp/Prolog logic</a></li>
-		<li><a href="#transitivity-of-iff">Transitivity of &hArr;</a></li>
-		<li><a href="#commutativity-of-implication">Commutativity of Implication</a></li>
+		<li>Appendices
+			<ol type="a">
+				<li><a href="#transitivity-of-iff">Transitivity of &hArr;</a></li>
+				<li><a href="#commutativity-of-implication">Commutativity of Implication</a></li>
+				<li><a href="#modus-ponens-iff"><i>modus ponens</i> for &hArr;</a></li>
+			</ol>
+		</li>
 	</ol>
 </span>	
 <p id="origin">In <a href="https://archive.org/details/axiomaticsettheo0000bern">Axiomatic Set Theory</a>, Bernays mentions (hardcopy p.48, also digital p.48 in two-page view) how all 
@@ -190,7 +195,7 @@ The corresponding proof would then be:
 	<tr><td>6.</td><td>B &#9500; A</td><td>Definition of &#x27DB; on (1)</td></tr>
 	<tr><td>7.</td><td>C &#9500; B</td><td>Definition of &#x27DB; on (2)</td></tr>
 	<tr><td>8.</td><td>C &#9500; A</td><td>Transitivity of syntactical entailment on (6), (7)</td></tr>
-	<tr><td>9.</td><td>A &#x27DB; B</td><td>Definition of &#x27DB; on (5), (8)</td></tr>
+	<tr><td>9.</td><td>A &#x27DB; C</td><td>Definition of &#x27DB; on (5), (8)</td></tr>
 </table>
 <table align="center">
 	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
@@ -1521,6 +1526,31 @@ end up evaluating Leftmost<sub>&</sub>(P).  We have structurally similar calcula
 	<tr><td align="center">P &rArr; (Q &rArr; R) &#9500; Q &rArr; (P &rArr; R)</td><td align="left">Commutativity of implication</td><td align="left">Lisp/Prolog</td><td>None</td></tr>
 </table>
 
+<h2 id="modus-ponens-iff" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px"><i>modus ponens</i> for &hArr;</h2>
+<table align="right">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>P &hArr; Q</td><td>Given</td></tr>
+	<tr><td>2.</td><td>P</td><td>Given</td></tr>
+	<tr><td>3.</td><td>(P &rArr; Q) & (Q &rArr; P)</td><td>Definition of &hArr; on (1)</td></tr>
+	<tr><td>4.</td><td>P &rArr; Q</td><td>Conjunction elimination on (3)</td></tr>
+	<tr><td>5.</td><td>Q</td><td><i>modus ponens</i> on (4),(2)</td></tr>
+</table><p>In natural language proofs, it is very common to use <i>modus ponens</i> and <i>modus tollens</i> with an if-and-only-if &hArr; statement,
+	eliding the unpacking of the nonstrict implication.</p>
+<p>The proofs for the other nine entries listed, are very similar.</p>
+
+<table align="center">
+	<tr><th></th><th>Name</th><th>Works for which of our logics?</th></tr>
+	<tr><td align="center">P &hArr; Q, P &#9500; Q</td><td align="left" rowspan="2" valign="center"><span style="background:yellow"><i>modus ponens</i> for &hArr;</span></td><td rowspan="2" valign="center">All</td></tr>
+	<tr><td align="center">P &hArr; Q, Q &#9500; P</td></tr>
+	<tr><td align="center">P &hArr; Q, ~P &#9500; ~Q</td><td align="left" rowspan="2" valign="center"><span style="background:yellow"><i>modus tollens</i> for &hArr;</span></td><td rowspan="2" valign="center">All</td></tr>
+	<tr><td align="center">P &hArr; Q, ~Q &#9500; ~P</td></tr>
+	<tr><td align="center">(P &#x27DB; Q), P &#9500; Q</td><td align="left" rowspan="2" valign="center"><span style="background:yellow"><i>modus ponens</i> for &#x27DB;</span></td><td rowspan="2" valign="center">All</td></tr>
+	<tr><td align="center">(P &#x27DB; Q), Q &#9500; P</td></tr>
+	<tr><td align="center">P &hArr; Q, ~P &#9500; ~(Q &#x21A6; <i>true</i>)</td><td align="left" rowspan="4" valign="center"><span style="background:yellow"><i>modus tollens</i> for &#x27DB;</span></td><td rowspan="2" valign="center">Technically all</td></tr>
+	<tr><td align="center">P &hArr; Q, ~Q &#9500; ~(P &#x21A6; <i>true</i>)</td></tr>
+	<tr><td align="center">P &hArr; Q, ~P &#9500; ~Q</td><td rowspan="2" valign="center">Classical</td></tr>
+	<tr><td align="center">P &hArr; Q, ~Q &#9500; ~P</td></tr>
+</table>
 <p align="right" style="clear:right">Next: <a href="./SubatomicPhysicsOfMath_IsMemberOf.html">description of &#x2208;, "is member of"</a></p>
 </body>
 </html>

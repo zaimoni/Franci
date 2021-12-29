@@ -70,7 +70,7 @@
 <p align="center">{a &#x2208; A : Z(a)}</p>
 <p>with intended interpretation "the mathematical collection of a in the mathematical collection A such that Z(a)", a term in the same domain of discourse as A; i.e., set-builder notation.</p>
 
-<p>The most important alternatives we are not considering here, are type-theoretic i.e. New Foundations, and Morse-Kelley.</p>
+<p>The most important alternatives we are not considering here, are type-theoretic i.e. New Foundations, and Morse-Kelley.  We also are not covering either Tarksi-Grothendieck, or Kripke-Platek, set theories.</p>
 
 <h2 id="ZF" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Zermelo-Frankel &#x2208;</h2>
 <p>There is only one universe of discourse for Zermelo-Frankel set theory: sets.</p>
@@ -136,7 +136,11 @@ We then introduce the syntactical entailment:</p>
 	<tr align="center"><td>&#9500; A = A</td><td>Reflexivity</td><td>A = A</td></tr>
 	<tr align="center"><td>A = B &#x27DB; B = A</td><td>Symmetry</td><td>A = B &hArr; B = A</td></tr>
 	<tr align="center"><td>A = B, B = C &#9500; A = C</td><td>Transitivity</td><td>(A = B & B = C) &rArr; A = C</td></tr>
-	<tr align="center" valign="top"><td>A = B &#9500; Z(A) &rArr; Z(B)<br><span style="background:yellow">A = B &#9500; (Z(A) &#9500; Z(B))</span></td><td style="background:yellow">Uniform substitution given equality</td><td>A = B &rArr; (Z(A) &rArr; Z(B))</td></tr>
+	<tr align="center" valign="top"><td>A = B &#9500; Z(A) &rArr; Z(B)
+		<br><span style="background:yellow">A = B &#9500; (Z(A) &#9500; Z(B))
+		<br><span style="background:yellow">A = B &#9500; (Z &#9500; Z[B/A])
+		<br><span style="background:yellow">A = B &#9500; (Z &#9500; Z[A/B])</span>
+	</td><td style="background:yellow">Uniform substitution given equality</td><td>A = B &rArr; (Z(A) &rArr; Z(B))</td></tr>
 </table>
 
 <p>For A,B,C for which the infix binary predicate equality = is defined, we have the following expectations for a working definition:</p>
