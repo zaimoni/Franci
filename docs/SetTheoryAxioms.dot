@@ -1,0 +1,69 @@
+strict digraph {
+    UnrestrictedComprehension [label="Axiom of Unrestricted Comprehension" style=filled fillcolor=black fontcolor=white]
+    RussellsParadox [label="Russell's paradox"]
+    ClassExistence [label="Class Existence"]
+
+    subgraph clusterUnrestrictedComprehension {
+        UnrestrictedComprehension -> RussellsParadox
+        UnrestrictedComprehension -> ClassExistence
+    }
+
+    ZF [label="Zermelo-Frankel"]
+    NBG [label="Von Neumann-Bernays-G&ouml;del"]
+
+    NBG -> ClassExistence
+
+    SubsetAxiom [label="Subset Axiom (schema)"]
+    AxiomOfEmptySet [label="Axiom Of Empty Set &#x2205;"]
+
+    Intersection [label="Intersection A &#x2229; B"]
+    SetDifference [label="Set Difference A\\B"]
+
+    SubsetAxiom -> {Intersection, SetDifference}
+
+    AxiomOfPairing [label="Axiom of Pairing {a,b}"]
+    AxiomOfPairingWeak [label="(weak) Axiom of Pairing {a,b}"]
+
+    {AxiomOfPairingWeak, SubsetAxiom} -> AxiomOfPairing
+
+    Singleton [label="Singleton {a}"]
+    OrderedPair [label="Ordered Pair (x,y)"]
+    OrderedPairKuratowski [label="Ordered Pair (x,y) := {{a}, {a,b}}"]
+    OrderedPairTarksiGrothendieck [label="Ordered Pair (x,y) := {a, {a,b}}"]
+
+    AxiomOfPairing -> {Singleton, OrderedPair}
+    OrderedPair -> {OrderedPairKuratowski, OrderedPairTarksiGrothendieck}
+
+    OrderedPairCoordinatewiseEquality [label="(a,b)=(x,y) iff a=x,b=y"]
+    OrderedPairCoordinatewiseEqualityKuratowski [label="(a,b)=(x,y) works for {{a}, {a,b}}"]
+    OrderedPairCoordinatewiseEqualityTarksiGrothendieck [label="(a,b)=(x,y) works for {a, {a,b}}"]
+
+    {OrderedPairCoordinatewiseEqualityKuratowski OrderedPairCoordinatewiseEqualityTarksiGrothendieck} -> OrderedPairCoordinatewiseEquality
+    OrderedPairKuratowski -> OrderedPairCoordinatewiseEqualityKuratowski
+
+    AxiomOfAbsoluteUnion [label="Axiom of (absolute) union"]
+    CartesianProduct [label="Cartesian Product"]
+    AxiomOfPowerSet [label="Axiom Of Power Set"]
+
+    FunctionsAndRelations [label="Functions and relations"]
+
+    {AxiomOfAbsoluteUnion, AxiomOfPowerSet, OrderedPairCoordinatewiseEquality} -> CartesianProduct -> FunctionsAndRelations
+
+    PeanoAxioms [label="Peano axioms for &#x2115;"]
+    AxiomOfInfinity [label="Axiom of Infinity"]
+
+    {FunctionsAndRelations, AxiomOfEmptySet} -> PeanoAxioms -> AxiomOfInfinity
+
+    ZF -> {SubsetAxiom AxiomOfEmptySet AxiomOfPairingWeak AxiomOfAbsoluteUnion AxiomOfPowerSet }
+    ClassExistence -> { SubsetAxiom AxiomOfEmptySet AxiomOfPairingWeak AxiomOfAbsoluteUnion AxiomOfPowerSet }
+
+
+    subgraph clusterSetSpawn {
+        AxiomOfEmptySet
+        AxiomOfPairingWeak
+        AxiomOfPairing
+        AxiomOfAbsoluteUnion
+        AxiomOfPowerSet
+        AxiomOfInfinity
+    }
+}
