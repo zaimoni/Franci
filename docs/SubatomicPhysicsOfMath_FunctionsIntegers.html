@@ -145,7 +145,11 @@
 <tr><td align="right">A &#x2229; &#x2205; =&nbsp;</td><td>&#x2205;</td></tr>
 <tr><td align="right">&#x2205;\B =&nbsp;</td><td>&#x2205;</td></tr>
 <tr><td align="right">A\&#x2205; =&nbsp;</td><td>A</td></tr>
+<tr><td align="right">x &#x2209; A &#x2229; B, x &isin; A &#9500;&nbsp;</td><td>x &#x2209; B</td><td><span style="background:yellow"><i>modus ponendo tollens</i> for &#x2229;</span></td></tr>
+<tr><td align="right">&#x2205; = A &#x2229; B, x &isin; A &#9500;&nbsp;</td><td>x &#x2209; B</td><td><span style="background:yellow"><i>modus ponendo tollens</i> for &#x2229;</span></td></tr>
 </table>
+
+
 
 <h2 id="axiom-pairing" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Axiom of Pairing</h2>
 <p>Given two elements that syntactically can be in a mathematical collection, it is reasonable that a mathematical collection containing exactly those two elements, exists.  Like before, this is a theorem 
@@ -356,6 +360,8 @@ emphasize that A is playing the role of an "indexing collection", so a common al
 		s o r:X <span style="position:relative; top: -2px">&#x2192;</span> Z, defined as 
 		<p align="center">s o r := {(x,z) &#x2208; X <span style="font:sans-serif; position:relative; top: -1px">x</span> Z : (<span style="transform:rotate(180deg);display:inline-block">E</span>y &#x2208; Y)((x,y) &#x2208; r & (y,z) &#x2208; s) }</p>
 		s(r(x)) is an alternate syntax for (s o r)(x).</li>
+	<li>The image of a <i>class</i> or <i>set</i> A for a relation r, is defined as r(A) := {y &isin; Y : (x &isin; <b>Set</b>)(x &isin; A & (x,y) &isin; r) }.  This corresponds to 
+		pointwise evaluation of the relation r.  The preimage of r is defined as the image of the inverse relation r<sup>-1</sup>.</li>
 </ul>
 <p>The abuses of notation previously introduced, have used philosophical domains of discourse in place of mathematical collections.  We take the above definitions as precedent for continuing with such abuses.  
 	In particular, we describe a predicate as a partial function, whose range is contained in <b>TruthValues</b> (which is a <i>set</i>, for the set theories with <i>ur-elements</i>).  [This would be a circular definition; 
@@ -385,7 +391,7 @@ emphasize that A is playing the role of an "indexing collection", so a common al
 <table align="center">
 	<tr><th>Von Neumann</th><th>Zermelo</th></tr>
 	<tr><td colspan="2" align="center">0 := &#x2205;</td></tr>
-	<tr><td>S(x) := a &#x222A; {a}</td><td>S(x) := {a}</td></tr>
+	<tr><td>S(x) := x &#x222A; {x}</td><td>S(x) := {x}</td></tr>
 </table>
 <p>Both choices of S:<b>Set</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>Set</b> are Von Neumann-Bernays-G&ouml;del functions, but not Zermelo-Frankel functions (i.e., we have to use the domain of discourse notational abuse for Zermelo-Frankel set theory).  When checking 
 	that the choice of definition of 0 and S implement the Peano axioms, only the points in gray background color need verification.  Von Neumann's definition supports infinite ordinal numbers, while Zermelo's definition does not.  However, since

@@ -181,6 +181,51 @@
 		(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(<b>Truth</b>(x &#x2208; A)=<b>Truth</b>(x &#x2208; B)) & (<span style="transform:rotate(180deg);display:inline-block">A</span>z &#x2208; <b>Ur</b>)(<b>Truth</b>(z &#x2208; A)=<b>Truth</b>(z &#x2208; B))
 	</td></tr>
 </table>
+<table align="right">
+	<tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td></td><td>x &#x2208; A</td><td>Given</td></tr>
+	<tr><td>2.</td><td></td><td>y &#x2209; A</td><td>Given</td></tr>
+	<tr><td>3.</td><td></td><td>x=y</td><td>Hypothesis</td></tr>
+	<tr><td>4.</td><td></td><td>y &#x2208; A</td><td>[y/x] on (1) by (3)</td></tr>
+	<tr><td>5.</td><td>x=y &#9500; y &#x2208; A</td><td></td><td>Syntactical entailment introduction, (3) and (4)</td></tr>
+	<tr><th colspan="4">Classical logic</th></tr>
+	<tr><td>6.</td><td></td><td>x &ne; y</td><td><span style="background:yellow"><i>modus tollens</i> for &#9500;</span>, (5) and (2)</td></tr>
+	<tr><th colspan="4">Other logics</th></tr>
+	<tr><td>6a.</td><td></td><td>~(x=y &#x21A6; <i>true</i>)</td><td><span style="background:yellow"><i>modus tollens</i> for &#9500;</span>, (5) and (2)</td></tr>
+</table>
+<table align="right">
+	<tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td></td><td>x &#x2208; A</td><td>Given</td></tr>
+	<tr><td>2.</td><td></td><td>y &#x2209; A</td><td>Given</td></tr>
+	<tr><th colspan="4">Zermelo-Frankel, with or without ur-elements</th></tr>
+	<tr><td>3.</td><td></td><td>A &#x2208; <b>Set</b></td><td>(1) is defined</td></tr>
+	<tr><td>4.</td><td></td><td><b>Truth</b>(x &#x2208; A)&ne;<b>Truth</b>(y &#x2208; A)</td><td>(1) and (2)</td></tr>
+	<tr><td>5.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>z &#x2208; <b>Set</b>)(<b>Truth</b>(x &#x2208; z)&ne;<b>Truth</b>(y &#x2208; z))</td><td>Existential instantiation on (4)</td></tr>
+	<tr><td>6.</td><td></td><td>~(<span style="transform:rotate(180deg);display:inline-block">A</span>z &#x2208; <b>Set</b>)(~~(<b>Truth</b>(x &#x2208; z)=<b>Truth</b>(y &#x2208; z)))</td><td>Definition of <span style="transform:rotate(180deg);display:inline-block">E</span> on (5)</td></tr>
+	<tr><td>7.</td><td></td><td>~(<span style="transform:rotate(180deg);display:inline-block">A</span>z &#x2208; <b>Set</b>)(<b>Truth</b>(x &#x2208; z)=<b>Truth</b>(y &#x2208; z))</td><td>Remove double negation on (6)</td></tr>
+	<tr><th colspan="4">Zermelo-Frankel</th></tr>
+	<tr><td>8.</td><td></td><td>x &#x2208; <b>Set</b></td><td>(1) is defined</td></tr>
+	<tr><td>9.</td><td></td><td>y &#x2208; <b>Set</b></td><td>(2) is defined</td></tr>
+	<tr><td>10.</td><td></td><td>x &ne; y</td><td><b>Truth</b> definition of equality of <i>sets</i> and (7)</td></tr>
+	<tr><th colspan="4">Zermelo-Frankel with ur-elements</th></tr>
+	<tr><td>8a.</td><td></td><td>x &#x2208; <b>Set</b> &#x2228; x &#x2208; <b>Ur</b></td><td>(1) is defined</td></tr>
+	<tr><td>9a.</td><td></td><td>y &#x2208; <b>Set</b> &#x2228; y &#x2208; <b>Ur</b></td><td>(2) is defined</td></tr>
+	<tr><td>10a.</td><td></td><td>(x &#x2208; <b>Set</b> &#x2228; x &#x2208; <b>Ur</b>) & (y &#x2208; <b>Set</b> &#x2228; y &#x2208; <b>Ur</b>)</td><td>Conjunction introduction, (8a) and (9a)</td></tr>
+	<tr><td colspan="4" align="center">Intent is to rewrite above to minterm standard form, but we haven't defined what that is yet</td></tr>
+	<tr><td>11a.</td><td></td><td>((x &#x2208; <b>Set</b>) & (y &#x2208; <b>Set</b> &#x2228; y &#x2208; <b>Ur</b>)) &#x2228; ((x &#x2208; <b>Ur</b>) & (y &#x2208; <b>Set</b> &#x2228; y &#x2208; <b>Ur</b>))</td><td>Right distributivity of & over &#x2228; on (10a)</td></tr>
+	<tr><td>12a.</td><td></td><td>(((x &#x2208; <b>Set</b>) & (y &#x2208; <b>Set</b>)) &#x2228; ((x &#x2208; <b>Set</b>) & (y &#x2208; <b>Ur</b>))) &#x2228; ((x &#x2208; <b>Ur</b>) & (y &#x2208; <b>Set</b>)) &#x2228; ((x &#x2208; <b>Ur</b>) & (y &#x2208; <b>Ur</b>))</td><td>Left distributivity of & over &#x2228; on (11a).</td></tr>
+	<tr><td>13a.</td><td></td><td>((x &#x2208; <b>Set</b>) & (y &#x2208; <b>Set</b>)) &#x2228; (((x &#x2208; <b>Set</b>) & (y &#x2208; <b>Ur</b>)) &#x2228; ((x &#x2208; <b>Ur</b>) & (y &#x2208; <b>Set</b>))) &#x2228; ((x &#x2208; <b>Ur</b>) & (y &#x2208; <b>Ur</b>))</td><td>Associativity of &#x2228; on (12a).</td></tr>
+	<tr><td>14a.</td><td></td><td>((x &#x2208; <b>Set</b>) & (y &#x2208; <b>Set</b>)) &#x2228; ((x &#x2208; <b>Ur</b>) & (y &#x2208; <b>Ur</b>)) &#x2228; (((x &#x2208; <b>Set</b>) & (y &#x2208; <b>Ur</b>)) &#x2228; ((x &#x2208; <b>Ur</b>) & (y &#x2208; <b>Set</b>)))</td><td>Commutativity of &#x2228; on (13a).</td></tr>
+	<tr><td>15a.</td><td>((x &#x2208; <b>Set</b>) & (y &#x2208; <b>Ur</b>)) &#x2228; ((x &#x2208; <b>Ur</b>) & (y &#x2208; <b>Set</b>)) &#9500; x&ne;y</td><td></td><td>Proof by cases, extended definition of &ne;</td></tr>
+	<tr><td>16a.</td><td>((x &#x2208; <b>Set</b>) & (y &#x2208; <b>Set</b>)) &#x2228; ((x &#x2208; <b>Ur</b>) & (y &#x2208; <b>Ur</b>)) &#9500; x&ne;y</td><td></td><td>Proof by cases, <b>Truth</b> definition of equality and (7)</td></tr>
+	<tr><td>17a.</td><td></td><td>x &ne; y</td><td>Proof by cases, (18a) (19a) and (20a)</td></tr>
+</table>
+<p>We consider what we can infer from knowing that x is an element of a mathematical collection A, while y is not an element of A.  The "substitution leads to 
+	absurdity" approach suffers from the weakness of <i>modus tollens</i> in the presence of non-classical truth values.</p>
+<p>The extra clause in the definition of equality for the Zermelo-Frankel set theories (from only having one domain of discourse) allows us to get the classical result 
+	in the presence of non-classical truth values, when using the <b>Truth</b> rewrite of the standard definition.  This doesn't transparently work for 
+	the Von Neumann-Bernays-G&ouml;del set theories.</p>
+
 <p align="right" style="clear:right">Next: <a href="./SubatomicPhysicsOfMath_FunctionsIntegers.html">Sprint for functions and natural numbers</a></p>
 </body>
 </html>
