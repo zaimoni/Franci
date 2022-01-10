@@ -75,10 +75,45 @@
 <table align="center">
 <tr><th colspan="2">Typical</th></tr>
 <tr><td valign="center"><nobr>A &#x2286; B :=&nbsp;</nobr></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; A &rArr; x &#x2208; B) & (<span style="transform:rotate(180deg);display:inline-block">A</span>u &#x2208; <b>Ur</b>)(u &#x2208; A &rArr; u &#x2208; B)</td></tr>
-<tr><th colspan="2">Alternate, to make Belnap's four-valued logic act like the others</th></tr>
+<tr><th colspan="2">Alternate, to make non-classical logics act classical</th></tr>
+<tr><td valign="center"><nobr>A &#x2286; B :=&nbsp;</nobr></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)((x &#x2208; A &#x21A6; <i>true</i>) &rArr; (x &#x2208; B &#x21A6; <i>true</i>)) & (<span style="transform:rotate(180deg);display:inline-block">A</span>u &#x2208; <b>Ur</b>)((u &#x2208; A &#x21A6; <i>true</i>) &rArr; (u &#x2208; B &#x21A6; <i>true</i>))</td></tr>
+<tr><th colspan="2">(failed) Alternate, to make Belnap's four-valued logic act like the others</th></tr>
 <tr><td valign="center"><nobr>A &#x2286; B :=&nbsp;</nobr></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)((x &#x2208; A &rArr; x &#x2208; B) & ~((x &#x2208; A &#x21A6; <i>unknown</i>) &  (x &#x2208; B &#x21A6; <i>contradiction</i>)) & ~((x &#x2208; A &#x21A6; <i>contradiction</i>) &  (x &#x2208; B &#x21A6; <i>unknown</i>))) & <nobr>(<span style="transform:rotate(180deg);display:inline-block">A</span>u &#x2208; <b>Ur</b>)((u &#x2208; A &rArr; u &#x2208; B) & ~((u &#x2208; A &#x21A6; <i>unknown</i>) & (u &#x2208; B &#x21A6; <i>contradiction</i>)) & ~((u &#x2208; A &#x21A6; <i>contradiction</i>) &  (u &#x2208; B &#x21A6; <i>unknown</i>)))</nobr></td></tr>
-</table><p>The set theories without <i>ur-elements</i>, omit the <i>ur-elements</i> clause.</p>
-
+</table>
+<table align="right">
+	<tr><th colspan="4">Von Neumann-Bernays-G&ouml;del with <i>ur-elements</i>, Classical logic</th></tr>
+	<tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td></td><td>A &#x2286; B</td><td>Given</td></tr>
+	<tr><td>2.</td><td></td><td>B &#x2286; A</td><td>Given</td></tr>
+	<tr><td>3.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; A &rArr; x &#x2208; B)</td><td>Conjunction elimination on definition of &#x2286;, on (1)</td></tr>
+	<tr><td>3u.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>u &#x2208; <b>Ur</b>)(u &#x2208; A &rArr; u &#x2208; B)</td><td>Conjunction elimination on definition of &#x2286;, on (1)</td></tr>
+	<tr><td>4.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; B &rArr; x &#x2208; A)</td><td>Conjunction elimination on definition of &#x2286;, on (2)</td></tr>
+	<tr><td>4u.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>u &#x2208; <b>Ur</b>)(u &#x2208; B &rArr; u &#x2208; A)</td><td>Conjunction elimination on definition of &#x2286;, on (2)</td></tr>
+	<tr><td>5.</td><td></td><td>(a1 &#x2208; <b>Set</b>) & (a1 &#x2208; A &rArr; a1 &#x2208; B)</td><td>Universal instantiation on (3)</td></tr>
+	<tr><td>6.</td><td></td><td>a1 &#x2208; <b>Set</b></td><td>Conjunction elimination on (5)</td></tr>
+	<tr><td>7.</td><td></td><td>a1 &#x2208; A &rArr; a1 &#x2208; B</td><td>Conjunction elimination on (5)</td></tr>
+	<tr><td>8.</td><td></td><td>a1 &#x2208; B &rArr; a1 &#x2208; A</td><td>Universal instantiation on (4)</td></tr>
+	<tr><td>9.</td><td></td><td>a1 &#x2208; A &hArr; a1 &#x2208; B</td><td>Definition of &hArr;, (7) and (8)</td></tr>
+	<tr><td>10.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; A &hArr; x &#x2208; B)</td><td>Universal instantiation on (9)</td></tr>
+	<tr><th colspan="4">The same rationales work when starting from (3u) and (4u), leading to</th></tr>
+	<tr><td>10u.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>u &#x2208; <b>Ur</b>)(u &#x2208; A &hArr; u &#x2208; B)</td><td></td></tr>
+	<tr><td>11.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Ur</b>)(x &#x2208; A &hArr; x &#x2208; B) & (<span style="transform:rotate(180deg);display:inline-block">A</span>u &#x2208; <b>Ur</b>)(u &#x2208; A &hArr; u &#x2208; B)</td><td>Conjunction introduction, (10) and (10u)</td></tr>
+	<tr><td>12.</td><td></td><td>A=B</td><td>Definition of equality (Zermelo-Frankel uses <i>axiom of extenstionality</i> here)</td></tr>
+	<tr><th colspan="4">other direction is immediate by simultaneous substitution justified by A=B</th></tr>
+	<tr><th colspan="4">A &#x2286; B & B &#x2286; A &#x27DB; A=B</th></tr>
+	<tr><td colspan="4" align="center">Non-classical truth-value logics logics use the alternate definition, but the above steps only reach</td></tr>
+	<tr><th colspan="4">A &#x2286; B & B &#x2286; A &#9500; (x &#x2208; A &#x21A6; <i>true</i> A &#x27DB; x &#x2208; B &#x21A6; <i>true</i>)</th></tr>
+	<tr><td colspan="4" align="center">The principle of bivalence for ... &#x21A6; <i>true</i> allows reaching</td></tr>
+	<tr><th colspan="4">A &#x2286; B & B &#x2286; A &#9500; (x &#x2208; A &#x21A6; <i>true</i> A &hArr; x &#x2208; B &#x21A6; <i>true</i>)</th></tr>
+</table>	
+<p>The set theories without <i>ur-elements</i>, omit the <i>ur-elements</i> clause, both in the definition of &#x2286; and the inference of equality from mutual subset relations.</p>
+<p>A pragmatic difficulty with non-classical truth values, is that we want the subset A &#x2286; B relation to whitelist sets and ur-elements that are not in A.  Classical logic does this, with the <i>principle of explosion</i>.  The failed alternate still 
+	breaks for Kleene's weak three-valued logic (as does the typical definition), when faced with a term t0 for which t0 &#x2208; A &#x21A6; <i>unknown</i>.  The working alternate, relies on the principle of trivalence/tetravalence making
+	the truth values of the various ... &#x21A6; <i>true</i> statements only have the classical logic truth values <i>true</i> and <i>false</i>.</p>
+<p>The calculation that A &#x2286; B,B &#x2286; A &#9500; A=B, fails for all of the non-classical logics.  We cannot rule out the existence of a term t0 such that 
+	t0 &#x2208; A and t0 &#x2208; B evaluate to distinct not-<i>true</i> truth values, without additional premises.  The adaptation to the other set theories we are considering, is 
+	mechanical.</p>
+	
 <h2 id="subset-axiom" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Subset Axiom (schema)</h2>
 <p>Arguably, one could catalog set theories by their choice of weaker versions of the provably false Unrestricted Comprehension, to syntactically disallow Russell's Paradox.  We already saw how
 	Von Neumann-Bernays-G&ouml;del modifies this.  We'll start with the weakest option: "A predicate applied to a mathematical collection's elements, defines a mathematical subcollection in the same 
@@ -107,7 +142,7 @@
 <p align="center">Subset<sub>&phi;</sub>(Subset<sub>&phi;</sub>(A))=Subset<sub>&phi;</sub>(A)</p>
 <p>Abusing terminology yet to be defined, we say evaluating the <i>subset axiom (schema)</i> is idempotent.  If we further have, for a given predicate &phi; (and &psi;, for the mixed <i>set</i> and <i>ur-element</i> case),
 <p align="center">Subset<sub>&phi;</sub>(A)=Subset<sub>&phi;</sub>(B)</p>
-<p>then that choice of &phi; (and &psi;, if relevant) actually defines a set.</p>
+<p>then that choice of &phi; (and &psi;, if relevant) actually defines a <i>set</i>.</p>
 
 <!-- fix option: axiom of replacement https://en.wikipedia.org/wiki/Axiom_schema_of_replacement (depends on functions being defined) -->
 <!-- fix option: axiom of limitation of size https://en.wikipedia.org/wiki/Axiom_of_limitation_of_size (even heavier) -->
@@ -134,10 +169,11 @@
 	both analysis, and abstract algebra.</p>
 <p>In the set builder notation, above, the mathematical collection that is the source for the <i>subset axiom (schema)</i> is on the left of :; the predicate that 
 	the <i>subset axiom (schema)</i> is instantiated with, is on the right of :.  The universal quantification (<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; A), is suppressed.  The corresponding domain of discourse is read off of the domains of discourse for A and B.</p>
-<p>The following are mechanical exercises for mathematical collections A, B, holding regardless of the logic we are considering:</p>
+<p>The following are mechanical exercises for mathematical collections A, B.  Unless stated otherwise, they hold for all of the logics we are considering.</p>
 <table align="center">
 <tr><th colspan="3">Arithmetic table for A &#x2229; B and A\B</th></tr>
-<tr><td align="right">A &#x2229; B =&nbsp;</td><td>B &#x2229; A</td><td>Proof uses syntactical commutativity of &</td></tr>
+<tr><td align="right">A &#x2229; B =&nbsp;</td><td>B &#x2229; A</td><td>Proof uses substitution commutativity of &: fails Lisp/Prolog</td></tr>
+<tr><td align="right">x &#x2208; A &#x2229; B &#x27DB;&nbsp;</td><td>x &#x2208; B &#x2229; A</td><td>But this only uses syntactical commutativity of &, so works for Lisp/Prolog</td></tr>
 <tr><td align="right">A &#x2229; B &#x2286;&nbsp;</td><td>A</td></tr>
 <tr><td align="right">A &#x2229; B &#x2286;&nbsp;</td><td>B</td></tr>
 <tr><td align="right">A\B &#x2286;&nbsp;</td><td>A</td></tr>
@@ -148,8 +184,6 @@
 <tr><td align="right">x &#x2209; A &#x2229; B, x &isin; A &#9500;&nbsp;</td><td>x &#x2209; B</td><td><span style="background:yellow"><i>modus ponendo tollens</i> for &#x2229;</span></td></tr>
 <tr><td align="right">&#x2205; = A &#x2229; B, x &isin; A &#9500;&nbsp;</td><td>x &#x2209; B</td><td><span style="background:yellow"><i>modus ponendo tollens</i> for &#x2229;</span></td></tr>
 </table>
-
-
 
 <h2 id="axiom-pairing" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Axiom of Pairing</h2>
 <p>Given two elements that syntactically can be in a mathematical collection, it is reasonable that a mathematical collection containing exactly those two elements, exists.  Like before, this is a theorem 
