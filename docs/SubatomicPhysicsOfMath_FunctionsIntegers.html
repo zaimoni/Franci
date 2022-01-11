@@ -184,6 +184,47 @@
 <tr><td align="right">x &#x2209; A &#x2229; B, x &isin; A &#9500;&nbsp;</td><td>x &#x2209; B</td><td><span style="background:yellow"><i>modus ponendo tollens</i> for &#x2229;</span></td></tr>
 <tr><td align="right">&#x2205; = A &#x2229; B, x &isin; A &#9500;&nbsp;</td><td>x &#x2209; B</td><td><span style="background:yellow"><i>modus ponendo tollens</i> for &#x2229;</span></td></tr>
 </table>
+<table align="right">
+	<tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>y &isin; B &#x27DB; y &isin; C </td><td></td><td>Given</td></tr>
+	<tr><td>2.</td><td></td><td>x &isin; A &#x2229; B</td><td>Hypothesis</td></tr>
+	<tr><td>3.</td><td></td><td>x &isin; A & x &isin; B</td><td>Definition of &#x2229; on (1)</td></tr>
+	<tr><td>4.</td><td></td><td>x &isin; A</td><td>Conjunction eliminination on (3)</td></tr>
+	<tr><td>5.</td><td></td><td>x &isin; B</td><td>Conjunction eliminination on (3)</td></tr>
+	<tr><td>6.</td><td></td><td>x &isin; C</td><td><span style="background:yellow"><i>modus ponens</i> for &#x27DB;</span>, (2) and (5)</td></tr>
+	<tr><td>7.</td><td></td><td>x &isin; A & x &isin; C</td><td>Conjunction introduction, (4) and (6)</td></tr>
+	<tr><td>8.</td><td></td><td>x &isin; A &#x2229; C</td><td>Definition of &#x2229; on (7)</td></tr>
+	<tr><th colspan="4">above rationales are fully reversible, so we actually have two syntactical entailment introductions</th></tr>
+	<tr><th colspan="4">(y &isin; B &#x27DB; y &isin; C) &#9500; (x &isin; A &#x2229; B &#x27DB; x &isin; A &#x2229; C) </th></tr>
+</table>
+<p>As we had problems with one of the usual set theory inferences in the presence of non-classical truth values, we specifically check 
+	that we still can do the usual inferences without full equality =.  The other rules have closely comparable proofs, to the exemplar.</p>
+<table align="center">
+	<tr><th colspan="2">Useful for non-classical logics</th></tr>
+	<tr><td align="right">(y &isin; B &#x27DB; y &isin; C) &#9500;&nbsp;</td><td>(x &isin; A &#x2229; B &#x27DB; x &isin; A &#x2229; C)</td></tr>
+	<tr><td align="right">(y &isin; A &#x27DB; y &isin; C) &#9500;&nbsp;</td><td>(x &isin; A &#x2229; B &#x27DB; x &isin; C &#x2229; B)</td></tr>
+	<tr><td align="right">(y &isin; A &#x27DB; y &isin; C) &#9500;&nbsp;</td><td>(x &isin; A\B &#x27DB; x &isin; C\B)</td></tr>
+	<tr><td align="right">(y &#x2209; B &#x27DB; y &#x2209; C) &#9500;&nbsp;</td><td>(x &isin; A\B &#x27DB; x &isin; A\C)</td></tr>
+</table>
+<br style="clear:both">
+<table align="right">
+	<tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td></td><td>A &#x2286; B</td><td>Given</td></tr>
+	<tr><td>2.</td><td></td><td>&#x2205; = A &#x2229; B</td><td>Given</td></tr>
+	<tr><td>3.</td><td></td><td>~(x &isin; A & x &isin; B)</td><td>Universal instantiation of definitions of intersection, and empty set</td></tr>
+	<tr><th colspan="4">~Intuitionistic</th></tr>
+	<tr><td>4.</td><td></td><td>x &#x2209; A &#x2228; x &#x2209; B</td><td>De Morgan's Law, <span style="background:yellow">unwrap from not-and</span></td></tr>
+	<tr><td>5.</td><td></td><td>x &isin; A &rArr; x &#x2209; B</td><td>Definition of &rArr;</td></tr>
+	<tr><td>6.</td><td></td><td>(x &isin; A &#x21A6; <i>true</i>) &rArr; (x &isin; B &#x21A6; <i>true</i>)</td><td>Universal instantiation  of alternate definition of subset</td></tr>
+	<tr><td>7.</td><td></td><td>x &isin; A &rArr; (x &isin; B &#x21A6; <i>true</i>)</td><td><span style="background:yellow">Invert using intended interpretation of &#x21A6; on hypothesis</span> of (6)</td></tr>
+	<tr><td>8.</td><td></td><td>x &isin; A &rArr; (x &isin; B &#x21A6; <i>false</i>)</td><td><span style="background:yellow">Use intended interpretation of &#x21A6; on consequence</span> of (5)</td></tr>
+	<tr><td>9.</td><td></td><td>x &isin; A &rArr; ~(x &isin; B &#x21A6; <i>true</i>)</td><td><span style="background:yellow">Use principle of non-contradiction on consequence</span> of (8)</td></tr>
+	<tr><th colspan="4">would be ~Belnap, except that we have principle of bivalence for &#x21A6;<sub><b>Truth</b></sub></th></tr>
+	<tr><td>10.</td><td></td><td>x &#x2209; A</td><td>Classical law of contradiction, (7) and (9)</td></tr>
+	<tr><td>11.</td><td></td><td>&#x2205; = A</td><td>Universal instantiation to definition of &#x2205;</td></tr>
+	<tr><th colspan="4">A &#x2286; B, &#x2205; = A &#x2229; B &#9500; &#x2205; = A</th></tr>
+</table>
+<p>The alternate definition of subset, almost failed to recreate another traditional set-theory identity for Belnap's four-valued logic.</p>
 
 <h2 id="axiom-pairing" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Axiom of Pairing</h2>
 <p>Given two elements that syntactically can be in a mathematical collection, it is reasonable that a mathematical collection containing exactly those two elements, exists.  Like before, this is a theorem 
