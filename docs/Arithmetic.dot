@@ -1,0 +1,76 @@
+strict digraph {
+    VonNeumann_N [label="Von Neumann model of &#x2115;"]
+    Zermelo_N [label="Zermelo model of &#x2115;"]
+    PeanoAxioms [label="Peano axioms for &#x2115;"]
+    Addition [label="Definition of +"]
+    Multiplication [label="Definition of &middot;"]
+    LinearTotalOrdering [label="Definition of &le;"]
+    Digits [label="Definition of digits"]
+
+    { VonNeumann_N Zermelo_N } -> PeanoAxioms -> {Addition Digits}
+    Addition -> { Multiplication LinearTotalOrdering }
+
+    AdditionPeanoS [label="S(a)=a+1"]
+    { Addition Digits } -> AdditionPeanoS
+
+    AdditionIdentity [label="0 is identity for +"]
+    AdditionAssociativity [label="Associativity of +"]
+    AdditionCommutativity [label="Commutativity of +"]
+    AdditionCancellation [label="Cancellation rule of +"]
+    AdditionCommutativityZero [label="Commutativity of + for 0"]
+    AdditionCommutativityOne [label="Commutativity of + for 1"]
+
+    Addition -> {AdditionIdentity AdditionAssociativity AdditionCommutativityZero}
+    {AdditionAssociativity AdditionPeanoS} -> AdditionCommutativityOne
+    { AdditionCommutativityZero AdditionCommutativityOne } -> AdditionCommutativity
+    { AdditionIdentity AdditionPeanoS } -> AdditionCancellation
+
+    MultiplicationIdentity [label="1 is identity for &middot;"]
+    MultiplicationIdentityLeft [label="1 is left identity for &middot;"]
+    MultiplicationIdentityRight [label="1 is right identity for &middot;"]
+
+    { MultiplicationIdentityLeft MultiplicationIdentityRight } -> MultiplicationIdentity
+    { Multiplication AdditionIdentity } -> MultiplicationIdentityRight
+    { Multiplication AdditionPeanoS AdditionCommutativity } -> MultiplicationIdentityLeft
+
+    MultiplicationAnnihilator [label="0 is annihilator for &middot;"]
+    MultiplicationAnnihilatorLeft [label="0 is left annihilator for &middot;"]
+
+    Multiplication -> MultiplicationAnnihilatorLeft -> MultiplicationAnnihilator
+
+    MultiplicationRightDistributiveOverAddition [label="Right distributivity of &middot; over +"]
+    MultiplicationLeftDistributiveOverAddition [label="Left distributivity of &middot; over +"]
+
+    { Multiplication AdditionAssociativity AdditionCommutativity } -> MultiplicationRightDistributiveOverAddition
+    { MultiplicationRightDistributiveOverAddition AdditionPeanoS MultiplicationIdentityLeft } -> MultiplicationLeftDistributiveOverAddition
+
+    MultiplicationAssociativity [label="Associativity of &middot;"]
+    MultiplicationCommutativity [label="Commutativity of &middot;"]
+
+    { MultiplicationLeftDistributiveOverAddition MultiplicationIdentityRight } -> MultiplicationAssociativity
+    { MultiplicationLeftDistributiveOverAddition MultiplicationIdentity } -> MultiplicationCommutativity
+
+    OtherOrdering [label="&lt; &gt; &ge;"]
+    AncientSubtraction [label="b-a when a&le;b"]
+    Ellipsis [label="a...b when a&le;b"]
+    Infinum [label="infimum i.e. greatest lower bound"]
+    Supremum [label="supremum i.e. least greatest bound"]
+
+    LinearTotalOrdering -> OtherOrdering -> { AncientSubtraction Ellipsis Infinum Supremum }
+
+    TransitivityOrdering [label="Transitivity of &le;, etc."]
+    AdditionCancellationOrdered [label="Cancellation of + for &lt;"]
+    MultiplicationCancellationOrdered [label="Cancellation of &middot; for &lt;"]
+    OtherOrdering -> { TransitivityOrdering AdditionCancellationOrdered MultiplicationCancellationOrdered }
+
+    Trichotomy [label="Trichotomy of &lt; = &gt;"]
+
+    { AncientSubtraction AdditionCommutativity } -> Trichotomy
+    WellOrdering [label="well ordering of natural numbers" style=filled fillcolor=silver]
+    { AncientSubtraction AdditionPeanoS Infinum } -> WellOrdering
+
+    FiniteSequence [label="Finite Sequences"]
+    Ellipsis -> FiniteSequence
+    ArithmeticTables [label="Arithmetic tables"]
+    { Digits FiniteSequence} -> ArithmeticTables
+}

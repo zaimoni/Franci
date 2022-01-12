@@ -1,0 +1,618 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=windows-1252"/>
+	<title>Subatomic Physics of Math: Arithmetic Tables</title>
+	<style type="text/css">
+		@page { margin: 0.79in }
+		p { margin-bottom: 0.1in; line-height: 120% }
+		a:link { so-language: zxx }
+		* {
+            font-family: "Liberation Serif", serif
+        }
+	</style>
+</head>
+<body lang="en-US" dir="ltr">
+<div style="position:fixed; top:0.5em; left:0.5em; background:white"><a href="./">Home</a> &gt; <a href="./SubatomicPhysicsOfMath_IsMemberOf.html">description of &#x2208;, "is member of"</a></div>
+
+<h1 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 16px">Subatomic Physics of Math: Arithmetic Tables</h1>
+
+<span style="border: 1px solid black; display:block; float:right">
+	<ol type="I">
+		<li><a href="#digits">Digits</a></li>
+		<li><a href="#addition">Addition +</a></li>
+		<li><a href="#multiplication">Multiplication &middot;</a></li>
+		<li><a href="#less-than-or-equal">Total linear ordering &le;</a></li>
+	</ol>
+</span>
+
+<p>As a cross-check that we have correct naming of the natural numbers &#x2115;, we shall follow instructions to re-implement the grade school arithmetic tables.</p>
+<p>Technically speaking, there is a huge difference between the second-order <i>axiom of (weak natural) induction</i> and the first order 
+	<i>axiom schema of (weak natural) induction</i>: there is exactly one second-order &#x2115;, but many distinguishable first-order &#x2115;.  We have not yet covered
+	the terminology required to explain this non-technically.  The instructions we are following, are for the second-order &#x2115;.</p>
+
+<h2 id="digits" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Digits</h2>
+<p>We already had to define 0, to set up checking that we have an instance of the Peano axioms.  We next interpret the other digits of the Arabic/Hindu decimal numeration system:</p>
+<table align="center">
+	<tr><th></th><th>Name</th></tr>
+	<tr><td>1 := S(0)</td><td rowspan="9" valign="center">Intended interpretation of (decimal) digits</td></tr>
+	<tr><td>2 := S(1)</td></tr>
+	<tr><td>3 := S(2)</td></tr>
+	<tr><td>4 := S(3)</td></tr>
+	<tr><td>5 := S(4)</td></tr>
+	<tr><td>6 := S(5)</td></tr>
+	<tr><td>7 := S(6)</td></tr>
+	<tr><td>8 := S(7)</td></tr>
+	<tr><td>9 := S(8)</td></tr>
+</table><p>We are translating the verbal counting order of the numbers zero through nine, into uses of the successor function S &mdash; an unary tally system, so to speak.</p>
+<a href="./Arithmetic.dot.svg" target="_blank"><img src="./Arithmetic.dot.svg" width="100%" alt="map of arithmetic i.e. college algebra"></a>
+<h2 id="addition" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Addition +</h2>
+<p>We next recursively define addition +:&#x2115; <span style="font:sans-serif; position:relative; top: -1px">x</span> &#x2115; <span style="position:relative; top: -2px">&#x2192;</span> &#x2115;</p>
+<table align="center">
+	<tr><th colspan="2"></th><th>Name</th></tr>
+	<tr><td align="right">a + 0 :=&nbsp;</td><td>a</td><td>0 is the additive identity</td></tr>
+	<tr><td align="right">a + S(b) :=&nbsp;</td><td>S(a+b)</td><td></td></tr>
+</table>
+<p>If we avoid standard practice by not using the <i>axiom of infinity</i>, then this cannot be formalized in a set theory that only has <i>sets</i>.</p>
+<table align="right">
+	<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td></td><td>a &#x2208; &#x2115;</td><td>Given</td></tr>
+	<tr><td>2.</td><td></td><td>b &#x2208; &#x2115;</td><td>Given</td></tr>
+	<tr><td>3.</td><td></td><td>c &#x2208; &#x2115;</td><td>Given</td></tr>
+
+	<tr><td>4.</td><td></td><td>a+b = a+b</td><td>Reflexivity of =</td></tr>
+	<tr><td>5.</td><td></td><td>(a+b)+0 = a+(b+0)</td><td>Nonuniform substitution ((a+b)+0,a+(b+0)),(a+b,a+b), definition of +</td></tr>
+
+	<tr><td>6.</td><td></td><td>(a+b)+c = a+(b+c)</td><td>Hypothesis</td></tr>
+	<tr><td>7.</td><td></td><td>S((a+b)+c) = S(a+(b+c))</td><td>Syntactical equivalence Peano axiom for S on (6)</td></tr>
+	<tr><td>8.</td><td></td><td>(a+b)+S(c) = a+S((b+c))</td><td>Definition of + on (7)</td></tr>
+	<tr><td>9.</td><td></td><td>(a+b)+S(c) = a+(b+S(c))</td><td>Definition of + on (8)</td></tr>
+	<tr><td>10.</td><td>(a+b)+c = a+(b+c) &#9500; (a+b)+S(c) = a+(b+S(c))</td><td></td><td>Syntactical entailment introduction, (6) and (9)</td></tr>
+	<tr><td>11.</td><td></td><td>(a+b)+c = a+(b+c)</td><td><i>axiom of (weak natural) induction</i>, (5) and (10)</td></tr>
+	<tr><th colspan="4">Associativity of +</th></tr>
+</table>
+<p>Having to prove associativity and commutativity of addition + for natural numbers a,b, is intentional: these are reality checks that addition + has been defined correctly.
+	It is simpler to start by proving associativity of +. That this structurally looks like <i>associativity of &</i> and <i>associatvity of &#x2228;</i>, is an intentional naming convention.
+	As with the other two associativity rules, we consider a+b+c defined for natural numbers and equal to both (a+b)+c and a+(b+c).</p>
+<br style="clear:both">
+<table align="right">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>a &#x2208; &#x2115;</td><td>Given</td></tr>
+	<tr><td>2.</td><td>a+S(0) = S(a+0)</td><td>Definition of +</td></tr>
+	<tr><td>3.</td><td>a+S(0) = S(a)</td><td>Definition of + on (2)</td></tr>
+	<tr><td>4.</td><td>a+1 = S(a)</td><td>Definition of 1 on (3)</td></tr>
+	<tr><td>5.</td><td>S<sup>-1</sup>(a+1) = S<sup>-1</sup>(S(a))</td><td>Syntactical equivalence Peano axiom for S on (4)</td></tr>
+	<tr><td>6.</td><td>S<sup>-1</sup>(a+1) = a</td><td>evaluate S<sup>-1</sup>(S(a)) on (5)</td></tr>
+	<tr><th colspan="3">a &#x2208; &#x2115; &#9500; S(a) = a+1</th></tr>
+	<tr><th colspan="3">a &#x2208; &#x2115; &#9500; S<sup>-1</sup>(a+1) = a</th></tr>
+</table>
+<p>We next confirm that the Peano successor function S, corresponds to adding 1 to a.</p>
+<br style="clear:both">
+<table align="right">
+	<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td></td><td>b &#x2208; &#x2115;</td><td>Given</td></tr>
+	<tr><td>2.</td><td></td><td>0+0=0+0</td><td>Reflexivity of equality =</td></tr>
+	<tr><td>3.</td><td></td><td>0+b = b+0</td><td>Hypothesis</td></tr>
+	<tr><td>4.</td><td></td><td>S(0+b) = S(b+0)</td><td>Syntactical equivalence Peano axiom for S on (3)</td></tr>
+	<tr><td>5.</td><td></td><td>S(0+b) = S(b)</td><td>[b/b+0], definition of + on (4)</td></tr>
+	<tr><td>6.</td><td></td><td>0+S(b) = S(b)</td><td>[0+S(b)/S(0+b)], definition of + on (5)</td></tr>
+	<tr><td>7.</td><td></td><td>0+S(b) = S(b)+0</td><td>[S(b)+0/S(b)], definition of + on (6)</td></tr>
+	<tr><td>8.</td><td>0+b = b+0 &#9500; 0+S(b) = S(b)+0</td><td></td><td>Syntactical entailment introduction, (3) and (7)</td></tr>
+	<tr><td>9.</td><td></td><td>0+b = b+0</td><td><i>axiom of (weak natural) induction</i>, (2) and (8)</td></tr>
+	<tr><th colspan="4">Commutativity of + for 0</th></tr>
+	<tr><td>10.</td><td></td><td>1+b = b+1</td><td>Hypothesis</td></tr>
+	<tr><td>11.</td><td></td><td>S(1+b) = S(b+1)</td><td>Syntactical equivalence Peano axiom for S on (11)</td></tr>
+	<tr><td>12.</td><td></td><td>1+S(b) = b+S(1)</td><td>Definition of + on (10)</td></tr>
+	<tr><td>13.</td><td></td><td>1+S(b) = b+(1+1)</td><td>S(a) = a+1</td></tr>
+	<tr><td>14.</td><td></td><td>1+S(b) = (b+1)+1</td><td>associativity of +</td></tr>
+	<tr><td>15.</td><td></td><td>1+S(b) = S(b)+1</td><td>S(a) = a+1</td></tr>
+	<tr><td>16.</td><td>1+b = b+1 &#9500; 1+S(b) = S(b)+1</td><td></td><td>Syntactical entailment introduction, (10) and (15)</td></tr>
+	<tr><td>9.</td><td></td><td>1+b = b+1</td><td><i>axiom of (weak natural) induction</i>, (10) and (16)</td></tr>
+	<tr><th colspan="4">Commutativity of + for 1</th></tr>
+</table>
+<table align="left">
+	<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td></td><td>a &#x2208; &#x2115;</td><td>Given</td></tr>
+	<tr><td>2.</td><td></td><td>b &#x2208; &#x2115;</td><td>Given</td></tr>
+
+	<tr><td>3.</td><td></td><td>a+b = b+a</td><td>Hypothesis</td></tr>
+	<tr><td>4.</td><td></td><td>S(a+b) = S(b+a)</td><td>Syntactical equivalence Peano axiom for S on (3)</td></tr>
+	<tr><td>5.</td><td></td><td>a+S(b) = b+S(a)</td><td>Definition of + on (4)</td></tr>
+
+	<tr><td>6.</td><td></td><td>a+(b+1) = b+S(a)</td><td>S(a) = a + 1</td></tr>
+	<tr><td>7.</td><td></td><td>a+(1+b) = b+S(a)</td><td>Commutativity of + for 1</td></tr>
+	<tr><td>8.</td><td></td><td>(a+1)+b = b+S(a)</td><td>associativity of +</td></tr>
+	<tr><td>9.</td><td></td><td>S(a)+b = b+S(a)</td><td>S(a) = a + 1</td></tr>
+	<tr><td>10.</td><td>a+b = b+a &#9500; S(a)+b = b+S(a)</td><td></td><td>Syntactical entailment introduction, (3) and (9)</td></tr>
+	<tr><td>11.</td><td></td><td>a+b = b+a</td><td><i>axiom of (weak natural) induction</i>, commutativity of + for 0 and (3)</td></tr>
+	<tr><th colspan="4">Commutativity of +</th></tr>
+</table>
+<p>We next prove our basis case for commutativity of +, 0+a = a+0.  Proving 1+a = a+1 was done <i>ex post facto</i>, specifically because the final proof of commutativity of + needed 
+	that to be valid.</p>
+
+<br style="clear:both">
+<table align="right">
+	<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td></td><td>a &#x2208; &#x2115;</td><td>Given</td></tr>
+	<tr><td>2.</td><td></td><td>b &#x2208; &#x2115;</td><td>Given</td></tr>
+	<tr><td>3.</td><td></td><td>c &#x2208; &#x2115;</td><td>Given</td></tr>
+
+	<tr><td>4.</td><td></td><td>a+0=b+0</td><td>Hypothesis</td></tr>
+	<tr><td>5.</td><td></td><td>a=b</td><td>0 is additive identity (definition)</td></tr>
+	<tr><td>6.</td><td>a+0=b+0 &#9500; a=b</td><td></td><td>Syntactical entailment introduction, (3) and (4)</td></tr>
+	<tr><th colspan="4">Rationale for (4) is reversible, so we actually have</th></tr>
+	<tr><td>6a.</td><td>a+0=b+0 &#x27DB; a=b</td><td></td><td></td></tr>
+
+	<tr><td>7.</td><td>a+c=b+c &#9500; a=b</td><td></td><td>Hypothesis</td></tr>
+	<tr><td>8.</td><td></td><td>a+S(c)=b+S(c)</td><td>Hypothesis</td></tr>
+	<tr><td>9.</td><td></td><td>a+c+1=b+c+1</td><td>S(a)=a+1</td></tr>
+	<tr><td>10.</td><td></td><td>S(a+c)=S(b+c)</td><td>S(a)=a+1</td></tr>
+	<tr><td>11.</td><td></td><td>a+c=b+c</td><td>Peano axiom of syntactical equivalence for S</td></tr>
+	<tr><td>12.</td><td></td><td>a=b</td><td>(Hypothesis)</td></tr>
+	<tr><td>13.</td><td>a+S(c)=b+S(c) &#9500; a=b</td><td></td><td>Syntactical entailment introduction, (8) and (12)</td></tr>
+	<tr><td>14.</td><td>(a+c=b+c &#9500; a=b) &#9500; (a+S(c)=b+S(c) &#9500; a=b)</td><td></td><td>Syntactical entailment introduction, (7) and (13)</td></tr>
+	<tr><td>15.</td><td>a+c=b+c &#9500; a=b</td><td></td><td><i>axiom of (weak) natural induction</i>, (6) and (14)</td></tr>
+	<tr><td>16.</td><td></td><td>a=b</td><td>Hypothesis</td></tr>
+	<tr><td>17.</td><td></td><td>a+c=a+c</td><td>Reflexivity of =</td></tr>
+	<tr><td>18.</td><td></td><td>a+c=b+c</td><td>Nonuniform substitution (a,b)/(a,a) on (17) by (16)</td></tr>
+	<tr><td>19.</td><td>a=b &#9500; a+c=b+c</td><td></td><td>Syntactical entailment introduction, (16) and (18)</td></tr>
+	<tr><td>20.</td><td>a+c=b+c &#x27DB; a=b</td><td></td><td>Definiton of syntactical equivalence, (15) and (19)</td></tr>
+	<tr><th colspan="4">Cancellation rule for +</th></tr>
+</table>
+<p>We next <a href="https://mathweb.ucsd.edu/~nwallach/peano.pdf">verify</a> the cancellation rule for addition +.  The <i>axiom schema of (weak natural) induction</i> is <b>not</b>
+	a valid justification, here.  This is why the first-order axiomatizations of &#x2115; do not try to define addition +, multiplication &middot; or the total ordering &le; from 
+	the successor function S.</p>
+<p>Since all of these proofs are based on non-uniform substitutions, they are robust against both our choice of logic, and choice of set theory.  They would work similarly even 
+	if we were approaching this from lambda calculus, i.e. took functions to be undefined and had to define mathematical containers in terms of functions.</p>
+<table align="center">
+	<tr><th colspan="2">Properties of + for &#x2115;</th></tr>
+	<tr><td>a+0 = a</td><td>0 is additive identity of + (definition)</td></tr>
+	<tr><td>(a+b)+c = a+(b+c)</td><td>Associativity of +</td></tr>
+	<tr><td>a+b = b+a</td><td>Commutativity of +</td></tr>
+	<tr><td>a+c=b+c &#x27DB; a=b</td><td>Cancellation rule for +</td></tr>
+</table>
+<h2 id="multiplication" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Multiplication &middot;</h2>
+<p>It is arbitrary whether to define multiplication &middot;, or the total linear ordering &le;, next.
+We next recursively define multiplication &middot;:&#x2115; <span style="font:sans-serif; position:relative; top: -1px">x</span> &#x2115; <span style="position:relative; top: -2px">&#x2192;</span> &#x2115;</p>
+<table align="center">
+	<tr><th colspan="2"></th><th>Name</th></tr>
+	<tr><td align="right">a&middot;0 :=&nbsp;</td><td>0</td><td>0 is the right multiplicative annihilator</td></tr>
+	<tr><td align="right">a&middot;S(b) :=&nbsp;</td><td>a+a&middot;b</td><td></td></tr>
+</table>
+<table align="right">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>a &#x2208; &#x2115;</td><td>Given</td></tr>
+	<tr><td>2.</td><td>a&middot;S(0) = a+a&middot;0</td><td>Definition of &middot;</td></tr>
+	<tr><td>3.</td><td>a&middot;1 = a+a&middot;0</td><td>Definition of 1</td></tr>
+	<tr><td>4.</td><td>a&middot;1 = a+0</td><td>0 is multiplicative annihilator</td></tr>
+	<tr><td>5.</td><td>a&middot;1 = a</td><td>0 is additive identity</td></tr>
+	<tr><th colspan="3">1 is right multiplicative identity</th></tr>
+</table>
+<table align="left">
+	<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td></td><td>a &#x2208; &#x2115;</td><td>Given</td></tr>
+	<tr><td>2.</td><td></td><td>1&middot;0 = 0</td><td>Definition of &middot;</td></tr>
+	<tr><td>3.</td><td></td><td>1&middot;a = a</td><td>Hypothesis</td></tr>
+	<tr><td>4.</td><td></td><td>1&middot;S(a) = 1&middot;S(a)</td><td>Reflexivity of =</td></tr>
+	<tr><td>5.</td><td></td><td>1&middot;S(a) = 1+1&middot;a</td><td>Definition of &middot; on (4)</td></tr>
+	<tr><td>6.</td><td></td><td>1&middot;S(a) = 1+a</td><td>(3) on (5)</td></tr>
+	<tr><td>7.</td><td></td><td>1&middot;S(a) = a+1</td><td>Commutativity of + on (6)</td></tr>
+	<tr><td>8.</td><td></td><td>1&middot;S(a) = S(a)</td><td>S(a) = a+1</td></tr>
+	<tr><td>9.</td><td>1&middot;a = a &#9500; 1&middot;S(a) = S(a)</td><td></td><td>Syntactical inference introduction, (3) and (8)</td></tr>
+	<tr><td>10.</td><td></td><td>1&middot;a = a</td><td><i>axiom of (weak natural) induction</i>, (2) and (9)</td></tr>
+	<tr><th colspan="4">1 is left multiplicative identity</th></tr>
+</table>
+<p>We adopt the usual precedence convention, i.e. &middot; is higher precedence than + so a+a&middot;b = a+(a&middot;b)</p>
+<p>Having to prove all of the following is intentional: 1 is multiplicative identity, commutativity of &middot;, associativity of &middot; distributivity of &middot; over +.  As with addition +, this is 
+	a cross-check that multiplication &middot; has been defined correctly.  We start by proving 1 is the multiplicative identity.  This also establishes commutativity of 1 for &middot;</p>
+<br style="clear:both" />
+<p>We next verify that 0 is the left annihilator of &middot;.  This also establishes commutativity of 0 for &middot;.</p>
+<table align="left">
+	<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td></td><td>a &#x2208; &#x2115;</td><td>Given</td></tr>
+	<tr><td>2.</td><td></td><td>0&middot;0 = 0</td><td>Definition of &middot;</td></tr>
+	<tr><td>3.</td><td></td><td>0&middot;a = 0</td><td>Hypothesis</td></tr>
+	<tr><td>4.</td><td></td><td>0&middot;S(a) = 0&middot;S(a)</td><td>Reflexivity of =</td></tr>
+	<tr><td>5.</td><td></td><td>0&middot;S(a) = 0+0&middot;a</td><td>Definition of + on (5)</td></tr>
+	<tr><td>6.</td><td></td><td>0&middot;S(a) = 0+0</td><td>(3) on (5)</td></tr>
+	<tr><td>7.</td><td></td><td>0&middot;S(a) = 0</td><td>Definition of + on (6)</td></tr>
+	<tr><td>8.</td><td>0&middot;a = 0 &#9500; 0&middot;S(a) = 0</td><td>/td><td>Syntactical entailment introduction, (3) and </td></tr>
+	<tr><td>9.</td><td></td><td>0&middot;a = 0</td><td><i>axiom of weak natural induction</i>, (2) and (8)</td></tr>
+	<tr><th colspan="4">0 is left annihilator of &middot;</th></tr>
+</table>
+<br style="clear:both" />
+<table align="left">
+	<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td></td><td>a &#x2208; &#x2115;</td><td>Given</td></tr>
+	<tr><td>2.</td><td></td><td>b &#x2208; &#x2115;</td><td>Given</td></tr>
+	<tr><td>3.</td><td></td><td>c &#x2208; &#x2115;</td><td>Given</td></tr>
+	<tr><td>4.</td><td></td><td>0=0</td><td>Reflexivity of =</td></tr>
+	<tr><td>5.</td><td></td><td>0+0=0</td><td>Definition of +</td></tr>
+	<tr><td>6.</td><td></td><td>(a&middot;0)+(b&middot;0)=(a+b)&middot;0</td><td>0 is right annhilator of &middot; (definition)</td></tr>
+	<tr><td>7.</td><td></td><td>(a&middot;c)+(b&middot;c)=(a+b)&middot;c</td><td>Hypothesis</td></tr>
+	<tr><td>8.</td><td></td><td>(a+b)&middot;S(c)=(a+b)&middot;S(c)</td><td>Reflexivity of =</td></tr>
+	<tr><td>9.</td><td></td><td>(a+b)&middot;S(c)=(a+b)+(a+b)&middot;c</td><td>Definition of &middot; on (8)</td></tr>
+	<tr><td>10.</td><td></td><td>(a+b)&middot;S(c)=(a+b)+((a&middot;c)+(b&middot;c))</td><td>(7) on (9) (we cannot use generalized rearrangement of +, only associativity and commutativity)</td></tr>
+	<tr><td>11.</td><td></td><td>(a+b)&middot;S(c)=((a+b)+(a&middot;c))+(b&middot;c)</td><td>associativity of + on (10)</td></tr>
+	<tr><td>12.</td><td></td><td>(a+b)&middot;S(c)=(a+(b+(a&middot;c)))+(b&middot;c)</td><td>associativity of + on (11)</td></tr>
+	<tr><td>13.</td><td></td><td>(a+b)&middot;S(c)=(a+((a&middot;c)+b))+(b&middot;c)</td><td>commutativity of + on (12)</td></tr>
+	<tr><td>14.</td><td></td><td>(a+b)&middot;S(c)=((a+(a&middot;c))+b)+(b&middot;c)</td><td>associativity of + on (14)</td></tr>
+	<tr><td>15.</td><td></td><td>(a+b)&middot;S(c)=a&middot;S(c)+b+b&middot;c</td><td>Definition of &middot; on (14) (now can use simplified notation from associativity of +)</td></tr>
+	<tr><td>16.</td><td></td><td>(a+b)&middot;S(c)=a&middot;S(c)+b&middot;S(c)</td><td>Definition of &middot; on (15)</td></tr>
+	<tr><td>17.</td><td>(a&middot;c)+(b&middot;c)=(a+b)&middot;c &#9500; (a+b)&middot;S(c)=a&middot;S(c)+b&middot;S(c)</td><td></td><td>Syntactical entailment introduction, (7) and (16)</td></tr>
+	<tr><td>18.</td><td></td><td>(a&middot;c)+(b&middot;c)=(a+b)&middot;c</td><td><i>axiom of (weak natural) induction</i>, (6) and (17)</td></tr>
+	<tr><th colspan="4">right distributivity of &middot; over +</th></tr>
+</table>
+<p>I wasn't able to check either commutativity of &middot;, or associativity of &middot;, at this point.  We next verify right distributivity of &middot; over +, and left distributivity of &middot; over +, in that order.</p>
+<table align="right">
+	<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td></td><td>a &#x2208; &#x2115;</td><td>Given</td></tr>
+	<tr><td>2.</td><td></td><td>b &#x2208; &#x2115;</td><td>Given</td></tr>
+	<tr><td>3.</td><td></td><td>c &#x2208; &#x2115;</td><td>Given</td></tr>
+	<tr><td>4.</td><td></td><td>0=0</td><td>Reflexivity of =</td></tr>
+	<tr><td>5.</td><td></td><td>0=0+0</td><td>Definition of +</td></tr>
+	<tr><td>6.</td><td></td><td>(0&middot;b)+(0&middot;c)=0&middot;(b+c)</td><td>0 is left annihilator of &middot;</td></tr>
+	<tr><td>7.</td><td></td><td>(a&middot;b)+(a&middot;c)=a&middot;(b+c)</td><td>Hypothesis</td></tr>
+	<tr><td>8.</td><td></td><td>S(a)&middot;(b+c)=S(a)&middot;(b+c)</td><td>Reflexivity of =</td></tr>
+	<tr><td>9.</td><td></td><td>(a+1)&middot;(b+c)=S(a)&middot;(b+c)</td><td>S(a)=a+1 on (8)</td></tr>
+	<tr><td>10.</td><td></td><td>a&middot;(b+c)+1&middot;(b+c)=S(a)&middot;(b+c)</td><td>right distributivity of &middot; over + on (9)</td></tr>
+	<tr><td>11.</td><td></td><td>(a&middot;b)+(a&middot;c)+1&middot;(b+c)=S(a)&middot;(b+c)</td><td>(7) on (10)</td></tr>
+	<tr><td>12.</td><td></td><td>(a&middot;b)+((a&middot;c)+(b+c))=S(a)&middot;(b+c)</td><td>1 is left identity of &middot; on (11) (associativity of + notational shortcut unusable now)</td></tr>
+	<tr><td>13.</td><td></td><td>(a&middot;b)+(((a&middot;c)+b)+c)=S(a)&middot;(b+c)</td><td>associativity of + on (12)</td></tr>
+	<tr><td>14.</td><td></td><td>(a&middot;b)+((b+(a&middot;c))+c)=S(a)&middot;(b+c)</td><td>commutativity of + on (13)</td></tr>
+	<tr><td>15.</td><td></td><td>((a&middot;b)+(b+(a&middot;c)))+c=S(a)&middot;(b+c)</td><td>associativity of + on (14)</td></tr>
+	<tr><td>16.</td><td></td><td>(((a&middot;b)+b)+(a&middot;c))+c=S(a)&middot;(b+c)</td><td>associativity of + on (15)</td></tr>
+	<tr><td>17.</td><td></td><td>((a&middot;b)+b)+((a&middot;c)+c)=S(a)&middot;(b+c)</td><td>associativity of + on (16)</td></tr>
+	<tr><td>18.</td><td></td><td>((a&middot;b)+1&middot;b)+((a&middot;c)+1&middot;c)=S(a)&middot;(b+c)</td><td>1 is left identity for &middot; on (17)</td></tr>
+	<tr><td>19.</td><td></td><td>(a+1)&middot;b+(a+1)&middot;c=S(a)&middot;(b+c)</td><td>right distributivity of &middot; over + on (18)</td></tr>
+	<tr><td>20.</td><td></td><td>S(a)&middot;b+S(a)&middot;c=S(a)&middot;(b+c)</td><td>S(a)=a+1 on (19)</td></tr>
+	<tr><td>21.</td><td>(a&middot;b)+(a&middot;c)=a&middot;(b+c) &#9500; S(a)&middot;b+S(a)&middot;c=S(a)&middot;(b+c)</td><td></td><td>syntactical entailment introduction, (7) and (20)</td></tr>
+	<tr><td>22.</td><td></td><td>(a&middot;b)+(a&middot;c)=a&middot;(b+c)</td><td><i>axiom of (weak natural) inductiion</i>, (6) and (21)</td></tr>
+	<tr><th colspan="4">left distributivity of &middot; over +</th></tr>
+</table>
+<br style="clear:both" />
+<table align="left">
+	<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>a &#x2208; &#x2115;</td><td>Given</td></tr>
+	<tr><td>2.</td><td>b &#x2208; &#x2115;</td><td>Given</td></tr>
+	<tr><td>3.</td><td>a&middot;b = b&middot;a</td><td>Hypothesis</td></tr>
+	<tr><td>4.</td><td>S(a)&middot;b = S(a)&middot;b</td><td>Reflexivity of =</td></tr>
+	<tr><td>5.</td><td>S(a)&middot;b = (a+1)&middot;b</td><td>S(a)=a+1 on (4)</td></tr>
+	<tr><td>6.</td><td>S(a)&middot;b = a&middot;b+1&middot;b</td><td>right distributivity of &middot; over + on (5)</td></tr>
+	<tr><td>7.</td><td>S(a)&middot;b = 1&middot;b+a&middot;b</td><td>commutativity of + on (6)</td></tr>
+	<tr><td>8.</td><td>S(a)&middot;b = 1&middot;b+b&middot;a</td><td>(3) on (7)</td></tr>
+	<tr><td>9.</td><td>S(a)&middot;b = b&middot;1+b&middot;a</td><td>commutativity of 1 for &middot; on (8)</td></tr>
+	<tr><td>10.</td><td>S(a)&middot;b = b&middot;(1+a)</td><td>left distributivity of &middot; over + on (9)</td></tr>
+	<tr><td>11.</td><td>S(a)&middot;b = b&middot;(a_1)</td><td>commutativity of + on (10)</td></tr>
+	<tr><td>12.</td><td>S(a)&middot;b = b&middot;S(a)</td><td>S(a)=a+1 on (11)</td></tr>
+	<tr><th colspan="3">commutativity of &middot;</th></tr>
+</table>
+<p>We next verify commutativity of &middot; and associativity of &middot;.  The exact order doesn't matter; their proofs are independent of each other.</p>
+<table align="right">
+	<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td></td><td>a &#x2208; &#x2115;</td><td>Given</td></tr>
+	<tr><td>2.</td><td></td><td>b &#x2208; &#x2115;</td><td>Given</td></tr>
+	<tr><td>3.</td><td></td><td>c &#x2208; &#x2115;</td><td>Given</td></tr>
+	<tr><td>4.</td><td></td><td>0=0</td><td>Reflexivity of =</td></tr>
+	<tr><td>5.</td><td></td><td>(a&middot;b)&middot;0=a&middot;0</td><td>definition of &middot;</td></tr>
+	<tr><td>6.</td><td></td><td>(a&middot;b)&middot;0=a&middot;(b&middot;0)</td><td>definition of &middot;</td></tr>
+	<tr><td>7.</td><td></td><td>(a&middot;b)&middot;c=a&middot;(b&middot;c)</td><td>Hypothesis</td></tr>
+	<tr><td>8.</td><td></td><td>(a&middot;b)&middot;S(c)=(a&middot;b)&middot;S(c)</td><td>Reflexivity of =</td></tr>
+	<tr><td>9.</td><td></td><td>(a&middot;b)&middot;S(c)=(a&middot;b)&middot;(c+1)</td><td>S(a)=a+1 on (8)</td></tr>
+	<tr><td>10.</td><td></td><td>(a&middot;b)&middot;S(c)=(a&middot;b)&middot;c+(a&middot;b)&middot;1</td><td>left distributivity of &middot; over + on (9)</td></tr>
+	<tr><td>11.</td><td></td><td>(a&middot;b)&middot;S(c)=a&middot;(b&middot;c)+(a&middot;b)&middot;1</td><td>(7) on (10)</td></tr>
+	<tr><td>12.</td><td></td><td>(a&middot;b)&middot;S(c)=a&middot;(b&middot;c)+a&middot;b</td><td>1 is right identity for &middot; on (11)</td></tr>
+	<tr><td>13.</td><td></td><td>(a&middot;b)&middot;S(c)=a&middot;(b&middot;c)+a&middot;(b&middot;1)</td><td>1 is right identity for &middot; on (12)</td></tr>
+	<tr><td>14.</td><td></td><td>(a&middot;b)&middot;S(c)=a&middot;(b&middot;c+b&middot;1)</td><td>left distributivity of &middot; over + on (13)</td></tr>
+	<tr><td>15.</td><td></td><td>(a&middot;b)&middot;S(c)=a&middot;(b&middot;(c+1))</td><td>left distributivity of &middot; over + on (14)</td></tr>
+	<tr><td>16.</td><td></td><td>(a&middot;b)&middot;S(c)=a&middot;(b&middot;S(c))</td><td>S(a)=a+1 on (15)</td></tr>
+	<tr><td>17.</td><td>(a&middot;b)&middot;c=a&middot;(b&middot;c) &#9500; (a&middot;b)&middot;S(c)=a&middot;(b&middot;S(c))</td><td></td><td>Syntactical entailment introduction, (7) and (16)</td></tr>
+	<tr><td>18.</td><td></td><td>(a&middot;b)&middot;c=a&middot;(b&middot;c)</td><td><i>axiom of (weak natural) induction</i>, (6) and (17)</td></tr>
+	<tr><th colspan="3">associativity of &middot;</th></tr>
+</table>
+<p>At this point, we have built out more than enough to allow both setting up G&ouml;del numbering,
+	and the arithmetic version of the diagonalization argument that triggers G&ouml;del's Second Incompleteness Theorem.</p>
+<table align="center">
+	<tr><th colspan="2">Properties of &middot; for &#x2115;</th></tr>
+	<tr><td>a&middot;0 = 0</td><td>0 is annhilator of &middot; (definition)</td></tr>
+	<tr><td>a&middot;1 = a</td><td>1 is identity of &middot;</td></tr>
+	<tr><td>(a&middot;b)&middot;c = a&middot;(b&middot;c)</td><td>Associativity of &middot;</td></tr>
+	<tr><td>a&middot;b = b&middot;a</td><td>Commutativity of +</td></tr>
+<!--	<tr><td>a+c=b+c &#x27DB; a=b</td><td>Cancellation rule for +</td></tr> -->
+</table>	
+
+<h2 id="less-than-or-equal" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Total linear ordering &le;</h2>
+<p>We next define &le; for natural numbers a,b by</p>
+<p align="center">a &le; b := (<span style="transform:rotate(180deg);display:inline-block">E</span>c &isin; &#x2115;)(a+c = b)</p>
+<p>If c exists, it is an easy verification (using the <i>cancellation rule for +</i>) that it is unique.  We can define the function 
+	b-a:{(a,b) &isin; &#x2115; <span style="font:sans-serif; position:relative; top: -1px">x</span> &#x2115; : a &le; b} <span style="position:relative; top: -2px">&#x2192;</span> &#x2115;
+	as having the value c, provided by using existential instantiation on the definition of a &le; b.  (Eliminating this restriction, is one motivation for extending the natural numbers to the integers.)</p>
+<p>It is provable for natural numbers a,b,c (leaning heavily on existential instantiation) that</p>
+<table align="center">
+	<tr><td></td><td>0 &le; a</td><td>0 is the least natural number</td></tr>
+	<tr><td align="right">a=b &#9500;&nbsp;</td><td>a &le; b</td></tr>
+	<tr><td align="right">a=b &#x27DB;&nbsp;</td><td>0 = b-a</td></tr>
+	<tr><td align="right">a &le; b, b &le; c &#9500;&nbsp;</td><td>a &le; c</td><td>Transitivity of &le;</td></tr>
+	<tr><td align="right">a &le; b &#9500;&nbsp;</td><td>a+c &le; b+c</td></tr>
+	<tr><td align="right">a &le; b &#9500;&nbsp;</td><td>a&middot;c &le; b&middot;c</td></tr>
+</table>
+<p>We have the following notational conventions:
+<ul>
+	<li>When &le; is defined, we define a&ge;b := b&le;a.</li>
+	<li>When &le; and = are both defined, but &lt; is not yet defined, we define a &lt; b := a &le; b & a &ne; b .</li>
+	<li>When &lt; is defined, we define a &gt; b := b &lt; a .</li>
+</ul>
+<table align="right">
+	<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td></td><td>a &#x2208; &#x2115;</td><td>Given</td></tr>
+	<tr><td>2.</td><td></td><td>b &#x2208; &#x2115;</td><td>Given</td></tr>
+	<tr><td>3.</td><td></td><td>a&lt;b</td><td>Hypothesis</td></tr>
+	<tr><td>4.</td><td></td><td>a &le; b & a &ne; b</td><td>Definition of &lt;</td></tr>
+	<tr><td>5.</td><td></td><td>a &le; b</td><td>Conjunction elimination on (4)</td></tr>
+	<tr><td>6.</td><td></td><td>a &ne; b</td><td>Conjunction elimination on (4)</td></tr>
+	<tr><td>7.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>c &isin; &#x2115;)(a+c = b)</td><td>Definition of &le;</td></tr>
+	<tr><td>8.</td><td></td><td>(t1 &#x2208; &#x2115;) & (a+t1 = b)</td><td>Existential instantiation</td></tr>
+	<tr><td>9.</td><td></td><td>t1 &#x2208; &#x2115;</td><td>Conjunction elimination on (8)</td></tr>
+	<tr><td>10.</td><td></td><td>a+t1 = b</td><td>Conjunction elimination on (8)</td></tr>
+	<tr><td>11.</td><td></td><td>t1 = 0</td><td>Hypothesis (we're working around not having subtraction)</td></tr>
+	<tr><td>12.</td><td></td><td>a+0 = b</td><td>[0/t1] on (10) by (11)</td></tr>
+	<tr><td>13.</td><td></td><td>a = b</td><td>0 is additive identity</td></tr>
+	<tr><td>14.</td><td>t1 = 0 &#9500; a = b</td><td></td><td>Syntactical entailment introduction, (11) and (13) </td></tr>
+	<tr><td>15.</td><td></td><td>t1 &ne; 0</td><td><span style="background:yellow"><i>modus tollens</i> for &#9500;</span> (14) and (6)</td></tr>
+	<tr><td>16.</td><td></td><td>t1 &#x2208; &#x2115;\{0}</td><td>Definition of set difference \</td></tr>
+	<tr><td>17.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>d &isin; &#x2115;\{0})(a+d = b)</td><td>Existential instantiation</td></tr>
+	<tr><td>18.</td><td>a&lt;b &#9500; (<span style="transform:rotate(180deg);display:inline-block">E</span>d &isin; &#x2115;\{0})(a+d = b)</td><td></td><td>Syntactical entailment introduction, (3) and (17)</td></tr>
+	<tr><th colspan="4">Reverse direction is similar technique but simpler</th></tr>
+	<tr><th colspan="4">Description of &lt;</th></tr>
+	<tr><th colspan="4">a&lt;b &#x27DB; (<span style="transform:rotate(180deg);display:inline-block">E</span>d &isin; &#x2115;\{0})(a+d = b)</th></tr>
+</table>
+<p>At this point, it matters that for both S<sub>Zermelo</sub>(x) := {x} and S<sub>Von Neumann</sub>(x) := x &#x222A; {x} that 
+	(<span style="transform:rotate(180deg);display:inline-block">A</span>x &isin; <b>Set</b>)(0 &ne; S(x)); that means 0=x is a <b>classical</b> logic statement 
+	for x &isin; {0} &#x222A; Range(S), so we can use the classical logic version of <span style="background:yellow"><i>modus tollens</i> for &#9500;</span> regardless of our choice of truth-table described logic.</p>
+<table align="left">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>a &#x2208; &#x2115;</td><td>Given</td></tr>
+	<tr><td>2.</td><td>1 &le; a</td><td>Hypothesis</td></tr>
+	<tr><td>3.</td><td>a=a</td><td>Reflexivity of =</td></tr>
+	<tr><td>4.</td><td>S(S<sup>-1</sup>>(a))=a</td><td>Expand partial identity function as S o S<sup>-1</sup>, by (2)</td></tr>
+	<tr><td>5.</td><td>S<sup>-1</sup>(a)+1=a</td><td>S(a)=a+1 on (4)</td></tr>
+</table>	
+<p>We can refine the initial summary for &le; to account for &lt; as well, again leaning heavily on existential instantiation:</p>
+<table align="center">
+	<tr><td align="right">a &lt; b &#x27DB;&nbsp;</td><td>0 &lt; b-a</td></tr>
+	<tr><td align="right">a &lt; b, b &le; c &#9500;&nbsp;</td><td>a &lt; c</td><td>Transitivity of &lt; and &le;</td></tr>
+	<tr><td align="right">a &le; b, b &lt; c &#9500;&nbsp;</td><td>a &lt; c</td><td><nobr>Transitivity of &le; and &lt;</nobr></td></tr>
+	<tr><td align="right"><nobr>a &lt; b, b &lt; c &#9500;&nbsp;</nobr></td><td>a &lt; c</td><td>Transitivity of &lt;</td></tr>
+	<tr><td align="right">a &lt; b &#x27DB;&nbsp;</td><td>a+c &lt; b+c</td><td>Cancellation of + for &lt;</td></tr>
+	<tr><td align="right">a &lt; b & 0&lt;c &#x27DB;&nbsp;</td><td>a&middot;c &lt; b&middot;c</td><td>Cancellation of &middot; for &lt;</td></tr>
+	<tr><td align="right">1 &le; a &#9500;&nbsp;</td><td><nobr>S<sup>-1</sup>(a)+1=a</nobr></td><td>S<sup>-1</sup>(a)+1=a when 1&le;a</td></tr>
+</table>
+<p>We have the following notational conventions: when a&lt;b, a&le;b, b&lt;c, b&le;c are defined, and it is definite that b is not a truth value, we define:</p>
+<ul>
+	<li>a&lt;b&lt;c := a&lt;b & a&lt;c</li>
+	<li>a&lt;b&le;c := a&lt;b & a&le;c</li>
+	<li>a&le;b&lt;c := a&le;b & a&lt;c</li>
+	<li>a&le;b&le;c := a&le;b & a&le;c</li>
+</ul>
+<p>If a and c are natural numbers such that a&le;c, we define a...c := {x &isin; &#x2115;: a&le;x&le;b }.  (This definition can be made more generally, but we are nowhere close to that.)</p>
+
+<br style="clear:both"/>
+<!-- https://mathweb.ucsd.edu/~nwallach/peano.pdf -->
+<table align="right">
+	<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td></td><td>a &#x2208; &#x2115;</td><td>Given</td></tr>
+	<tr><td>2.</td><td></td><td>b &#x2208; &#x2115;</td><td>Given</td></tr>
+	<tr><td>3.</td><td></td><td>b &lt; b+1</td><td>Description of &lt;</td></tr>
+	<tr><th colspan="4" align="center">Want a &lt; b &#x2228; a=b &#x2228; a &gt; b as final hypothesis</th></tr>
+	<tr><td>4.</td><td></td><td>a &lt; b</td><td>Hypothesis</td></tr>
+	<tr><td>5.</td><td></td><td>a &lt; b+1</td><td>Transitivity of &lt;, (4) and (3)</td></tr>
+	<tr><td>6.</td><td>a &lt; b &#9500; a &lt; b+1</td><td></td><td>Syntactical entailment introduction, (4) and (5)</td></tr>
+	<tr><td>7.</td><td></td><td>a=b</td><td>Hypothesis</td></tr>
+	<tr><td>8.</td><td></td><td>a&lt;b+1</td><td>Nonuniform substitution (a,b)/(b,b) on (3) by (7)</td></tr>
+	<tr><td>9.</td><td>a=b &#9500; a&lt;b+1</td><td></td><td>Syntactical entailment introduction, (7) and (8)</td></tr>
+	<tr><td>10.</td><td>a &lt; b &#x2228; a=b &#9500; a&lt;b+1</td><td></td><td>Proof by cases, (6) and (9)</td></tr>
+	<tr><td>10a.</td><td>a &lt; b &#x2228; a=b &#9500; a&lt;S(b)</td><td></td><td>S(a)=a+1 on (10)</td></tr>
+	<tr><td>11.</td><td></td><td>a &gt; b</td><td>Hypothesis (:= b &lt; a)</td></tr>
+	<tr><td>12.</td><td></td><td>1 &le; a-b</td><td>Description of &lt; on (11)</td></tr>
+	<tr><td>13.</td><td></td><td>a = b+(a-b)</td><td>Definition of - on (11)</td></tr>
+	<tr><td>14.</td><td></td><td>a = b+S<sup>-1</sup>(a-b)+1</td><td>S<sup>-1</sup>(a)+1=a when 1&le;a on (13)</td></tr>
+	<tr><td>15.</td><td></td><td>a = b+1+S<sup>-1</sup>(a-b)</td><td>Commutativity of + on (14)</td></tr>
+	<tr><td>16.</td><td></td><td>a = S(b)+S<sup>-1</sup>(a-b)</td><td>S(a)=a+1 on (15)</td></tr>
+	<tr><td>17.</td><td></td><td>a - S(b) = S<sup>-1</sup>(a-b)</td><td>Definition of -</td></tr>
+	<tr><td>18.</td><td></td><td>S(b) &le; a</td><td>Definition of - on (17)</td></tr>
+	<tr><td>19.</td><td></td><td>S(b)=a &#x2228; S(b) &lt; a</td><td>Definition of &lt; on (18)</td></tr>
+	<tr><td>20.</td><td></td><td>a=S(b) &#x2228; S(b) &lt; a</td><td>Reflexivity of = on (19)</td></tr>
+	<tr><td>21.</td><td></td><td>a=S(b) &#x2228; a &gt; S(b)</td><td>Definition of &gt; on (20)</td></tr>
+	<tr><td>22.</td><td>a &gt; b &#9500; a=S(b) &#x2228; a &gt; S(b)</td><td></td><td>Syntactical entailment introduction, (11) and (21)</td></tr>
+	<tr><td>23.</td><td></td><td>a &lt; b &#x2228; a=b &#x2228; a &gt; b</td><td>Hypothesis</td></tr>
+	<tr><td>24.</td><td></td><td>a &lt; S(b) &#x2228; a=S(b) &#x2228; a &gt; S(b)</td><td>Proof by cases, (23) and (10a) and (22)</td></tr>
+	<tr><td>25.</td><td>a &lt; b &#x2228; a=b &#x2228; a &gt; b &#9500; a &lt; S(b) &#x2228; a=S(b) &#x2228; a &gt; S(b)</td><td></td><td>Syntactical entailment introduction, (23) and (24)</td></tr>
+	<tr><td>26.</td><td></td><td>a &lt; b &#x2228; a=b &#x2228; a &gt; b</td><td><i>axiom of weak natural induction</i>, <i>0 is the least natural number</i> and (25)</td></tr>
+	<tr><th colspan="4">Total ordering of &#x2115; by &le;, i.e.  Trichotomy of &lt;, =, &gt;</th></tr>
+</table>
+<p>We then verify that the natural numbers &#x2115; are totally ordered with &le;</p>
+<!--
+<p>As mentioned earlier, the techniques used to define addition +, multiplication &middot; and less-than-or-equal &lt; require the second order <i>axiom of (weak natural) induction</i>.  The corresponding 
+	first order models work around this by providing all of +, &middot;, and &le; in the signature (&#x2115;, +, &middot;, &le;).</p>
+-->
+<br style="clear:both" />
+<table align="right">
+	<tr><td colspan="4" align="center">Adapted from Karl Stromberg's <i>An Introduction To Classical Real Analysis</i></td></tr>
+	<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td></td><td>A &#x2286; &#x2115;</td><td>Given</td></tr>
+	<tr><td>2.</td><td></td><td>&#x2205; &ne; A</td><td>Given</td></tr>
+	<tr><td>3.</td><td></td><td>L := {n &isin; &#x2115; : (<span style="transform:rotate(180deg);display:inline-block">A</span>a &isin; A)(n &le; a)}</td><td>Local definition: set of nonstrict lower bounds of A</td></tr>
+	<tr><td>4.</td><td></td><td>0 &isin; L</td><td>0 is least bound of the natural numbers</td></tr>
+	<tr><td>5.</td><td></td><td>&#x2205; = A &#x2229; L</td><td>Hypothesis: A does not contain any of its lowest bounds</td></tr>
+	<tr><td>6.</td><td></td><td>b &isin; L</td><td>Hypothesis</td></tr>
+	<tr><td>7.</td><td></td><td>b &#x2209; A</td><td><span style="background:yellow"><i>modus ponendo tollens</i> for &#x2229;</span>, (5) and (6)</td></tr>
+	<tr><td>8.</td><td></td><td>a1 &isin; A & b &le; a1</td><td>Universal instantiation on (3), (6)</td></tr>
+	<tr><td>9.</td><td></td><td>a1 &isin; A</td><td>Conjunction elimination on (8)</td></tr>
+	<tr><td>10.</td><td></td><td>b &le; a1</td><td>Conjunction elimination on (8)</td></tr>
+	<tr><td>11.</td><td></td><td>b+(a1-b) = a1</td><td>Definition of &le; (10) and (11)</td></tr>
+	<tr><td>12.</td><td></td><td>a1 &#x2209; L</td><td><span style="background:yellow"><i>modus ponendo tollens</i> for &#x2229;</span>, (5) and (9)</td></tr>
+	<tr><td>13.</td><td></td><td>b &ne; a1</td><td>(6) and (12)</td></tr>
+	<tr><td>14.</td><td></td><td>b &lt; a1</td><td>Definition of &lt; (10) and (13)</td></tr>
+	<tr><td>15.</td><td></td><td>1 &le; a1 -b</td><td>Description of &lt; on (14)</td></tr>
+	<tr><td>16.</td><td></td><td>b+1+S<sup>-1</sup>(a1-b) = a1</td><td>S<sup>-1</sup>(a)+1=a when 1&le;a on (15)</td></tr>
+	<tr><td>17.</td><td></td><td>S(b)+S<sup>-1</sup>(a1-b) = a1</td><td>S(a)=a+1 on (16)</td></tr>
+	<tr><td>18.</td><td></td><td>S(b) &le; a1</td><td>Definition of &lt; on (17)</td></tr>
+	<tr><td>19.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>a &isin; A)(S(b) &le; a)</td><td>Universal instantiation on (18)</td></tr>
+	<tr><td>20.</td><td></td><td>S(b) &isin; L</td><td>Definition of L on (19)</td></tr>
+	<tr><td>21.</td><td>b &isin; L &#9500; S(b) &isin; L</td><td></td><td>Syntactical entailment introduction, (6) and (20)</td></tr>
+	<tr><td>22.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>b &isin; &#x2115;)(b &isin; L)</td><td><i>axiom of (weak natural) induction</i>, (4) and (21)</td></tr>
+	<tr><td>23.</td><td></td><td>&#x2115; &#x2286; L</td><td>Definition of &#x2286;</td></tr>
+	<tr><th colspan="4">Classical logic</th></tr>
+	<tr><td style="background:orange">19.</td><td></td><td>&#x2115;=L</td><td>(3) and (18)</td></tr>
+	<tr><td>20.</td><td></td><td>&#x2205; = A &#x2229; &#x2115;</td><td>substitute (19) into (5)</td></tr>
+	<tr><td>21.</td><td></td><td>&#x2205; = A</td><td>(1) and (20)</td></tr>
+	<tr><td>22.</td><td>&#x2205; = A &#x2229; L &#9500; &#x2205; = A</td><td></td><td>Syntactical entailment introduction, (5) and (21)</td></tr>
+	<tr><td style="background:red">23.</td><td></td><td>&#x2205; &ne; A &#x2229; L</td><td>modus tollens for &#9500;, (22) and (2)</td></tr>
+	<tr><td>24.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>x &isin; <b>Set</b>)(x &isin; A &#x2229; L)</td><td>Definition of equality on (23)</td></tr>
+	<tr><th colspan="4">A contains at least one of its lowest bounds</th></tr>
+<!--	
+	<tr><th colspan="4">Other logics</th></tr>
+	<tr><td>19a.</td><td>x &isin; &#x2115; &#x27DB; x &isin; L</td><td></td><td>(3) and (18)</td></tr>	
+ -->
+</table>
+<p>For a non-empty subset A &#x2286; &#x2115;, if there exists b &isin; &#x2115; such that b &le; x for all x &isin; A, we say b is a lower bound of A.  A lower bound inf of A
+	for which inf &ge; b for any lower bound b, is said to be the greatest lower bound i.e. infimum of the subset A.</p>
+<p>Likewise,  if there exists u &isin; &#x2115; such that u &ge; x for all x &isin; A, we say u is an upper bound of A.  An upper bound sup of A
+	for which sup &le; u for any upper bound b, is said to be the least upper bound i.e. supremum of the subset A.</p>
+<p>Since &#x2115; has no upper bound (by the definition of successor function S), sup:&#x1D4AB;(&#x2115;)\{&#x2205;} <span style="position:relative; top: -2px">&#x2192;</span> &#x2115; is only a partial function.</p>
+<p>There are extreme difficulties in proving well-ordering of &#x2115;, i.e. inf:&#x1D4AB;(&#x2115;)\{&#x2205;} <span style="position:relative; top: -2px">&#x2192;</span> &#x2115; is a function,
+	in the presence of non-classical truth values.  The problem is that in order to allow 
+	equality to justify substitutions, we have to say that if x &isin; A &#x21A6; <i>false</i> while x &isin; B  &#x21A6; <i>unknown</i>, 
+	that ~(A=B &#x21A6; <i>true</i>) even though x is not a member of either A or B.  That is, the working technique for defining the subset 
+	relation &#x2286; to hold up against non-classical truth values, does not work for set or class equality itself.</p>
+<p>Proving that two nonstrict lower bounds of A, both in A, are equal is left as an exercise.</p>
+<p>Note that the final listed step (24) is correct as-is for both the Von Neumann and Zermelo models of the natural numbers, even for the set theories with <i>ur-elements</i>.
+	This is reasonable, since both models work just fine in the set theories without <i>ur-elements</i>: they start with the empty set (which contains no elements at all), and both choices of the successor function S:<b>Set</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>Set</b> do not directly introduce <i>ur-elements</i>.
+	Actually proving this, requires defining hereditary sets.</p>
+<p>For now, we shall consider the well-ordering of the natural numbers proven for classical logic only, for all of the set theories we are considering.</p>
+<p>It is a mechanical verification that for natural numbers a, b such that a&le;b, that sup a...b = b and inf a...b = a.</p>
+<p>Abusing terminology that is properly defined elsewhere, we say that for any natural number n
+<ul>
+	<li>{x &isin; &#x2115;: n&le;x} is a closed upward-opening ray.</li>
+	<li>{x &isin; &#x2115;: n&lt;x} is an open upward-opening ray.</li>
+</ul>
+<p>It is a routine verification that neither of these has a supremum.  We also have, from the trichotomy property:</p>
+<table align="center">
+<tr><td align="right">inf {x &isin; &#x2115;: n&le;x} =&nbsp;</td><td> n</td></tr>
+<tr><td align="right">inf {x &isin; &#x2115;: n&lt;x} =&nbsp;</td><td>S(n)</td></tr>
+<tr><td align="right">0&lt;n &#9500; (y &isin; 0...n &#x222A; {x &isin; &#x2115;: n&lt;x} &#x27DB;&nbsp;</td><td>y &isin; &#x2115;)</td></tr>
+<tr><th colspan="2">Classical logic</th></tr>
+<tr><td align="right">0&lt;n &#9500; 0...n &#x222A; {x &isin; &#x2115;: n&lt;x} =&nbsp;</td><td>&#x2115;</td></tr>
+</table>
+<p>As with well-ordering of natural numbers, the fourth statement is much easier to prove for classical logic.</p>
+
+<br style="clear:both">
+<table align="left">
+	<tr align="right"><th align="center">+</th><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td></tr>	
+	<tr align="right"><td>0</td><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td></tr>	
+	<tr align="right"><td>1</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td></tr>	
+	<tr align="right"><td>2</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td></tr>	
+	<tr align="right"><td>3</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td></tr>	
+	<tr align="right"><td>4</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td></tr>	
+	<tr align="right"><td>5</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td></tr>	
+	<tr align="right"><td>6</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td></tr>	
+	<tr align="right"><td>7</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td></tr>	
+	<tr align="right"><td>8</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td></tr>	
+	<tr align="right"><td>9</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td></tr>	
+</table>
+<table align="right">
+	<tr align="right"><th align="center">&middot;</th><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td></tr>	
+	<tr align="right"><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>	
+	<tr align="right"><td>1</td><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td></tr>	
+	<tr align="right"><td>2</td><td>0</td><td>2</td><td>4</td><td>6</td><td>8</td><td>10</td><td>12</td><td>14</td><td>16</td><td>18</td></tr>	
+	<tr align="right"><td>3</td><td>0</td><td>3</td><td>6</td><td>9</td><td>12</td><td>15</td><td>18</td><td>21</td><td>24</td><td>27</td></tr>	
+	<tr align="right"><td>4</td><td>0</td><td>4</td><td>8</td><td>12</td><td>16</td><td>20</td><td>24</td><td>28</td><td>32</td><td>36</td></tr>	
+	<tr align="right"><td>5</td><td>0</td><td>5</td><td>10</td><td>15</td><td>20</td><td>25</td><td>30</td><td>35</td><td>40</td><td>45</td></tr>	
+	<tr align="right"><td>6</td><td>0</td><td>6</td><td>12</td><td>18</td><td>24</td><td>30</td><td>36</td><td>42</td><td>48</td><td>54</td></tr>	
+	<tr align="right"><td>7</td><td>0</td><td>7</td><td>14</td><td>21</td><td>28</td><td>35</td><td>42</td><td>49</td><td>56</td><td>63</td></tr>	
+	<tr align="right"><td>8</td><td>0</td><td>8</td><td>16</td><td>24</td><td>32</td><td>40</td><td>48</td><td>56</td><td>64</td><td>72</td></tr>	
+	<tr align="right"><td>9</td><td>0</td><td>9</td><td>18</td><td>27</td><td>36</td><td>45</td><td>54</td><td>63</td><td>72</td><td>81</td></tr>	
+</table>
+
+
+<h2 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Decimal numerals</h2>
+<p>We next consider an entry in the multiplication table: 3&middot;5=15.  We have not yet defined 15, but have been told that we should have 15=10+5.  Likewise we have the entry 
+	3&middot;7 = 21, and we should have 21=20+1 i.e. 2&middot;10+1.</p>
+<p>Philosophically, we should distinguish between the natural numbers 0 through 9, and the textual glyphs 0 through 9.  The numbers are definitely mathematical objects; it is not clear that the textual glyphs are mathematical objects.
+	In the set theories with <i>ur-elements</i>, we can talk about functions with mathematical range textual glyphs without formal issue.  Following prior art, we interpret the example numerals as follows:</p>
+<table align="center">
+	<tr><td>Numeral</td><td>Partial function &#x2115; <span style="position:relative; top: -2px">&#x2192;</span> "textual glyphs" represented by numeral</td><td>Domain &#x2286; &#x2115;</td><td>Range &#x2286; {0,1,2,3,4,5,6,7,8,9}</td></tr>
+	<tr valign="center"><td>3</td><td>0 &#x21A6; 3</td><td>{0}</td><td>{3}</td></tr>
+	<tr valign="center"><td>5</td><td>0 &#x21A6; 5</td><td>{0}</td><td>{5}</td></tr>
+	<tr valign="center"><td>7</td><td>0 &#x21A6; 7</td><td>{0}</td><td>{7}</td></tr>
+	<tr valign="center"><td>15</td><td>0 &#x21A6; 5<br>1 &#x21A6; 1</td><td>{0,1} i.e. 0...1</td><td>{1,5}</td></tr>
+	<tr valign="center"><td>21</td><td>0 &#x21A6; 1<br>1 &#x21A6; 2</td><td>{0,1} i.e. 0...1</td><td>{1,2}</td></tr>
+</table>		
+<p>This is promising.  Next, introduce a "thin translation partial function" ToGlyph:&#x2115; <span style="position:relative; top: -2px">&#x2192;</span> "textual glyphs" 
+	whose domain is the natural numbers {0,1,2,3,4,5,6,7,8,9}, whose range is {0,1,2,3,4,5,6,7,8,9}, and that <b>looks</b> like the identity function x &#x21A6; x.  Then, define</p>
+<p align="center">10 := S(9)</p>
+<p>Let X be a mathematical collection.  For a,b &isin; &#x2115; with a &le;b: we say a finite sequence in X is a function (x<sub>j</sub>)<sub>j=a...b</sub> with domain {x &isin; &#x2115; : a &le; x & x &le; b } and range contained in X.
+	The element x<sub>j</sub> is called the jth term of the sequence.</p>
+<p>This definition is chosen, so that numerals can be interpreted as finite sequences that represent numbers.  (A proper buildout of this would use the division theorem, and some other machinery. We just want to replicate the arithmetic tables.)</p>
+<!--
+<p>If addition + is defined on X, For a finite sequence (x<sub>j</sub>>)<sub>j=a..b</sub> in X, we recursively define the sum of the sequence &Sigma;<sub>j=a..b</sub>x<sub>j</sub> as</p>
+<p align="center">&Sigma;<sub>j=a..a</sub>x<sub>j</sub> := x<sub>a</sub></p>
+<p align="center">&Sigma;<sub>j=a..b</sub>x<sub>j</sub> := &Sigma;<sub>j=a..b-1</sub>x<sub>j</sub>+x<sub>b</sub></p>
+-->
+<table align="center">
+	<tr><td>Numeral</td><td>Finite sequence, range textual glyphs</td><td>Corresponding natural number (glyphs converted to natural numbers with ToGlyph<sup>-1</sup>)</td></tr>
+	<tr valign="center"><td>3</td><td>0 &#x21A6; 3</td><td>3&middot;1</td></tr>
+	<tr valign="center"><td>5</td><td>0 &#x21A6; 5</td><td>5&middot;1</td></tr>
+	<tr valign="center"><td>7</td><td>0 &#x21A6; 7</td><td>7&middot;1</td></tr>
+	<tr valign="center"><td>15</td><td>0 &#x21A6; 5<br>1 &#x21A6; 1</td><td>1&middot;10+5&middot;1</td></tr>
+	<tr valign="center"><td>21</td><td>0 &#x21A6; 1<br>1 &#x21A6; 2</td><td>2&middot;10+1&middot;1</td></tr>
+</table>
+<p>What the division theorem and extra machinery (e.g., sum of a finite sequence) would do, is tell us not only that each numeral corresponded to a single natural number, but that each natural number had a single numeral.</p>
+<p>Now, suppose that we had not memorized the addition or multiplication tables.  What <b>physical</b> process would let us recreate them, using just copy-paste techniques?</p>
+<p>The key, is that the textual representation, i.e. notation, of substitutions (uniform, simulataneous, and nonuniform) have domain and range, finite sequences of textual glyphs.
+	So, if the encoding from the mathematics to the finite sequences of textual glyphs is fixed, then we would expect that if two textual glyph sequences are equal, 
+	then the corresponding mathematical objects are equal.  That is: we can mathematically model, what we have been doing when writing up proofs in the tabular format.</p>
+<table align="right">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>2&middot;2 = 2&middot;2</td><td>Reflexivity of =</td></tr>
+	<tr><td>2.</td><td>2&middot;2 = 2+2&middot;1</td><td>Definition of &middot; on (1)</td></tr>
+	<tr><td>3.</td><td>2&middot;2 = 2+2</td><td>1 is multiplicative identity on (2)</td></tr>
+	<tr><td>4.</td><td>2&middot;2 = 2+S(1)</td><td>Definition of 2 on (3)</td></tr>
+	<tr><td>5.</td><td>2&middot;2 = S(2+1)</td><td>Definition of + on (4)</td></tr>
+	<tr><td>6.</td><td>2&middot;2 = S(2+S(0))</td><td>Definition of 1 on (5)</td></tr>
+	<tr><td>7.</td><td>2&middot;2 = S(S(2+0))</td><td>Definition of + on (6)</td></tr>
+	<tr><td>8.</td><td>2&middot;2 = S(S(2))</td><td>0 is additive identity on (7)</td></tr>
+	<tr><td>9.</td><td>2&middot;2 = S(3)</td><td>0 is additive identity on (8)</td></tr>
+	<tr><td>10.</td><td>2&middot;2 = 4</td><td>0 is additive identity on (9)</td></tr>
+</table>
+<p>As an illustration, let's work this for 2&middot;2 = 4: the smallest entry which we don't have a direct rule already recorded.</p>
+<p>Each entry in the Proposition column, physically is the textual representation of a statement; this textual representation 
+	is also a (non-unique) finite sequence of textual glyphs. The rationale column records which nonuniform substitutions were used, 
+	on which statements.  In those tabular formatted proofs with Inference Rule columns, those entries also were physically textual representations of 
+	inference rules, that also were finite sequences of textual glyphs.</p>
+<p>So we should be able to re-create the addition and multiplication table entries, by verifying no more than one hundred ten equality statements.  
+	For this exercise, the two digit numerals yx are to be considered as representing the natural number x+10&middot;y.</p>
+<!--
+<p>To be certain this is generally valid, we need the division algorithm: if n,b are natural numbers with 1&le;b, then there exist unique 
+	integers quotient q and remainder r such that n=b&middot;q+r, 0&le;r, and r&lt;b.  (b=1 trivializes; in that case r=0 and q=n.)  The trick, is that we have to do this
+	without division, or integers.</p>
+
+<table align="right">
+	<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>0.</td><td></td><td>y &#x2208; &#x2115;</td><td>Given (working variable)</td></tr>
+	<tr><td>1.</td><td></td><td>n &#x2208; &#x2115;</td><td>Given</td></tr>
+	<tr><td>2.</td><td></td><td>b &#x2208; { x &isin; &#x2115; : 2&le;x}</td><td>Given</td></tr>
+	<tr><td>3.</td><td></td><td>I := {x &isin; &#x2115; : x&middot;b &le; n}</td><td>Local definition (we want the supremum of this)</td></tr>
+	<tr><td>3a.</td><td></td><td>U := {x &isin; &#x2115; : n &lt; x&middot;b}</td><td>Local definition</td></tr>
+	<tr><td>4.</td><td></td><td>0&le;n</td><td>0 is the least natural number</td></tr>
+	<tr><td>5.</td><td></td><td>0&middot;b&le;n</td><td>0 is the multiplicative annihilator</td></tr>
+	<tr><td>6.</td><td></td><td>0 &isin; I</td><td>alternate way of phrasing (4)</td></tr>
+	<tr><td>7.</td><td></td><td>S(y)&middot;b &le; n</td><td>Hypothesis</td></tr>
+	<tr><td>8.</td><td></td><td>y &lt; y+1</td><td>Definition of &lt;</td></tr>
+	<tr><td>9.</td><td></td><td>y &lt; S(y)</td><td>S(y)=y+1</td></tr>
+	<tr><td>10.</td><td></td><td>y&middot;b &lt; S(y)&middot;b</td><td>Cancellation rule for &middot;, (10) and (2)</td></tr>
+	<tr><td>11.</td><td></td><td>y&middot;b &lt; n</td><td>Transitivity of &lt; and &le;, (10) and (7)</td></tr>
+</table>
+-->
+</body>
+</html>
