@@ -470,7 +470,9 @@ We next recursively define multiplication &middot;:&#x2115; <span style="font:sa
 	<tr><td>22.</td><td>&#x2205; = A &#x2229; L &#9500; &#x2205; = A</td><td></td><td>Syntactical entailment introduction, (5) and (21)</td></tr>
 	<tr><td style="background:red">23.</td><td></td><td>&#x2205; &ne; A &#x2229; L</td><td>modus tollens for &#9500;, (22) and (2)</td></tr>
 	<tr><td>24.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>x &isin; <b>Set</b>)(x &isin; A &#x2229; L)</td><td>Definition of equality on (23)</td></tr>
-	<tr><th colspan="4">A contains at least one of its lowest bounds</th></tr>
+	<tr><th colspan="4" align="center">A contains at least one of its lowest bounds</th></tr>
+	<tr><td colspan="4" align="center">With some extra work using existentiial instantiation and generalization, we can get</td></tr>
+	<tr><th colspan="4">(<span style="transform:rotate(180deg);display:inline-block">E</span>!x &isin; &#x2115;)(x &isin; A &#x2229; L)</th></tr>
 <!--	
 	<tr><th colspan="4">Other logics</th></tr>
 	<tr><td>19a.</td><td>x &isin; &#x2115; &#x27DB; x &isin; L</td><td></td><td>(3) and (18)</td></tr>	
@@ -487,6 +489,10 @@ We next recursively define multiplication &middot;:&#x2115; <span style="font:sa
 	that ~(A=B &#x21A6; <i>true</i>) even though x is not a member of either A or B.  That is, the working technique for defining the subset 
 	relation &#x2286; to hold up against non-classical truth values, does not work for set or class equality itself.</p>
 <p>Proving that two nonstrict lower bounds of A, both in A, are equal is left as an exercise.</p>
+<p>For a domain of discourse A on which equality = is defined, we define (<span style="transform:rotate(180deg);display:inline-block">E</span>!x &isin; A) by the 
+	syntactical equivalence schema</p>
+<p align="center">(<span style="transform:rotate(180deg);display:inline-block">E</span>x &isin; A)(&phi;(x)),(&phi;(x)=&phi;(y) &#9500; x=y) &#x27DB; (<span style="transform:rotate(180deg);display:inline-block">E</span>!x &isin; A)(&phi;(x))</p>
+<p>(We would prefer to use := here to justify substitutions for non-classical logics, but that would require using an inference rule as an argument to logical and &.  I am staying within pre-existing notational abuses.)</p>
 <p>Note that the final listed step (24) is correct as-is for both the Von Neumann and Zermelo models of the natural numbers, even for the set theories with <i>ur-elements</i>.
 	This is reasonable, since both models work just fine in the set theories without <i>ur-elements</i>: they start with the empty set (which contains no elements at all), and both choices of the successor function S:<b>Set</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>Set</b> do not directly introduce <i>ur-elements</i>.
 	Actually proving this, requires defining hereditary sets.</p>

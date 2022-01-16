@@ -57,6 +57,8 @@ strict digraph {
     ZF -> {SubsetAxiom AxiomOfEmptySet AxiomOfPairingWeak AxiomOfAbsoluteUnion AxiomOfPowerSet }
     ClassExistence -> { SubsetAxiom AxiomOfEmptySet AxiomOfPairingWeak AxiomOfAbsoluteUnion AxiomOfPowerSet }
 
+    AxiomOfReplacement [label="Axiom (schema) of Replacement"]
+    {FunctionsAndRelations AxiomOfAbsoluteUnion} -> AxiomOfReplacement
 
     subgraph clusterSetSpawn {
         AxiomOfEmptySet
@@ -65,5 +67,6 @@ strict digraph {
         AxiomOfAbsoluteUnion
         AxiomOfPowerSet
         AxiomOfInfinity
+        AxiomOfReplacement
     }
 }
