@@ -17,6 +17,15 @@
 
 <h1 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 16px">Subatomic Physics of Math: Arithmetic Tables</h1>
 
+<span style="border: 1px solid black; display:block; float:left; margin-right: 20px; padding: 5px">
+	<b>Reaching <i>terra cognita</i>: Grade School Arithmetic</b>
+	<ol type="I">
+		<li><a href="./SubatomicPhysicsOfMath_QuestForEquality.html">retrying defining equality =</a></li>
+		<li><a href="./SubatomicPhysicsOfMath_FunctionsIntegers.html">Sprint for functions and natural numbers</a></li>
+		<li><b>Arithmetic Tables</b></li>
+		<li><a href="./SubatomicPhysicsOfMath_Numerals.html">Numerals</a></li>
+	</ol>
+</span>
 <span style="border: 1px solid black; display:block; float:right">
 	<ol type="I">
 		<li><a href="#digits">Digits</a></li>
@@ -541,7 +550,6 @@ We next recursively define multiplication &middot;:&#x2115; <span style="font:sa
 	<tr align="right"><td>9</td><td>0</td><td>9</td><td>18</td><td>27</td><td>36</td><td>45</td><td>54</td><td>63</td><td>72</td><td>81</td></tr>	
 </table>
 
-
 <h2 id="decimal-numerals" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Decimal numerals</h2>
 <p>We next consider an entry in the multiplication table: 3&middot;5=15.  We have not yet defined 15, but have been told that we should have 15=10+5.  Likewise we have the entry 
 	3&middot;7 = 21, and we should have 21=20+1 i.e. 2&middot;10+1.</p>
@@ -561,11 +569,6 @@ We next recursively define multiplication &middot;:&#x2115; <span style="font:sa
 <p>Let X be a mathematical collection.  For a,b &isin; &#x2115; with a &le;b: we say a finite sequence in X is a function (x<sub>j</sub>)<sub>j=a...b</sub> with domain {x &isin; &#x2115; : a &le; x & x &le; b } and range contained in X.
 	The element x<sub>j</sub> is called the jth term of the sequence.</p>
 <p>This definition is chosen, so that numerals can be interpreted as finite sequences that represent numbers.  (A proper buildout of this would use the division theorem, and some other machinery. We just want to replicate the arithmetic tables.)</p>
-<!--
-<p>If addition + is defined on X, For a finite sequence (x<sub>j</sub>>)<sub>j=a..b</sub> in X, we recursively define the sum of the sequence &Sigma;<sub>j=a..b</sub>x<sub>j</sub> as</p>
-<p align="center">&Sigma;<sub>j=a..a</sub>x<sub>j</sub> := x<sub>a</sub></p>
-<p align="center">&Sigma;<sub>j=a..b</sub>x<sub>j</sub> := &Sigma;<sub>j=a..b-1</sub>x<sub>j</sub>+x<sub>b</sub></p>
--->
 <table align="center">
 	<tr><td>Numeral</td><td>Finite sequence, range textual glyphs</td><td>Corresponding natural number (glyphs converted to natural numbers with ToGlyph<sup>-1</sup>)</td></tr>
 	<tr valign="center"><td>3</td><td>0 &#x21A6; 3</td><td>3&middot;1</td></tr>
@@ -599,27 +602,7 @@ We next recursively define multiplication &middot;:&#x2115; <span style="font:sa
 	inference rules, that also were finite sequences of textual glyphs.</p>
 <p>So we should be able to re-create the addition and multiplication table entries, by verifying no more than one hundred ten equality statements.  
 	For this exercise, the two digit numerals yx are to be considered as representing the natural number x+10&middot;y.</p>
-<!--
-<p>To be certain this is generally valid, we need the division algorithm: if n,b are natural numbers with 1&le;b, then there exist unique 
-	integers quotient q and remainder r such that n=b&middot;q+r, 0&le;r, and r&lt;b.  (b=1 trivializes; in that case r=0 and q=n.)  The trick, is that we have to do this
-	without division, or integers.</p>
 
-<table align="right">
-	<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
-	<tr><td>0.</td><td></td><td>y &#x2208; &#x2115;</td><td>Given (working variable)</td></tr>
-	<tr><td>1.</td><td></td><td>n &#x2208; &#x2115;</td><td>Given</td></tr>
-	<tr><td>2.</td><td></td><td>b &#x2208; { x &isin; &#x2115; : 2&le;x}</td><td>Given</td></tr>
-	<tr><td>3.</td><td></td><td>I := {x &isin; &#x2115; : x&middot;b &le; n}</td><td>Local definition (we want the supremum of this)</td></tr>
-	<tr><td>3a.</td><td></td><td>U := {x &isin; &#x2115; : n &lt; x&middot;b}</td><td>Local definition</td></tr>
-	<tr><td>4.</td><td></td><td>0&le;n</td><td>0 is the least natural number</td></tr>
-	<tr><td>5.</td><td></td><td>0&middot;b&le;n</td><td>0 is the multiplicative annihilator</td></tr>
-	<tr><td>6.</td><td></td><td>0 &isin; I</td><td>alternate way of phrasing (4)</td></tr>
-	<tr><td>7.</td><td></td><td>S(y)&middot;b &le; n</td><td>Hypothesis</td></tr>
-	<tr><td>8.</td><td></td><td>y &lt; y+1</td><td>Definition of &lt;</td></tr>
-	<tr><td>9.</td><td></td><td>y &lt; S(y)</td><td>S(y)=y+1</td></tr>
-	<tr><td>10.</td><td></td><td>y&middot;b &lt; S(y)&middot;b</td><td>Cancellation rule for &middot;, (10) and (2)</td></tr>
-	<tr><td>11.</td><td></td><td>y&middot;b &lt; n</td><td>Transitivity of &lt; and &le;, (10) and (7)</td></tr>
-</table>
--->
+<p align="right" style="clear:right">Next: <a href="./SubatomicPhysicsOfMath_Numerals.html">Numerals</a></p>
 </body>
 </html>
