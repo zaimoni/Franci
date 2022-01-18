@@ -181,14 +181,14 @@
 <!-- AxiomOfPairing -->
 <g id="node10" class="node">
 <title>AxiomOfPairing</title>
-<ellipse fill="none" stroke="black" cx="866.64" cy="-162" rx="94.78" ry="18"/>
-<text text-anchor="middle" x="866.64" y="-158.3" font-family="Times New Roman,serif" font-size="14.00">Axiom of Pairing {a,b}</text>
+<ellipse fill="none" stroke="black" cx="841.64" cy="-162" rx="94.78" ry="18"/>
+<text text-anchor="middle" x="841.64" y="-158.3" font-family="Times New Roman,serif" font-size="14.00">Axiom of Pairing {a,b}</text>
 </g>
 <!-- SubsetAxiom&#45;&gt;AxiomOfPairing -->
 <g id="edge6" class="edge">
 <title>SubsetAxiom&#45;&gt;AxiomOfPairing</title>
-<path fill="none" stroke="black" d="M312.65,-221.12C324.31,-219.29 336.31,-217.5 347.64,-216 495.14,-196.43 667.06,-180.15 771.32,-171"/>
-<polygon fill="black" stroke="black" points="771.85,-174.47 781.5,-170.11 771.24,-167.49 771.85,-174.47"/>
+<path fill="none" stroke="black" d="M312.65,-221.17C324.31,-219.33 336.31,-217.53 347.64,-216 486.68,-197.19 648.48,-180.89 747.97,-171.5"/>
+<polygon fill="black" stroke="black" points="748.37,-174.98 758,-170.56 747.72,-168.01 748.37,-174.98"/>
 </g>
 <!-- PeanoAxioms -->
 <g id="node23" class="node">
@@ -205,14 +205,14 @@
 <!-- Singleton -->
 <g id="node12" class="node">
 <title>Singleton</title>
-<ellipse fill="none" stroke="black" cx="866.64" cy="-90" rx="59.59" ry="18"/>
-<text text-anchor="middle" x="866.64" y="-86.3" font-family="Times New Roman,serif" font-size="14.00">Singleton {a}</text>
+<ellipse fill="none" stroke="black" cx="841.64" cy="-90" rx="59.59" ry="18"/>
+<text text-anchor="middle" x="841.64" y="-86.3" font-family="Times New Roman,serif" font-size="14.00">Singleton {a}</text>
 </g>
 <!-- AxiomOfPairing&#45;&gt;Singleton -->
 <g id="edge8" class="edge">
 <title>AxiomOfPairing&#45;&gt;Singleton</title>
-<path fill="none" stroke="black" d="M866.64,-143.7C866.64,-135.98 866.64,-126.71 866.64,-118.11"/>
-<polygon fill="black" stroke="black" points="870.14,-118.1 866.64,-108.1 863.14,-118.1 870.14,-118.1"/>
+<path fill="none" stroke="black" d="M841.64,-143.7C841.64,-135.98 841.64,-126.71 841.64,-118.11"/>
+<polygon fill="black" stroke="black" points="845.14,-118.1 841.64,-108.1 838.14,-118.1 845.14,-118.1"/>
 </g>
 <!-- OrderedPair -->
 <g id="node13" class="node">
@@ -223,14 +223,14 @@
 <!-- AxiomOfPairing&#45;&gt;OrderedPair -->
 <g id="edge9" class="edge">
 <title>AxiomOfPairing&#45;&gt;OrderedPair</title>
-<path fill="none" stroke="black" d="M934.81,-174.53C948,-176.54 961.73,-178.47 974.64,-180 1024.12,-185.88 1384.38,-182.93 1421.64,-216 1485.4,-272.58 1402.5,-340.74 1459.64,-404 1476.41,-422.57 1500.68,-433.55 1524.58,-440.02"/>
+<path fill="none" stroke="black" d="M908.28,-174.88C920.36,-176.78 932.86,-178.59 944.64,-180 997.42,-186.33 1381.8,-180.82 1421.64,-216 1485.54,-272.42 1402.5,-340.74 1459.64,-404 1476.41,-422.57 1500.68,-433.55 1524.58,-440.02"/>
 <polygon fill="black" stroke="black" points="1523.88,-443.45 1534.42,-442.45 1525.55,-436.66 1523.88,-443.45"/>
 </g>
 <!-- AxiomOfPairingWeak&#45;&gt;AxiomOfPairing -->
 <g id="edge7" class="edge">
 <title>AxiomOfPairingWeak&#45;&gt;AxiomOfPairing</title>
-<path fill="none" stroke="black" d="M866.64,-215.7C866.64,-207.98 866.64,-198.71 866.64,-190.11"/>
-<polygon fill="black" stroke="black" points="870.14,-190.1 866.64,-180.1 863.14,-190.1 870.14,-190.1"/>
+<path fill="none" stroke="black" d="M860.46,-215.7C857.65,-207.81 854.25,-198.3 851.12,-189.55"/>
+<polygon fill="black" stroke="black" points="854.41,-188.34 847.75,-180.1 847.82,-190.7 854.41,-188.34"/>
 </g>
 <!-- OrderedPairKuratowski -->
 <g id="node14" class="node">
@@ -313,26 +313,26 @@
 <!-- AxiomOfReplacement -->
 <g id="node25" class="node">
 <title>AxiomOfReplacement</title>
-<ellipse fill="none" stroke="black" cx="1113.64" cy="-162" rx="129.98" ry="18"/>
-<text text-anchor="middle" x="1113.64" y="-158.3" font-family="Times New Roman,serif" font-size="14.00">Axiom (schema) of Replacement</text>
+<ellipse fill="none" stroke="black" cx="1138.64" cy="-162" rx="184.67" ry="18"/>
+<text text-anchor="middle" x="1138.64" y="-158.3" font-family="Times New Roman,serif" font-size="14.00">Axiom (schema) of Replacement [cf. Numerals]</text>
 </g>
 <!-- AxiomOfAbsoluteUnion&#45;&gt;AxiomOfReplacement -->
 <g id="edge32" class="edge">
 <title>AxiomOfAbsoluteUnion&#45;&gt;AxiomOfReplacement</title>
-<path fill="none" stroke="black" d="M1113.64,-215.7C1113.64,-207.98 1113.64,-198.71 1113.64,-190.11"/>
-<polygon fill="black" stroke="black" points="1117.14,-190.1 1113.64,-180.1 1110.14,-190.1 1117.14,-190.1"/>
+<path fill="none" stroke="black" d="M1119.82,-215.7C1122.64,-207.81 1126.03,-198.3 1129.16,-189.55"/>
+<polygon fill="black" stroke="black" points="1132.47,-190.7 1132.53,-180.1 1125.87,-188.34 1132.47,-190.7"/>
 </g>
 <!-- FunctionsAndRelations -->
 <g id="node22" class="node">
 <title>FunctionsAndRelations</title>
-<ellipse fill="none" stroke="black" cx="1113.64" cy="-90" rx="94.78" ry="18"/>
-<text text-anchor="middle" x="1113.64" y="-86.3" font-family="Times New Roman,serif" font-size="14.00">Functions and relations</text>
+<ellipse fill="none" stroke="black" cx="1138.64" cy="-90" rx="94.78" ry="18"/>
+<text text-anchor="middle" x="1138.64" y="-86.3" font-family="Times New Roman,serif" font-size="14.00">Functions and relations</text>
 </g>
 <!-- CartesianProduct&#45;&gt;FunctionsAndRelations -->
 <g id="edge18" class="edge">
 <title>CartesianProduct&#45;&gt;FunctionsAndRelations</title>
-<path fill="none" stroke="black" d="M1463.46,-146.76C1451.09,-142.85 1437.41,-138.9 1424.64,-136 1351.82,-119.46 1267.96,-107.75 1205.69,-100.42"/>
-<polygon fill="black" stroke="black" points="1205.83,-96.91 1195.49,-99.24 1205.02,-103.87 1205.83,-96.91"/>
+<path fill="none" stroke="black" d="M1463.44,-146.85C1451.07,-142.95 1437.4,-138.98 1424.64,-136 1359.19,-120.71 1284.08,-109.12 1227.26,-101.53"/>
+<polygon fill="black" stroke="black" points="1227.6,-98.04 1217.23,-100.2 1226.69,-104.98 1227.6,-98.04"/>
 </g>
 <!-- AxiomOfPowerSet&#45;&gt;CartesianProduct -->
 <g id="edge17" class="edge">
@@ -343,14 +343,14 @@
 <!-- FunctionsAndRelations&#45;&gt;PeanoAxioms -->
 <g id="edge20" class="edge">
 <title>FunctionsAndRelations&#45;&gt;PeanoAxioms</title>
-<path fill="none" stroke="black" d="M1042.12,-78.14C957.22,-65.25 816.21,-43.84 729.17,-30.62"/>
-<polygon fill="black" stroke="black" points="729.51,-27.13 719.09,-29.09 728.46,-34.05 729.51,-27.13"/>
+<path fill="none" stroke="black" d="M1065.62,-78.48C975.46,-65.5 822.75,-43.5 730.45,-30.21"/>
+<polygon fill="black" stroke="black" points="730.72,-26.71 720.33,-28.75 729.72,-33.64 730.72,-26.71"/>
 </g>
 <!-- FunctionsAndRelations&#45;&gt;AxiomOfReplacement -->
 <g id="edge33" class="edge">
 <title>FunctionsAndRelations&#45;&gt;AxiomOfReplacement</title>
-<path fill="none" stroke="black" d="M1113.64,-108.1C1113.64,-115.79 1113.64,-125.05 1113.64,-133.67"/>
-<polygon fill="black" stroke="black" points="1110.14,-133.7 1113.64,-143.7 1117.14,-133.7 1110.14,-133.7"/>
+<path fill="none" stroke="black" d="M1138.64,-108.1C1138.64,-115.79 1138.64,-125.05 1138.64,-133.67"/>
+<polygon fill="black" stroke="black" points="1135.14,-133.7 1138.64,-143.7 1142.14,-133.7 1135.14,-133.7"/>
 </g>
 <!-- AxiomOfInfinity -->
 <g id="node24" class="node">

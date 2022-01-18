@@ -53,10 +53,10 @@ strict digraph {
     OtherOrdering [label="&lt; &gt; &ge;"]
     AncientSubtraction [label="b-a when a&le;b"]
     Ellipsis [label="a...b when a&le;b"]
-    Infinum [label="infimum i.e. greatest lower bound"]
+    Infimum [label="infimum i.e. greatest lower bound"]
     Supremum [label="supremum i.e. least greatest bound"]
 
-    LinearTotalOrdering -> OtherOrdering -> { AncientSubtraction Ellipsis Infinum Supremum }
+    LinearTotalOrdering -> OtherOrdering -> { AncientSubtraction Ellipsis Infimum Supremum }
 
     TransitivityOrdering [label="Transitivity of &le;, etc."]
     AdditionCancellationOrdered [label="Cancellation of + for &lt;"]
@@ -67,7 +67,10 @@ strict digraph {
 
     { AncientSubtraction AdditionCommutativity } -> Trichotomy
     WellOrdering [label="well ordering of natural numbers" style=filled fillcolor=silver]
-    { AncientSubtraction AdditionPeanoS Infinum } -> WellOrdering
+    { AncientSubtraction AdditionPeanoS Infimum } -> WellOrdering
+
+    DivisionAlgorithm [label="Division algorithm (cf. Numerals)" style=filled fillcolor=silver]
+    { WellOrdering Trichotomy MultiplicationRightDistributiveOverAddition AdditionCancellationOrdered} -> DivisionAlgorithm
 
     FiniteSequence [label="Finite Sequences"]
     Ellipsis -> FiniteSequence
