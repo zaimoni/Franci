@@ -1,0 +1,63 @@
+strict digraph {
+    FiniteSequence [label="Finite Sequences"]
+    FormalLanguage [label="Formal Languages"]
+    FormalAlphabet [label="Alphabet &Sigma;"]
+    FormalWord [label="Word"]
+
+    {FormalAlphabet FiniteSequence } -> FormalWord -> FormalLanguage
+
+    ConstructiveRationale [label="Brouwer-Heyting-Kolmogorov interpretation"]
+
+    AllFormalWords [label=<All formal words &Sigma;<sup>*</sup>>]
+    AxiomOfAbsoluteUnion [label="Axiom of (absolute) union"]
+    FunctionsAndRelations [label="Functions and relations"]
+
+    { FormalWord AxiomOfAbsoluteUnion FunctionsAndRelations } -> AllFormalWords
+
+    FormalAlphabetSet [label="&Sigma; is a set"]
+    AllFormalWordsSet [label=<&Sigma;<sup>*</sup> is a set>]
+    { ConstructiveRationale FormalAlphabet } -> FormalAlphabetSet
+    { ConstructiveRationale AllFormalWords } -> AllFormalWordsSet
+
+    AxiomOfReplacement [label="Axiom (schema) of Replacement"]
+    AllFormalWordsSet -> AxiomOfReplacement
+
+    DivisionAlgorithm [label="Division algorithm" style=filled fillcolor=silver]
+    QuotientRemainder [label="quotient and remainder"]
+    Numeral [label="Natural number numerals"]
+
+    { DivisionAlgorithm ReversalFiniteSequence } -> Numeral
+
+    DivisionAlgorithm -> QuotientRemainder
+
+    ConcatenationFiniteSequence [label="Concatenation of finite sequences"]
+    ReversalFiniteSequence [label="Reversal of finite sequences"]
+    KleeneStar [label="Kleene Star of formal language"]
+
+    FiniteSequence -> { ConcatenationFiniteSequence ReversalFiniteSequence }
+    { FormalLanguage ConcatenationFiniteSequence } -> KleeneStar
+
+    NonTerminalSymbols [label="Non-terminal symbols"]
+    ProductionRules [label="Production rules"]
+    FormalGenerativeGrammar [label="Formal generative grammar"]
+    KurodaNormalForm [label="Kuroda Normal Form"]
+    { FormalAlphabet NonTerminalSymbols FunctionsAndRelations } -> ProductionRules
+    ProductionRules -> FormalGenerativeGrammar -> KurodaNormalForm
+
+    GrammarForNumerals [label="Formal grammar for numerals"]
+    { KurodaNormalForm Numeral} -> GrammarForNumerals
+
+    ClosureAxiom [label="Axiom of Closure"]
+    IdentityElement [label="Identity element"]
+    RightFold [label="Haskell/F# right fold"]
+    Exponentiation [label="Exponentiation"]
+    FunctionsAndRelations -> ClosureAxiom -> IdentityElement -> RightFold -> Exponentiation
+
+    SumOfFiniteSequence [label="sum of finite sequence"]
+    NumeralsToNumbers [label="Numerals to numbers"]
+    
+    FiniteSequence -> SumOfFiniteSequence
+    { SumOfFiniteSequence Exponentiation GrammarForNumerals } -> NumeralsToNumbers
+
+    
+}

@@ -1,0 +1,336 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=windows-1252"/>
+	<title>Subatomic Physics of Math: Arithmetic Tables</title>
+	<style type="text/css">
+		@page { margin: 0.79in }
+		p { margin-bottom: 0.1in; line-height: 120% }
+		a:link { so-language: zxx }
+		* {
+            font-family: "Liberation Serif", serif
+        }
+	</style>
+</head>
+<body lang="en-US" dir="ltr">
+<div style="position:fixed; top:0.5em; left:0.5em; background:white"><a href="./">Home</a> &gt; <a href="./SubatomicPhysicsOfMath_IsMemberOf.html">description of &#x2208;, "is member of"</a></div>
+
+<h1 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 16px">Subatomic Physics of Math: Numerals</h1>
+
+<span style="border: 1px solid black; display:block; float:right">
+	<ol type="I">
+		<li><a href="#formal-languages">Formal languages</a></li>
+		<li><a href="#defining-sigma-star">Defining &Sigma;<sup>*</sup></a></li>
+		<li><a href="#division-algorithm">Division algorithm</a></li>
+		<li><a href="#numerals-for-numbers">Computing numerals for natural numbers</a></li>
+		<li><a href="#grammar-numerals">A formal grammar for decimal numerals</a></li>
+		<li><a href="#exponentiation">Exponentiation</a></li>
+	</ol>
+</span>
+
+<h2 id="formal-languages" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Formal languages</h2>
+<p>Interpreting <a href="https://en.wikipedia.org/wiki/Formal_language">prior art</a>, we say an alphabet is a <i>subset</i> of the domain of discourse of 
+	textual glyphs.  (<i>subclass</i> will not do, here.  We experience that it is definite that some textual glyphs are in some natural-language alphabets, but not others.
+	This definite identification, corresponds to the Von Neumann-Bernays-G&ouml;del definition that a <i>class</i> is actually a <i>set</i>.)</p>
+<p>We presume textual glyphs are not mathematical objects, i.e. textual glyphs are <i>ur-elements</i>.  Intended standard encodings from 
+	natural numbers into textual glyphs, include ASCII, EDBDIC, and at least fourteen versions of UNICODE.  As a cross-check, we note that the alphabet 
+	one learned in grade school, is a formal <i>alphabet</i>.</p>
+<p>We say a word in a given <i>alphabet</i> &Sigma;, is a <i>finite sequence</i> (w<sub>k</sub>)<sub>k=0...n</sub> in &Sigma;.  We say the natural number n+1 is the length of the <i>word</i>.  We would like the mathematical collection of all <i>words</i>
+	over the given <i>alphabet</i> &Sigma;, &Sigma;<sup>*</sup>, to be a <i>set</i> rather than a <i>class</i>; the set theory axioms introduced previously, are insufficient for this.</p>
+<p>We say the empty set &#x2205; is the empty word, which has length zero.  Our authorities disagree on whether the <i>empty word</i> is in &Sigma;<sup>*</sup>.  
+	For our purposes, the <i>empty word</i> is an element of &Sigma;<sup>*</sup>, even though it is not a <i>finite sequence</i>.</p>
+<p>We say a formal language L over a given <i>alphabet</i> &Sigma;, is a mathematical subcollection of &Sigma;<sup>*</sup>.  It is our strong preference that L be a <i>subset</i> of &Sigma;<sup>*</sup>,
+	rather than a <i>subclass</i>.  We interpret a successful lookup in a physical dictionary, as a physical example of w &isin; L.  Thus, we define that a <i>word</i> w is 
+	well-formed, to be w &isin; L .</p>
+<p>Comparing these definitions with our overview of natural language description of formal systems, it is clear that we can interpret 
+	the textual representation of both terms and formulas, to be instances of <i>words</i>.  (To <b>define</b> terms and formulas as <i>words</i>, is 
+	circular reasoning.)  The general description of well-formed formulas, can be interpreted as a verbal description of how to evaluate the &isin; operator 
+	for the <i>formal language</i> corresponding to the natural language described formal system.</p>
+<p>My objective here, is make progress towards completing what we started with the arithmetic table exercise.  We want to demonstrate:</p>
+<ul>
+	<li>There is a function Encode<sub>&#x2115;</sub> from the natural numbers &#x2115;, to <i>words</i> in {0,1,2,3,4,5,6,7,8,9}<sup>*</sup>\{&#x2205;}.
+		Range(Encode<sub>&#x2115;</sub>), a <i>formal language</i>, is simply the decimal numerals one learned about in grade school (without spacing characters such as "," or ".") &mdash; written right-to-left rather than left-to-right.</li>
+	<li>Encode<sub>&#x2115;</sub><sup>-1</sup> is a partial function.  That is, any decimal numeral has exactly one natural number corresponding to it.</li>
+</ul>
+<h2 id="defining-sigma-star" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Defining &Sigma;<sup>*</sup></h2>
+<p>We follow prior art: our strategy for interpreting the description of the mathematical collection &Sigma;<sup>*</sup> as a formal definition, is to 
+	construct an indexing mathematical collection whose absolute union is defined to be &Sigma;<sup>*</sup>.  We start by describing a function schema on the <i>alphabet</i> &Sigma;, whose domain is 
+	the natural numbers &#x2115;:</p>
+<table align="center">
+	<tr><td align="center" colspan="2">&phi;<sub>&Sigma;</sub>: &#x2115; <span style="position:relative; top: -2px">&#x2192;</span> <b>Set</b> (read &#x21A6; as &#x21A6;<sub>&phi;<sub>&Sigma;</sub></sub>, below)</td></tr>
+	<tr><td align="right">0 &#x21A6;&nbsp;</td><td>&#x2205;</td></tr>
+	<tr><td align="center" colspan="2">Recall that w &#x2286; 0...n-1 <span style="font:sans-serif; position:relative; top: -1px">x</span> &Sigma; &#9500; w &isin; &#x1D4AB;(&#x1D4AB;(0...n-1 &#x222A; &Sigma;))</td></tr>
+	<tr><td align="right">1&le;n &#x21A6;&nbsp;</td><td>{w &#x2286; 0...n-1 <span style="font:sans-serif; position:relative; top: -1px">x</span> &Sigma; : w is a function}</td></tr>
+</table>
+<p>At first sight, the last line looks like a botched use of the <i>subset axiom</i>.  However, since the condition on the left of : syntactically entails 
+	a condition that is correctly formatted for the <i>subset axiom</i>, we abuse notation this way for clarity.  We then define</p>
+<p align="center">&Sigma;<sup>*</sup> := <big>&#x222A;</big>Range(&phi;<sub>&Sigma;</sub>)</p>
+<p>This is obviously a <i>class</i> as the <i>axiom of absolute union</i> says this collection exists, but is it a <i>set</i>?</p>
+<p>Note that for any two finite sequences of textual glyphs, it is physically possible, i.e. finite time cost, to verify that:</p>
+<ul>
+	<li>Each textual glyph is, or is not, in a given <i>alphabet</i> &Sigma;.  We would need non-classical truth values only to account for physical difficulties in 
+		identifying the textual glyphs.</li>
+	<li>That the two finite sequences are, or are not, the same length.  (This confirms that both finite sequences are in &Sigma;<sup>*</sup>.)</li>
+	<li>That in each position of the two finite sequences, the corresponding textual glyphs are, or are not the same glyph.</li>
+</ul>
+<p>We recall that one way of phrasing the Brouwer-Heyting-Kolmogorov interpretation of constructive logic, is in terms of knowing solutions to problems.  In this case, 
+	we have verbally sketched what has to be done, physically, to verify what is a numeral (i.e., which <i>words</i> w are syntactically numerals), and 
+	compare two numerals for equality.  Having a solution for the second problem is expected, since we already know that the elements of the range of &phi;<sub>&Sigma;</sub> are <i>sets</i>.  Having a 
+	solution for the first problem, materially is defining a predicate whose truth value for a <i>word</i> w, <b>is</b> the truth value of w &isin; &Sigma;<sup>*</sup>.</p>
+<p>That is, the Brouwer-Heyting-Kolmogorov interpretation states that, empirically, &Sigma;<sup>*</sup> is a Von Neumann-Bernays-G&ouml;del <i>set</i>, rather than a <i>proper class</i>.
+	There is an axiom that we have not yet introduced, that is needed to make the set theories under consideration, agree with physical reality.</p>
+<p>We have not yet formalized the size of a <i>set</i>, i.e. how many elements a <i>set</i> contains.  It is reasonable to expect:</p>
+<ul>
+	<li>Functions to have ranges, that are no larger than their domains.</li>
+	<li>Any given <i>set</i>, to be smaller than any given <i>class</i>.</li>
+</ul>
+<p>The above is a rationale for "if &phi; is a <i>function</i>, and A is a <i>subset</i> of Domain(&phi;), then the image of &phi; restricted to A is a <i>set</i>". 
+	We interpret this as</p>
+<table align="center">
+	<tr><th colspan="3"><a href="https://en.wikipedia.org/wiki/Axiom_of_union">Axiom (schema) of Replacement</a></th></tr>
+	<tr><td align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>&phi;:<b>Set</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>Set</b>)(<span style="transform:rotate(180deg);display:inline-block">A</span>A &isin; { y &isin; <b>Set</b> : y &#x2286; Domain(&phi;) })(<big>&#x222A;</big><sub>x&isin;A</sub>&phi;(x) &isin; <b>Set</b>)</td></tr>
+</table>
+<p>Terser notation is possible, but hard to set up to not conflict with usage outside of set theory.  As with the <i>axiom (schema) of class existence</i>, we take &phi; to range over functions from <b>Set</b> into <b>Set</b>.  This axiom 
+	is common to both Zermelo-Frankel and Von-Neumann-Bernays-G&ouml;del set theories; its introduction is the key difference between Zermelo set theory, and Zermelo-Frankel set theory.</p>
+<p>The typical Faustian bargain that makes set theory agree with the empirical existence of an effective decision procedure for whether a finite textual glyph sequence is a numeral for a natural number, is that we accept:</p>
+<ul>
+	<li>The <i>axiom of infinity</i> (so that the natural numbers &#x2115; are a <i>set</i>).</li>
+	<li>The <i>axiom (schema) of replacement</i> (so that the image of the function &phi;<sub>&Sigma;</sub> from natural numbers, to the sets of all words of length n in &Sigma;, is a <i>set</i>).</li>
+	<li>The <i>axiom of (absolute) union</i>.  (Unlike other prior uses of set-theoretic union, the finitistic axiom of adjunction won't work as-is here.)</li>
+</ul>
+<p>Note that the <i>axiom (schema) of replacement</i> enables following the instructions for re-verifying most of the transfinite ordinal branch of set theory, in conjunction with the Von Neumann model of the 
+	natural numbers &#x2115;.</p>
+<p>Since we needed the <i>subset axiom (schema)</i> to define <i>functions</i> for even phrasing the <i>axiom (schema) of replacement</i>, it is a semantic paradox to 
+	claim that the <i>subset axiom (schema)</i> is implied by the <i>axiom of the empty set</i> and the <i>axiom (schema) of replacement</i>.  (If you inline everything using uniform substitutions, etc., 
+	this is a defensible claim formally.  This begs the question, of what rationale one would have for accepting the inlined form of the <i>axiom (schema) of replacement</i> in the first place.)
+<h2 id="division-algorithm" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Division algorithm</h2>
+<table align="right">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>n &#x2208; &#x2115;</td><td>Given</td></tr>
+	<tr><td>2.</td><td>b &#x2208; { x &isin; &#x2115; : 2&le;x}</td><td>Given</td></tr>
+	<tr><td>3.</td><td>I := {x &isin; &#x2115; : x&middot;b &le; n}</td><td>Local definition (we want the supremum of this)</td></tr>
+	<tr><td>3a.</td><td>U := {x &isin; &#x2115; : n &lt; x&middot;b}</td><td>Local definition</td></tr>
+	<tr><td>4.</td><td>0&le;n</td><td>0 is the least natural number</td></tr>
+	<tr><td>5.</td><td>0&middot;b&le;n</td><td>0 is the multiplicative annihilator</td></tr>
+	<tr><td>6.</td><td>0 &isin; I</td><td>alternate way of phrasing (4)</td></tr>
+	<tr><td style="background:yellow">7.</td><td>inf U &#x2208; &#x2115;</td><td>Well-ordering of &#x2115;</td></tr>
+	<tr><td>8.</td><td>0 &lt; inf U</td><td>Trichotomy principle, definitions of I and U</td></tr>
+	<tr><td>9.</td><td>1 &le; inf U</td><td>Description of &lt;</td></tr>
+	<tr><td>9a.</td><td>(inf U) - 1 &#x2209; U</td><td>Definition of infimum</td></tr>
+	<tr><td>9b.</td><td>(inf U) - 1 &isin; I  &#x2228; (inf U) - 1 &isin; U</td><td>Trichotomy of &lt; = &gt;, (3) and (3a)</td></tr>
+	<tr><th colspan="4">~Intuitionistic</th></tr>
+	<tr><td>10.</td><td>(inf U) - 1 &isin; I</td><td>Or elimination, (9b) and (9a)</td></tr>
+	<tr><td>11.</td><td>((inf U) - 1)&middot;b &le; n</td><td>(10), definition of I</td></tr>
+	<tr><td>11a.</td><td>((inf U) - 1)&middot;b+(n-((inf U) - 1)&middot;b) = n</td><td>(11), definition of -</td></tr>
+	<tr><td>12.</td><td>n &lt; (inf U)&middot;b</td><td>(7), definition of U</td></tr>
+	<tr><td>13.</td><td>n &lt; (((inf U)-1)+1)&middot;b</td><td>definition of - on (12) by (9)</td></tr>
+	<tr><td>14.</td><td>((inf U) - 1)&middot;b+(n-((inf U) - 1)&middot;b)) &lt; (((inf U)-1)+1)&middot;b</td><td>definition of - on (13) by (11)</td></tr>
+	<tr><td>15.</td><td>((inf U) - 1)&middot;b+(n-((inf U) - 1)&middot;b) &lt; ((inf U)-1)&middot;b+1&middot;b</td><td>Right distributivity of &middot; over +</td></tr>
+	<tr><td>16.</td><td>n-((inf U) - 1)&middot;b &lt; 1&middot;b</td><td>Cancellation of + for &lt;</td></tr>
+	<tr><td>17.</td><td>n-((inf U) - 1)&middot;b &lt; b</td><td>1 is identity for &middot;</td></tr>
+	<tr><td>18.</td><td>0 &le; n-((inf U) - 1)&middot;b</td><td>0 is lower bound for &#x2115;</td></tr>
+	<tr><td>19.</td><td>0 &le; n-((inf U) - 1)&middot;b &lt; b</td><td>Conjunction introduction, (18) and (17)</td></tr>
+	<tr><td>20.</td><td>((inf U) - 1)&middot;b+(n-((inf U) - 1)&middot;b) = n & 0 &le; n-((inf U) - 1)&middot;b &lt; b</td><td>Conjunction introduction, (11a) and (19)</td></tr>
+	<tr><td>21.</td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>!r &isin; &#x2115;)(((inf U) - 1)&middot;b+r = n & 0 &le; r &lt; b)</td><td>Existential instantiation, (20) [r := n-((inf U) - 1)&middot;b]</td></tr>
+	<tr><td>22.</td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>!q &isin; &#x2115;)(<span style="transform:rotate(180deg);display:inline-block">E</span>!r &isin; &#x2115;)(q&middot;b+r = n & 0 &le; r &lt; b)</td><td>Existential instantiation on (21) [q := (inf U) - 1]</td></tr>
+	<tr><th colspan="4">Division algorithm</th></tr>
+</table>
+<p>We next consider how to formally agree with grade school arithmetic, that we only need the digits 0 through 9 for numerals.  Our instructions 
+	say we need:</p>
+<table align="center">
+	<tr><th>The Division Algorithm</th></tr>
+	<tr><td>if n,b are natural numbers with 1&le;b, then there exist unique 
+		integers quotient q and remainder r such that n=q&middot;b+r, 0&le;r, and r&lt;b.</td></tr>
+</table>		
+<p>(b=1 trivializes; in that case r=0 and q=n.)  The trick, is that we have to do this without division, or integers.  We use parentheses around inf U, to 
+	account for possiblity that the definition of + might be extended at some point.</p>
+<p>We'll want to return to this; the given proof is only known to work for classical logic, since we don't have a working proof of
+	well-ordering of &#x2115; in the presence of non-classical truth values.</p>
+<p>At this point, it appears that our definition 10 := S(9) is arbitrary, i.e. there are other numeral systems available than the one we 
+	learned in grade school.  That is, 0...10-1 &#x2286; &#x2115; would be a valid domain to map to textual glyphs, as long as 10 := S(x) for a fixed x &isin; &#x2115;.  
+	We see that the decimal i.e. base ten numeral system, corresponds to 10 := S(9).</p>
+<p>For natural numbers n,b:</p>
+<ul>
+	<li>We define n/b and n%b to be the natural numbers q and r, the division algorithm asserts the unique existence of.</li>
+	<li>We say n/b is the quotient, of dividing n by b.</li>
+	<li>We say n%b is the remainder, of dividing n by b.</li>
+</ul>
+<p>It is a mechanical exercise that while the quotient and remaider of dividing n by b are functions, their inverses are only relations.</p>
+<h2 id="numerals-for-numbers" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Computing numerals for natural numbers</h2>
+<p>We say that:</p>
+<ul>
+	<li>The concatenation of two <i>finite sequences</i> (x<sub>i</sub>)<sub>i=0...n</sub>, (y<sub>j</sub>)<sub>j=0...m</sub> in a <i>class</i> A is the <i>finite sequence</i> (z<sub>k</sub>)<sub>k=0...n+1+m</sub> where
+		<ul>
+			<li>z<sub>k</sub> := x<sub>k</sub> for k &isin; 0...n</li>
+			<li>z<sub>k</sub> := y<sub>k-(n+1)</sub> for k &isin; n+1...n+1+m</li>
+		</ul>
+		In particular, this defines the concatenation of two <i>words</i> in a common given <i>alphabet</i> &Sigma; .
+	</li>
+	<li>The concatenation of the <i>empty word</i> &#x2205; with a <i>finite sequence</i> (x<sub>i</sub>)<sub>i=0...n</sub> , is (x<sub>i</sub>)<sub>i=0...n</sub> .</li>
+	<li>The concatenation of a <i>finite sequence</i> (x<sub>i</sub>)<sub>i=0...n</sub> with the <i>empty word</i>, is (x<sub>i</sub>)<sub>i=0...n</sub> .</li>
+	<li>The Kleene star L<sup>*</sup> of a <i>formal language</i> L over a given <i>alphabet</i> &Sigma;, is the mathematical collection containing both the empty word, and all words formed by concatenating one or more words in L.  The 
+		formal definition is closely comparable to that for &Sigma;<sup>*</sup>.  Authorities that do not include the <i>empty word</i> &#x2205; in &Sigma;<sup>*</sup>, do not include it in L<sup>*</sup> either.</li>
+	<li>The reversal of the <i>empty word</i>, is the <i>empty word</i>.</li>
+	<li>The reversal of a <i>finite sequence</i> (x<sub>i</sub>)<sub>i=0...n</sub>, is the <i>finite sequence</i> (y<sub>j</sub>)<sub>j=0...n</sub> where y<sub>j</sub> := x<sub>n-j</sub>.</li>
+</ul>
+<p>We note that we have defined the <i>empty word</i> to be the identity, for the <i>concatenation</i> of two <i>finite sequences</i>.</p>
+<p>We do not have good non-conflicting notation for the <i>concatenation</i> of two finite sequences.  The important conventions for denoting the <i>concatenation</i> of two <i>words</i> w<sub>1</sub>, w<sub>2</sub> are:</p>
+<ul>
+	<li>Formal language theory: w<sub>1</sub>&middot;w<sub>2</sub></li>
+	<li>Formal language theory, alternate: w<sub>1</sub>w<sub>2</sub> (depends on subscripting, etc. to be parsable)</li>
+	<li>C++ std::string w, v concatenation: w+v</li>
+	<li>Perl string $w, $v concatenation: $w.$v</li>
+</ul>
+<p>Most major programming languages follow one of the C++ or Perl conventions.  For a <i>word</i> w in an alphabet &Sigma;, a common notation for the <i>reversal</i> of a <i>word</i> in formal language theory,
+	is w<sup>R</sup>.  It is a mechanical exercise that for a given <i>alphabet</i> &Sigma;, , </p>
+<ul>
+	<li><i>reversal</i> of a <i>finite sequence</i> is a function R:&Sigma;<sup>*</sup> <span style="position:relative; top: -2px">&#x2192;</span> &Sigma;<sup>*</sup></li>
+	<li>The inverse of <i>reversal</i> of a <i>finite sequence</i> is just plain <i>reversal</i>, R<sup>-1</sup>=R .</li>
+</ul>
+<p>We say that applying a function &phi; to a <i>finite sequence</i> (x<sub>i</sub>)<sub>i=a...b</sub>, is the composition of &phi; with the <i>finite sequence</i>: &phi; o (x<sub>i</sub>)<sub>i=a...b</sub>.  It is a mechanical exercise 
+	that the result is the <i>finite sequence</i> (&phi;(x<sub>i</sub>))<sub>i=a...b</sub>.
+<p>We introduce a function schema ToSequence<sub>1,A</sub> for translating elements of a class A, to finite sequences of length 1 in A:</p>
+<p align="center">x &#x21A6;<sub>ToSequence<sub>1,A</sub></sub> (x)<sub>i=0...0</sub></p>
+<p>We now have the notation for a function mapping the natural numbers, to decimal numerals.  We define a function schema ToModSequence<sub>b</sub> with domain &#x2115;, and range finite sequences in &#x2115;, recursively as follows:</p>
+<table align="center">
+	<tr><td colspan="4" align="center">ToModSequence<sub>b</sub> (read &#x21A6; as &#x21A6;<sub>ToModSequence<sub>b</sub></sub>, below), 2&le;b, b &isin; &#x2115;</td></tr>
+	<tr><td>x &#x21A6;&nbsp;</td><td>ToSequence<sub>&#x2115;,1</sub>(x)</td><td>when x&lt;b</td><td>(base case)</td></tr>
+	<tr><td>x &#x21A6;&nbsp;</td><td>ToSequence<sub>&#x2115;,1</sub>(x%b)&middot;ToModSequence<sub>b</sub>(x/b)</td><td>when x&le;b</td><td>(recursive case)</td></tr>
+</table>
+<p>Proving that this function definition works (i.e, that the computation terminates), depends on <i>well-ordering of &#x2115;</i>, which is the same limitation we have with the division algorithm.  The 
+	decimal numeral in the Kleene star of the decimal digit glyphs, {0,1,2,3,4,6,7,8,9}<sup>*</sup>, for a given natural number n, is then (ToGlyph o ToModSequence<sub>10</sub>(n))<sup>R</sup>.
+	Checking that the inverse of this is a partial function, is an exercise left to the reader.</p>
+
+<h2 id="grammar-numerals" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">A formal grammar for decimal numerals</h2>
+<p>Comparing the result of evaluating a decimal numeral for a natural number, with the formal grammar terminology, we see (as a matter of natural language reasoning) that:</p>
+<ul>
+	<li>The <i>alphabet</i> for decimal numerals, is the set of textual glyphs 0...9.</li>
+	<li>All finite sequences of length 1 in the <i>alphabet</i>, are decimal numerals.  These are from the base case.</li>
+	<li>No decimal numeral of length greater than one in the <i>alphabet</i>, has a leading digit of 0.  This leading digit is from
+		using the base case, from the final recursion case.</li>
+</ul>
+<p>This looks like we should be able to formally describe the format of decimal numerals, without directly mentioning how they are computed from natural numbers.</p>
+<p>We say that the signature of a generative grammar is:</p>
+<ul>
+	<li>An <i>alphabet</i> &Sigma;, may also be said to be a <i>set</i> of terminal symbols.</li>
+	<li>A <i>set</i> N of nonterminal symbols.  The intersection of terminal symbols, and non-terminal symbols, is the <i>empty set</i>.</li>
+	<li>A unique start symbol S, that is in the set of non-terminal symbols.</li>
+	<li>A <i>set</i> P of partial functions (N &#x222A; &Sigma;)<sup>*</sup>\&Sigma;<sup>*</sup> <span style="position:relative; top: -2px">&#x2192;</span> (N &#x222A; &Sigma;)<sup>*</sup>, i.e. <a href="https://en.wikipedia.org/wiki/Production_(computer_science)">production rules</a>.
+		As a notational abuse, we may use partial relations. Any actual evaluation of a production rule, has to be one of the functions that is a subset of the relation.</li>
+</ul>
+<p>For engineering purposes (e.g., compiler implementation), we must to be able to positively identify what terminal and non-terminal symbols are, and what production rules are: this requires that they be <i>sets</i>.</p>
+<p>The above is very general.  For now, we shall consider just one normal form in the literature for a <i>generative grammar</i>: <a href="https://en.wikipedia.org/wiki/Kuroda_normal_form">Kuroda normal form.</a></p>
+<p>We say a generative grammar is in Kuroda normal form, if its production rules using non-terminal symbols A,B,C,D and/or terminal symbol a are in one of the following formats (reading AB as the finite sequence concatenation of A and B):</p>
+<ul>
+	<li>AB &#x21A6; CD</li>
+	<li>A &#x21A6; BC</li>
+	<li>A &#x21A6; B</li>
+	<li>A &#x21A6; a</li>
+</ul>
+<p>Note that all of these rule formats have singleton domain and range.  To make the above grammar usable on arbitrary <i>words</i>, we will have to define some pattern-matching for finite sequences.</p>
+<p>We define a (contiguous finite) subsequence v of a <i>finite sequence</i> w (x<sub>i</sub>)<sub>i=a...b</sub>, to be (x<sub>i</sub>)<sub>i=c...d</sub> where a&le;c and d&le;c.  A proper subsequence uses &lt; rather than &le; for at least one of the 
+	inequalities.  We say that:</p>
+<ul>
+	<li>v is at absolute offset c in w.</li>
+	<li>v is at relative offset c-a in w.</li>
+	<li>If c=a, we say the subsequence of w to the left of v, is the <i>empty word</i> &#x2205;.</li>
+	<li>If c&lt;a, we say the subsequence of w to the left of v, is (x<sub>i</sub>)<sub>i=a...c-1</sub>.</li>
+	<li>For purposes of exposition, we denote Left(w,v) as the subsequence of w to the left of v.</li>
+	<li>If d=b, we say the subsequence of w to the right of v, is the <i>empty word</i>.</li>
+	<li>If d&lt;b, we say the subsequence of w to the right of v, is (x<sub>i</sub>)<sub>i=d+1...b</sub>.</li>
+	<li>For purposes of exposition, we denote Right(w,v) as the subsequence of w to the right of v.</li>
+</ul>
+<p>We shall use the following atypical notations:</p>
+<ul>
+	<li>We denote Left(w,v) as the subsequence of w to the left of v.</li>
+	<li>We denote Right(w,v) as the subsequence of w to the right of v.</li>
+</ul>
+<p>We say two finite sequences (x<sub>i</sub>)<sub>i=a...b</sub> and (y<sub>j</sub>)<sub>j=c...d</sub> are equivalent, if b-a = d-c and x<sub>i</sub>=y<sub>c+(d-(b-i))</sub> for all a &le; i &le; b.  (Remember, we don't have integers yet; that's why we can't reduce that expression to something looking more familiar.)</p>
+<p>We say a production rule p matches a <i>word</i> w := (x<sub>i</sub>)<sub>i=0...n</sub> in (N &#x222A; &Sigma;)<sup>*</sup>\&Sigma;<sup>*</sup>, when there is a subsequence v = (x<sub>i</sub>)<sub>i=a...b</sub> in w equivalent to 
+	the finite sequence, that is the sole element of Domain(p).  p is said to produce Left(w,v)&middot;z&middot;Right(w,v) from w, where Range(p) = {z}.</p>
+<p>We say a production rule p partially parses a <i>word</i> w := (x<sub>i</sub>)<sub>i=0...n</sub> in (N &#x222A; &Sigma;)<sup>*</sup>, when there is a subsequence (x<sub>i</sub>)<sub>i=a...b</sub> in w equivalent to 
+	the finite sequence, that is the sole element of Range(p).  p is said to parse Left(w,v)&middot;y&middot;Right(w,v) from w, where Domain(p) = {y}.</p>
+<p>We say the formal language described by a generative grammar with alphabet &Sigma;, is the mathematical collection of all words w in &Sigma;<sup>*</sup>, that have a finite sequence of production rule evaluations 
+	from the start symbol of the grammar, to w.  If all words in the language have exactly one such finite sequence, we say the language is unambigous.</p>
+<p>It looks like we need four non-terminal symbols (the start symbol, two for the base case of ToModSequence, and two for the recursive case of ToModSequence).  Let the start symbol be 
+	&#x2205;, and the other three non-terminal symbols be the textual glyphs &alpha;, &Omicron; and &Omega;.  The base case will have one production rule for each decimal digit.  We would expect the Kuroda grammar for natural number numerals to be:</p>
+<table align="center">
+	<tr><td align="right">{ &Omega; } <span style="font:sans-serif; position:relative; top: -1px">x</span>&nbsp;</td><td>0...9</td><td>a relation representing ten production rules; handles r</td></tr>
+	<tr><td align="right">{ &Omicron; } <span style="font:sans-serif; position:relative; top: -1px">x</span>&nbsp;</td><td>1...9</td><td>a relation representing nine production rules; leading digit r for 10&le;n</td></tr>
+	<tr><td align="right">&#x2205; &#x21A6;&nbsp;</td><td>&Omega;</td><td>i.e. {(&#x2205;, &Omega;)}; handles 0&le;n&lt;10</td></tr>
+	<tr><td align="right">&#x2205; &#x21A6;&nbsp;</td><td>&Omicron;&alpha;</td><td>i.e. {(&#x2205;, &Omicron;&alpha;)}; handles 10&le;n, </td></tr>
+	<tr><td align="right">&alpha; &#x21A6;&nbsp;</td><td>&Omega;</td><td>i.e. {(&alpha;, &Omega;)}; base case</td></td></tr>
+	<tr><td align="right">&alpha; &#x21A6;&nbsp;</td><td>&Omega;&alpha;</td><td>i.e. {(&alpha;, &Omega;&alpha;)}; recursive case</td></tr>
+</table>	
+<p>In principle, we can check that each numeral for a natural number, corresponds to a finite sequence of digits of length n reachable by a finite sequence of 2&middot;n production rule evaluations, from the start symbol.
+	More importantly, we can also verify that each such finite sequence of digits, only has <b>one</b> finite sequence of production rule uses that can evaluate to it, from the start symbol.</p>
+<p>A terse formula for naming the natural number designated by a numeral, needs some notation not yet introduced.  We are very close, however.  We also have done enough to justify 
+	how we could directly verify that this axiomatic arithmetic, gives the grade-school arithmetic tables for + and &middot;.</p>
+
+<h2 id="exponentiation" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Exponentiation</h2>
+<p>We need to introduce enough abstract algebra, to complete going from numerals to natural numbers.</p>
+<p>Both multiplication and addition of natural numbers, are functions of type &#x2115; <span style="font:sans-serif; position:relative; top: -1px">x</span> &#x2115; <span style="position:relative; top: -2px">&#x2192;</span> &#x2115; .  They have the following common properties:</p>
+<ul>
+	<li>Closure: Baked into the notation, so hard to see this is a meaningful property.</li>
+	<li>Associativity</li>
+	<li>Identity element: 0 for +, 1 for &middot; .</li>
+	<li>Commutativity</li>
+</ul>
+<p>To motivate closure, we consider the <i>class</i> (<b>Set</b> <span style="font:sans-serif; position:relative; top: -1px">x</span> <b>Set</b>) <span style="font:sans-serif; position:relative; top: -1px">x</span> <b>Set</b>.
+	Using a cross product as the domain, is how we have been notating a binary relation's domain (i.e., we treat the two arguments as a single ordered pair for a single-argument relation), and thus a 
+	binary function's domain.  We now consider an arbitrary non-empty partial function f &#x228A; (<b>Set</b> <span style="font:sans-serif; position:relative; top: -1px">x</span> <b>Set</b>) <span style="font:sans-serif; position:relative; top: -1px">x</span> <b>Set</b>.</p>
+<p>To extract the coordinates of an ordered pair, we use projection functions of type <b>Set</b> <span style="font:sans-serif; position:relative; top: -1px">x</span> <b>Set</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>Set</b>:</p>
+<p align="center">Projection<sub>0</sub>((a,b)) := a <br>
+	Projection<sub>1</sub>((a,b)) := b</p>
+<p>The literature does not have a consistent, non-conflicting terse naming convention here: abbreviating <i>Projection</i> as <i>P</i> or <i>&pi;</i>, is typical.  The choice of subscripting, reflects several definitions of ordered pair 
+	that were disallowed here, as circular definitions.</p>
+<p>We say that a binary partial function f for which</p>
+<ul>
+	<li>Projection<sub>0</sub>(Domain(f))=Projection<sub>1</sub>(Domain(f))</li>
+	<li>Range(f) &#x2286; Projection<sub>0</sub>(Domain(f))</li>
+</ul>
+<p>satisfies the closure axiom, as an operation on Projection<sub>0</sub>(Domain(f)).  Conversely, we can consider the ordered pair [when defined]
+	(M, &middot;) where the function &middot;:M <span style="font:sans-serif; position:relative; top: -1px">x</span> M <span style="position:relative; top: -2px">&#x2192;</span> M 
+	implements the <i>closure axiom</i>.  (The subset requirement on the range is "baked into" this notation; the first requirement is strictly implied by <i>function</i>.)</p>
+<p>There are several names in the literature, but the non-conflicted name is <a href="https://en.wikipedia.org/wiki/Magma_(algebra)">magma</a>.</p>
+<p>We have already seen several examples of this, such as addition + and multiplication &middot; on the natural numbers.  The corresponding notations are (&#x2115;,+) and (&#x2115;,&middot;).</p>
+<p>The <i>closure axiom</i> enables other definitions.  In particular, we say that a binary function that satisifes the <i>closure axiom</i> for a <i>class</i> M, is 
+	associative when</p>
+<p align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>a &isin; M)(<span style="transform:rotate(180deg);display:inline-block">A</span>b &isin; M)(<span style="transform:rotate(180deg);display:inline-block">A</span>c &isin; M)(f(f(a,b),c))=(f(a,f(b,c)))</p>
+<p>All of our prior references to associativity, other than those about logical connectives, can be read as referring to this definition.  As for logical connectives, in the set theories with ur-elements 
+	for each logical connective, there is a function that "acts like" that logical connective.  We impute properties of the "clone of logical connective" function, to the logical connective itself.</p>
+<p>We say that a binary function f that satisfies the <i>closure axiom</i> for a <i>class</i> M, has an identity e &isin; M when</p>
+<p align="center">(<span style="transform:rotate(180deg);display:inline-block">E</span>e &isin; M)(<span style="transform:rotate(180deg);display:inline-block">A</span>a &isin; M)(f(e,a)=a & f(a,e)=a)</p>
+<p>It is a routine exercise that if a binary function has an identity, that identity is unique.</p>
+<p>Now, review the definition of multiplication of natural numbers:</p>
+<table align="center">
+	<tr><td align="right">a&middot;0 :=&nbsp;</td><td>0</td></tr>
+	<tr><td align="right">a&middot;S(b) :=&nbsp;</td><td>a+a&middot;b</td></tr>
+</table>
+<p>Knowing that the binary function + uses infix notation, it appears that for <b>any</b> function f that satisfies the <i>closure axiom</i> for a <i>class</i> M with identity e, we can 
+	recursively define a function g:M <span style="font:sans-serif; position:relative; top: -1px">x</span> &#x2115; <span style="position:relative; top: -2px">&#x2192;</span> M as</p>
+<table align="center">
+	<tr><td align="right">g(a,0) :=&nbsp;</td><td>e</td></tr>
+	<tr><td align="right">g(a,S(b)) :=&nbsp;</td><td>f(a,g(a,b))</td></tr>
+</table>
+<p>For addition +, that means right-multiplication of a natural number a, by a natural number b, is <b>defined</b> to be the sum of b instances of a (added right to left).</p>
+<p>Functional programming languages, such as Haskell or F#, call this function schema a <a href="https://wiki.haskell.org/Fold">right fold</a>.</p>
+<p>As a special case of this function schema, we recursively define exponentiation a<sup>b</sup> of natural numbers a,b this way, in terms of multiplication of natural numbers.</p>
+<table align="center">
+	<tr><td align="right">a<sup>0</sup> :=&nbsp;</td><td>1</td></tr>
+	<tr><td align="right">a<sup>S(b)</sup> :=&nbsp;</td><td>a&middot;a<sup>b</sup></td></tr>
+</table>
+<p>Finally, to define all of the notation we need, we define the sum of a finite sequence recursively:</p>
+<table align="center">
+	<tr><td align="right"><big>&Sigma;</big><sub>i=a...a</sub> x<sub>i</sub> :=&nbsp;</td><td>x<sub>a</sub></td></tr>
+	<tr><td align="right"><big>&Sigma;</big><sub>i=a...b</sub> x<sub>i</sub> :=&nbsp;</td><td>(<big>&Sigma;</big><sub>i=a...b-1</sub> x<sub>i</sub>) + x<sub>b</sub></td><td>when a&lt;b</td></tr>
+</table>
+<p>Then, the desired answer is that the numeral, a finite sequence (x<sub>i</sub>)<sub>i=0...n</sub> of textual glyphs 0...9, corresponds to the natural number</p>
+<p align="center"><big>&Sigma;</big><sub>i=0...n</sub> 10<sup>n-i</sup>&middot;x<sub>n-i</sub></p>
+<p>This makes sense: the leading digit x<sub>0</sub> is from the base case, and the last digit x<sub>n</sub> is from the first recursive case when 1&le;n, so we had to reverse the finite sequence.  
+	Also, n is how many times the recursive case was used in computing the finite sequence.  We also had to convert from textual glyphs to the natural numbers 0...9, 
+	to make it valid to use natural number multipication.</p>
+<p>The Kuroda grammar for natural number numerals, proscribes the zero glyph as x<sub>0</sub> for numerals longer than one digit.  So we expect this to not only be the inverse of the function that evaluates to natural number numerals to 
+	natural numbers, but to actually be an inverse function.  (Actually proving this, is omitted.)</p>
+</body>
+</html>
