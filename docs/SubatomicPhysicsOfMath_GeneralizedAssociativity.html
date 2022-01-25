@@ -1,0 +1,148 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=windows-1252"/>
+	<title>Subatomic Physics of Math: Generalized Associativity</title>
+	<style type="text/css">
+		@page { margin: 0.79in }
+		p { margin-bottom: 0.1in; line-height: 120% }
+		a:link { so-language: zxx }
+		* {
+            font-family: "Liberation Serif", serif
+        }
+	</style>
+</head>
+<body lang="en-US" dir="ltr">
+<div style="position:fixed; top:0.5em; left:0.5em; background:white"><a href="./">Home</a> &gt; <a href="./SubatomicPhysicsOfMath_Numerals.html">Numerals</a></div>
+
+<h1 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 16px">Subatomic Physics of Math: Generalized Associativity</h1>
+
+<span style="border: 1px solid black; display:block; float:right">
+	<ol type="I">
+		<li><a href="#conglomerates">Conglomerates</a></li>
+		<li><a href="#generalized-associativity-statement">Statement of Generalized Associativity</a></li>
+		<li><a href="#strong-natural-induction">Strong induction for &#x2115;</a></li>
+		<li><a href="#rearrangement-principle">Rearrangement principle</a></li>
+	</ol>
+</span>
+
+<h2 id="conglomerates" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Conglomerates</h2>
+
+<p>In our overview of (non)classical logic, there is one glaring gap: we did not prove generalized associativity.  This omission was because I have no 
+	sources for such a proof, that do not rely on the natural numbers &#x2115;.  My attempt at drafting such a proof was personally instructive, but invalid.</p>
+<p>So far, we have seen the following examples we would like to use an ordered pair as signature for a <i>set</i> or <i>class</i> with an associative binary function:</p>
+<p align="center">(&#x2115;, &middot;)&nbsp;(&#x2115;, +)<br>
+	(<b>TruthValues</b>, &)&nbsp;(<b>TruthValues</b>, &#x2228;)<br>
+	(<b>Class</b>, &#x2229;)&nbsp;(<b>Class</b>, &#x222A;)</p>
+<p>However, only the first four <b>are</b> ordered pairs (and even that only when using the <i>axiom of infinity</i>): both our verified definition (Kuratowski), and 
+the Tarksi-Grothendieck definition that needs a not-yet-introduced axiom to even have a working equality, require their elements to be <i>sets</i>.</p>
+<!-- pull quotation from Strecker's text on category theory. -->
+<p>The usual workaround in abstract algebraic category theory, is to first look more carefully at the <i>axiom of class existence</i>:</p>
+<table align="center">
+	<tr><th>Von Neumann-Bernays-G&ouml;del, <i>class</i> existence, Classical Logic</th></tr>
+	<tr><td align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span> &phi;:<b>Set</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b>)(<span style="transform:rotate(180deg);display:inline-block">E</span>B &#x2208; <b>Class</b>)(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; B &hArr; &phi;(x))</td></tr>
+</table>
+<p>The sole technicality preventing Russell's paradox, is that the mathematical collection whose existence is asserted, is not in the same domain of discourse, as the domain of the predicate.  Even though 
+	we do not have a good way of formalizing a successor function with domain and range domains of discourse, it is reasonable to expect that we can formalize a successor function for reserved 
+	notation, that notates those domains of discourse. Fortunately, we immediately need only one such iteration.</p>
+<ul>
+	<li>The intended interpretation of <b>Conglomerate</b>, is the domain of discourse of all conglomerates.</li>
+	<li>a &#x2208; A, where a is a <i>class</i> and A is a <i>conglomerate</i>, has the usual intended interpretation "a is an element of A"</li>
+	<li>We say that a proper conglomerate, is a <i>conglomerate</i> that has a <i>proper class</i> member.</li>
+</ul>
+<table align="center">
+	<tr><th><i>conglomerate</i> existence, Classical Logic</th></tr>
+	<tr><td align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>&phi;:<b>Class</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b>)(<span style="transform:rotate(180deg);display:inline-block">E</span>B &#x2208; <b>Conglomerate</b>)(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Class</b>)(x &#x2208; B &hArr; &phi;(x))</td></tr>
+</table>
+<p>The usual adjustments for non-classical truth values, and to allow <i>ur-elements</i> as elements, work like they do on Von Neumann-Bernays-G&ouml;del <i>axiom of class existence</i>.  After mechanically verifying that 
+ 	the axioms that enable the Kuratowski definition of ordered pairs have direct parallels for <i>conglomerates</i>, we consider (<b>Class</b>, &#x2229;) and (<b>Class</b>, &#x222A;)
+	to notate <i>proper conglomerate</i> ordered pairs.  We do not proceed further along these lines at this time.</p>
+<p>Following prior art in abstract algebra, we say that an ordered pair (A,&middot;) where &middot;:A <span style="font:sans-serif; position:relative; top: -1px">x</span> A <span style="position:relative; top: -2px">&#x2192;</span> A is an associative function that also satisifies the <i>closure axiom</i>, 
+	notates a semigroup.  Our intent is to describe, then prove, generalized associativity for <i>semigroups</i>.</p>
+
+<h2 id="generalized-associativity-statement" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Statement of Generalized Associativity</h2>
+<p>All six of our examples, use infix notation for their binary operation.  One rationale, <b>is</b> that the operation is associative.</p>
+<table align="center">
+	<tr><th></th><th colspan="2">Associativity</th><th>allows defining</th></tr>
+	<tr><td>(&#x2115;, &middot;)&nbsp;</td><td align="right">(x&middot;y)&middot;z =&nbsp;</td><td>x&middot;(y&middot;z)</td><td>&nbsp;x&middot;y&middot;z</td></tr>
+	<tr><td>(<b>TruthValues</b>, &)&nbsp;</td><td align="right"><b>Truth</b>((P & Q) & R) =&nbsp;</td><td><b>Truth</b>(P & (Q & R))</td><td>&nbsp;P & Q & R</td></tr>
+	<tr><td>(<b>TruthValues</b>, &)&nbsp;</td><td align="right">(P & Q) & R &#x27DB;&nbsp;</td><td>P & (Q & R)</td><td>&nbsp;P & Q & R</td></tr>
+</table>
+<p>The third example is not strictly correct in the presence of non-classical truth values, since syntactical equivalence is only concerned with <i>true</i>, 
+	rather than all truth values of the target logic; it just avoids atypical notation.</p>
+<p>We see, by inspecting the notation, that <i>associativity</i> allows defining without ambiguity a finite sequence of three textual glyphs representing variables, and two 
+	textual glyphs representing the operation itself.  The grouping parentheses textual glyph pair that is required for a <i>magma</i>, may be safely omitted.  Generalized associativity, is that a comparable notation 
+	is well-defined for 3&le;n variables; i.e. the grouping parentheses may be safely omitted, leaving a notation with n&isin;&#x2115; variables.  (That is, the binary operation has a natural generalization from two arguments, 
+	to an arbitrary finite number of arguments.)</p>
+<p>The mathematical range of notation we have already been using and need to mathematically model for <i>generalized associativity</i>, must include:</p>
+<ul>
+	<li>The textual glyphs ( and ), with two intended interpreations to date: grouping of operations, and ordered pairs.</li>
+	<li>The textual glyph =, with intended interpretation equality</li>
+	<li>The textual glyph used to notate the binary operation itself</li>
+	<li>The textual glyphs used to notate the values of the domain M of the binary operation</li>
+	<li>The textual glyphs used to notate the variables whose values are in M</li>
+</ul>
+<p>We actually need at least as many variables, as natural numbers &#x2115;.  We can work around this by treating x and x<sub>i</sub> as distinct variables, where i &isin; &#x2115;.  Likewise, for i,j &isin; &#x2115; if i&ne;j then x<sub>i</sub> and x<sub>j</sub> are distinct variables.</p>
+<p>If there is otherwise no ambiguity in parsing, we may interpolate multiplication &middot; as the operation.  E.g., 2n is to be read as 2&middot;n.</p>
+<p>For two natural numbers a,b, we say a is divisible by b when 0=a%b .  We do not go further into number theory at this time.</p>
+<p>We say a&le;b&isin;&#x2115; when a is a natural number term (i.e., has a definite numeral), b is a natural number variable, and a&le;b.  The corresponding set is { b&isin;&#x2115; : a&le;b }.  We use similar definitions for &lt;, &gt;, and &ge;.</p>
+<p>For an associative binary operation &middot; on M, the notation x<sub>m</sub> &middot; ... &middot; x<sub>n</sub> abbreviates the finite sequence of textual glyphs (y<sub>i</sub>)<sub>i=2m...2n</sub> where</p>
+<table align="center">
+	<tr><td>y<sub>i</sub> :=&nbsp;</td><td>x<sub>i/2</sub> when i is divisible by 2</td></tr>
+	<tr><td>y<sub>i</sub> :=&nbsp;</td><td>&middot; when i is not divisible by 2</td></tr>
+</table>
+<p>We wish to prove that x<sub>0</sub> &middot; ... &middot; x<sub>n</sub> can be defined unambiguously when 4&le;n&isin;&#x2115;.  (n=2 is the &middot; operation itself; n=3 is <i>associativity</i>.)  Thus, 
+	the name <i>generalized associativity</i> for this property.  In particular, we want</p>
+<p align="center">x<sub>0</sub> &middot; (x<sub>1</sub> &middot; ... &middot; x<sub>n</sub>)=(x<sub>0</sub> &middot; ... &middot; x<sub>n-1</sub>) &middot; x<sub>n</sub></p>
+<p>When x<sub>0</sub> &middot; ... &middot; x<sub>n</sub>, we expect for any 1&le;k&isin;&#x2115; x<sub>k</sub> &middot; ... &middot; x<sub>n+k</sub> to be defined.  (This is by a simultaneous substitution on the variable names.)</p>
+
+<h2 id="strong-natural-induction" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Strong induction for &#x2115;</h2>
+<p>If we try to prove generalized associativity by adapting our prior proofs using the <i>axiom of (weak) natural induction</i>, we have technical issues.  The <a href="https://courses.cs.cornell.edu/cs2800/wiki/index.php/Proof:Strong_induction_is_equivalent_to_weak_induction">workaround</a> is to 
+	use a philosophically stronger induction hypothesis.</p>
+<table align="center">
+	<tr><th></th><th>Basis</th><th>Induction hypothesis</th></tr>
+	<tr><td>(weak) natural induction</td><td rowspan="2" valign="center">0 &isin; K i.e. &phi;(0)</td><td>n &isin; K i.e. &phi;(n)</td></tr>
+	<tr><td>strong natural induction</td><td>0...n &#x2286; K i.e. (<span style="transform:rotate(180deg);display:inline-block">A</span>k &isin; 0...n)(&phi;(k))</td></tr>
+</table>
+<p>That the philosophically strong induction hypothesis syntactically entails the weak induction hypothesis, is one step: a use of universal instantiation.  The other direction,
+	is not as transparent: it relies on (proof left as exercise)</p>
+ <table align="center">
+	 <tr><td align="right">x &isin; 0...n &#x222A; {n+1} &#x27DB;&nbsp;</td><td>x &isin; 0...n+1</td></tr>
+	 <tr><th colspan="2">Classical logic</th></tr>
+	 <tr><td align="right">0...n &#x222A;{n+1} =&nbsp;</td><td>0...n+1</td></tr>
+ </table>
+<p>That is, we can relocate where the philosophically stronger hypothesis is, to restructure the <i>strong natural induction</i> proof to use the <i>axiom of (weak) natural induction</i>.</p>
+<h2 id="rearrangement-principle" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Rearrangement principle</h2>
+<table align="right">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>x<sub>0</sub> &middot; ... &middot; x<sub>m</sub> is well-defined for m&le;n&isin;&#x2115;</td><td>Hypothesis</td></tr>
+
+	<tr><td>2.</td><td>(x<sub>0</sub> &middot; ... &middot; x<sub>n</sub>) &middot; x<sub>n+1</sub> = (x<sub>0</sub> &middot; ... &middot; x<sub>n</sub>) &middot; x<sub>n+1</sub></td><td>Reflexivity of =</td></tr>
+	<tr><td>3.</td><td>(x<sub>0</sub> &middot; ... &middot; x<sub>n</sub>) &middot; x<sub>n+1</sub> = x<sub>0</sub> &middot; (x<sub>1</sub> &middot; ... &middot; x<sub>n</sub>) &middot; x<sub>n+1</sub></td><td>(1) and <i>associativity</i> on (2)</td></tr>
+	<tr><td>4.</td><td>(x<sub>0</sub> &middot; ... &middot; x<sub>n</sub>) &middot; x<sub>n+1</sub> = x<sub>0</sub> &middot; (x<sub>1</sub> &middot; ... &middot; x<sub>n+1</sub>)</td><td>(1) and <i>associativity</i> on (3)</td></tr>
+	<tr><th colspan="4">At this point, we have the extreme cases, but not the middle.</th></tr>
+	<tr><td>5.</td><td>(x<sub>0</sub> &middot; ... &middot; x<sub>m</sub>) &middot; (x<sub>m+1</sub> &middot; ... &middot; x<sub>n+1</sub>) = (x<sub>0</sub> &middot; ... &middot; x<sub>m</sub>) &middot; (x<sub>m+1</sub> &middot; ... &middot; x<sub>n+1</sub>)</td><td>Reflexivity of =</td></tr>
+	<tr><td>6.</td><td>(x<sub>0</sub> &middot; ... &middot; x<sub>m</sub>) &middot; (x<sub>m+1</sub> &middot; ... &middot; x<sub>n+1</sub>) = (x<sub>0</sub> &middot; ... &middot; x<sub>m</sub>) &middot; (x<sub>m+1</sub> &middot; ... &middot; x<sub>n</sub>) &middot; x<sub>n+1</sub></td><td>(1) and <i>associativity</i> on (5)</td></tr>
+	<tr><td>7.</td><td>(x<sub>0</sub> &middot; ... &middot; x<sub>m</sub>) &middot; (x<sub>m+1</sub> &middot; ... &middot; x<sub>n+1</sub>) = (x<sub>0</sub> &middot; ... &middot; x<sub>n</sub>) &middot; x<sub>n+1</sub></td><td>(1) and <i>associativity</i> on (6)</td></tr>
+	<tr><td>8.</td><td>x<sub>0</sub> &middot; ... &middot; x<sub>n+1</sub> is defined </td><td>(4) and (7)</td></tr>
+	<tr><th colspan="4">Strong induction step for Generalized Associativity</th></tr>
+</table>
+
+<p>The key, is that for <a href="https://groupprops.subwiki.org/wiki/Associative_implies_generalized_associative">any parenthesization</a> of x<sub>0</sub> &middot; ... &middot; x<sub>n</sub> there is an outermost &middot; not contained within
+	parentheses.  [As reviewed earlier, there is no useful parenthesization for n=0 (one variable) or n=1 (two variables); n=2 (three variables) is <i>associativity</i>; the first, is our basis case n=0.]</p>
+<p>There is a risk of circular reasoning here, as (&Sigma;<sup>*</sup>, <i>word</i> concatenation) is a semigroup.  That is what mathematically models the notation, in the proof.  However, we have 
+	not formally defined what the various substitutions on finite sequences of textual glyphs are.  We are still using the same natural language understanding that we had, when doing 
+	the overview of logic.</p>
+<p>When I tried to do this without natural numbers, I was able to get an analog of the third step (and thus steps 2-4), but did not have a analog for steps 5-7.</p>
+<p>If, in addition, we have for our semigroup (M, &middot;) that &middot; is commutative, i.e.</p>
+<p align="center">a&middot;b = b&middot;a</p>
+<p>then we expect to have the rearrangement principle.  The manually verifiable usage (the transposition of two placeholder variables in x<sub>0</sub> &middot; ... &middot; x<sub>n</sub>) has three cases.  The variables to be transposed,
+	x<sub>i</sub> and x<sub>j</sub> where i&lt;j, may be</p>
+<ol>
+	<li>Adjacent, i.e. x<sub>i</sub> and x<sub>i+1</sub></li>
+	<li>Separated by one variable: x<sub>i</sub> and x<sub>i+2</sub>.</li>
+	<li>Separated by two or more variables: 3&le;j-i.</li>
+</ol> 
+<p>The proofs of these three cases, are left as an exercise.</p>
+</body>
+</html>
