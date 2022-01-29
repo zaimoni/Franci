@@ -84,7 +84,7 @@ public:
 	LinearInterval(const LinearInterval& src);
 	LinearInterval(LinearInterval&& src) = default;
 	LinearInterval& operator=(const LinearInterval& src);
-	LinearInterval& operator=(LinearInterval& src) = default;
+	LinearInterval& operator=(LinearInterval&& src) = default;
 	virtual ~LinearInterval() = default;
 
 	void CopyInto(MetaConcept*& dest) const override {CopyInto_ForceSyntaxOK(*this,dest);};	// can throw memory failure

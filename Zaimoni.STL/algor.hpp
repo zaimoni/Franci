@@ -69,9 +69,8 @@ _elementwise_op(T* LHS, size_t Idx, V op)
 
 // numerics for array arguments
 template<typename T>
-T _max(const T* const TargetArray, size_t Idx)
+T _max(const T* const TargetArray, size_t Idx) requires requires() { TargetArray[0] < TargetArray[1]; }
 {
-	boost::function_requires<boost::LessThanComparableConcept<T> >();
 	assert(0<Idx);
 	assert(TargetArray);
 	T Tmp = TargetArray[--Idx];
@@ -82,9 +81,8 @@ T _max(const T* const TargetArray, size_t Idx)
 }
 
 template<typename T, typename U, typename V>
-V _max(const T* const TargetArray, size_t Idx, V (&transform)(U))
+V _max(const T* const TargetArray, size_t Idx, V (&transform)(U)) requires requires() { transform(TargetArray[0]) < transform(TargetArray[1]); }
 {
-	boost::function_requires<boost::LessThanComparableConcept<V> >();
 	assert(0<Idx);
 	assert(TargetArray);
 	V Tmp = transform(TargetArray[--Idx]);
@@ -98,9 +96,8 @@ V _max(const T* const TargetArray, size_t Idx, V (&transform)(U))
 }
 
 template<typename T, typename U, typename V, typename W, typename X>
-V _max(const T* const TargetArray, const X* const TargetArray2, size_t Idx, V (&transform)(U,W))
+V _max(const T* const TargetArray, const X* const TargetArray2, size_t Idx, V (&transform)(U,W)) requires requires() { transform(TargetArray[0]) < transform(TargetArray[1]); }
 {
-	boost::function_requires<boost::LessThanComparableConcept<V> >();
 	assert(0<Idx);
 	assert(TargetArray);
 	assert(TargetArray2);
@@ -117,9 +114,8 @@ V _max(const T* const TargetArray, const X* const TargetArray2, size_t Idx, V (&
 }
 
 template<typename T>
-T _min(const T* const TargetArray, size_t Idx)
+T _min(const T* const TargetArray, size_t Idx) requires requires() { TargetArray[0] < TargetArray[1]; }
 {
-	boost::function_requires<boost::LessThanComparableConcept<T> >();
 	assert(0<Idx);
 	assert(TargetArray);
 	T Tmp = TargetArray[--Idx];
@@ -130,9 +126,8 @@ T _min(const T* const TargetArray, size_t Idx)
 }
 
 template<typename T, typename U, typename V>
-V _min(const T* const TargetArray, size_t Idx, V (&transform)(U))
+V _min(const T* const TargetArray, size_t Idx, V (&transform)(U)) requires requires() { transform(TargetArray[0]) < transform(TargetArray[1]); }
 {
-	boost::function_requires<boost::LessThanComparableConcept<V> >();
 	assert(0<Idx);
 	assert(TargetArray);
 	V Tmp = transform(TargetArray[--Idx]);
@@ -146,9 +141,8 @@ V _min(const T* const TargetArray, size_t Idx, V (&transform)(U))
 }
 
 template<typename T, typename U, typename V, typename W, typename X>
-V _min(const T* const TargetArray, const X* const TargetArray2, size_t Idx, V (&transform)(U,W))
+V _min(const T* const TargetArray, const X* const TargetArray2, size_t Idx, V (&transform)(U,W)) requires requires() { transform(TargetArray[0]) < transform(TargetArray[1]); }
 {
-	boost::function_requires<boost::LessThanComparableConcept<V> >();
 	assert(0<Idx);
 	assert(TargetArray);
 	assert(TargetArray2);
@@ -167,19 +161,15 @@ V _min(const T* const TargetArray, const X* const TargetArray2, size_t Idx, V (&
 // sorts
 // sort nets
 template<typename T>
-void
-sort_net_2(T* TargetArray)
+void sort_net_2(T* TargetArray) requires requires() { TargetArray[0] < TargetArray[1]; }
 {
-	boost::function_requires<boost::LessThanComparableConcept<T> >();
 	if (TargetArray[1]<TargetArray[0])
 		swap(TargetArray[0],TargetArray[1]);
 }
 
 template<typename T, typename U, typename V>
-void
-sort_net_2(T* TargetArray, V (&transform)(U))
+void sort_net_2(T* TargetArray, V (&transform)(U)) requires requires() { transform(TargetArray[0]) < transform(TargetArray[1]); }
 {
-	boost::function_requires<boost::LessThanComparableConcept<V> >();
 	if (transform(TargetArray[1])<transform(TargetArray[0]))
 		swap(TargetArray[0],TargetArray[1]);
 }

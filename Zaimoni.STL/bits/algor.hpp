@@ -5,10 +5,8 @@
 namespace detail {
 
 template<typename T>
-void
-downheap(T* const TargetArray,size_t v,size_t N)
+void downheap(T* const TargetArray, size_t v, size_t N) requires requires() { TargetArray[0] < TargetArray[1]; }
 {
-	boost::function_requires<boost::LessThanComparableConcept<T> >();
 	size_t w = 2*v+1;
 	while(w<N)
 		{
@@ -21,10 +19,8 @@ downheap(T* const TargetArray,size_t v,size_t N)
 }
 
 template<typename T, typename U, typename V>
-void
-downheap(T* const TargetArray,size_t v,size_t N, V (&transform)(U))
+void downheap(T* const TargetArray,size_t v,size_t N, V (&transform)(U)) requires requires() { transform(TargetArray[0]) < transform(TargetArray[1]); }
 {
-	boost::function_requires<boost::LessThanComparableConcept<V> >();
 	size_t w = 2*v+1;
 	while(w<N)
 		{
@@ -68,10 +64,8 @@ downheap(T** const TargetArray,size_t v,size_t N)
 }
 
 template<typename T, typename U, typename V>
-void
-downheap(T** const TargetArray,size_t v,size_t N, V (&transform)(U))
+void downheap(T** const TargetArray,size_t v,size_t N, V (&transform)(U)) requires requires() { transform(TargetArray[0]) < transform(TargetArray[1]); }
 {
-	boost::function_requires<boost::LessThanComparableConcept<V> >();
 	size_t w = 2*v+1;
 	while(w<N)
 		{
