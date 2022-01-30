@@ -1,7 +1,7 @@
 // MetaRAM2.hpp
 // more C++ memory interface functions
 // these require the Iskandria memory manager
-// (C)2009,2010,2015,2020 Kenneth Boyd, license: MIT.txt
+// (C)2009,2010,2015,2020,2022 Kenneth Boyd, license: LICENSE.md
 
 #ifndef ZAIMONI_METARAM2_HPP
 #define ZAIMONI_METARAM2_HPP 1
@@ -11,6 +11,7 @@
 #include "z_memory.h"
 #endif
 #include "Logging.h"
+#include "Augment.STL/algorithm"
 
 #ifdef ZAIMONI_FORCE_ISO
 #define ZAIMONI_NONISO_ISO_PARAM(A, B) , B
@@ -283,21 +284,18 @@ _new_buffer_uninitialized_nonNULL_throws(size_t i)
 	return tmp;
 }
 
-template<typename T>
-typename std::enable_if<!(std::is_trivially_destructible_v<T>&& std::is_trivially_copy_assignable_v<T>), bool>::type
-__resize2(ZAIMONI_NONISO_ISO_SRC(T*& _ptr, size_t _ptr_size), size_t n)
-{
-	return n == ZAIMONI_NONISO_ISO_SRC(ArraySize(_ptr), _ptr_size);
-}
-
 #ifndef ZAIMONI_FORCE_ISO
-template<typename T>
-typename std::enable_if<std::is_trivially_destructible_v<T>&& std::is_trivially_copy_assignable_v<T>, bool>::type
-__resize2(T*& _ptr, size_t n)
+template<typename T> requires(std::is_trivially_destructible_v<T> && std::is_trivially_copy_assignable_v<T>)
+bool __resize2(T*& _ptr, size_t n)
 {
 	if (n<=ArraySize(_ptr)) return _ptr = REALLOC(_ptr,n*sizeof(T)),true;
 	return false;
 }
+
+template<typename T> requires(!(std::is_trivially_destructible_v<T>&& std::is_trivially_copy_assignable_v<T>))
+bool __resize2(T*& _ptr, size_t n) { return n == ArraySize(_ptr); }
+#else
+constexpr bool __resize2(size_t _ptr_size, size_t n) { return n == _ptr_size; }
 #endif
 
 template<typename T>
@@ -329,7 +327,7 @@ _resize(T*& _ptr ZAIMONI_ISO_PARAM(size_t& _ptr_size), size_t n)
 	if (__resize2(ZAIMONI_NONISO_ISO_SRC(_ptr, _ptr_size), n)) return true;
 
 	if (T* Tmp = _new_buffer<T>(n)) {
-		_copy_expendable_buffer(Tmp, _ptr, std::min(ZAIMONI_NONISO_ISO_SRC(ArraySize(_ptr), _ptr_size), n));
+		_copy_expendable_buffer(Tmp, _ptr, min(ZAIMONI_NONISO_ISO_SRC(ArraySize(_ptr), _ptr_size), n));
 		_flush(_ptr);
 		_ptr = Tmp;
 #ifdef ZAIMONI_FORCE_ISO

@@ -1,5 +1,5 @@
 // c_array.hpp
-// (C)2009,2011,2020 Kenneth Boyd, license: MIT.txt
+// (C)2009,2011,2020,2022 Kenneth Boyd, license: LICENSE.md
 
 // base types to signal that a class type is meant to be used like a C array.
 
@@ -11,18 +11,9 @@
 
 #include "../Logging.h"
 #include "../MetaRAM.hpp"
-#include <algorithm>
 #include "../logic_lt.hpp"
 #include "operator.hpp"
-
-namespace zaimoni {
-
-// pull these into namespace zaimoni to keep Koenig lookup happy (GCC implementations OK)
-using std::swap;
-using std::max;
-using std::min;
-
-}	// namespace zaimoni
+#include "../Augment.STL/algorithm"
 
 // this macro goes in the class body
 // turns out the STL type definition glue doesn't inherit properly (in GCC)
