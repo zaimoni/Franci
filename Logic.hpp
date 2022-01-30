@@ -14,6 +14,30 @@
 
 namespace logic {
 
+template<class T>
+std::vector<std::string> to_string_vector(const std::vector<T>& src) requires requires(std::vector<std::string> test) { test.push_back(to_string(*src.begin())); }
+{
+	std::vector<std::string> ret;
+	ret.reserve(src.size());
+	for (decltype(auto) x : src) ret.push_back(to_string(x));
+	return ret;
+}
+
+inline std::string display_as_enumerated_set(const std::vector<std::string>& src)
+{
+	if (src.empty()) return "{}";
+	bool want_comma = false;
+	std::string ret("{ ");
+	for (decltype(auto) x : src) {
+		if (want_comma) ret += ", ";
+		ret += x;
+		want_comma = true;
+	}
+
+	return ret += " }";
+
+}
+
 // Our native logic, for convenience
 enum class TruthValue : unsigned char {
 	Contradiction = 0, // Kripke strong 3-valued logic; "super-false"
@@ -57,6 +81,18 @@ enum class logics {
 	belnap,
 	franci
 };
+
+constexpr const char* to_string(TruthValue l)
+{
+	switch (l)
+	{
+	case TruthValue::Contradiction: return "CONTRADICTION";
+	case TruthValue::True: return "TRUE";
+	case TruthValue::False: return "FALSE";
+	case TruthValue::Unknown: return "UNKNOWN";
+	default: return nullptr;
+	}
+}
 
 // API
 struct logic_API {
@@ -273,6 +309,7 @@ public:
 	}
 
 	auto arity() const { return _args.size(); }
+	auto& name() const { return symbol; } // at least for arity 0
 	auto catalog_vars() {
 		std::vector<TruthTable*> ret;
 		_catalog_vars(this, ret);
@@ -299,7 +336,7 @@ public:
 		while (0 < ub) {
 			--ub;
 			if (auto x = _cache[ub].lock()) {
-				if (name == x->symbol) continue;
+				if (name != x->symbol) continue;
 				if (l == x->_logic) return x;
 				return nullptr;
 			} else {

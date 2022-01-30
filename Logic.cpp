@@ -2,6 +2,8 @@
 
 #include "Logic.hpp"
 
+std::vector< std::weak_ptr<logic::TruthTable> > logic::TruthTable::_cache;
+
 #ifdef LOGIC_DRIVER
 #include "test_driver.h"
 
@@ -16,16 +18,24 @@ int main(int argc, char* argv[], char* envp[])
 {
 	C_STRING_TO_STDOUT(logic::Classical::get().name());
 	C_STRING_TO_STDOUT("\n");
-	C_STRING_TO_STDOUT(logic::KleeneStrong::get().name());
-	C_STRING_TO_STDOUT("\n");
-	C_STRING_TO_STDOUT(logic::KleeneWeak::get().name());
-	C_STRING_TO_STDOUT("\n");
-	C_STRING_TO_STDOUT(logic::LispProlog::get().name());
-	C_STRING_TO_STDOUT("\n");
-	C_STRING_TO_STDOUT(logic::Belnap::get().name());
-	C_STRING_TO_STDOUT("\n");
-	C_STRING_TO_STDOUT(logic::Franci::get().name());
-	C_STRING_TO_STDOUT("\n");
+
+	std::shared_ptr<logic::TruthTable> test_var[6];
+	std::vector<logic::TruthValue> test_values[6];
+
+	int ub = (int)logic::logics::franci+1;
+	while (0 < --ub) {
+		C_STRING_TO_STDOUT(toAPI((logic::logics)ub).name());
+		C_STRING_TO_STDOUT("\n");
+		test_var[ub] = logic::TruthTable::variable(std::string(1, 'A'+ub), (logic::logics)ub);
+		STL_STRING_TO_STDOUT(test_var[ub]->name());
+		C_STRING_TO_STDOUT("\n");
+		test_values[ub] = test_var[ub]->variable_values().value();
+		auto stage = logic::display_as_enumerated_set(logic::to_string_vector(test_values[ub]));
+		STL_STRING_TO_STDOUT(stage);
+		C_STRING_TO_STDOUT("\n");
+	}
+
+
 	STRING_LITERAL_TO_STDOUT("End testing\n");
 	return 0;	// success
 };
