@@ -27,11 +27,13 @@
 #undef ZAIMONI_REALLOC_TO_ZERO_IS_NULL
 #define ZAIMONI_REALLOC_TO_ZERO_IS_NULL 1
 
-#ifdef _WIN32
-__declspec(dllexport)
-#endif
 #ifdef __cplusplus
 extern "C"
+#else
+extern
+#endif
+#ifdef _WIN32
+__declspec(dllexport)
 #endif
 inline size_t __cdecl _msize(void* memblock)
 {	/* FORMALLY CORRECT: Kenneth Boyd, 9/15/1999 */
@@ -75,11 +77,13 @@ SafeArraySize(const T* memblock)
 /*!
  * checks that memory block in question is not only dynamically allocated, but is safe to free/realloc
  */
-#ifdef _WIN32
-__declspec(dllimport)
-#endif
 #ifdef __cplusplus
 extern "C"
+#else
+extern
+#endif
+#ifdef _WIN32
+__declspec(dllimport)
 #endif
 int _memory_block_start_valid(const void* x);
 
@@ -90,11 +94,13 @@ int _memory_block_start_valid(const void* x);
  * 
  * \return int 1 if ok, 0 if memory overwrites detected
  */
-#ifdef _WIN32
-__declspec(dllimport)
-#endif
 #ifdef __cplusplus
 extern "C"
+#else
+extern
+#endif
+#ifdef _WIN32
+__declspec(dllimport)
 #endif
 int _no_obvious_overwrites(void);
 
