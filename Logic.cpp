@@ -16,14 +16,11 @@ static_assert(logic::Franci().is_commutative());
 
 int main(int argc, char* argv[], char* envp[])
 {
-	C_STRING_TO_STDOUT(logic::Classical::get().name());
-	C_STRING_TO_STDOUT("\n");
-
 	std::shared_ptr<logic::TruthTable> test_var[6];
 	std::vector<logic::TruthValue> test_values[6];
 
 	int ub = (int)logic::logics::franci+1;
-	while (0 < --ub) {
+	while (0 <= --ub) {
 		C_STRING_TO_STDOUT(toAPI((logic::logics)ub).name());
 		C_STRING_TO_STDOUT("\n");
 		test_var[ub] = logic::TruthTable::variable(std::string(1, 'A'+ub), (logic::logics)ub);
