@@ -37,6 +37,11 @@ target_link_options(Franci_console PRIVATE /FORCE:MULTIPLE)
 target_compile_definitions(Franci_console PUBLIC FRANCI_CLI)
 # add_dependencies(... AutoDetect)
 
+add_executable(LogicC Logic.cpp)
+target_link_libraries(LogicC z_memory)
+target_link_options(LogicC PRIVATE /FORCE:MULTIPLE)
+target_compile_definitions(LogicC PUBLIC LOGIC_DRIVER)
+
 add_custom_command(TARGET Franci POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         $<TARGET_FILE:z_memory>

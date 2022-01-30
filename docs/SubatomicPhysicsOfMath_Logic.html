@@ -104,10 +104,58 @@ of the inference schemas of predicate calculus are derivable from the usual unde
 	undefined terminology here. I'm expecting everything needed for these, to be formally definable in terms of what we're looking at here.</p>
 <a href="./LogicFormalization.dot.svg" target="_blank"><img src="./LogicFormalization.dot.svg" width="100%" alt="map of logic"></a>
 <h2 id="transitivity-of-implication" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Transitivity of implication</h2>
-<p>As our first example of a conditional proof, let's formally calculate <i>transitivity of implication</i> for three propositional variables P, Q, R:</p>
-<p align="center">P &rArr; Q, Q &rArr; R &#9500; P &rArr; R</p>
-<p>We'll use a table-based layout, instead of an ordered list.  The actual <a href="https://en.wikipedia.org/wiki/Hypothetical_syllogism">calculation</a>, is notated in the second column.</p>
+<p>Considering that our text predates the Gentzen-style notation, we can take an alternate form of <i>modus ponens</i> as axiomatic:</p>
 <table align="center">
+	<tr><th></th><th>Name</th><th></th></tr>
+	<tr align="center"><td>P, (P &#9500; Q) &#9500; Q</td><td><i>modus ponens</i> (for &#9500;)</td><td></td></tr>
+</table>
+<p>Here, we use the truth-table interpretation of &#9500; to justify the atypical notation of including inference rules as premises in 
+	Gentzen-style notation.  In the absence of a proper authority, I'll extend the syntactical entailment notation by wrapping entailment rules 
+	in parentheses.</p>
+<p>The truth table interpretation is not strictly correct, philosophically; we would like to think of an inference rule as a function, with domain and range within statements.
+	(None of "function", "domain", or "range" have been formally defined, at this point.)  That is, if we were to 
+	consider a standard inference rule using &#9500; to be "first order with domain of discourse statements", then the extended notation inference rules in
+	the above table would be "second order with domain of discourse statements": these use variables that range over inference rules, rather than statements i.e. truth-valued expressions.</p>
+<p>As our first example of a conditional proof, let's formally calculate the cut rule for &#9500;, i.e. transitivity of syntactical entailment.</p>
+<table align="right">
+	<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>P &#9500; Q</td><td></td><td>Given</td></tr>
+	<tr><td>2.</td><td>Q &#9500; R</td><td></td><td>Given</td></tr>
+	<tr><td>3.</td><td></td><td>P</td><td>Hypothesis</td></tr>
+	<tr><td>4.</td><td></td><td>Q</td><td><i>modus ponens</i> on (1) and (3)</td></tr>
+	<tr><td>5.</td><td></td><td>R</td><td><i>modus ponens</i> on (2) and (4)</td></tr>
+	<tr><td>6.</td><td>P &#9500; R</td><td></td><td><span style="background:yellow">Syntactical entailment introduction</span>, (3) and (5)</td></tr>
+</table>
+<p>We'll use a table-based layout, instead of an ordered list.  The actual calculation, is notated in the second column.</p>
+<p>This table documents a formal calculation that the <i>transitivity of syntactical entailment</i> syntactical entailment, 
+	is derivable i.e. provable from <i>modus ponens</i>. The third column is a terse mnemonic that in principle can 
+	be expanded into full sentences.  That is, we can translate the above table into a (much longer) English-wrapped conditional proof.
+	In the tabular representation for conditionally proving a syntactical entailment:</p>
+<ul>
+	<li>The syntactically entailed statement is always the last row.</li>
+	<li>The hypothesis statements of the syntactical entailment, are the first rows in the table.  They are labeled "Given" and are 
+		assumed to be possible to evaluate to the truth value <i>true</i>.  A statement labeled Given, whose truth value cannot evaluate to <i>true</i>,
+		results in a syntactically reasonable yet invalid formal calculation.  This is critical for syntactical entailment introduction to work,
+		for the truth table describable non-classical logics we are considering.</li>
+	<li>The remaining table rows, are roughly in reverse order of how one would do the formal calculation by textual substitions.</li>
+</ul>
+<p>We could replace the given <i>P &#9500; Q</i> and its matching <i>modus ponens</i> use, with the nonstrict implication <i>P &rArr; Q</i>.  This gives three other variations with similar proofs.</p>
+<table align="center">
+	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
+	<tr><td align="center" style="background: yellow">(P &#9500; Q), (Q &#9500; R) &#9500; (P &#9500; R)</td><td align="left"><span style="background:yellow">Transitivity of syntactical entailment</span>, i.e. cut rule</td><td align="left">None</td><td>Defeasible logics</td></tr>
+	<tr><td align="center" style="background: yellow">(P &#9500; Q), Q &rArr; R &#9500; (P &#9500; R)</td><td align="left" style="background: yellow">Using Q &rArr; R on the conclusion of P &#9500; Q</td><td align="left">None</td><td>Defeasible logics</td></tr>
+	<tr><td align="center" style="background: yellow">P &rArr; Q, (Q &#9500; R) &#9500; (P &#9500; R)</td><td align="left" style="background: yellow">Invert using P &rArr; Q on the hypothesis of Q &#9500; R</td><td align="left">None</td><td>Defeasible logics</td></tr>
+	<tr><td align="center" style="background: yellow">P &rArr; Q, Q &rArr; R &#9500; (P &#9500; R)</td><td align="left"><span style="background:yellow"></td><td align="left">None</td><td>Defeasible logics</td></tr>
+</table>
+<p>Comparing the truth table descriptions of &#9500; and &rArr;, we see:</p>
+<ul>
+	<li>Their truth table descriptions agree for classical logic <b>only</b>.</li>
+	<li>For the other truth table describable logics we are considering, P &rArr; Q would be expected to syntactically entail P &#9500; Q.  (However, as a matter of 
+		intended interpretatiion this does <b>not</b> work.)</li>
+</ul>
+<p>The corresponding inference rule for classical logic, is implication introduction.  The analogous result, is <a href="https://en.wikipedia.org/wiki/Hypothetical_syllogism">transitivity of implication</a>.
+<table align="center">
+	<tr><th colspan="3">Classical Logic</th></tr>
 	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
 	<tr><td>1.</td><td>P &rArr; Q</td><td>Given</td></tr>
 	<tr><td>2.</td><td>Q &rArr; R</td><td>Given</td></tr>
@@ -116,28 +164,8 @@ of the inference schemas of predicate calculus are derivable from the usual unde
 	<tr><td>5.</td><td>R</td><td><i>modus ponens</i> on (2) and (4)</td></tr>
 	<tr><td>6.</td><td>P &rArr; R</td><td>Implication introduction, (3) and (5)</td></tr>
 </table>
-<p>The above table documents a formal calculation that the <i>transitivity of implication</i> syntactical entailment, 
-	is derivable i.e. provable from <i>modus ponens</i>. The third column is a terse mnemonic that in principle can 
-	be expanded into full sentences.  That is, we can translate the above table into a (much longer) English-wrapped conditional proof.
-	In the tabular representation for conditionally proving a syntactical entailment:</p>
-<ul>
-	<li>The syntactically entailed statement is always the last row.</li>
-	<li>The hypothesis statements of the syntactical entailment, are the first rows in the table.  They are labeled "Given" and are 
-		assumed to be possible to evaluate to the truth value <i>true</i>.  A statement labeled Given, whose truth value cannot evaluate to <i>true</i>,
-		results in a syntactically reasonable yet invalid formal calculation.  This is critical for Implication Introduction to work
-		for the truth table describable non-classical logics we are considering.</li>
-	<li>The remaining table rows, are roughly in reverse order of how one would do the formal calculation by textual substitions.</li>
-</ul>
 <p>Other names for <i>transitivity of implication</i> are "hypothetical syllogism" (abbreviated HS), "chain argument", or the exceedingly generic "chain rule".</p>
-<p>The hypotheses to be tested for the conditional proof technique, can be read off of <i>modus ponens</i>: they're
-	the missing hypotheses of the <i>modus ponens</i> instances.  We had two candidate hypotheses, A and B.  However, B was
-	the result of one of the <i>modus ponens</i> instances, while A could not be obtained that way.</p>
-<p>Also, we could replace the given <i>P &rArr; Q</i> and its matching <i>modus ponens</i> use, with the syntactical entailment rule <i>P &#9500; Q</i> .  Likewise, we could replace the given <i>Q &rArr; R</i> and its matching <i>modus ponens</i> use, with the syntactical entailment rule <i>Q &#9500; R</i> .  Notating this 
-is tricky, as syntactical entailment rules are not truth-valued.  In the absence of a proper authority, I'll extend the syntactical entailment notation by wrapping entailment rules 
-in parentheses.  The non-standard parts of the following table, have background color yellow.</p>
-
-<p>The above proof, is invalid for Belnap's four-valued logic(!).  To verify this, let <i>P</i> and <i>R</i> have truth value <i>contradiction</i> and <i>Q</i> have truth value <i>unknown</i>.  It is
-	then a mechanical exercise that <i>P &rArr; Q</i> and <i>Q &rArr; R</i> both evaluate to <i>true</i>, yet <i>P &rArr; R</i> evaluates to their common truth value <i>contradiction</i>.</p>
+<p>As before, we could replace the given <i>P &rArr; Q</i> and its matching <i>modus ponens</i> use, with the syntactical entailment rule <i>P &#9500; Q</i> .</p>
 <p>Let us introduce some terminology.  For a nonstrict implication <i>A &rArr; B</i>, we say:</p>
 <ul>
 <li><i>A</i> is the hypothesis of <i>A &rArr; B</i>.  Alternately, <i>A</i> is the antecedent of <i>A &rArr; B</i>.</li>
@@ -150,11 +178,10 @@ in parentheses.  The non-standard parts of the following table, have background 
 </ul>
 <p>From the truth table description of &rArr;, it appears the problem is that for the non-classical logics, we don't actually know that
 	the Hypothesis step, and the reached Conclusion step, do not have non-classical truth values. (This choice of phrasing, is to allow for Intuitionistic logic.)
-	There may be other problems as well.  For now, we will treat <i>implication introduction</i> as valid for classical logic,
-	but not any of the truth table described non-classical logics we are considering.</p>
+	There may be other problems as well.</p>
 <p>Once we have verified the analogies that allow translating a truth table verification of a propositional calculus inference rule, to a symbolic logic verification of said 
 	inference rule, the exercise of verifying <i>transitivity of implication</i> (or lack thereof) for all five truth table-described nonclassical logics 
-	can be done.  (This verification will be classical logic reasoning about a given non-classical logic.)</p>
+	can be done in symbolic logic.  (This verification will be classical logic reasoning about a given non-classical logic.)</p>
 <table align="center">
 	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
 	<tr><td align="center">P &rArr; Q, Q &rArr; R &#9500; P &rArr; R</td><td align="left">Transitivity of implication</td><td align="left">Belnap</td><td>Defeasible logics</td></tr>
@@ -165,33 +192,6 @@ in parentheses.  The non-standard parts of the following table, have background 
 that is, a plain English statement describing a (semantic) implication, often has a much larger formal expansion than a direct interpretation would suggest.
 This is <b>not</b> a problem for the level of mathematics, that we are following instructions for building out.  (This also means defeasible logics have issues either
 with <i>modus ponens</i> itself, or the conditional proof formalism as a justification for implication introduction.)</p>
-<p>A philosophical problem with the non-standard notation I introduced above, is that strictly speaking an inference rule is not a truth-valued statement.  We would like to
-think of an inference rule as a function, with domain and range statements.  (None of "function", "domain", or "range" have been formally defined, at this point.)  That is, if we were to 
-consider a standard inference rule using &#9500; to be "first order with domain of discourse statements", then the extended notation inference rules in
-the above table would be "second order with domain of discourse statements": these use variables that range over inference rules, rather than statements i.e. truth-valued expressions.</p>
-<p>Considering that our text predates the Gentzen-style notation, it appears that we can take an alternate form of <i>modus ponens</i> as axiomatic:</p>
-<table align="center">
-	<tr><th></th><th>Name</th><th></th></tr>
-	<tr align="center"><td>P, (P &#9500; Q) &#9500; Q</td><td><i>modus ponens</i> (for &#9500;)</td><td></td></tr>
-</table>
-The corresponding proof would then be:
-<table align="center">
-	<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
-	<tr><td>1.</td><td>P &#9500; Q</td><td></td><td>Given</td></tr>
-	<tr><td>2.</td><td>Q &#9500; R</td><td></td><td>Given</td></tr>
-	<tr><td>3.</td><td></td><td>P</td><td>Hypothesis</td></tr>
-	<tr><td>4.</td><td></td><td>Q</td><td><i>modus ponens</i> on (1) and (3)</td></tr>
-	<tr><td>5.</td><td></td><td>R</td><td><i>modus ponens</i> on (2) and (4)</td></tr>
-	<tr><td>6.</td><td>P &#9500; R</td><td></td><td><span style="background:yellow">Syntactical entailment introduction</span>, (3) and (5)</td></tr>
-</table>
-<p>The more typical name for this, is the cut rule.  We have three other variations with very similar proofs:</p>
-<table align="center">
-	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
-	<tr><td align="center" style="background: yellow">(P &#9500; Q), (Q &#9500; R) &#9500; (P &#9500; R)</td><td align="left"><span style="background:yellow">Transitivity of syntactical entailment</span>, i.e. cut rule</td><td align="left">None</td><td>Defeasible logics</td></tr>
-	<tr><td align="center" style="background: yellow">(P &#9500; Q), Q &rArr; R &#9500; (P &#9500; R)</td><td align="left" style="background: yellow">Using Q &rArr; R on the conclusion of P &#9500; Q</td><td align="left">None</td><td>Defeasible logics</td></tr>
-	<tr><td align="center" style="background: yellow">P &rArr; Q, (Q &#9500; R) &#9500; (P &#9500; R)</td><td align="left" style="background: yellow">Invert using P &rArr; Q on the hypothesis of Q &#9500; R</td><td align="left">None</td><td>Defeasible logics</td></tr>
-	<tr><td align="center" style="background: yellow">P &rArr; Q, Q &rArr; R &#9500; (P &#9500; R)</td><td align="left"><span style="background:yellow"></td><td align="left">None</td><td>Defeasible logics</td></tr>
-</table>
 <p>We also have transitivity of syntactical equivalence, as follows:</p>
 <table align="center">
 	<tr><th></th><th>Inference Rule</th><th>Rationale</th></tr>
