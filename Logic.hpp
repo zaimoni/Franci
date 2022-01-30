@@ -6,6 +6,8 @@
 // We take deductive truth values to be implemented by the C++ langage.
 #include <stdexcept>
 #include <string>
+#include <vector>
+#include <memory>
 #include <functional>
 #include <utility>
 #include <optional>
@@ -155,7 +157,7 @@ struct KleeneStrong final : public logic_API {
 struct KleeneWeak final : public logic_API {
 	constexpr bool is_out_of_of_range(TruthValue x) const override { return TruthValue::Contradiction == x; }
 	constexpr const char* name() const override { return "Kleene's weak"; }
-	constexpr virtual TruthValue And_annihilator() const { return TruthValue::Unknown; }
+	constexpr TruthValue And_annihilator() const override { return TruthValue::Unknown; }
 
 	constexpr TruthValue And(TruthValue lhs, TruthValue rhs) const override {
 		if (auto x = And_core(lhs, rhs)) return *x;
@@ -169,7 +171,7 @@ struct KleeneWeak final : public logic_API {
 };
 
 struct LispProlog final : public logic_API {
-	constexpr virtual bool is_commutative() const { return false; }
+	constexpr bool is_commutative() const override { return false; }
 	constexpr bool is_out_of_of_range(TruthValue x) const override { return TruthValue::Contradiction == x; }
 	constexpr const char* name() const override { return "Lisp/Prolog"; }
 
@@ -200,7 +202,7 @@ struct Belnap final : public logic_API {
 
 struct Franci final : public logic_API {
 	constexpr const char* name() const override { return "Franci's"; }
-	constexpr virtual TruthValue And_annihilator() const { return TruthValue::Contradiction; }
+	constexpr TruthValue And_annihilator() const override { return TruthValue::Contradiction; }
 
 	constexpr TruthValue And(TruthValue lhs, TruthValue rhs) const override {
 		if (auto x = And_core(lhs, rhs)) return *x;
