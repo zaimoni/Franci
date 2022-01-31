@@ -30,6 +30,10 @@ int main(int argc, char* argv[], char* envp[])
 		auto stage = logic::display_as_enumerated_set(logic::to_string_vector(test_values[ub]));
 		STL_STRING_TO_STDOUT(stage);
 		C_STRING_TO_STDOUT("\n");
+		test_values[ub] = test_var[ub]->possible_values().value();
+		stage = logic::display_as_enumerated_set(logic::to_string_vector(test_values[ub]));
+		STL_STRING_TO_STDOUT(stage);
+		C_STRING_TO_STDOUT("\n");
 	}
 
 

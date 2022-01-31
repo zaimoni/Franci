@@ -75,15 +75,6 @@ static_assert(TruthValue::True == !TruthValue::False);
 static_assert(TruthValue::False == !TruthValue::True);
 static_assert(TruthValue::Unknown == !TruthValue::Unknown);
 
-enum class logics {
-	classical = 0,
-	kleene_strong,
-	kleene_weak,
-	lisp_prolog,
-	belnap,
-	franci
-};
-
 constexpr const char* to_string(TruthValue l)
 {
 	switch (l)
@@ -94,6 +85,25 @@ constexpr const char* to_string(TruthValue l)
 	case TruthValue::Unknown: return "UNKNOWN";
 	default: return nullptr;
 	}
+}
+
+enum class logics {
+	classical = 0,
+	kleene_strong,
+	kleene_weak,
+	lisp_prolog,
+	belnap,
+	franci
+};
+
+constexpr bool is_sublogic(logics sub, logics sup) {
+	if (sub == sup) return true;
+	if (sub == logics::classical) return true;
+	if (sup == logics::classical) return false;
+	if (sub == logics::kleene_weak || sub == logics::lisp_prolog) return false;
+	if (sup == logics::kleene_weak || sub == logics::lisp_prolog) return false;
+	if (sub == logics::kleene_strong) return true;
+	return false;
 }
 
 // API
@@ -128,10 +138,7 @@ struct Classical final : public logic_API {
 	constexpr bool is_out_of_of_range(TruthValue x) const override { return TruthValue::Unknown == x || TruthValue::Contradiction == x; }
 	constexpr const char* name() const override { return "Classical"; }
 
-	constexpr TruthValue And(TruthValue lhs, TruthValue rhs) const override {
-		if (auto x = And_core(lhs, rhs)) return *x;
-		throw std::logic_error("Classical logic faced with non-classical truth value");
-	};
+	constexpr TruthValue And(TruthValue lhs, TruthValue rhs) const override { return And_core(lhs, rhs).value(); };
 
 	static auto& get() {
 		static Classical ooao;
@@ -247,11 +254,14 @@ private:
 	static constexpr const TruthValue ref_classical[] = { TruthValue::False, TruthValue::True };
 	static constexpr const TruthValue ref_threeval[] = { TruthValue::False, TruthValue::True, TruthValue::Unknown };
 	static constexpr const TruthValue ref_fourval[] = { TruthValue::False, TruthValue::True, TruthValue::Unknown, TruthValue::Contradiction };
+	static constexpr const std::pair<const char*, int> predefined[] = {{"~", 1}, {"&", 2}};
 
 	std::string symbol;
 	logics _logic;
 	std::vector< std::shared_ptr<TruthTable> > _args;
-	unsigned char _var_values;	// bitmap
+	std::optional<unsigned char> _var_values;	// bitmap, expected range 0...15
+	// \todo following needs 2 bits for each input, and 2 bits for self
+	std::optional<std::vector<unsigned short> > _var_enumerated;
 
 	// if we need these, undelete
 	TruthTable() = delete;
@@ -320,8 +330,23 @@ public:
 	std::optional<std::vector<TruthValue> > variable_values() const {
 		ptrdiff_t ub = _args.size();
 		if (ub) return std::nullopt;	// either error case, or a logical connective
-		return decode_bitmap(_var_values, set_theoretic_range());
+		if (!_var_values) return std::nullopt; // error case
+		return decode_bitmap(*_var_values, set_theoretic_range());
 	}
+
+	std::optional<std::vector<TruthValue> > possible_values() const {
+		if (_var_values) return decode_bitmap(*_var_values, set_theoretic_range());
+		if (_var_enumerated) {
+			auto code = extract_truth_bitmap(*_var_enumerated, 0);	// *our* value, not our arguments' values
+			if (code) {
+				*const_cast<std::optional<unsigned char>*>(&_var_values) = code; // cache variable update
+				return decode_bitmap(code, set_theoretic_range());
+			}
+		}
+		// \todo populate from arguments
+		return std::nullopt;
+	}
+
 	auto catalog_values(const std::vector<TruthTable*>& src) const {
 		ptrdiff_t ub = src.size();
 		std::vector<std::vector<TruthValue> > ret(src.size());
@@ -352,6 +377,51 @@ public:
 	}
 
 private:
+	static unsigned char extract_truth_bitmap(unsigned short src, int index) {
+		return (src >> 4 * index) & 0x0FU;
+	}
+
+	static unsigned char extract_truth_bitmap(const std::vector<unsigned short>& src, int index) {
+		unsigned char ret = 0;
+		for (decltype(auto) x : src) {
+			auto test = (x >> 2 * index) & 0x03U;
+			ret |= (1ULL << test);
+		}
+		return ret;
+	}
+
+	// codes could either be bitmaps (range 0..15) or coded values (range 0..3)
+	static void _update_truth_codes(std::vector<unsigned short>& dest, unsigned short already, const std::vector<unsigned char>& src) {
+		for (decltype(auto) now : src) dest.push_back(already | now);
+	}
+
+	std::vector<unsigned short> cartesian_append_truth_codes(const std::vector<unsigned short>& prior, const std::vector<unsigned char>& src) {
+		std::vector<unsigned short> ret;
+		if (prior.empty()) {
+			_update_truth_codes(ret, 0, src);
+		} else {
+			for (decltype(auto) already : prior) {
+				_update_truth_codes(ret, already << 2, src);
+			}
+		}
+		return ret;
+	}
+
+	std::vector<unsigned short> cartesian_append_truth_bitmap(const std::vector<unsigned short>& prior, unsigned char src) {
+		auto to_append = decode_bitmap(src, set_theoretic_range());
+		std::vector<unsigned short> ret;
+		if (!to_append.empty()) {
+			if (prior.empty()) {
+				for (decltype(auto) t : to_append) ret.push_back((unsigned short)t);
+			} else {
+				for (decltype(auto) already : prior) {
+					for (decltype(auto) t : to_append) ret.push_back(already << 2 | (unsigned short)t);
+				}
+			}
+		}
+		return ret;
+	}
+
 	static void _catalog_vars(TruthTable* origin, std::vector<TruthTable*>& ret) {
 retry:
 		// we almost certainly will be out of RAM long before this cast is undefined behavior
