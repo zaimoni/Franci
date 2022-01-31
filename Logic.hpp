@@ -14,6 +14,8 @@
 #include <ranges>
 #include <stddef.h>
 
+#include "Zaimoni.STL/Logging.h"
+
 namespace logic {
 
 template<class T>
@@ -250,12 +252,13 @@ auto decode_bitmap(unsigned long long src, const T& key)
 class TruthTable final
 {
 private:
-	static constexpr const bool integrity_check = false; // control expensive checks centrally
+	static constexpr const bool integrity_check = true; // control expensive checks centrally
 
 	static std::vector< std::weak_ptr<TruthTable> > _cache;
 	static constexpr const TruthValue ref_classical[] = { TruthValue::False, TruthValue::True };
 	static constexpr const TruthValue ref_threeval[] = { TruthValue::False, TruthValue::True, TruthValue::Unknown };
 	static constexpr const TruthValue ref_fourval[] = { TruthValue::False, TruthValue::True, TruthValue::Unknown, TruthValue::Contradiction };
+	static constexpr const TruthValue ref_display[] = { TruthValue::Contradiction, TruthValue::False, TruthValue::True, TruthValue::Unknown };
 	static constexpr const std::pair<const char*, int> predefined[] = {{"~", 1}, {"&", 2}};
 
 	std::string symbol;
@@ -274,41 +277,22 @@ private:
 	TruthTable& operator=(const TruthTable& src) = delete;
 	TruthTable& operator=(TruthTable&& src) = delete;
 
-	constexpr static auto _var_begin(logics l) {
-		switch (l) {
-		case logics::classical: return std::begin(ref_classical);
-		case logics::kleene_strong:
-		case logics::kleene_weak:
-		case logics::lisp_prolog:	return std::begin(ref_threeval);
-		case logics::belnap:
-		case logics::franci:	return std::begin(ref_fourval);
-		}
-	}
-
-	constexpr static auto _var_end(logics l) {
-		switch (l) {
-		case logics::classical: return std::end(ref_classical);
-		case logics::kleene_strong:
-		case logics::kleene_weak:
-		case logics::lisp_prolog:	return std::end(ref_threeval);
-		case logics::belnap:
-		case logics::franci:	return std::end(ref_fourval);
-		}
-	}
-
 	constexpr static decltype(_var_values) _var_agnostic(logics l) {
 		switch (l) {
-		case logics::classical: return (1ULL << std::end(ref_classical) - std::begin(ref_classical)) - 1ULL;
+		case logics::classical: return 0x06;
 		case logics::kleene_strong:
 		case logics::kleene_weak:
-		case logics::lisp_prolog:	return (1ULL << std::end(ref_threeval) - std::begin(ref_threeval)) - 1ULL;
+		case logics::lisp_prolog:	return 0x0E;
 		case logics::belnap:
-		case logics::franci:	return (1ULL << std::end(ref_fourval) - std::begin(ref_fourval)) - 1ULL;
+		case logics::franci:	return 0x0F;
 		}
 	}
 
 	// Propositional variable.  No arguments
 	TruthTable(const std::string& name, logics l) : symbol(name), _logic(l), _var_values(_var_agnostic(l)), update_bitmap(nullptr), update_enumeration(nullptr) {}
+
+	// Unary connective
+	TruthTable(const std::string& name, const std::shared_ptr<TruthTable>& src, decltype(update_bitmap) update) : symbol(name), _logic(src->_logic), _args(1,src), update_bitmap(update), update_enumeration(nullptr) {}
 
 public:
 	~TruthTable() = default;
@@ -324,8 +308,39 @@ public:
 		}
 	}
 
+	auto display_range() const { return std::ranges::subrange(ref_display); }
+
 	auto arity() const { return _args.size(); }
 	auto& name() const { return symbol; } // at least for arity 0
+
+	bool is_primary_term() const {
+		if (_args.empty()) return true;	// propositional variable is ok
+		if (symbol == "~") return true; // hard-coded logical not
+		return false;	// haven't done these yet.
+	}
+
+	std::string desc() const {
+		if (_args.empty()) return symbol;
+
+		if (symbol == "~") {
+			// hard-coded logical not; prefix operation.
+			if (_args.front()->is_primary_term()) return symbol + _args.front()->desc();
+			return symbol + "(" + _args.front()->desc() + ")";
+		}
+
+		// general case: assume function-like
+		bool have_seen_first = false;
+		std::string ret(symbol);
+		ret += "(";
+		for (decltype(auto) x : _args) {
+			if (have_seen_first) ret += ", ";
+			ret += x->desc();
+			have_seen_first = true;
+		}
+		ret += ")";
+		return ret;
+	}
+
 	auto catalog_vars() {
 		std::vector<TruthTable*> ret;
 		_catalog_vars(this, ret);
@@ -335,28 +350,26 @@ public:
 		ptrdiff_t ub = _args.size();
 		if (ub) return std::nullopt;	// either error case, or a logical connective
 		if (!_var_values) return std::nullopt; // error case
-		return decode_bitmap(*_var_values, set_theoretic_range());
+		return decode_bitmap(*_var_values, display_range());
 	}
 
 	std::optional<std::vector<TruthValue> > possible_values() const {
 		if (_var_values) {
 exit_by_values:
-			return decode_bitmap(*_var_values, set_theoretic_range());
+			return decode_bitmap(*_var_values, display_range());
 		}
 		if (_var_enumerated) {
 			auto code = extract_truth_bitmap(*_var_enumerated, 0);	// *our* value, not our arguments' values
 			if (code) {
 				*const_cast<std::optional<unsigned char>*>(&_var_values) = code; // cache variable update
-				return decode_bitmap(code, set_theoretic_range());
+				return decode_bitmap(code, display_range());
 			}
 		}
 		if (update_bitmap) {
 			if (1 == _args.size()) {
 				if (auto code = update_bitmap(_args.front())) {
-					if (code) {
-						*const_cast<decltype(_var_values)*>(&_var_values) = code; // cache variable update
-						goto exit_by_values;
-					}
+					*const_cast<decltype(_var_values)*>(&_var_values) = code; // cache variable update
+					goto exit_by_values;
 				}
 			};	// otherwise, invariant violation
 		}
@@ -365,7 +378,6 @@ exit_by_values:
 				*const_cast<decltype(_var_enumerated)*>(&_var_enumerated) = update_enumeration(_args); // cache variable update
 			};	// otherwise, invariant violation
 		}
-		// \todo populate from arguments
 		return std::nullopt;
 	}
 
@@ -386,6 +398,7 @@ exit_by_values:
 			--ub;
 			if (auto x = _cache[ub].lock()) {
 				if (name != x->symbol) continue;
+				if (!x->_args.empty()) continue;
 				if (is_sublogic(x->_logic, l)) return x;
 				return nullptr;
 			} else {
@@ -394,9 +407,44 @@ exit_by_values:
 			}
 		}
 		std::shared_ptr<TruthTable> stage(new TruthTable(name, l));
-		if (integrity_check && !stage->syntax_ok()) throw std::logic_error("invalid constructor");
+		if constexpr (integrity_check) {
+			if (!stage->syntax_ok()) throw std::logic_error("invalid constructor");
+		}
 		_cache.push_back(stage);
 		return stage;
+	}
+
+	static std::shared_ptr<TruthTable> Not(const std::shared_ptr<TruthTable>& src) {
+		if (!src) throw std::logic_error("empty proposition");
+		std::string op_name("~");
+		auto ub = _cache.size();
+		while (0 < ub) {
+			--ub;
+			if (auto x = _cache[ub].lock()) {
+				if (op_name != x->symbol) continue;
+				if (src.get() != x->_args.front().get()) continue;
+				if (1 != x->_args.size()) continue; // invariant failure
+				return x;
+			} else {
+				_cache[ub].swap(_cache.back());
+				_cache.pop_back();
+			}
+		}
+
+		std::shared_ptr<TruthTable> stage(new TruthTable(op_name, src, &update_Not));
+		if constexpr (integrity_check) {
+			if (!stage->syntax_ok()) throw std::logic_error("invalid constructor");
+		}
+		_cache.push_back(stage);
+		return stage;
+	}
+
+	static unsigned char update_Not(const std::shared_ptr<TruthTable>& src) {
+		unsigned char ret = 0;
+		if (const auto x = src->possible_values()) {
+			for (decltype(auto) t : *x) update_truth_bitmap(ret, !t);
+		}
+		return ret;
 	}
 
 private:
@@ -404,6 +452,7 @@ private:
 		if (update_bitmap && update_enumeration) return false;
 		if (update_bitmap && 1 != _args.size()) return false;
 		if (update_enumeration && 2 > _args.size()) return false;
+		if (!update_bitmap && !update_enumeration && !_args.empty()) return false;
 		return true;
 	}
 
@@ -419,6 +468,8 @@ private:
 		}
 		return ret;
 	}
+
+	/* constexpr? */ static void update_truth_bitmap(unsigned char& dest, TruthValue src) { dest |= (1ULL << (int)src); }
 
 	// codes could either be bitmaps (range 0..15) or coded values (range 0..3)
 	static void _update_truth_codes(std::vector<unsigned short>& dest, unsigned short already, const std::vector<unsigned char>& src) {
@@ -438,7 +489,7 @@ private:
 	}
 
 	std::vector<unsigned short> cartesian_append_truth_bitmap(const std::vector<unsigned short>& prior, unsigned char src) {
-		auto to_append = decode_bitmap(src, set_theoretic_range());
+		auto to_append = decode_bitmap(src, display_range());
 		std::vector<unsigned short> ret;
 		if (!to_append.empty()) {
 			if (prior.empty()) {
