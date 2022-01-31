@@ -269,6 +269,8 @@ private:
 	std::optional<std::vector<unsigned short> > _var_enumerated;
 	unsigned char (*update_bitmap)(const std::shared_ptr<TruthTable>& src);	// for unary logical connectives/functions
 	std::vector<unsigned short>(*update_enumeration)(const decltype(_args)& src);	// for n-ary logical connectives/functions
+	// for observer pattern: have to know who directly updates when we do
+	mutable std::vector<std::weak_ptr<TruthTable> > _watching;
 
 	// if we need these, undelete
 	TruthTable() = delete;
@@ -418,6 +420,7 @@ public:
 			if (!stage->syntax_ok()) throw std::logic_error("invalid constructor");
 		}
 		_cache.push_back(stage);
+		src->is_arg_for(stage);
 		return stage;
 	}
 
@@ -436,6 +439,10 @@ private:
 		if (update_enumeration && 2 > _args.size()) return false;
 		if (!update_bitmap && !update_enumeration && !_args.empty()) return false;
 		return true;
+	}
+
+	void is_arg_for(std::shared_ptr<TruthTable>& src) const {
+		if (src) _watching.push_back(src);
 	}
 
 	static unsigned char extract_truth_bitmap(unsigned short src, int index) {
