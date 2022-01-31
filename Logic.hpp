@@ -250,6 +250,8 @@ auto decode_bitmap(unsigned long long src, const T& key)
 class TruthTable final
 {
 private:
+	static constexpr const bool integrity_check = false; // control expensive checks centrally
+
 	static std::vector< std::weak_ptr<TruthTable> > _cache;
 	static constexpr const TruthValue ref_classical[] = { TruthValue::False, TruthValue::True };
 	static constexpr const TruthValue ref_threeval[] = { TruthValue::False, TruthValue::True, TruthValue::Unknown };
@@ -262,6 +264,8 @@ private:
 	std::optional<unsigned char> _var_values;	// bitmap, expected range 0...15
 	// \todo following needs 2 bits for each input, and 2 bits for self
 	std::optional<std::vector<unsigned short> > _var_enumerated;
+	unsigned char (*update_bitmap)(const std::shared_ptr<TruthTable>& src);	// for unary logical connectives/functions
+	std::vector<unsigned short>(*update_enumeration)(const decltype(_args)& src);	// for n-ary logical connectives/functions
 
 	// if we need these, undelete
 	TruthTable() = delete;
@@ -304,7 +308,7 @@ private:
 	}
 
 	// Propositional variable.  No arguments
-	TruthTable(const std::string& name, logics l) : symbol(name), _logic(l), _var_values(_var_agnostic(l)) {}
+	TruthTable(const std::string& name, logics l) : symbol(name), _logic(l), _var_values(_var_agnostic(l)), update_bitmap(nullptr), update_enumeration(nullptr) {}
 
 public:
 	~TruthTable() = default;
@@ -335,13 +339,31 @@ public:
 	}
 
 	std::optional<std::vector<TruthValue> > possible_values() const {
-		if (_var_values) return decode_bitmap(*_var_values, set_theoretic_range());
+		if (_var_values) {
+exit_by_values:
+			return decode_bitmap(*_var_values, set_theoretic_range());
+		}
 		if (_var_enumerated) {
 			auto code = extract_truth_bitmap(*_var_enumerated, 0);	// *our* value, not our arguments' values
 			if (code) {
 				*const_cast<std::optional<unsigned char>*>(&_var_values) = code; // cache variable update
 				return decode_bitmap(code, set_theoretic_range());
 			}
+		}
+		if (update_bitmap) {
+			if (1 == _args.size()) {
+				if (auto code = update_bitmap(_args.front())) {
+					if (code) {
+						*const_cast<decltype(_var_values)*>(&_var_values) = code; // cache variable update
+						goto exit_by_values;
+					}
+				}
+			};	// otherwise, invariant violation
+		}
+		if (update_enumeration && !_var_enumerated) {
+			if (2 <= _args.size()) {
+				*const_cast<decltype(_var_enumerated)*>(&_var_enumerated) = update_enumeration(_args); // cache variable update
+			};	// otherwise, invariant violation
 		}
 		// \todo populate from arguments
 		return std::nullopt;
@@ -364,7 +386,7 @@ public:
 			--ub;
 			if (auto x = _cache[ub].lock()) {
 				if (name != x->symbol) continue;
-				if (l == x->_logic) return x;
+				if (is_sublogic(x->_logic, l)) return x;
 				return nullptr;
 			} else {
 				_cache[ub].swap(_cache.back());
@@ -372,11 +394,19 @@ public:
 			}
 		}
 		std::shared_ptr<TruthTable> stage(new TruthTable(name, l));
+		if (integrity_check && !stage->syntax_ok()) throw std::logic_error("invalid constructor");
 		_cache.push_back(stage);
 		return stage;
 	}
 
 private:
+	bool syntax_ok() const {
+		if (update_bitmap && update_enumeration) return false;
+		if (update_bitmap && 1 != _args.size()) return false;
+		if (update_enumeration && 2 > _args.size()) return false;
+		return true;
+	}
+
 	static unsigned char extract_truth_bitmap(unsigned short src, int index) {
 		return (src >> 4 * index) & 0x0FU;
 	}
