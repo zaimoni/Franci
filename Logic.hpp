@@ -42,6 +42,18 @@ inline std::string display_as_enumerated_set(const std::vector<std::string>& src
 
 }
 
+struct proof_by_contradiction final : public std::runtime_error
+{
+	proof_by_contradiction(const std::string& msg) : std::runtime_error(msg) {}
+	proof_by_contradiction(const char* msg) : std::runtime_error(msg) {}
+
+	proof_by_contradiction(const proof_by_contradiction& src) = default;
+	proof_by_contradiction(proof_by_contradiction&& src) = default;
+	proof_by_contradiction& operator=(const proof_by_contradiction& src) = default;
+	proof_by_contradiction& operator=(proof_by_contradiction && src) = default;
+	~proof_by_contradiction() = default;
+};
+
 // Our native logic, for convenience
 enum class TruthValue : unsigned char {
 	Contradiction = 0, // Kripke strong 3-valued logic; "super-false"
@@ -254,7 +266,7 @@ class TruthTable final
 private:
 	static constexpr const bool integrity_check = true; // control expensive checks centrally
 
-	static std::vector< std::weak_ptr<TruthTable> > _cache;
+	static std::vector<std::weak_ptr<TruthTable> > _cache;
 	static constexpr const TruthValue ref_classical[] = { TruthValue::False, TruthValue::True };
 	static constexpr const TruthValue ref_threeval[] = { TruthValue::False, TruthValue::True, TruthValue::Unknown };
 	static constexpr const TruthValue ref_fourval[] = { TruthValue::False, TruthValue::True, TruthValue::Unknown, TruthValue::Contradiction };
@@ -263,12 +275,15 @@ private:
 
 	std::string symbol;
 	logics _logic;
-	std::vector< std::shared_ptr<TruthTable> > _args;
+	std::vector<std::shared_ptr<TruthTable> > _args;
 	std::optional<unsigned char> _var_values;	// bitmap, expected range 0...15
 	// \todo following needs 2 bits for each input, and 2 bits for self
 	std::optional<std::vector<unsigned short> > _var_enumerated;
+
 	unsigned char (*update_bitmap)(const std::shared_ptr<TruthTable>& src);	// for unary logical connectives/functions
 	std::vector<unsigned short>(*update_enumeration)(const decltype(_args)& src);	// for n-ary logical connectives/functions
+	void (*_infer)(TruthValue forced, const std::vector<std::shared_ptr<TruthTable> >& src); // for anything not a propositional variable
+
 	// for observer pattern: have to know who directly updates when we do
 	mutable std::vector<std::weak_ptr<TruthTable> > _watching;
 
@@ -279,7 +294,7 @@ private:
 	TruthTable& operator=(const TruthTable& src) = delete;
 	TruthTable& operator=(TruthTable&& src) = delete;
 
-	constexpr static decltype(_var_values) _var_agnostic(logics l) {
+	constexpr static unsigned char _var_agnostic(logics l) {
 		switch (l) {
 		case logics::classical: return 0x06;
 		case logics::kleene_strong:
@@ -291,10 +306,10 @@ private:
 	}
 
 	// Propositional variable.  No arguments
-	TruthTable(const std::string& name, logics l) : symbol(name), _logic(l), _var_values(_var_agnostic(l)), update_bitmap(nullptr), update_enumeration(nullptr) {}
+	TruthTable(const std::string& name, logics l) : symbol(name), _logic(l), _var_values(_var_agnostic(l)), update_bitmap(nullptr), update_enumeration(nullptr), _infer(nullptr) {}
 
 	// Unary connective
-	TruthTable(const std::string& name, const std::shared_ptr<TruthTable>& src, decltype(update_bitmap) update) : symbol(name), _logic(src->_logic), _args(1,src), update_bitmap(update), update_enumeration(nullptr) {}
+	TruthTable(const std::string& name, const std::shared_ptr<TruthTable>& src, decltype(update_bitmap) update, decltype(_infer) chain_infer) : symbol(name), _logic(src->_logic), _args(1,src), update_bitmap(update), update_enumeration(nullptr), _infer(chain_infer) {}
 
 public:
 	~TruthTable() = default;
@@ -375,6 +390,59 @@ public:
 		return ret;
 	}
 
+	// actively infer a truth value (triggers non-contradiction processing)
+	void infer(TruthValue src) {
+		regenerate_var_values();
+		auto code = (1ULL << (int)src);
+		if (!_var_values.value()) {
+			// could happen with constructive logic
+			_var_values = code;
+		} else {
+			auto test = *_var_values;
+			if (test == code) return;	// no-op
+			if (0 == (test & code)) throw proof_by_contradiction(desc() + ": Eliminated all truth values");
+			_var_values = code;
+			if (!_watching.empty()) {
+				INFORM("need back-propagation implementation of TruthValue::infer");
+			}
+			if (!is_propositional_variable()) _infer(src, _args);
+		}
+	}
+
+	void exclude(TruthValue src) {
+		regenerate_var_values();
+		auto code = (1ULL << (int)src);
+		if (!_var_values.value()) {
+			// could happen with constructive logic
+			// \todo build out support for this
+		} else {
+			auto test = *_var_values;
+			if (test == code) throw proof_by_contradiction(desc() + ": Eliminated all truth values");
+			if (0 == (test & code)) return; // no-op
+			test &= ~(code);
+			test &= _var_agnostic(_logic);
+			if (0 == test) throw proof_by_contradiction(desc() + ": Eliminated all truth values"); // data integrity error
+			_var_values = test;
+			auto candidates = decode_bitmap(test, display_range());
+			if (candidates.empty()) throw proof_by_contradiction(desc() + ": Eliminated all truth values"); // data integrity error
+			if (1 == candidates.size()) {
+				// singleton: treat as inferred
+				if (!_watching.empty()) {
+					INFORM("need back-propagation implementation of TruthValue::infer");
+				}
+				if (!is_propositional_variable()) _infer(candidates.front(), _args);
+				return;
+			}
+
+			if (!_watching.empty()) {
+				INFORM("need back-propagation implementation of TruthValue::exclude");
+			}
+			if (!is_propositional_variable()) {
+				INFORM("need forward-propagation implementation of TruthValue::exclude");
+			}
+		}
+	}
+
 	// factories
 	static std::shared_ptr<TruthTable> variable(const std::string& name, logics l) {
 		auto ub = _cache.size();
@@ -415,7 +483,7 @@ public:
 			}
 		}
 
-		std::shared_ptr<TruthTable> stage(new TruthTable(op_name, src, &update_Not));
+		std::shared_ptr<TruthTable> stage(new TruthTable(op_name, src, &update_Not, &infer_Not));
 		if constexpr (integrity_check) {
 			if (!stage->syntax_ok()) throw std::logic_error("invalid constructor");
 		}
@@ -432,12 +500,18 @@ public:
 		return ret;
 	}
 
+	static void infer_Not(TruthValue forced, const std::vector<std::shared_ptr<TruthTable> >& args) {
+		args.front()->infer(!forced);
+	}
+
 private:
 	bool syntax_ok() const {
 		if (update_bitmap && update_enumeration) return false;
 		if (update_bitmap && 1 != _args.size()) return false;
 		if (update_enumeration && 2 > _args.size()) return false;
 		if (!update_bitmap && !update_enumeration && !_args.empty()) return false;
+		if (!_infer && !_args.empty()) return false;
+		if (_infer && _args.empty()) return false;
 		return true;
 	}
 

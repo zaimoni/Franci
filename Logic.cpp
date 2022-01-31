@@ -39,7 +39,6 @@ int main(int argc, char* argv[], char* envp[])
 		survey(*(test_Not[ub] = logic::TruthTable::Not(test_var[ub])));
 	}
 
-
 	STRING_LITERAL_TO_STDOUT("End testing\n");
 	return 0;	// success
 };
