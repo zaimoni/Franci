@@ -312,6 +312,7 @@ public:
 
 	auto arity() const { return _args.size(); }
 	auto& name() const { return symbol; } // at least for arity 0
+	bool is_propositional_variable() const { return _args.empty(); }
 
 	bool is_primary_term() const {
 		if (_args.empty()) return true;	// propositional variable is ok
@@ -346,41 +347,22 @@ public:
 		_catalog_vars(this, ret);
 		return ret;
 	}
-	std::optional<std::vector<TruthValue> > variable_values() const {
-		ptrdiff_t ub = _args.size();
-		if (ub) return std::nullopt;	// either error case, or a logical connective
-		if (!_var_values) return std::nullopt; // error case
-		return decode_bitmap(*_var_values, display_range());
-	}
 
 	std::optional<std::vector<TruthValue> > possible_values() const {
-		if (_var_values) {
-exit_by_values:
-			return decode_bitmap(*_var_values, display_range());
-		}
-		if (_var_enumerated) {
-			auto code = extract_truth_bitmap(*_var_enumerated, 0);	// *our* value, not our arguments' values
-			if (code) {
-				*const_cast<std::optional<unsigned char>*>(&_var_values) = code; // cache variable update
-				return decode_bitmap(code, display_range());
-			}
-		}
-		if (update_bitmap) {
-			if (1 == _args.size()) {
-				if (auto code = update_bitmap(_args.front())) {
-					*const_cast<decltype(_var_values)*>(&_var_values) = code; // cache variable update
-					goto exit_by_values;
-				}
-			};	// otherwise, invariant violation
-		}
-		if (update_enumeration && !_var_enumerated) {
-			if (2 <= _args.size()) {
-				*const_cast<decltype(_var_enumerated)*>(&_var_enumerated) = update_enumeration(_args); // cache variable update
-			};	// otherwise, invariant violation
-		}
+		regenerate_var_values();
+		if (_var_values) return decode_bitmap(*_var_values, display_range());
 		return std::nullopt;
 	}
 
+private:
+	// unsure whether this should be public API
+	std::optional<std::vector<TruthValue> > variable_values() const {
+		if (!is_propositional_variable()) return std::nullopt;
+		if (!_var_values) return std::nullopt; // error case; likely invariant violation
+		return decode_bitmap(*_var_values, display_range());
+	}
+
+public:
 	auto catalog_values(const std::vector<TruthTable*>& src) const {
 		ptrdiff_t ub = src.size();
 		std::vector<std::vector<TruthValue> > ret(src.size());
@@ -502,6 +484,34 @@ private:
 		}
 		return ret;
 	}
+
+	void regenerate_enumerated_values() const {
+		if (update_enumeration && !_var_enumerated) {
+			if (2 <= _args.size()) {
+				*const_cast<decltype(_var_enumerated)*>(&_var_enumerated) = update_enumeration(_args); // cache variable update
+			};	// otherwise, invariant violation
+		}
+	}
+
+	void regenerate_var_values() const {
+		if (!_var_values) {
+			if (update_bitmap) {
+				if (1 == _args.size()) {
+					if (auto code = update_bitmap(_args.front())) {
+						*const_cast<decltype(_var_values)*>(&_var_values) = code; // cache variable update
+					}
+				};	// otherwise, invariant violation
+			}
+			regenerate_enumerated_values();
+			if (_var_enumerated) {
+				auto code = extract_truth_bitmap(*_var_enumerated, 0);	// *our* value, not our arguments' values
+				if (code) {
+					*const_cast<std::optional<unsigned char>*>(&_var_values) = code; // cache variable update
+				}
+			}
+		}
+	}
+
 
 	static void _catalog_vars(TruthTable* origin, std::vector<TruthTable*>& ret) {
 retry:

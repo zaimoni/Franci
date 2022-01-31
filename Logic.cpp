@@ -19,14 +19,11 @@ static void survey(const logic::TruthTable& src) {
 	C_STRING_TO_STDOUT("\n");
 	STL_STRING_TO_STDOUT(src.desc());
 	C_STRING_TO_STDOUT("\n");
+	INFORM(src.is_propositional_variable() ? "is propositional variable" : "is not propositional variable");
+	INFORM(src.is_primary_term() ? "is primary term" : "is not primary term");
 	auto stage_values = src.possible_values().value();
 	auto stage = logic::display_as_enumerated_set(logic::to_string_vector(stage_values));
 	STL_STRING_TO_STDOUT(stage);
-	if (auto is_var = src.variable_values()) {
-		C_STRING_TO_STDOUT("\n");
-		stage = logic::display_as_enumerated_set(logic::to_string_vector(*is_var));
-		STL_STRING_TO_STDOUT(stage);
-	}
 	C_STRING_TO_STDOUT("\n\n");
 }
 
@@ -37,8 +34,7 @@ int main(int argc, char* argv[], char* envp[])
 
 	int ub = (int)logic::logics::franci+1;
 	while (0 <= --ub) {
-		C_STRING_TO_STDOUT(toAPI((logic::logics)ub).name());
-		C_STRING_TO_STDOUT("\n");
+		INFORM(toAPI((logic::logics)ub).name());
 		survey(*(test_var[ub] = logic::TruthTable::variable(std::string(1, 'A' + ub), (logic::logics)ub)));
 		survey(*(test_Not[ub] = logic::TruthTable::Not(test_var[ub])));
 	}
