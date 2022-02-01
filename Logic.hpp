@@ -266,7 +266,12 @@ class TruthTable final
 private:
 	static constexpr const bool integrity_check = true; // control expensive checks centrally
 
+	using logic_substitution_spec = std::pair<std::shared_ptr<TruthTable>, TruthValue>;
+	using inverse_infer_spec = std::pair<std::shared_ptr<TruthTable>, logic_substitution_spec >;
+
 	static std::vector<std::weak_ptr<TruthTable> > _cache;
+	static std::vector<inverse_infer_spec> _inferred_reevaluations;
+
 	static constexpr const TruthValue ref_classical[] = { TruthValue::False, TruthValue::True };
 	static constexpr const TruthValue ref_threeval[] = { TruthValue::False, TruthValue::True, TruthValue::Unknown };
 	static constexpr const TruthValue ref_fourval[] = { TruthValue::False, TruthValue::True, TruthValue::Unknown, TruthValue::Contradiction };
@@ -282,7 +287,7 @@ private:
 
 	unsigned char (*update_bitmap)(const std::shared_ptr<TruthTable>& src);	// for unary logical connectives/functions
 	std::vector<unsigned short>(*update_enumeration)(const decltype(_args)& src);	// for n-ary logical connectives/functions
-	void (*_infer)(TruthValue forced, const std::vector<std::shared_ptr<TruthTable> >& src); // for anything not a propositional variable
+	void (*_infer)(TruthValue forced, const std::shared_ptr<TruthTable>& origin); // for anything not a propositional variable
 
 	// for observer pattern: have to know who directly updates when we do
 	mutable std::vector<std::weak_ptr<TruthTable> > _watching;
@@ -325,7 +330,9 @@ public:
 		}
 	}
 
-	auto display_range() const { return std::ranges::subrange(ref_display); }
+	static auto display_range() { return std::ranges::subrange(ref_display); }
+	static auto count_expressions() { return _cache.size(); }
+	static auto count_inferred_reevaluations() { return _inferred_reevaluations.size(); }
 
 	auto arity() const { return _args.size(); }
 	auto& name() const { return symbol; } // at least for arity 0
@@ -391,53 +398,51 @@ public:
 	}
 
 	// actively infer a truth value (triggers non-contradiction processing)
-	void infer(TruthValue src) {
-		regenerate_var_values();
+	static void infer(std::shared_ptr<TruthTable> target, TruthValue src, std::shared_ptr<TruthTable> origin=nullptr) {
+		target->regenerate_var_values();
 		auto code = (1ULL << (int)src);
-		if (!_var_values.value()) {
+		if (!target->_var_values) {
 			// could happen with constructive logic
-			_var_values = code;
+			target->_var_values = code;
 		} else {
-			auto test = *_var_values;
+			auto test = *target->_var_values;
 			if (test == code) return;	// no-op
-			if (0 == (test & code)) throw proof_by_contradiction(desc() + ": Eliminated all truth values");
-			_var_values = code;
-			if (!_watching.empty()) {
-				INFORM("need back-propagation implementation of TruthValue::infer");
-			}
-			if (!is_propositional_variable()) _infer(src, _args);
+			if (0 == (test & code)) throw proof_by_contradiction(target->desc() + ": Eliminated all truth values");
+			target->_var_values = code;
+			request_reevaluations(target, src, origin);
+			if (!target->is_propositional_variable()) target->_infer(src, target);
+			while (execute_reevaluation());
 		}
 	}
 
-	void exclude(TruthValue src) {
-		regenerate_var_values();
+	static void exclude(std::shared_ptr<TruthTable> target, TruthValue src, std::shared_ptr<TruthTable> origin = nullptr) {
+		target->regenerate_var_values();
 		auto code = (1ULL << (int)src);
-		if (!_var_values.value()) {
+		if (!target->_var_values) {
 			// could happen with constructive logic
 			// \todo build out support for this
 		} else {
-			auto test = *_var_values;
-			if (test == code) throw proof_by_contradiction(desc() + ": Eliminated all truth values");
+			auto test = *target->_var_values;
+			if (test == code) throw proof_by_contradiction(target->desc() + ": Eliminated all truth values");
 			if (0 == (test & code)) return; // no-op
 			test &= ~(code);
-			test &= _var_agnostic(_logic);
-			if (0 == test) throw proof_by_contradiction(desc() + ": Eliminated all truth values"); // data integrity error
-			_var_values = test;
+			test &= _var_agnostic(target->_logic);
+			if (0 == test) throw proof_by_contradiction(target->desc() + ": Eliminated all truth values"); // data integrity error
+			target->_var_values = test;
 			auto candidates = decode_bitmap(test, display_range());
-			if (candidates.empty()) throw proof_by_contradiction(desc() + ": Eliminated all truth values"); // data integrity error
+			if (candidates.empty()) throw proof_by_contradiction(target->desc() + ": Eliminated all truth values"); // data integrity error
 			if (1 == candidates.size()) {
 				// singleton: treat as inferred
-				if (!_watching.empty()) {
-					INFORM("need back-propagation implementation of TruthValue::infer");
-				}
-				if (!is_propositional_variable()) _infer(candidates.front(), _args);
+				request_reevaluations(target, candidates.front(), origin);
+				if (!target->is_propositional_variable()) target->_infer(candidates.front(), target);
+				while (execute_reevaluation());
 				return;
 			}
 
-			if (!_watching.empty()) {
+			if (!target->_watching.empty()) {
 				INFORM("need back-propagation implementation of TruthValue::exclude");
 			}
-			if (!is_propositional_variable()) {
+			if (!target->is_propositional_variable()) {
 				INFORM("need forward-propagation implementation of TruthValue::exclude");
 			}
 		}
@@ -500,8 +505,8 @@ public:
 		return ret;
 	}
 
-	static void infer_Not(TruthValue forced, const std::vector<std::shared_ptr<TruthTable> >& args) {
-		args.front()->infer(!forced);
+	static void infer_Not(TruthValue forced, const std::shared_ptr<TruthTable>& origin) {
+		infer(origin->_args.front(), !forced, origin);
 	}
 
 private:
@@ -517,6 +522,53 @@ private:
 
 	void is_arg_for(std::shared_ptr<TruthTable>& src) const {
 		if (src) _watching.push_back(src);
+	}
+
+	static void request_reevaluations(std::shared_ptr<TruthTable> target, TruthValue src, std::shared_ptr<TruthTable> origin) {
+		auto& audience = target->_watching;
+		if (ptrdiff_t ub = audience.size()) {
+			const auto authority = origin ? origin.get() : nullptr;
+			while (0 <= --ub) {
+				if (auto x = audience[ub].lock()) {
+					if (authority == x.get()) continue;
+					_inferred_reevaluations.push_back({ x , { target, src } });
+				}
+				else {
+					audience[ub].swap(audience.back());
+					audience.pop_back();
+				}
+			}
+		}
+	}
+
+	static bool execute_reevaluation() {
+		if (!_inferred_reevaluations.empty()) {
+			auto& stage = _inferred_reevaluations.front();
+			auto ret = stage.first->execute_reevaluation(stage.second);
+			_inferred_reevaluations.erase(_inferred_reevaluations.begin());
+		}
+		return false;
+	}
+
+	bool execute_reevaluation(const logic_substitution_spec& src) {
+		if (_args.empty()) throw std::logic_error(desc()+", execute substitution: no arguments");
+		if (!src.first) throw std::logic_error(desc() + ", execute substitution: no rationale");
+		ptrdiff_t ub = _args.size();
+		while (0 <= --ub) {
+			if (_args[ub].get() == src.first.get()) break;
+		}
+		if (0 > ub) throw std::logic_error(desc() + ", execute substitution: do not have required target");
+		if (update_bitmap) {
+			_var_values = std::nullopt;
+			return true;
+		}
+		if (update_enumeration) {
+			_var_values = std::nullopt;
+			_var_enumerated = std::nullopt;
+			// \todo should just prune already-calculated _var_enumerated rather than discard completely
+			return true;
+		}
+		return false; // but already invalid syntax if we get here
 	}
 
 	static unsigned char extract_truth_bitmap(unsigned short src, int index) {

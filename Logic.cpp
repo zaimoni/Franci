@@ -3,6 +3,8 @@
 #include "Logic.hpp"
 
 std::vector< std::weak_ptr<logic::TruthTable> > logic::TruthTable::_cache;
+std::vector<logic::TruthTable::inverse_infer_spec> logic::TruthTable::_inferred_reevaluations;
+
 
 #ifdef LOGIC_DRIVER
 #include "test_driver.h"
@@ -15,8 +17,6 @@ static_assert(logic::Belnap().is_commutative());
 static_assert(logic::Franci().is_commutative());
 
 static void survey(const logic::TruthTable& src) {
-	STL_STRING_TO_STDOUT(src.name());
-	C_STRING_TO_STDOUT("\n");
 	STL_STRING_TO_STDOUT(src.desc());
 	C_STRING_TO_STDOUT("\n");
 	INFORM(src.is_propositional_variable() ? "is propositional variable" : "is not propositional variable");
@@ -38,6 +38,10 @@ int main(int argc, char* argv[], char* envp[])
 		survey(*(test_var[ub] = logic::TruthTable::variable(std::string(1, 'A' + ub), (logic::logics)ub)));
 		survey(*(test_Not[ub] = logic::TruthTable::Not(test_var[ub])));
 	}
+	INC_INFORM("tracking: ");
+	INFORM(logic::TruthTable::count_expressions());
+	INC_INFORM("queued substitutions: ");
+	INFORM(logic::TruthTable::count_inferred_reevaluations());
 
 	STRING_LITERAL_TO_STDOUT("End testing\n");
 	return 0;	// success
