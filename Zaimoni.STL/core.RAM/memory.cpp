@@ -86,6 +86,14 @@
 #define AlphaInvalidLocationsDetected "ALPHA: overlapping memory blocks detected."
 #define AlphaPointerTableOverextended "ALPHA: pointer table overextended."
 
+#ifdef _WIN32
+__declspec(dllexport)
+#endif
+#ifdef __cplusplus
+extern "C"
+#endif
+int zaimoni_is_debugging = 0;	// debug tracer; possibly useful in general
+
 #ifdef __cplusplus
 // This needs the AIMutex.hxx header
 static AIMutex RAMBlock;	// RAM Block.  Must unlock for exit()
