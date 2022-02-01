@@ -128,8 +128,11 @@ struct logic_API {
 
 	static constexpr const TruthValue And_identity = TruthValue::True;
 	constexpr virtual TruthValue And_annihilator() const { return TruthValue::False; }
+	constexpr virtual TruthValue Or_identity() const { return And_annihilator(); }
+	constexpr virtual TruthValue Or_annihilator() const { return And_identity; }
 
 	constexpr virtual TruthValue And(TruthValue lhs, TruthValue rhs) const = 0;
+	constexpr virtual TruthValue Or(TruthValue lhs, TruthValue rhs) const = 0;
 
 protected:
 	logic_API() = default;
@@ -146,6 +149,18 @@ protected:
 		if (lhs == rhs) return lhs;	// always idempotent
 		return std::nullopt;
 	}
+
+	constexpr std::optional<TruthValue> Or_core(TruthValue lhs, TruthValue rhs) const {
+		if (is_out_of_of_range(lhs) || is_out_of_of_range(rhs)) throw std::logic_error(std::string(name()) + " logic out of range");
+
+		if (And_identity == lhs) return rhs;
+		if (And_identity == rhs) return lhs;
+		const auto a = And_annihilator();
+		if (a == lhs) return a;
+		if (a == rhs && is_commutative()) return a;
+		if (lhs == rhs) return lhs;	// always idempotent
+		return std::nullopt;
+	}
 };
 
 struct Classical final : public logic_API {
@@ -153,6 +168,7 @@ struct Classical final : public logic_API {
 	constexpr const char* name() const override { return "Classical"; }
 
 	constexpr TruthValue And(TruthValue lhs, TruthValue rhs) const override { return And_core(lhs, rhs).value(); };
+	constexpr TruthValue Or(TruthValue lhs, TruthValue rhs) const override { return Or_core(lhs, rhs).value(); };
 
 	static auto& get() {
 		static Classical ooao;
@@ -169,6 +185,11 @@ struct KleeneStrong final : public logic_API {
 		return TruthValue::Unknown;
 	};
 
+	constexpr TruthValue Or(TruthValue lhs, TruthValue rhs) const override {
+		if (auto x = Or_core(lhs, rhs)) return *x;
+		return TruthValue::Unknown;
+	};
+
 	static auto& get() {
 		static KleeneStrong ooao;
 		return ooao;
@@ -179,10 +200,17 @@ struct KleeneWeak final : public logic_API {
 	constexpr bool is_out_of_of_range(TruthValue x) const override { return TruthValue::Contradiction == x; }
 	constexpr const char* name() const override { return "Kleene's weak"; }
 	constexpr TruthValue And_annihilator() const override { return TruthValue::Unknown; }
+	constexpr TruthValue Or_identity() const override { return TruthValue::False; }
+	constexpr TruthValue Or_annihilator() const override { return TruthValue::Unknown; }
 
 	constexpr TruthValue And(TruthValue lhs, TruthValue rhs) const override {
 		if (auto x = And_core(lhs, rhs)) return *x;
 		return TruthValue::False;
+	};
+
+	constexpr TruthValue Or(TruthValue lhs, TruthValue rhs) const override {
+		if (auto x = Or_core(lhs, rhs)) return *x;
+		return TruthValue::True;
 	};
 
 	static auto& get() {
@@ -201,6 +229,11 @@ struct LispProlog final : public logic_API {
 		return TruthValue::Unknown; // other left annhiliator
 	};
 
+	constexpr TruthValue Or(TruthValue lhs, TruthValue rhs) const override {
+		if (auto x = Or_core(lhs, rhs)) return *x;
+		return TruthValue::Unknown; // other left annhiliator
+	};
+
 	static auto& get() {
 		static LispProlog ooao;
 		return ooao;
@@ -213,6 +246,11 @@ struct Belnap final : public logic_API {
 	constexpr TruthValue And(TruthValue lhs, TruthValue rhs) const override {
 		if (auto x = And_core(lhs, rhs)) return *x;
 		return TruthValue::False; // Unknown & Contradiction, or vice versa
+	};
+
+	constexpr TruthValue Or(TruthValue lhs, TruthValue rhs) const override {
+		if (auto x = Or_core(lhs, rhs)) return *x;
+		return TruthValue::True; // Unknown & Contradiction, or vice versa
 	};
 
 	static auto& get() {
@@ -228,6 +266,11 @@ struct Franci final : public logic_API {
 	constexpr TruthValue And(TruthValue lhs, TruthValue rhs) const override {
 		if (auto x = And_core(lhs, rhs)) return *x;
 		return TruthValue::False; // False & Unknown, or vice versa
+	};
+
+	constexpr TruthValue Or(TruthValue lhs, TruthValue rhs) const override {
+		if (auto x = Or_core(lhs, rhs)) return *x;
+		return TruthValue::Unknown; // False & Unknown, or vice versa
 	};
 
 	static auto& get() {
@@ -334,6 +377,7 @@ public:
 	static auto count_expressions() { return _cache.size(); }
 	static auto count_inferred_reevaluations() { return _inferred_reevaluations.size(); }
 
+	auto logic() const { return _logic; }
 	auto arity() const { return _args.size(); }
 	auto& name() const { return symbol; } // at least for arity 0
 	bool is_propositional_variable() const { return _args.empty(); }
