@@ -938,14 +938,16 @@ _DynamicRAMIsNotObviouslyCorrupted(void)
 #endif
 
 #ifdef __cplusplus
+// The Microsoft implementation doesn't need this, but standard compliance does
+//#define REPLACE_NEW_DELETE 1
 
-std::new_handler ZaimoniNewHandler = NULL;
-
+#ifdef REPLACE_NEW_DELETE
 void* operator new(size_t NewSize)
 {
 	void* Tmp = calloc(1,NewSize);
-	if (ZaimoniNewHandler)
-		while(!Tmp) Tmp = (ZaimoniNewHandler(),calloc(1,NewSize));
+	if (auto nh = std::get_new_handler()) {
+		while (!Tmp) Tmp = (nh(), calloc(1, NewSize));
+	}
 
 	if (!Tmp) throw std::bad_alloc();
 	return Tmp;
@@ -954,8 +956,9 @@ void* operator new(size_t NewSize)
 void* operator new[](std::size_t NewSize)
 {
 	void* Tmp = calloc(1,NewSize);
-	if (ZaimoniNewHandler)
-		while(!Tmp) Tmp = (ZaimoniNewHandler(),calloc(1,NewSize));
+	if (auto nh = std::get_new_handler()) {
+		while (!Tmp) Tmp = (nh(), calloc(1, NewSize));
+	}
 
 	if (!Tmp) throw std::bad_alloc();
 	return Tmp;
@@ -964,29 +967,26 @@ void* operator new[](std::size_t NewSize)
 void* operator new(size_t NewSize, const std::nothrow_t&) noexcept
 {
 	void* Tmp = calloc(1,NewSize);
-	if (ZaimoniNewHandler)
-		try	{
-			while(!Tmp) Tmp = (ZaimoniNewHandler(),calloc(1,NewSize));
-			}
-		catch(const std::bad_alloc&)
-			{
-			return NULL;
-			}
-
+	if (auto nh = std::get_new_handler()) {
+		try {
+			while (!Tmp) Tmp = (nh(), calloc(1, NewSize));
+		} catch (const std::bad_alloc&) {
+			return nullptr;
+		}
+	}
 	return Tmp;
 }
 
 void* operator new[](std::size_t NewSize, const std::nothrow_t&) noexcept
 {
 	void* Tmp = calloc(1,NewSize);
-	if (ZaimoniNewHandler)
-		try	{
-			while(!Tmp) Tmp = (ZaimoniNewHandler(),calloc(1,NewSize));
-			}
-		catch(const std::bad_alloc&)
-			{
-			return NULL;
-			}
+	if (auto nh = std::get_new_handler()) {
+		try {
+			while (!Tmp) Tmp = (nh(), calloc(1, NewSize));
+		} catch (const std::bad_alloc&) {
+			return nullptr;
+		}
+	}
 
 	return Tmp;
 }
@@ -1002,5 +1002,6 @@ void operator delete[](void* Target) noexcept
 
 void operator delete[](void* Target, const std::nothrow_t&) noexcept
 {/* FORMALLY CORRECT: 9/27/2005, Kenneth Boyd */ free(Target);}
+#endif
 
 #endif

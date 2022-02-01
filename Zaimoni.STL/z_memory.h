@@ -148,8 +148,6 @@ inline void operator delete[](void* Target) throw()
  */
 #include <new>
 
-extern std::new_handler ZaimoniNewHandler; /* new handler for the custom memory manager */
-
 #endif	/* end __cplusplus */
 #endif	/* end ZAIMONI_STL_Z_MEMORY_H */
 
