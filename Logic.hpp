@@ -343,20 +343,22 @@ void cast_mixed_radix_Gray_code_to(const std::vector<U>& code, const std::vector
 	if (int ub = code.size()) {
 		while (0 <= --ub) dest[ub] = key[ub][code[ub]];
 	}
-	return ret;
 }
 
+// true n-ary connectives would warrant converting this to an abstract base class
 class Connective final
 {
 private:
 	static constexpr const bool integrity_check = true; // control expensive checks centrally
 
 	std::string symbol;
-	std::function<TruthValue(logics,TruthValue,TruthValue)> _op;	// typical core definition
+	std::function<TruthValue(logics, TruthValue,TruthValue)> _op;	// typical core definition
 
 public:
 	Connective(const std::string& glyph, decltype(_op) op) : symbol(glyph), _op(op) {}
 	~Connective() = default;
+
+	auto& name() const { return symbol; }
 
 	// diagonal.
 	TruthValue eval(logics host, TruthValue src) { return _op(host, src, src); }
@@ -702,6 +704,14 @@ private:
 			return true;
 		}
 		return false; // but already invalid syntax if we get here
+	}
+
+	static TruthValue _nonstrict_implication(logics host, TruthValue lhs, TruthValue rhs) {
+		return toAPI(host).Or(!lhs, rhs);
+	}
+	static auto nonstrict_implication() {
+		static std::shared_ptr<Connective> ooao(new Connective("&rArr;", &_nonstrict_implication));
+		return ooao;
 	}
 
 	static unsigned char extract_truth_bitmap(unsigned short src, int index) {
