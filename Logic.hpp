@@ -304,6 +304,27 @@ auto decode_bitmap(unsigned long long src, const T& key)
 	return ret;
 }
 
+class Connective final
+{
+private:
+	static constexpr const bool integrity_check = true; // control expensive checks centrally
+
+	std::string symbol;
+	std::function<TruthValue(logics,TruthValue,TruthValue)> _op;	// typical core definition
+
+public:
+	Connective(const std::string& glyph, decltype(_op) op) : symbol(glyph), _op(op) {}
+	~Connective() = default;
+
+	// diagonal.
+	TruthValue eval(logics host, TruthValue src) { return _op(host, src, src); }
+	// base case
+	TruthValue eval(logics host, TruthValue lhs, TruthValue rhs) { return _op(host, lhs, rhs); }
+	std::vector<unsigned short> enumerate(const std::vector<std::vector<TruthValue> >& src) { 
+		return std::vector<unsigned short>(); // stub
+	}
+};
+
 class TruthTable final
 {
 private:
@@ -319,7 +340,6 @@ private:
 	static constexpr const TruthValue ref_threeval[] = { TruthValue::False, TruthValue::True, TruthValue::Unknown };
 	static constexpr const TruthValue ref_fourval[] = { TruthValue::False, TruthValue::True, TruthValue::Unknown, TruthValue::Contradiction };
 	static constexpr const TruthValue ref_display[] = { TruthValue::Contradiction, TruthValue::False, TruthValue::True, TruthValue::Unknown };
-	static constexpr const std::pair<const char*, int> predefined[] = {{"~", 1}, {"&", 2}};
 
 	std::string symbol;
 	logics _logic;
@@ -329,7 +349,7 @@ private:
 	std::optional<std::vector<unsigned short> > _var_enumerated;
 
 	unsigned char (*update_bitmap)(const std::shared_ptr<TruthTable>& src);	// for unary logical connectives/functions
-	std::vector<unsigned short>(*update_enumeration)(const decltype(_args)& src);	// for n-ary logical connectives/functions
+	std::shared_ptr<Connective> op; // for n-ary logical connectives/functions
 	void (*_infer)(TruthValue forced, const std::shared_ptr<TruthTable>& origin); // for anything not a propositional variable
 
 	// for observer pattern: have to know who directly updates when we do
@@ -354,10 +374,10 @@ private:
 	}
 
 	// Propositional variable.  No arguments
-	TruthTable(const std::string& name, logics l) : symbol(name), _logic(l), _var_values(_var_agnostic(l)), update_bitmap(nullptr), update_enumeration(nullptr), _infer(nullptr) {}
+	TruthTable(const std::string& name, logics l) : symbol(name), _logic(l), _var_values(_var_agnostic(l)), update_bitmap(nullptr), _infer(nullptr) {}
 
 	// Unary connective
-	TruthTable(const std::string& name, const std::shared_ptr<TruthTable>& src, decltype(update_bitmap) update, decltype(_infer) chain_infer) : symbol(name), _logic(src->_logic), _args(1,src), update_bitmap(update), update_enumeration(nullptr), _infer(chain_infer) {}
+	TruthTable(const std::string& name, const std::shared_ptr<TruthTable>& src, decltype(update_bitmap) update, decltype(_infer) chain_infer) : symbol(name), _logic(src->_logic), _args(1,src), update_bitmap(update), _infer(chain_infer) {}
 
 public:
 	~TruthTable() = default;
@@ -555,10 +575,10 @@ public:
 
 private:
 	bool syntax_ok() const {
-		if (update_bitmap && update_enumeration) return false;
+		if (update_bitmap && op) return false;
 		if (update_bitmap && 1 != _args.size()) return false;
-		if (update_enumeration && 2 > _args.size()) return false;
-		if (!update_bitmap && !update_enumeration && !_args.empty()) return false;
+		if (op && 2 > _args.size()) return false;
+		if (!update_bitmap && !op && !_args.empty()) return false;
 		if (!_infer && !_args.empty()) return false;
 		if (_infer && _args.empty()) return false;
 		return true;
@@ -606,7 +626,7 @@ private:
 			_var_values = std::nullopt;
 			return true;
 		}
-		if (update_enumeration) {
+		if (op) {
 			_var_values = std::nullopt;
 			_var_enumerated = std::nullopt;
 			// \todo should just prune already-calculated _var_enumerated rather than discard completely
@@ -662,10 +682,21 @@ private:
 		return ret;
 	}
 
+	static std::optional<std::vector<std::vector<TruthValue> > > toTruthVector(const decltype(_args)& src) {
+		std::vector<std::vector<TruthValue> > ret(src.size());
+		size_t n = 0;
+		for (decltype(auto) x : src) {
+			if (auto stage = x->possible_values()) ret[n] = std::move(*stage);
+			else return std::nullopt;
+			n++;
+		}
+		return ret;
+	}
+
 	void regenerate_enumerated_values() const {
-		if (update_enumeration && !_var_enumerated) {
+		if (op && !_var_enumerated) {
 			if (2 <= _args.size()) {
-				*const_cast<decltype(_var_enumerated)*>(&_var_enumerated) = update_enumeration(_args); // cache variable update
+				if (auto stage = toTruthVector(_args)) *const_cast<decltype(_var_enumerated)*>(&_var_enumerated) = op->enumerate(*stage);
 			};	// otherwise, invariant violation
 		}
 	}
