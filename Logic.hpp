@@ -12,6 +12,7 @@
 #include <utility>
 #include <optional>
 #include <ranges>
+#include <concepts>
 #include <stddef.h>
 
 #include "Zaimoni.STL/Logging.h"
@@ -304,6 +305,47 @@ auto decode_bitmap(unsigned long long src, const T& key)
 	return ret;
 }
 
+// plausibly belongs in a more general library
+template<class T> requires(std::ranges::range<T>)
+std::vector<size_t> get_upper_bounds(const std::vector<T>& key) requires requires { key.front().size(); }
+{
+	std::vector<size_t> ret;
+	for (decltype(auto) x : key) ret.push_back(x.size());
+	return ret;
+}
+
+// Naming attributed to Knuth.  Alternate name is chinese remainder theorem encoding
+template<std::unsigned_integral U>
+bool increment_mixed_radix_Gray_code(std::vector<U>& code, const std::vector<size_t>& bounds) {
+	size_t scan = 0;
+	while (bounds.size() > scan) {
+		if (++code[scan] < bounds[scan]) return true;
+		code[scan++] = 0;
+	}
+	return false;
+}
+
+template<std::unsigned_integral U, class K>
+std::vector<K> cast_mixed_radix_Gray_code_to(const std::vector<U>& code, const std::vector<std::vector<K> >& key)
+	requires requires(K dest) { dest = key[0][code[0]]; }
+{
+	std::vector<K> ret(code.size());
+	if (int ub = code.size()) {
+		while (0 <= --ub) ret[ub] = key[ub][code[ub]];
+	}
+	return ret;
+}
+
+template<std::unsigned_integral U, class K>
+void cast_mixed_radix_Gray_code_to(const std::vector<U>& code, const std::vector<std::vector<K> >& key, std::vector<K>& dest)
+	requires requires(K dest) { dest = key[0][code[0]]; }
+{
+	if (int ub = code.size()) {
+		while (0 <= --ub) dest[ub] = key[ub][code[ub]];
+	}
+	return ret;
+}
+
 class Connective final
 {
 private:
@@ -320,8 +362,35 @@ public:
 	TruthValue eval(logics host, TruthValue src) { return _op(host, src, src); }
 	// base case
 	TruthValue eval(logics host, TruthValue lhs, TruthValue rhs) { return _op(host, lhs, rhs); }
-	std::vector<unsigned short> enumerate(const std::vector<std::vector<TruthValue> >& src) { 
-		return std::vector<unsigned short>(); // stub
+	std::vector<unsigned short> enumerate(logics host, const std::vector<std::vector<TruthValue> >& src) {
+		const int src_size = src.size();
+		if (integrity_check && 0 >= src_size) throw std::logic_error("Connective::enumerate: nothing to enumerate");;
+		if (integrity_check && 7 < src_size) throw std::logic_error("Connective::enumerate: implementation limit of 7 arguments");;
+		std::vector<unsigned short> ret;
+		std::vector<size_t> ubs = get_upper_bounds(src); // "upper bounds"
+		std::vector<unsigned char> index(src.size(),0);
+		std::vector<TruthValue> iter = cast_mixed_radix_Gray_code_to(index, src);
+
+		do {
+			unsigned short stage = 0;
+			TruthValue r_fold = (1 == src_size) ? eval(host, iter[0], iter[0]) : eval(host, iter[src_size-2], iter[src_size-1]);
+			// load the bitmap with the argument tuple, compressed
+			int ub = src_size;
+			while (0 <= --ub) {
+				stage <<= 2;
+				stage |= (int)iter[ub];
+			};
+			if (2 < src_size) {	// assume truth-functional associative; otherwise a syntax error
+				ub = src_size - 2;
+				while (0 <= --ub) r_fold = eval(host, iter[ub], r_fold);
+			};
+			stage <<= 2;
+			stage |= (int)r_fold;
+			ret.push_back(stage);
+			if (!increment_mixed_radix_Gray_code(index, ubs)) break;
+			cast_mixed_radix_Gray_code_to(index, src, iter);
+		} while(true);
+		return ret;
 	}
 };
 
@@ -696,7 +765,7 @@ private:
 	void regenerate_enumerated_values() const {
 		if (op && !_var_enumerated) {
 			if (2 <= _args.size()) {
-				if (auto stage = toTruthVector(_args)) *const_cast<decltype(_var_enumerated)*>(&_var_enumerated) = op->enumerate(*stage);
+				if (auto stage = toTruthVector(_args)) *const_cast<decltype(_var_enumerated)*>(&_var_enumerated) = op->enumerate(_logic, *stage);
 			};	// otherwise, invariant violation
 		}
 	}
