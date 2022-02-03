@@ -121,6 +121,13 @@ constexpr bool is_sublogic(logics sub, logics sup) {
 	return false;
 }
 
+constexpr std::optional<logics> common_logic(logics lhs, logics rhs)
+{
+	if (is_sublogic(lhs, rhs)) return rhs;
+	if (is_sublogic(rhs, lhs)) return lhs;
+	return std::nullopt;
+}
+
 // API
 struct logic_API {
 	constexpr virtual bool is_commutative() const { return true; }
@@ -452,7 +459,7 @@ private:
 
 	// binary connective
 	// \todo: fixup logic field (ask the operation)
-	TruthTable(const std::shared_ptr<TruthTable>& lhs, const std::shared_ptr<TruthTable>& rhs, decltype(op) update, decltype(_infer) chain_infer) : _logic(lhs->_logic), _args(2), op(update), _infer(chain_infer) {
+	TruthTable(const std::shared_ptr<TruthTable>& lhs, const std::shared_ptr<TruthTable>& rhs, decltype(op) update, decltype(_infer) chain_infer) : _logic(common_logic(lhs->_logic, rhs->_logic).value()), _args(2), op(update), _infer(chain_infer) {
 		_args[0] = lhs;
 		_args[1] = rhs;
 	}
