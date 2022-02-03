@@ -450,6 +450,13 @@ private:
 	// Unary connective
 	TruthTable(const std::string& name, const std::shared_ptr<TruthTable>& src, decltype(update_bitmap) update, decltype(_infer) chain_infer) : symbol(name), _logic(src->_logic), _args(1,src), update_bitmap(update), _infer(chain_infer) {}
 
+	// binary connective
+	// \todo: fixup logic field (ask the operation)
+	TruthTable(const std::shared_ptr<TruthTable>& lhs, const std::shared_ptr<TruthTable>& rhs, decltype(op) update, decltype(_infer) chain_infer) : _logic(lhs->_logic), _args(2), op(update), _infer(chain_infer) {
+		_args[0] = lhs;
+		_args[1] = rhs;
+	}
+
 public:
 	~TruthTable() = default;
 
@@ -470,7 +477,7 @@ public:
 
 	auto logic() const { return _logic; }
 	auto arity() const { return _args.size(); }
-	auto& name() const { return symbol; } // at least for arity 0
+	auto& name() const { return op ? op->name() : symbol; }
 	bool is_propositional_variable() const { return _args.empty(); }
 
 	bool is_primary_term() const {
@@ -499,6 +506,26 @@ public:
 		}
 		ret += ")";
 		return ret;
+	}
+
+	/// <summary>
+	/// Ignores syntactical equivalences; this is about the parse tree being identical.
+	/// We don't check the sublogic relation here, as we don't have context.
+	/// </summary>
+	static bool are_equivalent(const std::shared_ptr<TruthTable>& lhs, const std::shared_ptr<TruthTable>& rhs)
+	{
+		if (!lhs || !rhs) return false;	// pretend null is not equivalent to null, that's an error case anyway
+		if (lhs.get() == rhs.get()) return true;
+		if (lhs->name() != rhs->name()) return false;
+		// \todo? screen on op as well?
+		auto ub = lhs->arity();
+		static_assert(std::is_unsigned_v<decltype(ub)>);
+		if (ub != rhs->arity()) return false;
+		while (0 < ub) {
+			--ub;
+			if (!are_equivalent(lhs->_args[ub], rhs->_args[ub])) return false;
+		};
+		return true;
 	}
 
 	auto catalog_vars() {
@@ -585,53 +612,31 @@ public:
 
 	// factories
 	static std::shared_ptr<TruthTable> variable(const std::string& name, logics l) {
-		auto ub = _cache.size();
-		while (0 < ub) {
-			--ub;
-			if (auto x = _cache[ub].lock()) {
-				if (name != x->symbol) continue;
-				if (!x->_args.empty()) continue;
-				if (is_sublogic(x->_logic, l)) return x;
-				return nullptr;
-			} else {
-				_cache[ub].swap(_cache.back());
-				_cache.pop_back();
-			}
-		}
 		std::shared_ptr<TruthTable> stage(new TruthTable(name, l));
 		if constexpr (integrity_check) {
 			if (!stage->syntax_ok()) throw std::logic_error("invalid constructor");
 		}
+
+		if (auto x = is_in_cache(stage)) return *x;
 		_cache.push_back(stage);
 		return stage;
 	}
 
 	static std::shared_ptr<TruthTable> Not(const std::shared_ptr<TruthTable>& src) {
 		if (!src) throw std::logic_error("empty proposition");
-		std::string op_name("~");
-		auto ub = _cache.size();
-		while (0 < ub) {
-			--ub;
-			if (auto x = _cache[ub].lock()) {
-				if (op_name != x->symbol) continue;
-				if (src.get() != x->_args.front().get()) continue;
-				if (1 != x->_args.size()) continue; // invariant failure
-				return x;
-			} else {
-				_cache[ub].swap(_cache.back());
-				_cache.pop_back();
-			}
-		}
 
-		std::shared_ptr<TruthTable> stage(new TruthTable(op_name, src, &update_Not, &infer_Not));
+		std::shared_ptr<TruthTable> stage(new TruthTable("~", src, &update_Not, &infer_Not));
 		if constexpr (integrity_check) {
 			if (!stage->syntax_ok()) throw std::logic_error("invalid constructor");
 		}
+
+		if (auto x = is_in_cache(stage)) return *x;
 		_cache.push_back(stage);
 		src->is_arg_for(stage);
 		return stage;
 	}
 
+private:
 	static unsigned char update_Not(const std::shared_ptr<TruthTable>& src) {
 		unsigned char ret = 0;
 		if (const auto x = src->possible_values()) {
@@ -644,6 +649,37 @@ public:
 		infer(origin->_args.front(), !forced, origin);
 	}
 
+	static TruthValue _nonstrict_implication(logics host, TruthValue lhs, TruthValue rhs) {
+		return toAPI(host).Or(!lhs, rhs);
+	}
+	static auto nonstrict_implication() {
+		static std::shared_ptr<Connective> ooao(new Connective("&rArr;", &_nonstrict_implication));
+		return ooao;
+	}
+
+public:
+	static std::shared_ptr<TruthTable> NonStrictlyImplies(const std::shared_ptr<TruthTable>& hypothesis, const std::shared_ptr<TruthTable>& consequence) {
+		if (!hypothesis) throw std::logic_error("empty proposition");
+		if (!consequence) throw std::logic_error("empty proposition");
+		if (    hypothesis->logic() != consequence->logic()
+			&& !is_sublogic(hypothesis->logic(), consequence->logic())
+			&& !is_sublogic(consequence->logic(), hypothesis->logic()))
+			throw std::logic_error("incompatible hypothesis and consequence");
+
+		std::shared_ptr<TruthTable> stage(new TruthTable(hypothesis, consequence, nonstrict_implication(), &infer_Not));
+		if constexpr (integrity_check) {
+			if (!stage->syntax_ok()) throw std::logic_error("invalid constructor");
+		}
+
+		if (auto x = is_in_cache(stage)) return *x;
+
+		_cache.push_back(stage);
+		hypothesis->is_arg_for(stage);
+		consequence->is_arg_for(stage);
+		return stage;
+	}
+
+// main private section
 private:
 	bool syntax_ok() const {
 		if (update_bitmap && op) return false;
@@ -657,6 +693,23 @@ private:
 
 	void is_arg_for(std::shared_ptr<TruthTable>& src) const {
 		if (src) _watching.push_back(src);
+	}
+
+	static std::optional<std::shared_ptr<TruthTable> > is_in_cache(const std::shared_ptr<TruthTable>& src)
+	{
+		auto ub = _cache.size();
+		while (0 < ub) {
+			--ub;
+			if (auto x = _cache[ub].lock()) {
+				if (!are_equivalent(x, src)) continue;
+				if (is_sublogic(x->_logic, src->_logic)) return x;
+				return nullptr;
+			} else {
+				_cache[ub].swap(_cache.back());
+				_cache.pop_back();
+			}
+		}
+		return std::nullopt;
 	}
 
 	static void request_reevaluations(std::shared_ptr<TruthTable> target, TruthValue src, std::shared_ptr<TruthTable> origin) {
@@ -706,11 +759,14 @@ private:
 		return false; // but already invalid syntax if we get here
 	}
 
-	static TruthValue _nonstrict_implication(logics host, TruthValue lhs, TruthValue rhs) {
-		return toAPI(host).Or(!lhs, rhs);
+	// this does not handle the parsing aspects of syntactical entailment
+	static TruthValue _core_syntactical_entailment(logics host, TruthValue lhs, TruthValue rhs) {
+		if (TruthValue::True != lhs) return TruthValue::True; // no inference in this case
+		if (TruthValue::True == rhs) return TruthValue::True; // ok (at truth value level, not necessarily as valid reasoning)
+		return TruthValue::False;
 	}
-	static auto nonstrict_implication() {
-		static std::shared_ptr<Connective> ooao(new Connective("&rArr;", &_nonstrict_implication));
+	static auto core_syntactical_entailment() {
+		static std::shared_ptr<Connective> ooao(new Connective("&#9500;", &_core_syntactical_entailment));
 		return ooao;
 	}
 
