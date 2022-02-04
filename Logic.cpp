@@ -8,6 +8,13 @@ std::vector<logic::TruthTable::inverse_infer_spec> logic::TruthTable::_inferred_
 
 #ifdef LOGIC_DRIVER
 #include "test_driver.h"
+#include "Zaimoni.STL/Pure.C/comptest.h"
+
+#ifdef ZAIMONI_HAS_MICROSOFT_IO_H
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
 
 static_assert(logic::Classical().is_commutative());
 static_assert(logic::KleeneStrong().is_commutative());
@@ -29,13 +36,22 @@ static void survey(const logic::TruthTable& src) {
 
 int main(int argc, char* argv[], char* envp[])
 {
+#ifdef ZAIMONI_HAS_MICROSOFT_IO_H
+	const bool to_console = _isatty(_fileno(stdout));
+#else
+	const bool to_console = isatty(fileno(stdout));
+#endif
+
 	std::shared_ptr<logic::TruthTable> test_var[6];
+	std::shared_ptr<logic::TruthTable> test_var_Q[6];
 	std::shared_ptr<logic::TruthTable> test_Not[6];
 
+	if (!to_console) STRING_LITERAL_TO_STDOUT("<pre>\n");
 	int ub = (int)logic::logics::franci+1;
 	while (0 <= --ub) {
 		INFORM(toAPI((logic::logics)ub).name());
-		survey(*(test_var[ub] = logic::TruthTable::variable(std::string(1, 'A' + ub), (logic::logics)ub)));
+		survey(*(test_var[ub] = logic::TruthTable::variable(std::string("P<sub>")+std::to_string(ub) + "</sub>", (logic::logics)ub)));
+		test_var_Q[ub] = logic::TruthTable::variable(std::string("Q<sub>") + std::to_string(ub)+"</sub>", (logic::logics)ub);
 		survey(*(test_Not[ub] = logic::TruthTable::Not(test_var[ub])));
 	}
 	INC_INFORM("tracking: ");
@@ -44,6 +60,7 @@ int main(int argc, char* argv[], char* envp[])
 	INFORM(logic::TruthTable::count_inferred_reevaluations());
 
 	STRING_LITERAL_TO_STDOUT("End testing\n");
+	if (!to_console) STRING_LITERAL_TO_STDOUT("</pre>\n");
 	return 0;	// success
 };
 #endif
