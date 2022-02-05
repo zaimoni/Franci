@@ -18,6 +18,211 @@
 #include "Zaimoni.STL/Logging.h"
 
 namespace logic {
+	struct proof_by_contradiction final : public std::runtime_error
+	{
+		proof_by_contradiction(const std::string& msg) : std::runtime_error(msg) {}
+		proof_by_contradiction(const char* msg) : std::runtime_error(msg) {}
+
+		proof_by_contradiction(const proof_by_contradiction& src) = default;
+		proof_by_contradiction(proof_by_contradiction&& src) = default;
+		proof_by_contradiction& operator=(const proof_by_contradiction& src) = default;
+		proof_by_contradiction& operator=(proof_by_contradiction&& src) = default;
+		~proof_by_contradiction() = default;
+	};
+}
+
+namespace zaimoni {
+
+	// copied from C#.
+	template<class SRC>
+	struct observer {
+		virtual void onNext(const SRC& value) = 0; // observable reports data
+	};
+
+	template<class SRC>
+	class lambda_observer : public observer<SRC>
+	{
+		std::function<void(const SRC&)> _op;
+
+	public:
+		lambda_observer(decltype(_op) src) : _op(src) {}
+		lambda_observer(const lambda_observer& src) = delete;
+		lambda_observer(lambda_observer&& src) = delete;
+		lambda_observer& operator=(const lambda_observer& src) = delete;
+		lambda_observer& operator=(lambda_observer&& src) = delete;
+		~lambda_observer() = default;
+
+		void onNext(const SRC& value) override { _op(value); }
+	};
+}
+
+namespace enumerated {
+	template<class V>
+	class Set final {
+		std::string _name;
+		std::optional<std::vector<V> > _elements;
+		std::vector<std::weak_ptr<zaimoni::observer<std::vector<V> > > > _watchers;
+
+		Set() = delete;	// if we need this, default it
+		// unnamed sets
+		Set(const std::vector<V>& src) : _elements(src) {}
+		Set(std::vector<V>&& src) : _elements(std::move(src)) {}
+
+		// named sets
+		Set(const std::string& name, const std::vector<V>& src) : _name(name), _elements(src) {}
+		Set(const std::string& name, std::vector<V>&& src) : _name(name), _elements(std::move(src)) {}
+		Set(std::string&& name, const std::vector<V>& src) : _name(std::move(name)), _elements(src) {}
+		Set(std::string&& name, std::vector<V>&& src) : _name(std::move(name)), _elements(std::move(src)) {}
+
+	public:
+		Set(const Set& src) = delete;
+		Set(Set&& src) = delete;
+		Set& operator=(const Set& src) = delete;
+		Set& operator=(Set&& src) = delete;
+		~Set() = default;
+
+		auto& name() const { return _name; }
+		auto size() const { return _elements ? _elements->size() : 0; }
+		bool empty() const { return _elements ? _elements->empty() : true; }
+		bool is_defined() const{ return _elements; }  // constructive logic can have undefined variables
+
+		void restrict_to(const std::vector<V>& src) {
+			if (std::nullptr_t == _elements) {
+				// Prior declaration was constructive logic: this initializes
+				_elements = src;
+				notify();
+				return;
+			}
+			destructive_intersect(*_elements, src);
+		}
+
+		void exclude(const std::vector<V>& src) {
+			if (std::nullptr_t == _elements) {
+				// Prior declaration was constructive logic
+				// \todo work out a way to record this
+				return;
+			}
+			destructive_difference(*_elements, src);
+		}
+
+		// factory functions
+		// unnamed set -- no caching
+		template<class SRC>
+		auto declare(SRC&& src) requires requires() { new Set(std::forward(src)); }
+		{
+			return std::shared_ptr<Set>(new Set(std::forward(src)));
+		}
+
+		// named sets -- these are cached
+		template<class SRC>
+		auto declare(const std::string& name, SRC&& src) requires requires() { new Set(name, std::forward(src)); }
+		{
+			if (auto x = find(name)) {
+				// already have this: treat as restriction
+				x->restrict_to(src);
+				return x;
+			}
+
+			std::shared_ptr<Set> stage(new Set(name, std::forward(src)));
+			cache().push_back(stage);
+			return stage;
+		}
+
+		template<class SRC>
+		auto declare(std::string&& name, SRC&& src) requires requires() { new Set(std::move(name), std::forward(src)); }
+		{
+			if (auto x = find(name)) {
+				// already have this: treat as restriction
+				x->restrict_to(src);
+				return x;
+			}
+
+			std::shared_ptr<Set> stage(new Set(std::move(name), std::forward(src)));
+			cache().push_back(stage);
+			return stage;
+		}
+
+	private:
+		auto& cache() {
+			std::vector<std::weak_ptr<Set<V> > > ooao;
+			return ooao;
+		}
+
+		std::shared_ptr<Set<V> > find(decltype(_name)& name) {
+			auto& already = cache();
+			ptrdiff_t ub = already.size();
+			while (0 <= --ub) {
+				if (const auto x = already[ub].lock()) {
+					if (name == x->_name) return x;
+				} else {
+					already[ub].swap(already.back());
+					already.pop_back();
+				}
+			}
+			return nullptr;
+		}
+
+		void notify() {
+			ptrdiff_t ub = _watchers.size();
+			while (0 <= --ub) {
+				if (auto x = _watchers[ub].lock()) x->onNext(*_elements)
+				else if (1 == _watchers.size()) {
+					std::vector<V>().swap(*_elements);
+					return;
+				} else {
+					_watchers[ub].swap(_watchers.back());
+					_watchers.pop_back();
+				}
+			}
+		}
+
+		static void destructive_intersect(std::vector<V>& host, const std::vector<V>& src) {
+			bool now_empty = true;
+			bool changed = false;
+			ptrdiff_t ub = host.size();
+			while (0 <= --ub) {
+				if (std::ranges::any_of(src, [&x](auto y) { return x == y })) {
+					now_empty = false;
+					continue;
+				}
+				host[ub].swap(host.back());
+				host.pop_back();
+				changed = true;
+			}
+			if (now_empty) std::vector<V>().swap(host);
+			if (changed) notify();
+		}
+
+		static void destructive_difference(std::vector<V>& host, const std::vector<V>& src) {
+			bool now_empty = true;
+			bool changed = false;
+			ptrdiff_t ub = host.size();
+			while (0 <= --ub) {
+				if (!std::ranges::any_of(src, [&x](auto y) { return x == y })) {
+					now_empty = false;
+					continue;
+				}
+				host[ub].swap(host.back());
+				host.pop_back();
+				changed = true;
+			}
+			if (now_empty) std::vector<V>().swap(host);
+			if (changed) notify();
+		}
+
+		static void destructive_union(std::vector<V>& host, const std::vector<V>& src) {
+			bool changed = false;
+			for (decltype(auto) x : src) {
+				if (std::ranges::any_of(host, [&x](auto y) { return x == y })) continue;
+				host.push_back(x);
+				changed = true;
+			}
+			if (changed) notify();
+		}
+	};
+}
+
+namespace logic {
 
 template<class T>
 std::vector<std::string> to_string_vector(const std::vector<T>& src) requires requires(std::vector<std::string> test) { test.push_back(to_string(*src.begin())); }
@@ -52,18 +257,6 @@ static std::string format_as_primary_expression(std::shared_ptr<T> src) requires
 	if (src->is_primary_term()) return src->desc();
 	return std::string("(") + src->desc() + ")";
 }
-
-struct proof_by_contradiction final : public std::runtime_error
-{
-	proof_by_contradiction(const std::string& msg) : std::runtime_error(msg) {}
-	proof_by_contradiction(const char* msg) : std::runtime_error(msg) {}
-
-	proof_by_contradiction(const proof_by_contradiction& src) = default;
-	proof_by_contradiction(proof_by_contradiction&& src) = default;
-	proof_by_contradiction& operator=(const proof_by_contradiction& src) = default;
-	proof_by_contradiction& operator=(proof_by_contradiction && src) = default;
-	~proof_by_contradiction() = default;
-};
 
 // Our native logic, for convenience
 enum class TruthValue : unsigned char {
@@ -876,7 +1069,6 @@ private:
 			}
 		}
 	}
-
 
 	static void _catalog_vars(TruthTable* origin, std::vector<TruthTable*>& ret) {
 retry:
