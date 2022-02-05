@@ -8,7 +8,6 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <functional>
 #include <utility>
 #include <optional>
 #include <ranges>
@@ -16,6 +15,7 @@
 #include <stddef.h>
 
 #include "Zaimoni.STL/Logging.h"
+#include "Zaimoni.STL/observer.hpp"
 
 namespace logic {
 	struct proof_by_contradiction final : public std::runtime_error
@@ -31,31 +31,6 @@ namespace logic {
 	};
 }
 
-namespace zaimoni {
-
-	// copied from C#.
-	template<class SRC>
-	struct observer {
-		virtual void onNext(const SRC& value) = 0; // observable reports data
-	};
-
-	template<class SRC>
-	class lambda_observer : public observer<SRC>
-	{
-		std::function<void(const SRC&)> _op;
-
-	public:
-		lambda_observer(decltype(_op) src) : _op(src) {}
-		lambda_observer(const lambda_observer& src) = delete;
-		lambda_observer(lambda_observer&& src) = delete;
-		lambda_observer& operator=(const lambda_observer& src) = delete;
-		lambda_observer& operator=(lambda_observer&& src) = delete;
-		~lambda_observer() = default;
-
-		void onNext(const SRC& value) override { _op(value); }
-	};
-}
-
 namespace enumerated {
 	template<class V>
 	class Set final {
@@ -63,7 +38,8 @@ namespace enumerated {
 		std::optional<std::vector<V> > _elements;
 		std::vector<std::weak_ptr<zaimoni::observer<std::vector<V> > > > _watchers;
 
-		Set() = delete;	// if we need this, default it
+		Set() = default;	// unnamed set with no known elements
+
 		// unnamed sets
 		Set(const std::vector<V>& src) : _elements(src) {}
 		Set(std::vector<V>&& src) : _elements(std::move(src)) {}
@@ -105,7 +81,17 @@ namespace enumerated {
 			destructive_difference(*_elements, src);
 		}
 
+		template<std::invocable<V> FUNC>
+		std::optional<std::vector<decltype(op(_elements->front()))> > image_of(const FUNC& op) {
+			if (!_elements) return std::nullopt;	// constructive logic
+			std::vector<decltype(op(_elements->front()))> ret;
+			for (decltype(auto) x : *_elements) ret.push_back(op(x));
+			return ret;
+		}
+
 		// factory functions
+		auto intuitionist_empty() { return std::shared_ptr<Set>(new Set()); }
+
 		// unnamed set -- no caching
 		template<class SRC>
 		auto declare(SRC&& src) requires requires() { new Set(std::forward(src)); }
@@ -218,6 +204,27 @@ namespace enumerated {
 				changed = true;
 			}
 			if (changed) notify();
+		}
+	};
+
+	template<class V>
+	class UniformCartesianProductSubset final {
+		std::vector<std::shared_ptr<Set<V> > > _args;
+		std::shared_ptr<Set<std::vector<V> > > _elements;
+		std::function<bool(const std::vector<V>&)> _axiom_predicate;
+
+	public:
+		UniformCartesianProductSubset() = default;
+		UniformCartesianProductSubset(const decltype(_args)& args) : _args(args) {}
+		UniformCartesianProductSubset(decltype(_args) && args) : _args(std::move(args)) {}
+		UniformCartesianProductSubset(const decltype(_args)& args, decltype(_axiom_predicate) ok) : _args(args),_axiom_predicate(ok) {}
+		UniformCartesianProductSubset(decltype(_args)&& args, decltype(_axiom_predicate) ok) : _args(std::move(args)), _axiom_predicate(ok) {}
+		~UniformCartesianProductSubset() = default;
+
+	private:
+		void bootstrap() {
+			if (_elements) return;
+			// need to populate
 		}
 	};
 }
