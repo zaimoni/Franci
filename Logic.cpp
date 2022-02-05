@@ -44,20 +44,56 @@ int main(int argc, char* argv[], char* envp[])
 
 	std::shared_ptr<logic::TruthTable> test_var[6];
 	std::shared_ptr<logic::TruthTable> test_var_Q[6];
+	std::shared_ptr<logic::TruthTable> test_var_R[6];
 	std::shared_ptr<logic::TruthTable> test_Not[6];
+	std::shared_ptr<logic::TruthTable> test_Not_Q[6];
+	std::shared_ptr<logic::TruthTable> test_Not_R[6];
 
 	if (!to_console) STRING_LITERAL_TO_STDOUT("<pre>\n");
+	{	// audit P and ~P; assume others work if those two do
+	const std::string P("P");
+	const std::string Q("Q");
+	const std::string R("R");
+
 	int ub = (int)logic::logics::franci+1;
 	while (0 <= --ub) {
 		INFORM(toAPI((logic::logics)ub).name());
-		survey(*(test_var[ub] = logic::TruthTable::variable(std::string("P<sub>")+std::to_string(ub) + "</sub>", (logic::logics)ub)));
-		test_var_Q[ub] = logic::TruthTable::variable(std::string("Q<sub>") + std::to_string(ub)+"</sub>", (logic::logics)ub);
+		const auto suffix = std::string("<sub>") + std::to_string(ub) + "</sub>";
+		survey(*(test_var[ub] = logic::TruthTable::variable(P+suffix, (logic::logics)ub)));
+		test_var_Q[ub] = logic::TruthTable::variable(Q + suffix, (logic::logics)ub);
+		test_var_R[ub] = logic::TruthTable::variable(R + suffix, (logic::logics)ub);
 		survey(*(test_Not[ub] = logic::TruthTable::Not(test_var[ub])));
+		test_Not_Q[ub] = logic::TruthTable::Not(test_var_Q[ub]);
+		test_Not_R[ub] = logic::TruthTable::Not(test_var_R[ub]);
 	}
 	INC_INFORM("tracking: ");
 	INFORM(logic::TruthTable::count_expressions());
 	INC_INFORM("queued substitutions: ");
 	INFORM(logic::TruthTable::count_inferred_reevaluations());
+	}
+
+#if 0
+	{
+	std::vector<std::shared_ptr<logic::TruthTable> > overview;
+
+	ub = (int)logic::logics::franci + 1;
+	while (0 <= --ub) {
+		int ub2 = (int)logic::logics::franci + 1;
+		while (0 <= --ub2) {
+			try {
+				auto stage = logic::TruthTable::NonStrictlyImplies(test_var[ub], test_var_Q[ub2]);
+				overview.push_back(std::move(stage));
+			} catch (const std::logic_error& e) {
+				INC_INFORM(e.what());
+				INC_INFORM(": ");
+				INC_INFORM(toAPI((logic::logics)ub).name());
+				INC_INFORM(", ");
+				INFORM(toAPI((logic::logics)ub2).name());
+			}
+		}
+	}
+	}
+#endif
 
 	STRING_LITERAL_TO_STDOUT("End testing\n");
 	if (!to_console) STRING_LITERAL_TO_STDOUT("</pre>\n");

@@ -116,7 +116,7 @@ constexpr bool is_sublogic(logics sub, logics sup) {
 	if (sub == logics::classical) return true;
 	if (sup == logics::classical) return false;
 	if (sub == logics::kleene_weak || sub == logics::lisp_prolog) return false;
-	if (sup == logics::kleene_weak || sub == logics::lisp_prolog) return false;
+	if (sup == logics::kleene_weak || sup == logics::lisp_prolog) return false;
 	if (sub == logics::kleene_strong) return true;
 	return false;
 }
