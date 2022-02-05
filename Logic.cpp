@@ -100,6 +100,12 @@ int main(int argc, char* argv[], char* envp[])
 	survey(*P_implies_Q);
 	survey(*Q_implies_R);
 
+	auto P_implies_Q_vars = P_implies_Q->catalog_vars();
+	auto Q_implies_R_vars = Q_implies_R->catalog_vars();
+
+	for (decltype(auto) x : P_implies_Q_vars) INFORM(x->desc().c_str());
+	for (decltype(auto) x : Q_implies_R_vars) INFORM(x->desc().c_str());
+
 	STRING_LITERAL_TO_STDOUT("End testing\n");
 	if (!to_console) STRING_LITERAL_TO_STDOUT("</pre>\n");
 	return 0;	// success

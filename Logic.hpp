@@ -881,19 +881,20 @@ private:
 	static void _catalog_vars(TruthTable* origin, std::vector<TruthTable*>& ret) {
 retry:
 		// we almost certainly will be out of RAM long before this cast is undefined behavior
-		ptrdiff_t ub = origin->_args.size();
-		switch(ub) {
+		const ptrdiff_t strict_ub = origin->_args.size();
+		switch(strict_ub) {
 		case 0: // base case
 			if (ptrdiff_t ub2 = ret.size()) {
-				while (0 < --ub2) if (origin == ret[ub]) return;
-				ret.push_back(origin);
+				while (0 <= --ub2) if (origin == ret[ub2]) return;
 			}
+			ret.push_back(origin);
 			return;
 		case 1:	// tail-recurse
 			origin = origin->_args.front().get();
 			goto retry;
 		}
-		while (0 < --ub) _catalog_vars(origin->_args[ub].get(), ret);
+		ptrdiff_t n = strict_ub;
+		while (0 <= --n) _catalog_vars(origin->_args[strict_ub -n-1].get(), ret);
 	}
 };
 
