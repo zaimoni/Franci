@@ -95,6 +95,11 @@ int main(int argc, char* argv[], char* envp[])
 	}
 #endif
 
+	auto P_implies_Q = logic::TruthTable::NonStrictlyImplies(test_var[0], test_var_Q[0]);
+	auto Q_implies_R = logic::TruthTable::NonStrictlyImplies(test_var_Q[0], test_var_R[0]);
+	survey(*P_implies_Q);
+	survey(*Q_implies_R);
+
 	STRING_LITERAL_TO_STDOUT("End testing\n");
 	if (!to_console) STRING_LITERAL_TO_STDOUT("</pre>\n");
 	return 0;	// success

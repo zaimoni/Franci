@@ -43,6 +43,16 @@ inline std::string display_as_enumerated_set(const std::vector<std::string>& src
 
 }
 
+template<class T>
+static std::string format_as_primary_expression(std::shared_ptr<T> src) requires requires() {
+	src->is_primary_term();
+	src->desc();
+}
+{
+	if (src->is_primary_term()) return src->desc();
+	return std::string("(") + src->desc() + ")";
+}
+
 struct proof_by_contradiction final : public std::runtime_error
 {
 	proof_by_contradiction(const std::string& msg) : std::runtime_error(msg) {}
@@ -496,15 +506,20 @@ public:
 	std::string desc() const {
 		if (_args.empty()) return symbol;
 
-		if (symbol == "~") {
-			// hard-coded logical not; prefix operation.
-			if (_args.front()->is_primary_term()) return symbol + _args.front()->desc();
-			return symbol + "(" + _args.front()->desc() + ")";
+		const auto sym = name();
+		if (sym == "~") {
+			// hard-coded logical not; unary prefix operation.
+			return sym + format_as_primary_expression(_args.front());
+		}
+
+		if (sym == "&rArr;") {
+			// hard-coded binary infix operations
+			return format_as_primary_expression(_args.front()) + sym + format_as_primary_expression(_args.back());
 		}
 
 		// general case: assume function-like
 		bool have_seen_first = false;
-		std::string ret(symbol);
+		std::string ret(name());
 		ret += "(";
 		for (decltype(auto) x : _args) {
 			if (have_seen_first) ret += ", ";
