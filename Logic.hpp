@@ -31,6 +31,49 @@ namespace logic {
 	};
 }
 
+// plausibly belongs in a more general library
+template<class T> requires(std::ranges::range<T>)
+std::vector<size_t> get_upper_bounds(const std::vector<T>& key) requires requires { key.front().size(); }
+{
+	std::vector<size_t> ret;
+	for (decltype(auto) x : key) ret.push_back(x.size());
+	return ret;
+}
+
+namespace Gray_code {
+
+	// Naming attributed to Knuth.  Alternate name is chinese remainder theorem encoding
+	template<std::unsigned_integral U>
+	bool increment(std::vector<U>& code, const std::vector<size_t>& bounds) {
+		size_t scan = 0;
+		while (bounds.size() > scan) {
+			if (++code[scan] < bounds[scan]) return true;
+			code[scan++] = 0;
+		}
+		return false;
+	}
+
+	template<std::unsigned_integral U, class K>
+	std::vector<K> cast_to(const std::vector<U>& code, const std::vector<std::vector<K> >& key)
+		requires requires(K dest) { dest = key[0][code[0]]; }
+	{
+		std::vector<K> ret(code.size());
+		if (int ub = code.size()) {
+			while (0 <= --ub) ret[ub] = key[ub][code[ub]];
+		}
+		return ret;
+	}
+
+	template<std::unsigned_integral U, class K>
+	void cast_to(const std::vector<U>& code, const std::vector<std::vector<K> >& key, std::vector<K>& dest)
+		requires requires(K dest) { dest = key[0][code[0]]; }
+	{
+		if (int ub = code.size()) {
+			while (0 <= --ub) dest[ub] = key[ub][code[ub]];
+		}
+	}
+}
+
 namespace enumerated {
 	template<class V>
 	class Set final {
@@ -63,7 +106,7 @@ namespace enumerated {
 		bool is_defined() const{ return _elements; }  // constructive logic can have undefined variables
 
 		void restrict_to(const std::vector<V>& src) {
-			if (std::nullptr_t == _elements) {
+			if (std::nullopt_t == _elements) {
 				// Prior declaration was constructive logic: this initializes
 				_elements = src;
 				notify();
@@ -73,12 +116,26 @@ namespace enumerated {
 		}
 
 		void exclude(const std::vector<V>& src) {
-			if (std::nullptr_t == _elements) {
+			if (std::nullopt_t == _elements) {
 				// Prior declaration was constructive logic
 				// \todo work out a way to record this
 				return;
 			}
 			destructive_difference(*_elements, src);
+		}
+
+		void adjoin(const V& src) {
+			if (std::nullopt_t == _elements) {
+				// Prior declaration was constructive logic: this initializes
+				_elements = std::vector<V>(1,src);
+				notify();
+				return;
+			}
+			if (!std::ranges:any_of(*_elements, [&](const V& x) {x == src})) {
+				(*_elements).push_back(src);
+				notify();
+				return;
+			}
 		}
 
 		template<std::invocable<V> FUNC>
@@ -90,7 +147,7 @@ namespace enumerated {
 		}
 
 		// factory functions
-		auto intuitionist_empty() { return std::shared_ptr<Set>(new Set()); }
+		static auto intuitionist_empty() { return std::shared_ptr<Set>(new Set()); }
 
 		// unnamed set -- no caching
 		template<class SRC>
@@ -225,6 +282,16 @@ namespace enumerated {
 		void bootstrap() {
 			if (_elements) return;
 			// need to populate
+			const auto strict_upper_bounds = get_upper_bounds(_args);
+			if (std::ranges::any_of(strict_upper_bounds, [](auto x) { 0 >= x; })) throw std::logic_error("empty set in cartesian product");
+			std::vector<size_t> key(_args.size(), 0);
+			auto iter = Gray_code::cast_to(key, _args);
+			bool ok = true;
+			_elements = Set<V>::intuitionist_empty()
+			do {
+				if (!_axiom_predicate || _axiom_predicate(iter)) _elements->adjoin(std::shared_ptr<decltype(iter)>(new decltype(iter)(iter)));
+				if (ok = Gray_code::increment(key)) Gray_code::cast_to(key, _args, iter);
+			} while (ok);
 		}
 	};
 }
@@ -522,46 +589,6 @@ auto decode_bitmap(unsigned long long src, const T& key)
 	return ret;
 }
 
-// plausibly belongs in a more general library
-template<class T> requires(std::ranges::range<T>)
-std::vector<size_t> get_upper_bounds(const std::vector<T>& key) requires requires { key.front().size(); }
-{
-	std::vector<size_t> ret;
-	for (decltype(auto) x : key) ret.push_back(x.size());
-	return ret;
-}
-
-// Naming attributed to Knuth.  Alternate name is chinese remainder theorem encoding
-template<std::unsigned_integral U>
-bool increment_mixed_radix_Gray_code(std::vector<U>& code, const std::vector<size_t>& bounds) {
-	size_t scan = 0;
-	while (bounds.size() > scan) {
-		if (++code[scan] < bounds[scan]) return true;
-		code[scan++] = 0;
-	}
-	return false;
-}
-
-template<std::unsigned_integral U, class K>
-std::vector<K> cast_mixed_radix_Gray_code_to(const std::vector<U>& code, const std::vector<std::vector<K> >& key)
-	requires requires(K dest) { dest = key[0][code[0]]; }
-{
-	std::vector<K> ret(code.size());
-	if (int ub = code.size()) {
-		while (0 <= --ub) ret[ub] = key[ub][code[ub]];
-	}
-	return ret;
-}
-
-template<std::unsigned_integral U, class K>
-void cast_mixed_radix_Gray_code_to(const std::vector<U>& code, const std::vector<std::vector<K> >& key, std::vector<K>& dest)
-	requires requires(K dest) { dest = key[0][code[0]]; }
-{
-	if (int ub = code.size()) {
-		while (0 <= --ub) dest[ub] = key[ub][code[ub]];
-	}
-}
-
 // true n-ary connectives would warrant converting this to an abstract base class
 class Connective final
 {
@@ -588,7 +615,7 @@ public:
 		std::vector<unsigned short> ret;
 		std::vector<size_t> ubs = get_upper_bounds(src); // "upper bounds"
 		std::vector<unsigned char> index(src.size(),0);
-		std::vector<TruthValue> iter = cast_mixed_radix_Gray_code_to(index, src);
+		std::vector<TruthValue> iter = Gray_code::cast_to(index, src);
 
 		do {
 			unsigned short stage = 0;
@@ -606,8 +633,8 @@ public:
 			stage <<= 2;
 			stage |= (int)r_fold;
 			ret.push_back(stage);
-			if (!increment_mixed_radix_Gray_code(index, ubs)) break;
-			cast_mixed_radix_Gray_code_to(index, src, iter);
+			if (!Gray_code::increment(index, ubs)) break;
+			Gray_code::cast_to(index, src, iter);
 		} while(true);
 		return ret;
 	}
