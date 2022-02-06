@@ -106,7 +106,7 @@ namespace enumerated {
 		bool is_defined() const{ return _elements; }  // constructive logic can have undefined variables
 
 		void restrict_to(const std::vector<V>& src) {
-			if (std::nullopt_t == _elements) {
+			if (!_elements) {
 				// Prior declaration was constructive logic: this initializes
 				_elements = src;
 				notify();
@@ -115,8 +115,13 @@ namespace enumerated {
 			destructive_intersect(*_elements, src);
 		}
 
+		template<std::ranges::range SRC>
+		void restrict_to(SRC&& src) requires(std::is_convertible_v<decltype(*src.begin()), V>) {
+			restrict_to(std::vector<V>(src.begin(), src.end()));
+		}
+
 		void exclude(const std::vector<V>& src) {
-			if (std::nullopt_t == _elements) {
+			if (!_elements) {
 				// Prior declaration was constructive logic
 				// \todo work out a way to record this
 				return;
@@ -125,7 +130,7 @@ namespace enumerated {
 		}
 
 		void adjoin(const V& src) {
-			if (std::nullopt_t == _elements) {
+			if (!_elements) {
 				// Prior declaration was constructive logic: this initializes
 				_elements = std::vector<V>(1,src);
 				notify();
@@ -139,11 +144,11 @@ namespace enumerated {
 		}
 
 		template<std::invocable<V> FUNC>
-		std::optional<std::vector<decltype(op(_elements->front()))> > image_of(const FUNC& op) {
-			if (!_elements) return std::nullopt;	// constructive logic
+		auto image_of(const FUNC& op) {
 			std::vector<decltype(op(_elements->front()))> ret;
+			if (!_elements) return std::optional<decltype(ret)>();	// constructive logic
 			for (decltype(auto) x : *_elements) ret.push_back(op(x));
-			return ret;
+			return std::optional<decltype(ret)>(ret);
 		}
 
 		// factory functions
@@ -151,14 +156,14 @@ namespace enumerated {
 
 		// unnamed set -- no caching
 		template<class SRC>
-		auto declare(SRC&& src) requires requires() { new Set(std::forward(src)); }
+		static auto declare(SRC&& src) requires requires() { new Set(std::forward(src)); }
 		{
 			return std::shared_ptr<Set>(new Set(std::forward(src)));
 		}
 
 		// named sets -- these are cached
-		template<class SRC>
-		auto declare(const std::string& name, SRC&& src) requires requires() { new Set(name, std::forward(src)); }
+		template<std::ranges::range SRC>
+		static auto declare(const std::string& name, SRC&& src) requires(std::is_convertible_v<decltype(*src.begin()), V>)
 		{
 			if (auto x = find(name)) {
 				// already have this: treat as restriction
@@ -166,13 +171,13 @@ namespace enumerated {
 				return x;
 			}
 
-			std::shared_ptr<Set> stage(new Set(name, std::forward(src)));
+			std::shared_ptr<Set> stage(new Set(name, std::vector<V>(src.begin(), src.end())));
 			cache().push_back(stage);
 			return stage;
 		}
 
-		template<class SRC>
-		auto declare(std::string&& name, SRC&& src) requires requires() { new Set(std::move(name), std::forward(src)); }
+		template<std::ranges::range SRC>
+		static auto declare(std::string&& name, SRC&& src) requires(std::is_convertible_v<decltype(*src.begin()), V>)
 		{
 			if (auto x = find(name)) {
 				// already have this: treat as restriction
@@ -180,18 +185,18 @@ namespace enumerated {
 				return x;
 			}
 
-			std::shared_ptr<Set> stage(new Set(std::move(name), std::forward(src)));
+			std::shared_ptr<Set> stage(new Set(std::move(name), std::vector<V>(src.begin(), src.end())));
 			cache().push_back(stage);
 			return stage;
 		}
 
 	private:
-		auto& cache() {
-			std::vector<std::weak_ptr<Set<V> > > ooao;
+		static auto& cache() {
+			static std::vector<std::weak_ptr<Set<V> > > ooao;
 			return ooao;
 		}
 
-		std::shared_ptr<Set<V> > find(decltype(_name)& name) {
+		static std::shared_ptr<Set<V> > find(const decltype(_name)& name) {
 			auto& already = cache();
 			ptrdiff_t ub = already.size();
 			while (0 <= --ub) {
@@ -656,16 +661,34 @@ private:
 	static constexpr const TruthValue ref_fourval[] = { TruthValue::False, TruthValue::True, TruthValue::Unknown, TruthValue::Contradiction };
 	static constexpr const TruthValue ref_display[] = { TruthValue::Contradiction, TruthValue::False, TruthValue::True, TruthValue::Unknown };
 
+public:
+	auto set_theoretic_range() const {
+		switch (_logic) {
+		case logics::classical: return std::ranges::subrange(ref_classical);
+		case logics::kleene_strong:
+		case logics::kleene_weak:
+		case logics::lisp_prolog:	return std::ranges::subrange(ref_threeval);
+		case logics::belnap:
+		case logics::franci:	return std::ranges::subrange(ref_fourval);
+		}
+	}
+
+private:
 	std::string symbol;
 	logics _logic;
+
+	std::shared_ptr<enumerated::Set<TruthValue> > _prop_variable;
+
+	// start legacy prototype
 	std::vector<std::shared_ptr<TruthTable> > _args;
-	std::optional<unsigned char> _var_values;	// bitmap, expected range 0...15
+	[[deprecated]] std::optional<unsigned char> _var_values;	// bitmap, expected range 0...15
 	// \todo following needs 2 bits for each input, and 2 bits for self
 	std::optional<std::vector<unsigned short> > _var_enumerated;
 
 	unsigned char (*update_bitmap)(const std::shared_ptr<TruthTable>& src);	// for unary logical connectives/functions
 	std::shared_ptr<Connective> op; // for n-ary logical connectives/functions
 	void (*_infer)(TruthValue forced, const std::shared_ptr<TruthTable>& origin); // for anything not a propositional variable
+	// end legacy prototype
 
 	// for observer pattern: have to know who directly updates when we do
 	mutable std::vector<std::weak_ptr<TruthTable> > _watching;
@@ -689,7 +712,14 @@ private:
 	}
 
 	// Propositional variable.  No arguments
-	TruthTable(const std::string& name, logics l) : symbol(name), _logic(l), _var_values(_var_agnostic(l)), update_bitmap(nullptr), _infer(nullptr) {}
+	TruthTable(const std::string& name, logics l)
+		: symbol(name),
+		 _logic(l),
+		_prop_variable(enumerated::Set<TruthValue>::declare(name, set_theoretic_range())),
+		 _var_values(_var_agnostic(l)),
+		update_bitmap(nullptr),
+		_infer(nullptr) {
+	}
 
 	// Unary connective
 	TruthTable(const std::string& name, const std::shared_ptr<TruthTable>& src, decltype(update_bitmap) update, decltype(_infer) chain_infer) : symbol(name), _logic(src->_logic), _args(1,src), update_bitmap(update), _infer(chain_infer) {}
@@ -704,24 +734,17 @@ private:
 public:
 	~TruthTable() = default;
 
-	auto set_theoretic_range() const {
-		switch(_logic) {
-		case logics::classical: return std::ranges::subrange(ref_classical);
-		case logics::kleene_strong:
-		case logics::kleene_weak:
-		case logics::lisp_prolog:	return std::ranges::subrange(ref_threeval);
-		case logics::belnap:
-		case logics::franci:	return std::ranges::subrange(ref_fourval);
-		}
-	}
-
 	static auto display_range() { return std::ranges::subrange(ref_display); }
 	static auto count_expressions() { return _cache.size(); }
 	static auto count_inferred_reevaluations() { return _inferred_reevaluations.size(); }
 
 	auto logic() const { return _logic; }
 	auto arity() const { return _args.size(); }
-	auto& name() const { return op ? op->name() : symbol; }
+	auto& name() const { 
+		if (op) return op->name();
+		if (_prop_variable) return _prop_variable->name();
+		return symbol;
+	}
 	bool is_propositional_variable() const { return _args.empty(); }
 
 	bool is_primary_term() const {
@@ -861,12 +884,13 @@ public:
 
 	// factories
 	static std::shared_ptr<TruthTable> variable(const std::string& name, logics l) {
+		if (auto x = is_in_cache(name, l)) return *x;
+
 		std::shared_ptr<TruthTable> stage(new TruthTable(name, l));
 		if constexpr (integrity_check) {
 			if (!stage->syntax_ok()) throw std::logic_error("invalid constructor");
 		}
 
-		if (auto x = is_in_cache(stage)) return *x;
 		_cache.push_back(stage);
 		return stage;
 	}
@@ -952,6 +976,25 @@ private:
 			if (auto x = _cache[ub].lock()) {
 				if (!are_equivalent(x, src)) continue;
 				if (is_sublogic(x->_logic, src->_logic)) return x;
+				return nullptr;
+			} else {
+				_cache[ub].swap(_cache.back());
+				_cache.pop_back();
+			}
+		}
+		return std::nullopt;
+	}
+
+	// checking for propositional variable without actually constructing it beforehand
+	static std::optional<std::shared_ptr<TruthTable> > is_in_cache(const std::string& name, logics target_logic)
+	{
+		auto ub = _cache.size();
+		while (0 < ub) {
+			--ub;
+			if (auto x = _cache[ub].lock()) {
+				if (name != x->name()) continue;
+				if (!x->is_propositional_variable()) continue;
+				if (is_sublogic(x->_logic, target_logic)) return x;
 				return nullptr;
 			} else {
 				_cache[ub].swap(_cache.back());
