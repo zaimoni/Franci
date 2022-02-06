@@ -105,6 +105,27 @@ namespace enumerated {
 		bool empty() const { return _elements ? _elements->empty() : true; }
 		bool is_defined() const{ return _elements; }  // constructive logic can have undefined variables
 
+		void force_equal(const V& src) {
+			if (!_elements) {
+				// Prior declaration was constructive logic: this initializes
+				_elements = std::vector<V>(1,src);
+				notify();
+				return;
+			}
+			ptrdiff_t ub = _elements->size();
+			while (0 <= --ub) {
+				if ((*_elements)[ub] == src) {
+					if (1 < _elements->size()) {
+						_elements->clear();
+						_elements->push_back(src);
+						notify();
+					}
+					return;
+				}
+			}
+			throw logic::proof_by_contradiction("required equality failed");
+		}
+
 		void restrict_to(const std::vector<V>& src) {
 			if (!_elements) {
 				// Prior declaration was constructive logic: this initializes
@@ -118,6 +139,22 @@ namespace enumerated {
 		template<std::ranges::range SRC>
 		void restrict_to(SRC&& src) requires(std::is_convertible_v<decltype(*src.begin()), V>) {
 			restrict_to(std::vector<V>(src.begin(), src.end()));
+		}
+
+		void force_unequal(const V& src) {
+			if (!_elements) {
+				// Prior declaration was constructive logic: this initializes
+				// \todo work out a way to record this
+				return;
+			}
+			ptrdiff_t ub = _elements->size();
+			while (0 <= --ub) {
+				if (src == (*_elements)[ub]) {
+					if (1 == _elements->size()) throw logic::proof_by_contradiction("required inequality failed");
+					_elements->erase(_elements->begin() + ub);
+					return;
+				}
+			}
 		}
 
 		void exclude(const std::vector<V>& src) {
@@ -213,7 +250,7 @@ namespace enumerated {
 		void notify() {
 			ptrdiff_t ub = _watchers.size();
 			while (0 <= --ub) {
-				if (auto x = _watchers[ub].lock()) x->onNext(*_elements)
+				if (auto x = _watchers[ub].lock()) x->onNext(*_elements);
 				else if (1 == _watchers.size()) {
 					std::vector<V>().swap(*_elements);
 					return;
@@ -713,8 +750,7 @@ private:
 
 	// Propositional variable.  No arguments
 	TruthTable(const std::string& name, logics l)
-		: symbol(name),
-		 _logic(l),
+		: _logic(l),
 		_prop_variable(enumerated::Set<TruthValue>::declare(name, set_theoretic_range())),
 		 _var_values(_var_agnostic(l)),
 		update_bitmap(nullptr),
@@ -742,6 +778,7 @@ public:
 	auto arity() const { return _args.size(); }
 	auto& name() const { 
 		if (op) return op->name();
+		if (!symbol.empty()) return symbol;
 		if (_prop_variable) return _prop_variable->name();
 		return symbol;
 	}
@@ -754,7 +791,10 @@ public:
 	}
 
 	std::string desc() const {
-		if (_args.empty()) return symbol;
+		if (_args.empty()) {
+			if (_prop_variable) return _prop_variable->name();
+			return symbol;
+		}
 
 		const auto sym = name();
 		if (sym == "~") {
@@ -833,6 +873,8 @@ public:
 
 	// actively infer a truth value (triggers non-contradiction processing)
 	static void infer(std::shared_ptr<TruthTable> target, TruthValue src, std::shared_ptr<TruthTable> origin=nullptr) {
+		if (target->_prop_variable) target->_prop_variable->force_equal(src);
+
 		target->regenerate_var_values();
 		auto code = (1ULL << (int)src);
 		if (!target->_var_values) {
@@ -850,6 +892,8 @@ public:
 	}
 
 	static void exclude(std::shared_ptr<TruthTable> target, TruthValue src, std::shared_ptr<TruthTable> origin = nullptr) {
+		if (target->_prop_variable) target->_prop_variable->force_unequal(src);
+
 		target->regenerate_var_values();
 		auto code = (1ULL << (int)src);
 		if (!target->_var_values) {
