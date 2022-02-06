@@ -188,6 +188,22 @@ namespace enumerated {
 			return std::optional<decltype(ret)>(ret);
 		}
 
+		void watched_by(const std::shared_ptr<zaimoni::observer<std::vector<V> > >& src) {
+			ptrdiff_t ub = _watchers.size();
+			while (0 <= --ub) {
+				if (auto x = _watchers[ub].lock()) {
+					if ((void*)(x.get()) == (void*)(src.get())) return;	// already installed
+				} else if (1 == _watchers.size()) {
+					std::vector<V>().swap(*_elements);
+					return;
+				} else {
+					_watchers[ub].swap(_watchers.back());
+					_watchers.pop_back();
+				}
+			}
+			_watchers.push_back(src);
+		}
+
 		// factory functions
 		static auto intuitionist_empty() { return std::shared_ptr<Set>(new Set()); }
 
@@ -250,8 +266,8 @@ namespace enumerated {
 		void notify() {
 			ptrdiff_t ub = _watchers.size();
 			while (0 <= --ub) {
-				if (auto x = _watchers[ub].lock()) x->onNext(*_elements);
-				else if (1 == _watchers.size()) {
+				if (auto x = _watchers[ub].lock(); x && x->onNext(*_elements)) continue;
+				if (1 == _watchers.size()) {
 					std::vector<V>().swap(*_elements);
 					return;
 				} else {
@@ -941,13 +957,50 @@ public:
 
 	static std::shared_ptr<TruthTable> Not(const std::shared_ptr<TruthTable>& src) {
 		if (!src) throw std::logic_error("empty proposition");
+		if (auto x = is_in_cache("~", src)) return *x;
 
 		std::shared_ptr<TruthTable> stage(new TruthTable("~", src, &update_Not, &infer_Not));
 		if constexpr (integrity_check) {
 			if (!stage->syntax_ok()) throw std::logic_error("invalid constructor");
 		}
+#if 0
+		// \todo wire in propositional variable updaters
+		std::shared_ptr<enumerated::Set<TruthValue> > src_var = src->_prop_variable;
+		std::shared_ptr<enumerated::Set<TruthValue> > new_var = stage->_prop_variable;
+		if (src_var && new_var) {
+			std::weak_ptr<enumerated::Set<TruthValue> > weak_src_var(src_var);
+			std::weak_ptr<enumerated::Set<TruthValue> > weak_new_var(new_var);
+			std::function<bool(const std::vector<TruthTable>&)> src_to_new = [weak_new_var](const std::vector<TruthValue>& src) {
+				auto dest_var = weak_new_var.lock();
+				if (!dest_var) return false;
+				if (1 == src.size()) {
+					dest_var->force_equal(!src.front());
+					return true;
+				}
+				std::vector<TruthValue> stage(src);
+				for (decltype(auto) x : stage) x = !x;
+				dest_var->restrict_to(stage);
+				if (dest_var->empty()) throw logic::proof_by_contradiction("required equality failed");
+				return true;
+			};
+			auto new_to_src = [weak_src_var](const std::vector<TruthValue>& src) {
+				auto dest_var = weak_src_var.lock();
+				if (!dest_var) return false;
+				if (1 == src.size()) {
+					dest_var->force_equal(!src.front());
+					return true;
+				}
+				std::vector<TruthValue> stage(src);
+				for (decltype(auto) x : stage) x = !x;
+				dest_var->restrict_to(stage);
+				if (dest_var->empty()) throw logic::proof_by_contradiction("required equality failed");
+				return true;
+			};
+			src_var->watched_by(std::shared_ptr<zaimoni::observer<std::vector<TruthTable> > >(new zaimoni::lambda_observer<std::vector<TruthTable> >(src_to_new)));
+			new_var->watched_by(std::shared_ptr<zaimoni::observer<std::vector<TruthTable> > >(new zaimoni::lambda_observer<std::vector<TruthTable> >(new_to_src)));
+		}
+#endif
 
-		if (auto x = is_in_cache(stage)) return *x;
 		_cache.push_back(stage);
 		src->is_arg_for(stage);
 		return stage;
@@ -1040,6 +1093,24 @@ private:
 				if (!x->is_propositional_variable()) continue;
 				if (is_sublogic(x->_logic, target_logic)) return x;
 				return nullptr;
+			} else {
+				_cache[ub].swap(_cache.back());
+				_cache.pop_back();
+			}
+		}
+		return std::nullopt;
+	}
+
+	static std::optional<std::shared_ptr<TruthTable> > is_in_cache(const std::string& sym, const std::shared_ptr<TruthTable>& src)
+	{
+		auto ub = _cache.size();
+		while (0 < ub) {
+			--ub;
+			if (auto x = _cache[ub].lock()) {
+				if (sym != x->symbol) continue;
+				if (1 != x->_args.size()) continue;
+				if (!are_equivalent(x->_args.front(), src)) continue;
+				return x;
 			} else {
 				_cache[ub].swap(_cache.back());
 				_cache.pop_back();

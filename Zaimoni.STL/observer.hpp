@@ -10,13 +10,16 @@ namespace zaimoni {
 	// copied from C#.
 	template<class SRC>
 	struct observer {
-		virtual void onNext(const SRC& value) = 0; // observable reports data
+		virtual ~observer() = default;
+
+		/// <returns>false if should be destructed as now irrelevant</returns>
+		virtual bool onNext(const SRC& value) = 0; // observable reports data
 	};
 
 	template<class SRC>
 	class lambda_observer : public observer<SRC>
 	{
-		std::function<void(const SRC&)> _op;
+		std::function<bool(const SRC&)> _op;
 
 	public:
 		lambda_observer(decltype(_op) src) : _op(src) {}
@@ -26,7 +29,7 @@ namespace zaimoni {
 		lambda_observer& operator=(lambda_observer&& src) = delete;
 		~lambda_observer() = default;
 
-		void onNext(const SRC& value) override { _op(value); }
+		bool onNext(const SRC& value) override { _op(value); }
 	};
 }
 
