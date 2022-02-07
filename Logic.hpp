@@ -85,9 +85,10 @@ namespace enumerated {
 			return ooao;
 		}
 
+		using elts = std::vector<V>;
 		std::string _name;
-		std::optional<std::vector<V> > _elements;
-		std::vector<std::shared_ptr<zaimoni::observer<std::vector<V> > > > _watchers;
+		std::optional<elts> _elements;
+		std::vector<std::shared_ptr<zaimoni::observer<elts> > > _watchers;
 
 		Set() = default;	// unnamed set with no known elements
 
@@ -334,10 +335,11 @@ namespace enumerated {
 			return ooao;
 		}
 
+		using elts = Set<std::vector<V> >;
 		std::vector<std::shared_ptr<Set<V> > > _args;
-		std::shared_ptr<Set<std::vector<V> > > _elements;
+		std::shared_ptr<elts> _elements;
 		std::function<bool(const std::vector<V>&)> _axiom_predicate;
-		std::vector<std::shared_ptr<zaimoni::observer<Set<std::vector<V> > > > > _watchers;
+		std::vector<std::shared_ptr<zaimoni::observer<elts> > > _watchers;
 
 	public:
 		UniformCartesianProductSubset() = default;
