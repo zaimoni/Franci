@@ -739,9 +739,6 @@ private:
 
 	// start legacy prototype
 	std::vector<std::shared_ptr<TruthTable> > _args;
-	[[deprecated]] std::optional<unsigned char> _var_values;	// bitmap, expected range 0...15
-
-	[[deprecated]] unsigned char (*update_bitmap)(const std::shared_ptr<TruthTable>& src);	// for unary logical connectives/functions
 	std::shared_ptr<Connective> op; // for n-ary logical connectives/functions
 	// end legacy prototype
 
@@ -769,19 +766,16 @@ private:
 	// Propositional variable.  No arguments
 	TruthTable(const std::string& name, logics l)
 		: _logic(l),
-		_prop_variable(enumerated::Set<TruthValue>::declare(name, set_theoretic_range())),
-		 _var_values(_var_agnostic(l)),
-		update_bitmap(nullptr)
+		_prop_variable(enumerated::Set<TruthValue>::declare(name, set_theoretic_range()))
 	{
 	}
 
 	// Unary connective
-	TruthTable(const std::string& name, const std::shared_ptr<TruthTable>& src, decltype(update_bitmap) update)
+	TruthTable(const std::string& name, const std::shared_ptr<TruthTable>& src)
 		: symbol(name),
 		_logic(src->_logic),
 		_prop_variable(enumerated::Set<TruthValue>::declare(set_theoretic_range())),
-		_args(1,src),
-		update_bitmap(update)
+		_args(1,src)
 	{
 	}
 
@@ -876,28 +870,8 @@ public:
 			if (const auto x = _prop_variable->possible_values()) return *x;	// \todo eliminate full copy here
 			return std::nullopt;
 		}
-		regenerate_var_values();
-		if (_var_values) return decode_bitmap(*_var_values, display_range());
+		// \todo other implementations
 		return std::nullopt;
-	}
-
-private:
-	// unsure whether this should be public API
-	std::optional<std::vector<TruthValue> > variable_values() const {
-		if (!is_propositional_variable()) return std::nullopt;
-		if (!_var_values) return std::nullopt; // error case; likely invariant violation
-		return decode_bitmap(*_var_values, display_range());
-	}
-
-public:
-	auto catalog_values(const std::vector<TruthTable*>& src) const {
-		ptrdiff_t ub = src.size();
-		std::vector<std::vector<TruthValue> > ret(src.size());
-		while (0 < --ub) {
-			if (auto x = src[ub]->variable_values()) ret[ub] = std::move(*x);
-//			else ... // invariant violation
-		}
-		return ret;
 	}
 
 	// actively infer a truth value (triggers non-contradiction processing)
@@ -906,20 +880,7 @@ public:
 			target->_prop_variable->force_equal(src);
 			return;
 		}
-
-		target->regenerate_var_values();
-		auto code = (1ULL << (int)src);
-		if (!target->_var_values) {
-			// could happen with constructive logic
-			target->_var_values = code;
-		} else {
-			auto test = *target->_var_values;
-			if (test == code) return;	// no-op
-			if (0 == (test & code)) throw proof_by_contradiction(target->desc() + ": Eliminated all truth values");
-			target->_var_values = code;
-			request_reevaluations(target, src, origin);
-			while (execute_reevaluation());
-		}
+		// \todo other implementations
 	}
 
 	static void exclude(std::shared_ptr<TruthTable> target, TruthValue src, std::shared_ptr<TruthTable> origin = nullptr) {
@@ -927,36 +888,7 @@ public:
 			target->_prop_variable->force_unequal(src);
 			return;
 		}
-
-		target->regenerate_var_values();
-		auto code = (1ULL << (int)src);
-		if (!target->_var_values) {
-			// could happen with constructive logic
-			// \todo build out support for this
-		} else {
-			auto test = *target->_var_values;
-			if (test == code) throw proof_by_contradiction(target->desc() + ": Eliminated all truth values");
-			if (0 == (test & code)) return; // no-op
-			test &= ~(code);
-			test &= _var_agnostic(target->_logic);
-			if (0 == test) throw proof_by_contradiction(target->desc() + ": Eliminated all truth values"); // data integrity error
-			target->_var_values = test;
-			auto candidates = decode_bitmap(test, display_range());
-			if (candidates.empty()) throw proof_by_contradiction(target->desc() + ": Eliminated all truth values"); // data integrity error
-			if (1 == candidates.size()) {
-				// singleton: treat as inferred
-				request_reevaluations(target, candidates.front(), origin);
-				while (execute_reevaluation());
-				return;
-			}
-
-			if (!target->_watching.empty()) {
-				INFORM("need back-propagation implementation of TruthValue::exclude");
-			}
-			if (!target->is_propositional_variable()) {
-				INFORM("need forward-propagation implementation of TruthValue::exclude");
-			}
-		}
+		// \todo other implementations
 	}
 
 	// factories
@@ -976,7 +908,7 @@ public:
 		if (!src) throw std::logic_error("empty proposition");
 		if (auto x = is_in_cache("~", src)) return *x;
 
-		std::shared_ptr<TruthTable> stage(new TruthTable("~", src, &update_Not));
+		std::shared_ptr<TruthTable> stage(new TruthTable("~", src));
 		if constexpr (integrity_check) {
 			if (!stage->syntax_ok()) throw std::logic_error("invalid constructor");
 		}
@@ -1021,6 +953,7 @@ public:
 	}
 
 private:
+#if 0
 	static unsigned char update_Not(const std::shared_ptr<TruthTable>& src) {
 		unsigned char ret = 0;
 		if (const auto x = src->possible_values()) {
@@ -1032,6 +965,7 @@ private:
 	static void infer_Not(TruthValue forced, const std::shared_ptr<TruthTable>& origin) {
 		infer(origin->_args.front(), !forced, origin);
 	}
+#endif
 
 	static TruthValue _nonstrict_implication(logics host, TruthValue lhs, TruthValue rhs) {
 		return toAPI(host).Or(!lhs, rhs);
@@ -1066,10 +1000,7 @@ public:
 // main private section
 private:
 	bool syntax_ok() const {
-		if (update_bitmap && op) return false;
-		if (update_bitmap && 1 != _args.size()) return false;
 		if (op && 2 > _args.size()) return false;
-		if (!update_bitmap && !op && !_args.empty()) return false;
 		return true;
 	}
 
@@ -1165,12 +1096,7 @@ private:
 			if (_args[ub].get() == src.first.get()) break;
 		}
 		if (0 > ub) throw std::logic_error(desc() + ", execute substitution: do not have required target");
-		if (update_bitmap) {
-			_var_values = std::nullopt;
-			return true;
-		}
 		if (op) {
-			_var_values = std::nullopt;
 			// \todo should just prune already-calculated _var_enumerated rather than discard completely
 			return true;
 		}
@@ -1244,18 +1170,6 @@ private:
 			n++;
 		}
 		return ret;
-	}
-
-	void regenerate_var_values() const {
-		if (!_var_values) {
-			if (update_bitmap) {
-				if (1 == _args.size()) {
-					if (auto code = update_bitmap(_args.front())) {
-						*const_cast<decltype(_var_values)*>(&_var_values) = code; // cache variable update
-					}
-				};	// otherwise, invariant violation
-			}
-		}
 	}
 
 	static void _catalog_vars(TruthTable* origin, std::vector<TruthTable*>& ret) {

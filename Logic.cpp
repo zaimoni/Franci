@@ -28,10 +28,13 @@ static void survey(const logic::TruthTable& src) {
 	C_STRING_TO_STDOUT("\n");
 	INFORM(src.is_propositional_variable() ? "is propositional variable" : "is not propositional variable");
 	INFORM(src.is_primary_term() ? "is primary term" : "is not primary term");
-	auto stage_values = src.possible_values().value();
-	auto stage = logic::display_as_enumerated_set(logic::to_string_vector(stage_values));
-	STL_STRING_TO_STDOUT(stage);
-	C_STRING_TO_STDOUT("\n\n");
+	if (auto stage_values = src.possible_values()) {
+		auto stage = logic::display_as_enumerated_set(logic::to_string_vector(*stage_values));
+		STL_STRING_TO_STDOUT(stage);
+		C_STRING_TO_STDOUT("\n\n");
+	} else {
+		C_STRING_TO_STDOUT("possible values not inferred\n\n");
+	}
 }
 
 int main(int argc, char* argv[], char* envp[])
