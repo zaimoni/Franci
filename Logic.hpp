@@ -714,8 +714,6 @@ private:
 	static std::vector<inverse_infer_spec> _inferred_reevaluations;
 #endif
 
-	static std::vector<std::weak_ptr<TruthTable> > _cache;
-
 	static constexpr const TruthValue ref_classical[] = { TruthValue::False, TruthValue::True };
 	static constexpr const TruthValue ref_threeval[] = { TruthValue::False, TruthValue::True, TruthValue::Unknown };
 	static constexpr const TruthValue ref_fourval[] = { TruthValue::False, TruthValue::True, TruthValue::Unknown, TruthValue::Contradiction };
@@ -765,6 +763,11 @@ private:
 		}
 	}
 
+	static auto& cache() {
+		static std::vector<std::weak_ptr<TruthTable> > ooao;
+		return ooao;
+	}
+
 	// Propositional variable.  No arguments
 	TruthTable(const std::string& name, logics l)
 		: _logic(l),
@@ -792,7 +795,7 @@ public:
 	~TruthTable() = default;
 
 	static auto display_range() { return std::ranges::subrange(ref_display); }
-	static auto count_expressions() { return _cache.size(); }
+	static auto count_expressions() { return cache().size(); }
 #if TRUTHTABLE_REEVALUATION_QUEUE_PROTOTYPE
 	static auto count_inferred_reevaluations() { return _inferred_reevaluations.size(); }
 #endif
@@ -904,7 +907,7 @@ public:
 			if (!stage->syntax_ok()) throw std::logic_error("invalid constructor");
 		}
 
-		_cache.push_back(stage);
+		cache().push_back(stage);
 		return stage;
 	}
 
@@ -951,7 +954,7 @@ public:
 			new_var->watched_by(std::shared_ptr<zaimoni::observer<std::vector<TruthValue> > >(new zaimoni::lambda_observer<std::vector<TruthValue> >(new_to_src)));
 		}
 
-		_cache.push_back(stage);
+		cache().push_back(stage);
 		src->is_arg_for(stage);
 		return stage;
 	}
@@ -981,7 +984,7 @@ public:
 
 		if (auto x = is_in_cache(stage)) return *x;
 
-		_cache.push_back(stage);
+		cache().push_back(stage);
 		hypothesis->is_arg_for(stage);
 		consequence->is_arg_for(stage);
 		return stage;
@@ -1000,16 +1003,16 @@ private:
 
 	static std::optional<std::shared_ptr<TruthTable> > is_in_cache(const std::shared_ptr<TruthTable>& src)
 	{
-		auto ub = _cache.size();
-		while (0 < ub) {
-			--ub;
-			if (auto x = _cache[ub].lock()) {
+		auto& Cache = cache();
+		ptrdiff_t ub = Cache.size();
+		while (0 <= --ub) {
+			if (auto x = Cache[ub].lock()) {
 				if (!are_equivalent(x, src)) continue;
 				if (is_sublogic(x->_logic, src->_logic)) return x;
 				return nullptr;
 			} else {
-				_cache[ub].swap(_cache.back());
-				_cache.pop_back();
+				Cache[ub].swap(Cache.back());
+				Cache.pop_back();
 			}
 		}
 		return std::nullopt;
@@ -1018,17 +1021,17 @@ private:
 	// checking for propositional variable without actually constructing it beforehand
 	static std::optional<std::shared_ptr<TruthTable> > is_in_cache(const std::string& name, logics target_logic)
 	{
-		auto ub = _cache.size();
-		while (0 < ub) {
-			--ub;
-			if (auto x = _cache[ub].lock()) {
+		auto& Cache = cache();
+		ptrdiff_t ub = Cache.size();
+		while (0 <= --ub) {
+			if (auto x = Cache[ub].lock()) {
 				if (name != x->name()) continue;
 				if (!x->is_propositional_variable()) continue;
 				if (is_sublogic(x->_logic, target_logic)) return x;
 				return nullptr;
 			} else {
-				_cache[ub].swap(_cache.back());
-				_cache.pop_back();
+				Cache[ub].swap(Cache.back());
+				Cache.pop_back();
 			}
 		}
 		return std::nullopt;
@@ -1036,17 +1039,17 @@ private:
 
 	static std::optional<std::shared_ptr<TruthTable> > is_in_cache(const std::string& sym, const std::shared_ptr<TruthTable>& src)
 	{
-		auto ub = _cache.size();
-		while (0 < ub) {
-			--ub;
-			if (auto x = _cache[ub].lock()) {
+		auto& Cache = cache();
+		ptrdiff_t ub = Cache.size();
+		while (0 <= --ub) {
+			if (auto x = Cache[ub].lock()) {
 				if (sym != x->symbol) continue;
 				if (1 != x->_args.size()) continue;
 				if (!are_equivalent(x->_args.front(), src)) continue;
 				return x;
 			} else {
-				_cache[ub].swap(_cache.back());
-				_cache.pop_back();
+				Cache[ub].swap(Cache.back());
+				Cache.pop_back();
 			}
 		}
 		return std::nullopt;

@@ -2,7 +2,6 @@
 
 #include "Logic.hpp"
 
-std::vector< std::weak_ptr<logic::TruthTable> > logic::TruthTable::_cache;
 #if TRUTHTABLE_REEVALUATION_QUEUE_PROTOTYPE
 std::vector<logic::TruthTable::inverse_infer_spec> logic::TruthTable::_inferred_reevaluations;
 #endif
