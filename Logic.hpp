@@ -289,6 +289,25 @@ namespace enumerated {
 			}
 		}
 
+		static void Notify(const std::shared_ptr<Set>& origin) {
+			auto& notifications = notify_queue();
+			auto& watchers = origin->_watchers
+			ptrdiff_t ub = watchers.size();
+			while (0 <= --ub) {
+				if (watchers[ub]) {
+					notifications.push_back(notify_queue_entry(origin, watcher));
+					continue;
+				}
+				if (1 == _watchers.size()) {
+					decltype(_watchers)().swap(_watchers);
+					return;
+				} else {
+					_watchers[ub].swap(_watchers.back());
+					_watchers.pop_back();
+				}
+			}
+		}
+
 		static void ExecNotify() {
 			auto& notifications = notify_queue();
 			while (!notifications.empty()) {
@@ -300,7 +319,7 @@ namespace enumerated {
 							auto& curious = origin->_watchers;
 							auto is_gone = std::ranges::find(curious, watcher);
 							if (is_gone != curious.end()) {
-								if (1 == curious.size()) decltype(curious)().swap(curious);
+								if (1 == curious.size()) decltype(curious)().swap(curious); // XXX for MSVC++
 								else curious.erase(is_gone);
 							}
 						}
