@@ -80,6 +80,11 @@ namespace Gray_code {
 namespace enumerated {
 	template<class V>
 	class Set final {
+		static auto& cache() {
+			static std::vector<std::weak_ptr<Set<V> > > ooao;
+			return ooao;
+		}
+
 		std::string _name;
 		std::optional<std::vector<V> > _elements;
 		std::vector<std::shared_ptr<zaimoni::observer<std::vector<V> > > > _watchers;
@@ -249,11 +254,6 @@ namespace enumerated {
 		}
 
 	private:
-		static auto& cache() {
-			static std::vector<std::weak_ptr<Set<V> > > ooao;
-			return ooao;
-		}
-
 		static std::shared_ptr<Set<V> > find(const decltype(_name)& name) {
 			auto& already = cache();
 			ptrdiff_t ub = already.size();
@@ -329,9 +329,15 @@ namespace enumerated {
 
 	template<class V>
 	class UniformCartesianProductSubset final {
+		static auto& cache() {
+			static std::vector<std::weak_ptr<UniformCartesianProductSubset<V> > > ooao;
+			return ooao;
+		}
+
 		std::vector<std::shared_ptr<Set<V> > > _args;
 		std::shared_ptr<Set<std::vector<V> > > _elements;
 		std::function<bool(const std::vector<V>&)> _axiom_predicate;
+		std::vector<std::shared_ptr<zaimoni::observer<Set<std::vector<V> > > > > _watchers;
 
 	public:
 		UniformCartesianProductSubset() = default;
@@ -355,6 +361,20 @@ namespace enumerated {
 				if (!_axiom_predicate || _axiom_predicate(iter)) _elements->adjoin(std::shared_ptr<decltype(iter)>(new decltype(iter)(iter)));
 				if (ok = Gray_code::increment(key)) Gray_code::cast_to(key, _args, iter);
 			} while (ok);
+		}
+
+		void notify() {
+			ptrdiff_t ub = _watchers.size();
+			while (0 <= --ub) {
+				if (_watchers[ub] && _watchers[ub]->onNext(*_elements)) continue;
+				if (1 == _watchers.size()) {
+					decltype(_watchers)().swap(_watchers);
+					return;
+				} else {
+					_watchers[ub].swap(_watchers.back());
+					_watchers.pop_back();
+				}
+			}
 		}
 	};
 }
