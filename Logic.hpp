@@ -736,11 +736,11 @@ private:
 	std::vector<std::shared_ptr<TruthTable> > _args;
 	[[deprecated]] std::optional<unsigned char> _var_values;	// bitmap, expected range 0...15
 	// \todo following needs 2 bits for each input, and 2 bits for self
-	std::optional<std::vector<unsigned short> > _var_enumerated;
+	[[deprecated]] std::optional<std::vector<unsigned short> > _var_enumerated;
 
-	unsigned char (*update_bitmap)(const std::shared_ptr<TruthTable>& src);	// for unary logical connectives/functions
+	[[deprecated]] unsigned char (*update_bitmap)(const std::shared_ptr<TruthTable>& src);	// for unary logical connectives/functions
 	std::shared_ptr<Connective> op; // for n-ary logical connectives/functions
-	void (*_infer)(TruthValue forced, const std::shared_ptr<TruthTable>& origin); // for anything not a propositional variable
+	[[deprecated]] void (*_infer)(TruthValue forced, const std::shared_ptr<TruthTable>& origin); // for anything not a propositional variable
 	// end legacy prototype
 
 	// for observer pattern: have to know who directly updates when we do
