@@ -3,8 +3,9 @@
 #include "Logic.hpp"
 
 std::vector< std::weak_ptr<logic::TruthTable> > logic::TruthTable::_cache;
+#if TRUTHTABLE_REEVALUATION_QUEUE_PROTOTYPE
 std::vector<logic::TruthTable::inverse_infer_spec> logic::TruthTable::_inferred_reevaluations;
-
+#endif
 
 #ifdef LOGIC_DRIVER
 #include "test_driver.h"
@@ -71,8 +72,10 @@ int main(int argc, char* argv[], char* envp[])
 	}
 	INC_INFORM("tracking: ");
 	INFORM(logic::TruthTable::count_expressions());
+#if TRUTHTABLE_REEVALUATION_QUEUE_PROTOTYPE
 	INC_INFORM("queued substitutions: ");
 	INFORM(logic::TruthTable::count_inferred_reevaluations());
+#endif
 	}
 
 	// coverage test for logical negation, infer truth value
