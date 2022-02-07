@@ -90,6 +90,12 @@ namespace enumerated {
 		std::optional<elts> _elements;
 		std::vector<std::shared_ptr<zaimoni::observer<elts> > > _watchers;
 
+		using notify_queue_entry = std::pair<std::weak_ptr<Set>, std::weak_ptr<zaimoni::observer<elts> > >;
+		static auto& notify_queue() {
+			static std::vector<notify_queue_entry> ooao;
+			return ooao;
+		}
+
 		Set() = default;	// unnamed set with no known elements
 
 		// unnamed sets
@@ -280,6 +286,30 @@ namespace enumerated {
 					_watchers[ub].swap(_watchers.back());
 					_watchers.pop_back();
 				}
+			}
+		}
+
+		static void ExecNotify() {
+			auto& notifications = notify_queue();
+			while (!notifications.empty()) {
+				auto x = notifications.front();
+				if (auto origin = x.first.lock()) {
+					if (auto watcher = x.second.lock()) {
+						if (!watcher->onNext(*(origin->_elements))) {
+							// this watcher has gone invalid
+							auto& curious = origin->_watchers;
+							auto is_gone = std::ranges::find(curious, watcher);
+							if (is_gone != curious.end()) {
+								if (1 == curious.size()) decltype(curious)().swap(curious);
+								else curious.erase(is_gone);
+							}
+						}
+					}
+				}
+
+				// clear the entry
+				if (1 == notifications.size()) decltype(notifications)().swap(notifications);
+				else notifications.erase(notifications.begin());
 			}
 		}
 
