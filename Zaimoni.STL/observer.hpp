@@ -29,7 +29,7 @@ namespace zaimoni {
 		lambda_observer& operator=(lambda_observer&& src) = delete;
 		~lambda_observer() = default;
 
-		bool onNext(const SRC& value) override { _op(value); }
+		bool onNext(const SRC& value) override { return _op(value); }
 	};
 }
 

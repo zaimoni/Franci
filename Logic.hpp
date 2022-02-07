@@ -963,14 +963,14 @@ public:
 		if constexpr (integrity_check) {
 			if (!stage->syntax_ok()) throw std::logic_error("invalid constructor");
 		}
-#if 0
-		// \todo wire in propositional variable updaters
+
+		// wire in propositional variable updaters
 		std::shared_ptr<enumerated::Set<TruthValue> > src_var = src->_prop_variable;
 		std::shared_ptr<enumerated::Set<TruthValue> > new_var = stage->_prop_variable;
 		if (src_var && new_var) {
 			std::weak_ptr<enumerated::Set<TruthValue> > weak_src_var(src_var);
 			std::weak_ptr<enumerated::Set<TruthValue> > weak_new_var(new_var);
-			std::function<bool(const std::vector<TruthTable>&)> src_to_new = [weak_new_var](const std::vector<TruthValue>& src) {
+			auto src_to_new = [weak_new_var](const std::vector<TruthValue>& src) {
 				auto dest_var = weak_new_var.lock();
 				if (!dest_var) return false;
 				if (1 == src.size()) {
@@ -996,10 +996,9 @@ public:
 				if (dest_var->empty()) throw logic::proof_by_contradiction("required equality failed");
 				return true;
 			};
-			src_var->watched_by(std::shared_ptr<zaimoni::observer<std::vector<TruthTable> > >(new zaimoni::lambda_observer<std::vector<TruthTable> >(src_to_new)));
-			new_var->watched_by(std::shared_ptr<zaimoni::observer<std::vector<TruthTable> > >(new zaimoni::lambda_observer<std::vector<TruthTable> >(new_to_src)));
+			src_var->watched_by(std::shared_ptr<zaimoni::observer<std::vector<TruthValue> > >(new zaimoni::lambda_observer<std::vector<TruthValue> >(src_to_new)));
+			new_var->watched_by(std::shared_ptr<zaimoni::observer<std::vector<TruthValue> > >(new zaimoni::lambda_observer<std::vector<TruthValue> >(new_to_src)));
 		}
-#endif
 
 		_cache.push_back(stage);
 		src->is_arg_for(stage);

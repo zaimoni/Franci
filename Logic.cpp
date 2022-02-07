@@ -72,6 +72,17 @@ int main(int argc, char* argv[], char* envp[])
 	INFORM(logic::TruthTable::count_inferred_reevaluations());
 	}
 
+	// coverage test for logical negation
+	logic::TruthTable::infer(test_var[0], logic::TruthValue::True);
+	survey(*test_var[0]);
+	survey(*test_Not[0]);
+
+	logic::TruthTable::infer(test_Not_Q[0], logic::TruthValue::True);
+	survey(*test_var_Q[0]);
+	survey(*test_Not_Q[0]);
+
+
+	// coverage test for non-strict implication
 #if 0
 	{
 	std::vector<std::shared_ptr<logic::TruthTable> > overview;
