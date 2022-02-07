@@ -12,12 +12,15 @@
 #include <optional>
 #include <ranges>
 #include <concepts>
+#include <algorithm>
 #include <stddef.h>
 
 #include "Zaimoni.STL/Logging.h"
 #include "Zaimoni.STL/observer.hpp"
 
 namespace logic {
+	using std::swap;
+
 	struct proof_by_contradiction final : public std::runtime_error
 	{
 		proof_by_contradiction(const std::string& msg) : std::runtime_error(msg) {}
@@ -79,7 +82,7 @@ namespace enumerated {
 	class Set final {
 		std::string _name;
 		std::optional<std::vector<V> > _elements;
-		std::vector<std::weak_ptr<zaimoni::observer<std::vector<V> > > > _watchers;
+		std::vector<std::shared_ptr<zaimoni::observer<std::vector<V> > > > _watchers;
 
 		Set() = default;	// unnamed set with no known elements
 
@@ -104,6 +107,7 @@ namespace enumerated {
 		auto size() const { return _elements ? _elements->size() : 0; }
 		bool empty() const { return _elements ? _elements->empty() : true; }
 		bool is_defined() const{ return _elements; }  // constructive logic can have undefined variables
+		const std::vector<V>* possible_values() const { return _elements ? &(*_elements) : nullptr; }
 
 		void force_equal(const V& src) {
 			if (!_elements) {
@@ -133,11 +137,11 @@ namespace enumerated {
 				notify();
 				return;
 			}
-			destructive_intersect(*_elements, src);
+			if (destructive_intersect(*_elements, src)) notify();
 		}
 
 		template<std::ranges::range SRC>
-		void restrict_to(SRC&& src) requires(std::is_convertible_v<decltype(*src.begin()), V>) {
+		void restrict_to(SRC&& src) requires(std::is_convertible_v<decltype(*src.begin()), V> && !std::is_same_v<SRC, std::vector<V> >) {
 			restrict_to(std::vector<V>(src.begin(), src.end()));
 		}
 
@@ -152,6 +156,7 @@ namespace enumerated {
 				if (src == (*_elements)[ub]) {
 					if (1 == _elements->size()) throw logic::proof_by_contradiction("required inequality failed");
 					_elements->erase(_elements->begin() + ub);
+					notify();
 					return;
 				}
 			}
@@ -163,7 +168,7 @@ namespace enumerated {
 				// \todo work out a way to record this
 				return;
 			}
-			destructive_difference(*_elements, src);
+			if (destructive_difference(*_elements, src)) notify();
 		}
 
 		void adjoin(const V& src) {
@@ -191,10 +196,10 @@ namespace enumerated {
 		void watched_by(const std::shared_ptr<zaimoni::observer<std::vector<V> > >& src) {
 			ptrdiff_t ub = _watchers.size();
 			while (0 <= --ub) {
-				if (auto x = _watchers[ub].lock()) {
-					if ((void*)(x.get()) == (void*)(src.get())) return;	// already installed
+				if (_watchers[ub]) {
+					if ((void*)(_watchers[ub].get()) == (void*)(src.get())) return;	// already installed
 				} else if (1 == _watchers.size()) {
-					std::vector<V>().swap(*_elements);
+					decltype(_watchers)().swap(_watchers);
 					return;
 				} else {
 					_watchers[ub].swap(_watchers.back());
@@ -208,10 +213,10 @@ namespace enumerated {
 		static auto intuitionist_empty() { return std::shared_ptr<Set>(new Set()); }
 
 		// unnamed set -- no caching
-		template<class SRC>
-		static auto declare(SRC&& src) requires requires() { new Set(std::forward(src)); }
+		template<std::ranges::range SRC>
+		static auto declare(SRC&& src) requires(std::is_convertible_v<decltype(*src.begin()), V>)
 		{
-			return std::shared_ptr<Set>(new Set(std::forward(src)));
+			return std::shared_ptr<Set>(new Set(std::vector<V>(src.begin(), src.end())));
 		}
 
 		// named sets -- these are cached
@@ -266,9 +271,9 @@ namespace enumerated {
 		void notify() {
 			ptrdiff_t ub = _watchers.size();
 			while (0 <= --ub) {
-				if (auto x = _watchers[ub].lock(); x && x->onNext(*_elements)) continue;
+				if (_watchers[ub] && _watchers[ub]->onNext(*_elements)) continue;
 				if (1 == _watchers.size()) {
-					std::vector<V>().swap(*_elements);
+					decltype(_watchers)().swap(_watchers);
 					return;
 				} else {
 					_watchers[ub].swap(_watchers.back());
@@ -277,21 +282,21 @@ namespace enumerated {
 			}
 		}
 
-		static void destructive_intersect(std::vector<V>& host, const std::vector<V>& src) {
+		static bool destructive_intersect(std::vector<V>& host, const std::vector<V>& src) {
 			bool now_empty = true;
 			bool changed = false;
 			ptrdiff_t ub = host.size();
 			while (0 <= --ub) {
-				if (std::ranges::any_of(src, [&x](auto y) { return x == y })) {
+				if (std::ranges::any_of(src, [&](auto y) { return host[ub] == y; })) {
 					now_empty = false;
 					continue;
 				}
-				host[ub].swap(host.back());
+				swap(host[ub], host.back());
 				host.pop_back();
 				changed = true;
 			}
 			if (now_empty) std::vector<V>().swap(host);
-			if (changed) notify();
+			return changed;
 		}
 
 		static void destructive_difference(std::vector<V>& host, const std::vector<V>& src) {
@@ -299,26 +304,26 @@ namespace enumerated {
 			bool changed = false;
 			ptrdiff_t ub = host.size();
 			while (0 <= --ub) {
-				if (!std::ranges::any_of(src, [&x](auto y) { return x == y })) {
+				if (!std::ranges::any_of(src, [&](auto y) { return host[ub] == y; })) {
 					now_empty = false;
 					continue;
 				}
-				host[ub].swap(host.back());
+				swap(host[ub], host.back());
 				host.pop_back();
 				changed = true;
 			}
 			if (now_empty) std::vector<V>().swap(host);
-			if (changed) notify();
+			return changed;
 		}
 
-		static void destructive_union(std::vector<V>& host, const std::vector<V>& src) {
+		static bool destructive_union(std::vector<V>& host, const std::vector<V>& src) {
 			bool changed = false;
 			for (decltype(auto) x : src) {
 				if (std::ranges::any_of(host, [&x](auto y) { return x == y })) continue;
 				host.push_back(x);
 				changed = true;
 			}
-			if (changed) notify();
+			return changed;
 		}
 	};
 
@@ -735,12 +740,9 @@ private:
 	// start legacy prototype
 	std::vector<std::shared_ptr<TruthTable> > _args;
 	[[deprecated]] std::optional<unsigned char> _var_values;	// bitmap, expected range 0...15
-	// \todo following needs 2 bits for each input, and 2 bits for self
-	[[deprecated]] std::optional<std::vector<unsigned short> > _var_enumerated;
 
 	[[deprecated]] unsigned char (*update_bitmap)(const std::shared_ptr<TruthTable>& src);	// for unary logical connectives/functions
 	std::shared_ptr<Connective> op; // for n-ary logical connectives/functions
-	[[deprecated]] void (*_infer)(TruthValue forced, const std::shared_ptr<TruthTable>& origin); // for anything not a propositional variable
 	// end legacy prototype
 
 	// for observer pattern: have to know who directly updates when we do
@@ -769,16 +771,23 @@ private:
 		: _logic(l),
 		_prop_variable(enumerated::Set<TruthValue>::declare(name, set_theoretic_range())),
 		 _var_values(_var_agnostic(l)),
-		update_bitmap(nullptr),
-		_infer(nullptr) {
+		update_bitmap(nullptr)
+	{
 	}
 
 	// Unary connective
-	TruthTable(const std::string& name, const std::shared_ptr<TruthTable>& src, decltype(update_bitmap) update, decltype(_infer) chain_infer) : symbol(name), _logic(src->_logic), _args(1,src), update_bitmap(update), _infer(chain_infer) {}
+	TruthTable(const std::string& name, const std::shared_ptr<TruthTable>& src, decltype(update_bitmap) update)
+		: symbol(name),
+		_logic(src->_logic),
+		_prop_variable(enumerated::Set<TruthValue>::declare(set_theoretic_range())),
+		_args(1,src),
+		update_bitmap(update)
+	{
+	}
 
 	// binary connective
 	// \todo: fixup logic field (ask the operation)
-	TruthTable(const std::shared_ptr<TruthTable>& lhs, const std::shared_ptr<TruthTable>& rhs, decltype(op) update, decltype(_infer) chain_infer) : _logic(common_logic(lhs->_logic, rhs->_logic).value()), _args(2), op(update), _infer(chain_infer) {
+	TruthTable(const std::shared_ptr<TruthTable>& lhs, const std::shared_ptr<TruthTable>& rhs, decltype(op) update) : _logic(common_logic(lhs->_logic, rhs->_logic).value()), _args(2), op(update) {
 		_args[0] = lhs;
 		_args[1] = rhs;
 	}
@@ -863,6 +872,10 @@ public:
 	}
 
 	std::optional<std::vector<TruthValue> > possible_values() const {
+		if (_prop_variable) {
+			if (const auto x = _prop_variable->possible_values()) return *x;	// \todo eliminate full copy here
+			return std::nullopt;
+		}
 		regenerate_var_values();
 		if (_var_values) return decode_bitmap(*_var_values, display_range());
 		return std::nullopt;
@@ -889,7 +902,10 @@ public:
 
 	// actively infer a truth value (triggers non-contradiction processing)
 	static void infer(std::shared_ptr<TruthTable> target, TruthValue src, std::shared_ptr<TruthTable> origin=nullptr) {
-		if (target->_prop_variable) target->_prop_variable->force_equal(src);
+		if (target->_prop_variable) {
+			target->_prop_variable->force_equal(src);
+			return;
+		}
 
 		target->regenerate_var_values();
 		auto code = (1ULL << (int)src);
@@ -902,13 +918,15 @@ public:
 			if (0 == (test & code)) throw proof_by_contradiction(target->desc() + ": Eliminated all truth values");
 			target->_var_values = code;
 			request_reevaluations(target, src, origin);
-			if (!target->is_propositional_variable()) target->_infer(src, target);
 			while (execute_reevaluation());
 		}
 	}
 
 	static void exclude(std::shared_ptr<TruthTable> target, TruthValue src, std::shared_ptr<TruthTable> origin = nullptr) {
-		if (target->_prop_variable) target->_prop_variable->force_unequal(src);
+		if (target->_prop_variable) {
+			target->_prop_variable->force_unequal(src);
+			return;
+		}
 
 		target->regenerate_var_values();
 		auto code = (1ULL << (int)src);
@@ -928,7 +946,6 @@ public:
 			if (1 == candidates.size()) {
 				// singleton: treat as inferred
 				request_reevaluations(target, candidates.front(), origin);
-				if (!target->is_propositional_variable()) target->_infer(candidates.front(), target);
 				while (execute_reevaluation());
 				return;
 			}
@@ -959,7 +976,7 @@ public:
 		if (!src) throw std::logic_error("empty proposition");
 		if (auto x = is_in_cache("~", src)) return *x;
 
-		std::shared_ptr<TruthTable> stage(new TruthTable("~", src, &update_Not, &infer_Not));
+		std::shared_ptr<TruthTable> stage(new TruthTable("~", src, &update_Not));
 		if constexpr (integrity_check) {
 			if (!stage->syntax_ok()) throw std::logic_error("invalid constructor");
 		}
@@ -968,9 +985,7 @@ public:
 		std::shared_ptr<enumerated::Set<TruthValue> > src_var = src->_prop_variable;
 		std::shared_ptr<enumerated::Set<TruthValue> > new_var = stage->_prop_variable;
 		if (src_var && new_var) {
-			std::weak_ptr<enumerated::Set<TruthValue> > weak_src_var(src_var);
-			std::weak_ptr<enumerated::Set<TruthValue> > weak_new_var(new_var);
-			auto src_to_new = [weak_new_var](const std::vector<TruthValue>& src) {
+			auto src_to_new = [weak_new_var = std::weak_ptr<enumerated::Set<TruthValue> >(new_var)](const std::vector<TruthValue>& src) {
 				auto dest_var = weak_new_var.lock();
 				if (!dest_var) return false;
 				if (1 == src.size()) {
@@ -983,7 +998,7 @@ public:
 				if (dest_var->empty()) throw logic::proof_by_contradiction("required equality failed");
 				return true;
 			};
-			auto new_to_src = [weak_src_var](const std::vector<TruthValue>& src) {
+			auto new_to_src = [weak_src_var = std::weak_ptr<enumerated::Set<TruthValue> >(src_var)](const std::vector<TruthValue>& src) {
 				auto dest_var = weak_src_var.lock();
 				if (!dest_var) return false;
 				if (1 == src.size()) {
@@ -1035,7 +1050,7 @@ public:
 			&& !is_sublogic(consequence->logic(), hypothesis->logic()))
 			throw std::logic_error("incompatible hypothesis and consequence");
 
-		std::shared_ptr<TruthTable> stage(new TruthTable(hypothesis, consequence, nonstrict_implication(), &infer_Not));
+		std::shared_ptr<TruthTable> stage(new TruthTable(hypothesis, consequence, nonstrict_implication()));
 		if constexpr (integrity_check) {
 			if (!stage->syntax_ok()) throw std::logic_error("invalid constructor");
 		}
@@ -1055,8 +1070,6 @@ private:
 		if (update_bitmap && 1 != _args.size()) return false;
 		if (op && 2 > _args.size()) return false;
 		if (!update_bitmap && !op && !_args.empty()) return false;
-		if (!_infer && !_args.empty()) return false;
-		if (_infer && _args.empty()) return false;
 		return true;
 	}
 
@@ -1158,7 +1171,6 @@ private:
 		}
 		if (op) {
 			_var_values = std::nullopt;
-			_var_enumerated = std::nullopt;
 			// \todo should just prune already-calculated _var_enumerated rather than discard completely
 			return true;
 		}
@@ -1234,14 +1246,6 @@ private:
 		return ret;
 	}
 
-	void regenerate_enumerated_values() const {
-		if (op && !_var_enumerated) {
-			if (2 <= _args.size()) {
-				if (auto stage = toTruthVector(_args)) *const_cast<decltype(_var_enumerated)*>(&_var_enumerated) = op->enumerate(_logic, *stage);
-			};	// otherwise, invariant violation
-		}
-	}
-
 	void regenerate_var_values() const {
 		if (!_var_values) {
 			if (update_bitmap) {
@@ -1250,13 +1254,6 @@ private:
 						*const_cast<decltype(_var_values)*>(&_var_values) = code; // cache variable update
 					}
 				};	// otherwise, invariant violation
-			}
-			regenerate_enumerated_values();
-			if (_var_enumerated) {
-				auto code = extract_truth_bitmap(*_var_enumerated, 0);	// *our* value, not our arguments' values
-				if (code) {
-					*const_cast<std::optional<unsigned char>*>(&_var_values) = code; // cache variable update
-				}
 			}
 		}
 	}
