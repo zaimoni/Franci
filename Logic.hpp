@@ -145,19 +145,23 @@ namespace enumerated {
 			throw logic::proof_by_contradiction("required equality failed");
 		}
 
-		void restrict_to(const std::vector<V>& src) {
-			if (!_elements) {
+		static void restrict_to(const std::shared_ptr<Set>& dest, const std::vector<V>& src) {
+			if (!dest->_elements) {
 				// Prior declaration was constructive logic: this initializes
-				_elements = src;
-				notify();
+				dest->_elements = src;
+				Notify(dest);
+				ExecNotify();
 				return;
 			}
-			if (destructive_intersect(*_elements, src)) notify();
+			if (destructive_intersect(*(dest->_elements), src)) {
+				Notify(dest);
+				ExecNotify();
+			}
 		}
 
 		template<std::ranges::range SRC>
-		void restrict_to(SRC&& src) requires(std::is_convertible_v<decltype(*src.begin()), V> && !std::is_same_v<SRC, std::vector<V> >) {
-			restrict_to(std::vector<V>(src.begin(), src.end()));
+		static void restrict_to(const std::shared_ptr<Set>& dest, SRC&& src) requires(std::is_convertible_v<decltype(*src.begin()), V> && !std::is_same_v<SRC, std::vector<V> >) {
+			restrict_to(dest, std::vector<V>(src.begin(), src.end()));
 		}
 
 		void force_unequal(const V& src) {
@@ -239,8 +243,7 @@ namespace enumerated {
 		static auto declare(const std::string& name, SRC&& src) requires(std::is_convertible_v<decltype(*src.begin()), V>)
 		{
 			if (auto x = find(name)) {
-				// already have this: treat as restriction
-				x->restrict_to(src);
+				restrict_to(x, src); // already have this: treat as restriction
 				return x;
 			}
 
@@ -253,8 +256,7 @@ namespace enumerated {
 		static auto declare(std::string&& name, SRC&& src) requires(std::is_convertible_v<decltype(*src.begin()), V>)
 		{
 			if (auto x = find(name)) {
-				// already have this: treat as restriction
-				x->restrict_to(src);
+				restrict_to(x, src); // already have this: treat as restriction
 				return x;
 			}
 
@@ -1014,7 +1016,7 @@ public:
 				}
 				std::vector<TruthValue> stage(src);
 				for (decltype(auto) x : stage) x = !x;
-				dest_var->restrict_to(stage);
+				enumerated::Set<TruthValue>::restrict_to(dest_var, stage);
 				if (dest_var->empty()) throw logic::proof_by_contradiction("required equality failed");
 				return true;
 			};
@@ -1027,7 +1029,7 @@ public:
 				}
 				std::vector<TruthValue> stage(src);
 				for (decltype(auto) x : stage) x = !x;
-				dest_var->restrict_to(stage);
+				enumerated::Set<TruthValue>::restrict_to(dest_var, stage);
 				if (dest_var->empty()) throw logic::proof_by_contradiction("required equality failed");
 				return true;
 			};
