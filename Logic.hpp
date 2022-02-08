@@ -17,6 +17,7 @@
 
 #include "Zaimoni.STL/Logging.h"
 #include "Zaimoni.STL/observer.hpp"
+#include "Zaimoni.STL/simple_lock.hpp"
 
 namespace logic {
 	using std::swap;
@@ -121,20 +122,22 @@ namespace enumerated {
 		bool is_defined() const{ return _elements; }  // constructive logic can have undefined variables
 		const std::vector<V>* possible_values() const { return _elements ? &(*_elements) : nullptr; }
 
-		void force_equal(const V& src) {
-			if (!_elements) {
+		static void force_equal(const std::shared_ptr<Set>& dest, const V& src) {
+			if (!dest->_elements) {
 				// Prior declaration was constructive logic: this initializes
-				_elements = std::vector<V>(1,src);
-				notify();
+				dest->_elements = std::vector<V>(1, src);
+				Notify(dest);
+				ExecNotify();
 				return;
 			}
-			ptrdiff_t ub = _elements->size();
+			ptrdiff_t ub = dest->_elements->size();
 			while (0 <= --ub) {
-				if ((*_elements)[ub] == src) {
-					if (1 < _elements->size()) {
-						_elements->clear();
-						_elements->push_back(src);
-						notify();
+				if ((*(dest->_elements))[ub] == src) {
+					if (1 < dest->_elements->size()) {
+						dest->_elements->clear();
+						dest->_elements->push_back(src);
+						Notify(dest);
+						ExecNotify();
 					}
 					return;
 				}
@@ -205,11 +208,11 @@ namespace enumerated {
 			return std::optional<decltype(ret)>(ret);
 		}
 
-		void watched_by(const std::shared_ptr<zaimoni::observer<std::vector<V> > >& src) {
+		void watched_by(const std::shared_ptr<zaimoni::observer<elts> >& src) {
 			ptrdiff_t ub = _watchers.size();
 			while (0 <= --ub) {
 				if (_watchers[ub]) {
-					if ((void*)(_watchers[ub].get()) == (void*)(src.get())) return;	// already installed
+					if (_watchers[ub] == src) return;	// already installed
 				} else if (1 == _watchers.size()) {
 					decltype(_watchers)().swap(_watchers);
 					return;
@@ -291,24 +294,31 @@ namespace enumerated {
 
 		static void Notify(const std::shared_ptr<Set>& origin) {
 			auto& notifications = notify_queue();
-			auto& watchers = origin->_watchers
+			auto& watchers = origin->_watchers;
 			ptrdiff_t ub = watchers.size();
 			while (0 <= --ub) {
 				if (watchers[ub]) {
-					notifications.push_back(notify_queue_entry(origin, watcher));
+					notifications.push_back(notify_queue_entry(origin, watchers[ub]));
 					continue;
 				}
-				if (1 == _watchers.size()) {
-					decltype(_watchers)().swap(_watchers);
+				if (1 == watchers.size()) {
+					std::remove_reference_t<decltype(watchers)>().swap(watchers);
 					return;
 				} else {
-					_watchers[ub].swap(_watchers.back());
-					_watchers.pop_back();
+					watchers[ub].swap(watchers.back());
+					watchers.pop_back();
 				}
 			}
 		}
 
+		static unsigned int& in_ExecNotify() {
+			static unsigned int ooao = 0;
+			return ooao;
+		} 
 		static void ExecNotify() {
+			if (1 <= in_ExecNotify()) return;
+			const auto held = zaimoni::simple_lock(in_ExecNotify());
+
 			auto& notifications = notify_queue();
 			while (!notifications.empty()) {
 				auto x = notifications.front();
@@ -319,7 +329,7 @@ namespace enumerated {
 							auto& curious = origin->_watchers;
 							auto is_gone = std::ranges::find(curious, watcher);
 							if (is_gone != curious.end()) {
-								if (1 == curious.size()) decltype(curious)().swap(curious); // XXX for MSVC++
+								if (1 == curious.size()) std::remove_reference_t<decltype(curious)>().swap(curious); // XXX for MSVC++
 								else curious.erase(is_gone);
 							}
 						}
@@ -327,7 +337,7 @@ namespace enumerated {
 				}
 
 				// clear the entry
-				if (1 == notifications.size()) decltype(notifications)().swap(notifications);
+				if (1 == notifications.size()) std::remove_reference_t<decltype(notifications)>().swap(notifications);
 				else notifications.erase(notifications.begin());
 			}
 		}
@@ -955,7 +965,7 @@ public:
 	// actively infer a truth value (triggers non-contradiction processing)
 	static void infer(std::shared_ptr<TruthTable> target, TruthValue src, std::shared_ptr<TruthTable> origin=nullptr) {
 		if (target->_prop_variable) {
-			target->_prop_variable->force_equal(src);
+			enumerated::Set<TruthValue>::force_equal(target->_prop_variable, src);
 			return;
 		}
 		// \todo other implementations
@@ -999,7 +1009,7 @@ public:
 				auto dest_var = weak_new_var.lock();
 				if (!dest_var) return false;
 				if (1 == src.size()) {
-					dest_var->force_equal(!src.front());
+					enumerated::Set<TruthValue>::force_equal(dest_var,!src.front());
 					return true;
 				}
 				std::vector<TruthValue> stage(src);
@@ -1012,7 +1022,7 @@ public:
 				auto dest_var = weak_src_var.lock();
 				if (!dest_var) return false;
 				if (1 == src.size()) {
-					dest_var->force_equal(!src.front());
+					enumerated::Set<TruthValue>::force_equal(dest_var, !src.front());
 					return true;
 				}
 				std::vector<TruthValue> stage(src);
