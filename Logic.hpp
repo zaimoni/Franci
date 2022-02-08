@@ -855,15 +855,14 @@ private:
 	std::string symbol;
 	logics _logic;
 
+	// we are delegating to the following change notification systems
 	std::shared_ptr<enumerated::Set<TruthValue> > _prop_variable;
+	std::shared_ptr<enumerated::UniformCartesianProductSubset<TruthValue> > _table;
 
 	// start legacy prototype
 	std::vector<std::shared_ptr<TruthTable> > _args;
 	std::shared_ptr<Connective> op; // for n-ary logical connectives/functions
 	// end legacy prototype
-
-	// for observer pattern: have to know who directly updates when we do
-	mutable std::vector<std::weak_ptr<TruthTable> > _watching;
 
 	// if we need these, undelete
 	TruthTable() = delete;
@@ -1075,7 +1074,6 @@ public:
 		}
 
 		cache().push_back(stage);
-		src->is_arg_for(stage);
 		return stage;
 	}
 
@@ -1105,8 +1103,6 @@ public:
 		if (auto x = is_in_cache(stage)) return *x;
 
 		cache().push_back(stage);
-		hypothesis->is_arg_for(stage);
-		consequence->is_arg_for(stage);
 		return stage;
 	}
 
@@ -1115,10 +1111,6 @@ private:
 	bool syntax_ok() const {
 		if (op && 2 > _args.size()) return false;
 		return true;
-	}
-
-	void is_arg_for(std::shared_ptr<TruthTable>& src) const {
-		if (src) _watching.push_back(src);
 	}
 
 	static std::optional<std::shared_ptr<TruthTable> > is_in_cache(const std::shared_ptr<TruthTable>& src)
