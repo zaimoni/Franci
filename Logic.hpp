@@ -130,12 +130,13 @@ namespace enumerated {
 				ExecNotify();
 				return;
 			}
-			ptrdiff_t ub = dest->_elements->size();
+			auto& target = *(dest->_elements);
+			ptrdiff_t ub = target.size();
 			while (0 <= --ub) {
-				if ((*(dest->_elements))[ub] == src) {
-					if (1 < dest->_elements->size()) {
-						dest->_elements->clear();
-						dest->_elements->push_back(src);
+				if (src == target[ub]) {
+					if (1 < target.size()) {
+						target.clear();
+						target.push_back(src);
 						Notify(dest);
 						ExecNotify();
 					}
@@ -164,48 +165,55 @@ namespace enumerated {
 			restrict_to(dest, std::vector<V>(src.begin(), src.end()));
 		}
 
-		void force_unequal(const V& src) {
-			if (!_elements) {
+		static void force_unequal(const std::shared_ptr<Set>& dest, const V& src) {
+			if (!dest->_elements) {
 				// Prior declaration was constructive logic: this initializes
 				// \todo work out a way to record this
 				return;
 			}
-			ptrdiff_t ub = _elements->size();
+			auto& target = *(dest->_elements);
+			ptrdiff_t ub = target.size();
 			while (0 <= --ub) {
-				if (src == (*_elements)[ub]) {
-					if (1 == _elements->size()) throw logic::proof_by_contradiction("required inequality failed");
-					_elements->erase(_elements->begin() + ub);
-					notify();
+				if (src == target[ub]) {
+					if (1 == target.size()) throw logic::proof_by_contradiction("required inequality failed");
+					target.erase(target.begin() + ub);
+					Notify(dest);
+					ExecNotify();
 					return;
 				}
 			}
 		}
 
-		void exclude(const std::vector<V>& src) {
-			if (!_elements) {
+		static void exclude(const std::shared_ptr<Set>& dest, const std::vector<V>& src) {
+			if (!dest->_elements) {
 				// Prior declaration was constructive logic
 				// \todo work out a way to record this
 				return;
 			}
-			if (destructive_difference(*_elements, src)) notify();
+			if (destructive_difference(*(dest->_elements), src)) {
+				Notify(dest);
+				ExecNotify();
+			}
 		}
 
-		void adjoin(const V& src) {
-			if (!_elements) {
+		static void adjoin(const std::shared_ptr<Set>& dest, const V& src) {
+			if (!dest->_elements) {
 				// Prior declaration was constructive logic: this initializes
-				_elements = std::vector<V>(1,src);
-				notify();
+				dest->_elements = std::vector<V>(1,src);
+				Notify(dest);
+				ExecNotify();
 				return;
 			}
-			if (!std::ranges:any_of(*_elements, [&](const V& x) {x == src})) {
-				(*_elements).push_back(src);
-				notify();
+			if (!std::ranges:any_of(*(dest->_elements), [&](const V& x) {x == src})) {
+				(*(dest->_elements)).push_back(src);
+				Notify(dest);
+				ExecNotify();
 				return;
 			}
 		}
 
 		template<std::invocable<V> FUNC>
-		auto image_of(const FUNC& op) {
+		auto image_of(const FUNC& op) const {
 			std::vector<decltype(op(_elements->front()))> ret;
 			if (!_elements) return std::optional<decltype(ret)>();	// constructive logic
 			for (decltype(auto) x : *_elements) ret.push_back(op(x));
@@ -278,20 +286,6 @@ namespace enumerated {
 				}
 			}
 			return nullptr;
-		}
-
-		void notify() {
-			ptrdiff_t ub = _watchers.size();
-			while (0 <= --ub) {
-				if (_watchers[ub] && _watchers[ub]->onNext(*_elements)) continue;
-				if (1 == _watchers.size()) {
-					decltype(_watchers)().swap(_watchers);
-					return;
-				} else {
-					_watchers[ub].swap(_watchers.back());
-					_watchers.pop_back();
-				}
-			}
 		}
 
 		static void Notify(const std::shared_ptr<Set>& origin) {
@@ -421,7 +415,7 @@ namespace enumerated {
 			bool ok = true;
 			_elements = Set<V>::intuitionist_empty()
 			do {
-				if (!_axiom_predicate || _axiom_predicate(iter)) _elements->adjoin(std::shared_ptr<decltype(iter)>(new decltype(iter)(iter)));
+				if (!_axiom_predicate || _axiom_predicate(iter)) enumerated::elts::adjoin(std::shared_ptr<decltype(iter)>(new decltype(iter)(iter)));
 				if (ok = Gray_code::increment(key)) Gray_code::cast_to(key, _args, iter);
 			} while (ok);
 		}
@@ -975,7 +969,7 @@ public:
 
 	static void exclude(std::shared_ptr<TruthTable> target, TruthValue src, std::shared_ptr<TruthTable> origin = nullptr) {
 		if (target->_prop_variable) {
-			target->_prop_variable->force_unequal(src);
+			enumerated::Set<TruthValue>::force_unequal(target->_prop_variable, src);
 			return;
 		}
 		// \todo other implementations
