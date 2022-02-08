@@ -82,7 +82,7 @@ namespace enumerated {
 	template<class V>
 	class Set final {
 		static auto& cache() {
-			static std::vector<std::weak_ptr<Set<V> > > ooao;
+			static std::vector<std::weak_ptr<Set> > ooao;
 			return ooao;
 		}
 
@@ -386,7 +386,7 @@ namespace enumerated {
 	template<class V>
 	class UniformCartesianProductSubset final {
 		static auto& cache() {
-			static std::vector<std::weak_ptr<UniformCartesianProductSubset<V> > > ooao;
+			static std::vector<std::weak_ptr<UniformCartesianProductSubset> > ooao;
 			return ooao;
 		}
 
@@ -395,6 +395,12 @@ namespace enumerated {
 		std::shared_ptr<elts> _elements;
 		std::function<bool(const std::vector<V>&)> _axiom_predicate;
 		std::vector<std::shared_ptr<zaimoni::observer<elts> > > _watchers;
+
+		using notify_queue_entry = std::pair<std::weak_ptr<UniformCartesianProductSubset>, std::weak_ptr<zaimoni::observer<elts> > >;
+		static auto& notify_queue() {
+			static std::vector<notify_queue_entry> ooao;
+			return ooao;
+		}
 
 	public:
 		UniformCartesianProductSubset() = default;
@@ -420,17 +426,54 @@ namespace enumerated {
 			} while (ok);
 		}
 
-		void notify() {
-			ptrdiff_t ub = _watchers.size();
+		static void Notify(const std::shared_ptr<UniformCartesianProductSubset>& origin) {
+			auto& notifications = notify_queue();
+			auto& watchers = origin->_watchers;
+			ptrdiff_t ub = watchers.size();
 			while (0 <= --ub) {
-				if (_watchers[ub] && _watchers[ub]->onNext(*_elements)) continue;
-				if (1 == _watchers.size()) {
-					decltype(_watchers)().swap(_watchers);
-					return;
-				} else {
-					_watchers[ub].swap(_watchers.back());
-					_watchers.pop_back();
+				if (watchers[ub]) {
+					notifications.push_back(notify_queue_entry(origin, watchers[ub]));
+					continue;
 				}
+				if (1 == watchers.size()) {
+					std::remove_reference_t<decltype(watchers)>().swap(watchers);
+					return;
+				}
+				else {
+					watchers[ub].swap(watchers.back());
+					watchers.pop_back();
+				}
+			}
+		}
+
+		static unsigned int& in_ExecNotify() {
+			static unsigned int ooao = 0;
+			return ooao;
+		}
+		static void ExecNotify() {
+			if (1 <= in_ExecNotify()) return;
+			const auto held = zaimoni::simple_lock(in_ExecNotify());
+
+			auto& notifications = notify_queue();
+			while (!notifications.empty()) {
+				auto x = notifications.front();
+				if (auto origin = x.first.lock()) {
+					if (auto watcher = x.second.lock()) {
+						if (!watcher->onNext(*(origin->_elements))) {
+							// this watcher has gone invalid
+							auto& curious = origin->_watchers;
+							auto is_gone = std::ranges::find(curious, watcher);
+							if (is_gone != curious.end()) {
+								if (1 == curious.size()) std::remove_reference_t<decltype(curious)>().swap(curious); // XXX for MSVC++
+								else curious.erase(is_gone);
+							}
+						}
+					}
+				}
+
+				// clear the entry
+				if (1 == notifications.size()) std::remove_reference_t<decltype(notifications)>().swap(notifications);
+				else notifications.erase(notifications.begin());
 			}
 		}
 	};
