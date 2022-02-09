@@ -13,6 +13,7 @@
 #include <ranges>
 #include <concepts>
 #include <algorithm>
+#include <new>
 #include <stddef.h>
 
 #include "Zaimoni.STL/Logging.h"
@@ -410,6 +411,37 @@ namespace enumerated {
 		UniformCartesianProductSubset(decltype(_args)&& args, decltype(_axiom_predicate) ok) : _args(std::move(args)), _axiom_predicate(ok) {}
 		~UniformCartesianProductSubset() = default;
 
+		auto ProjectionMap(const std::shared_ptr<Set<V> >& dest) {
+			auto i = find_var_index(dest);
+			return [i,target=std::weak_ptr(dest),origin=std::weak_ptr(_elements)](const Set<std::vector<V> >& src) {
+				auto dest = target.lock();
+				if (!dest) return false;
+				auto stage = src.image_of([i](const std::vector<V>& src2) {
+					return src2[i];
+					});
+				if (!stage) throw logic::proof_by_contradiction("required equality failed");
+				if (1 == stage->size()) Set<V>::force_equal(dest, stage->front());
+				else Set<V>::restrict_to(dest, *stage);
+				return true;
+			};
+		}
+
+		void watched_by(const std::shared_ptr<zaimoni::observer<elts> >& src) {
+			ptrdiff_t ub = _watchers.size();
+			while (0 <= --ub) {
+				if (_watchers[ub]) {
+					if (_watchers[ub] == src) return;	// already installed
+				} else if (1 == _watchers.size()) {
+					decltype(_watchers)().swap(_watchers);
+					return;
+				} else {
+					_watchers[ub].swap(_watchers.back());
+					_watchers.pop_back();
+				}
+			}
+			_watchers.push_back(src);
+		}
+
 	private:
 		void bootstrap() {
 			if (_elements) return;
@@ -426,6 +458,26 @@ namespace enumerated {
 			} while (ok);
 		}
 
+		ptrdiff_t find_var_index(const std::shared_ptr<Set<V> >& dest) const {
+			ptrdiff_t i = -1;
+			for (decltype(auto) x : _args) {
+				++i;
+				if (dest == x) return i;
+			}
+			throw std::logic_error("can't find required variable");
+		}
+
+		auto find_var_index(const std::shared_ptr<Set<V> >& dest, std::nothrow_t) const {
+			std::optional<ptrdiff_t> ret;
+			ptrdiff_t i = -1;
+			for (decltype(auto) x : _args) {
+				++i;
+				if (dest == x) return (ret = i);
+			}
+			return ret;
+		}
+
+		// change notification subsystem
 		static void Notify(const std::shared_ptr<UniformCartesianProductSubset>& origin) {
 			auto& notifications = notify_queue();
 			auto& watchers = origin->_watchers;
@@ -908,6 +960,29 @@ private:
 	TruthTable(const std::shared_ptr<TruthTable>& lhs, const std::shared_ptr<TruthTable>& rhs, decltype(op) update) : _logic(common_logic(lhs->_logic, rhs->_logic).value()), _args(2), op(update) {
 		_args[0] = lhs;
 		_args[1] = rhs;
+
+#if 0
+		// set up the "table"
+		std::vector<std::shared_ptr<enumerated::Set<TruthValue> > > cart_product_args(2);
+		if (!(cart_product_args[0] = lhs->_prop_variable)) return;
+		if (!(cart_product_args[1] = rhs->_prop_variable)) return;
+		// in final version this would be the member variable
+		auto test = std::shared_ptr<enumerated::UniformCartesianProductSubset<TruthValue> >(new enumerated::UniformCartesianProductSubset<TruthValue>(cart_product_args));
+
+		// the following setup may end up in the above constructor
+		auto project_lhs = test->ProjectionMap(cart_product_args[0]);
+		auto project_rhs = test->ProjectionMap(cart_product_args[1]);
+		test->watched_by(std::shared_ptr<zaimoni::observer<enumerated::Set<std::vector<TruthValue> > > >(new zaimoni::lambda_observer<enumerated::Set<std::vector<TruthValue> > >(project_lhs)));
+		test->watched_by(std::shared_ptr<zaimoni::observer<enumerated::Set<std::vector<TruthValue> > > >(new zaimoni::lambda_observer<enumerated::Set<std::vector<TruthValue> > >(project_rhs)));
+
+		auto restrict_lhs = []() {
+		};
+
+		auto restrict_rhs = []() {
+		};
+
+		// but enforcing the relation between *our* range variable and the table belongs here
+#endif
 	}
 
 public:
@@ -1078,11 +1153,9 @@ public:
 	}
 
 private:
-	static TruthValue _nonstrict_implication(logics host, TruthValue lhs, TruthValue rhs) {
-		return toAPI(host).Or(!lhs, rhs);
-	}
 	static auto nonstrict_implication() {
-		static std::shared_ptr<Connective> ooao(new Connective("&rArr;", &_nonstrict_implication));
+		static auto op = [](logics host, TruthValue lhs, TruthValue rhs) { return toAPI(host).Or(!lhs, rhs); };
+		static std::shared_ptr<Connective> ooao(new Connective("&rArr;", op));
 		return ooao;
 	}
 
