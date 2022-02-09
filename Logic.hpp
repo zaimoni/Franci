@@ -161,6 +161,18 @@ namespace enumerated {
 			}
 		}
 
+		static void restrict_to(const std::shared_ptr<Set>& dest, std::function<bool(const V&)> test) {
+			if (!dest->_elements) {
+				// Prior declaration was constructive logic
+				// \todo record constraint
+				return;
+			}
+			if (destructive_intersect(*(dest->_elements), test)) {
+				Notify(dest);
+				ExecNotify();
+			}
+		}
+
 		template<std::ranges::range SRC>
 		static void restrict_to(const std::shared_ptr<Set>& dest, SRC&& src) requires(std::is_convertible_v<decltype(*src.begin()), V> && !std::is_same_v<SRC, std::vector<V> >) {
 			restrict_to(dest, std::vector<V>(src.begin(), src.end()));
@@ -339,7 +351,7 @@ namespace enumerated {
 			}
 		}
 
-		static bool destructive_intersect(std::vector<V>& host, const std::vector<V>& src) {
+		static bool destructive_intersect(elts& host, const std::vector<V>& src) {
 			bool now_empty = true;
 			bool changed = false;
 			ptrdiff_t ub = host.size();
@@ -356,7 +368,24 @@ namespace enumerated {
 			return changed;
 		}
 
-		static void destructive_difference(std::vector<V>& host, const std::vector<V>& src) {
+		static bool destructive_intersect(elts& host, std::function<bool(const V&)> test) {
+			bool now_empty = true;
+			bool changed = false;
+			ptrdiff_t ub = host.size();
+			while (0 <= --ub) {
+				if (test(host[ub])) {
+					now_empty = false;
+					continue;
+				}
+				swap(host[ub], host.back());
+				host.pop_back();
+				changed = true;
+			}
+			if (now_empty) std::vector<V>().swap(host);
+			return changed;
+		}
+
+		static void destructive_difference(elts& host, const std::vector<V>& src) {
 			bool now_empty = true;
 			bool changed = false;
 			ptrdiff_t ub = host.size();
@@ -373,7 +402,7 @@ namespace enumerated {
 			return changed;
 		}
 
-		static bool destructive_union(std::vector<V>& host, const std::vector<V>& src) {
+		static bool destructive_union(elts& host, const std::vector<V>& src) {
 			bool changed = false;
 			for (decltype(auto) x : src) {
 				if (std::ranges::any_of(host, [&x](auto y) { return x == y })) continue;
@@ -411,9 +440,9 @@ namespace enumerated {
 		UniformCartesianProductSubset(decltype(_args)&& args, decltype(_axiom_predicate) ok) : _args(std::move(args)), _axiom_predicate(ok) {}
 		~UniformCartesianProductSubset() = default;
 
-		auto ProjectionMap(const std::shared_ptr<Set<V> >& dest) {
+		auto EnforceProjectionMap(const std::shared_ptr<Set<V> >& dest) {
 			auto i = find_var_index(dest);
-			return [i,target=std::weak_ptr(dest),origin=std::weak_ptr(_elements)](const Set<std::vector<V> >& src) {
+			return [i,target=std::weak_ptr(dest)](const Set<std::vector<V> >& src) {
 				auto dest = target.lock();
 				if (!dest) return false;
 				auto stage = src.image_of([i](const std::vector<V>& src2) {
@@ -424,6 +453,70 @@ namespace enumerated {
 				else Set<V>::restrict_to(dest, *stage);
 				return true;
 			};
+		}
+
+		auto EnforceInclusionMap(const std::shared_ptr<Set<V> >& src) {
+			auto i = find_var_index(src);
+			return[i, target = std::weak_ptr(_elements)](const std::vector<V>& legal) {
+				auto dest = target.lock();
+				if (!dest) return false;
+				if (legal.empty()) throw logic::proof_by_contradiction("required equality failed");
+				auto is_ok = [i,&legal](const std::vector<V>& src) {
+					return std::ranges::any_of(legal, [i,&src](const V& y) { return src[i] == y;  });
+				};
+
+				elts::restrict_to(dest, is_ok);
+				return true;
+			};
+		}
+
+		static void force_equal(const std::shared_ptr<UniformCartesianProductSubset>& dest, ptrdiff_t col, const V& src) {
+			if (!dest->_elements) bootstrap();
+			if (!dest->_elements) {
+				// Prior declaration was constructive logic: bootstrap failed
+				// \todo record constraint
+				return;
+			}
+			auto& target = *(dest->_elements);
+			ptrdiff_t ub = target.size();
+			while (0 <= --ub) {
+				if (src == target[ub]) {
+					if (1 < target.size()) {
+						target.clear();
+						target.push_back(src);
+						Notify(dest);
+						ExecNotify();
+					}
+					return;
+				}
+			}
+			throw logic::proof_by_contradiction("required equality failed");
+		}
+
+		static void restrict_to(const std::shared_ptr<UniformCartesianProductSubset>& dest, ptrdiff_t col, const std::vector<V>& src) {
+			if (!dest->_elements) bootstrap();
+			if (!dest->_elements) {
+				// Prior declaration was constructive logic: bootstrap failed
+				// \todo record constraint
+				return;
+			}
+			if (destructive_intersect(*(dest->_elements), col, src)) {
+				Notify(dest);
+				ExecNotify();
+			}
+		}
+
+		static void restrict_to(const std::shared_ptr<UniformCartesianProductSubset>& dest, ptrdiff_t col, const V& src) {
+			if (!dest->_elements) bootstrap();
+			if (!dest->_elements) {
+				// Prior declaration was constructive logic: bootstrap failed
+				// \todo record constraint
+				return;
+			}
+			if (destructive_intersect(*(dest->_elements), col, src)) {
+				Notify(dest);
+				ExecNotify();
+			}
 		}
 
 		void watched_by(const std::shared_ptr<zaimoni::observer<elts> >& src) {
@@ -475,6 +568,40 @@ namespace enumerated {
 				if (dest == x) return (ret = i);
 			}
 			return ret;
+		}
+
+		static bool destructive_intersect(elts& host, ptrdiff_t col, const std::vector<V>& src) {
+			bool now_empty = true;
+			bool changed = false;
+			ptrdiff_t ub = host.size();
+			while (0 <= --ub) {
+				if (std::ranges::any_of(src, [&](auto y) { return host[ub][col] == y; })) {
+					now_empty = false;
+					continue;
+				}
+				swap(host[ub], host.back());
+				host.pop_back();
+				changed = true;
+			}
+			if (now_empty) std::vector<V>().swap(host);
+			return changed;
+		}
+
+		static bool destructive_intersect(elts& host, ptrdiff_t col, const V& src) {
+			bool now_empty = true;
+			bool changed = false;
+			ptrdiff_t ub = host.size();
+			while (0 <= --ub) {
+				if (host[ub][col] == src) {
+					now_empty = false;
+					continue;
+				}
+				swap(host[ub], host.back());
+				host.pop_back();
+				changed = true;
+			}
+			if (now_empty) std::vector<V>().swap(host);
+			return changed;
 		}
 
 		// change notification subsystem
@@ -970,16 +1097,15 @@ private:
 		auto test = std::shared_ptr<enumerated::UniformCartesianProductSubset<TruthValue> >(new enumerated::UniformCartesianProductSubset<TruthValue>(cart_product_args));
 
 		// the following setup may end up in the above constructor
-		auto project_lhs = test->ProjectionMap(cart_product_args[0]);
-		auto project_rhs = test->ProjectionMap(cart_product_args[1]);
+		auto project_lhs = test->EnforceProjectionMap(cart_product_args[0]);
+		auto project_rhs = test->EnforceProjectionMap(cart_product_args[1]);
 		test->watched_by(std::shared_ptr<zaimoni::observer<enumerated::Set<std::vector<TruthValue> > > >(new zaimoni::lambda_observer<enumerated::Set<std::vector<TruthValue> > >(project_lhs)));
 		test->watched_by(std::shared_ptr<zaimoni::observer<enumerated::Set<std::vector<TruthValue> > > >(new zaimoni::lambda_observer<enumerated::Set<std::vector<TruthValue> > >(project_rhs)));
 
-		auto restrict_lhs = []() {
-		};
-
-		auto restrict_rhs = []() {
-		};
+		auto restrict_lhs = test->EnforceInclusionMap(cart_product_args[0]);
+		auto restrict_rhs = test->EnforceInclusionMap(cart_product_args[1]);
+		cart_product_args[0]->watched_by(std::shared_ptr<zaimoni::observer<std::vector<TruthValue> > >(new zaimoni::lambda_observer<std::vector<TruthValue> >(restrict_rhs)));
+		cart_product_args[1]->watched_by(std::shared_ptr<zaimoni::observer<std::vector<TruthValue> > >(new zaimoni::lambda_observer<std::vector<TruthValue> >(restrict_rhs)));
 
 		// but enforcing the relation between *our* range variable and the table belongs here
 #endif
