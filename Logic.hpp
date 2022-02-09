@@ -287,7 +287,7 @@ namespace enumerated {
 		}
 
 	private:
-		static std::shared_ptr<Set<V> > find(const decltype(_name)& name) {
+		static std::shared_ptr<Set> find(const decltype(_name)& name) {
 			auto& already = cache();
 			ptrdiff_t ub = already.size();
 			while (0 <= --ub) {
@@ -432,20 +432,24 @@ namespace enumerated {
 			return ooao;
 		}
 
-	public:
 		UniformCartesianProductSubset() = default;
-		UniformCartesianProductSubset(const decltype(_args)& args) : _args(args) {
+		UniformCartesianProductSubset(const decltype(_args) & args) : _args(args) {
 			construct_subtable_observers();
 		}
 		UniformCartesianProductSubset(decltype(_args) && args) : _args(std::move(args)) {
 			construct_subtable_observers();
 		}
-		UniformCartesianProductSubset(const decltype(_args)& args, decltype(_axiom_predicate) ok) : _args(args),_axiom_predicate(ok) {
+		UniformCartesianProductSubset(const decltype(_args) & args, decltype(_axiom_predicate) ok) : _args(args), _axiom_predicate(ok) {
 			construct_subtable_observers();
 		}
-		UniformCartesianProductSubset(decltype(_args)&& args, decltype(_axiom_predicate) ok) : _args(std::move(args)), _axiom_predicate(ok) {
+		UniformCartesianProductSubset(decltype(_args) && args, decltype(_axiom_predicate) ok) : _args(std::move(args)), _axiom_predicate(ok) {
 			construct_subtable_observers();
 		}
+	public:
+		UniformCartesianProductSubset(const UniformCartesianProductSubset& src) = delete;
+		UniformCartesianProductSubset(UniformCartesianProductSubset&& src) = delete;
+		UniformCartesianProductSubset& operator=(const UniformCartesianProductSubset& src) = delete;
+		UniformCartesianProductSubset& operator=(UniformCartesianProductSubset&& src) = delete;
 		~UniformCartesianProductSubset() = default;
 
 		auto EnforceProjectionMap(const std::shared_ptr<Set<V> >& dest) {
@@ -557,6 +561,25 @@ namespace enumerated {
 			}
 		}
 
+		ptrdiff_t find_var_index(const std::shared_ptr<Set<V> >& dest) const {
+			ptrdiff_t i = -1;
+			for (decltype(auto) x : _args) {
+				++i;
+				if (dest == x) return i;
+			}
+			throw std::logic_error("can't find required variable");
+		}
+
+		auto find_var_index(const std::shared_ptr<Set<V> >& dest, std::nothrow_t) const {
+			std::optional<ptrdiff_t> ret;
+			ptrdiff_t i = -1;
+			for (decltype(auto) x : _args) {
+				++i;
+				if (dest == x) return (ret = i);
+			}
+			return ret;
+		}
+
 		void watched_by(const std::shared_ptr<zaimoni::observer<elts> >& src) {
 			ptrdiff_t ub = _watchers.size();
 			while (0 <= --ub) {
@@ -573,6 +596,15 @@ namespace enumerated {
 			_watchers.push_back(src);
 		}
 
+		// factory functions
+		static auto declare(const decltype(_args)& args)
+		{
+			if (auto x = find(args)) return x;
+
+			std::shared_ptr<UniformCartesianProductSubset> stage(new UniformCartesianProductSubset(args));
+			cache().push_back(stage);
+			return stage;
+		}
 	private:
 		void bootstrap() {
 			if (_elements) return;
@@ -600,23 +632,25 @@ namespace enumerated {
 			// todo subtable inclusion observers
 		}
 
-		ptrdiff_t find_var_index(const std::shared_ptr<Set<V> >& dest) const {
-			ptrdiff_t i = -1;
-			for (decltype(auto) x : _args) {
-				++i;
-				if (dest == x) return i;
-			}
-			throw std::logic_error("can't find required variable");
+		bool unordered_same_args(const decltype(_args)& src) const
+		{
+			for (decltype(auto) x : src)
+				if (!std::ranges::any_of(_args, [&](const std::shared_ptr<Set<V> >& y) { return x == y; })) return false;
+			return true;
 		}
 
-		auto find_var_index(const std::shared_ptr<Set<V> >& dest, std::nothrow_t) const {
-			std::optional<ptrdiff_t> ret;
-			ptrdiff_t i = -1;
-			for (decltype(auto) x : _args) {
-				++i;
-				if (dest == x) return (ret = i);
+		static std::shared_ptr<UniformCartesianProductSubset> find(const decltype(_args)& args) {
+			auto& already = cache();
+			ptrdiff_t ub = already.size();
+			while (0 <= --ub) {
+				if (const auto x = already[ub].lock()) {
+					if (x->unordered_same_args(args)) return x;
+				} else {
+					already[ub].swap(already.back());
+					already.pop_back();
+				}
 			}
-			return ret;
+			return nullptr;
 		}
 
 		static bool destructive_intersect(elts& host, ptrdiff_t col, const std::vector<V>& src) {
@@ -666,8 +700,7 @@ namespace enumerated {
 				if (1 == watchers.size()) {
 					std::remove_reference_t<decltype(watchers)>().swap(watchers);
 					return;
-				}
-				else {
+				} else {
 					watchers[ub].swap(watchers.back());
 					watchers.pop_back();
 				}
@@ -1146,12 +1179,16 @@ private:
 		std::vector<std::shared_ptr<enumerated::Set<TruthValue> > > cart_product_args(2);
 		if (!(cart_product_args[0] = lhs->_prop_variable)) return;
 		if (!(cart_product_args[1] = rhs->_prop_variable)) return;
-		// this constructor should handle sub-table observers on its own
-		_table = decltype(_table)(new enumerated::UniformCartesianProductSubset<TruthValue>(cart_product_args));
+		// this should handle sub-table observers on its own
+		_table = enumerated::UniformCartesianProductSubset<logic::TruthValue>::declare(cart_product_args);
+
+		// n-ary version would warrant a permutation identifier
+		ptrdiff_t arg0_index = _table->find_var_index(cart_product_args[0]);
+		ptrdiff_t arg1_index = _table->find_var_index(cart_product_args[1]);
 
 		// Enforcing the relation between *our* range variable and the table belongs here.
 		// C++20: auto does not work for wire_in
-		std::function<TruthValue(const std::vector<TruthValue>&)> wire_in = [this](const std::vector<TruthValue>& src) { return this->op->eval(this->_logic, src[0], src[1]);  };
+		std::function<TruthValue(const std::vector<TruthValue>&)> wire_in = [this, arg0_index, arg1_index](const std::vector<TruthValue>& src) { return this->op->eval(this->_logic, src[arg0_index], src[arg1_index]);  };
 
 		auto restrict_range = _table->EnforceRangeRestriction(_prop_variable, wire_in);
 		auto use_range = _table->EnforceRangeConstraint(wire_in);
