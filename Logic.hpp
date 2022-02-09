@@ -434,10 +434,18 @@ namespace enumerated {
 
 	public:
 		UniformCartesianProductSubset() = default;
-		UniformCartesianProductSubset(const decltype(_args)& args) : _args(args) {}
-		UniformCartesianProductSubset(decltype(_args) && args) : _args(std::move(args)) {}
-		UniformCartesianProductSubset(const decltype(_args)& args, decltype(_axiom_predicate) ok) : _args(args),_axiom_predicate(ok) {}
-		UniformCartesianProductSubset(decltype(_args)&& args, decltype(_axiom_predicate) ok) : _args(std::move(args)), _axiom_predicate(ok) {}
+		UniformCartesianProductSubset(const decltype(_args)& args) : _args(args) {
+			construct_subtable_observers();
+		}
+		UniformCartesianProductSubset(decltype(_args) && args) : _args(std::move(args)) {
+			construct_subtable_observers();
+		}
+		UniformCartesianProductSubset(const decltype(_args)& args, decltype(_axiom_predicate) ok) : _args(args),_axiom_predicate(ok) {
+			construct_subtable_observers();
+		}
+		UniformCartesianProductSubset(decltype(_args)&& args, decltype(_axiom_predicate) ok) : _args(std::move(args)), _axiom_predicate(ok) {
+			construct_subtable_observers();
+		}
 		~UniformCartesianProductSubset() = default;
 
 		auto EnforceProjectionMap(const std::shared_ptr<Set<V> >& dest) {
@@ -579,6 +587,17 @@ namespace enumerated {
 				if (!_axiom_predicate || _axiom_predicate(iter)) enumerated::elts::adjoin(std::shared_ptr<decltype(iter)>(new decltype(iter)(iter)));
 				if (ok = Gray_code::increment(key)) Gray_code::cast_to(key, _args, iter);
 			} while (ok);
+		}
+
+		void construct_subtable_observers() {
+			// single arguments
+			for (decltype(auto) x : _args) {
+				auto project_to_arg = EnforceProjectionMap(x);
+				watched_by(std::shared_ptr<zaimoni::observer<elts> >(new zaimoni::lambda_observer<elts>(project_to_arg)));
+				auto restrict_by_arg = EnforceInclusionMap(x);
+				x->watched_by(std::shared_ptr<zaimoni::observer<std::vector<V> > >(new zaimoni::lambda_observer<std::vector<V> >(restrict_by_arg)));
+			}
+			// todo subtable inclusion observers
 		}
 
 		ptrdiff_t find_var_index(const std::shared_ptr<Set<V> >& dest) const {
@@ -1114,38 +1133,30 @@ private:
 
 	// binary connective
 	// \todo: fixup logic field (ask the operation)
-	TruthTable(const std::shared_ptr<TruthTable>& lhs, const std::shared_ptr<TruthTable>& rhs, decltype(op) update) : _logic(common_logic(lhs->_logic, rhs->_logic).value()), _args(2), op(update) {
+	TruthTable(const std::shared_ptr<TruthTable>& lhs, const std::shared_ptr<TruthTable>& rhs, decltype(op) update)
+		: _logic(common_logic(lhs->_logic, rhs->_logic).value()),
+		_prop_variable(enumerated::Set<TruthValue>::declare(set_theoretic_range())),
+		_args(2),
+		op(update)
+	{
 		_args[0] = lhs;
 		_args[1] = rhs;
 
-#if 0
 		// set up the "table"
 		std::vector<std::shared_ptr<enumerated::Set<TruthValue> > > cart_product_args(2);
 		if (!(cart_product_args[0] = lhs->_prop_variable)) return;
 		if (!(cart_product_args[1] = rhs->_prop_variable)) return;
-		// in final version this would be the member variable
-		auto test = std::shared_ptr<enumerated::UniformCartesianProductSubset<TruthValue> >(new enumerated::UniformCartesianProductSubset<TruthValue>(cart_product_args));
+		// this constructor should handle sub-table observers on its own
+		_table = decltype(_table)(new enumerated::UniformCartesianProductSubset<TruthValue>(cart_product_args));
 
-		// the following setup may end up in the above constructor
-		auto project_lhs = test->EnforceProjectionMap(cart_product_args[0]);
-		auto project_rhs = test->EnforceProjectionMap(cart_product_args[1]);
-		test->watched_by(std::shared_ptr<zaimoni::observer<enumerated::Set<std::vector<TruthValue> > > >(new zaimoni::lambda_observer<enumerated::Set<std::vector<TruthValue> > >(project_lhs)));
-		test->watched_by(std::shared_ptr<zaimoni::observer<enumerated::Set<std::vector<TruthValue> > > >(new zaimoni::lambda_observer<enumerated::Set<std::vector<TruthValue> > >(project_rhs)));
-
-		auto restrict_lhs = test->EnforceInclusionMap(cart_product_args[0]);
-		auto restrict_rhs = test->EnforceInclusionMap(cart_product_args[1]);
-		cart_product_args[0]->watched_by(std::shared_ptr<zaimoni::observer<std::vector<TruthValue> > >(new zaimoni::lambda_observer<std::vector<TruthValue> >(restrict_lhs)));
-		cart_product_args[1]->watched_by(std::shared_ptr<zaimoni::observer<std::vector<TruthValue> > >(new zaimoni::lambda_observer<std::vector<TruthValue> >(restrict_rhs)));
-
-		// but enforcing the relation between *our* range variable and the table belongs here
+		// Enforcing the relation between *our* range variable and the table belongs here.
 		// C++20: auto does not work for wire_in
 		std::function<TruthValue(const std::vector<TruthValue>&)> wire_in = [this](const std::vector<TruthValue>& src) { return this->op->eval(this->_logic, src[0], src[1]);  };
 
-		auto restrict_range = test->EnforceRangeRestriction(_prop_variable, wire_in);
-		auto use_range = test->EnforceRangeConstraint(wire_in);
-		test->watched_by(std::shared_ptr<zaimoni::observer<enumerated::Set<std::vector<TruthValue> > > >(new zaimoni::lambda_observer<enumerated::Set<std::vector<TruthValue> > >(restrict_range)));
+		auto restrict_range = _table->EnforceRangeRestriction(_prop_variable, wire_in);
+		auto use_range = _table->EnforceRangeConstraint(wire_in);
+		_table->watched_by(std::shared_ptr<zaimoni::observer<enumerated::Set<std::vector<TruthValue> > > >(new zaimoni::lambda_observer<enumerated::Set<std::vector<TruthValue> > >(restrict_range)));
 		_prop_variable->watched_by(std::shared_ptr<zaimoni::observer<std::vector<TruthValue> > >(new zaimoni::lambda_observer<std::vector<TruthValue> >(use_range)));
-#endif
 	}
 
 public:
