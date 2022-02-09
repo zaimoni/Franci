@@ -442,7 +442,7 @@ namespace enumerated {
 
 		auto EnforceProjectionMap(const std::shared_ptr<Set<V> >& dest) {
 			auto i = find_var_index(dest);
-			return [i,target=std::weak_ptr(dest)](const Set<std::vector<V> >& src) {
+			return [i,target=std::weak_ptr(dest)](const elts& src) {
 				auto dest = target.lock();
 				if (!dest) return false;
 				auto stage = src.image_of([i](const std::vector<V>& src2) {
@@ -463,6 +463,36 @@ namespace enumerated {
 				if (legal.empty()) throw logic::proof_by_contradiction("required equality failed");
 				auto is_ok = [i,&legal](const std::vector<V>& src) {
 					return std::ranges::any_of(legal, [i,&src](const V& y) { return src[i] == y;  });
+				};
+
+				elts::restrict_to(dest, is_ok);
+				return true;
+			};
+		}
+
+		template<class W>
+		auto EnforceRangeRestriction(const std::shared_ptr<Set<V> >& dest, std::function<W(const std::vector<V>&)> op) {
+			if (find_var_index(dest, std::nothrow)) throw std::logic_error("constraint is not well-founded");
+			return[op,target = std::weak_ptr(dest)](const elts& src) {
+				auto dest = target.lock();
+				if (!dest) return false;
+				auto stage = src.image_of(op);
+				if (!stage) throw logic::proof_by_contradiction("required equality failed");
+				if (1 == stage->size()) Set<V>::force_equal(dest, stage->front());
+				else Set<V>::restrict_to(dest, *stage);
+				return true;
+			};
+		}
+
+		template<class W>
+		auto EnforceRangeConstraint(std::function<W(const std::vector<V>&)> op) {
+			return[op, target = std::weak_ptr(_elements)](const std::vector<V>& src) {
+				auto dest = target.lock();
+				if (!dest) return false;
+
+				auto is_ok = [op,&src](const std::vector<V>& data) {
+					auto ref = op(data);
+					return std::ranges::any_of(src, [ref](const V& y) { return ref == y;  });
 				};
 
 				elts::restrict_to(dest, is_ok);
@@ -1104,10 +1134,17 @@ private:
 
 		auto restrict_lhs = test->EnforceInclusionMap(cart_product_args[0]);
 		auto restrict_rhs = test->EnforceInclusionMap(cart_product_args[1]);
-		cart_product_args[0]->watched_by(std::shared_ptr<zaimoni::observer<std::vector<TruthValue> > >(new zaimoni::lambda_observer<std::vector<TruthValue> >(restrict_rhs)));
+		cart_product_args[0]->watched_by(std::shared_ptr<zaimoni::observer<std::vector<TruthValue> > >(new zaimoni::lambda_observer<std::vector<TruthValue> >(restrict_lhs)));
 		cart_product_args[1]->watched_by(std::shared_ptr<zaimoni::observer<std::vector<TruthValue> > >(new zaimoni::lambda_observer<std::vector<TruthValue> >(restrict_rhs)));
 
 		// but enforcing the relation between *our* range variable and the table belongs here
+		// C++20: auto does not work for wire_in
+		std::function<TruthValue(const std::vector<TruthValue>&)> wire_in = [this](const std::vector<TruthValue>& src) { return this->op->eval(this->_logic, src[0], src[1]);  };
+
+		auto restrict_range = test->EnforceRangeRestriction(_prop_variable, wire_in);
+		auto use_range = test->EnforceRangeConstraint(wire_in);
+		test->watched_by(std::shared_ptr<zaimoni::observer<enumerated::Set<std::vector<TruthValue> > > >(new zaimoni::lambda_observer<enumerated::Set<std::vector<TruthValue> > >(restrict_range)));
+		_prop_variable->watched_by(std::shared_ptr<zaimoni::observer<std::vector<TruthValue> > >(new zaimoni::lambda_observer<std::vector<TruthValue> >(use_range)));
 #endif
 	}
 
