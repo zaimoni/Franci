@@ -569,8 +569,13 @@ namespace enumerated {
 			};
 		}
 
+		auto possible_values() const {
+			if (_elements) return _elements->possible_values();
+			return decltype(_elements->possible_values())(nullptr);
+		}
+
 		static void force_equal(const std::shared_ptr<UniformCartesianProductSubset>& dest, ptrdiff_t col, const V& src) {
-			if (!dest->_elements) bootstrap();
+			if (!dest->_elements) dest.bootstrap();
 			if (!dest->_elements) {
 				// Prior declaration was constructive logic: bootstrap failed
 				// \todo record constraint
@@ -691,6 +696,7 @@ namespace enumerated {
 
 		bool unordered_same_args(const decltype(_args)& src) const
 		{
+			if (_args.size() != src.size()) return false;
 			for (decltype(auto) x : src)
 				if (!std::ranges::any_of(_args, [&](const std::shared_ptr<Set<V> >& y) { return x == y; })) return false;
 			return true;
@@ -1314,6 +1320,11 @@ public:
 
 	auto possible_values() const { return _prop_variable->possible_values(); }
 	auto possible_values_text() const { return to_string(*_prop_variable); }
+
+	auto table_as_text() const {
+		if (_table) return to_string(*_table);
+		return std::string();
+	}
 
 	// actively infer a truth value (triggers non-contradiction processing)
 	static void infer(std::shared_ptr<TruthTable> target, TruthValue src, std::shared_ptr<TruthTable> origin=nullptr) {

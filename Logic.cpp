@@ -122,6 +122,10 @@ int main(int argc, char* argv[], char* envp[])
 	auto P_implies_Q = logic::TruthTable::NonStrictlyImplies(test_var[0], test_var_Q[0]);
 	auto Q_implies_R = logic::TruthTable::NonStrictlyImplies(test_var_Q[0], test_var_R[0]);
 	survey(*P_implies_Q);
+	INFORM(P_implies_Q->table_as_text().c_str());
+	logic::TruthTable::infer(P_implies_Q, logic::TruthValue::True);
+	INFORM(P_implies_Q->possible_values_text().c_str());
+	INFORM(P_implies_Q->table_as_text().c_str());
 	survey(*Q_implies_R);
 
 	auto P_implies_Q_vars = P_implies_Q->catalog_vars();
