@@ -413,6 +413,40 @@ namespace enumerated {
 		}
 	};
 
+	template<class T>
+	std::vector<std::string> to_string_vector(const std::vector<T>& src) requires requires(std::vector<std::string> test) { test.push_back(to_string(*src.begin())); }
+	{
+		std::vector<std::string> ret;
+		ret.reserve(src.size());
+		for (decltype(auto) x : src) ret.push_back(to_string(x));
+		return ret;
+	}
+
+	inline std::string display_as_enumerated_set(const std::vector<std::string>& src)
+	{
+		if (src.empty()) return "{}";
+		bool want_comma = false;
+		std::string ret("{ ");
+		for (decltype(auto) x : src) {
+			if (want_comma) ret += ", ";
+			ret += x;
+			want_comma = true;
+		}
+
+		return ret += " }";
+	}
+
+	template<class V>
+	std::string to_string(const Set<V>& src)
+	{
+		if (auto stage_values = src.possible_values()) {
+			if (stage_values->empty()) return "{}";
+			return display_as_enumerated_set(to_string_vector(*stage_values));
+		} else {
+			return "<i>undefined</i>";
+		}
+	}
+
 	template<class V>
 	class UniformCartesianProductSubset final {
 		static auto& cache() {
@@ -741,30 +775,6 @@ namespace enumerated {
 }
 
 namespace logic {
-
-template<class T>
-std::vector<std::string> to_string_vector(const std::vector<T>& src) requires requires(std::vector<std::string> test) { test.push_back(to_string(*src.begin())); }
-{
-	std::vector<std::string> ret;
-	ret.reserve(src.size());
-	for (decltype(auto) x : src) ret.push_back(to_string(x));
-	return ret;
-}
-
-inline std::string display_as_enumerated_set(const std::vector<std::string>& src)
-{
-	if (src.empty()) return "{}";
-	bool want_comma = false;
-	std::string ret("{ ");
-	for (decltype(auto) x : src) {
-		if (want_comma) ret += ", ";
-		ret += x;
-		want_comma = true;
-	}
-
-	return ret += " }";
-
-}
 
 template<class T>
 static std::string format_as_primary_expression(std::shared_ptr<T> src) requires requires() {
@@ -1268,14 +1278,8 @@ public:
 		return ret;
 	}
 
-	std::optional<std::vector<TruthValue> > possible_values() const {
-		if (_prop_variable) {
-			if (const auto x = _prop_variable->possible_values()) return *x;	// \todo eliminate full copy here
-			return std::nullopt;
-		}
-		// \todo other implementations
-		return std::nullopt;
-	}
+	auto possible_values() const { return _prop_variable->possible_values(); }
+	auto possible_values_text() const { return to_string(*_prop_variable); }
 
 	// actively infer a truth value (triggers non-contradiction processing)
 	static void infer(std::shared_ptr<TruthTable> target, TruthValue src, std::shared_ptr<TruthTable> origin=nullptr) {
@@ -1385,6 +1389,7 @@ public:
 private:
 	bool syntax_ok() const {
 		if (op && 2 > _args.size()) return false;
+		if (!_prop_variable) return false;
 		return true;
 	}
 
