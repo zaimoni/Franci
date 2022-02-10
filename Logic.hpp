@@ -413,6 +413,34 @@ namespace enumerated {
 		}
 	};
 
+	inline std::string display_as_enumerated_set(const std::vector<std::string>& src)
+	{
+		if (src.empty()) return "{}";
+		bool want_comma = false;
+		std::string ret("{");
+		for (decltype(auto) x : src) {
+			if (want_comma) ret += ", ";
+			ret += x;
+			want_comma = true;
+		}
+
+		return ret += "}";
+	}
+
+	inline std::string display_as_ordered_tuple(const std::vector<std::string>& src)
+	{
+		if (src.empty()) return "()";
+		bool want_comma = false;
+		std::string ret("(");
+		for (decltype(auto) x : src) {
+			if (want_comma) ret += ", ";
+			ret += x;
+			want_comma = true;
+		}
+
+		return ret += ")";
+	}
+
 	template<class T>
 	std::vector<std::string> to_string_vector(const std::vector<T>& src) requires requires(std::vector<std::string> test) { test.push_back(to_string(*src.begin())); }
 	{
@@ -422,18 +450,13 @@ namespace enumerated {
 		return ret;
 	}
 
-	inline std::string display_as_enumerated_set(const std::vector<std::string>& src)
+	template<class T>
+	std::vector<std::string> to_string_tuple_vector(const std::vector<std::vector<T> >& src) // requires requires(std::vector<std::string> test) { test.push_back(display_as_ordered_tuple(to_string_vector(*src.begin()))); }
 	{
-		if (src.empty()) return "{}";
-		bool want_comma = false;
-		std::string ret("{ ");
-		for (decltype(auto) x : src) {
-			if (want_comma) ret += ", ";
-			ret += x;
-			want_comma = true;
-		}
-
-		return ret += " }";
+		std::vector<std::string> ret;
+		ret.reserve(src.size());
+		for (decltype(auto) x : src) ret.push_back(display_as_ordered_tuple(to_string_vector(x)));
+		return ret;
 	}
 
 	template<class V>
@@ -772,6 +795,17 @@ namespace enumerated {
 			}
 		}
 	};
+
+	template<class V>
+	std::string to_string(const UniformCartesianProductSubset<V>& src)
+	{
+		if (auto stage_values = src.possible_values()) {
+			if (stage_values->empty()) return "{}";
+			return display_as_enumerated_set(to_string_tuple_vector(*stage_values));
+		} else {
+			return "<i>undefined</i>";
+		}
+	}
 }
 
 namespace logic {
