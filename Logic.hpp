@@ -1089,12 +1089,6 @@ class TruthTable final
 private:
 	static constexpr const bool integrity_check = true; // control expensive checks centrally
 
-#if TRUTHTABLE_REEVALUATION_QUEUE_PROTOTYPE
-	using logic_substitution_spec = std::pair<std::shared_ptr<TruthTable>, TruthValue>;
-	using inverse_infer_spec = std::pair<std::shared_ptr<TruthTable>, logic_substitution_spec >;
-	static std::vector<inverse_infer_spec> _inferred_reevaluations;
-#endif
-
 	static constexpr const TruthValue ref_classical[] = { TruthValue::False, TruthValue::True };
 	static constexpr const TruthValue ref_threeval[] = { TruthValue::False, TruthValue::True, TruthValue::Unknown };
 	static constexpr const TruthValue ref_fourval[] = { TruthValue::False, TruthValue::True, TruthValue::Unknown, TruthValue::Contradiction };
@@ -1201,9 +1195,6 @@ public:
 
 	static auto display_range() { return std::ranges::subrange(ref_display); }
 	static auto count_expressions() { return cache().size(); }
-#if TRUTHTABLE_REEVALUATION_QUEUE_PROTOTYPE
-	static auto count_inferred_reevaluations() { return _inferred_reevaluations.size(); }
-#endif
 
 	auto logic() const { return _logic; }
 	auto arity() const { return _args.size(); }
@@ -1450,49 +1441,6 @@ private:
 		}
 		return std::nullopt;
 	}
-
-#if TRUTHTABLE_REEVALUATION_QUEUE_PROTOTYPE
-	static void request_reevaluations(std::shared_ptr<TruthTable> target, TruthValue src, std::shared_ptr<TruthTable> origin) {
-		auto& audience = target->_watching;
-		if (ptrdiff_t ub = audience.size()) {
-			const auto authority = origin ? origin.get() : nullptr;
-			while (0 <= --ub) {
-				if (auto x = audience[ub].lock()) {
-					if (authority == x.get()) continue;
-					_inferred_reevaluations.push_back({ x , { target, src } });
-				}
-				else {
-					audience[ub].swap(audience.back());
-					audience.pop_back();
-				}
-			}
-		}
-	}
-
-	static bool execute_reevaluation() {
-		if (!_inferred_reevaluations.empty()) {
-			auto& stage = _inferred_reevaluations.front();
-			auto ret = stage.first->execute_reevaluation(stage.second);
-			_inferred_reevaluations.erase(_inferred_reevaluations.begin());
-		}
-		return false;
-	}
-
-	bool execute_reevaluation(const logic_substitution_spec& src) {
-		if (_args.empty()) throw std::logic_error(desc()+", execute substitution: no arguments");
-		if (!src.first) throw std::logic_error(desc() + ", execute substitution: no rationale");
-		ptrdiff_t ub = _args.size();
-		while (0 <= --ub) {
-			if (_args[ub].get() == src.first.get()) break;
-		}
-		if (0 > ub) throw std::logic_error(desc() + ", execute substitution: do not have required target");
-		if (op) {
-			// \todo should just prune already-calculated _var_enumerated rather than discard completely
-			return true;
-		}
-		return false; // but already invalid syntax if we get here
-	}
-#endif
 
 	// this does not handle the parsing aspects of syntactical entailment
 	static TruthValue _core_syntactical_entailment(logics host, TruthValue lhs, TruthValue rhs) {
