@@ -37,11 +37,19 @@ namespace logic {
 }
 
 // plausibly belongs in a more general library
-template<class T> requires(std::ranges::range<T>)
+template<class T>
 std::vector<size_t> get_upper_bounds(const std::vector<T>& key) requires requires { key.front().size(); }
 {
 	std::vector<size_t> ret;
 	for (decltype(auto) x : key) ret.push_back(x.size());
+	return ret;
+}
+
+template<class T>
+std::vector<size_t> get_upper_bounds(const std::vector<T>& key) requires requires { key.front()->size(); }
+{
+	std::vector<size_t> ret;
+	for (decltype(auto) x : key) ret.push_back(x->size());
 	return ret;
 }
 
@@ -248,6 +256,7 @@ namespace enumerated {
 			}
 			_watchers.push_back(src);
 		}
+		auto observers() const { return _watchers.size(); }
 
 		// factory functions
 		static auto intuitionist_empty() { return std::shared_ptr<Set>(new Set()); }
@@ -657,6 +666,7 @@ namespace enumerated {
 			}
 			_watchers.push_back(src);
 		}
+		auto observers() const { return _watchers.size(); }
 
 		// factory functions
 		static auto declare(const decltype(_args)& args)
@@ -676,14 +686,17 @@ namespace enumerated {
 			std::vector<size_t> key(_args.size(), 0);
 			auto iter = Gray_code::cast_to(key, _args);
 			bool ok = true;
-			_elements = Set<V>::intuitionist_empty()
+			_elements = Set<V>::intuitionist_empty();
 			do {
-				if (!_axiom_predicate || _axiom_predicate(iter)) enumerated::elts::adjoin(std::shared_ptr<decltype(iter)>(new decltype(iter)(iter)));
+				if (!_axiom_predicate || _axiom_predicate(iter)) Set<V>::adjoin(std::shared_ptr<decltype(iter)>(new decltype(iter)(iter)));
 				if (ok = Gray_code::increment(key)) Gray_code::cast_to(key, _args, iter);
 			} while (ok);
 		}
 
 		void construct_subtable_observers() {
+#if 0
+			bootstrap();
+#endif
 			// single arguments
 			for (decltype(auto) x : _args) {
 				auto project_to_arg = EnforceProjectionMap(x);
