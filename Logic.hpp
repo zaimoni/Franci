@@ -10,7 +10,9 @@
 #include <memory>
 #include <utility>
 #include <optional>
+#include <variant>
 #include <ranges>
+#include <compare>
 #include <concepts>
 #include <algorithm>
 #include <new>
@@ -51,6 +53,50 @@ std::vector<size_t> get_upper_bounds(const std::vector<T>& key) requires require
 	std::vector<size_t> ret;
 	for (decltype(auto) x : key) ret.push_back(x->size());
 	return ret;
+}
+
+template<class T>
+std::variant<
+	std::partial_ordering,
+	std::pair<
+		std::partial_ordering,
+		std::vector<std::pair<size_t, size_t> >
+	>
+>
+subset(const std::vector<T>& lhs, const std::vector<T>& rhs)
+{
+	ptrdiff_t lhs_ub = lhs.size();
+	ptrdiff_t rhs_ub = rhs.size();
+	const bool lt_possible = lhs_ub <= rhs_ub;
+	const bool gt_possible = lhs_ub >= rhs_ub;
+	if (0 == lhs_ub) return (0 == rhs_ub) ? std::partial_ordering::equivalent : std::partial_ordering::less;
+	if (0 == rhs_ub) return std::pair(std::partial_ordering::greater, std::vector<std::pair<size_t, size_t> >(;
+	std::vector<std::pair<size_t, size_t> > injection(lt_possible ? lhs_ub : rhs_ub);
+	size_t n = 0;
+	if (lt_possible) {
+		for (decltype(auto) l : lhs) {
+			size_t i = 0;
+			for (decltype(auto) r : rhs) {
+				if (l == r) break;
+				i++;
+			}
+			if (i == rhs.size()) return std::partial_ordering::unordered;
+			injection[n++] = i;
+		}
+		return std::pair((lhs_ub == rhs_ub) ? std::partial_ordering::equivalent : std::partial_ordering::less, std::move(injection));
+	} else {
+		for (decltype(auto) r : rhs) {
+			size_t i = 0;
+			for (decltype(auto) l : lhs) {
+				if (l == r) break;
+				i++;
+			}
+			if (i == lhs.size()) return std::partial_ordering::unordered;
+			injection[n++] = i;
+		}
+		return std::pair(std::partial_ordering::greater, std::move(injection));
+	}
+//	return std::partial_ordering::unordered;
 }
 
 namespace Gray_code {
@@ -538,6 +584,16 @@ namespace enumerated {
 		UniformCartesianProductSubset& operator=(UniformCartesianProductSubset&& src) = delete;
 		~UniformCartesianProductSubset() = default;
 
+		std::optional<std::pair<ptrdiff_t, std::shared_ptr<UniformCartesianProductSubset> > > find_projection_other_target(const std::shared_ptr<Set<V> >& avoid) {
+			if (2 == _args.size()) return std::nullopt;	// return value is wrong type
+			auto i = find_var_index(avoid, std::nothrow);
+			if (!i) return std::nullopt;	// we don't use this variable; "projection" is actually identity map
+			decltype(_args) test_args(_args);	// \todo micro-optimize here
+			test_args.erase(test_args.begin() + i);
+			if (auto x = find(test_args)) return std::pair(i, x);
+			return std::nullopt;
+		}
+
 		auto EnforceProjectionMap(const std::shared_ptr<Set<V> >& dest) {
 			auto i = find_var_index(dest);
 			return [i,target=std::weak_ptr(dest)](const elts& src) {
@@ -720,9 +776,7 @@ namespace enumerated {
 		}
 
 		void construct_subtable_observers() {
-#if 2
 			bootstrap();
-#endif
 			// single arguments
 			for (decltype(auto) x : _args) {
 				auto project_to_arg = EnforceProjectionMap(x);
