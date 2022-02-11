@@ -78,11 +78,31 @@ namespace Gray_code {
 	}
 
 	template<std::unsigned_integral U, class K>
+	std::vector<K> cast_to(const std::vector<U>& code, const std::vector<const std::vector<K>* >& key)
+		requires requires(K dest) { dest = (*key[0])[code[0]]; }
+	{
+		std::vector<K> ret(code.size());
+		if (int ub = code.size()) {
+			while (0 <= --ub) ret[ub] = (*key[ub])[code[ub]];
+		}
+		return ret;
+	}
+
+	template<std::unsigned_integral U, class K>
 	void cast_to(const std::vector<U>& code, const std::vector<std::vector<K> >& key, std::vector<K>& dest)
 		requires requires(K dest) { dest = key[0][code[0]]; }
 	{
 		if (int ub = code.size()) {
 			while (0 <= --ub) dest[ub] = key[ub][code[ub]];
+		}
+	}
+
+	template<std::unsigned_integral U, class K>
+	void cast_to(const std::vector<U>& code, const std::vector<const std::vector<K>* >& key, std::vector<K>& dest)
+		requires requires(K dest) { dest = (*key[0])[code[0]]; }
+	{
+		if (int ub = code.size()) {
+			while (0 <= --ub) dest[ub] = (*key[ub])[code[ub]];
 		}
 	}
 }
@@ -225,7 +245,7 @@ namespace enumerated {
 				ExecNotify();
 				return;
 			}
-			if (!std::ranges:any_of(*(dest->_elements), [&](const V& x) {x == src})) {
+			if (!std::ranges::any_of(*(dest->_elements), [&](const V& x) {return x == src; })) {
 				(*(dest->_elements)).push_back(src);
 				Notify(dest);
 				ExecNotify();
@@ -681,20 +701,26 @@ namespace enumerated {
 		void bootstrap() {
 			if (_elements) return;
 			// need to populate
-			const auto strict_upper_bounds = get_upper_bounds(_args);
-			if (std::ranges::any_of(strict_upper_bounds, [](auto x) { 0 >= x; })) throw std::logic_error("empty set in cartesian product");
+			std::vector<decltype(_args.front()->possible_values())> key2(_args.size());
+			ptrdiff_t ub = _args.size();
+			while (0 <= --ub) {
+				if (!(key2[ub] = _args[ub]->possible_values())) return;	// at least one of our arguments is not yet defined properly
+				if (0 >= key2[ub]->size()) throw std::logic_error("empty set in cartesian product");
+			}
+
 			std::vector<size_t> key(_args.size(), 0);
-			auto iter = Gray_code::cast_to(key, _args);
+			const auto strict_upper_bounds = get_upper_bounds(_args);
+			auto iter = Gray_code::cast_to(key, key2);
 			bool ok = true;
-			_elements = Set<V>::intuitionist_empty();
+			_elements = std::remove_reference_t<decltype(*_elements)>::intuitionist_empty();
 			do {
-				if (!_axiom_predicate || _axiom_predicate(iter)) Set<V>::adjoin(std::shared_ptr<decltype(iter)>(new decltype(iter)(iter)));
-				if (ok = Gray_code::increment(key)) Gray_code::cast_to(key, _args, iter);
+				if (!_axiom_predicate || _axiom_predicate(iter)) std::remove_reference_t<decltype(*_elements)>::adjoin(_elements, iter);
+				if (ok = Gray_code::increment(key, strict_upper_bounds)) Gray_code::cast_to(key, key2, iter);
 			} while (ok);
 		}
 
 		void construct_subtable_observers() {
-#if 0
+#if 2
 			bootstrap();
 #endif
 			// single arguments
@@ -945,9 +971,9 @@ protected:
 	constexpr std::optional<TruthValue> Or_core(TruthValue lhs, TruthValue rhs) const {
 		if (is_out_of_of_range(lhs) || is_out_of_of_range(rhs)) throw std::logic_error(std::string(name()) + " logic out of range");
 
-		if (And_identity == lhs) return rhs;
-		if (And_identity == rhs) return lhs;
-		const auto a = And_annihilator();
+		if (Or_identity() == lhs) return rhs;
+		if (Or_identity() == rhs) return lhs;
+		const auto a = Or_annihilator();
 		if (a == lhs) return a;
 		if (a == rhs && is_commutative()) return a;
 		if (lhs == rhs) return lhs;	// always idempotent
