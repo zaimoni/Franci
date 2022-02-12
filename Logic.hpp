@@ -609,6 +609,33 @@ namespace enumerated {
 			};
 		}
 
+		auto EnforceProjectionMap(const std::shared_ptr<UniformCartesianProductSubset>& dest) {
+			auto check_valid = subset(dest->_args, _args);
+			auto could_be_valid = std::get<std::pair<
+					std::partial_ordering,
+					std::vector<std::pair<size_t, size_t> >
+				> >(check_valid);	// throwing ok, invariant violation
+			if (std::partial_ordering::greater != could_be_valid.first) throw std::logic_error("wanted destination arguments to be subset");
+			if (1 >= could_be_valid.second.size()) throw std::logic_error("should have called arity-1 version");
+
+			return[filter_order=could_be_valid.second, target = std::weak_ptr(dest)](const elts& src) {
+				auto dest = target.lock();
+				if (!dest) return false;
+				auto stage = src.image_of([&filter_order](const std::vector<V>& src2) {
+						std::vector<V> ret(filter_order.size());
+						size_t n = 0;
+						for (decltype(auto) i : filter_order) {
+							ret[n++] = src2[i];
+						};
+						return ret;
+					});
+				if (!stage) throw logic::proof_by_contradiction("required equality failed");
+				if (1 == stage->size()) UniformCartesianProductSubset::force_equal(dest, stage->front());
+				else UniformCartesianProductSubset::restrict_to(dest, *stage);
+				return true;
+			};
+		}
+
 		auto EnforceInclusionMap(const std::shared_ptr<Set<V> >& src) {
 			auto i = find_var_index(src);
 			return[i, target = std::weak_ptr(_elements)](const std::vector<V>& legal) {
@@ -617,6 +644,35 @@ namespace enumerated {
 				if (legal.empty()) throw logic::proof_by_contradiction("required equality failed");
 				auto is_ok = [i,&legal](const std::vector<V>& src) {
 					return std::ranges::any_of(legal, [i,&src](const V& y) { return src[i] == y;  });
+				};
+
+				elts::restrict_to(dest, is_ok);
+				return true;
+			};
+		}
+
+		auto EnforceInclusionMap(const std::shared_ptr<UniformCartesianProductSubset>& src) {
+			auto check_valid = subset(src->_args, _args);
+			auto could_be_valid = std::get<std::pair<
+				std::partial_ordering,
+				std::vector<std::pair<size_t, size_t> >
+			> >(check_valid);	// throwing ok, invariant violation
+			if (std::partial_ordering::less != could_be_valid.first) throw std::logic_error("wanted destination arguments to be subset");
+			if (1 >= could_be_valid.second.size()) throw std::logic_error("should have called arity-1 version");
+
+			return[filter_order = could_be_valid.second, target = std::weak_ptr(_elements)](const std::vector<std::vector<V> >& legal) {
+				auto dest = target.lock();
+				if (!dest) return false;
+				if (legal.empty()) throw logic::proof_by_contradiction("required equality failed");
+				auto is_ok = [&filter_order, &legal](const std::vector<V>& src) {
+					return std::ranges::any_of(legal, [&filter_order, &src](const std::vector<V>& y) {
+						size_t n = 0;
+						for (decltype(auto) test : y) {
+							if (src[n] != y[filter_order[n]]) return false;
+							++n;
+						}
+						return true;
+					});
 				};
 
 				elts::restrict_to(dest, is_ok);
