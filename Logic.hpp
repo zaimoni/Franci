@@ -833,12 +833,15 @@ namespace enumerated {
 
 		void construct_subtable_observers() {
 			bootstrap();
-			// single arguments
-			for (decltype(auto) x : _args) {
-				auto project_to_arg = EnforceProjectionMap(x);
-				watched_by(std::shared_ptr<zaimoni::observer<elts> >(new zaimoni::lambda_observer<elts>(project_to_arg)));
-				auto restrict_by_arg = EnforceInclusionMap(x);
-				x->watched_by(std::shared_ptr<zaimoni::observer<std::vector<V> > >(new zaimoni::lambda_observer<std::vector<V> >(restrict_by_arg)));
+			if (2 >= _args.size()) {
+				// single arguments
+				for (decltype(auto) x : _args) {
+					auto project_to_arg = EnforceProjectionMap(x);
+					watched_by(std::shared_ptr<zaimoni::observer<elts> >(new zaimoni::lambda_observer<elts>(project_to_arg)));
+					auto restrict_by_arg = EnforceInclusionMap(x);
+					x->watched_by(std::shared_ptr<zaimoni::observer<std::vector<V> > >(new zaimoni::lambda_observer<std::vector<V> >(restrict_by_arg)));
+				}
+				return;
 			}
 			// todo subtable inclusion observers
 		}
