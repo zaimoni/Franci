@@ -56,6 +56,16 @@ std::vector<size_t> get_upper_bounds(const std::vector<T>& key) requires require
 }
 
 template<class T>
+std::optional<size_t> index_of(const std::vector<T>& host, const T& src)
+{
+	ptrdiff_t ub = host.size();
+	while (0 <= --ub) {
+		if (src == host[ub]) return ub;
+	}
+	return std::nullopt;
+}
+
+template<class T>
 std::variant<
 	std::partial_ordering,
 	std::pair<
@@ -75,24 +85,20 @@ subset(const std::vector<T>& lhs, const std::vector<T>& rhs)
 	size_t n = 0;
 	if (lt_possible) {
 		for (decltype(auto) l : lhs) {
-			size_t i = 0;
-			for (decltype(auto) r : rhs) {
-				if (l == r) break;
-				i++;
+			if (const auto i = index_of(rhs, l)) {
+				injection[n] = std::pair(n, *i);
+				++n;
 			}
-			if (i == rhs.size()) return std::partial_ordering::unordered;
-			injection[n++] = i;
+			else return std::partial_ordering::unordered;
 		}
 		return std::pair((lhs_ub == rhs_ub) ? std::partial_ordering::equivalent : std::partial_ordering::less, std::move(injection));
 	} else {
 		for (decltype(auto) r : rhs) {
-			size_t i = 0;
-			for (decltype(auto) l : lhs) {
-				if (l == r) break;
-				i++;
+			if (const auto i = index_of(lhs, r)) {
+				injection[n] = std::pair(*i, n);
+				++n;
 			}
-			if (i == lhs.size()) return std::partial_ordering::unordered;
-			injection[n++] = i;
+			else return std::partial_ordering::unordered;
 		}
 		return std::pair(std::partial_ordering::greater, std::move(injection));
 	}
@@ -803,7 +809,10 @@ namespace enumerated {
 		// factory functions
 		static auto declare(const decltype(_args)& args)
 		{
-			if (auto x = find(args)) return x;
+			if (auto x = find_related(args)) {
+				if (auto ret = std::get_if<std::shared_ptr<UniformCartesianProductSubset> >(&(*x))) return *ret;
+				// \todo synthetic table checks
+			}
 
 			std::shared_ptr<UniformCartesianProductSubset> stage(new UniformCartesianProductSubset(args));
 			cache().push_back(stage);
@@ -846,26 +855,74 @@ namespace enumerated {
 			// todo subtable inclusion observers
 		}
 
-		bool unordered_same_args(const decltype(_args)& src) const
-		{
-			if (_args.size() != src.size()) return false;
-			for (decltype(auto) x : src)
-				if (!std::ranges::any_of(_args, [&](const std::shared_ptr<Set<V> >& y) { return x == y; })) return false;
-			return true;
-		}
-
-		static std::shared_ptr<UniformCartesianProductSubset> find(const decltype(_args)& args) {
+		static std::optional<
+			std::variant<
+				std::shared_ptr<UniformCartesianProductSubset>,
+				std::vector<std::pair<std::shared_ptr<UniformCartesianProductSubset>, unsigned long long> >
+			>
+		> find_related(const decltype(_args)& args) {
 			auto& already = cache();
+			using entry = std::pair<std::shared_ptr<UniformCartesianProductSubset>, unsigned long long>;
+			std::vector<entry> _exact;
+			std::vector<entry> _partial;
+			std::vector<entry> _discard;
+			ptrdiff_t arg_n = args.size();
+			// \todo error checks: at least 2 args, not more than bits in unsigned long long
+			--arg_n;
+
 			ptrdiff_t ub = already.size();
 			while (0 <= --ub) {
 				if (const auto x = already[ub].lock()) {
-					if (x->unordered_same_args(args)) return x;
+					if (const auto i = index_of(x->_args, args[arg_n])) _exact.push_back(entry(x, (1ULL << arg_n)));
+					else _discard.push_back(entry(x, 0ULL));
 				} else {
 					already[ub].swap(already.back());
 					already.pop_back();
 				}
 			}
-			return nullptr;
+			if (_exact.empty()) return std::nullopt;
+
+			while (0 <= --arg_n) {
+				bool have_found = false;
+				for (decltype(auto) e : _partial) {
+					if (const auto i = index_of(e.first->_args, args[arg_n])) {
+						have_found = true;
+						e.second |= (1ULL << arg_n);
+					}
+				}
+				ub = _exact.size();
+				while (0 <= --ub) {
+					auto& e = _exact[ub];
+					if (const auto i = index_of(e.first->_args, args[arg_n])) {
+						e.second |= (1ULL << arg_n);
+						have_found = true;
+					} else {
+						_partial.push_back(e);
+						swap(e, _exact.back());
+						_exact.pop_back();
+					}
+				}
+				ub = _discard.size();
+				while (0 <= --ub) {
+					auto& e = _discard[ub];
+					if (const auto i = index_of(e.first->_args, args[arg_n])) {
+						have_found = true;
+						_partial.push_back(entry(e.first, 1ULL << arg_n));
+						swap(e, _discard.back());
+						_discard.pop_back();
+					};
+				}
+				if (!have_found) return std::nullopt;
+			}
+			if (!_exact.empty()) {
+				for (decltype(auto) e : _exact) {
+					if (e.first->_args.size() == args.size()) return e.first;
+				}
+				return _exact;
+			}
+			if (!_exact.empty()) return _exact.front().first;
+			if (!_partial.empty()) return _partial;
+			return std::nullopt;
 		}
 
 		static bool destructive_intersect(elts& host, ptrdiff_t col, const std::vector<V>& src) {
