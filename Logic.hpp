@@ -105,6 +105,17 @@ subset(const std::vector<T>& lhs, const std::vector<T>& rhs)
 //	return std::partial_ordering::unordered;
 }
 
+template<class T>
+std::vector<T> set_difference(const std::vector<T>& lhs, const std::vector<T>& rhs)
+{
+	std::vector<T> ret;
+	for (decltype(auto) x : lhs) {
+		if (index_of(rhs, x)) continue;
+		ret.push_back(x);
+	}
+	return ret;
+}
+
 namespace Gray_code {
 
 	// Naming attributed to Knuth.  Alternate name is chinese remainder theorem encoding
@@ -806,11 +817,31 @@ namespace enumerated {
 		}
 		auto observers() const { return _watchers.size(); }
 
+		void use_projection_inference() {
+			// single arguments
+			for (decltype(auto) x : _args) {
+				auto project_to_arg = EnforceProjectionMap(x);
+				watched_by(std::shared_ptr<zaimoni::observer<elts> >(new zaimoni::lambda_observer<elts>(project_to_arg)));
+			}
+		}
+
 		// factory functions
 		static auto declare(const decltype(_args)& args)
 		{
 			if (auto x = find_related(args)) {
 				if (auto ret = std::get_if<std::shared_ptr<UniformCartesianProductSubset> >(&(*x))) return *ret;
+				auto& scan = std::get<std::vector<std::pair<std::shared_ptr<UniformCartesianProductSubset>, unsigned long long> >  >(*x);
+				std::vector<std::pair<size_t, size_t> > candidates;
+				const unsigned long long ok_bitmap = 2 * ((1ULL << (args.size() - 1)) - 1) + 1;
+				size_t i = 0;
+				for (decltype(auto) x : scan) {
+					size_t j = 0;
+					for (decltype(auto) y : scan) {
+						if (i < j && ok_bitmap == (x.second | y.second)) candidates.push_back(std::pair(i, j));
+						j++;
+					}
+					i++;
+				};
 				// \todo synthetic table checks
 			}
 
@@ -842,17 +873,11 @@ namespace enumerated {
 
 		void construct_subtable_observers() {
 			bootstrap();
-			if (2 >= _args.size()) {
-				// single arguments
-				for (decltype(auto) x : _args) {
-					auto project_to_arg = EnforceProjectionMap(x);
-					watched_by(std::shared_ptr<zaimoni::observer<elts> >(new zaimoni::lambda_observer<elts>(project_to_arg)));
-					auto restrict_by_arg = EnforceInclusionMap(x);
-					x->watched_by(std::shared_ptr<zaimoni::observer<std::vector<V> > >(new zaimoni::lambda_observer<std::vector<V> >(restrict_by_arg)));
-				}
-				return;
+			// single arguments
+			for (decltype(auto) x : _args) {
+				auto restrict_by_arg = EnforceInclusionMap(x);
+				x->watched_by(std::shared_ptr<zaimoni::observer<std::vector<V> > >(new zaimoni::lambda_observer<std::vector<V> >(restrict_by_arg)));
 			}
-			// todo subtable inclusion observers
 		}
 
 		static std::optional<
@@ -920,7 +945,6 @@ namespace enumerated {
 				}
 				return _exact;
 			}
-			if (!_exact.empty()) return _exact.front().first;
 			if (!_partial.empty()) return _partial;
 			return std::nullopt;
 		}
@@ -1434,6 +1458,7 @@ private:
 		if (!(cart_product_args[1] = rhs->_prop_variable)) return;
 		// this should handle sub-table observers on its own
 		_table = enumerated::UniformCartesianProductSubset<logic::TruthValue>::declare(cart_product_args);
+		_table->use_projection_inference();
 
 		// n-ary version would warrant a permutation identifier
 		ptrdiff_t arg0_index = _table->find_var_index(cart_product_args[0]);
