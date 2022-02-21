@@ -825,6 +825,12 @@ namespace enumerated {
 			}
 		}
 
+		// our caller has context indicating this is valid
+		static void use_projection_inference(std::shared_ptr<UniformCartesianProductSubset>& src, std::shared_ptr<UniformCartesianProductSubset>& dest) {
+			src->EnforceProjectionMap(dest);
+			dest->EnforceInclusionMap(src);
+		}
+
 		// factory functions
 		static auto declare(const decltype(_args)& args)
 		{
