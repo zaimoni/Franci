@@ -834,23 +834,6 @@ namespace enumerated {
 		// factory functions
 		static auto declare(const decltype(_args)& args)
 		{
-			if (auto x = find_related(args)) {
-				if (auto ret = std::get_if<std::shared_ptr<UniformCartesianProductSubset> >(&(*x))) return *ret;
-				auto& scan = std::get<std::vector<std::pair<std::shared_ptr<UniformCartesianProductSubset>, unsigned long long> >  >(*x);
-				std::vector<std::pair<size_t, size_t> > candidates;
-				const unsigned long long ok_bitmap = 2 * ((1ULL << (args.size() - 1)) - 1) + 1;
-				size_t i = 0;
-				for (decltype(auto) x : scan) {
-					size_t j = 0;
-					for (decltype(auto) y : scan) {
-						if (i < j && ok_bitmap == (x.second | y.second)) candidates.push_back(std::pair(i, j));
-						j++;
-					}
-					i++;
-				};
-				// \todo synthetic table checks
-			}
-
 			std::shared_ptr<UniformCartesianProductSubset> stage(new UniformCartesianProductSubset(args));
 			cache().push_back(stage);
 			return stage;
@@ -1462,7 +1445,11 @@ private:
 		std::vector<std::shared_ptr<enumerated::Set<TruthValue> > > cart_product_args(2);
 		if (!(cart_product_args[0] = lhs->_prop_variable)) return;
 		if (!(cart_product_args[1] = rhs->_prop_variable)) return;
-		// this should handle sub-table observers on its own
+
+		// \todo try to reuse other tables' sets (domain-specific knowledge)
+		// cf ...::find_related
+
+		// this should handle the variable observers on its own
 		_table = enumerated::UniformCartesianProductSubset<logic::TruthValue>::declare(cart_product_args);
 		_table->use_projection_inference();
 
