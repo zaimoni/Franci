@@ -151,8 +151,13 @@ of the inference schemas of predicate calculus are derivable from the usual unde
 <ul>
 	<li>Their truth table descriptions agree for classical logic <b>only</b>.</li>
 	<li>For the other truth table describable logics we are considering, P &rArr; Q would be expected to syntactically entail P &#9500; Q.  (However, as a matter of 
-		intended interpretatiion this does <b>not</b> work.)</li>
+		intended interpretatiion this does <b>not</b> work: we expect a brute fact to require meaning, but syntactical entailment to not rely on meaning.)</li>
 </ul>
+<table align="center">
+	<tr><th></th><th>Name</th><th>Works for which of our logics?</th></tr>
+	<tr><td align="center" style="background: yellow">P &rArr; Q &#9500; (P &#9500; Q)</td><td align="left"><span style="background:yellow">Upgrade &rArr; to &#9500;</span></td><td align="left">All</td></tr>
+</table>
+
 <p>The corresponding inference rule for classical logic, is implication introduction.  The analogous result, is <a href="https://en.wikipedia.org/wiki/Hypothetical_syllogism">transitivity of implication</a>.
 <table align="center">
 	<tr><th colspan="3">Classical Logic</th></tr>
@@ -180,17 +185,17 @@ of the inference schemas of predicate calculus are derivable from the usual unde
 	the Hypothesis step, and the reached Conclusion step, do not have non-classical truth values. (This choice of phrasing, is to allow for Intuitionistic logic.)
 	There may be other problems as well.</p>
 <p>Also, the conflict between the truth-value interpretation of syntactical entailment &#9500;, and the intended interpretation, is that a syntactical entailment rule 
-	only applies when the hypothesis is pattern-matched.  That is, our truth-value interpretation is incomplete &mdash; we need a predicate with domain statements, to fully formalize 
-	syntactical entailment.</p>
+	only applies when the hypothesis is pattern-matched.  That is, our truth-value interpretation is incomplete &mdash; we need a system of predicates with domain statements, 
+	to fully formalize the notation we are describing.</p>
 <p>Once we have verified the analogies that allow translating a truth table verification of a propositional calculus inference rule, to a symbolic logic verification of said 
 	inference rule, the exercise of verifying <i>transitivity of implication</i> (or lack thereof) for all five truth table-described nonclassical logics 
 	can be done in symbolic logic.  (This verification will be classical logic reasoning about a given non-classical logic.)</p>
 <table align="center">
 	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
 	<tr><td align="center">P &rArr; Q, Q &rArr; R &#9500; P &rArr; R</td><td align="left">Transitivity of implication</td><td align="left">Belnap</td><td>Defeasible logics</td></tr>
-	<tr><td align="center" style="background: yellow">(P &#9500; Q), Q &rArr; R &#9500; P &rArr; R</td><td align="left" style="background: yellow">Invert using P &#9500; Q on the hypothesis of Q &rArr; R</td><td align="left">Belnap</td><td>Defeasible logics</td></tr>
-	<tr><td align="center" style="background: yellow">P &rArr; Q, (Q &#9500; R)  &#9500; P &rArr; R</td><td align="left" style="background: yellow">Using Q &#9500; R on the conclusion of P &rArr; Q</td><td align="left">Belnap</td><td>Defeasible logics</td></tr>
 </table>
+<p>While it is tempting to check whether &rArr; can be weakened to &#9500; in the hypothesis for <i>transitivity of implication</i> analogs for 
+	the non-classical truth table-describable logics we are considering, this does not work out.</p>
 <p>The general issue defeasible logics have with <i>transitivity of implication</i>, is that in natural language we omit many "default hypotheses". 
 that is, a plain English statement describing a (semantic) implication, often has a much larger formal expansion than a direct interpretation would suggest.
 This is <b>not</b> a problem for the level of mathematics, that we are following instructions for building out.  (This also means defeasible logics have issues either
@@ -316,8 +321,7 @@ rather than define how uniform substitutions work.</p>
 	<tr><td>3.</td><td></td><td>B</td><td><i>modus ponens</i> on (1), (2)</td></tr>
 	<tr><td>4.</td><td>A &#9500; B</td><td></td><td><span style="background:yellow">Syntactical entailment introduction</span>, (2) and (3)</td></tr>
 </table>
-<p>For classical logic <b>only</b>, we have a downgrade procedure from &#9500; to &rArr; .  The upgrade procedure is more reliable; it uses <i>syntactical entailment introduction</i>.  Proving the &hArr; versions from the &rArr; versions is 
-left as an exercise.</p>
+<p>For classical logic <b>only</b>, we have a downgrade procedure from &#9500; to &rArr; .  The upgrade procedure is more reliable.</p>
 <table align="center" style="clear:both">
 	<tr><th></th><th>Name</th><th>Works for which logics?</th></tr>
 	<tr><td align="center">(A &#9500; B) &#9500; (&#9500; A &rArr; B)</td><td><span style="background:yellow">Downgrade &#9500; to &rArr;</span></td><td>Classical</td></tr>
