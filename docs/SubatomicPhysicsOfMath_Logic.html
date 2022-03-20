@@ -158,7 +158,7 @@ of the inference schemas of predicate calculus are derivable from the usual unde
 	<tr><td align="center" style="background: yellow">P &rArr; Q &#9500; (P &#9500; Q)</td><td align="left"><span style="background:yellow">Upgrade &rArr; to &#9500;</span></td><td align="left">All</td></tr>
 </table>
 
-<p>The corresponding inference rule for classical logic, is implication introduction.  The analogous result, is <a href="https://en.wikipedia.org/wiki/Hypothetical_syllogism">transitivity of implication</a>.
+<p>The corresponding inference rule for classical logic to syntactical entailment introduction, is implication introduction.  The analogous result, is <a href="https://en.wikipedia.org/wiki/Hypothetical_syllogism">transitivity of implication</a>.
 <table align="center">
 	<tr><th colspan="3">Classical Logic</th></tr>
 	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
@@ -390,7 +390,7 @@ For two truth-valued expressions A and B, if whenever A evaluates to a truth val
 	<tr><th>Rationale</th><th></th><th>Name</th></tr>
 	<tr><td align="center">P,Q &#9500; P</td><td align="left" valign="top" rowspan="2"></td></tr>
 	<tr><td align="center">P,Q &#9500; Q</td></tr>
-	<tr><td align="center" style="background: yellow">A, (A &#9500; B) &#9500; (A &#9500; B)</td><td style="background: yellow">Idempotence of hypotheses of &#9500; (example of schema)</td></tr>
+	<tr><td align="center" style="background: yellow">(A, A &#9500; B) &#9500; (A &#9500; B)</td><td style="background: yellow">Idempotence of hypotheses of &#9500; (example of schema)</td></tr>
 </table>
 <p>Of the above, only <i>idempotence of &</i> can be said to be formally derivable (by evaluating either of the uniform substitutions, named in the rationale).  The others are meaning-based, i.e. semantic, translations 
 	between different descriptions of logical and &.</p>
@@ -525,7 +525,8 @@ classical logic, since we have so far only derived <i>transitivity of implicatio
 <p>We have a counterexample for Lisp/Prolog logic: if P is <i>false</i> while R and S are both <i>true</i>, the truth value imputed to Q is unconstrained.  This is 
 	not a material issue for our other truth-table described logics, but for Lisp/Prolog assigning Q a truth value of <i>unknown</i> causes Q &#x2228; S to be 
 	<i>unknown</i>.  Our givens only guarantee that P and R have classical truth values.</p>
-<p>Once we have verified that truth table calculations and (classical) symbolic logic calculations are equivalent, the exercise that <i>constructive dilemma</i> holds for Belnap's four-valued logic is doable.</p>
+<p>Once we have verified that truth table calculations and (classical) symbolic logic calculations are equivalent, the exercise that <i>constructive dilemma</i> holds for Belnap's four-valued logic is doable.
+However, <span style="background:yellow">right half of constructive dilemma</span> does <b>not</b> hold for Belnap's four-valued logic.</p>
 <table align="center" style="clear:both">
 	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
 	<tr><td align="center">P &rArr; Q, R &rArr; S, P &#x2228; R &#9500; Q &#x2228; S</td><td align="left" rowspan="4">Constructive dilemma</td><td align="left" rowspan="4">Lisp/Prolog</td><td rowspan="4">Defeasible logics; Intuitionistic?</td></tr>
@@ -630,8 +631,8 @@ In classical logic, this is known as <i>proof by contradiction</i>; other names 
 </table>
 <table align="center">
 	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
-	<tr><td align="center">P &rArr; ~Q &#9500; Q &rArr; ~P</td><td align="left">taking contrapositive</td><td align="left">Lisp/Prolog</td><td>None</td></tr>
-	<tr><td align="center">P &rArr; Q &#9500; ~Q &rArr; ~P</td><td align="left">taking contrapositive</td><td align="left">Lisp/Prolog</td><td>None</td></tr>
+	<tr><td align="center">P &rArr; ~Q &#9500; Q &rArr; ~P</td><td align="left">taking contrapositive</td><td rowspan="2" align="left">Lisp/Prolog</td><td rowspan="2">None</td></tr>
+	<tr><td align="center">P &rArr; Q &#9500; ~Q &rArr; ~P</td><td align="left">taking contrapositive</td></tr>
 </table>
 <table align="left">
 	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
@@ -650,8 +651,8 @@ In classical logic, this is known as <i>proof by contradiction</i>; other names 
 	identify the extra hypotheses required for this to work for Lisp/Prolog logic.</p>
 <table align="center" style="clear:both">
 	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
-	<tr><td align="center">~P &rArr; Q &#9500; ~Q &rArr; P</td><td align="left">taking contrapositive</td><td align="left">Lisp/Prolog</td><td>None</td></tr>
-	<tr><td align="center">~P &rArr; ~Q &#9500; Q &rArr; P</td><td align="left">taking contrapositive</td><td align="left">Lisp/Prolog</td><td>Intuitionistic</td></tr>
+	<tr><td align="center">~P &rArr; Q &#9500; ~Q &rArr; P</td><td align="left">taking contrapositive</td><td rowspan="2" align="left">Lisp/Prolog</td><td rowspan="2">Intuitionistic</td></tr>
+	<tr><td align="center">~P &rArr; ~Q &#9500; Q &rArr; P</td><td align="left">taking contrapositive</td></tr>
 </table>
 <table align="left">
 	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
