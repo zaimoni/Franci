@@ -1,0 +1,632 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=windows-1252"/>
+	<title>Subatomic Physics of Math: Re-reviewing Logic</title>
+	<style type="text/css">
+		@page { margin: 0.79in }
+		p { margin-bottom: 0.1in; line-height: 120% }
+		a:link { so-language: zxx }
+		* {
+            font-family: "Liberation Serif", serif
+        }
+	</style>
+</head>
+<body lang="en-US" dir="ltr">
+<div style="position:fixed; top:0.5em; left:0.5em; background:white"><a href="./">Home</a> &gt; <a href="./SubatomicPhysicsOfMath_Numerals.html">Numerals</a></div>
+<h1 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 16px">Subatomic Physics of Math: Re-reviewing Logic</h1>
+
+<span style="border: 1px solid black; display:block; float:left; margin-right: 20px; padding: 5px">
+	<b>Verifying the rest of elementary logic</b>
+	<ol type="I">
+		<li><a href="./SubatomicPhysicsOfMath_GeneralizedAssociativity.html">Generalized Associativity</a></li>
+		<li><b>Re-reviewing Logic</b></li>
+	</ol>
+</span>
+<span style="border: 1px solid black; display:block; float:right">
+	<ol type="I">
+		<li><a href="#Brouwer-Heyting-Kolmogorov">Brouwer-Heyting-Kolmogorov interpretation</a></li>
+		<li><a href="#syntactical-entailment">Intended interpretation of &#9500;</a></li>
+		<li><a href="#suszko-thesis">Suszko's Thesis</a></li>
+		<li><a href="#proof-by-cases">Generalized Proof by cases</a></li>
+		<li><a href="#generalized-conjunction-elimination">Generalized conjunction elimination</a></li>
+		<li><a href="#generalized-cut-rule">Generalized cut rule</a></li>
+		<li><a href="#generalized-or-elimination">Generalized or-elimination</a></li>
+		<li><a href="#annihilators">Annihilators</a></li>
+		<li><a href="#generalized-or-elimination-lisp-prolog">Generalized or-elimination, Lisp/Prolog</a></li>
+		<li><a href="#generalized-modus-ponendo-tollens">Generalized <i>modus ponendo tollens</i></a></li>
+		<li><a href="#de-morgan-franci">De Morgan's Laws: Franci's opinion</a></li>
+		<li><a href="#generalized-de-morgan">Generalized De Morgan's Laws</a></li>
+		<li><a href="#generalized-constructive-dilemma">Generalized Constructive Dilemma</a></li>
+		<li><a href="#generalized-distributivity">Generalized Distributivity</a></li>
+	</ol>
+</span>
+
+<h2 id="Brouwer-Heyting-Kolmogorov" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Brouwer-Heyting-Kolmogorov interpretation</h2>
+<p>This interpretation, the now-standard rationale for constructive logic, has two <a href="https://sartemov.ws.gc.cuny.edu/files/2014/01/p257-artemov.pdf">origins</a>.  Translating into our notation:</p>
+<blockquote>
+	A.N.Kolmogorov in [Kol] suggested an informal interpretation 
+	of sentences of Intuitionistic logic Int as statements about 
+	the possibility of solving certain general problems; 
+	propositional variables were supposed to denote "problems", 
+	logical connectives were given a natural interpretation as 
+	operators over "problems":
+	<ul>
+		<li>a formula A&B denotes a problem  "to solve both A and B".</li>
+		<li>a formula A&#x2228;B denotes "to solve either A or B".</li>
+		<li>an implication A&rArr;B is interpreted as a  problem "to reduce a solution of B to any solution of A".</li>
+		<li>~A  is A&rArr;&#x22A5; that means a problem "to demonstrate an unsolvability of A".</li>
+	</ul>
+	Kolmogorov hadn't given a precise definition of 
+	"problems", just appealing to the common sense of a working 
+	mathematician but had conjectured that his interpretation of 
+	Int was complete.
+</blockquote>
+<p>In the above, &#x22A5; has intended interpretation absurdity.  As mentioned above, in constructive logic it is typical 
+	to consider absurdity &#x22A5; rather than <i>false</i> as undefined.</p>
+<p>Our other <a href="https://en.wikipedia.org/wiki/Brouwer%E2%80%93Heyting%E2%80%93Kolmogorov_interpretation">source</a>, for the phrasing due to Heyting, 
+	presumes that we have a fully working mathematical model of proof notation.</p>
+
+<h2 id="syntactical-entailment" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Intended interpretation of &#9500;</h2>
+<p>Now that we have generalized associativity of &, we can denotate the usual intended interpretation of &#9500;:</p>
+<table align="center">
+	<tr><td align="right">A<sub>0</sub>, ..., A<sub>n</sub> &#9500; B :=&nbsp;</td><td>A<sub>0</sub> & ... & A<sub>n</sub> &#9500; B</td></tr>
+	<tr><td align="right">A &#9500; B<sub>0</sub> ... B<sub>n</sub> :=&nbsp;</td><td>A &#9500; (<span style="transform:rotate(180deg);display:inline-block">E</span>k &isin; 0...n)(B<sub>k</sub>)</td></tr>
+</table>
+<p>We use the existence quantifier for sequent calculus inference rules, to avoid notational complexity.</p>
+<p>We verify, as a matter of plain English reasoning, that the above formal definition is consistent with the natural language intended interpretation we 
+	have been using.  That is, we can <i>replace</i> almost all uses of natural language intended interpretation of &#9500; we started with, with the above formal notation.  (The uses of the intended interpretation of &#9500; in 
+	the intended interpretation of :=, would need to be checked for triggering circular reasoning, before replacing.)</p>
+<p>I will proceed with this replacement.  This corresponds to replacing a plank, in the <a href="https://open.library.okstate.edu/introphilosophy/chapter/ship-of-theseus/">Ship of</a> <a href="https://en.wikipedia.org/wiki/Ship_of_Theseus">Theseus</a> and <a href="https://plato.stanford.edu/entries/neurath/">Neurath's</a> <a href="https://en.wikipedia.org/wiki/Neurath%27s_boat">Boat</a> paradoxes.</p>	
+
+<h2 id="suszko-thesis" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Suszko's Thesis</h2>
+<p><a href="https://plato.stanford.edu/entries/truth-values/suszko-thesis.html">Suszko</a> (1977) proposed that the truth values <i>true</i> and <i>false</i> can be used, for a specific logic, to define the non-classical truth values of a logic.  
+	Rather than take up the technical analysis (which, again, requires a working mathematical model of notation), we cherry-pick some terminology used 
+	to identify possible issues in translating between formal notation, and natural language.</p>
+<p>Suszko's thesis is certainly tempting, as we have already hit two roadblocks that force using classical logic:</p>
+<ul>
+	<li>We were only able to directly justify enough symbolic logic to replicate the truth table notation for logic, with classical logic.  We then 
+		had to use classical logic reasoning about non-classical truth values, to backfill in most of the missing links (and verify which missing links
+		were unfixable, i.e. had counter-examples).</li>
+	<li>Well-ordering of the natural numbers, is much easier for classical logic.  Many traditional set theory identities do not work 
+		with non-classical truth values.</li>
+</ul>
+<p>We say that:</p>
+<ul>
+	<li><i>true</i> is a designated truth value for any logic.  For a given logic, we say the set of all designated truth values is D<sup>+</sup>.  The designated truth values, are the truth values of the propositions we accept.</li>
+	<li><i>false</i> is an anti-designated truth value for any logic.  For a given logic, we say the set of all anti-designated truth values is D<sup>-</sup>.  The anti-designated truth values, are the truth values of the propositions we reject.</li>
+	<li>We require that &#x2205; = D<sup>+</sup> &#x2229; D<sup>-</sup>.</li>
+</ul>
+<p>The canonical assignments (requiring a set theory with <i>ur-elements</i>) are D<sup>+</sup> = {<i>true</i>} and D<sup>-</sup> = {<i>false</i>}.</p>
+<p>Malinkowsi (1994), in his counteranalysis of Suszko's thesis, considered the following generalizations of <span style="background:yellow"><i>modus ponens</i> for &#9500;</span>:</p>
+<table align="center">
+<tr><td><b>Truth</b>(P) &isin; D<sup>+</sup>, (P&#9500;<sub>t</sub>Q) &#9500; <b>Truth</b>(Q) &isin; D<sup>+</sup></td><td>t-entailment, &#9500;<sub>t</sub></td></tr>
+<tr><td><b>Truth</b>(P) &isin; <b>TruthValues</b>\D<sup>-</sup>, (P&#9500;<sub>f</sub>Q) &#9500; <b>Truth</b>(Q) &isin; <b>TruthValues</b>\D<sup>-</sup></td><td>f-entailment, &#9500;<sub>f</sub></td></tr>
+<tr><td><b>Truth</b>(P) &isin; <b>TruthValues</b>\D<sup>-</sup>, (P&#9500;<sub>q</sub>Q) &#9500; <b>Truth</b>(Q) &isin; D<sup>+</sup></td><td>q-entailment, &#9500;<sub>q</sub></td></tr>
+<tr><td><b>Truth</b>(P) &isin; D<sup>+</sup>, (P&#9500;<sub>p</sub>Q) &#9500; <b>Truth</b>(Q) &isin; <b>TruthValues</b>\D<sup>-</sup></td><td>p-entailment (i.e. "plausibility" entailment), &#9500;<sub>p</sub></td></tr>
+</table>
+<p>Malinkowski's general conclusion was that Suszko's writeup tacitly assumed that all truth values had to be one of <i>designated</i> or <i>anti-designated</i> (and thus allowed algebraic reduction 
+	to one of <i>true</i> or <i>false</i>.  The corresponding algebraic reduction for <b>TruthValues</b>\(D<sup>+</sup> &#x222A; D<sup>-</sup>), is to <i>unknown</i>.)
+<p>Comparing this against prior results, it is a mechanical verification that:</p>
+<ul>
+	<li>Malinowski's t-entailment, with the canonical D<sup>+</sup>, is the syntactical entailment we have been using.</li>
+	<li>All four generalizations of syntactical entailment, agree for classical logic (i.e., they are reasonable generalizations).</li>
+	<li>Replacing &#9500; with &rArr; in the presence of non-classical truth values, gives very pathological results that do not represent natural language reasoning well.</li>
+	<li>p-entailment does not have a cut rule, i.e. we do not have transitivity of p-entailment.  The other three do have cut rules.</li>
+</ul>
+<p>The above definitions allow defining three kinds of syntactical equivalence beyond the usual one.  For given D<sup>+</sup> and D<sup>-</sup>, we say:</p>
+<ul>
+	<li>A &#x27DB;<sub>t</sub> B, when A &#9500;<sub>t</sub> B and B &#9500;<sub>t</sub> A</li>
+	<li>A &#x27DB;<sub>f</sub> B, when A &#9500;<sub>f</sub> B and B &#9500;<sub>f</sub> A</li>
+	<li>A &#x27DB;<sub>pq</sub> B, when A &#9500;<sub>p</sub> B and B &#9500;<sub>q</sub> A</li>
+</ul>
+
+<h2 id="proof-by-cases" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Generalized Proof by cases</h2>
+<p>The following inference rules use logical and & or logical or &#x2228;, and thus look like they should have versions that use generalized associativity:</p>
+<ul>
+	<li>Proof by cases</li>
+	<li>Or elimination</li>
+	<li><i>modus ponendo tollens</i></li>
+	<li>Conjunction elimination</li>
+	<li>All four of De Morgan's laws</li>
+	<li>Constructive Dilemma</li>
+	<li>Destructive Dilemma</li>
+	<li>All four distributivity laws</li>
+</ul>
+<table align="right">
+	<tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>0.</td><td></td><td>1&le;n &isin; &#x2115;</td><td>Given</td></tr>
+	<tr><td>1.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>m &isin; 0...1)(P<sub>m</sub> &rArr; Q), P<sub>0</sub> &#x2228; P<sub>1</sub> &#9500; Q</td><td></td><td>Proof by cases</td></tr>
+	<tr><td>2.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>m &isin; 0...n)(P<sub>m</sub> &rArr; Q), P<sub>0</sub> &#x2228; ... &#x2228; P<sub>n</sub> &#9500; Q</td><td></td><td>Hypothesis (to set up strong natural induction)</td></tr>
+	<tr><td>3.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>m &isin; 0...n+1)(P<sub>m</sub> &rArr; Q) & P<sub>0</sub> &#x2228; ... &#x2228; P<sub>n+1</sub></td><td>Hypothesis</td></tr>
+	<tr><td>3a.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>m &isin; 0...n+1)(P<sub>m</sub> &rArr; Q)</td><td>Conjunction elimination on (3)</td></tr>
+	<tr><td>3b.</td><td></td><td>P<sub>0</sub> &#x2228; ... &#x2228; P<sub>n+1</sub></td><td>Conjunction elimination on (3)</td></tr>
+	<tr><td>4.</td><td></td><td>(P<sub>0</sub> &#x2228; ...  &#x2228; P<sub>n</sub>) &#x2228; P<sub>n+1</sub></td><td>Generalized associativity on (3b)</td></tr>
+	<tr><td>5.</td><td>P<sub>0</sub> &#x2228; ... &#x2228; P<sub>n</sub> &#9500; Q</td><td></td><td><i>modus ponens</i> for &#9500;, (2) and (3a)</td></tr>
+	<tr><td>6.</td><td></td><td>P<sub>n+1</sub> &rArr; Q</td><td>Universal instantiation on (3a)</td></tr>
+	<tr><td>7.</td><td></td><td>Q</td><td>Proof by cases: (5),(6),(4)</td></tr>
+	<tr><td>8.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>m &isin; 0...n+1)(P<sub>m</sub> &rArr; Q) & P<sub>0</sub> &#x2228; ... &#x2228; P<sub>n+1</sub> &#9500; Q</td><td></td><td>syntactical entailment introduction, (3) and (7)</td></tr>
+	<tr><td>9.</td><td>((<span style="transform:rotate(180deg);display:inline-block">A</span>m &isin; 0...n)(P<sub>m</sub> &rArr; Q), P<sub>0</sub> &#x2228; ... &#x2228; P<sub>n</sub> &#9500; Q) &#9500; ((<span style="transform:rotate(180deg);display:inline-block">A</span>m &isin; 0...n+1)(P<sub>m</sub> &rArr; Q) & P<sub>0</sub> &#x2228; ... &#x2228; P<sub>n+1</sub> &#9500; Q)</td><td></td><td>syntactical entailment introduction, (2) and (8)</td></tr>
+	<tr><td>10.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>n &isin; &#x2115;)((<span style="transform:rotate(180deg);display:inline-block">A</span>m &isin; 0...n)(P<sub>m</sub> &rArr; Q), P<sub>0</sub> &#x2228; ... &#x2228; P<sub>n</sub> &#9500; Q)</td><td></td><td>strong natural induction, (1) and (9)</td></tr>
+	<tr><th colspan="4">Generalized proof by cases</th></tr>
+</table>
+<p>Once we have generalized versions of the above, we shall actually have formalized everything covered in an introductory course on logic.</p>
+<p>We start by generalizing proof by cases. (This completes making our <a href="./Reference_Logic.html">reference table</a> well-defined.)</p>
+<p>A structurally similar proof holds when replacing <nobr style="font-style: italic">P<sub>m</sub> &rArr; Q</nobr> with <nobr style="font-style: italic">P<sub>m</sub> &#9500; Q</nobr>.  We do not (yet) have clean notation built out for an 
+	arbitrary mixture of &rArr; and &#9500; in the strong induction hypothesis.</p>
+<p>We are taking advantage of the usual definition of the 1-argument degenerate case for generalized associativity for a semigroup: P<sub>0</sub> &#x2228; ... &#x2228; P<sub>0</sub> := P<sub>0</sub></p>
+
+<h2 id="generalized-conjunction-elimination" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Generalized conjunction elimination</h2>
+<table align="right">
+	<tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>0.</td><td></td><td>1&le;n &isin; &#x2115;</td><td>Given</td></tr>
+	<tr><td>1.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>m &isin; 0...1)(P<sub>0</sub> & P<sub>1</sub> &#9500; P<sub>m</sub>)</td><td></td><td>Conjunction elimination</td></tr>
+	<tr><td>2.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>m &isin; 0...n)(P<sub>0</sub> & ... & P<sub>n</sub> &#9500; P<sub>m</sub>)</td><td></td><td>Hypothesis (to set up strong natural induction)</td></tr>
+	<tr><td>3.</td><td></td><td>P<sub>0</sub> & ... & P<sub>n+1</sub></td><td>Hypothesis</td></tr>
+	<tr><td>4.</td><td></td><td>(P<sub>0</sub> & ... & P<sub>n</sub>) & P<sub>n+1</sub></td><td>Generalized associativity on (3)</td></tr>
+	<tr><td>5.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>m &isin; 0...n)((P<sub>0</sub> & ... & P<sub>n</sub>) & P<sub>n+1</sub> &#9500; P<sub>m</sub>)</td><td></td><td>Transitivity of syntactical entailment, (3) and conjunction elimination on (4)</td></tr>
+	<tr><td>6.</td><td>(P<sub>0</sub> & ... & P<sub>n</sub>) & P<sub>n+1</sub> &#9500; P<sub>n+1</sub></td><td></td><td>Conjunction elimination for (4)</td></tr>
+	<tr><td>7.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>m &isin; 0...n+1)((P<sub>0</sub> & ... & P<sub>n</sub>) & P<sub>n+1</sub> &#9500; P<sub>m</sub>)</td><td></td><td>(5) and (6)</td></tr>
+	<tr><td>8.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>m &isin; 0...n+1)(P<sub>0</sub> & ... & P<sub>n+1</sub> &#9500; P<sub>m</sub>)</td><td></td><td>Generalized Associativity on (7)</td></tr>
+	<tr><td>9.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>m &isin; 0...n)(P<sub>0</sub> & ... & P<sub>n</sub> &#9500; P<sub>m</sub>) &#9500; (<span style="transform:rotate(180deg);display:inline-block">A</span>m &isin; 0...n+1)(P<sub>0</sub> & ... & P<sub>n+1</sub> &#9500; P<sub>m</sub>)</td><td></td><td>Syntactical entailment introduction, (3) and (8)</td></tr>
+	<tr><td>10.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>m &isin; 0...n)(P<sub>0</sub> & ... & P<sub>n</sub> &#9500; P<sub>m</sub>)</td><td></td><td>Strong natural induction, (2) and (9)</td></tr>
+	<tr><th colspan="4">Generalized conjunction elimination</th></tr>
+</table>
+<p>We next verify generalized conjunction elimination.  We have some abuses of notation here, as we're having to universally quantify inference rules rather than truth-valued expressions.</p>
+
+<h2 id="generalized-cut-rule" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:right">Generalized cut rule</h2>
+<table align="right">
+	<tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>0.</td><td></td><td>1&le;n &isin; &#x2115;</td><td>Given</td></tr>
+	<tr><td>1.</td><td>Q<sub>0</sub> & ... & Q<sub>n</sub> &#9500; R</td><td></td><td>Given</td></tr>
+	<tr><td>2.</td><td>P &#9500; Q<sub>k</sub></td><td></td><td>Given</td></tr>
+	<tr><td>3.</td><td></td><td>k=0</td><td>Hypothesis</td></tr>
+	<tr><td>4.</td><td></td><td>P & Q<sub>1</sub> & ... & Q<sub>n</sub></td><td>Hypothesis</td></tr>
+	<tr><td>5.</td><td></td><td>P</td><td>Conjunction elimination on (4)</td></tr>
+	<tr><td>6.</td><td></td><td>Q<sub>1</sub> & ... & Q<sub>n</sub></td><td>Conjunction elimination on (4)</td></tr>
+	<tr><td>7.</td><td></td><td>Q<sub>0</sub></td><td><i>modus ponens</i>, (2) and (5)</td></tr>
+	<tr><td>8.</td><td></td><td>Q<sub>0</sub> & Q<sub>1</sub> & ... & Q<sub>n</sub></td><td>Conjunction introduction, (7) and (6)</td></tr>
+	<tr><td>9.</td><td>P & Q<sub>1</sub> & ... & Q<sub>n</sub> &#9500; Q<sub>0</sub> & ... & Q<sub>n</sub></td><td></td><td>Syntactical entailment introduction, (4) and (8)</td></tr>
+	<tr><td>10.</td><td>P & Q<sub>1</sub> & ... & Q<sub>n</sub> &#9500; R</td><td></td><td>cut rule, (9) and (1)</td></tr>
+	<tr><td>11.</td><td>k=0 &#9500; ((P &#9500; Q<sub>k</sub>), P & Q<sub>1</sub> & ... & Q<sub>n</sub> &#9500; R)</td><td></td><td>syntactical entailment introduction, (4) and (10)</td></tr>
+	<tr><td>12.</td><td></td><td>k=n</td><td>Hypothesis</td></tr>
+	<tr><td>13.</td><td></td><td>Q<sub>0</sub> & ... & Q<sub>n-1</sub> & P</td><td>Hypothesis</td></tr>
+	<tr><td>14.</td><td></td><td>P</td><td>Conjunction elimination on (13)</td></tr>
+	<tr><td>15.</td><td></td><td>Q<sub>0</sub> & ... & Q<sub>n-1</sub></td><td>Conjunction elimination on (13)</td></tr>
+	<tr><td>16.</td><td></td><td>Q<sub>n</sub></td><td><i>modus ponens</i>, (2) and (14)</td></tr>
+	<tr><td>17.</td><td></td><td>Q<sub>0</sub> & ... & Q<sub>n-1</sub> & Q<sub>n</sub></td><td>Conjunction introduction, (15) and (16)</td></tr>
+	<tr><td>18.</td><td>Q<sub>0</sub> & ... & Q<sub>n-1</sub> & P &#9500; Q<sub>0</sub> & ... & Q<sub>n</sub></td><td></td><td>Syntactical entailment introduction, (13) and (17)</td></tr>
+	<tr><td>19.</td><td>Q<sub>0</sub> & ... & Q<sub>n-1</sub> & P &#9500; R</td><td></td><td>cut rule, (18) and (1)</td></tr>
+	<tr><td>20.</td><td>k=n &#9500; ((P &#9500; Q<sub>k</sub>), Q<sub>0</sub> & ... & Q<sub>n-1</sub> & P &#9500; R)</td><td></td><td>syntactical entailment introduction, (12) and (19)</td></tr>
+	<tr><td>21.</td><td></td><td>k &isin; 1..n-1</td><td>Hypothesis</td></tr>
+	<tr><td>22.</td><td></td><td>Q<sub>0</sub> & ... & Q<sub>k-1</sub> & P & Q<sub>k+1</sub> &  ... & Q<sub>n</sub></td><td>Hypothesis</td></tr>
+	<tr><td>23.</td><td></td><td>P</td><td>Generalized conjunction elimination on (22)</td></tr>
+	<tr><td>24.</td><td></td><td>Q<sub>0</sub> & ... & Q<sub>k-1</sub></td><td>Conjunction elimination on (22)</td></tr>
+	<tr><td>25.</td><td></td><td>Q<sub>k+1</sub> &  ... & Q<sub>n</sub></td><td>Conjunction elimination on (22)</td></tr>
+	<tr><td>26.</td><td></td><td>Q<sub>k</sub></td><td><i>modus ponens</i>, (2) and (23)</td></tr>
+	<!-- want generalized conjunction introduction here -->
+	<tr><td>27.</td><td></td><td>Q<sub>0</sub> & ... & Q<sub>k-1</sub> & Q<sub>k</sub></td><td>Conjunction introduction, (24) and (26)</td></tr>
+	<tr><td>28.</td><td></td><td>Q<sub>0</sub> & ... & Q<sub>k-1</sub> & Q<sub>k</sub> & Q<sub>k+1</sub> &  ... & Q<sub>n</sub></td><td>Conjunction introduction, (27) and (25)</td></tr>
+	<tr><td>29.</td><td>Q<sub>0</sub> & ... & Q<sub>k-1</sub> & P & Q<sub>k+1</sub> &  ... & Q<sub>n</sub> &#9500; Q<sub>0</sub> & ... & Q<sub>n</sub></td><td></td><td>Syntactical entailment introduction, (22) and (28)</td></tr>
+	<tr><td>30.</td><td>Q<sub>0</sub> & ... & Q<sub>k-1</sub> & P & Q<sub>k+1</sub> &  ... & Q<sub>n</sub> &#9500; R</td><td></td><td>cut rule, (29) and (1)</td></tr>
+	<tr><td>31.</td><td>k &isin; 1..n-1 &#9500; (Q<sub>0</sub> & ... & Q<sub>k-1</sub> & P & Q<sub>k+1</sub> &  ... & Q<sub>n</sub> &#9500; R)</td><td></td><td>syntactical entailment introduction, (21) and (30)</td></tr>
+	<tr><th colspan="4">(Q<sub>0</sub> & ... & Q<sub>n</sub> &#9500; R),(P &#9500; Q<sub>k</sub>) &#9500; (Q<sub>0</sub> & ... & Q<sub>k-1</sub> & P & Q<sub>k+1</sub> &  ... & Q<sub>n</sub> &#9500; R)</th></tr>
+	<tr><th colspan="4">Generalized cut rule for &#9500;</th></tr>
+	<tr><th colspan="4">(Q<sub>0</sub>, ..., Q<sub>n</sub> &#9500; R),(P &#9500; Q<sub>k</sub>) &#9500; (Q<sub>0</sub>, ..., Q<sub>k-1</sub>, P, Q<sub>k+1</sub>,  ..., Q<sub>n</sub> &#9500; R)</th></tr>
+	<tr><th colspan="4">Other generalized cut rules</th></tr>
+	<tr><th colspan="4">(Q<sub>0</sub>, ..., Q<sub>n</sub> &rArr; R),(P &#9500; Q<sub>k</sub>) &#9500; (Q<sub>0</sub>, ..., Q<sub>k-1</sub>, P, Q<sub>k+1</sub>,  ..., Q<sub>n</sub> &#9500; R)</th></tr>
+	<tr><th colspan="4">(Q<sub>0</sub>, ..., Q<sub>n</sub> &#9500; R),(P &rArr; Q<sub>k</sub>) &#9500; (Q<sub>0</sub>, ..., Q<sub>k-1</sub>, P, Q<sub>k+1</sub>,  ..., Q<sub>n</sub> &#9500; R)</th></tr>
+	<tr><th colspan="4">(Q<sub>0</sub>, ..., Q<sub>n</sub> &rArr; R),(P &rArr; Q<sub>k</sub>) &#9500; (Q<sub>0</sub>, ..., Q<sub>k-1</sub>, P, Q<sub>k+1</sub>,  ..., Q<sub>n</sub> &#9500; R)</th></tr>
+</table>
+<p>We use the new intended interpretation of &#9500;, to convert between the defining right-hand side with the explicit logical and &, 
+	and the defined left hand side listing the propositional variables.</p>
+<p>There are two distinct ways to get the corresponding three inference rules using &rArr; instead of &#9500; in the hypotheses.  We could just replicate  the entire proof, using rArr; instead of 
+	&#9500; in the affected givens.  Alternately, we can use the generalized cut rule <i>on itself</i>, using an appropriate instance of <span style="background:yellow">Upgrade &rArr; to &#9500;</span>.</p>
+
+<h2 id="generalized-or-elimination" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Generalized or-elimination</h2>
+<table align="right">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>0.</td><td>3&le;n&isin;&#x2115;</td><td>Given</td></tr>
+	<tr><td>1.</td><td>P<sub>0</sub> &#x2228; ... &#x2228; P<sub>n</sub></td><td>Given</td></tr>
+	<tr><td>2.</td><td>~P<sub>0</sub></td><td>Given</td></tr>
+	<tr><td>3.</td><td>P<sub>0</sub> &#x2228; (P<sub>1</sub> &#x2228;  ... &#x2228; P<sub>n</sub>)</td><td>Generalized associativity on (1)</td></tr>
+	<tr><td>4.</td><td>P<sub>1</sub> &#x2228;  ... &#x2228; P<sub>n</sub></td><td>Or-elimination (3),(2)</td></tr>
+	<tr><th colspan="3">Generalized or-elimination, first proposition</th></tr>
+</table>
+<table align="right" style="clear:right">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>0.</td><td>3&le;n&isin;&#x2115;</td><td>Given</td></tr>
+	<tr><td>1.</td><td>P<sub>0</sub> &#x2228; ... &#x2228; P<sub>n</sub></td><td>Given</td></tr>
+	<tr><td>2.</td><td>~P<sub>n</sub></td><td>Given</td></tr>
+	<tr><td>3.</td><td>(P<sub>0</sub> &#x2228; ... &#x2228; P<sub>n-1</sub>) &#x2228; P<sub>n</sub></td><td>Generalized associativity on (1)</td></tr>
+	<tr><td>4.</td><td>P<sub>0</sub> &#x2228; ... &#x2228; P<sub>n-1</sub></td><td>Or-elimination (3),(2)</td></tr>
+	<tr><th colspan="3">Generalized or-elimination, last proposition</th></tr>
+</table>
+<table align="right" style="clear:right">
+	<tr><th colspan="3">~Lisp/Prolog</th></tr>
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>0.</td><td>3&le;n &isin; &#x2115;</td><td>Given</td></tr>
+	<tr><td>0a.</td><td>1&le;m&le;2 & m &isin; &#x2115;</td><td>Given</td></tr>
+	<tr><td>1.</td><td>P<sub>0</sub> &#x2228; ... &#x2228; P<sub>n</sub></td><td>Given</td></tr>
+	<tr><td>2.</td><td>~P<sub>m</sub></td><td>Given</td></tr>
+	<tr><td>3.</td><td>((P<sub>0</sub> &#x2228; ... &#x2228; P<sub>m-1</sub>) &#x2228; P<sub>m</sub>) &#x2228; (P<sub>m+1</sub> &#x2228; ... &#x2228; P<sub>n</sub>)</td><td>Generalized associativity on (1)</td></tr>
+	<tr><td>4.</td><td>(P<sub>m</sub> &#x2228; (P<sub>0</sub> &#x2228; ... &#x2228; P<sub>m-1</sub>)) &#x2228; (P<sub>m+1</sub> &#x2228; ... &#x2228; P<sub>n</sub>)</td><td>Commutativity of &#x2228; on (3)</td></tr>
+	<tr><td>5.</td><td>P<sub>m</sub> &#x2228; ((P<sub>0</sub> &#x2228; ... &#x2228; P<sub>m-1</sub>) &#x2228; (P<sub>m+1</sub> &#x2228; ... &#x2228; P<sub>n</sub>))</td><td>Associativity of &#x2228; on (4)</td></tr>
+	<tr><td>6.</td><td>(P<sub>0</sub> &#x2228; ... &#x2228; P<sub>m-1</sub>) &#x2228; (P<sub>m+1</sub> &#x2228; ... &#x2228; P<sub>n</sub>)</td><td>Or-elimination (5),(2)</td></tr>
+	<tr><th colspan="3">Generalized or-elimination, interior proposition</th></tr>
+</table>
+<p>We next try generalizing or-elimination.  Generalized or-eliminating the first and last propositions directly follows from <i>or-elimination</i> and <i>generalized associativity</i>.</p>
+<p>For or-eliminating a proposition in the middle, Lisp/Prolog logic uses unusual measures as it does not have <i>commutativity of &#x2228;</i>.  We will return to this shortly.</p>
+
+<h2 id="annihilators" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Annihilators</h2>
+<p>For a <i>magma</i> (M,&middot;), we say that:</p>
+<ul>
+	<li>a &isin; M is a left annihilator when for all b in M, a&middot;b = a.</li>
+	<li>a &isin; M is a right annihilator when for all b in M, b&middot;a = a.</li>
+	<li>a &isin; M is an annihilator if a is both a left annihilator, and a right annihilator.</li>
+</ul>
+<p>The archetypical example, from grade school arithmetic, is 0 is an annihilator for (&#x2115;, &middot;).  We can read off the annihilators for the logical and &, and logical or &#x2228;, logical connectives 
+	from their truth table descriptions.  While we are doing that, let's read off their identity elements as well.</p>
+<table align="center">
+	<tr><th colspan="2"></th><th>Identity</th><th>Annihilator</th><th>Zero divisors</th></tr>
+	<tr><td valign="center" rowspan="2">Classical</td><td>(<b>TruthValues</b>, &)</td><td><i>true</i></td><td><i>false</i></td></tr>
+	<tr><td>(<b>TruthValues</b>, &#x2228;)</td><td><i>false</i></td><td><i>true</i></td></tr>
+	<tr><td valign="center" rowspan="2">Kleene strong</td><td>(<b>TruthValues</b>, &)</td><td><i>true</i></td><td><i>false</i></td></tr>
+	<tr><td>(<b>TruthValues</b>, &#x2228;)</td><td><i>false</i></td><td><i>true</i></td></tr>
+	<tr><td valign="center" rowspan="2">Kleene weak</td><td>(<b>TruthValues</b>, &)</td><td><i>true</i></td><td><i>unknown</i></td></tr>
+	<tr><td>(<b>TruthValues</b>, &#x2228;)</td><td><i>false</i></td><td><i>unknown</i></td></tr>
+	<tr><td valign="center" rowspan="2">Lisp/Prolog</td><td>(<b>TruthValues</b>, &)</td><td><i>true</i></td><td>left: <i>false</i>, <i>unknown</i></td></tr>
+	<tr><td>(<b>TruthValues</b>, &#x2228;)</td><td><i>false</i></td><td>left: <i>true</i>, <i>unknown</i></td></tr>
+	<tr><td valign="center" rowspan="2">Belnap</td><td>(<b>TruthValues</b>, &)</td><td><i>true</i></td><td><i>false</i></td><td>yes: <i>unknown<i> & <i>contradiction<i></i></td></tr>
+	<tr><td>(<b>TruthValues</b>, &#x2228;)</td><td><i>false</i></td><td><i>true</i></td><td>yes: <i>unknown<i> &#x2228; <i>contradiction<i></i></td></tr>
+	<tr><td valign="center" rowspan="2">Franci</td><td>(<b>TruthValues</b>, &)</td><td><i>true</i></td><td><i>contradiction</i></td></tr>
+	<tr><td>(<b>TruthValues</b>, &#x2228;)</td><td><i>contradiction</i></td><td><i>true</i></td></tr>
+	<tr><td valign="center" rowspan="2">Natural numbers</td><td>(&#x2115;, &middot;)</td><td>1</td><td>0</td></tr>
+	<tr><td>(&#x2115;, +)</td><td><i>0</i></td><td></td></tr>
+</table>
+<p>As having an identity as well as an associative operation is common, we shall follow prior art.  We say that a <i>class</i> M with an associative binary operation &middot; that has an identity element, is 
+	a monoid (M,&middot;).  [Yes, this is the same signature as for a <i>semigroup</i> or <i>magma</i>.]  If the operation is also commutative, this just 
+	rates an adjective: we say that a monoid (M,&middot;) with a commutative &middot;, is a commutative monoid, or alternately an abelian monoid.</p>
+<p>Belnap's four-valued logic stands out, since <i>contradiction</i> &#x2228; <i>unknown</i> = <i>true</i>.  Following prior art, we say that if a semigroup (M,&middot;) has 
+	an annhiliator a and two elements b,c that are not annhilators such that a=bc, that the annhilator a has zero divisors.  This is in contrast to (&#x2115;, &middot;), 
+	whose 0 does not have zero divisors.  We have a similar definition for left annihilators, and right annihilators.</p>
+<p>It is a routine exercise that if a semigroup (M,&middot;) has an annihilator a, that a is unique.  Lisp/Prolog logic provides two counterexamples for left annihilators.</p>
+<p>We define exponentiation for a magma (M,&middot;) with identity e, much like we did for the natural numbers:</p>
+<table align="center">
+	<tr><td align="right">a<sup>0</sup> :=&nbsp;</td><td>e</td></tr>
+	<tr><td align="right">a<sup>b+1</sup> :=&nbsp;</td><td>a&middot;a<sup>b</sup></td></tr>
+</table>
+<p>It is a mechanical exercise, using the <i>axiom of (weak) natural induction</i>:</p>
+<ul>
+	<li>For the identity e: For all natural numbers n, e<sup>n</sup> = e.</li>
+	<li>If a is either a left annihilator or a right annihiliator: For 1&le;n , a<sup>n</sup> = a.</li>
+</ul>
+<p>In general, for a mathematical object:</p>
+<ul>
+	<li>The signature of that object, has as its first coordinate the common domain M of all of the operations.  Other coordinates are relations (often functions, but details depend on the abstraction).  To date,
+		we have only defined signatures that are ordered pairs. Once we extend that, we can use the extensions for signatures as well.</li>
+	<li>If, for a subclass N of M, the restriction of all operations on M to N also implements the required properties of the mathematical object, we say
+		N with the restricted operations is a subobject of M.  E.g., classical (<b>TruthValues</b>, &) is a commutative submonoid of the other five logics' (<b>TruthValues</b>, &), even 
+		though Lisp/Prolog's (<b>TruthValues</b>, &) isn't commutative.  There are also technicalities when the identity for an operation changes, due to this procedure. [This is a special case of a more general technique.]</li>
+</ul>
+
+<h2 id="generalized-or-elimination-lisp-prolog" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Generalized or-elimination, Lisp/Prolog</h2>
+<table align="right">
+	<tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>0.</td><td></td><td>3&le;n &isin; &#x2115;</td><td>Given</td></tr>
+	<tr><td>1.</td><td></td><td>m &isin; 1...n-1 &isin; &#x2115;</td><td>Given</td></tr>
+	<tr><td>2.</td><td></td><td>(M,&middot;) is a monoid with identity e</td><td>Given</td></tr>
+	<tr><td>3.</td><td></td><td>e = x<sub>m</sub></td><td>Given</td></tr>
+	<tr><td>4.</td><td></td><td>x<sub>0</sub> &middot; ... &middot; x<sub>n</sub> = x<sub>0</sub> &middot; ... &middot; x<sub>n</sub></td><td>Reflexivity of =</td></tr>
+	<tr><td>5.</td><td></td><td>x<sub>0</sub> &middot; ... &middot; x<sub>n</sub> = (x<sub>0</sub> &middot; ... &middot; x<sub>m-1</sub>) &middot; x<sub>m</sub> &middot; (x<sub>m+1</sub> &middot; ... &middot; x<sub>n</sub>)</td><td>Generalized associativity on (4)</td></tr>
+	<tr><td>6.</td><td></td><td>x<sub>0</sub> &middot; ... &middot; x<sub>n</sub> = (x<sub>0</sub> &middot; ... &middot; x<sub>m-1</sub>) &middot; e &middot; (x<sub>m+1</sub> &middot; ... &middot; x<sub>n</sub>)</td><td>[e/x<sub>m</sub>] on (5) by (3)</td></tr>
+	<tr><td>7.</td><td></td><td>x<sub>0</sub> &middot; ... &middot; x<sub>n</sub> = ((x<sub>0</sub> &middot; ... &middot; x<sub>m-1</sub>) &middot; e) &middot; (x<sub>m+1</sub> &middot; ... &middot; x<sub>n</sub>)</td><td>Associativity on (6)</td></tr>
+	<tr><td>8.</td><td></td><td>x<sub>0</sub> &middot; ... &middot; x<sub>n</sub> = (x<sub>0</sub> &middot; ... &middot; x<sub>m-1</sub>) &middot; (x<sub>m+1</sub> &middot; ... &middot; x<sub>n</sub>)</td><td>Definition of identity on (7)</td></tr>
+</table>
+<p>We return to generalized <i>or-elimination</i> for Lisp/Prolog logic. We first prove a computational fact about identity elements.	
+	Since the truth-table describable logics use classical logic when interpreting the  truth table description in symbolic logic (specifically, for the P &#x21A6; ... i.e. <b>Truth</b>(P)=... view), we can translate this result to 
+	the Lisp/Prolog (<b>TruthValues</b>, &#x2228;) <i>monoid</i>.</p>
+<table align="right" style="clear:right">
+	<tr><th colspan="3">~Franci</th></tr>
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>0.</td><td>3&le;n &isin; &#x2115;</td><td>Given</td></tr>
+	<tr><td>0a.</td><td>1&le;m&le;2 & m &isin; &#x2115;</td><td>Given</td></tr>
+	<tr><td>1.</td><td>P<sub>0</sub> &#x2228; ... &#x2228; P<sub>n</sub></td><td>Given</td></tr>
+	<tr><td>2.</td><td>~P<sub>m</sub></td><td>Given</td></tr>
+	<tr><td>3.</td><td>((P<sub>0</sub> &#x2228; ... &#x2228; P<sub>m-1</sub>) &#x2228; P<sub>m</sub>) &#x2228; (P<sub>m+1</sub> &#x2228; ... &#x2228; P<sub>n</sub>)</td><td>Generalized associativity on (1)</td></tr>
+	<tr><td>4.</td><td>(P<sub>0</sub> &#x2228; ... &#x2228; P<sub>m-1</sub>) &#x2228; (P<sub>m+1</sub> &#x2228; ... &#x2228; P<sub>n</sub>)</td><td>(<b>TruthValues</b>, &#x2228;) is a monoid with identity <i>false</i></td></tr>
+	<tr><th colspan="3">Generalized or-elimination, interior proposition</th></tr>
+</table>
+<table align="center">
+<tr><td>1&le;n, P<sub>0</sub> &#x2228; ... &#x2228; P<sub>n</sub>, ~P<sub>0</sub> &#9500; P<sub>1</sub> &#x2228; ... &#x2228; P<sub>n</sub></td><td rowspan="3" valign="center">Generalized or-elimination</td></tr>
+<tr><td>1&le;n, P<sub>0</sub> &#x2228; ... &#x2228; P<sub>n</sub>, ~P<sub>n</sub> &#9500; P<sub>0</sub> &#x2228; ... &#x2228; P<sub>n-1</sub></td></tr>
+<tr><td>1&le;n, P<sub>0</sub> &#x2228; ... &#x2228; P<sub>n</sub>, ~P<sub>m</sub>, m &isin; 0...n &#9500; (P<sub>0</sub> &#x2228; ... &#x2228; P<sub>m-1</sub>) &#x2228; (P<sub>m+1</sub> &#x2228; ... &#x2228; P<sub>n</sub>)</td></tr>
+</table>
+<h2 id="generalized-modus-ponendo-tollens" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Generalized <i>modus ponendo tollens</i></h2>
+<p>Generalized <i>modus ponendo tollens</i> has a structurally comparable proof strategy, to <i>generalized or elimination</i>.  Details are left as an exercise.</p>
+<p>Since all six of the truth table describable logics consider (<b>TruthValues</b>, &) to be a <i>monoid</i> with identity <i>true</i>, the failover proof that covers Lisp/Prolog logic 
+	also works for Franci's logic.</p>
+<table align="center">
+	<tr><td>1&le;n, ~(P<sub>0</sub> & ... & P<sub>n</sub>), P<sub>0</sub> &#9500; P<sub>1</sub> & ... & P<sub>n</sub></td><td rowspan="3" valign="center">Generalized <i>modus ponendo tollens</i></td></tr>
+	<tr><td>1&le;n, ~(P<sub>0</sub> & ... & P<sub>n</sub>), P<sub>n</sub> &#9500; P<sub>0</sub> & ... & P<sub>n-1</sub></td></tr>
+	<tr><td>1&le;n, ~(P<sub>0</sub> & ... & P<sub>n</sub>), P<sub>m</sub>, m &isin; 0...n &#9500; (P<sub>0</sub> & ... & P<sub>m-1</sub>) & (P<sub>m+1</sub> & ... & P<sub>n</sub>)</td></tr>
+</table>
+
+<h2 id="de-morgan-franci" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">De Morgan's Laws: Franci's opinion</h2>
+<p>It is a mechanical exercise to verify (or fail to verify) these laws for the functions, that clone the logical connectives in an <i>ur-element</i> classical logic set theory:</p>
+<table align="center">
+<tr><th></th><th>Name</th><th>Fails for which of our logics</th></tr>	
+<tr><td><b>Truth</b>(~P & ~Q) = <b>Truth</b>(~(P &#x2228; Q))</td><td>De Morgan's Law <span style="background:yellow">-- wrap-to/unwrap-from not-or</span></td><td valign="center" rowspan="2">Franci</td></tr>
+<tr><td><b>Truth</b>(~P &#x2228; ~Q) = <b>Truth</b>(~(P & Q))</td><td>De Morgan's Law <span style="background:yellow">-- wrap-to/unwrap-from not-or</span></td></tr>
+</table>
+<p>The Brouwer-Heyting-Kolmogorov interpretation explicitly states, for constructive logics, that <b>Truth</b>(~P &#x2228; ~Q) is not guaranteed to be defined and <i>true</i> i.e. provable, when <b>Truth</b>(~(P & Q)) is defined and <i>true</i> 
+	i.e. provable.</p>
+<p>Malinowski's counter-analysis to Suszko's Thesis, gives a strategy for describing Franci's logic: we need to use D<sup>-</sup> = {<i>false</i>, <i>contradiction</i>}.  It is a mechanical exercise (in classical logic about non-classical logic)
+	that</p>
+<table align="center">
+	<tr><th colspan="3">Franci, D<sup>-</sup> = {<i>false</i>, <i>contradiction</i>}</th></tr>	
+	<tr><th colspan="3">other logics, D<sup>-</sup> = {<i>false</i>}</th></tr>	
+	<tr><td><b>Truth</b>(P) &isin; D<sup>-</sup> & <b>Truth</b>(Q) &isin; D<sup>-</sup> = <b>Truth</b>(P &#x2228; Q) &isin; D<sup>-</sup></td></tr>
+	<tr><td><b>Truth</b>(P) &isin; D<sup>-</sup> &#x2228; <b>Truth</b>(Q) &isin; D<sup>-</sup> = <b>Truth</b>(P & Q) &isin; D<sup>-</sup></td></tr>
+</table>
+<p>Interpretation as f-entailment goes through classical logic De Morgan's Law:</p>
+<table align="center">
+	<tr><th colspan="3">Franci, D<sup>-</sup> = {<i>false</i>, <i>contradiction</i>}</th></tr>	
+	<tr><th colspan="3">other logics, D<sup>-</sup> = {<i>false</i>}</th></tr>	
+	<tr><td>~(<b>Truth</b>(P) &isin; D<sup>-</sup>) &#x2228; ~(<b>Truth</b>(Q) &isin; D<sup>-</sup>) = ~(<b>Truth</b>(P &#x2228; Q) &isin; D<sup>-</sup>)</td></tr>
+	<tr><td>~(<b>Truth</b>(P) &isin; D<sup>-</sup>) & ~(<b>Truth</b>(Q) &isin; D<sup>-</sup>) = ~(<b>Truth</b>(P & Q) &isin; D<sup>-</sup>)</td></tr>
+</table>
+<p>Then we have a direct computation of the corresponding f-entailments (left as an exercise):</p>
+<table align="center">
+	<tr><th colspan="3">Franci, D<sup>-</sup> = {<i>false</i>, <i>contradiction</i>}</th><th valign="center" rowspan="2">Rationale</th></tr>	
+	<tr><th colspan="3">other logics, D<sup>-</sup> = {<i>false</i>}</th></tr>	
+	<tr><td>P &#9500;<sub>f</sub> P &#x2228; Q</td><td valign="center" rowspan="2">Disjunction introduction</td></tr>
+	<tr><td>Q &#9500;<sub>f</sub> P &#x2228; Q</td></tr>
+	<tr><td>P & Q &#9500;<sub>f</sub> P</td><td valign="center" rowspan="2">Conjunction elimination</td></tr>
+	<tr><td>P & Q &#9500;<sub>f</sub> Q</td></tr>
+</table>
+<p>We do not proceed further along these lines at this time.</p>
+
+<h2 id="generalized-de-morgan" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Generalized De Morgan's Laws</h2>
+<table align="right">
+	<tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>0.</td><td></td><td>1&le;n &isin; &#x2115;</td><td>Given</td></tr>
+	<tr><td>1.</td><td>~P<sub>0</sub> & ~P<sub>1</sub> &#9500; ~(P<sub>0</sub> &#x2228; P<sub>1</sub>)</td><td></td><td>De Morgan's Law <span style="background: yellow">-- wrap to not-or</span></td></tr>
+	<tr><td>2.</td><td>~P<sub>0</sub> & ... & ~P<sub>n</sub> &#9500; ~(P<sub>0</sub> &#x2228; ... &#x2228; P<sub>n</sub>)</td><td></td><td>Hypothesis (to set up strong natural induction)</td></tr>
+	<tr><td>3.</td><td></td><td>~P<sub>0</sub> & ... & ~P<sub>n+1</sub></td><td>Hypothesis</td></tr>
+	<tr><td>4.</td><td></td><td>(~P<sub>0</sub> & ... & ~P<sub>n</sub>) & ~P<sub>n+1</sub></td><td>Generalized associativity on (3)</td></tr>
+	<tr><td>4a.</td><td></td><td>~P<sub>0</sub> & ... & ~P<sub>n</sub></sub></td><td>Conjunction elimination on (4)</td></tr>
+	<tr><td>4b.</td><td></td><td>~P<sub>n+1</sub></td><td>Conjunction elimination on (4)</td></tr>
+	<tr><td>5.</td><td></td><td>~(P<sub>0</sub> &#x2228; ... &#x2228; P<sub>n</sub>)</td><td><i>modus ponens</i> for &#9500;, (3) and (4a)</td></tr>
+	<tr><td>6.</td><td></td><td>~(P<sub>0</sub> &#x2228; ... &#x2228; P<sub>n</sub>) & ~P<sub>n+1</sub></td><td><i>Conjunction introduction, (5) and (4b)</td></tr>
+	<tr><td>7.</td><td></td><td>~((P<sub>0</sub> &#x2228; ... &#x2228; P<sub>n</sub>) &#x2228; P<sub>n+1</sub>)</td><td>De Morgan's Law <span style="background: yellow">-- wrap to not-or</span> on (6)</td></tr>
+	<tr><td>8.</td><td></td><td>~(P<sub>0</sub> &#x2228; ...  &#x2228; P<sub>n+1</sub>)</td><td>Generalized associativity on (7)</td></tr>
+	<tr><td>9.</td><td>~P<sub>0</sub> & ... & ~P<sub>n+1</sub> &#9500; ~(P<sub>0</sub> &#x2228; ...  &#x2228; P<sub>n+1</sub>)</td><td></td><td>Syntactical entailment introduction, (3) and (8)</td></tr>
+	<tr><th colspan="4">Our base case was 0+1, rather than 0</th></tr>
+	<tr><td>10.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>1&le;n&isin;&#x2115;)(~P<sub>0</sub> & ... & ~P<sub>n</sub> &#9500; ~(P<sub>0</sub> &#x2228; ... &#x2228; P<sub>n</sub>))</td><td></td><td>Strong natural induction, (2) and (9)</td></tr>
+	<tr><td>11.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>n &isin; &#x2115;)(~P<sub>0</sub> & ... & ~P<sub>n</sub> &#9500; ~(P<sub>0</sub> &#x2228; ... &#x2228; P<sub>n</sub>))</td><td></td><td>(10) and A &#9500; A</td></tr>
+</table>
+<p>All four generalized De Morgan's laws are similar in how they are proven.  We do have a notational issue: we need to indicate when the logical negation is to be applied point-wise.</p>
+<p>Reviewing our initial definition:</p>
+<blockquote>
+	<p>For an associative binary operation &middot; on M, the notation x<sub>m</sub> &middot; ... &middot; x<sub>n</sub> abbreviates the finite sequence of textual glyphs (y<sub>i</sub>)<sub>i=2m...2n</sub> where</p>
+	<table align="center">
+		<tr><td>y<sub>i</sub> :=&nbsp;</td><td>x<sub>i/2</sub> when i is divisible by 2</td></tr>
+		<tr><td>y<sub>i</sub> :=&nbsp;</td><td>&middot; when i is not divisible by 2</td></tr>
+	</table>
+</blockquote>
+<p>It appears that the first clause is a special case of evaluating a function &phi; from the indexing mathematical collection (m...n, in this case) to finite sequences of textual glyphs, with n &#x21A6;<sub>&phi;</sub> x<sub>i/2</sub>.  
+	If we accept "the simplest such" &phi; that parses as being interpretable, we can proceed with the De Morgan's law proofs.</p>
+<p>The other three De Morgan's Law proofs are left as exercises.  We do not attempt Franci's version at this time.</p>
+<table align="center">
+	<tr><th></th><th>Name</th><th>Fails for which of our logics?</th><th>Fails for other logics?</th></tr>
+	<tr><td align="center">~P<sub>0</sub> & ... & ~P<sub>n</sub> &#9500; <nobr>~(P<sub>0</sub> &#x2228; ... &#x2228; P<sub>n</sub>)</nobr></td><td align="left">Generalized De Morgan's Law <span style="background: yellow">-- wrap to not-or</span></td><td align="left">None</td><td valign="top" rowspan="3">None</td></tr>
+	<tr><td align="center">~(P<sub>0</sub> &#x2228; ... &#x2228; P<sub>n</sub>) &#9500; <nobr>~P<sub>0</sub> & ... & ~P<sub>n</sub></nobr></td><td align="left">Generalized De Morgan's Law <span style="background: yellow">-- unwrap from not-or</span></td><td align="left">Franci</td></tr>
+	<tr><td align="center">~(P<sub>0</sub> &#x2228; ... &#x2228; P<sub>n</sub>) &#x27DB; <nobr>~P<sub>0</sub> & ... & ~P<sub>n</sub></nobr></td><td align="left">Generalized De Morgan's Law</td><td align="left">Franci</td></tr>
+	<tr><td align="center">~P<sub>0</sub> &#x2228; ... &#x2228; ~P<sub>n</sub> &#9500; <nobr>~(P<sub>0</sub> & ... & P<sub>n</sub>)</nobr></td><td align="left">Generalized De Morgan's Law <span style="background: yellow">-- wrap to not-and</span></td><td align="left">Franci</td><td>None</td></tr>
+	<tr><td align="center">~(P<sub>0</sub> & ... & P<sub>n</sub>) &#9500; <nobr>~P<sub>0</sub> &#x2228; ... &#x2228; ~P<sub>n</sub></nobr></td><td align="left">Generalized De Morgan's Law <span style="background: yellow">-- unwrap from not-and</span></td><td align="left">None</td><td>Intuitionistic</td></tr>
+	<tr><td align="center">~(P<sub>0</sub> & ... & P<sub>n</sub>) &#x27DB; <nobr>~P<sub>0</sub> &#x2228; ... &#x2228; ~P<sub>n</sub></nobr></td><td align="left">Generalized De Morgan's Law</td><td align="left">Franci</td><td>Intuitionistic</td></tr>
+</table>
+
+<h2 id="generalized-constructive-dilemma" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Generalized Constructive Dilemma</h2>
+<table align="right">
+	<tr><th colspan="4">~Lisp/Prolog, ~Belnap</th></tr>
+	<tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>0.</td><td></td><td>1&le;n &isin; &#x2115;</td><td>Given</td></tr>
+	<tr><td>1.</td><td></td><td>P<sub>0</sub> &#x2228; ...  &#x2228; P<sub>n</sub></td><td>Given</td></tr>
+	<tr><td>2.</td><td>P<sub>n</sub> &#9500; Q</td><td></td><td>Given</td></tr>
+	<tr><td>3.</td><td></td><td>(P<sub>0</sub> &#x2228; ...  &#x2228; P<sub>n-1</sub>) &#x2228; P<sub>n</sub></td><td>Generalized associativity on (1)</td></tr>
+	<tr><td>4.</td><td></td><td>(P<sub>0</sub> &#x2228; ...  &#x2228; P<sub>n-1</sub>) &#x2228; Q</td><td>Right half of constructive dilemma, (3) and (2)</td></tr>
+	<tr><th colspan="4">Rightmost generalized constructive dilemma</th></tr>
+	<tr><th colspan="4">P<sub>0</sub> &#x2228; ...  &#x2228; P<sub>n</sub>, (P<sub>n</sub> &#9500; Q) &#9500; (P<sub>0</sub> &#x2228; ...  &#x2228; P<sub>n-1</sub>) &#x2228; Q</th></tr>
+	<tr><th colspan="4">P<sub>0</sub> &#x2228; ...  &#x2228; P<sub>n</sub>, P<sub>n</sub> &rArr; Q &#9500; (P<sub>0</sub> &#x2228; ...  &#x2228; P<sub>n-1</sub>) &#x2228; Q</th></tr>
+</table>
+<p>As with <i>constructive dilemma</i>, we take our base case to be updating the last variable.  The other two stages are left as exercises.</p>
+<p>All of the truth-table describable logics we are interested in, that are allowed, have (substitution) commutativity of &#x2228;;, and thus the rearrangement principle for &#x2228;. 
+	that allows <i>P<sub>k</sub> &#9500; Q</i> and <i>P<sub>k</sub> &rArr; Q</i> to work as hypotheses.  The final version uses a finite sequence of hypotheses (P<sub>k</sub> &#9500; Q<sub>k</sub>)<sub>k=0...n</sub> .</p>
+<p>We replace the auxilliary &#9500; hypotheses with &rArr; versions, using the <i>generalized cut rule</i> as needed.</p>
+<p>The proof for <i>generalized destructive dilemma</i> from the pure &rArr; variant of <i>generalized constructive dilemma</i>, is structurally similar to the proof of <i>destructive dilemma</i> from the pure &rArr; variant of <i>constructive dilemma</i>.</p>
+<h2 id="generalized-distributivity" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:right">Generalized Distributivity</h2>
+<table align="right">
+	<tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>0.</td><td></td><td>1&le;n &isin; &#x2115;</td><td>Given</td></tr>
+	<tr><td>1.</td><td>P &#x2228; (Q<sub>0</sub> & Q<sub>1</sub>) &#x27DB; (P &#x2228; Q<sub>0</sub>) & (P &#x2228; Q<sub>1</sub>)</td><td></td><td>Left distributivity of &#x2228; over &</td></tr>
+	<tr><td>2.</td><td>P &#x2228; (Q<sub>0</sub> & ... & Q<sub>n</sub>) &#x27DB; (P &#x2228; Q<sub>0</sub>) & ... & (P &#x2228; Q<sub>n</sub>)</td><td></td><td>Hypothesis (to set up strong natural induction)</td></tr>
+	<tr><td>3.</td><td></td><td>P &#x2228; (Q<sub>0</sub> & ... & Q<sub>n+1</sub>)</td><td>Hypothesis</td></tr>
+	<tr><td>4.</td><td></td><td>P &#x2228; ((Q<sub>0</sub> & ... & Q<sub>n</sub>) & Q<sub>n+1</sub>)</td><td>Generalized associativity on (3)</td></tr>
+	<tr><td>5.</td><td></td><td>(P &#x2228; (Q<sub>0</sub> & ... & Q<sub>n</sub>)) & (P &#x2228; Q<sub>n+1</sub>)</td><td>Left distibutivity of &#x2228; over & on (4)</td></tr>
+	<tr><td>5a.</td><td></td><td>P &#x2228; (Q<sub>0</sub> & ... & Q<sub>n</sub>)</td><td>Conjunction elimination on (5)</td></tr>
+	<tr><td>5b.</td><td></td><td>P &#x2228; Q<sub>n+1</sub></td><td>Conjunction elimination on (5)</td></tr>
+	<tr><td>6.</td><td></td><td>(P &#x2228; Q<sub>0</sub>) & ... & (P &#x2228; Q<sub>n</sub>)</td><td><i>modus ponens</i> for &#x27DB;, (2) and (5a)</td></tr>
+	<tr><td>7.</td><td></td><td>((P &#x2228; Q<sub>0</sub>) & ... & (P &#x2228; Q<sub>n</sub>)) & (P &#x2228; Q<sub>n+1)</sub></td><td>Conjunction introduction, (6) and (5b)</td></tr>
+	<tr><td>8.</td><td></td><td>(P &#x2228; Q<sub>0</sub>) & ... & (P &#x2228; Q<sub>n+1</sub>)</td><td>Generalized associativity on (7)</td></tr>
+	<tr><td>9.</td><td>P &#x2228; (Q<sub>0</sub> & ... & Q<sub>n+1</sub>) &#9500; (P &#x2228; Q<sub>0</sub>) & ... & (P &#x2228; Q<sub>n+1</sub>)</td><td></td><td>Syntactical entailment introduction, (3) and (8)</td></tr>
+	<tr><th colspan="4">now have forward direction</th></tr>
+	<tr><td>10.</td><td></td><td>(P &#x2228; Q<sub>0</sub>) & ... & (P &#x2228; Q<sub>n+1</sub>)</td><td>Hypothesis</td></tr>
+	<tr><td>11.</td><td></td><td>((P &#x2228; Q<sub>0</sub>) & ... & (P &#x2228; Q<sub>n</sub>)) & (P &#x2228; Q<sub>n+1</sub>)</td><td>Generalized associativity on (10)</td></tr>
+	<tr><td>11a.</td><td></td><td>(P &#x2228; Q<sub>0</sub>) & ... & (P &#x2228; Q<sub>n</sub>)</td><td>Conjunction elimination on (11)</td></tr>
+	<tr><td>11b.</td><td></td><td>P &#x2228; Q<sub>n+1</sub></td><td>Conjunction elimination on (11)</td></tr>
+	<tr><td>12.</td><td></td><td>P &#x2228; (Q<sub>0</sub> & ... & Q<sub>n</sub>)</td><td><i>modus ponens</i> for &#x27DB;, (2) and (11a)</td></tr>
+	<tr><td>13.</td><td></td><td>(P &#x2228; (Q<sub>0</sub> & ... & Q<sub>n</sub>)) & (P &#x2228; Q<sub>n+1</sub>)</td><td>Conjunction introduction, (12) and (11b)</td></tr>
+	<tr><td>14.</td><td>P &#x2228; ((Q<sub>0</sub> & ... & Q<sub>n</sub>) & Q<sub>n+1</sub>)</td><td></td><td>Left distibutivity of &#x2228; over & on (13)</td></tr>
+	<tr><td>15.</td><td>P &#x2228; (Q<sub>0</sub> & ... & Q<sub>n+1</sub>)</td><td></td><td>Generalized associativity on (14)</td></tr>
+	<tr><td>16.</td><td>P &#x2228; (Q<sub>0</sub> & ... & Q<sub>n+1</sub>)</td><td></td><td>Generalized associativity on (14)</td></tr>
+	<tr><td>17.</td><td>(P &#x2228; Q<sub>0</sub>) & ... & (P &#x2228; Q<sub>n+1</sub>) &#9500; P &#x2228; (Q<sub>0</sub> & ... & Q<sub>n+1</sub>)</td><td></td><td>Syntactical entailment introduction, (10) and (16)</td></tr>
+	<tr><td>18.</td><td>P &#x2228; (Q<sub>0</sub> & ... & Q<sub>n+1</sub>) &#x27DB; (P &#x2228; Q<sub>0</sub>) & ... & (P &#x2228; Q<sub>n+1</sub>)</td><td></td><td>Definition of &#x27DB;, (9) and (17)</td></tr>
+	<tr><td>19.</td><td>(P &#x2228; (Q<sub>0</sub> & ... & Q<sub>n</sub>) &#x27DB; (P &#x2228; Q<sub>0</sub>) & ... & (P &#x2228; Q<sub>n</sub>)) &#9500; (P &#x2228; (Q<sub>0</sub> & ... & Q<sub>n+1</sub>) &#x27DB; (P &#x2228; Q<sub>0</sub>) & ... & (P &#x2228; Q<sub>n+1</sub>))</td><td></td><td>Syntactical entailment introduction, (2) and (18)</td></tr>
+	<tr><td>20.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>1&le;n&isin;&#x2115;)(P &#x2228; (Q<sub>0</sub> & ... & Q<sub>n</sub>) &#x27DB; (P &#x2228; Q<sub>0</sub>) & ... & (P &#x2228; Q<sub>n</sub>))</td><td></td><td>Strong natural induction, (1) and (19)</td></tr>
+	<tr><td>21.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>n &isin; &#x2115;)(P &#x2228; (Q<sub>0</sub> & ... & Q<sub>n</sub>) &#x27DB; (P &#x2228; Q<sub>0</sub>) & ... & (P &#x2228; Q<sub>n</sub>))</td><td></td><td>(20) and A &#9500; A</td></tr>
+	<tr><th colspan="4">Generalized Left distributivity of &#x2228; over &</th></tr>
+</table>
+<table align="right">
+	<tr><th colspan="4">~Lisp/Prolog, ~Belnap</th></tr>
+	<tr><td>0.</td><td></td><td>1&le;n &isin; &#x2115;</td><td>Given</td></tr>
+	<tr><td>1.</td><td>P & (Q<sub>0</sub> &#x2228; Q<sub>1</sub>) &#x27DB; (P & Q<sub>0</sub>) &#x2228; (P & Q<sub>1</sub>)</td><td></td><td>Left distributivity of & over &#x2228;</td></tr>
+	<tr><td>2.</td><td>P & (Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>n</sub>) &#x27DB; (P & Q<sub>0</sub>) &#x2228; ... &#x2228; (P & Q<sub>n</sub>)</td><td></td><td>Hypothesis (to set up strong natural induction)</td></tr>
+	<tr><td>3.</td><td></td><td>P & (Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>n+1</sub>)</td><td>Hypothesis</td></tr>
+	<tr><td>4.</td><td></td><td>P & ((Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>n</sub>) &#x2228; Q<sub>n+1</sub>)</td><td>Generalized associativity on (3)</td></tr>
+	<tr><td>5.</td><td></td><td>(P & (Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>n</sub>)) &#x2228; (P & Q<sub>n+1</sub>)</td><td>Left distributivity of & over &#x2228; on (4)</td></tr>
+	<tr><td style="background:yellow">6.</td><td></td><td>((P & Q<sub>0</sub>) &#x2228; ... &#x2228; (P & Q<sub>n</sub>)) &#x2228; (P & Q<sub>n+1</sub>)</td><td>Generalized constructive dilemma: (5),(2)</td></tr>
+	<tr><td>7.</td><td></td><td>(P & Q<sub>0</sub>) &#x2228; ... &#x2228; (P & Q<sub>n+1</sub>)</td><td>Generalized associativity on (6)</td></tr>
+	<tr><td>8.</td><td>P & (Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>n+1</sub>) &#9500; (P & Q<sub>0</sub>) &#x2228; ... &#x2228; (P & Q<sub>n+1</sub>)</td><td></td><td>Syntactical entailment introduction, (3) and (7)</td></tr>
+	<tr><th colspan="4">now have forward direction</th></tr>
+	<tr><td>9.</td><td></td><td>(P & Q<sub>0</sub>) &#x2228; ... &#x2228; (P & Q<sub>n+1</sub>)</td><td>Hypothesis</td></tr>
+	<tr><td>10.</td><td></td><td>((P & Q<sub>0</sub>) &#x2228; ... &#x2228; (P & Q<sub>n</sub>)) &#x2228; (P & Q<sub>n+1</sub>)</td><td>Generalized associativity on (9)</td></tr>
+	<tr><td style="background:yellow">11.</td><td></td><td>(P & (Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>n</sub>)) &#x2228; (P & Q<sub>n+1</sub>)</td><td>Generalized constructive dilemma: (10),(2)</td></tr>
+	<tr><td>12.</td><td></td><td>P & ((Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>n</sub>) &#x2228; Q<sub>n+1</sub>)</td><td>Left distributivity of & over &#x2228; on (11)</td></tr>
+	<tr><td>13.</td><td></td><td>P & (Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>n+1</sub>)</td><td>Generalized associativity on (12)</td></tr>
+	<tr><td>14.</td><td>(P & Q<sub>0</sub>) &#x2228; ... &#x2228; (P & Q<sub>n+1</sub>) &#9500; P & (Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>n+1</sub>)</td><td></td><td>Syntactical entailment introduction, (9) and (13)</td></tr>
+	<tr><td>15.</td><td>P & (Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>n+1</sub>) &#x27DB; (P & Q<sub>0</sub>) &#x2228; ... &#x2228; (P & Q<sub>n+1</sub>)</td><td></td><td>Definition of &#x27DB;, (8) and (14)</td></tr>
+	<tr><td>16.</td><td>(P & (Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>n</sub>) &#x27DB; (P & Q<sub>0</sub>) &#x2228; ... &#x2228; (P & Q<sub>n</sub>)) &#9500; (P & (Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>n+1</sub>) &#x27DB; (P & Q<sub>0</sub>) &#x2228; ... &#x2228; (P & Q<sub>n+1</sub>))</td><td></td><td>Syntactical entailment introduction, (2) and (15)</td></tr>
+	<tr><td>17.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>1&le;n&isin;&#x2115;)(P & (Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>n</sub>) &#x27DB; (P & Q<sub>0</sub>) &#x2228; ... &#x2228; (P & Q<sub>n</sub>))</td><td></td><td>Strong natural induction, (1) and (17)</td></tr>
+	<tr><td>18.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>n &isin; &#x2115;)(P & (Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>n</sub>) &#x27DB; (P & Q<sub>0</sub>) &#x2228; ... &#x2228; (P & Q<sub>n</sub>))</td><td></td><td>(17) and A &#9500; A</td></tr>
+	<tr><th colspan="4">Generalized left distributivity of & over &#x2228;</th></tr>
+</table>
+<p>Technically, this can be viewed as an abstract algebraic property (for an object not yet introduced).  Generalized left and right distributivity have very similar proofs; the generalized right distributivity proofs are left as an exercise.</p>
+<!--
+<br style="clear:both">
+<table align="right">
+	<tr><th colspan="4">Classical logic</th></tr>
+	<tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>0.</td><td></td><td>1&le;n &isin; &#x2115;</td><td>Given</td></tr>
+	<tr><td>1.</td><td></td><td>(M,&middot;) is a semigroup</td><td>Given</td></tr>
+	<tr><td>2.</td><td></td><td>a &isin; M is a left annihilator of &middot;</td><td>Given</td></tr>
+	<tr><td>3.</td><td></td><td>a has no zero divisors</td><td>Given (this excludes Belnap's logic)</td></tr>
+	<tr><td>4.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>m &isin; 0...1)(x<sub>m</sub>&ne;a) &#9500; x<sub>0</sub> &middot; ... &middot; x<sub>n</sub> &ne; a</td><td></td><td>restatement of (3)</td></tr>
+	<tr><td>5.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>m &isin; 0...n)(x<sub>m</sub>&ne;a) &#9500; x<sub>0</sub> &middot; ... &middot; x<sub>n</sub> &ne; a</td><td></td><td>Hypothesis (sets up strong natural induction)</td></tr>
+	<tr><td>6.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>k &isin; 0...n+1)(x<sub>m</sub> &ne; a)</td><td>Hypothesis</td></tr>
+	<tr><td>7.</td><td></td><td>x<sub>0</sub> &middot; ... &middot; x<sub>n</sub> &ne; a</td><td><i>modus ponens</i> for &#9500;, (5) and (6)</td></tr>
+	<tr><td>8.</td><td></td><td>x<sub>n+1</sub> &ne; a</td><td>Universal instantiation on (6)</td></tr>
+	<tr><td>9.</td><td></td><td>(x<sub>0</sub> &middot; ... &middot; x<sub>n</sub>) &middot; x<sub>n+1</sub> &ne; a</td><td>a has no zero divisors</td></tr>
+	<tr><td>10.</td><td></td><td>x<sub>0</sub> &middot; ... &middot; x<sub>n+1</sub> &ne; a</td><td>Generalized associativity on (9)</td></tr>
+	<tr><td>11.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>k &isin; 0...n+1)(x<sub>m</sub> &ne; a) &#9500; x<sub>0</sub> &middot; ... &middot; x<sub>n+1</sub> &ne; a</td><td></td><td>Syntactical entailment introduction, (6) and (10)</td></tr>
+	<tr><td>12.</td><td>((<span style="transform:rotate(180deg);display:inline-block">A</span>m &isin; 0...n)(x<sub>m</sub>&ne;a) &#9500; x<sub>0</sub> &middot; ... &middot; x<sub>n</sub> &ne; a) &#9500; ((<span style="transform:rotate(180deg);display:inline-block">A</span>k &isin; 0...n+1)(x<sub>k</sub> &ne; a) &#9500; x<sub>0</sub> &middot; ... &middot; x<sub>n+1</sub> &ne; a)</td><td></td><td>Syntactical entailment introduction, (5) and (11)</td></tr>
+	<tr><td>13.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>1&le;n &isin; &#x2115;)((<span style="transform:rotate(180deg);display:inline-block">A</span>m &isin; 0...n)(x<sub>m</sub> &ne; a) &#9500; x<sub>0</sub> &middot; ... &middot; x<sub>n</sub> &ne; a)</td><td></td><td>Strong natural induction, (4) and (12)</td></tr>
+	<tr><th colspan="4">if no x<sub>m</sub> is a given left annihilator with no zero divisors, then x<sub>0</sub> &middot; ... &middot; x<sub>n</sub> is not that left annihilator</th></tr>
+	<tr><td>13a.</td><td>x<sub>0</sub> &ne; a &#x27DB; x<sub>0</sub> &middot; ... &middot; x<sub>0</sub> &ne; a</td><td></td><td>Generalized associativity notation for one variable</td></tr>
+	<tr><td>13b.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>n &isin; &#x2115;)((<span style="transform:rotate(180deg);display:inline-block">A</span>m &isin; 0...n)(x<sub>m</sub> &ne; a) &#9500; x<sub>0</sub> &middot; ... &middot; x<sub>n</sub> &ne; a)</td><td></td><td>(13) and (13a)</td></tr>
+	<tr><td>14.</td><td></td><td>x<sub>0</sub> &middot; ... &middot; x<sub>n</sub> = a</td><td>Hypothesis</td></tr>
+	<tr><td>15.</td><td></td><td>~(<span style="transform:rotate(180deg);display:inline-block">A</span>m &isin; 0...n)(x<sub>m</sub> &ne; a)</td><td><i>modus tollens</i> for &#9500;, (13b) and (14)</td></tr>
+	<tr><th colspan="4">~Intuitionistic</th></tr>
+	<tr><td>16.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>m &isin; 0...n)(x<sub>m</sub> = a)</td><td>Definition of existential quantifier on (15)</td></tr>
+	<tr><td>17.</td><td></td><td>inf {x &isin; 0...n : x<sub>m</sub> = a} &isin; 0...n</td><td>well ordering of &#x2115; on (16)</td></tr>
+	<tr><td>18.</td><td>x<sub>0</sub> &middot; ... &middot; x<sub>n</sub> = a &#9500; inf {x &isin; 0...n : x<sub>m</sub> = a} &isin; 0...n</td><td></td><td>syntactical entailment introduction, (14) and (17)</td></tr>
+	<tr><th colspan="4">If x<sub>0</sub> &middot; ... &middot; x<sub>n</sub> equals a left annihilator with no zero divisors, there is a leftmost variable/term whose value is that annihilator</th></tr>
+</table>
+
+<p>To bridge the gap for Lisp/Prolog logic, we need to use classical logic for the disallowed steps.  We first prove a classical logic computational fact about left annihilators with no zero divisors.
+(There is a structurally similar proof for right annihilators.)</p>
+<br style="clear:both">
+<table align="right">
+	<tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>0.</td><td></td><td>1&le;n &isin; &#x2115;</td><td>Given</td></tr>
+	<tr><td>1.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>k &isin; 0...n)(Q<sub>k</sub> &isin; <b>TruthValued</b>)</td><td>Given (predeclares propositions)</td></tr>
+	<tr><td>2.</td><td></td><td>t<sub>0</sub> &isin; <b>TruthValues</b></td><td>Given (sets up universal instantiation)</td></tr>
+	<tr><td>3.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>k &isin; 0...n)(Q<sub>k</sub> &#x21A6; t<sub>0</sub>)</td><td>Hypothesis</td></tr>
+	<tr><td>4.</td><td></td><td>inf {x &isin; 0...n : Q<sub>x</sub> &#x21A6; t<sub>0</sub>} &isin; 0...n</td><td>Well ordering of &#x2115; on (3)</td></tr>
+	<tr><td>5.</td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>k &isin; 0...n)(Q<sub>k</sub> &#x21A6; t<sub>0</sub>) &#9500; inf {x &isin; 0...n : Q<sub>x</sub> &#x21A6; t<sub>0</sub>} &isin; 0...n</td><td></td><td>Syntactical entailment introduction, (3) and (4)</td></tr>
+	<tr><td>6.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>t &isin; <b>TruthValues</b>)(<span style="transform:rotate(180deg);display:inline-block">E</span>k &isin; 0...n)(Q<sub>k</sub> &#x21A6; t) &#9500; inf {x &isin; 0...n : Q<sub>x</sub> &#x21A6; t} &isin; 0...n</td><td></td><td>Universal instantiation, (2) and (5)</td></tr>
+	<tr><th colspan="4">For a given finite sequence of propositions: if any proposition evaluates to a given truth value, there is a lexically first proposition that evaluates to that truth value.</th></tr>
+</table>
+<table align="right" style="clear:right">
+	<tr><th colspan="4">Lisp/Prolog logic</th></tr>
+	<tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>0.</td><td></td><td>1&le;n &isin; &#x2115;</td><td>Given</td></tr>
+	<tr><td>1.</td><td></td><td>Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>n</sub></td><td>Hypothesis</td></tr>
+	<tr><td>2.</td><td></td><td>t<sub>0</sub> := inf {x &isin; 0...n : Q<sub>x</sub>} &isin; 0...n</td><td><i>true</i> is a left annihilator for Lisp/Prolog logic &#x2228; (without zero divisors); local definition of t<sub>0</sub></td></tr>
+	<tr><td>3.</td><td></td><td>U := {y &isin; 0...n : y &lt; t<sub>0</sub> & Q<sub>x</sub> &#x21A6; <i>unknown</i>}</td><td>Local definition: propositions lexically earlier than Q<sub>t<sub>0</sub></sub> that are <i>unknown</i></td></tr>
+	<tr><td>3a.</td><td></td><td>F := {y &isin; 0...n : y &lt; t<sub>0</sub> & ~Q<sub>x</sub>}</td><td>Local definition: propositions lexically earlier than Q<sub>t<sub>0</sub></sub> that are <i>false</i></td></tr>
+	<tr><th colspan="4">Only need two syntactical inferences for proof by cases against trichotomy of &lt; = &gt; for &#x2115;, for 0</th></tr>
+	<tr><td>4.</td><td></td><td>0 = t<sub>0</sub></td><td>Hypothesis</td></tr>
+	<tr><td>5.</td><td></td><td>F = &#x2205;</td><td>0 is least bound of &#x2115;</td></tr>
+	<tr><td>6.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>t<sub>0</sub>&gt;z &isin; 0...n)(~Q<sub>z</sub>)</td><td>local definition of F (3a) and (5) [vacuous truth]</td></tr>
+	<tr><td>7.</td><td>0 = t<sub>0</sub> &#9500; (<span style="transform:rotate(180deg);display:inline-block">A</span>t<sub>0</sub>&gt;z &isin; 0...n)(~Q<sub>z</sub>)</td><td></td><td>Syntactical entailment introduction, (4) and (6)</td></tr>
+	<tr><td>n.</td><td></td><td>0&lt;t<sub>0</sub></td><td>Hypothesis (formatted for trichotomy of &lt; = &gt;, could use 1&le;t<sub>0</sub> instead)</td></tr>
+	<tr><td>n+1.</td><td></td><td>(Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>t<sub>0</sub>-1</sub>) &#x2228; (Q<sub>t<sub>0</sub></sub> &#x2228; ... &#x2228; Q<sub>n)</td><td>Generalized associativity on (1)</td></tr>
+	<tr><td>n+2.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &isin; 0...t<sub>0</sub>-1)(~(Q<sub>x</sub> &#x21A6; <i>true</i>))</td><td>Restate (2), local definition of t<sub>0</sub></td></tr>
+	<tr><td>n+3.</td><td></td><td>~((Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>t<sub>0</sub>-1</sub>) &#x21A6; <i>true</i>)</td><td><i>true</i> is a left annihilator for Lisp/Prolog logic &#x2228;, and (n+2)</td></tr>
+	<tr><td>n+4.</td><td></td><td>~((Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>t<sub>0</sub>-1</sub>) &#x21A6; <i>unknown</i>)</td><td><i>unknown</i> is a left annihilator for Lisp/Prolog logic &#x2228;, and (n+1)</td></tr>
+	<tr><td>n+5.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &isin; 0...t<sub>0</sub>-1)(~(Q<sub>x</sub> &#x21A6; <i>unknown</i>))</td><td><i>unknown</i> is a left annihilator for Lisp/Prolog logic &#x2228;, and (n+4)</td></tr>
+	<tr><td>n+6.</td><td></td><td>U = &#x2205;</td><td>(n+5) and local definition of U (3)</td></tr>
+	<tr><td>n+7.</td><td></td><td>t<sub>1</sub> &isin; 0...t<sub>0</sub>-1 & ~(Q<sub>t<sub>1</sub></sub> &#x21A6; <i>true</i>)</td><td>universal instantiation, (n+2)</td></tr>
+	<tr><td>n+7a.</td><td></td><td>t<sub>1</sub> &isin; 0...t<sub>0</sub>-1</td><td>Conjunction elimination on (n+7)</td></tr>
+	<tr><td>n+7b.</td><td></td><td>~(Q<sub>t<sub>1</sub></sub> &#x21A6; <i>true</i>)</td><td>Conjunction elimination on (n+7)</td></tr>
+	<tr><td>n+8.</td><td></td><td>~(Q<sub>t<sub>1</sub></sub> &#x21A6; <i>unknown</i>)</td><td>universal instantiation, (n+5) and (n+7a)</td></tr>
+	<tr><td>n+9.</td><td></td><td>Q<sub>t<sub>1</sub></sub> &#x21A6; <i>true</i> &#x2228; Q<sub>t<sub>1</sub></sub> &#x21A6; <i>false</i></td><td>Generalized or elimination, principle of trivalence and (n+8)</td></tr>
+	<tr><td>n+10.</td><td></td><td>Q<sub>t<sub>1</sub></sub> &#x21A6; <i>false</i></td><td>or elimination, (n+9) and (n+7b)</td></tr>
+	<tr><td>n+11.</td><td></td><td>~Q<sub>t<sub>1</sub></sub></td><td>Intended interpretation of &#x21A6;</td></tr>
+	<tr><td>n+12.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &isin; 0...t<sub>0</sub>-1)(~Q<sub>x</sub>)</td><td>Universal instantiation, (n+7a) and (n+11)</td></tr>
+	<tr><td>n+13.</td><td></td><td>F = 0...t<sub>0</sub>-1</td><td>local definition of F (3a) and (n+12)</td></tr>
+	<tr><td>n+14.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>t<sub>0</sub>&gt;z &isin; 0...n)(~Q<sub>z</sub>)</td><td>Restate local definition of F (3a) and (n+13)</td></tr>
+	<tr><td>n+15.</td><td>0&lt;t<sub>0</sub> &#9500; (<span style="transform:rotate(180deg);display:inline-block">A</span>t<sub>0</sub>&gt;z &isin; 0...n)(~Q<sub>z</sub>)</td><td></td><td>Syntactical entailment introduction, (n) and (n+14)</td></tr>
+	<tr><td>n+16.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>t<sub>0</sub>&gt;z &isin; 0...n)(~Q<sub>z</sub>)</td><td>Proof by cases: trichotomy of &lt; = &gt; for &#x2115;, (6), (n+15)</td></tr>
+	<tr><td>n+17.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>inf {x &isin; 0...n : Q<sub>x</sub>}&gt;z &isin; 0...n)(~Q<sub>z</sub>)</td><td>substitute out t<sub>0</sub></td></tr>
+	<tr><td>n+18.</td><td>Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>n</sub> &#9500; (<span style="transform:rotate(180deg);display:inline-block">A</span>inf {x &isin; 0...n : Q<sub>x</sub>}&gt;z &isin; 0...n)(~Q<sub>z</sub>)</td><td></td><td>Syntactical entailment introduction, (1) and (n+17)</td></tr>
+	<tr><th colspan="4">Given Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>n</sub>, all statements lexically to the left of the lexically first true statement are false</th></tr>
+</table>
+
+<table align="right">
+	<tr><th colspan="4">Lisp/Prolog logic</th></tr>
+	<tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>0.</td><td></td><td>1&le;n &isin; &#x2115;</td><td>Given</td></tr>
+	<tr><td>1.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>k &isin; 0...n)(Q<sub>k</sub> &isin; <b>TruthValued</b>)</td><td>Given (predeclares propositions)</td></tr>
+	<tr><td>2.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>k &isin; 0...n)(Q<sub>k</sub>)</td><td>Given</td></tr>
+	<tr><td>3.</td><td></td><td>t<sub>0</sub> := inf {x &isin; 0...n : Q<sub>x</sub>} &isin; 0...n</td><td>Local definition of lexically first true proposition Q<sub>t<sub>0</sub></sub></td></tr>
+	<tr><td>4.</td><td></td><td>Q<sub>t<sub>0</sub></sub></td><td>local definition of t<sub>0</sub> (3)</td></tr>
+	<tr><td>5.</td><td></td><td>t<sub>0</sub> = n</td><td>Hypothesis</td></tr>
+	<tr><td>6.</td><td>Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>n</sub> &#x27DB; Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>n</sub></td><td></td><td>A &#x27DB; A</td></tr>
+	<tr><td>7.</td><td>Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>n</sub> &#x27DB; Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>t<sub>0</sub></sub></td><td></td><td>Non-uniform substitution (n,t<sub>0</sub>)/(n,n) into (6) by (6)</td></tr>
+	<tr><td>8.</td><td>t<sub>0</sub> = n &#9500; (Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>n</sub> &#x27DB; Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>t<sub>0</sub></sub>)</td><td></td><td>Syntactical entailment introduction, (5) and (7)</td></tr>
+
+	<tr><td>9.</td><td></td><td>t<sub>0</sub> &lt; n</td><td>Hypothesis</td></tr>
+	<tr><td>10.</td><td></td><td>Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>t<sub>0</sub></sub></td><td>Hypothesis</td></tr>
+	<tr><td>11.</td><td></td><td>(Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>t<sub>0</sub></sub>) &#x2228; (Q<sub>t<sub>0</sub>+1</sub> &#x2228; ... &#x2228; Q<sub>n</sub>)</td><td>(left) disjunction introduction on (10)</td></tr>
+	<tr><td>12.</td><td></td><td>Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>n</sub></td><td>Generalized associativity on (11)</td></tr>
+	<tr><td>13.</td><td>Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>t<sub>0</sub></sub> &#9500; Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>n</sub></td><td></td><td>Syntactical entailment introduction, (10) and (12)</td></tr>
+	<tr><td>m.</td><td></td><td>Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>n</sub></td><td>Hypothesis</td></tr>
+	<tr><td>m+1.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>t<sub>0</sub>&gt;z &isin; 0...n)(~Q<sub>z</sub>)</td><td><i>modus ponens</i> for &#9500;, "statements lexically before first true statement are false" and (m)</td></tr>
+
+	<tr><td>p.</td><td></td><td>0 = t<sub>0</sub></td><td>Hypothesis</td></tr>
+	<tr><td>p+1.</td><td></td><td>Q<sub>t<sub>0</sub></sub> &#x2228; ... &#x2228; Q<sub>t<sub>0</sub></sub></td><td>Degenerate generalized associativity on (4)</td></tr>
+	<tr><td>p+2.</td><td></td><td>Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>t<sub>0</sub></sub></td><td>Nonuniform substitution (0,t<sub>0</sub>)/(t<sub>0</sub>,t<sub>0</sub>) on (p+1) by (p)</td></tr>
+	<tr><td>p+3.</td><td>0 = t<sub>0</sub> &#9500; Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>t<sub>0</sub></sub></td><td></td><td>Syntactical entailment introduction, (p) and (p+2)</td></tr>
+
+	<tr><td>q.</td><td></td><td></sub></td><td>Hypothesis</td></tr>
+	<tr><td>q+1.</td><td></td><td>Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>t<sub>0</sub>-1</sub> &#x21A6; <i>false</i></td><td>(m+1); (<b>TruthValues</b>, &#x2228;) is a monoid with identity <i>false</i>, i.e. this is <i>false</i><sup>t<sub>0</sub></sup>(!)</td></tr>
+	<tr><td>q+2.</td><td></td><td>(Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>t<sub>0</sub>-1</sub>) &#x2228; Q<sub>t<sub>0</sub></sub></td><td>(right) disjunction introduction, (q+1) and (4) (both statements have classical truth values)</td></tr>
+	<tr><td>q+3.</td><td></td><td>Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>t<sub>0</sub></sub></td><td>Generalized associativity on (q+2)</td></tr>
+	<tr><td>q+3.</td><td>0 &lt; t<sub>0</sub> &#9500; Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>t<sub>0</sub></sub></td><td></td><td>Syntactical entailment introduction, (q) and (q+3)</td></tr>
+	<tr><td>q+4.</td><td></td><td>Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>t<sub>0</sub></sub></td><td>Proof by cases, trichotomy of &lt; = &gt; for &#x2115;, (p+3), and (q+3)</td></tr>
+	<tr><td>q+5.</td><td>Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>n</sub> &#9500; Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>t<sub>0</sub></sub></td><td></td><td>Syntactical entailment introduction, (m) and (q+4)</td></tr>
+	<tr><td>q+6.</td><td>Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>n</sub> &#x27DB; Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>t<sub>0</sub></sub></td><td></td><td>Definition of &#x27DB;, (13) and (q+5)</td></tr>
+	<tr><td>q+7.</td><td>t<sub>0</sub> &lt; n &#9500; (Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>n</sub> &#x27DB; Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>t<sub>0</sub></sub>)</td><td></td><td>Syntactical entailment introduction, (9) and (q+6)</td></tr>
+	<tr><td>q+8.</td><td>Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>n</sub> &#x27DB; Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>t<sub>0</sub></sub></td><td></td><td>Proof by cases, trichotomy of &lt; = &gt; for &#x2115;, (8), and (q+7)</td></tr>
+</table>
+<p>We then use the abstract algebraic result about (left) annhilators, to infer enough about the Lisp/Prolog truth values of a Q<sub>0</sub> &#x2228; ... &#x2228; Q<sub>n</sub> to enable using <i>generalized distributivity of &#x2228; over &</i> for Lisp/Prolog logic.</p>
+-->
+<!-- editorial problems:
+universal instantiation/generalization is wrongly phrased, have to cart domain in/out
+special case of trichotomy of ... for 0, endpoint of 
+-->
+</body>
+</html>

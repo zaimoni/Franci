@@ -19,6 +19,7 @@ results as measured by the *NIX cmp utility.)  The arithmetic support was parked
 <ul>
 	<li><a href="SubatomicPhysicsOfMath.html">Elementary Principles of Set Theory</a></li>
 	<li><a href="SubatomicPhysicsOfMath_QuestForEquality.html">Reaching <i>terra cognita</i>: Grade School Arithmetic</a></li>
+	<li><a href="SubatomicPhysicsOfMath_GeneralizedAssociativity.html">Verifying the rest of elementary logic</a></li>
 </ul>
 </body>
 </html>
