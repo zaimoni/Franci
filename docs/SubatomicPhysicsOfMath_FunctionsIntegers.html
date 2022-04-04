@@ -179,7 +179,6 @@
 </table>
 <p>We also have, as a routine exercise:</p>
 <p align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>x &isin; A)(&phi;(x)) &#9500; A={x &isin; A: &phi;(x)}</p>
-
 <table align="right">
 	<tr><th colspan="4">Von Neumann-Bernays-G&ouml;del with <i>ur-elements</i></th></tr>
 	<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
@@ -207,7 +206,10 @@
 	<tr><td>19.</td><td></td><td>X={x &isin; X : &phi;(x)}</td><td>Definition of =: conjunction introduction on (18), (18a)</td></tr>
 	<tr><th colspan="4">X &#x2286; {x<sub>0</sub> &isin; X : &phi;(x<sub>0</sub>)} &#9500; X={x &isin; X : &phi;(x)}</th></tr>
 </table>
-
+<p style="clear:both">A similar exercise gives for all of the (non-classical) truth table-describable logics we are considering,</p>
+<p align="center">A &isin; <b>Class</b>, {x&isin;A : &phi;(x)} &#x2286; {x&isin;A : &psi;(x)}, {x&isin;A : &psi;(x)} &#x2286; {x&isin;A : &phi;(x)} &#9500; {x&isin;A : &phi;(x)} = {x&isin;A : &psi;(x)}</p>
+<p>That is, our choice of the non-classical phrasing of the <i>subset axiom (schema)</i>, avoids the behavior that downgrades typical set equality inferences to 
+	syntactical equivalences.</p>
 
 <!-- fix option: axiom of replacement https://en.wikipedia.org/wiki/Axiom_schema_of_replacement (depends on functions being defined) -->
 <!-- fix option: axiom of limitation of size https://en.wikipedia.org/wiki/Axiom_of_limitation_of_size (even heavier) -->
@@ -227,6 +229,8 @@
 <p>For the Zermelo-Frankel set theories, we take what was proven for the corresponding Von Neumann-Bernays-G&ouml;del set theory, as an axiom.  [This is not remotely close to the historical origin.]  Again, it is 
 	a mechanical exercise to prove that two sets that both are described by the empty set axiom, are equal.</p>
 <p>The corresponding explicit enumeration notation for &#x2205;, is {}.</p>
+<p>For classical logic only, we can go further.  (Example is for Von Neumann-Bernays-G&ouml;del set theory with <i>ur-elements</i>; adjust accordingly for other set theories.)</p>
+<p align="center">A &isin; <b>Class</b>,A&ne;&#x2205; &#9500; (x&isin;<b>Set</b>)(x&isin;A)&#x2228;(u&isin;<b>Ur</b>)(u&isin;A)</p>
 
 <h2 id="intersection-set-difference" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Intersection and set difference: A &#x2229; B, A\B</h2>
 <p>The <i>subset axiom (schema)</i> allows us to define the intersection, and set difference, of two mathematical collections:</p>
