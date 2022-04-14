@@ -456,18 +456,18 @@ We next recursively define multiplication &middot;:&#x2115; <span style="font:sa
 	<tr><td>5.</td><td></td><td>&#x2205; = A &#x2229; L</td><td>Hypothesis: A does not contain any of its lowest bounds</td></tr>
 	<tr><td>6.</td><td></td><td>b &isin; L</td><td>Hypothesis</td></tr>
 	<tr><td>7.</td><td></td><td>b &#x2209; A</td><td><span style="background:yellow"><i>modus ponendo tollens</i> for &#x2229;</span>, (5) and (6)</td></tr>
-	<tr><td>8.</td><td></td><td>a1 &isin; A & b &le; a1</td><td>Universal instantiation on (3), (6)</td></tr>
-	<tr><td>9.</td><td></td><td>a1 &isin; A</td><td>Conjunction elimination on (8)</td></tr>
-	<tr><td>10.</td><td></td><td>b &le; a1</td><td>Conjunction elimination on (8)</td></tr>
-	<tr><td>11.</td><td></td><td>b+(a1-b) = a1</td><td>Definition of &le; (10) and (11)</td></tr>
-	<tr><td>12.</td><td></td><td>a1 &#x2209; L</td><td><span style="background:yellow"><i>modus ponendo tollens</i> for &#x2229;</span>, (5) and (9)</td></tr>
+	<tr><td>8.</td><td></td><td>a<sub>1</sub> &isin; A & b &le; a<sub>1</sub></td><td>Universal instantiation on (3), (6)</td></tr>
+	<tr><td>9.</td><td></td><td>a<sub>1</sub> &isin; A</td><td>Conjunction elimination on (8)</td></tr>
+	<tr><td>10.</td><td></td><td>b &le; a<sub>1</sub></td><td>Conjunction elimination on (8)</td></tr>
+	<tr><td>11.</td><td></td><td>b+(a<sub>1</sub>-b) = a<sub>1</sub></td><td>Definition of &le; (10) and (11)</td></tr>
+	<tr><td>12.</td><td></td><td>a<sub>1</sub> &#x2209; L</td><td><span style="background:yellow"><i>modus ponendo tollens</i> for &#x2229;</span>, (5) and (9)</td></tr>
 	<tr><th colspan="4">Zermelo-Frankel set theories, or classical logic</th></tr>
-	<tr><td style="background:yellow">13.</td><td></td><td>b &ne; a1</td><td>(6) and (12)</td></tr>
-	<tr><td>14.</td><td></td><td>b &lt; a1</td><td>Definition of &lt; (10) and (13)</td></tr>
-	<tr><td>15.</td><td></td><td>1 &le; a1 -b</td><td>Description of &lt; on (14)</td></tr>
-	<tr><td>16.</td><td></td><td>b+1+S<sup>-1</sup>(a1-b) = a1</td><td>S<sup>-1</sup>(a)+1=a when 1&le;a on (15)</td></tr>
-	<tr><td>17.</td><td></td><td>S(b)+S<sup>-1</sup>(a1-b) = a1</td><td>S(a)=a+1 on (16)</td></tr>
-	<tr><td>18.</td><td></td><td>S(b) &le; a1</td><td>Definition of &lt; on (17)</td></tr>
+	<tr><td style="background:yellow">13.</td><td></td><td>b &ne; a<sub>1</sub></td><td>(6) and (12)</td></tr>
+	<tr><td>14.</td><td></td><td>b &lt; a<sub>1</sub></td><td>Definition of &lt; (10) and (13)</td></tr>
+	<tr><td>15.</td><td></td><td>1 &le; a<sub>1</sub> -b</td><td>Description of &lt; on (14)</td></tr>
+	<tr><td>16.</td><td></td><td>b+1+S<sup>-1</sup>(a<sub>1</sub>-b) = a<sub>1</sub></td><td>S<sup>-1</sup>(a)+1=a when 1&le;a on (15)</td></tr>
+	<tr><td>17.</td><td></td><td>S(b)+S<sup>-1</sup>(a<sub>1</sub>-b) = a<sub>1</sub></td><td>S(a)=a+1 on (16)</td></tr>
+	<tr><td>18.</td><td></td><td>S(b) &le; a<sub>1</sub></td><td>Definition of &lt; on (17)</td></tr>
 	<tr><td>19.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>a &isin; A)(S(b) &le; a)</td><td>Universal instantiation on (18)</td></tr>
 	<tr><td>20.</td><td></td><td>S(b) &isin; L</td><td>Definition of L on (19)</td></tr>
 	<tr><td>21.</td><td>b &isin; L &#9500; S(b) &isin; L</td><td></td><td>Syntactical entailment introduction, (6) and (20)</td></tr>
