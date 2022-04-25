@@ -85,7 +85,7 @@
 <tr><th colspan="2">Typical</th></tr>
 <tr><td valign="center"><nobr>A &#x2286; B :=&nbsp;</nobr></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; A &rArr; x &#x2208; B) & (<span style="transform:rotate(180deg);display:inline-block">A</span>u &#x2208; <b>Ur</b>)(u &#x2208; A &rArr; u &#x2208; B)</td></tr>
 <tr><th colspan="2">Alternate, to make non-classical logics act classical</th></tr>
-<tr><td valign="center"><nobr>A &#x2286; B :=&nbsp;</nobr></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)((x &#x2208; A &#x21A6; <i>true</i>) &rArr; (x &#x2208; B &#x21A6; <i>true</i>)) & (<span style="transform:rotate(180deg);display:inline-block">A</span>u &#x2208; <b>Ur</b>)((u &#x2208; A &#x21A6; <i>true</i>) &rArr; (u &#x2208; B &#x21A6; <i>true</i>))</td></tr>
+<tr><td valign="center"><nobr>A &#x2286; B :=&nbsp;</nobr></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; A &#9500; x &#x2208; B) & (<span style="transform:rotate(180deg);display:inline-block">A</span>u &#x2208; <b>Ur</b>)(u &#x2208; A &#9500; u &#x2208; B)</td></tr>
 <tr><th colspan="2">(failed) Alternate, to make Belnap's four-valued logic act like the others</th></tr>
 <tr><td valign="center"><nobr>A &#x2286; B :=&nbsp;</nobr></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)((x &#x2208; A &rArr; x &#x2208; B) & ~((x &#x2208; A &#x21A6; <i>unknown</i>) &  (x &#x2208; B &#x21A6; <i>contradiction</i>)) & ~((x &#x2208; A &#x21A6; <i>contradiction</i>) &  (x &#x2208; B &#x21A6; <i>unknown</i>))) & <nobr>(<span style="transform:rotate(180deg);display:inline-block">A</span>u &#x2208; <b>Ur</b>)((u &#x2208; A &rArr; u &#x2208; B) & ~((u &#x2208; A &#x21A6; <i>unknown</i>) & (u &#x2208; B &#x21A6; <i>contradiction</i>)) & ~((u &#x2208; A &#x21A6; <i>contradiction</i>) &  (u &#x2208; B &#x21A6; <i>unknown</i>)))</nobr></td></tr>
 </table>
@@ -111,14 +111,14 @@
 	<tr><th colspan="4">other direction is immediate by simultaneous substitution justified by A=B</th></tr>
 	<tr><th colspan="4">A &#x2286; B & B &#x2286; A &#x27DB; A=B</th></tr>
 	<tr><td colspan="4" align="center">Non-classical truth-value logics logics use the alternate definition, but the above steps only reach</td></tr>
-	<tr><th colspan="4">A &#x2286; B & B &#x2286; A &#9500; (x &#x2208; A &#x21A6; <i>true</i> A &#x27DB; x &#x2208; B &#x21A6; <i>true</i>)</th></tr>
+	<tr><th colspan="4">A &#x2286; B & B &#x2286; A &#9500; (x &#x2208; A &#x27DB; x &#x2208; B)</th></tr>
 	<tr><td colspan="4" align="center">The principle of bivalence for ... &#x21A6; <i>true</i> allows reaching</td></tr>
 	<tr><th colspan="4">A &#x2286; B & B &#x2286; A &#9500; (x &#x2208; A &#x21A6; <i>true</i> A &hArr; x &#x2208; B &#x21A6; <i>true</i>)</th></tr>
 </table>	
 <p>The set theories without <i>ur-elements</i>, omit the <i>ur-elements</i> clause, both in the definition of &#x2286; and the inference of equality from mutual subset relations.</p>
 <p>A pragmatic difficulty with non-classical truth values, is that we want the subset A &#x2286; B relation to whitelist sets and ur-elements that are not in A.  Classical logic does this, with the <i>principle of explosion</i>.  The failed alternate still 
-	breaks for Kleene's weak three-valued logic (as does the typical definition), when faced with a term t<sub>0</sub> for which t<sub>0</sub> &#x2208; A &#x21A6; <i>unknown</i>.  The working alternate, relies on the principle of trivalence/tetravalence making
-	the truth values of the various ... &#x21A6; <i>true</i> statements only have the classical logic truth values <i>true</i> and <i>false</i>.</p>
+	breaks for Kleene's weak three-valued logic (as does the typical definition), when faced with a term t<sub>0</sub> for which t<sub>0</sub> &#x2208; A &#x21A6; <i>unknown</i>.  The working alternate, relies on the predicate interpretation of 
+	&#9500; only having classical truth values, regardless of logic.</p>
 <p>The calculation that A &#x2286; B,B &#x2286; A &#9500; A=B, fails for all of the non-classical logics.  We cannot rule out the existence of a term t<sub>0</sub> such that 
 	t<sub>0</sub> &#x2208; A and t<sub>0</sub> &#x2208; B evaluate to distinct not-<i>true</i> truth values, without additional premises.  The adaptation to the other set theories we are considering, is 
 	mechanical.</p>
@@ -156,8 +156,9 @@
 	<tr><td>Von Neumann-Bernays-G&ouml;del with ur-elements</td><td>provable from class existence</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span> &phi;:<b>Set</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b>)(<span style="transform:rotate(180deg);display:inline-block">A</span> &psi;:<b>Ur</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b>)(<span style="transform:rotate(180deg);display:inline-block">A</span>A &#x2208; <b>Class</b>)(<span style="transform:rotate(180deg);display:inline-block">E</span>B &#x2208; <b>Class</b>)[(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(<b>Truth</b>(x &#x2208; B)=<b>Truth</b>(x &#x2208; A & &phi;(x))) & (<span style="transform:rotate(180deg);display:inline-block">A</span>u &#x2208; <b>Ur</b>)(<b>Truth</b>(u &#x2208; B)=<b>Truth</b>(u &#x2208; A & &psi;(u)))]</td></tr>
 </table>
 <p>The above, however, will cause problems later on.  If the predicate &phi; is true for all x in A, we want the subset axiom to give a set that is equal to the original set.  E.g., for 
-	Belnap's four-valued logic for a <i>set</i> term t1, t1 &isin; A &#x21A6; <i>contradiction</i> & &phi(t1) &#x21A6; <i>unknown</i> results in t1 &isin; Subset<sub>&phi;</sub>(A) &#x21A6; <i>false</i>, 
-	which breaks an expectation we had from classical logic.  A better evaluation rule set is:</p>
+	Belnap's four-valued logic for a <i>set</i> term t<sub>1</sub>, t<sub>1</sub> &isin; A &#x21A6; <i>contradiction</i> & &phi;(t<sub>1</sub>) &#x21A6; <i>unknown</i> results in t<sub>1</sub> &isin; Subset<sub>&phi;</sub>(A) &#x21A6; <i>false</i>, 
+	which breaks an expectation we had from classical logic.  (In particular, we will find that this choice of definition breaks the definition of the size of a singleton set, in the presence of non-classical truth values.)</p>
+<p>A better evaluation rule set is:</p>
 <ul>
 	<li>~(x &isin; A &#x21A6; <i>true</i>) &#9500; <b>Truth</b>(x &#x2208; A)=<b>Truth</b>(x &#x2208; Subset<sub>&phi;</sub>(A))</li>
 	<li>x &isin; A &#x21A6; <i>true</i> &#9500; <b>Truth</b>(&phi;(x))=<b>Truth</b>(x &#x2208; Subset<sub>&phi;</sub>(A))</li>
@@ -185,12 +186,12 @@
 	<tr><td>1.</td><td></td><td>X &isin; <b>Class</b></td><td>Given</td></tr>
 	<tr><td>2.</td><td></td><td>&phi;:<b>Set</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b></td><td>Given</td></tr>
 	<tr><td>3.</td><td></td><td>X &#x2286; {x<sub>0</sub> &isin; X : &phi;(x<sub>0</sub>)}</td><td>Given</td></tr>
-	<tr><td>4.</td><td></td><td><nobr>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)((x &#x2208; X &#x21A6; <i>true</i>) &rArr; (x &#x2208; {x<sub>0</sub> &isin; X : &phi;(x<sub>0</sub>)} &#x21A6; <i>true</i>))</nobr> & <nobr>(<span style="transform:rotate(180deg);display:inline-block">A</span>u &#x2208; <b>Ur</b>)((u &#x2208; X &#x21A6; <i>true</i>) &rArr; (u &#x2208; {x<sub>0</sub> &isin; X : &phi;(x<sub>0</sub>)} &#x21A6; <i>true</i>))</nobr></td><td>Definition of &#x2286;</td></tr>
-	<tr><td>5.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)((x &#x2208; X &#x21A6; <i>true</i>) &rArr; (x &#x2208; {x<sub>0</sub> &isin; X : &phi;(x<sub>0</sub>)} &#x21A6; <i>true</i>))</td><td>Conjunction elimination on (4)</td></tr>
-	<tr><td>6.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>u &#x2208; <b>Ur</b>)((u &#x2208; X &#x21A6; <i>true</i>) &rArr; (u &#x2208; {x<sub>0</sub> &isin; X : &phi;(x<sub>0</sub>)} &#x21A6; <i>true</i>))</td><td>Conjunction elimination on (4)</td></tr>
-	<tr><td>7.</td><td></td><td>t<sub>0</sub> &isin; <b>Set</b> & ((t<sub>0</sub> &#x2208; X &#x21A6; <i>true</i>) &rArr; (t<sub>0</sub> &#x2208; {x<sub>0</sub> &isin; X : &phi;(x<sub>0</sub>)} &#x21A6; <i>true</i>))</td><td>Universal instantiation on (5)</td></tr>
+	<tr><td>4.</td><td></td><td><nobr>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; X &#9500; x &#x2208; {x<sub>0</sub> &isin; X : &phi;(x<sub>0</sub>)})</nobr> & <nobr>(<span style="transform:rotate(180deg);display:inline-block">A</span>u &#x2208; <b>Ur</b>)(u &#x2208; X &#9500; u &#x2208; {x<sub>0</sub> &isin; X : &phi;(x<sub>0</sub>)})</nobr></td><td>Definition of &#x2286;</td></tr>
+	<tr><td>5.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; X &#9500; x &#x2208; {x<sub>0</sub> &isin; X : &phi;(x<sub>0</sub>)})</td><td>Conjunction elimination on (4)</td></tr>
+	<tr><td>6.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>u &#x2208; <b>Ur</b>)(u &#x2208; X &#9500; u &#x2208; {x<sub>0</sub> &isin; X : &phi;(x<sub>0</sub>)})</td><td>Conjunction elimination on (4)</td></tr>
+	<tr><td>7.</td><td></td><td>t<sub>0</sub> &isin; <b>Set</b> & (t<sub>0</sub> &#x2208; X &#9500; t<sub>0</sub> &#x2208; {x<sub>0</sub> &isin; X : &phi;(x<sub>0</sub>)})</td><td>Universal instantiation on (5)</td></tr>
 	<tr><td>8.</td><td></td><td>t<sub>0</sub> &isin; <b>Set</b></td><td>Conjunction elimination on (7)</td></tr>
-	<tr><td>9.</td><td></td><td>(t<sub>0</sub> &#x2208; X &#x21A6; <i>true</i>) &rArr; (t<sub>0</sub> &#x2208; {x<sub>0</sub> &isin; X : &phi;(x<sub>0</sub>)} &#x21A6; <i>true</i>)</td><td>Conjunction elimination on (7)</td></tr>
+	<tr><td>9.</td><td>t<sub>0</sub> &#x2208; X &#9500; t<sub>0</sub> &#x2208; {x<sub>0</sub> &isin; X : &phi;(x<sub>0</sub>)}</td><td></td><td>Conjunction elimination on (7)</td></tr>
 	<tr><td>10.</td><td></td><td><b>Truth</b>(t<sub>0</sub> &#x2208; X)&ne;<i>true</i></td><td>Hypothesis</td></tr>
 	<tr><td>11.</td><td></td><td><b>Truth</b>(t<sub>0</sub> &#x2208; X)=<b>Truth</b>(t<sub>0</sub> &#x2208; {x<sub>0</sub> &isin; X : &phi;(x<sub>0</sub>)})</td><td>Subset axiom (schema)</td></tr>
 	<tr><td>12.</td><td><b>Truth</b>(t<sub>0</sub> &#x2208; X)&ne;<i>true</i> &#9500; <nobr><b>Truth</b>(t<sub>0</sub> &#x2208; X)=<b>Truth</b>(t<sub>0</sub> &#x2208; {x<sub>0</sub> &isin; X : &phi;(x<sub>0</sub>)})</nobr></td><td></td><td>Syntactical entailment introduction, (10) and (11)</td></tr>
@@ -234,24 +235,29 @@
 
 <h2 id="intersection-set-difference" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Intersection and set difference: A &#x2229; B, A\B</h2>
 <p>The <i>subset axiom (schema)</i> allows us to define the intersection, and set difference, of two mathematical collections:</p>
-<p align="center">A &#x2229; B := {x &#x2208; A: x &#x2208; B}<br>A\B := {x &#x2208; A: x &#x2209; B}</p><p>An alternate notation for set difference in the literature, A-B, conflicts with the pointwise usage in 
-	both analysis, and abstract algebra.</p>
+<table align="center">
+	<tr><td align="right">A &#x2229; B :=&nbsp;</td><td>{x &#x2208; A: x &#x2208; B}</td></tr>
+	<tr><th colspan="2">Classical logic</th></tr>
+	<tr><td align="right">A\B :=&nbsp;</td><td>{x &#x2208; A: x &#x2209; B}</td></tr>
+	<tr><th colspan="2">Alternate for non-classical truth values</th></tr>
+	<tr><td align="right">A\B :=&nbsp;</td><td>{x &#x2208; A: ~(x &#x2208; B &#x21A6; <i>true</i>)}</td></tr>
+</table>
+<p>An alternate notation for set difference in the literature, A-B, conflicts with the pointwise usage in both analysis, and abstract algebra.</p>
 <p>In the set builder notation, above, the mathematical collection that is the source for the <i>subset axiom (schema)</i> is on the left of :; the predicate that 
 	the <i>subset axiom (schema)</i> is instantiated with, is on the right of :.  The universal quantification (<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; A), is suppressed.  The corresponding domain of discourse is read off of the domains of discourse for A and B.</p>
-<p>The following are mechanical exercises for mathematical collections A, B.  Unless stated otherwise, they hold for all of the logics we are considering.</p>
+<p>The following are mechanical exercises for mathematical collections A, B.</p>
 <table align="center">
-<tr><th colspan="3">Arithmetic table for A &#x2229; B and A\B</th></tr>
-<tr><td align="right">A &#x2229; B =&nbsp;</td><td>B &#x2229; A</td><td>Proof uses substitution commutativity of &: fails Lisp/Prolog</td></tr>
-<tr><td align="right">x &#x2208; A &#x2229; B &#x27DB;&nbsp;</td><td>x &#x2208; B &#x2229; A</td><td>But this only uses syntactical commutativity of &, so works for Lisp/Prolog</td></tr>
-<tr><td align="right">A &#x2229; B &#x2286;&nbsp;</td><td>A</td></tr>
-<tr><td align="right">A &#x2229; B &#x2286;&nbsp;</td><td>B</td></tr>
-<tr><td align="right">A\B &#x2286;&nbsp;</td><td>A</td></tr>
-<tr><td align="right">&#x2205; &#x2229; B =&nbsp;</td><td>&#x2205;</td></tr>
-<tr><td align="right">A &#x2229; &#x2205; =&nbsp;</td><td>&#x2205;</td></tr>
-<tr><td align="right">&#x2205;\B =&nbsp;</td><td>&#x2205;</td></tr>
-<tr><td align="right">A\&#x2205; =&nbsp;</td><td>A</td></tr>
-<tr><td align="right">x &#x2209; A &#x2229; B, x &isin; A &#9500;&nbsp;</td><td>x &#x2209; B</td><td><span style="background:yellow"><i>modus ponendo tollens</i> for &#x2229;</span></td></tr>
-<tr><td align="right">&#x2205; = A &#x2229; B, x &isin; A &#9500;&nbsp;</td><td>x &#x2209; B</td><td><span style="background:yellow"><i>modus ponendo tollens</i> for &#x2229;</span></td></tr>
+	<tr><th colspan="3">Arithmetic table for A &#x2229; B and A\B</th></tr>
+	<tr><td align="right">A &#x2229; B &#x2286;&nbsp;</td><td>A</td><td rowspan="2">from subset axiom (schema)</td></tr>
+	<tr><td align="right">A\B &#x2286;&nbsp;</td><td>A</td></tr>
+	<tr><td align="right">&#x2205; &#x2229; B =&nbsp;</td><td>&#x2205;</td></tr>
+	<tr><td align="right">&#x2205;\B =&nbsp;</td><td>&#x2205;</td></tr>
+	<tr><td align="right">A\&#x2205; =&nbsp;</td><td>A</td></tr>
+	<tr><td align="right">x &isin; A &#9500;&nbsp;</td><td><b>Truth</b>(x &isin; A &#x2229; B)=<b>Truth</b>(x &isin; B)</td><td><span style="background:yellow"><i>modus ponendo tollens</i> for &#x2229;</span></td></tr>
+	<tr><th colspan="3">Classical Logic</th></tr>
+	<tr><td align="right">A &#x2229; B =&nbsp;</td><td>B &#x2229; A</td><td>Commutativity of &#x2229;</td></tr>
+	<tr><th colspan="3">Nonclassical Logic</th></tr>
+	<tr><td align="right">x &#x2208; A &#x2229; B &#x27DB;&nbsp;</td><td>x &#x2208; B &#x2229; A</td><td>Only uses syntactical commutativity of &; Works for all of the truth table describable logics</td></tr>
 </table>
 <table align="right">
 	<tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
