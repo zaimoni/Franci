@@ -1,0 +1,194 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=windows-1252"/>
+	<title>Subatomic Physics of Math: Nonclassical well-ordering of &#x2115;</title>
+	<style type="text/css">
+		@page { margin: 0.79in }
+		p { margin-bottom: 0.1in; line-height: 120% }
+		a:link { so-language: zxx }
+		* {
+            font-family: "Liberation Serif", serif
+        }
+	</style>
+</head>
+<body lang="en-US" dir="ltr">
+<div style="position:fixed; top:0.5em; left:0.5em; background:white"><a href="./">Home</a> &gt; <a href="./SubatomicPhysicsOfMath_GeneralizedAssociativity.html">Generalized Associativity</a></div>
+<h1 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 16px">Subatomic Physics of Math: Nonclassical well-ordering of &#x2115;</h1>
+<span style="border: 1px solid black; display:block; float:left; margin-right: 20px; padding: 5px">
+	<b>Defining how many things are in a <i>set</i></b>
+	<ol type="I">
+		<li><b>Nonclassical well-ordering of &#x2115;</b></li>
+	</ol>
+</span>
+<span style="border: 1px solid black; display:block; float:right">
+	<ol type="I">
+		<li><a href="#reverify-inequality-from-isin">Completing verifying x &isin; A, y &#x2209; A &#9500; x&ne;y</a></li>
+		<li><a href="#non-classical-well-ordering">Non-classical well-ordering of &#x2115;</a></li>
+	</ol>
+</span>
+<p>Our roadmap for defining the (cardinal) size of sets, requires two key facts to work: the well-ordering of the natural numbers &#x2155;, and 
+	the definition of a one-to-one function.  Both of these require unusual measures in the presence of non-classical truth values.  Our 
+	choice of the <i>subset axiom (schema)</i> for non-classical logic, is not intuitive.</p>
+<p>The proof we used for the well-ordering of &#x2115;, had two failure points.  The first one was when we lost known validity for non-classical logic Von Neumann-Bernays-G&ouml;del set theories:</p>
+<table align="center">
+	<tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td></td><td>x &#x2208; A</td><td>Given</td></tr>
+	<tr><td>2.</td><td></td><td>y &#x2209; A</td><td>Given</td></tr>
+	<tr><td>3.</td><td></td><td>x=y</td><td>Hypothesis</td></tr>
+	<tr><td>4.</td><td></td><td>y &#x2208; A</td><td>[y/x] on (1) by (3)</td></tr>
+	<tr><td>5.</td><td>x=y &#9500; y &#x2208; A</td><td></td><td>Syntactical entailment introduction, (3) and (4)</td></tr>
+	<tr><th colspan="4">Classical logic</th></tr>
+	<tr><td>6.</td><td></td><td>x &ne; y</td><td><span style="background:yellow"><i>modus tollens</i> for &#9500;</span>, (5) and (2)</td></tr>
+	<tr><th colspan="4">x &isin; A, y &#x2209; A &#9500; x&ne;y</th></tr>
+	<tr><th colspan="4">Other logics</th></tr>
+	<tr><td>6a.</td><td></td><td>~(x=y &#x21A6; <i>true</i>)</td><td><span style="background:yellow"><i>modus tollens</i> for &#9500;</span>, (5) and (2)</td></tr>
+</table>
+<p>(Zermelo-Frankel's definition of equality, had enough extra detail that we could get the desired classical logic conclusion.)  The non-classical logic summary</p>
+<p align="center">x &#x2208; A, y &#x2209; A &#9500; ~(x=y &#x21A6; <i>true</i>)</p>
+<p>has an alternate notation as</p>
+<p align="center"><b>Truth</b>(x &#x2208; A)=<i>true</i>, <b>Truth</b>(y &#x2208; A)=<i>false</i> &#9500; <b>Truth</b>(x=y)&ne;<i>true</i></p>
+<p>This is counterintuitive: we would expect, even in a non-classical logic,</p>
+<p align="center"><b>Truth</b>(x &#x2208; A)=<i>true</i>, <b>Truth</b>(y &#x2208; A)=<i>false</i> &#9500; <b>Truth</b>(x=y)=<i>false</i></p>
+<p>Is this because our (untrained) intuition is simply wrong (like the Axiom of Unrestricted Comprehension is provably not true)?  Or is the problem that we have not formalized <b>Truth</b> properly?</p>
+
+<h2 id="reverify-inequality-from-isin" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Completing verifying x &isin; A, y &#x2209; A &#9500; x&ne;y</h2>
+<p>Recall that the set theories with <i>ur-elements</i>, can replicate any of the elementary logical connectives of the truth-table describable logics as a function.
+	What about defining an <i>ur-element</i> set theoretic function &isin;:<b>Set</b> <span style="font:sans-serif; position:relative; top: -1px">x</span> <b>Class</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b>, with evaluation rule using the undefined predicate &isin;: (x,X) &#x21A6;<sub>&isin;</sub> x &isin; X?</p>
+<ul>
+	<li>The principle of bivalence/trivalence/tetravalence is what makes this a function, rather than a partial function.</li>
+	<li>This looks like a circular definition, but it is not: we are defining a truth-valued function, in terms of an undefined predicate.</li>
+	<li>We would need to have a definition of the Cartesian product of a <i>proper class</i> and a <i>proper conglomerate</i>.  (The result, would be a <i>proper conglomerate</i>.)</li>
+</ul>
+<p>While we could do the extra work to define the Cartesian product of two <i>conglomerates</i>, it is not needed for our immediate purpose.  (This is 
+	formally very similar to defining the Cartesian product of two proper classes.)  Instead, we can locally define a function.</p>
+<p>We define</p>
+<p align="center"><b>NValence</b>:<b>TruthValued</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b><br />P &#x21A6;<sub></sub> (<span style="transform:rotate(180deg);display:inline-block">E</span>t &#x2208; <b>TruthValues</b>)(P &#x21A6; t)</p>
+<p>We have one of these for each logic.  This allows notating whether the principle of bivalence/trivalence/tetravalence is valid for a given truth-valued expression.  The intended interpretation suggests</p>
+<p align="center">&phi;:<b>Set</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b> &#9500; Domain(&phi;) = {x &isin; <b>Set</b>: <b>NValence</b>(&phi;(x))}</p>
+
+<table align="right">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>&phi;:<b>Set</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b></td><td>Given</td></tr>
+	<tr><td>2.</td><td>&phi;(t<sub>0</sub>) &#x21A6; <i>true</i></td><td>Given</td></tr>
+	<tr><td>3.</td><td>&phi;(t<sub>1</sub>) &#x21A6; <i>false</i></td><td>Given</td></tr>
+	<tr><th colspan="4">Next statements are in classical logic rather than the target logic</th></tr>
+	<tr><td>4.</td><td>t<sub>0</sub> &isin; &phi;<sup>-1</sup>(<i>true</i>)</td><td>(2)</td></tr>
+	<tr><td>5.</td><td>t<sub>1</sub> &isin; &phi;<sup>-1</sup>(<i>false</i>)</td><td>(3)</td></tr>
+	<tr><td>6.</td><td>&#x2205; = &phi;<sup>-1</sup>(<i>true</i>) &#x2229; &phi;<sup>-1</sup>(<i>false</i>)</td><td>Definition of function on (1)</td></tr>
+	<tr><td>6a.</td><td>~(t<sub>0</sub> &isin; &phi;<sup>-1</sup>(<i>true</i>) & t<sub>0</sub> &isin; &phi;<sup>-1</sup>(<i>false</i>))</td><td>Universal instantiation of (7) with t<sub>0</sub></td></tr>
+	<tr><td>6b.</td><td>t<sub>0</sub> &#x2209; &phi;<sup>-1</sup>(<i>false</i>)</td><td><i>modus ponendo tollens</i>, (6a) and (2)</td></tr>
+	<tr><td>7.</td><td>t<sub>1</sub>&ne;t<sub>0</sub></td><td>x &isin; A, y &#x2209; A &#9500; x&ne;y on (5),(6b)</td></tr>
+	<tr><td>8.</td><td>t<sub>0</sub>&ne;t<sub>1</sub></td><td>Symmetry of &ne; on (7)</td></tr>
+	<tr><th colspan="4">But <i>false</i> is also in the target logic, so we can use the classical-logic inferred truth value for the target logic</th></tr>
+	<tr><th colspan="4">&phi;:<b>Set</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b>, &phi;(t<sub>0</sub>) &#x21A6; <i>true</i>, &phi;(t<sub>1</sub>) &#x21A6; <i>false</i> &#9500; t<sub>0</sub>&ne;t<sub>1</sub></th></tr>
+</table>	
+<p>It is unclear whether the above is actually provable, or just a translation of the intended interpretation. Conversely, it is unclear how the NValence predicate 
+	relates to the usual rationale for Intuitionistic logic.  Since Intuitionistic logic, i.e. constructive logic, with classical truth values explicitly rejects <i>P &#x2228; ~P</i> as a tautology while 
+	allowing it to be proven in specific cases, we expect</p>
+<table align="center">
+	<tr><th style="background:red">Intuitionistic logic, classical truth values</th></tr>
+	<tr><td>&#9500; (P &#x21A6; <i>true</i>) &#x2228; (P &#x21A6; <i>false</i>) &#x2228; (NValence(P) &#x21A6; <i>true</i> & ~(P &#x21A6; <i>true</i>) & ~(P &#x21A6; <i>false</i>)) &#x2228; ~(NValence(P) &#x21A6; <i>true</i>)</td></tr>
+</table>
+<p>However, the above is at best a classical logic statement about Intuitionistic logic. Recall that Intuitionistic <i>true</i> and <i>false</i> correspond to (finitely?) constructively provable classical-logic <i>true</i> and <i>false</i>.
+	It may not even be a correct interpretation.  (i.e., is it really compatible with the Kolmogorov rationale to <b>axiomatically</b> assume <i>P &#x2228; ~P</i> for a specific statement P?)</p>
+<p>We next consider a  lemma, a theorem that is not interesting in and of itself but is a means to other results.  We have a similar proof for any pair of distinct truth values.</p>
+
+<p>After the lemma is verified, we can retry the proof, introducing a locally defined (partial) function <i>&phi;(z) := z &isin; A</i> with domain <b>Set</b> and range <b>TruthValues</b>.</p>
+<table align="center" style="clear:both">
+	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td>x &isin; A</td><td>Given</td></tr>
+	<tr><td>2.</td><td>y &#x2209; A</td><td>Given</td></tr>
+	<tr><td>3.</td><td>&phi;(z) := z &isin; A</td><td>Local definition of function &phi;:<b>Set</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b></td></tr>
+	<tr><td>4.</td><td>x&ne;y</td><td>&phi;:<b>Set</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b>, &phi;(t<sub>0</sub>) &#x21A6; <i>true</i>, &phi;(t<sub>1</sub>) &#x21A6; <i>false</i> &#9500; t<sub>0</sub>&ne;t<sub>1</sub>; (3),(1),(2)</td></tr>
+	<tr><th colspan="4">x &isin; A, y &#x2209; A &#9500; x&ne;y</th></tr>
+</table>	
+<p>I.e., our original issue with proving this set-theoretic fact for non-classical logic Von Neumann-Bernays-G&ouml;del set theory, was 
+	that we had not yet formalized functions.</p>
+
+<h2 id="non-classical-well-ordering" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Non-classical well-ordering of &#x2115;,</h2>
+<p>Our remaining failure mode for our first proof sketch of the well-ordering of &#x2115;, looks like it has two parts:</p>
+<ul>
+	<li>The given subset <i>A &#x2286; &#x2115;</i>,  does not have to originate from the subset axiom (schema).</li>
+	<li>Non-equality of a set with the empty set, is a weaker hypothesis than a existentially qualified variable that is explicitly in the set.  They're equivalent for classical logic, so this strengthening is reasonable.</li>
+</ul>
+<br style="clear:both" />
+<table align="right">
+	<tr><th colspan="4">Von Neumann-Bernays-G&ouml;del set theories, non-classical logic</th></tr>
+	<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>1.</td><td></td><td>~(L\A = L  &#x21A6; <i>true</i>)</td><td>Given</td></tr>
+	<tr><th colspan="4">~Intuitonistic</th></tr>
+	<tr><td>2.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>x &isin; <b>Set</b>)(<b>Truth</b>(x &isin; L\A)&ne;<b>Truth</b>(x &isin; L))</td><td>Definition of =</td></tr>
+	<tr><td>3.</td><td></td><td>~((a<sub>1</sub> &isin; L) &#x21A6; <i>true</i>)</td><td>Hypothesis</td></tr>
+	<tr><td>4.</td><td></td><td><b>Truth</b>(a<sub>1</sub> &isin; L\A)=<b>Truth</b>(a<sub>1</sub> &isin; L)</td><td>Definition of set difference, (3) and subset axiom (schema)</td></tr>
+	<tr><td>5.</td><td>~((a<sub>1</sub> &isin; L) &#x21A6; <i>true</i>) &#9500; <b>Truth</b>(a<sub>1</sub> &isin; L\A)=<b>Truth</b>(a<sub>1</sub> &isin; L)</td><td></td><td>&#9500; introduction, (3) and (4)</td></tr>
+	<tr><td>6.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &isin; <b>Set</b>\L)(<b>Truth</b>(x &isin; L\A)=<b>Truth</b>(x &isin; L)</td><td>Universal instantiation, (5)</td></tr>
+	<tr><th colspan="4">A similar sub-proof holds for <b>Ur</b>\L, for Von Neumann-Bernays-G&ouml;del set theories with ur-elements</th></tr>
+	<tr><td>7.</td><td></td><td>t<sub>1</sub> &isin; <b>Set</b> & <b>Truth</b>(t<sub>1</sub> &isin; L\A)&ne;<b>Truth</b>(t<sub>1</sub> &isin; L)</td><td>Existential instantiation on (2)</td></tr>
+	<tr><td>7a.</td><td></td><td>t<sub>1</sub> &isin; <b>Set</b></td><td>Conjunction elimination on (7)</td></tr>
+	<tr><td>7b.</td><td></td><td><b>Truth</b>(t<sub>1</sub> &isin; L\A)&ne;<b>Truth</b>(t<sub>1</sub> &isin; L)</td><td>Conjunction elimination on (7)</td></tr>
+	<tr><td>8.</td><td></td><td>~(t<sub>1</sub> &isin; <b>Set</b>\L &#x21A6; <i>true</i>)</td><td>(6) and (7b)</td></tr>
+	<tr><td>9.</td><td></td><td>t<sub>1</sub> &isin; L</td><td>Definition of set difference, (7a) and (8)</td></tr>
+	<tr><td>10.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>x &isin; L)(<b>Truth</b>(x &isin; L\A)&ne;<b>Truth</b>(x &isin; L))</td><td>Existential generalization on (9)</td></tr>
+	<tr><td>11.</td><td></td><td>~((t<sub>1</sub> &isin; A) &#x21A6; <i>true</i>)</td><td>Hypothesis</td></tr>
+	<tr><td>12.</td><td></td><td><b>Truth</b>(t<sub>1</sub> &isin; L\A)=<b>Truth</b>(t<sub>1</sub> &isin; L)</td><td>Definition of set difference, (9), (11) and subset axiom (schema)</td></tr>
+	<tr><td>13.</td><td>~((t<sub>1</sub> &isin; A) &#x21A6; <i>true</i>) &#9500; <b>Truth</b>(t<sub>1</sub> &isin; L\A)=<b>Truth</b>(t<sub>1</sub> &isin; L)</td><td></td><td>&#9500; introduction, (11) and (12)</td></tr>
+	<tr><th colspan="4">Classical logic for next two steps as they're about &#x21A6;<sub>Truth</sub></th></tr>
+	<tr><td>14.</td><td></td><td>~~((t<sub>1</sub> &isin; A) &#x21A6; <i>true</i>)</td><td><i>modus tollens</i> for &#9500;, (13) and (7b)</td></tr>
+	<tr><td>15.</td><td></td><td>(t<sub>1</sub> &isin; A) &#x21A6; <i>true</i></td><td>Eliminate double negation on (14)</td></tr>
+	<tr><td>16.</td><td></td><td>t<sub>1</sub> &isin; A</td><td>Intended interpretation of &#x21A6; on (15)</td></tr>
+	<tr><td>17.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>x &isin; L)(x &isin; A)</td><td>Existential generalization, (9) and (16)</td></tr>
+	<tr><th colspan="4">~(L\A = L  &#x21A6; <i>true</i>) &#9500; (<span style="transform:rotate(180deg);display:inline-block">E</span>x &isin; L)(x &isin; A)</th></tr>
+</table>
+
+<p>If we try a direct modification of the classical logic proof adapted from Karl Stromberg's <i>Classical Analysis</i>, everything works until the last step.
+	We will expand the last step into its own lemma, and see if it actually works.</p>
+		
+	<table align="right">
+		<tr><th colspan="4">Von Neumann-Bernays-G&ouml;del set theories, non-classical logic</th></tr>
+		<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
+		<tr><td>1.</td><td></td><td>A &#x2286; &#x2115;</td><td>Given</td></tr>
+		<tr><td>2.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>x &isin; &#x2115;)(x &isin; A)</td><td>Given</td></tr>
+		<tr><td>3.</td><td></td><td>L := {n &isin; &#x2115; : (<span style="transform:rotate(180deg);display:inline-block">A</span>a &isin; A)(n &le; a)}</td><td>Local definition: set of nonstrict lower bounds of A</td></tr>
+		<tr><td>4.</td><td></td><td>0 &isin; L</td><td>0 is least bound of the natural numbers</td></tr>
+		<tr><td>5.</td><td></td><td>L\A = L</td><td>Hypothesis: A does not contain any of its lowest bounds</td></tr>
+	
+		<tr><td>6.</td><td></td><td>b &isin; L</td><td>Hypothesis</td></tr>
+		<tr><td>6a.</td><td></td><td>~(b &isin; A &#x21A6; <i>true</i>)</td><td>Universal instantiation of (5) on b</td></tr>
+		<tr><td>6b.</td><td></td><td>b &isin; &#x2115;</td><td>subset axiom (schema) on (6)</td></tr>
+	
+		<tr><td>8.</td><td></td><td>a<sub>1</sub> &isin; A & b &le; a<sub>1</sub></td><td>Universal instantiation of (3) on b</td></tr>
+		<tr><td>9.</td><td></td><td>a<sub>1</sub> &isin; A</td><td>Conjunction elimination on (8)</td></tr>
+		<tr><td>10.</td><td></td><td>b &le; a<sub>1</sub></td><td>Conjunction elimination on (8)</td></tr>
+		<tr><th colspan="4">Details for proof by cases, depend on the target logic</th></tr>
+		<tr><th colspan="4">~Intuitionistic(?)</th></tr>
+		<tr><td>13.</td><td></td><td>b &ne; a<sub>1</sub></td><td>(9) and (6a)</td></tr>
+	
+		<tr><td>14.</td><td></td><td>b &lt; a<sub>1</sub></td><td>Definition of &lt; (10) and (13)</td></tr>
+		<tr><td>15.</td><td></td><td>1 &le; a<sub>1</sub> -b</td><td>Description of &lt; on (14)</td></tr>
+		<tr><td>16.</td><td></td><td>b+1+S<sup>-1</sup>(a<sub>1</sub>-b) = a<sub>1</sub></td><td>S<sup>-1</sup>(a)+1=a when 1&le;a on (15)</td></tr>
+		<tr><td>17.</td><td></td><td>S(b)+S<sup>-1</sup>(a<sub>1</sub>-b) = a<sub>1</sub></td><td>S(a)=a+1 on (16)</td></tr>
+		<tr><td>18.</td><td></td><td>S(b) &le; a<sub>1</sub></td><td>Definition of &lt; on (17)</td></tr>
+		<tr><td>19.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>a &isin; A)(S(b) &le; a)</td><td>Universal instantiation on (18)</td></tr>
+		<tr><td>20.</td><td></td><td>S(b) &isin; L</td><td>Definition of L on (19)</td></tr>
+		<tr><td>21.</td><td>b &isin; L &#9500; S(b) &isin; L</td><td></td><td>Syntactical entailment introduction, (6) and (20)</td></tr>
+		<tr><td>22.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>b &isin; &#x2115;)(b &isin; L)</td><td><i>axiom of (weak natural) induction</i>, (4) and (21)</td></tr>
+		<tr><td>23.</td><td></td><td>&#x2115; &#x2286; L</td><td>Definition of &#x2286;</td></tr>
+		<tr><th colspan="4">~Intuitionistic</th></tr>
+		<tr><td>24.</td><td></td><td>&#x2115;=L</td><td>X &#x2286; {x<sub>0</sub> &isin; X : &phi;(x<sub>0</sub>)} &#9500; X={x &isin; X : &phi;(x)} on (3) and (18)</td></tr>
+		<tr><td>25.</td><td></td><td>&#x2115;\A = &#x2115;</td><td>substitute (19) into (5)</td></tr>
+		<tr><td>26.</td><td>L\A = L &#9500; &#x2115;\A = &#x2115;</td><td></td><td>Syntactical entailment introduction, (5) and (25)</td></tr>
+		<tr><td>26a.</td><td></td><td>a<sub>2</sub> &isin; A</td><td>Existential instantiation on (2)</td></tr>
+		<tr><td>26a.</td><td></td><td>a<sub>2</sub> &isin; &#x2115;</td><td>Definition of &#x2286;</td></tr>
+		<tr><td>26c.</td><td></td><td>a<sub>2</sub> &#x2209; &#x2115;\A</td><td>Definition of set difference \</td></tr>
+		<tr><td>27.</td><td></td><td>&#x2115;\A &ne; &#x2115;</td><td>Definition of equality =</td></tr>
+		<tr><td>28.</td><td></td><td>~(L\A = L  &#x21A6; <i>true</i>)</td><td><i>modus tollens</i> for &#9500;, (26) and 27</td></tr>
+		<tr><td>29.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>x &isin; L)(x &isin; A)</td><td><i>modus ponens</i> for &#9500;, ~(L\A = L  &#x21A6; <i>true</i>) &#9500; (<span style="transform:rotate(180deg);display:inline-block">E</span>x &isin; L)(x &isin; A) and (28)</td></tr>
+		<tr><th colspan="4" align="center">A contains at least one of its lowest bounds</th></tr>
+		<tr><td colspan="4" align="center">With some extra work using existentiial instantiation and generalization, we can get</td></tr>
+		<tr><th colspan="4">(<span style="transform:rotate(180deg);display:inline-block">E</span>!x &isin; &#x2115;)(x &isin; A &#x2229; L)</th></tr>
+	</table>
+	
+
+</body>
+</html>
