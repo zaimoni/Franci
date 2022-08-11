@@ -125,14 +125,17 @@ int main(int argc, char* argv[], char* envp[])
 	survey(*P_implies_Q);
 	INFORM(P_implies_Q->table_as_text().c_str());
 	std::remove_reference_t<decltype(*P_implies_Q)>::infer(P_implies_Q, logic::TruthValue::True);
+	survey(*P_implies_Q);
 	INFORM(P_implies_Q->possible_values_text().c_str());
 	INFORM(P_implies_Q->table_as_text().c_str());
 	survey(*Q_implies_R);
 	std::remove_reference_t<decltype(*Q_implies_R)>::infer(Q_implies_R, logic::TruthValue::True);
+	survey(*Q_implies_R);
 
 	auto P_implies_R = logic::TruthTable::NonStrictlyImplies(test_var[0], test_var_R[0]);
 	INFORM(P_implies_R->possible_values_text().c_str());
 	INFORM(P_implies_R->table_as_text().c_str());
+	survey(*P_implies_R);
 
 	auto P_implies_Q_vars = P_implies_Q->catalog_vars();
 	auto Q_implies_R_vars = Q_implies_R->catalog_vars();
