@@ -68,6 +68,18 @@
 	presumes that we have a fully working mathematical model of proof notation.</p>
 
 <h2 id="syntactical-entailment" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Intended interpretation of &#9500;</h2>
+<p>We recall that, for classical logic, with an implicit domain of discourse</p>
+<p align="center">(<span style="transform:rotate(180deg);display:inline-block">E</span>a)Z(a) := ~((<span style="transform:rotate(180deg);display:inline-block">A</span>a)~Z(a))</p>
+<p>However, the intended interpretation of:</p>
+<ul>
+	<li>(<span style="transform:rotate(180deg);display:inline-block">E</span>a)Z(a), is that at least one a exists such that Z(a) is true.</li>
+	<li>(<span style="transform:rotate(180deg);display:inline-block">A</span>a)Z(a), is that for all a whatsoever in the domain of discourse, Z(a) is true.</li>
+</ul>
+<p>Since Z(a) &#x27DB; (Z(a) &#x21A6; <i>true</i>),</p>
+<p align="center">(<span style="transform:rotate(180deg);display:inline-block">E</span>a)Z(a) := ~((<span style="transform:rotate(180deg);display:inline-block">A</span>a)~(Z(a) &#x21A6; <i>true</i>))</p>
+<p>has the same effect in classical logic, but may handle non-classical truth values more usefully.  (That is, if Z(a<sub>0</sub>) &#x21A6; <i>unknown</i>, we do not want to conclude
+	(<span style="transform:rotate(180deg);display:inline-block">E</span>a)Z(a) even though we have ~((<span style="transform:rotate(180deg);display:inline-block">A</span>a)~Z(a)).)</p>
+<p>We use the latter definition of (<span style="transform:rotate(180deg);display:inline-block">E</span>a)Z(a).</p>
 <p>Now that we have generalized associativity of &, we can denotate the usual intended interpretation of &#9500;:</p>
 <table align="center">
 	<tr><td align="right">A<sub>0</sub>, ..., A<sub>n</sub> &#9500; B :=&nbsp;</td><td>A<sub>0</sub> & ... & A<sub>n</sub> &#9500; B</td></tr>
