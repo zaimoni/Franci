@@ -499,7 +499,8 @@ emphasize that A is playing the role of an "indexing collection", so a common al
 	<li>We say that a relation r is from a mathematical collection X to a mathematical collection Y, if Domain(r) is a subcollection of X and Range(r) is a subcollection of Y; alternately, the relation r is of type X <span style="position:relative; top: -2px">&#x2192;</span> Y.
 		<p align="center">r:X <span style="position:relative; top: -2px">&#x2192;</span> Y := Domain(r) &#x2286; X & Range(r) &#x2286; Y</p></li>
 	<li>We say a relation r is right-unique i.e. is functional, if for any x in X there is at most one value it can evaluate to:
-		<p align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; X)(<span style="transform:rotate(180deg);display:inline-block">A</span>y0 &#x2208; Y)(<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; Y)((x,y0) &#x2208; r & (x,y) &#x2208; r) &rArr; y0=y)</p></li>
+		<p align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; X)(<span style="transform:rotate(180deg);display:inline-block">A</span>y<sub>0</sub> &#x2208; Y)(<span style="transform:rotate(180deg);display:inline-block">A</span>y<sub>1</sub> &#x2208; Y)((x,y<sub>0</sub>) &#x2208; r & (x,y<sub>1</sub>) &#x2208; r) &rArr; y<sub>0</sub>=y<sub>1</sub>) [classical]</p></li>
+		<p align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; X)(<span style="transform:rotate(180deg);display:inline-block">A</span>y<sub>0</sub> &#x2208; Y)(<span style="transform:rotate(180deg);display:inline-block">A</span>y<sub>1</sub> &#x2208; Y)((x,y<sub>0</sub>) &#x2208; r & (x,y<sub>1</sub>) &#x2208; r) &#9500; y<sub>0</sub>=y<sub>1</sub>) [nonclassical]</p></li>
 	<li>We say a relation r is left-total, i.e. does not have an implicit domain restriction, if for any x in X there is at least one value it can evaluate to:
 		<p align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; X)(<span style="transform:rotate(180deg);display:inline-block">E</span>y &#x2208; Y)((x,y) &#x2208; r)</p></li>
 	<li>We say that a function f is a relation that is both left-total, and right-unique i.e. functional.</li>
@@ -521,6 +522,7 @@ emphasize that A is playing the role of an "indexing collection", so a common al
 	second order concept with a first order object.</p>
 <p>At this point, any instructions for re-verifying mathematics, starting from mathematical functions or relations, are implementable.</p>
 <h2 id="peano-natural-numbers" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Peano axioms for natural numbers &#x2115;</h2>
+<p>(<a href="https://www.youtube.com/watch?v=dKtsjQtigag">A visual explanation of the following:</a> ~43 minutes viewing time.)
 <p>We now have the notation to state how to recognize a model of the natural numbers.  We reserve &#x2115; as a name for the domain of discourse of natural numbers.  The modern notation for what <a href="https://en.wikipedia.org/wiki/Peano_axioms">Giuseppe Peano</a> proposed, works out as:</p>
 <ul>
 	<li>0 is a natural number: 0 &#x2208; &#x2115;</li>
