@@ -44,7 +44,6 @@ public:
 
 	size_t size() const override;
 	const MetaConcept* ArgN(size_t n) const override;
-	MetaConcept* ArgN(size_t n) override;
 
 	size_t size_infix() const { return _infix.size(); }
 	size_t size_prefix() const { return _prefix.size(); }

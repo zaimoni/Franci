@@ -6863,8 +6863,8 @@ void MetaConceptWithArgArray::LogicalANDORCondenseORANDArgHyperCubeAuxDim1(size_
 	// XOR wants to merge AND clauses.  The merged arg is 2-ary IFF
 	assert(Idx>Idx2);
 	Digraph* const WorkingGraph = static_cast<Digraph*>((MetaConcept*)InferenceParameterMC);
-	MetaConcept* Arg1 = WorkingGraph->ArgN(Idx);
-	MetaConcept* Arg2 = WorkingGraph->ArgN(Idx2);
+	MetaConcept* Arg1 = InferenceParameterMC->ArgN(Idx);
+	MetaConcept* Arg2 = InferenceParameterMC->ArgN(Idx2);
 	WorkingGraph->RemoveVertex(Idx);
 	WorkingGraph->RemoveVertex(Idx2);
 	size_t TargetIdx1 = _findArgRelatedToLHS(*Arg1, AreSyntacticallyEqual)-1;
@@ -6906,8 +6906,8 @@ void MetaConceptWithArgArray::LogicalORXORCompactANDArgHyperCubeAuxDim1(size_t i
 {	// FORMALLY CORRECT: 2020-06-26
 	SUCCEED_OR_DIE(i>i2);
 	Digraph* const WorkingGraph = static_cast<Digraph*>((MetaConcept*)InferenceParameterMC);
-	MetaConcept* Arg1 = WorkingGraph->ArgN(i);
-	MetaConcept* Arg2 = WorkingGraph->ArgN(i2);
+	MetaConcept* Arg1 = InferenceParameterMC->ArgN(i);
+	MetaConcept* Arg2 = InferenceParameterMC->ArgN(i2);
 	WorkingGraph->RemoveVertex(i);
 	WorkingGraph->RemoveVertex(i2);
 	size_t TargetIdx1 = _findArgRelatedToLHS(*Arg1, AreSyntacticallyEqual);

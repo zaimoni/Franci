@@ -54,7 +54,6 @@ public:
 //	virtual const AbstractClass* UltimateType() const = 0;
 	size_t size() const final {return 2;};
 	const MetaConcept* ArgN(size_t n) const final;
-	MetaConcept* ArgN(size_t n) final;
 // Syntactical equality and inequality
 //	Override this for non-commutative types, or complicated internal structure
 	bool IsAbstractClassDomain() const override;

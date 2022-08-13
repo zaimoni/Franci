@@ -48,8 +48,7 @@ public:
 	virtual const AbstractClass* UltimateType() const;
 //	Arity functions
 	size_t size() const override { return 0; }
-	const MetaConcept* ArgN(size_t n) const override { return 0; }
-	MetaConcept* ArgN(size_t n) override { return 0; }
+	const MetaConcept* ArgN(size_t n) const override { return nullptr; }
 //  Evaluation functions
 	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override;
 	virtual bool CanEvaluate() const;

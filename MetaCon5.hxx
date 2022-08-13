@@ -34,7 +34,6 @@ public:
 //	virtual const AbstractClass* UltimateType() const = 0;
 	size_t size() const override { return 1; }
 	const T* ArgN(size_t n) const override { return (0 == n) ? Arg1 : 0; }
-	T* ArgN(size_t n) override { return (0 == n) ? Arg1 : 0; }
 // Syntactical equality and inequality
 	bool IsAbstractClassDomain() const override { return IsExplicitConstant(); }
 //  Evaluation functions

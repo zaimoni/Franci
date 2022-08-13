@@ -248,8 +248,8 @@ public:
 	size_t max_size() const {return VFTable1->MaxArity;};
 	virtual size_t size() const = 0;	// abstract function
 	virtual const MetaConcept* ArgN(size_t n) const = 0;
-	virtual MetaConcept* ArgN(size_t n) = 0;
-// Syntactical equality and inequality
+	MetaConcept* ArgN(size_t n) { const_cast<MetaConcept*>(const_cast<const MetaConcept*>(this)->ArgN(n)); }
+	// Syntactical equality and inequality
 	friend bool operator==(const MetaConcept& lhs, const MetaConcept& rhs);
 
 // Machine-format strict ordering
@@ -455,21 +455,6 @@ namespace zaimoni {
 template<>
 struct is_polymorphic_base<MetaConcept> : public std::true_type {};
 
-}
-
-// FORMALLY CORRECT: Kenneth Boyd 9/13/1999
-// A is the actual type, B is the function body as a macro
-#define STANDARD_DECLARE_ARGN(A,B)	\
-const MetaConcept*	\
-A::ArgN(size_t n) const	\
-{	\
-	B	\
-}	\
-	\
-MetaConcept*	\
-A::ArgN(size_t n)	\
-{	\
-	B	\
 }
 
 #endif

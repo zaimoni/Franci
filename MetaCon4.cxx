@@ -49,14 +49,10 @@ void MetaConceptWith2Args::operator=(const MetaConceptWith2Args& src)
 	IdxCurrentSelfEvalRule = src.IdxCurrentSelfEvalRule;
 }
 
-// FORMALLY CORRECT: Kenneth Boyd, 9/22/1998
-#define ARGN_BODY	\
-	return (0 == n) ? LHS_Arg1	\
-         : (1 == n) ? RHS_Arg2 : (MetaConcept*)NULL;
-
-STANDARD_DECLARE_ARGN(MetaConceptWith2Args,ARGN_BODY)
-
-#undef ARGN_BODY
+const MetaConcept* MetaConceptWith2Args::ArgN(size_t n) const
+{
+	return (0 == n) ? LHS_Arg1 : (1 == n) ? RHS_Arg2 : (MetaConcept*)nullptr;
+}
 
 bool MetaConceptWith2Args::EqualAux2(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 7/12/2002

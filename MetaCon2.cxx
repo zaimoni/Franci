@@ -204,12 +204,10 @@ bool MetaConceptWithArgArray::DestructiveEvaluateToSameType()
 	return false;
 }
 
-// FORMALLY CORRECT: 4/20/1998
-#define ARGN_BODY return (fast_size()>n) ? ArgArray[n] : NULL;
-
-STANDARD_DECLARE_ARGN(MetaConceptWithArgArray,ARGN_BODY)
-
-#undef ARGN_BODY
+const MetaConcept* MetaConceptWithArgArray::ArgN(size_t n) const
+{
+	return (fast_size() > n) ? ArgArray[n] : nullptr;
+}
 
 bool MetaConceptWithArgArray::EqualAux2(const MetaConcept& rhs) const
 {	// FORMALLY CORRECT: Kenneth Boyd, 11/29/2007
