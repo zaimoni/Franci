@@ -121,22 +121,20 @@ void _copy_buffer(T* dest, const T* src, size_t Idx)
 }
 
 // for resize
-template<typename T>
-void _copy_expendable_buffer(T* dest, T* src, size_t Idx)
+template<typename T> requires std::is_trivially_copy_assignable_v<T>
+void _copy_expendable_buffer(T* dest, const T* src, size_t Idx) noexcept
 {
-	if constexpr (has_MoveInto<T>::value) {
-		do {
-			--Idx;
-			src[Idx].MoveInto(dest[Idx]);
-		} while (0 < Idx);
-	} else {
-		_copy_buffer(dest, src, Idx);
-	}
+	memmove(dest, src, Idx * sizeof(T));
 }
 
 template<typename T>
-void _copy_expendable_buffer(T** dest, const T** src, size_t Idx)
-{	_copy_buffer(dest,src,Idx);	}
+void _copy_expendable_buffer(T* dest, T* src, size_t Idx) noexcept(std::is_nothrow_move_assignable_v<T>)
+{
+	do {
+		--Idx;
+		dest[Idx] = std::move(src[Idx]);
+	} while (0 < Idx);
+}
 
 // _vector_assign competes with std::fill_n
 // should be preferred to the _elementwise_op approach in algor.hpp
