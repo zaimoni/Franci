@@ -9,6 +9,8 @@ target_link_libraries(z_cstdio_console INTERFACE z_logging INTERFACE z_memory)
 
 target_compile_definitions(z_console PRIVATE ZAIMONI_HAVE_ACCURATE_MSIZE)
 target_compile_definitions(z_cstdio_console PRIVATE ZAIMONI_HAVE_ACCURATE_MSIZE)
+target_compile_definitions(z_console PRIVATE _HAS_ITERATOR_DEBUGGING=0)	# for MSVC++ STL
+target_compile_definitions(z_cstdio_console PRIVATE _HAS_ITERATOR_DEBUGGING=0)	# for MSVC++ STL
 
 if (NOT DEFINED $CACHE{ZSTL_WINDOWS_H} OR $CACHE{ZSTL_WINDOWS_H})
 	add_subdirectory(Win32)
