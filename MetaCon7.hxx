@@ -71,9 +71,9 @@ public:
 //  Type ID functions
 	virtual typename std::enable_if<MetaConcept_lookup<T>::return_code==1,const AbstractClass*>::type UltimateType() const {return &TruthValues;};	// specialize or else
 //	Arity functions
-	virtual size_t size() const {return 0;};
-	virtual const MetaConcept* ArgN(size_t n) const {return 0;};
-	virtual MetaConcept* ArgN(size_t n) {return 0;};
+	size_t size() const final {return 0;}
+	const MetaConcept* ArgN(size_t n) const final {return 0;}
+	MetaConcept* ArgN(size_t n) final {return 0;}
 // Syntactical equality and inequality
 	bool IsAbstractClassDomain() const override { return true; }
 //  Evaluation functions

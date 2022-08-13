@@ -24,9 +24,9 @@ public:
 //  Type ID functions
 //	virtual const AbstractClass* UltimateType() const = 0;
 //	Arity functions
-	size_t size() const override final { return 0; }
-	const MetaConcept* ArgN(size_t n) const override final { return 0; }
-	MetaConcept* ArgN(size_t n) override final { return 0; }
+	size_t size() const final { return 0; }
+	const MetaConcept* ArgN(size_t n) const final { return 0; }
+	MetaConcept* ArgN(size_t n) final { return 0; }
 // Syntactical equality and inequality
 	bool IsAbstractClassDomain() const override { return true; }
 //  Evaluation functions

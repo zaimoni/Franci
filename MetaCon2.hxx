@@ -112,10 +112,10 @@ public:
 //  Type ID functions
 //	virtual const AbstractClass* UltimateType() const = 0;
 //	Arity functions
-	virtual size_t size() const {return ArgArray.size();};
+	size_t size() const final {return ArgArray.size();}
 	size_t fast_size() const {assert(!ArgArray.empty()); return ArgArray.ArraySize();};
-	virtual const MetaConcept* ArgN(size_t n) const;
-	virtual MetaConcept* ArgN(size_t n);
+	const MetaConcept* ArgN(size_t n) const final;
+	MetaConcept* ArgN(size_t n) final;
 // Syntactical equality and inequality
 	bool IsAbstractClassDomain() const override;
 //  Evaluation functions

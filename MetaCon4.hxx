@@ -52,9 +52,9 @@ public:
 	inline void ForceCheckForEvaluation() const {IdxCurrentSelfEvalRule=None_SER;};
 //  Type ID functions
 //	virtual const AbstractClass* UltimateType() const = 0;
-	virtual size_t size() const {return 2;};
-	virtual const MetaConcept* ArgN(size_t n) const;
-	virtual MetaConcept* ArgN(size_t n);
+	size_t size() const final {return 2;};
+	const MetaConcept* ArgN(size_t n) const final;
+	MetaConcept* ArgN(size_t n) final;
 // Syntactical equality and inequality
 //	Override this for non-commutative types, or complicated internal structure
 	bool IsAbstractClassDomain() const override;
