@@ -25,11 +25,11 @@ class _meta_auto_ptr
 protected:
 	T* _ptr;
 
-	explicit _meta_auto_ptr() noexcept : _ptr(0) {};
-	explicit _meta_auto_ptr(T*& src) noexcept : _ptr(src) {src = 0;};
-	explicit _meta_auto_ptr(const _meta_auto_ptr& src) : _ptr(0) {*this=src;};
-	explicit _meta_auto_ptr(_meta_auto_ptr&& src) noexcept : _ptr(src._ptr) { src._ptr = 0; }
-	~_meta_auto_ptr() { _single_flush(_ptr); _ptr = 0; }
+	explicit _meta_auto_ptr() noexcept : _ptr(nullptr) {}
+	explicit _meta_auto_ptr(T*& src) noexcept : _ptr(src) {src = nullptr;}
+	explicit _meta_auto_ptr(const _meta_auto_ptr& src) : _ptr(nullptr) {*this=src;}
+	explicit _meta_auto_ptr(_meta_auto_ptr&& src) noexcept : _ptr(src._ptr) { src._ptr = nullptr; }
+	~_meta_auto_ptr() { _single_flush(_ptr); _ptr = nullptr; }
 
 	void operator=(T* src) noexcept {
 		if (_ptr != src) {
@@ -41,7 +41,7 @@ protected:
 	void operator=(const _meta_auto_ptr& src) {
 		if (!src._ptr) {
 			_single_flush(_ptr);
-			_ptr = 0;
+			_ptr = nullptr;
 			return;
 		};
 		if (_ptr && *_ptr == *src._ptr) return;
@@ -51,25 +51,25 @@ protected:
 	void operator=(_meta_auto_ptr&& src) noexcept {
 		_single_flush(_ptr);
 		_ptr = src._ptr;
-		src._ptr = 0;
+		src._ptr = nullptr;
 	}
 public:
 	void reset() { _single_flush(_ptr); _ptr = 0; }
 	void reset(T*& src) {	// this convolution handles a recursion issue
 		T* TmpPtr = src;
-		src = 0;
+		src = nullptr;
 		if (TmpPtr != _ptr) {
 			if (_ptr) _single_flush(_ptr);
 			_ptr = TmpPtr;
 		};
 	}
 
-	void MoveInto(_meta_auto_ptr<T>& dest) {dest.reset(_ptr);};
+	void MoveInto(_meta_auto_ptr<T>& dest) {dest.reset(_ptr);}
 
-	template<typename U> void TransferOutAndNULL(U*& dest) { _single_flush(dest); dest = _ptr; _ptr = 0; }
-	T* release() { T* tmp = _ptr; _ptr = 0; return tmp; }
+	template<typename U> void TransferOutAndNULL(U*& dest) { _single_flush(dest); dest = _ptr; _ptr = nullptr; }
+	T* release() { T* tmp = _ptr; _ptr = nullptr; return tmp; }
 	bool empty() const {return !_ptr;};
-	void NULLPtr() { _ptr = 0; }
+	void NULLPtr() { _ptr = nullptr; }
 
 	// typecasts
 	operator T*&() { return _ptr; }
@@ -77,28 +77,6 @@ public:
 
 	// NOTE: C/C++ -> of const pointer to nonconst data is not const
 	T* operator->() const { return _ptr; }
-};
-
-template<typename T>
-class autodel_ptr : public _meta_auto_ptr<T>
-{
-public:
-	explicit autodel_ptr() = default;
-	explicit autodel_ptr(T*& src) noexcept : _meta_auto_ptr<T>(src) {};
-	explicit autodel_ptr(autodel_ptr& src) : _meta_auto_ptr<T>(src._ptr) {};
-	explicit autodel_ptr(autodel_ptr&& src) = default;
-	~autodel_ptr() = default;
-
-	autodel_ptr& operator=(T* src) noexcept { _meta_auto_ptr<T>::operator=(src); return *this; }
-	autodel_ptr& operator=(const autodel_ptr& src) = delete;
-	autodel_ptr& operator=(autodel_ptr&& src) = default;
-
-	friend void swap(autodel_ptr& lhs, autodel_ptr& rhs) {std::swap(lhs._ptr,rhs._ptr);};
-};
-
-template<typename T>
-struct has_MoveInto<autodel_ptr<T> > : public std::true_type
-{
 };
 
 template<typename T>
