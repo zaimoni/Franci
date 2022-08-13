@@ -1,12 +1,10 @@
 // AutoPtr.hpp
 // a family of pointers that automatically delete themselves when going out of scope
-// (C)2009-2011,2020 Kenneth Boyd, license: MIT.txt
+// (C)2009-2011,2020,2022 Kenneth Boyd, license: MIT.txt
 
-// autodel_ptr: single pointer
+// autoval_ptr: single pointer
 // weakautoarray_ptr: array of weak pointers
 // autoarray_ptr: array of owned pointers
-
-// autodel_ptr should have similar semantics with the STL auto_ptr
 
 // this file is radically different than <memory>, don't pretend to be interoperable
 // NOTE: explicit-grabbing semantics for operator= breaks assigning function results (e.g., operator new)
@@ -94,11 +92,6 @@ public:
 	autoval_ptr& operator=(T* src) noexcept { _meta_auto_ptr<T>::operator=(src); return *this; }
 
 	friend void swap(autoval_ptr& lhs, autoval_ptr& rhs) { std::swap(lhs._ptr, rhs._ptr); }
-};
-
-template<typename T>
-struct has_MoveInto<autoval_ptr<T> > : public std::true_type
-{
 };
 
 template<typename T>
@@ -334,11 +327,6 @@ public:
 };
 
 template<typename T>
-struct has_MoveInto<autoarray_ptr<T> > : public std::true_type
-{
-};
-
-template<typename T>
 class autovalarray_ptr : public _meta_autoarray_ptr<T>
 {
 public:
@@ -360,11 +348,6 @@ public:
 };
 
 template<typename T>
-struct has_MoveInto<autovalarray_ptr<T> > : public std::true_type
-{
-};
-
-template<typename T>
 class autovalarray_ptr_throws : public _meta_autoarray_ptr<T>
 {
 public:
@@ -383,11 +366,6 @@ public:
 
 	// swaps
 	friend void swap(autovalarray_ptr_throws<T> & lhs, autovalarray_ptr_throws<T> & rhs) { lhs.swap(rhs); }
-};
-
-template<typename T>
-struct has_MoveInto<autovalarray_ptr_throws<T> > : public std::true_type
-{
 };
 
 template<typename T>

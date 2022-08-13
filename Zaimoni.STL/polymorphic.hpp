@@ -1,6 +1,6 @@
 // polymorphic.hpp
 // polymorphic type support
-// (C)2009,2015,2018 Kenneth Boyd, license: MIT.txt
+// (C)2009,2015,2018,2022 Kenneth Boyd, license: MIT.txt
 
 #ifndef ZAIMONI_STL_POLYMORPHIC_HPP
 #define ZAIMONI_STL_POLYMORPHIC_HPP 1
@@ -67,24 +67,6 @@ struct param : public std::conditional<sizeof(T)<=sizeof(unsigned long long) && 
 // * C++ STL hates this.
 template<typename T>
 struct has_invalid_assignment_but_copyconstructable : public std::false_type
-{
-};
-
-// class has MoveInto member function, and is *not* polymorphic-base
-// intended semantics: dest has former value of src, src has no content (may or may not be valid other than for destruction)
-template<typename T>
-struct has_MoveInto : public std::false_type
-{
-};
-
-// don't override this one
-template<typename T>
-struct has_MoveInto<const T> : public std::false_type
-{
-};
-
-template<typename T>
-struct has_MoveInto<volatile T> : public has_MoveInto<T>
 {
 };
 

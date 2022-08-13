@@ -1,7 +1,7 @@
 /* MetaRAM.hpp */
 /* C++ interface to C++/C memory management libraries */
 /* limited functionality in C */
-/* (C)2009,2015,2018,2020 Kenneth Boyd, license: MIT.txt */
+/* (C)2009,2015,2018,2020,2022 Kenneth Boyd, license: MIT.txt */
 
 #ifndef ZAIMONI_METARAM_HPP
 #define ZAIMONI_METARAM_HPP 1
