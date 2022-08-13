@@ -96,28 +96,28 @@ FREE_AND_NULL(T*& Target)
 
 // indirection glue
 // _copy_buffer competes with STL std::copy
-template<typename T,typename U>
-typename std::enable_if<!is_polymorphic_base<U>::value, void>::type
-_copy_buffer(U* dest, const T* src, size_t Idx)
+template<typename T, typename U> requires (!std::is_polymorphic_v<U> || std::is_final_v<U>)
+void _copy_buffer(U* dest, const T* src, size_t Idx)
 {
-	do	{
+	do {
 		--Idx;
 		dest[Idx] = src[Idx];
-		}
-	while(0<Idx);
+	} while (0 < Idx);
+}
+
+template<typename T> requires std::is_trivially_copy_assignable_v<T>
+void _copy_buffer(T* dest, const T* src, size_t Idx) noexcept
+{
+	memmove(dest, src, Idx * sizeof(T));
 }
 
 template<typename T>
 void _copy_buffer(T* dest, const T* src, size_t Idx)
 {
-	if constexpr (std::is_trivially_copy_assignable_v<T>) {
-		memmove(dest, src, Idx * sizeof(T));
-	} else {
-		do {
-			--Idx;
-			dest[Idx] = src[Idx];
-		} while (0 < Idx);
-	}
+	do {
+		--Idx;
+		dest[Idx] = src[Idx];
+	} while (0 < Idx);
 }
 
 // for resize
