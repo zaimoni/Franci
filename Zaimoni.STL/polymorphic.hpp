@@ -98,7 +98,7 @@ CopyInto(const T& src, U*& dest)
 	if constexpr (std::is_copy_constructible_v<T>) {
 		dest = new T(src);
 		return;
-	} else if constexpr (is_polymorphic_base<U>::value) {
+	} else if constexpr (requires { src.CopyInto(dest); }) {
 		src.CopyInto(dest);
 	} else {
 		static_assert(unconditional_v<bool, false, T>, "unclear how to copy type");

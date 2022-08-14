@@ -150,44 +150,43 @@ void _flush(T** _ptr ZAIMONI_ISO_PARAM(size_t& _ptr_size))
 		}
 }
 
-template<typename T>
-inline typename std::enable_if<!(std::is_pointer_v<T> || std::is_member_pointer_v<T>), void>::type
-_value_copy_buffer(T* dest,const T* src, size_t Idx) {_copy_buffer(dest,src,Idx);}
+template<typename T> requires(!(std::is_pointer_v<T> || std::is_member_pointer_v<T>))
+void _value_copy_buffer(T* dest,const T* src, size_t Idx) {_copy_buffer(dest,src,Idx);}
 
-template<typename T,typename U>
-typename std::enable_if<is_polymorphic<T>::value, void>::type
-_value_copy_buffer(U** dest,const T* const * src, size_t Idx)
-{	// T had better support the virtual member function CopyInto
-	do	{
+template<typename T, typename U>
+void _value_copy_buffer(U** dest, const T* const* src, size_t Idx) requires requires(U* _dest, const T* _src) { _src->CopyInto(_dest); }
+{
+	do {
 		if (src[--Idx]) src[Idx]->CopyInto(dest[Idx]);
-		else{
+		else {
 			_flush(dest[Idx]);
 			dest[Idx] = 0;
-			}
 		}
-	while(0<Idx);
+	} while (0 < Idx);
 }
 
 template<typename T>
-void _value_copy_buffer(T** dest, const T* const* src, size_t Idx)
+void _value_copy_buffer(T** dest, const T* const* src, size_t Idx) requires requires(T* _dest, const T* _src) { _src->CopyInto(_dest); }
 {
-	if constexpr (is_polymorphic<T>::value) {
-		do {
-			if (src[--Idx]) src[Idx]->CopyInto(dest[Idx]);
-			else {
-				_flush(dest[Idx]);
-				dest[Idx] = 0;
-			}
-		} while (0 < Idx);
-	} else {
-		do {
-			if (src[--Idx]) CopyInto(*src[Idx], dest[Idx]);
-			else {
-				_flush(dest[Idx]);
-				dest[Idx] = 0;
-			}
-		} while (0 < Idx);
-	}
+	do {
+		if (src[--Idx]) src[Idx]->CopyInto(dest[Idx]);
+		else {
+			_flush(dest[Idx]);
+			dest[Idx] = nullptr;
+		}
+	} while (0 < Idx);
+}
+
+template<typename T>
+void _value_copy_buffer(T** dest, const T* const* src, size_t Idx) requires (!requires(T* _dest, const T* _src) { _src->CopyInto(_dest); } && requires(T* _dest, const T* _src) { CopyInto(*_src, _dest); })
+{
+	do {
+		if (src[--Idx]) CopyInto(*src[Idx], dest[Idx]);
+		else {
+			_flush(dest[Idx]);
+			dest[Idx] = nullptr;
+		}
+	} while (0 < Idx);
 }
 
 template<typename T>
