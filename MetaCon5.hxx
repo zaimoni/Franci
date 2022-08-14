@@ -47,7 +47,7 @@ public:
 		if (!Arg1.empty()) Arg1->ConvertVariableToCurrentQuantification(src);
 	}
 
-	bool HasArgRelatedToThisConceptBy(const MetaConcept& Target, LowLevelBinaryRelation* TargetRelation) const override
+	bool HasArgRelatedToThisConceptBy(const MetaConcept& Target, LowLevelBinaryRelation* TargetRelation) const final
 	{
 		return TargetRelation(Target, *Arg1) || Arg1->HasArgRelatedToThisConceptBy(Target, TargetRelation);
 	}

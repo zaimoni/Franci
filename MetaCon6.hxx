@@ -35,14 +35,14 @@ public:
 //	virtual bool Evaluate(MetaConcept*& dest) = 0;		// same, or different type
 //	virtual bool DestructiveEvaluateToSameType() = 0;	// overwrites itself iff returns true
 // Formal manipulation functions
-	void ConvertVariableToCurrentQuantification(MetaQuantifier& src) override {};
-	virtual bool HasArgRelatedToThisConceptBy(const MetaConcept& Target, LowLevelBinaryRelation* TargetRelation) const;
-	bool UsesQuantifierAux(const MetaQuantifier& x) const override {return false;};
+	void ConvertVariableToCurrentQuantification(MetaQuantifier& src) override {}
+	bool HasArgRelatedToThisConceptBy(const MetaConcept& Target, LowLevelBinaryRelation* TargetRelation) const final { return false; }
+	bool UsesQuantifierAux(const MetaQuantifier& x) const override {return false;}
 	bool ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& lhs, const MetaConcept& rhs, LowLevelAction* RHSInducedActionOnArg, LowLevelBinaryRelation* TargetRelation) override { return true; }
 protected:
 //	virtual bool EqualAux2(const MetaConcept& rhs) const = 0;
-	void _forceStdForm() override {};
-	bool _IsExplicitConstant() const override {return true;};
+	void _forceStdForm() override {}
+	bool _IsExplicitConstant() const override {return true;}
 };
 
 #endif

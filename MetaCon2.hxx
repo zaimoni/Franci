@@ -125,7 +125,7 @@ public:
 	bool Evaluate(MetaConcept*& dest) final;		// same, or different type
 	bool DestructiveEvaluateToSameType() final;	// overwrites itself iff returns true
 	virtual void ConvertVariableToCurrentQuantification(MetaQuantifier& src);
-	virtual bool HasArgRelatedToThisConceptBy(const MetaConcept& Target, LowLevelBinaryRelation* TargetRelation) const;
+	bool HasArgRelatedToThisConceptBy(const MetaConcept& Target, LowLevelBinaryRelation* TargetRelation) const final;
 	virtual bool UsesQuantifierAux(const MetaQuantifier& x) const;
 	virtual bool ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& lhs, const MetaConcept& rhs, LowLevelAction* RHSInducedActionOnArg, LowLevelBinaryRelation* TargetRelation);
 // type-specific functions

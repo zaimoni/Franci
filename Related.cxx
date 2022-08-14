@@ -136,10 +136,6 @@ MetaConceptWith2Args::HasArgRelatedToThisConceptBy(const MetaConcept& Target, Lo
 		   || RHS_Arg2->HasArgRelatedToThisConceptBy(Target,TargetRelation);
 }
 
-bool
-MetaConceptZeroArgs::HasArgRelatedToThisConceptBy(const MetaConcept& Target, LowLevelBinaryRelation* TargetRelation) const
-{return false;}
-
 //! \todo Optimize MetaConcept::MetaConceptPtrRelatedToThisConceptBy for time
 bool
 MetaConcept::MetaConceptPtrRelatedToThisConceptBy(const MetaConcept* Target, LowLevelBinaryRelation* TargetRelation) const
