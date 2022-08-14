@@ -88,11 +88,4 @@ protected:
 
 };
 
-namespace zaimoni {
-
-template<class T>
-struct is_polymorphic_base<MetaConceptWith1Arg<T> > : public std::true_type {};
-
-}
-
 #endif

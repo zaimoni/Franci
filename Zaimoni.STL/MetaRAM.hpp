@@ -138,14 +138,6 @@ void _copy_expendable_buffer(T* dest, T* src, size_t Idx) noexcept(std::is_nothr
 
 // _vector_assign competes with std::fill_n
 // should be preferred to the _elementwise_op approach in algor.hpp
-template<typename T,typename U>
-typename std::enable_if<is_polymorphic_base<U>::value, void>::type
-_vector_assign(U* dest, const T& src, size_t Idx)
-{
-	do	dest[--Idx] = src;
-	while(0<Idx);
-}
-
 template<typename T>
 void _vector_assign(T* dest, typename zaimoni::param<T>::type src, size_t Idx)
 {

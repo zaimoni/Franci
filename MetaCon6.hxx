@@ -45,11 +45,4 @@ protected:
 	bool _IsExplicitConstant() const override {return true;};
 };
 
-namespace zaimoni {
-
-template<>
-struct is_polymorphic_base<MetaConceptZeroArgs> : public std::true_type {};
-
-}
-
 #endif

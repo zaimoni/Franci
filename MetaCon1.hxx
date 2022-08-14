@@ -450,11 +450,4 @@ bool StrongVarSubstitute(MetaConcept*& dest, const MetaConcept& lhs, const MetaC
 
 void CopyOrThrow(MetaConcept*& dest, MetaConcept*& src);	// throws bad_alloc on failure
 
-namespace zaimoni {
-
-template<>
-struct is_polymorphic_base<MetaConcept> : public std::true_type {};
-
-}
-
 #endif

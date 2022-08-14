@@ -328,13 +328,6 @@ private:
 	virtual bool DelegateSelfEvaluate() {return false;};		// same type
 };
 
-namespace zaimoni {
-
-template<>
-struct is_polymorphic_base<MetaConceptWithArgArray> : public std::true_type {};
-
-}
-
 #define NARY_FORCEARGSAMEIMPLEMENTATION_BODY \
 decltype(this) src = static_cast<decltype(this)>(ArgArray[n]); \
 ArgArray[n] = 0; \

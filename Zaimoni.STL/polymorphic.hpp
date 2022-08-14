@@ -16,25 +16,6 @@ namespace zaimoni	{
 	template<typename T, T v, typename...>
 	inline constexpr T unconditional_v = v;
 
-// polymorphic objects should not use assignment unless they are "final"
-// they should resort to the CopyInto member function instead (don't override these without a CopyInto)
-// may be other things that should react, so just notate
-// there is a boost::is_polymorphic
-template<typename T>
-struct is_polymorphic_base : public std::false_type
-{
-};
-
-template<typename T>
-struct is_polymorphic_base<const T> : public is_polymorphic_base<T>
-{
-};
-
-template<typename T>
-struct is_polymorphic_base<volatile T> : public is_polymorphic_base<T>
-{
-};
-
 template<typename T>
 struct param : public std::conditional<sizeof(T)<=sizeof(unsigned long long) && std::is_trivially_copy_assignable<T>::value, T , const T&>
 {

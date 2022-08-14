@@ -99,11 +99,4 @@ private:
 	virtual bool DelegateEvaluate(MetaConcept*& dest) {return false;};		// same, or different type
 };
 
-namespace zaimoni {
-
-template<>
-struct is_polymorphic_base<MetaConceptWith2Args> : public std::true_type {};
-
-}
-
 #endif
