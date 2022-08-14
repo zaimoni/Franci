@@ -248,7 +248,7 @@ public:
 	size_t max_size() const {return VFTable1->MaxArity;};
 	virtual size_t size() const = 0;	// abstract function
 	virtual const MetaConcept* ArgN(size_t n) const = 0;
-	MetaConcept* ArgN(size_t n) { const_cast<MetaConcept*>(const_cast<const MetaConcept*>(this)->ArgN(n)); }
+	MetaConcept* ArgN(size_t n) { return const_cast<MetaConcept*>(const_cast<const MetaConcept*>(this)->ArgN(n)); }
 	// Syntactical equality and inequality
 	friend bool operator==(const MetaConcept& lhs, const MetaConcept& rhs);
 

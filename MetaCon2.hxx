@@ -115,7 +115,7 @@ public:
 	size_t size() const final {return ArgArray.size();}
 	size_t fast_size() const {assert(!ArgArray.empty()); return ArgArray.ArraySize();};
 	const MetaConcept* ArgN(size_t n) const final;
-	MetaConcept* ArgN(size_t n) { const_cast<MetaConcept*>(const_cast<const MetaConceptWithArgArray*>(this)->ArgN(n)); }
+	MetaConcept* ArgN(size_t n) { return const_cast<MetaConcept*>(const_cast<const MetaConceptWithArgArray*>(this)->ArgN(n)); }
 // Syntactical equality and inequality
 	bool IsAbstractClassDomain() const override;
 //  Evaluation functions
