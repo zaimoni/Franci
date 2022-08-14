@@ -6,14 +6,6 @@
 
 #include "MetaCon5.hxx"
 
-class Phrase1Arg;
-namespace zaimoni {
-
-template<>
-struct is_polymorphic_final<Phrase1Arg> : public std::true_type {};
-
-}
-
 class Phrase1Arg final : public MetaConceptWith1Arg<>
 {
 private:

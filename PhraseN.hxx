@@ -6,14 +6,6 @@
 
 #include "MetaCon2.hxx"
 
-class PhraseNArg;
-namespace zaimoni {
-
-template<>
-struct is_polymorphic_final<PhraseNArg> : public std::true_type {};
-
-}
-
 class PhraseNArg final : public MetaConceptWithArgArray
 {
 private:

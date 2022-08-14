@@ -8,14 +8,6 @@
 #include "MetaCon2.hxx"
 #include "Class.hxx"
 
-class StdAddition;
-namespace zaimoni {
-
-template<>
-struct is_polymorphic_final<StdAddition> : public std::true_type {};
-
-}
-
 // NOTE: a 0-ary StdAddition is an "omnizero": a zero that matches its context
 
 class StdAddition final : public MetaConceptWithArgArray

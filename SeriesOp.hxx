@@ -18,14 +18,6 @@
 
 #include "MetaCon2.hxx"
 
-class SeriesOperation;
-namespace zaimoni {
-
-template<>
-struct is_polymorphic_final<SeriesOperation> : public std::true_type {};
-
-}
-
 class SeriesOperation final : public MetaConceptWithArgArray
 {
 	enum EvalRuleIdx_ER	{

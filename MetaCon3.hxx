@@ -21,14 +21,6 @@ enum MetaConnectiveModes	{
 							StrictBound_MCM=NAND_MCM+1				/* 8 */
 							};
 
-class MetaConnective;
-namespace zaimoni {
-
-template<>
-struct is_polymorphic_final<MetaConnective> : public std::true_type {};
-
-}
-
 class Variable;
 
 class MetaConnective final : public MetaConceptWithArgArray

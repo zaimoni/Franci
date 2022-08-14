@@ -8,14 +8,6 @@
 #include "TVal.hxx"
 #include <string>
 
-class AbstractClass;
-namespace zaimoni {
-
-template<>
-struct is_polymorphic_final<AbstractClass> : public std::true_type {};
-
-}
-
 class AbstractClass final : public MetaConceptWith1Arg<>
 {
 private:

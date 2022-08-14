@@ -7,14 +7,6 @@
 #include "MetaCon6.hxx"
 #include "Quantify.hxx"
 
-class Variable;
-namespace zaimoni {
-
-template<>
-struct is_polymorphic_final<Variable> : public std::true_type {};
-
-}
-
 class AbstractClass;
 
 // NOTE: Variable does *not* own its domain!

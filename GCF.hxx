@@ -7,14 +7,6 @@
 
 #include "MetaCon2.hxx"
 
-class GCF;
-namespace zaimoni {
-
-template<>
-struct is_polymorphic_final<GCF> : public std::true_type {};
-
-}
-
 class GCF final : public MetaConceptWithArgArray
 {
 public:

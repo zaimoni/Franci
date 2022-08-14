@@ -16,16 +16,7 @@
 #define LINEARINTERVAL_DEF
 
 #include "MetaCon4.hxx"
-
 #include "TVal.hxx"
-
-class LinearInterval;
-namespace zaimoni {
-
-template<>
-struct is_polymorphic_final<LinearInterval> : public std::true_type {};
-
-}
 
 // Interpretation for IntersectionUnionStatus
 enum IntersectionUnion_LI

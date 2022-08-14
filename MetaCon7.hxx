@@ -32,15 +32,6 @@ struct MetaConcept_lookup
 	// static bool isAntiIdempotentTo(const T& lhs,const T& rhs);
 };
 
-template<class T> class MetaConceptExternal;
-
-namespace zaimoni {
-
-template<class T>
-struct is_polymorphic_final<MetaConceptExternal<T> > : public std::true_type {};
-
-}
-
 // we'd like to replace most derivations from MetaConceptZeroAry (MetaCon6.hxx/cxx) with this
 template<class T>
 class MetaConceptExternal final : public MetaConcept

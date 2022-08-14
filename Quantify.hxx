@@ -18,14 +18,6 @@
 //	ThereIsNot, and ThereIs is "dual" to ForAllNot.  This constitutes a low-level dependency.
 // META: the MetaQuantifier family is *illegal* as a naked fact.
 
-class MetaQuantifier;
-namespace zaimoni {
-
-template<>
-struct is_polymorphic_final<MetaQuantifier> : public std::true_type {};
-
-}
-
 enum MetaQuantifierMode		{
 							ForAll_MQM = ForAll_MC-ForAll_MC,
 							ThereIs_MQM = ThereIs_MC-ForAll_MC,

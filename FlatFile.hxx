@@ -6,14 +6,6 @@
 
 #include "MetaCon2.hxx"
 
-class FlatFile;
-namespace zaimoni {
-
-template<>
-struct is_polymorphic_final<FlatFile> : public std::true_type {};
-
-}
-
 class FlatFile final : public MetaConceptWithArgArray
 {
 protected:

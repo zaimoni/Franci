@@ -4,14 +4,6 @@
 #include "MetaCon1.hxx"
 #include "Zaimoni.STL/LexParse/Kuroda.hpp"
 
-class ParseNode;
-namespace zaimoni {
-
-	template<>
-	struct is_polymorphic_final<ParseNode> : public std::true_type {};
-
-}
-
 class ParseNode final : public MetaConcept
 {
 private:

@@ -6,16 +6,7 @@
 #define DIGRAPH_DEF
 
 #include "MetaCon2.hxx"
-
 #include "TVal.hxx"
-
-class Digraph;
-namespace zaimoni {
-
-template<>
-struct is_polymorphic_final<Digraph> : public std::true_type {};
-
-}
 
 // NOTE: The true type of a Digraph is VertexSet x VertexSet -> TruthValue.
 // We want:

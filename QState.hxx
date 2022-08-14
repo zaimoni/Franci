@@ -6,14 +6,6 @@
 
 #include "MetaCon2.hxx"
 
-class QuantifiedStatement;
-namespace zaimoni {
-
-template<>
-struct is_polymorphic_final<QuantifiedStatement> : public std::true_type {};
-
-}
-
 class QuantifiedStatement final : public MetaConceptWithArgArray
 {
 	enum SelfEvalRuleIdx_SER{

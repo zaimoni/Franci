@@ -8,14 +8,6 @@
 #include "MetaCon2.hxx"
 #include "Class.hxx"
 
-class StdMultiplication;
-namespace zaimoni {
-
-template<>
-struct is_polymorphic_final<StdMultiplication> : public std::true_type {};
-
-}
-
 // NOTE: a 0-ary StdMultiplication is an "omnione": a one that matches its context
 
 class StdMultiplication final : public MetaConceptWithArgArray

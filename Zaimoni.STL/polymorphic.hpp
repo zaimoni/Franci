@@ -36,27 +36,6 @@ struct is_polymorphic_base<volatile T> : public is_polymorphic_base<T>
 };
 
 template<typename T>
-struct is_polymorphic_final : public std::false_type
-{
-};
-
-template<typename T>
-struct is_polymorphic_final<const T> : public is_polymorphic_final<T>
-{
-};
-
-template<typename T>
-struct is_polymorphic_final<volatile T> : public is_polymorphic_final<T>
-{
-};
-
-// yes, there is a boost::is_polymorphic.
-template<typename T>
-struct is_polymorphic : public std::integral_constant<bool, is_polymorphic_base<T>::value || is_polymorphic_final<T>::value>
-{
-};
-
-template<typename T>
 struct param : public std::conditional<sizeof(T)<=sizeof(unsigned long long) && std::is_trivially_copy_assignable<T>::value, T , const T&>
 {
 };

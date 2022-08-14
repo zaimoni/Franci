@@ -7,14 +7,6 @@
 #include "MetaCon6.hxx"
 #include "Zaimoni.STL/AutoPtr.hpp"
 
-class UnparsedText;
-namespace zaimoni {
-
-template<>
-struct is_polymorphic_final<UnparsedText> : public std::true_type {};
-
-}
-
 class UnparsedText final : public MetaConceptZeroArgs
 {
 private:

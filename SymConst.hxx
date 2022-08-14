@@ -15,14 +15,6 @@ enum SymConstantIndex	{
 												// NOT ALLOWED IN COMPLEX-VALUED EXPRESSIONS
 						};
 
-class SymbolicConstant;
-namespace zaimoni {
-
-template<>
-struct is_polymorphic_final<SymbolicConstant> : public std::true_type {};
-
-}
-
 class SymbolicConstant final : public MetaConceptZeroArgs
 {
 public:

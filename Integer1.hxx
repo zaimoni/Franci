@@ -26,14 +26,6 @@ enum PowersOfTen	{
 					WRAPLB		= 1000000000
 					};
 
-class IntegerNumeral;
-namespace zaimoni {
-
-template<>
-struct is_polymorphic_final<IntegerNumeral> : public std::true_type {};
-
-}
-
 class IntegerNumeral final : public MetaConceptZeroArgs,public _IntegerNumeral
 {
 public:

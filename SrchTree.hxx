@@ -10,14 +10,6 @@
 
 #include "MetaCon2.hxx"
 
-class SearchTree;
-namespace zaimoni {
-
-template<>
-struct is_polymorphic_final<SearchTree> : public std::true_type {};
-
-}
-
 enum SEARCHTREE_RESERVED	{
 							SC_FATAL = 0,
 							SC_ANALYZING = 1

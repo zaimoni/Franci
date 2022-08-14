@@ -12,14 +12,6 @@
 #include "MetaCon2.hxx"
 #include "Zaimoni.STL/LexParse/Kuroda.hpp"
 
-class CombinatorialLike;
-namespace zaimoni {
-
-template<>
-struct is_polymorphic_final<CombinatorialLike> : public std::true_type {};
-
-}
-
 enum CombinatorialModes	{
 						FACTORIAL_CM		= Factorial_MC-Factorial_MC,	/* 0 */
 //						GAMMAFUNCTION_CM	= GammaFunction_MC-Factorial_MC,	/* 1 */

@@ -19,14 +19,6 @@ enum EqualRelationModes	{
 						StrictBound_EM=NOTALLEQUAL_EM+1						// 6
 						};
 
-class EqualRelation;
-namespace zaimoni {
-
-template<>
-struct is_polymorphic_final<EqualRelation> : public std::true_type{};
-
-}
-
 //! \todo implement AND-Factor support
 //! \todo implement hypothesis augmentation
 class EqualRelation final : public MetaConceptWithArgArray
