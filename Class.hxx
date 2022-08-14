@@ -37,23 +37,22 @@ public:
 	void MoveInto(MetaConcept*& dest) override { zaimoni::MoveIntoV2(std::move(*this), dest); }
 	void MoveInto(AbstractClass*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
 //  Type ID functions
-	virtual const AbstractClass* UltimateType() const;
+	const AbstractClass* UltimateType() const override;
 //	Arity functions
 	size_t size() const override { return 0; }
 	const MetaConcept* ArgN(size_t n) const override { return nullptr; }
 //  Evaluation functions
 	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override;
-	virtual bool CanEvaluate() const;
-	virtual bool CanEvaluateToSameType() const;
-	virtual bool SyntaxOK() const;
-	virtual bool Evaluate(MetaConcept*& dest);		// same, or different type
-	virtual bool DestructiveEvaluateToSameType();	// overwrites itself iff returns true
+	bool CanEvaluate() const override;
+	bool CanEvaluateToSameType() const override;
+	bool SyntaxOK() const override;
+	bool Evaluate(MetaConcept*& dest) override;		// same, or different type
+	bool DestructiveEvaluateToSameType() override;	// overwrites itself iff returns true
 // text I/O functions
-	virtual const char* ViewKeyword() const;
+	const char* ViewKeyword() const override;
 // Type-specific controls
 	bool SetToThis(const AbstractClass& src);	// should this be Interface?
 
-	void SetName(const char* NewName);
 	void Set_IsProperSet();
 	void Set_IsProperClass();
 	void Set_IsDenseUnderStandardTopology();
@@ -113,10 +112,10 @@ public:
 	bool Arg1IsAfterEndpointAlongVectorAB(const MetaConcept& Arg1, const MetaConcept& A, const MetaConcept& B) const;
 
 protected:
-	virtual bool EqualAux2(const MetaConcept& rhs) const;
-	virtual bool InternalDataLTAux(const MetaConcept& rhs) const;
+	bool EqualAux2(const MetaConcept& rhs) const override;
+	bool InternalDataLTAux(const MetaConcept& rhs) const override;
 	std::string to_s_aux() const override;
-	virtual bool _IsExplicitConstant() const;
+	bool _IsExplicitConstant() const override;
 
 private:
 //	Operation support routines
