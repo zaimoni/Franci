@@ -987,15 +987,15 @@ MetaConcept::evalspec MetaConnective::_CanUseThisAsMakeImplyAND(const MetaConcep
 					DeleteThis = j;
 					if (2 == ArgArray.ArraySize()) {
 						if (typeid(MetaConnective) == typeid(*ArgArray[1 - DeleteThis])) {
-							return evalspec([&]() mutable {
-								auto stage = static_cast<MetaConnective*>(ArgArray[1 - DeleteThis]);
-								ArgArray[1 - DeleteThis] = 0;
+							return evalspec([=]() mutable {
+								auto stage = static_cast<MetaConnective*>(this->ArgArray[1 - DeleteThis]);
+								this->ArgArray[1 - DeleteThis] = 0;
 								*this = std::move(*stage);
 								delete stage;
 								return true;
 								}, 0);
 						}
-						return evalspec(0, [&](MetaConcept*& _dest) mutable {
+						return evalspec(0, [=](MetaConcept*& _dest) mutable {
 							TransferOutAndNULL(1 - DeleteThis, _dest);
 							return true;
 						});
@@ -1003,8 +1003,8 @@ MetaConcept::evalspec MetaConnective::_CanUseThisAsMakeImplyAND(const MetaConcep
 					}
 			while (0 < j);
 			if (-1 != DeleteThis) {
-				return evalspec([&]() mutable {
-					ArgArray.DeleteIdx(DeleteThis);
+				return evalspec([=]() mutable {
+					this->ArgArray.DeleteIdx(DeleteThis);
 					return true;
 				},0);
 			}
@@ -1028,7 +1028,7 @@ MetaConcept::evalspec MetaConnective::_CanUseThisAsMakeImplyOR(const MetaConcept
 					DeleteThis = i;
 					if (2 == ArgArray.ArraySize()) {
 						if (typeid(MetaConnective) == typeid(*ArgArray[1 - DeleteThis])) {
-							return evalspec([&]() mutable {
+							return evalspec([=]() mutable {
 								auto stage = static_cast<MetaConnective*>(ArgArray[1 - DeleteThis]);
 								ArgArray[1 - DeleteThis] = 0;
 								*this = std::move(*stage);
@@ -1036,7 +1036,7 @@ MetaConcept::evalspec MetaConnective::_CanUseThisAsMakeImplyOR(const MetaConcept
 								return true;
 								}, 0);
 						}
-						return evalspec(0, [&](MetaConcept*& _dest) mutable {
+						return evalspec(0, [=](MetaConcept*& _dest) mutable {
 							TransferOutAndNULL(1 - DeleteThis, _dest);
 							return true;
 							});
@@ -1045,7 +1045,7 @@ MetaConcept::evalspec MetaConnective::_CanUseThisAsMakeImplyOR(const MetaConcept
 				} else if (2 == ArgArray.ArraySize() || (3 == ArgArray.ArraySize() && -1 != DeleteThis)) {
 					if (Target.MakesLHSImplyLogicalNOTOfRHS(*ArgArray[i], *ArgArray[j])) {
 						if (-1 != DeleteThis) ArgArray.DeleteIdx(DeleteThis);
-						return evalspec([&]() mutable {
+						return evalspec([=]() mutable {
 							return AB_ToIFF_AnotB();
 						}, 0);
 					}
@@ -1053,8 +1053,8 @@ MetaConcept::evalspec MetaConnective::_CanUseThisAsMakeImplyOR(const MetaConcept
 			}
 			while (0 < j);
 			if (-1 != DeleteThis) {
-				return evalspec([&]() mutable {
-					ArgArray.DeleteIdx(DeleteThis);
+				return evalspec([=]() mutable {
+					this->ArgArray.DeleteIdx(DeleteThis);
 					return true;
 				}, 0);
 			}
@@ -1073,7 +1073,7 @@ MetaConcept::evalspec MetaConnective::_CanUseThisAsMakeImplyIFF(const MetaConcep
 			// \todo what about transition to AND?
 			do	if (i!= --j && Target.MakesLHSImplyLogicalNOTOfRHS(*ArgArray[i],*ArgArray[j]))
 					{	// IFF(A,B,...): boost to NOR(A,B,...) [AND(IFF(A,B,...),OR(~A,~B))]
-					return evalspec([&]() mutable {
+					return evalspec([=]() mutable {
 						set<LogicalNOR_MC>();
 						return true;
 					}, 0);
@@ -1093,7 +1093,7 @@ MetaConcept::evalspec MetaConnective::_CanUseThisAsMakeImplyXOR(const MetaConcep
 			size_t j = ArgArray.ArraySize();
 			do	if (i!= --j && Target.MakesLHSImplyRHS(*ArgArray[i],*ArgArray[j]))
 					{	// A=>B: force ~A AND XOR(...)
-					return evalspec([&]() mutable {
+					return evalspec([=]() mutable {
 						return TargetVariableFalse(i);
 					}, 0);
 					}
@@ -1112,7 +1112,7 @@ MetaConcept::evalspec MetaConnective::_CanUseThisAsMakeImplyNXOR(const MetaConce
 			size_t j = ArgArray.ArraySize();
 			do	if (i!= --j && Target.MakesLHSImplyRHS(*ArgArray[i],*ArgArray[j]))
 					{	// A=>B: force A OR NXOR(...)
-					return evalspec([&]() mutable {
+					return evalspec([=]() mutable {
 						return TargetVariableTrue(i);
 					}, 0);
 					}
@@ -6164,10 +6164,13 @@ RestartSpeculativeOR:
 					LOG("Using this");
 					LOG(*ArgArray[Idx4]);
 					LOG("to reduce speculative OR");
+					auto before = SpeculativeTarget->to_s();
 					LOG(*SpeculativeTarget);
 					LOG("to");
-					rules.first();
+					auto ok = rules.first();
 					LOG(*SpeculativeTarget);
+					auto after = SpeculativeTarget->to_s();
+					SUCCEED_OR_DIE(before!=after && ok);
 					if (!SpeculativeTarget->IsExactType(LogicalOR_MC)) {
 						// 2020-06-13: this heuristic is questionable
 						if (!_findArgRelatedToRHS(*SpeculativeTarget, NonStrictlyImplies)) {
@@ -6188,7 +6191,7 @@ RestartSpeculativeOR:
 					LOG("to reduce speculative OR");
 					LOG(*SpeculativeTarget);
 					LOG("to");
-					MetaConcept* test = 0;
+					MetaConcept* test = nullptr;
 					rules.second(test);
 					LOG(*test);
 					SUCCEED_OR_DIE(!test->IsExactType(LogicalOR_MC));	// associativity of OR should prohibit this
