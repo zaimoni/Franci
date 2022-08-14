@@ -43,7 +43,7 @@ public:
 	MetaConceptExternal(const T& src) noexcept(std::is_nothrow_copy_constructible_v<T>) : MetaConcept(MetaConcept_lookup<T>::exact_type()),_x(src) {}
 	MetaConceptExternal(const MetaConceptExternal& src) = default;
 	MetaConceptExternal(MetaConceptExternal&& src) = default;
-	virtual ~MetaConceptExternal() {}	// as a template doesn't go in Destruct.cxx
+	virtual ~MetaConceptExternal() = default;	// as a template doesn't go in Destruct.cxx
 	MetaConceptExternal& operator=(const MetaConceptExternal& src) noexcept(std::is_nothrow_copy_assignable_v<T>) {
 		_x = src._x;	// presumably this is ACID
 		MetaConcept::operator=(src);
@@ -60,7 +60,7 @@ public:
 	void MoveInto(MetaConceptExternal*& dest) { zaimoni::MoveIntoV2(std::move(*this), dest); }
 
 //  Type ID functions
-	virtual typename std::enable_if<MetaConcept_lookup<T>::return_code==1,const AbstractClass*>::type UltimateType() const {return &TruthValues;};	// specialize or else
+	std::enable_if_t<MetaConcept_lookup<T>::return_code==1,const AbstractClass*> UltimateType() const override {return &TruthValues;};	// specialize or else
 //	Arity functions
 	size_t size() const final {return 0;}
 	const MetaConcept* ArgN(size_t n) const final {return nullptr;}
@@ -70,9 +70,9 @@ public:
 	std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> > canEvaluate() const override { return std::pair<std::function<bool()>, std::function<bool(MetaConcept*&)> >(); }
 	bool CanEvaluate() const override { return false; }
 	bool CanEvaluateToSameType() const override { return false; }
-	virtual bool SyntaxOK() const {return MetaConcept_lookup<T>::syntax_ok(_x);};	// actually should do a syntax check on its arg
-	virtual bool Evaluate(MetaConcept*& dest) {return false;};		// same, or different type
-	virtual bool DestructiveEvaluateToSameType() {return false;};	// overwrites itself iff returns true
+	bool SyntaxOK() const override {return MetaConcept_lookup<T>::syntax_ok(_x);}	// actually should do a syntax check on its arg
+	bool Evaluate(MetaConcept*& dest) override {return false;}		// same, or different type
+	bool DestructiveEvaluateToSameType() override {return false;}	// overwrites itself iff returns true
 // text I/O functions
 	static bool read(MetaConcept*& dest,const char* Text)
 	{
@@ -83,21 +83,21 @@ public:
 		return dest;
 	}
 // Formal manipulation functions
-	virtual typename std::enable_if<MetaConcept_lookup<T>::return_code==1,void>::type SelfLogicalNOT() {MetaConcept_lookup<T>::SelfLogicalNOT(this->_x);};
-	virtual void ConvertVariableToCurrentQuantification(MetaQuantifier& src) {};
-	virtual bool HasArgRelatedToThisConceptBy(const MetaConcept& Target, LowLevelBinaryRelation* TargetRelation) const {return false;};
-	virtual bool UsesQuantifierAux(const MetaQuantifier& x) const {return false;};
-	virtual bool ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& lhs, const MetaConcept& rhs, LowLevelAction* RHSInducedActionOnArg, LowLevelBinaryRelation* TargetRelation) {return true;};
+	std::enable_if_t<MetaConcept_lookup<T>::return_code==1,void> SelfLogicalNOT() override {MetaConcept_lookup<T>::SelfLogicalNOT(this->_x);};
+	void ConvertVariableToCurrentQuantification(MetaQuantifier& src) override {}
+	bool HasArgRelatedToThisConceptBy(const MetaConcept& Target, LowLevelBinaryRelation* TargetRelation) const override {return false;}
+	bool UsesQuantifierAux(const MetaQuantifier& x) const override {return false;}
+	bool ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& lhs, const MetaConcept& rhs, LowLevelAction* RHSInducedActionOnArg, LowLevelBinaryRelation* TargetRelation) override {return true;}
 
 protected:
-	virtual bool EqualAux2(const MetaConcept& rhs) const {return _x==static_cast<const MetaConceptExternal&>(rhs)._x;};
-	virtual bool InternalDataLTAux(const MetaConcept& rhs) const {return MetaConcept_lookup<T>::lt_aux(_x,static_cast<const MetaConceptExternal<T>&>(rhs)._x);};
+	bool EqualAux2(const MetaConcept& rhs) const override {return _x==static_cast<const MetaConceptExternal&>(rhs)._x;}
+	bool InternalDataLTAux(const MetaConcept& rhs) const override {return MetaConcept_lookup<T>::lt_aux(_x,static_cast<const MetaConceptExternal<T>&>(rhs)._x);}
 	std::string to_s_aux() const override { return MetaConcept_lookup<T>::to_s_aux(_x); }
-	void _forceStdForm() override {};
+	void _forceStdForm() override {}
 	bool _IsExplicitConstant() const override { return true; }
 
 private:
-	virtual typename std::enable_if<MetaConcept_lookup<T>::return_code==1,bool>::type isAntiIdempotentTo(const MetaConcept& rhs) const {return MetaConcept_lookup<T>::isAntiIdempotentTo(this->_x,static_cast<const MetaConceptExternal&>(rhs)._x);};
+	std::enable_if_t<MetaConcept_lookup<T>::return_code==1,bool> isAntiIdempotentTo(const MetaConcept& rhs) const override {return MetaConcept_lookup<T>::isAntiIdempotentTo(this->_x,static_cast<const MetaConceptExternal&>(rhs)._x);}
 };
 
 #endif
