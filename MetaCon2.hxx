@@ -121,7 +121,7 @@ public:
 //  Evaluation functions
 	bool CanEvaluate() const final;
 	bool CanEvaluateToSameType() const final;
-	virtual bool SyntaxOK() const = 0;
+	// virtual bool SyntaxOK() const = 0;
 	bool Evaluate(MetaConcept*& dest) final;		// same, or different type
 	bool DestructiveEvaluateToSameType() final;	// overwrites itself iff returns true
 	virtual void ConvertVariableToCurrentQuantification(MetaQuantifier& src);

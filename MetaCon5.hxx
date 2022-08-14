@@ -37,11 +37,11 @@ public:
 // Syntactical equality and inequality
 	bool IsAbstractClassDomain() const override { return IsExplicitConstant(); }
 //  Evaluation functions
-	virtual bool CanEvaluate() const = 0;
-	virtual bool CanEvaluateToSameType() const = 0;
-	virtual bool SyntaxOK() const = 0;
-	virtual bool Evaluate(MetaConcept*& dest) = 0;		// same, or different type
-	virtual bool DestructiveEvaluateToSameType() = 0;	// overwrites itself iff returns true
+	// virtual bool CanEvaluate() const = 0;
+	// virtual bool CanEvaluateToSameType() const = 0;
+	// virtual bool SyntaxOK() const = 0;
+	// virtual bool Evaluate(MetaConcept*& dest) = 0;		// same, or different type
+	// virtual bool DestructiveEvaluateToSameType() = 0;	// overwrites itself iff returns true
 	void ConvertVariableToCurrentQuantification(MetaQuantifier& src) override
 	{
 		if (!Arg1.empty()) Arg1->ConvertVariableToCurrentQuantification(src);
