@@ -67,7 +67,7 @@ public:
 // Formal manipulation functions
 //	virtual bool SelfLogicalNOT(void);	// instantiate when above is true
 //	virtual bool DetectAntiIdempotent(const MetaConcept& Arg2) const;
-	virtual void ConvertVariableToCurrentQuantification(MetaQuantifier& src);
+	void ConvertVariableToCurrentQuantification(MetaQuantifier& src) final;
 	bool HasArgRelatedToThisConceptBy(const MetaConcept& Target, LowLevelBinaryRelation* TargetRelation) const final;
 	virtual bool UsesQuantifierAux(const MetaQuantifier& x) const;
 	virtual bool ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& lhs, const MetaConcept& rhs, LowLevelAction* RHSInducedActionOnArg, LowLevelBinaryRelation* TargetRelation);

@@ -124,7 +124,7 @@ public:
 	// virtual bool SyntaxOK() const = 0;
 	bool Evaluate(MetaConcept*& dest) final;		// same, or different type
 	bool DestructiveEvaluateToSameType() final;	// overwrites itself iff returns true
-	virtual void ConvertVariableToCurrentQuantification(MetaQuantifier& src);
+	void ConvertVariableToCurrentQuantification(MetaQuantifier& src) final;
 	bool HasArgRelatedToThisConceptBy(const MetaConcept& Target, LowLevelBinaryRelation* TargetRelation) const final;
 	virtual bool UsesQuantifierAux(const MetaQuantifier& x) const;
 	virtual bool ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& lhs, const MetaConcept& rhs, LowLevelAction* RHSInducedActionOnArg, LowLevelBinaryRelation* TargetRelation);

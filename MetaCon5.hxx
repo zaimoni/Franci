@@ -42,7 +42,7 @@ public:
 	// virtual bool SyntaxOK() const = 0;
 	// virtual bool Evaluate(MetaConcept*& dest) = 0;		// same, or different type
 	// virtual bool DestructiveEvaluateToSameType() = 0;	// overwrites itself iff returns true
-	void ConvertVariableToCurrentQuantification(MetaQuantifier& src) override
+	void ConvertVariableToCurrentQuantification(MetaQuantifier& src) final
 	{
 		if (!Arg1.empty()) Arg1->ConvertVariableToCurrentQuantification(src);
 	}
