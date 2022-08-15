@@ -83,6 +83,7 @@ namespace formal {
 		}
 
 		auto code() const { return _code; }
+		void interpret(unsigned long long src) { _code = src; }
 
 		src_location origin() const { return _origin; }
 		src_location after() const { return _origin + size(); }

@@ -47,11 +47,60 @@ static bool process_option(std::string_view arg)
 	return true;
 }
 
+// whitespace trimming utilities
+static void ltrim(std::string_view& src) {
+	while (!src.empty() && isspace(static_cast<unsigned char>(src.front()))) src.remove_prefix(1);
+}
+
+static void rtrim(std::string_view& src) {
+	while(!src.empty() && isspace(static_cast<unsigned char>(src.back()))) src.remove_suffix(1);
+}
+
+static void trim(std::string_view& src) {
+	ltrim(src);
+	rtrim(src);
+}
+
+enum LG_modes {
+	LG_Comment = 0,
+	LG_PP_like,	// #-format; could be interpreted later for C preprocessor directives if we were so inclined
+	LG_CPP_like, // //-format
+	LG_MAX
+};
+
+static_assert(sizeof(unsigned long long)*CHAR_BIT >= LG_MAX);
+
+// note that we use # for set-theoretic cardinality, so this would not be correct at later stages
+bool IsOneLineComment(formal::word*& x) {
+	auto test = x->value();
+	const auto o_size = test.size();
+	ltrim(test);
+	unsigned long long new_code = 0;
+	if (test.starts_with('#')) {
+		new_code = (1ULL << LG_Comment) | (1ULL << LG_PP_like);
+	} else if (test.starts_with("//")) {
+		new_code = (1ULL << LG_Comment) | (1ULL << LG_CPP_like);
+	}
+	if (new_code) {
+		const auto n_size = test.size();
+		if (o_size <= n_size) {
+			x->interpret(new_code);
+			return true;
+		}
+		std::unique_ptr<formal::word> stage(new formal::word(*x, o_size - n_size, test.size(), new_code));
+		delete x;
+		x = stage.release();
+		return true;
+	};
+	return false;
+}
+
 // first stage is a very simple line-finder (pre-preprocessor, shell script, ...)
 static auto& LineGrammar() {
 	static std::unique_ptr<kuroda::parser<formal::word> > ooao;
 	if (!ooao) {
 		ooao = decltype(ooao)(new kuroda::parser<formal::word>());
+		ooao->register_terminal(IsOneLineComment);
 	};
 	return *ooao;
 }
@@ -93,16 +142,16 @@ static auto to_lines(std::istream& in, formal::src_location& origin)
 				if (line_continue) {
 					std::unique_ptr<std::string> stripped(new std::string(*line_continue));
 					*stripped += *next;
-					std::unique_ptr<formal::word> stage(new formal::word(std::shared_ptr<const std::string>(stripped.release()), ret.back()->origin()));
+					std::unique_ptr<formal::word> stage(new formal::word(std::shared_ptr<const std::string>(stripped.release()), ret.back()->origin(), ret.back()->code()));
 					delete ret.back();
 					ret.back() = stage.release();
 				} else
-					ret.push_back(new formal::word(std::shared_ptr<const std::string>(next.release()), origin));
+					LineGrammar().append_to_parse(ret, new formal::word(std::shared_ptr<const std::string>(next.release()), origin));
 			} else
-				ret.push_back(new formal::word(std::shared_ptr<const std::string>(next.release()), origin));
+				LineGrammar().append_to_parse(ret, new formal::word(std::shared_ptr<const std::string>(next.release()), origin));
 		} else if constexpr (C_Shell_Line_Continue) {
 			if (line_continue) {
-				std::unique_ptr<formal::word> stage(new formal::word(std::shared_ptr<const std::string>(new std::string(*line_continue)), ret.back()->origin()));
+				std::unique_ptr<formal::word> stage(new formal::word(std::shared_ptr<const std::string>(new std::string(*line_continue)), ret.back()->origin(), ret.back()->code()));
 				delete ret.back();
 				ret.back() = stage.release();
 			}
@@ -137,7 +186,7 @@ int main(int argc, char* argv[], char* envp[])
 		// debugging view
 		std::cout << std::to_string(lines.size()) << "\n";
 		for (decltype(auto) x : lines) {
-			std::cout << x->origin().line_pos.first << ":" << x->value() << "\n";
+			std::cout << x->code() << ":" << x->origin().line_pos.first << ":" << x->value() << "\n";
 		}
 	}
 
