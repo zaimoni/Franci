@@ -306,27 +306,6 @@ public:
 };
 
 template<typename T>
-class autoarray_ptr : public _meta_autoarray_ptr<T>
-{
-public:
-	ZAIMONI_STL_TYPE_GLUE_ARRAY(T);
-
-	explicit autoarray_ptr() = default;
-	explicit autoarray_ptr(T*& src) noexcept : _meta_autoarray_ptr<T>(src) {}
-	explicit autoarray_ptr(size_t n) noexcept : _meta_autoarray_ptr<T>(std::nothrow,n) {}
-	explicit autoarray_ptr(const autoarray_ptr& src) = delete;
-	explicit autoarray_ptr(autoarray_ptr&& src) noexcept : _meta_autoarray_ptr<T>(std::move(src)) {}
-	~autoarray_ptr() = default;
-
-	autoarray_ptr& operator=(T* src) noexcept {_meta_autoarray_ptr<T>::operator=(src); return *this;}
-	autoarray_ptr& operator=(const autoarray_ptr& src) = delete;
-	autoarray_ptr& operator=(autoarray_ptr&& src) noexcept { _meta_autoarray_ptr<T>::operator=(std::move(src)); return *this; }
-
-	// swaps
-	friend void swap(autoarray_ptr<T>& lhs, autoarray_ptr<T>& rhs) {lhs.swap(rhs);}
-};
-
-template<typename T>
 class autovalarray_ptr : public _meta_autoarray_ptr<T>
 {
 public:
@@ -519,18 +498,6 @@ _meta_autoarray_ptr<T>::invgrep(UnaryPredicate* Predicate,_meta_autoarray_ptr<U*
 		return dest.Resize(Offset),false;	
 		}
 	return dest.Resize(Offset),true;
-}
-
-// Resize won't compile without this [CSVTable.cxx]
-template<typename T>
-inline void
-_copy_buffer(autoarray_ptr<T>* dest, autoarray_ptr<T>* src, size_t Idx)
-{
-	do	{
-		--Idx;
-		dest[Idx] = src[Idx];
-		}
-	while(0<Idx);
 }
 
 }		// end namespace zaimoni
