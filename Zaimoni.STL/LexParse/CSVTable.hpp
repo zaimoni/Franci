@@ -16,10 +16,10 @@ private:
 		// interpolated from the first value (backwards) that is not 
 		// an empty string.  Useful for human verifiability.
 
-	zaimoni::autoarray_ptr<char> RawText;
-	zaimoni::autoarray_ptr<char*> RawLines;
-	zaimoni::autoarray_ptr<char*> ColHeaders;
-	zaimoni::autoarray_ptr<zaimoni::autoarray_ptr<char*> > CSVRawText;
+	zaimoni::autovalarray_ptr<char> RawText;
+	zaimoni::autovalarray_ptr<char*> RawLines;
+	zaimoni::autovalarray_ptr<char*> ColHeaders;
+	zaimoni::autovalarray_ptr<zaimoni::autovalarray_ptr<char*> > CSVRawText;
 
 	// not copyable, so ...
 	CSVTable(const CSVTable& src);
