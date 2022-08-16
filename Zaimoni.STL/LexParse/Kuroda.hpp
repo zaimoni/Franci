@@ -28,6 +28,8 @@ namespace kuroda {
 	public:
 //		using sequence = std::vector<std::unique_ptr<T> >;
 		using sequence = zaimoni::_meta_autoarray_ptr<T*>;
+		using symbols = zaimoni::autovalarray_ptr_throws<T*>;
+//		using symbols = std::vector<std::unique_ptr<T> >;
 		using rewriter = std::function<std::vector<size_t>(sequence&, size_t)>;
 		// hinting (using a return value of rewriter) looked interesting but in practice it doesn't work (many parse rules work from
 		// the same rightmost token trigger for efficiency reasons)

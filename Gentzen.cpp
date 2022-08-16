@@ -108,7 +108,7 @@ static auto& LineGrammar() {
 template<bool C_Shell_Line_Continue=true>
 static auto to_lines(std::istream& in, formal::src_location& origin)
 {
-	zaimoni::autovalarray_ptr<formal::word*> ret;
+	kuroda::parser<formal::word>::symbols ret;
 	while (in.good()) {
 		std::unique_ptr<std::string> next(new std::string());
 		std::getline(in, *next);

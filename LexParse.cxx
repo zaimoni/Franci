@@ -67,7 +67,7 @@ std::pair<Variable*, UnparsedText*> LooksLikeVarName(MetaConcept* x) {
 
 static auto _initMetaConceptParserArray(char*& InputBuffer)
 {
-	zaimoni::autovalarray_ptr_throws<MetaConcept*> symbols;
+	kuroda::parser<MetaConcept>::symbols symbols;
 	auto staging = new UnparsedText(InputBuffer);
 	// below doesn't work for FORTRAN (comments are 5 spaces with & as sixth character)
 	staging->WS_Strip();
