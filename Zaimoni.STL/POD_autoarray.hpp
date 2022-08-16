@@ -39,12 +39,12 @@ public:
 	void swap(POD_autoarray_ptr<T>& rhs) { std::swap(_ptr, rhs._ptr); ZAIMONI_ISO_SRC(std::swap(_size, rhs._size);) }
 
 	// STL support	
-	size_t size() const { return ZAIMONI_NONISO_ISO_SRC(zaimoni::SafeArraySize(_ptr), _size); };
-	T* release() { T* tmp = _ptr; _ptr = 0; ZAIMONI_ISO_SRC(_size = 0;) return tmp; };
-	T* c_array() {return _ptr;};
-	const T* data() const {return _ptr;};
-	bool empty() const { return NULL==_ptr; };
-	static size_t max_size() { return size_t(-1)/sizeof(T); };	// XXX casting -1 to an unsigned type gets the maximum of that type
+	size_t size() const { return ZAIMONI_NONISO_ISO_SRC(zaimoni::SafeArraySize(_ptr), _size); }
+	T* release() { T* tmp = _ptr; _ptr = nullptr; ZAIMONI_ISO_SRC(_size = 0;) return tmp; }
+	T* c_array() {return _ptr;}
+	const T* data() const {return _ptr;}
+	bool empty() const { return !_ptr; }
+	static size_t max_size() { return size_t(-1)/sizeof(T); }	// XXX casting -1 to an unsigned type gets the maximum of that type
 
 	void push_back(const T& src) {
 		const size_t n = size();

@@ -36,9 +36,9 @@ bool EqualRelation::AddInvOutStdAddArg()
 		}
 	else{	// otherwise: create 2-ary StdAddition arg
 		autovalarray_ptr_throws<MetaConcept*> TmpArgArray(2);
-		CancelThis.TransferOutAndNULL(TmpArgArray[1]);
+		TmpArgArray[1] = CancelThis.release();
 		TmpArgArray[0]=VRArgList[1-InferenceParameter1];
-		VRArgList[1-InferenceParameter1] = NULL;	// avoid double-delete
+		VRArgList[1-InferenceParameter1] = nullptr;	// avoid double-delete
 		VRArgList[1-InferenceParameter1] = new StdAddition(TmpArgArray);
 		static_cast<StdAddition*>(VRArgList[1-InferenceParameter1])->ForceCheckForEvaluation();
 		}

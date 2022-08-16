@@ -817,12 +817,10 @@ bool CSVTable::DumpToFlatfile(const char* const FileName)
 }
 
 bool CSVTable::ForceLinesRepresentation()
-{	// FORMALLY CORRECT: Kenneth Boyd, 2/22/2005
-	if (NULL!=RawLines) return true;
-	if (NULL!=RawText)
+{
+	if (!RawLines.empty()) return true;
+	if (char* Tmp = RawText.release())
 		{
-		char* Tmp = NULL;
-		RawText.TransferOutAndNULL(Tmp);
 		if (_split('\n',Tmp,RawLines))
 			return CSVRawText.Resize(RawLines.ArraySize());
 		}

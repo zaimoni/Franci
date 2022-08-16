@@ -64,9 +64,9 @@ public:
 
 	void MoveInto(_meta_auto_ptr<T>& dest) {dest.reset(_ptr);}
 
-	template<typename U> void TransferOutAndNULL(U*& dest) { _single_flush(dest); dest = _ptr; _ptr = nullptr; }
-	T* release() { T* tmp = _ptr; _ptr = nullptr; return tmp; }
-	bool empty() const {return !_ptr;};
+	template<typename U> void TransferOutAndNULL(U*& dest) noexcept { _single_flush(dest); dest = _ptr; _ptr = nullptr; }
+	T* release() noexcept { T* tmp = _ptr; _ptr = nullptr; return tmp; }
+	bool empty() const { return !_ptr; }
 	void NULLPtr() { _ptr = nullptr; }
 
 	// typecasts
