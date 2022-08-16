@@ -4,6 +4,7 @@
 #include "CmdShell.hxx"
 #include "Zaimoni.STL/LexParse/CSVTable.hpp"
 #include "Zaimoni.STL/string.h"
+#include <string>
 
 using namespace std;
 using namespace zaimoni;
@@ -529,40 +530,30 @@ CmdShell::help(char*& InputBuffer) const
 		size_t DescriptionRow = 0;
 
 		// relay key information: Usage, Arity, Description
-		if (HelpTable.SELECT_MinTerm(DataIDCol,"Usage",streq,UsageRow))
-			{
+		if (HelpTable.SELECT_MinTerm(DataIDCol,"Usage",streq,UsageRow)) {
 #ifdef FRANCI_WARY
 			INFORM("Found Usage");
 #endif
 			do	{
-				const char* TextRef = HelpTable.CellText(UsageRow,DatumCol);
-				if (NULL!=TextRef)
-					{	// proper optimizing compiler would allow strlen("Usage: ") to evaluate at compile-time
-					autoarray_ptr<char> OutText(ZAIMONI_LEN_WITH_NULL(7+strlen(TextRef)));
-					strcpy(OutText,"Usage: ");
-					strcpy(OutText+7,TextRef);
-					StdOutHook(OutText);
-					}
+				if (const char* TextRef = HelpTable.CellText(UsageRow, DatumCol)) {
+					string OutText("Usage: ");
+					OutText += TextRef;
+					StdOutHook(OutText.c_str());
 				}
-			while(++UsageRow<MaxRow && streq("Usage",HelpTable.CellText(UsageRow,DataIDCol)));
-			}
-		if (HelpTable.SELECT_MinTerm(DataIDCol,"Arity",streq,ArityRow))
-			{
+			} while(++UsageRow<MaxRow && streq("Usage",HelpTable.CellText(UsageRow,DataIDCol)));
+		}
+		if (HelpTable.SELECT_MinTerm(DataIDCol,"Arity",streq,ArityRow)) {
 #ifdef FRANCI_WARY
 			INFORM("Found Arity");
 #endif
 			do	{
-				const char* TextRef = HelpTable.CellText(ArityRow,DatumCol);
-				if (NULL!=TextRef)
-					{	// proper optimizing compiler would allow strlen("Arity: ") to evaluate at compile-time
-					autoarray_ptr<char> OutText(ZAIMONI_LEN_WITH_NULL(7+strlen(TextRef)));
-					strcpy(OutText,"Arity: ");
-					strcpy(OutText+7,TextRef);
-					StdOutHook(OutText);
-					}
+				if (const char* TextRef = HelpTable.CellText(ArityRow, DatumCol)) {
+					string OutText("Arity: ");
+					OutText += TextRef;
+					StdOutHook(OutText.c_str());
 				}
-			while(++ArityRow<MaxRow && streq("Arity",HelpTable.CellText(ArityRow,DataIDCol)));
-			}
+			} while(++ArityRow<MaxRow && streq("Arity",HelpTable.CellText(ArityRow,DataIDCol)));
+		}
 		if (HelpTable.SELECT_MinTerm(DataIDCol,"Description",streq,DescriptionRow))
 			{
 #ifdef FRANCI_WARY

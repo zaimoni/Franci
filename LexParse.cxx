@@ -12,11 +12,12 @@
 #include "CmdShell.hxx"
 #include "InParse2.hxx"
 
-#include <ctype.h>
-
 #include "Zaimoni.STL/except/syntax_error.hpp"
 #include "Zaimoni.STL/LexParse/Parser.hpp"
 #include "Zaimoni.STL/Pure.C/logging.h"
+
+#include <ctype.h>
+#include <memory>
 
 // defined in VConsole.cxx
 void GetLineFromKeyboardHook(char*& InputBuffer);
@@ -47,13 +48,13 @@ typedef LexParseHandler* ActiveLexParseHandler(char*& InputBuffer);
 //! This only provides support for one problem at a time, which is implicit.
 //! While building this, the problem is really a QuantifiedStatement
 //! This is a target for a C++ class; must do this before multiple-situation support
-static MetaConcept* Situation = NULL;
+static MetaConcept* Situation = nullptr;
 static bool NoMoreVarsForSituation = false;	// turns on a syntax checker when true
 static size_t SituationTimeLimit = 0;			// time limit in seconds; 0 is no time limit
 static clock_t EvalTime0;						// start evaluation
 static bool DoNotExplain = false;				// turns off full explanations
 // 2-stage construction so improvisiation for evaluate-expression does not affect situation
-static autoarray_ptr<MetaQuantifier*> NewVarsOnThisPass;		// new vars on this pass ... oops, this is a proper class...
+static autovalarray_ptr<MetaQuantifier*> NewVarsOnThisPass;		// new vars on this pass ... oops, this is a proper class...
 
 // cf MetaConcept::IsPotentialVarName
 std::pair<Variable*, UnparsedText*> LooksLikeVarName(MetaConcept* x) {
@@ -239,7 +240,7 @@ static MetaQuantifier* PointToLookupQuantifier(const UnparsedText& Target, MetaC
 			}
 		};
 	
-	if (NULL!=NewVarsOnThisPass)
+	if (!NewVarsOnThisPass.empty())
 		{	// scan variables that already have been improvised
 		size_t i = NewVarsOnThisPass.ArraySize();
 		do	{
@@ -265,28 +266,16 @@ PointToImprovisedQuantifier(const UnparsedText& Target, MetaConcept*& Situation,
 	// Domain nonNULL: THEREIS, improvised
 	// NOTE: using goto to condense exit code
 	assert(Target.IsQuasiEnglishOrVarName());
-	{
-	MetaQuantifier* Tmp = PointToLookupQuantifier(Target,Situation,Domain);
-	if (NULL!=Tmp) return Tmp;
-	}
+	if (MetaQuantifier* Tmp = PointToLookupQuantifier(Target, Situation, Domain)) return Tmp;
 
 	// No more variables: do not improvise
-	if (NoMoreVarsForSituation) return NULL;
-	if (!NewVarsOnThisPass.Resize(NewVarsOnThisPass.size()+1)) return NULL;
+	if (NoMoreVarsForSituation) return nullptr;
+	if (!NewVarsOnThisPass.Resize(NewVarsOnThisPass.size()+1)) return nullptr;
 
 	// if that didn't work, improvise a new variable.
 	try	{
-		NewVarsOnThisPass.back() = new MetaQuantifier(Target.ViewKeyword(),Domain,(NULL==Domain) ? Free_MQM
-																						: ThereIs_MQM,true);
-#if 0
-		// but SyntaxOK is a freebie (any failures would be fatal RAM failure)
-		if (!NewVarsOnThisPass.back()->SyntaxOK())
-			{
-			NewVarsOnThisPass.Shrink(ArraySize(NewVarsOnThisPass)-1);
-			return NULL;
-			}
-#endif
-		return NewVarsOnThisPass.back();
+		NewVarsOnThisPass.back() = new MetaQuantifier(Target.ViewKeyword(), Domain, Domain ? ThereIs_MQM : Free_MQM, true);
+		return NewVarsOnThisPass.back(); // SyntaxOK is a freebie (any failures would be fatal RAM failure)
 		}
 	catch(const bad_alloc&)
 		{
@@ -565,24 +554,23 @@ void ConstraintForSituationAux1(MetaConcept* InitialResult)
 }
 
 void ConstraintForSituationAux2(kuroda::parser<MetaConcept>::sequence& ArgArray, MetaConcept*& InitialResult)
-{	// FORMALLY CORRECT: Kenneth Boyd, 5/19/2006
+{
 	try	{
-		autoval_ptr<QuantifiedStatement> Tmp;
-		Tmp = new QuantifiedStatement;
+		std::unique_ptr<QuantifiedStatement> Tmp(new QuantifiedStatement);
 		Tmp->insertNSlotsAt(NewVarsOnThisPass.ArraySize()+1,0);
 		InitialResult = ArgArray[0];
-		ArgArray[0] = NULL;
+		ArgArray[0] = nullptr;
 		ArgArray.clear();
 		Tmp->TransferInAndOverwriteRaw(0,InitialResult);
 		{
 		size_t Idx = NewVarsOnThisPass.ArraySize();
 		do	{
 			Tmp->TransferInAndOverwriteRaw(Idx,NewVarsOnThisPass[Idx-1]);
-			NewVarsOnThisPass[--Idx] = NULL;
+			NewVarsOnThisPass[--Idx] = nullptr;
 			}
 		while(0<Idx);
 		}
-		InitialResult = Tmp;
+		InitialResult = Tmp.release();
 		delete [] (MetaQuantifier**)(NewVarsOnThisPass);
 		NewVarsOnThisPass.NULLPtr();
 		}
@@ -628,7 +616,7 @@ bool ConstraintForSituation_handler(char*& InputBuffer)
 			}
 
 		MetaConcept* InitialResult = NULL;
-        if (NULL==NewVarsOnThisPass)
+        if (NewVarsOnThisPass.empty())
 			{
 			InitialResult = ArgArray[0];
 			ArgArray[0] = NULL;
@@ -689,15 +677,15 @@ static bool NewVarsForSituation_handler(char*& InputBuffer)
 		while(0<i);
 		// This is a list of globally quantified variables.  Move it in.
 		i = ArgArray.ArraySize();
-		const bool BootstrapQuantifiedSituation = NULL==Situation || !Situation->IsExactType(QuantifiedStatement_MC);
-		const size_t OriginalArity = (BootstrapQuantifiedSituation) ? 1 : Situation->size();
 		QuantifiedStatement* Tmp2 = static_cast<QuantifiedStatement*>(Situation);
+		const bool BootstrapQuantifiedSituation = !Tmp2;
+		const size_t OriginalArity = (BootstrapQuantifiedSituation) ? 1 : Situation->size();
 		try	{
 			if		(BootstrapQuantifiedSituation)
 				{
 				Tmp2 = new QuantifiedStatement();
 				Tmp2->insertNSlotsAt(i+1,0);
-				Tmp2->TransferInAndOverwriteRaw(0,(NULL==Situation) ? new TruthValue(true) : Situation);
+				Tmp2->TransferInAndOverwriteRaw(0,Situation ? Situation : new TruthValue(true));
 				}
 			else	// need to add vars to QuantifiedStatement.
 				Tmp2->insertNSlotsAt(i,OriginalArity);
@@ -710,7 +698,7 @@ static bool NewVarsForSituation_handler(char*& InputBuffer)
 		do	{
 			--i;
 			Tmp2->TransferInAndOverwriteRaw(OriginalArity+i,ArgArray[i]);
-			ArgArray[i] = NULL;
+			ArgArray[i] = nullptr;
 			}
 		while(0<i);
 		if (BootstrapQuantifiedSituation) Situation = Tmp2;
@@ -859,7 +847,7 @@ bool EvaluateExpression_handler(char*& InputBuffer)
 			size_t i = 0;
 			for (decltype(auto) x : NewVarsOnThisPass) args[++i] = x;
 			std::unique_ptr<QuantifiedStatement> Tmp(new QuantifiedStatement(args)); // failure visible for Kuroda grammar
-			for (decltype(auto) x : NewVarsOnThisPass) x = 0;
+			for (decltype(auto) x : NewVarsOnThisPass) x = nullptr;
 			InitialResult = Tmp.release();
 			NewVarsOnThisPass.clear();
 			}
@@ -927,7 +915,7 @@ bool WhatIf_handler(char*& InputBuffer)
 		};
 
 	// success.  Extract the lone argument and process it.
-	if (NULL!=NewVarsOnThisPass)
+	if (!NewVarsOnThisPass.empty())
 		{
 		WARNING("I cannot improvise variables for a 'what if' situation.");
 		WARNING("Ignoring flawed 'what if' situation.");

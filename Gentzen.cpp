@@ -162,6 +162,9 @@ static auto to_lines(std::istream& in, formal::src_location& origin)
 	return ret;
 }
 
+// lexing+preprocessing stage
+// main language syntax
+
 int main(int argc, char* argv[], char* envp[])
 {
 #ifdef ZAIMONI_HAS_MICROSOFT_IO_H

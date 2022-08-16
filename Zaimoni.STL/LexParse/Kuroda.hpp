@@ -26,7 +26,7 @@ namespace kuroda {
 	template<class T>
 	class parser {
 	public:
-//		using sequence = std::vector<zaimoni::autoval_ptr<T> >;
+//		using sequence = std::vector<std::unique_ptr<T> >;
 		using sequence = zaimoni::_meta_autoarray_ptr<T*>;
 		using rewriter = std::function<std::vector<size_t>(sequence&, size_t)>;
 		// hinting (using a return value of rewriter) looked interesting but in practice it doesn't work (many parse rules work from
