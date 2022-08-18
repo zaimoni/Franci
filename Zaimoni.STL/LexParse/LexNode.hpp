@@ -19,15 +19,16 @@ namespace formal {
 
 		lex_node(kuroda::parser<lex_node>::sequence& dest, size_t lb, size_t ub, unsigned long long code);	// slicing constructor
 		// thin-wrapping constructors
-		lex_node(std::unique_ptr<formal::word> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code) {
-			if (std::get<std::unique_ptr<formal::word> >(_anchor)->code() & formal::Comment) _code |= formal::Comment;
-		}
 		lex_node(formal::word*& src, unsigned long long code = 0) noexcept : _anchor(std::unique_ptr<formal::word>(src)), _code(code) {
 			if (src->code() & formal::Comment) _code |= formal::Comment;
 			src = nullptr;
 		}
 
 	public:
+		lex_node(std::unique_ptr<formal::word> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code) {
+			if (std::get<std::unique_ptr<formal::word> >(_anchor)->code() & formal::Comment) _code |= formal::Comment;
+		}
+
 		lex_node() noexcept : _code(0) {}
 		// \todo anchor constructor
 		lex_node(const lex_node& src) = delete;
@@ -37,12 +38,13 @@ namespace formal {
 		virtual ~lex_node() = default;
 
 		// factory function: slices a lex_node out of dest, then puts the lex_node at index lb
-		void slice(kuroda::parser<lex_node>::sequence& dest, size_t lb, size_t ub, unsigned long long code = 0);
+		static void slice(kuroda::parser<lex_node>::sequence& dest, size_t lb, size_t ub, unsigned long long code = 0);
 
 		formal::src_location origin() const { return origin(this); }
 
 		auto code() const { return _code; }
 		void interpret(unsigned long long src) { _code = src; }
+		void learn(unsigned long long src) { _code |= src; }
 
 		formal::word* anchor_word() const;
 		lex_node* anchor_node() const;

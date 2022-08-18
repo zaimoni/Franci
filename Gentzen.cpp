@@ -62,6 +62,22 @@ static void trim(std::string_view& src) {
 	rtrim(src);
 }
 
+static std::optional<std::pair<std::string_view, size_t> > kleene_star(const std::string_view& src, std::function<size_t(const std::string_view&)> ok) {
+	size_t len = ok(src);
+	if (0 >= len) return std::nullopt;
+	size_t matched = 0;
+	auto working = src;
+	while (0 < len) {
+		++matched;
+		working.remove_prefix(len);
+		len = ok(src);
+	}
+
+	std::pair<std::string_view, size_t> ret(src, matched);
+	ret.first.remove_suffix(working.size());
+	return ret;
+}
+
 enum LG_modes {
 	LG_PP_like = 1,	// #-format; could be interpreted later for C preprocessor directives if we were so inclined
 	LG_CPP_like, // //-format
@@ -71,6 +87,8 @@ enum LG_modes {
 static_assert(sizeof(unsigned long long)*CHAR_BIT >= LG_MAX);
 static_assert(!(formal::Comment & (1ULL << LG_PP_like)));
 static_assert(!(formal::Comment & (1ULL << LG_CPP_like)));
+static_assert(!(formal::Error & (1ULL << LG_PP_like)));
+static_assert(!(formal::Error & (1ULL << LG_CPP_like)));
 
 // note that we use # for set-theoretic cardinality, so this would not be correct at later stages
 bool IsOneLineComment(formal::word*& x) {
@@ -164,12 +182,190 @@ static auto to_lines(std::istream& in, formal::src_location& origin)
 	return ret;
 }
 
+enum TG_modes {
+	TG_tokenized = 61,
+	TG_inert_token,
+	TG_MAX
+};
+
+static_assert(sizeof(unsigned long long)* CHAR_BIT >= TG_MAX);
+static_assert(!(formal::Comment& (1ULL << TG_tokenized)));
+static_assert(!(formal::Comment& (1ULL << TG_inert_token)));
+static_assert(!(formal::Error & (1ULL << TG_tokenized)));
+static_assert(!(formal::Error & (1ULL << TG_inert_token)));
+
+// action coding: offset to parse at next
+static constexpr std::pair<std::string_view, int> reserved_atomic[] = {
+	{"(", 1},
+	{")", 0},
+	{"{", 1},
+	{"}", 0},
+};
+
+size_t alphanumeric(const std::string_view& src)
+{
+	if (isalnum(static_cast<unsigned char>(src[0]))) return 1;
+	return 0;
+}
+
+size_t issymbol(const std::string_view& src)
+{
+	if (isalnum(static_cast<unsigned char>(src[0]))) return 0;
+	if (isspace(static_cast<unsigned char>(src[0]))) return 0;
+	for (decltype(auto) x : reserved_atomic) {
+		if (src.starts_with(x.first)) return 0;
+	}
+	return 1;
+}
+
+
 // lexing+preprocessing stage
+std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint)
+{
+	std::vector<size_t> ret;
+
+	decltype(auto) x = src[viewpoint];
+	if (x->code() & (formal::Comment | (1ULL << TG_tokenized) | (1ULL << TG_inert_token))) return ret;	// do not try to lex comments, or already-tokenized
+	if (1 != x->is_pure_anchor()) return ret;	// we only try to manipulate things that don't have internal syntax
+
+	const auto w = x->anchor_word();
+	auto text = w->value();
+
+	auto text_size = text.size();
+	// like most formal languages, we don't care about leading whitespace.
+	ltrim(text);
+	if (const auto new_size = text.size(); new_size < text_size) {
+		if (0 == new_size) { // gone.
+			src.DeleteIdx(viewpoint);
+			ret.push_back(viewpoint);
+			return ret;
+		}
+		*w = formal::word(std::string(text), w->origin() + (text_size - new_size), w->code());
+		text_size = new_size;
+	}
+
+	for (decltype(auto) scan : reserved_atomic) {
+		if (scan.first == text) {
+			*w = formal::word(scan.first, w->origin(), w->code());	// force GC of std::shared_ptr
+			x->learn(1ULL << TG_inert_token);
+			if (1 != scan.second) ret.push_back(viewpoint + scan.second);
+			return ret;
+		}
+		if (text.starts_with(scan.first)) {
+			auto remainder = text;
+			remainder.remove_prefix(scan.first.size());
+			ltrim(remainder);
+			if (!remainder.empty()) {
+				std::unique_ptr<formal::word> stage(new formal::word(std::shared_ptr<const std::string>(new std::string(remainder)), w->origin() + (text.size() - remainder.size())));
+				std::unique_ptr<formal::lex_node> node(new formal::lex_node(std::move(stage)));
+				src.insertNSlotsAt(1, viewpoint + 1);
+				src[viewpoint + 1] = node.release();
+			};
+			*w = formal::word(scan.first, w->origin(), w->code());	// force GC of std::shared_ptr
+			x->learn(1ULL << TG_inert_token);
+			if (1 != scan.second) ret.push_back(viewpoint + scan.second);
+			return ret;
+		}
+	}
+
+	// failover: alphanumeric blob
+	if (auto test = kleene_star(text, alphanumeric)) {
+		if (test->first.size() < text.size()) {
+			auto remainder = text;
+			remainder.remove_prefix(test->first.size());
+			ltrim(remainder);
+			if (!remainder.empty()) {
+				std::unique_ptr<formal::word> stage(new formal::word(std::shared_ptr<const std::string>(new std::string(remainder)), w->origin() + (text.size() - remainder.size())));
+				std::unique_ptr<formal::lex_node> node(new formal::lex_node(std::move(stage)));
+				src.insertNSlotsAt(1, viewpoint + 1);
+				src[viewpoint + 1] = node.release();
+			};
+			text.remove_suffix(text.size() - test->first.size());
+			*w = formal::word(std::shared_ptr<const std::string>(new std::string(text)), w->origin());
+			x->learn(1ULL << TG_tokenized);
+			return ret;
+		}
+		x->learn(1ULL << TG_tokenized);
+		return ret;
+	}
+
+	// failover: symbolic blob
+	if (auto test = kleene_star(text, issymbol)) {
+		if (test->first.size() < text.size()) {
+			auto remainder = text;
+			remainder.remove_prefix(test->first.size());
+			ltrim(remainder);
+			if (!remainder.empty()) {
+				std::unique_ptr<formal::word> stage(new formal::word(std::shared_ptr<const std::string>(new std::string(remainder)), w->origin() + (text.size() - remainder.size())));
+				std::unique_ptr<formal::lex_node> node(new formal::lex_node(std::move(stage)));
+				src.insertNSlotsAt(1, viewpoint + 1);
+				src[viewpoint + 1] = node.release();
+			};
+			text.remove_suffix(text.size() - test->first.size());
+			*w = formal::word(std::shared_ptr<const std::string>(new std::string(text)), w->origin());
+			x->learn(1ULL << TG_tokenized);
+			return ret;
+		}
+		x->learn(1ULL << TG_tokenized);
+		return ret;
+	}
+
+	// failover: if we didn't handle it, pretend it's tokenized so we don't re-scan it
+	x->learn(1ULL << TG_tokenized);
+	return ret;
+}
+
+// stub for more sophisticated error reporting
+static void error_report(formal::lex_node& fail, const std::string& err) {
+	auto loc = fail.origin();
+	std::wcerr << loc.path << "(" << loc.line_pos.first << "," << loc.line_pos.second << "): error : ";
+	std::cerr << err;
+	fail.learn(formal::Error);
+}
+
+auto balanced_atomic_handler(const std::string_view& l_token, const std::string_view& r_token)
+{
+	return [=](kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
+		std::vector<size_t> ret;
+
+		decltype(auto) closing = src[viewpoint];
+		if (!(closing->code() & (1ULL << TG_inert_token))) return ret;	// our triggers are inert tokens
+		if (closing->code() & formal::Error) return ret;	// do not try to process error tokens
+		if (1 != closing->is_pure_anchor()) return ret;	// we only try to manipulate things that don't have internal syntax
+
+		auto close_text = closing->anchor_word()->value();
+
+		if (r_token != close_text) return ret;
+		ptrdiff_t ub = viewpoint;
+		while (0 <= --ub) {
+			decltype(auto) opening = src[viewpoint];
+			if (!(opening->code() & (1ULL << TG_inert_token))) return ret;	// our triggers are inert tokens
+//			if (x->code() & formal::Error) return ret;	// do not try to process error tokens
+			if (1 != opening->is_pure_anchor()) return ret;	// we only try to manipulate things that don't have internal syntax
+
+			auto open_text = opening->anchor_word()->value();
+			if (r_token == open_text) { // oops, consecutive unmatched
+				error_report(*closing, std::string("unmatched '") + std::string(r_token) + "'");
+				return ret;
+			}
+			if (l_token == open_text) { // ok
+				formal::lex_node::slice(src, ub, viewpoint);
+				ret.push_back(ub);
+				return ret;
+			}
+		}
+
+		return ret;
+	};
+}
 
 static auto& TokenGrammar() {
 	static std::unique_ptr<kuroda::parser<formal::lex_node> > ooao;
 	if (!ooao) {
 		ooao = decltype(ooao)(new decltype(ooao)::element_type());
+		ooao->register_build_nonterminal(tokenize);
+		ooao->register_build_nonterminal(balanced_atomic_handler(reserved_atomic[0].first, reserved_atomic[1].first));
+		ooao->register_build_nonterminal(balanced_atomic_handler(reserved_atomic[2].first, reserved_atomic[3].first));
 	};
 	return *ooao;
 }

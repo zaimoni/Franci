@@ -12,6 +12,7 @@
 
 namespace formal {
 	static constexpr const unsigned long long Comment = 1ULL; // reserve this flag for both word and lex_node
+	static constexpr const unsigned long long Error = (1ULL << 63); // reserve this flag for both word and lex_node
 
 	// this belongs elsewhere
 	struct src_location {
