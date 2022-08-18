@@ -410,7 +410,7 @@ int main(int argc, char* argv[], char* envp[])
 		kuroda::parser<formal::lex_node>::symbols stage;
 		auto wrapped = formal::lex_node::pop_front(lines);
 		while (wrapped) {
-			stage.push_back(wrapped.release());
+			TokenGrammar().append_to_parse(stage, wrapped.release());
 			wrapped = formal::lex_node::pop_front(lines);
 		};
 		std::cout << std::to_string(stage.size()) << "\n";
