@@ -1,5 +1,5 @@
-#ifndef FORMAL_WORD_HPP
-#define FORMAL_WORD_HPP 1
+#ifndef ZAIMONI_STL_LEXPARSE_FORMAL_WORD_HPP
+#define ZAIMONI_STL_LEXPARSE_FORMAL_WORD_HPP 1
 
 #include <filesystem>
 #include <functional>
