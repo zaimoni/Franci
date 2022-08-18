@@ -11,6 +11,8 @@
 #include <vector>
 
 namespace formal {
+	static constexpr const unsigned long long Comment = 1ULL; // reserve this flag for both word and lex_node
+
 	// this belongs elsewhere
 	struct src_location {
 		std::shared_ptr<const std::filesystem::path> path;

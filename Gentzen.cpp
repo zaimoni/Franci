@@ -63,13 +63,14 @@ static void trim(std::string_view& src) {
 }
 
 enum LG_modes {
-	LG_Comment = 0,
-	LG_PP_like,	// #-format; could be interpreted later for C preprocessor directives if we were so inclined
+	LG_PP_like = 1,	// #-format; could be interpreted later for C preprocessor directives if we were so inclined
 	LG_CPP_like, // //-format
 	LG_MAX
 };
 
 static_assert(sizeof(unsigned long long)*CHAR_BIT >= LG_MAX);
+static_assert(!(formal::Comment & (1ULL << LG_PP_like)));
+static_assert(!(formal::Comment & (1ULL << LG_CPP_like)));
 
 // note that we use # for set-theoretic cardinality, so this would not be correct at later stages
 bool IsOneLineComment(formal::word*& x) {
@@ -78,9 +79,9 @@ bool IsOneLineComment(formal::word*& x) {
 	ltrim(test);
 	unsigned long long new_code = 0;
 	if (test.starts_with('#')) {
-		new_code = (1ULL << LG_Comment) | (1ULL << LG_PP_like);
+		new_code = formal::Comment | (1ULL << LG_PP_like);
 	} else if (test.starts_with("//")) {
-		new_code = (1ULL << LG_Comment) | (1ULL << LG_CPP_like);
+		new_code = formal::Comment | (1ULL << LG_CPP_like);
 	}
 	if (new_code) {
 		const auto n_size = test.size();
@@ -100,7 +101,7 @@ bool IsOneLineComment(formal::word*& x) {
 static auto& LineGrammar() {
 	static std::unique_ptr<kuroda::parser<formal::word> > ooao;
 	if (!ooao) {
-		ooao = decltype(ooao)(new kuroda::parser<formal::word>());
+		ooao = decltype(ooao)(new decltype(ooao)::element_type());
 		ooao->register_terminal(IsOneLineComment);
 	};
 	return *ooao;
@@ -164,7 +165,24 @@ static auto to_lines(std::istream& in, formal::src_location& origin)
 }
 
 // lexing+preprocessing stage
+
+static auto& TokenGrammar() {
+	static std::unique_ptr<kuroda::parser<formal::lex_node> > ooao;
+	if (!ooao) {
+		ooao = decltype(ooao)(new decltype(ooao)::element_type());
+	};
+	return *ooao;
+}
+
 // main language syntax
+static auto& GentzenGrammar() {
+	static std::unique_ptr<kuroda::parser<formal::lex_node> > ooao;
+	if (!ooao) {
+		ooao = decltype(ooao)(new decltype(ooao)::element_type());
+	};
+	return *ooao;
+}
+
 
 int main(int argc, char* argv[], char* envp[])
 {

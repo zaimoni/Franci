@@ -19,8 +19,13 @@ namespace formal {
 
 		lex_node(kuroda::parser<lex_node>::sequence& dest, size_t lb, size_t ub, unsigned long long code);	// slicing constructor
 		// thin-wrapping constructors
-		lex_node(std::unique_ptr<formal::word> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code) {}
-		lex_node(formal::word*& src, unsigned long long code = 0) noexcept : _anchor(std::unique_ptr<formal::word>(src)), _code(code) { src = nullptr; }
+		lex_node(std::unique_ptr<formal::word> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code) {
+			if (std::get<std::unique_ptr<formal::word> >(_anchor)->code() & formal::Comment) _code |= formal::Comment;
+		}
+		lex_node(formal::word*& src, unsigned long long code = 0) noexcept : _anchor(std::unique_ptr<formal::word>(src)), _code(code) {
+			if (src->code() & formal::Comment) _code |= formal::Comment;
+			src = nullptr;
+		}
 
 	public:
 		lex_node() noexcept : _code(0) {}
