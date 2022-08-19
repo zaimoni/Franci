@@ -124,24 +124,31 @@ bool QuantifiedStatement::DelegateSelfEvaluate()
 	return (this->*SelfEvaluateRuleLookup[IdxCurrentSelfEvalRule-(MetaConceptWithArgArray::MaxSelfEvalRuleIdx_SER+1)])();
 }
 
+// no-log version for constructor
+void QuantifiedStatement::_sortQuantifiers()
+{	// This algorithm has to be in-place [RAM conservation]
+	// Until I have better ideas, this is going to be a bubble-sort
+	size_t i = fast_size() - 1;
+	while (0 < --i)
+		if (static_cast<MetaQuantifier*>(ArgArray[i + 1])->LexicalGT(*static_cast<MetaQuantifier*>(ArgArray[i])))
+		{
+			size_t j = i;
+			MetaConcept* Tmp = ArgArray[j];
+			do	ArgArray[j] = ArgArray[j + 1];
+			while (++j < fast_size() - 1
+				&& static_cast<MetaQuantifier*>(ArgArray[j + 1])->LexicalGT(*static_cast<MetaQuantifier*>(Tmp)));
+			ArgArray[j] = Tmp;
+		};
+	assert(SyntaxOK());
+}
+
 bool QuantifiedStatement::SortQuantifiers()
 {	// FORMALLY CORRECT: 9/29/1999
 	// This algorithm has to be in-place [RAM conservation]
 	// Until I have better ideas, this is going to be a bubble-sort
 	LOG("(by sorting quantifiers)");
-	size_t i = fast_size()-1;
-	while(0< --i)
-		if (static_cast<MetaQuantifier*>(ArgArray[i+1])->LexicalGT(*static_cast<MetaQuantifier*>(ArgArray[i])))
-			{
-			size_t j = i;
-			MetaConcept* Tmp = ArgArray[j];
-			do	ArgArray[j]=ArgArray[j+1];
-			while(   ++j<fast_size()-1
-				  && static_cast<MetaQuantifier*>(ArgArray[j+1])->LexicalGT(*static_cast<MetaQuantifier*>(Tmp)));
-			ArgArray[j]=Tmp;
-			};
+	_sortQuantifiers();
 	SetExplicitSort();
-	assert(SyntaxOK());
 	return SelfEvalCleanEnd();
 }
 

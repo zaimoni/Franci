@@ -1016,6 +1016,7 @@ ExactType_MC MetaConnective::parse_infix_ok(const kuroda::parser<MetaConcept>::s
 	if (2 >= symbols.size()) return Unknown_MC;
 	const auto kw = infix_keyword(symbols[n - 1]);
 	if (!kw) return Unknown_MC;
+	if (LogicalIFF_MC == kw) return Unknown_MC; // handle IFF as right-most parse, not here
 	if (symbols.size() - 1 > n) {
 		if (const auto kw2 = infix_keyword(symbols[n + 1])) {
 			if (kw != kw2) return Unknown_MC;	// hold off, don't want to mess with precedence
@@ -1059,6 +1060,51 @@ ExactType_MC MetaConnective::parse_macro_ok(const kuroda::parser<MetaConcept>::s
 	return kw;
 }
 
+std::vector<size_t> MetaConnective::rightmost_parse(kuroda::parser<MetaConcept>::sequence& symbols, size_t n)
+{
+	assert(symbols.size() > n);
+	static const auto tval_coerce = [](MetaConcept*& x) { return CoerceArgType(x, TruthValues); };
+	std::vector<size_t> ret;
+	if (2 > n) return ret;
+
+	const auto kw = infix_keyword(symbols[n - 1]);
+	// IFF is an equivalence relation for classical logic, so gets n-ary infix notation
+	if (kw != LogicalIFF_MC) return ret;
+
+	size_t scan_down = n - 1;
+	while (3 <= scan_down) {
+		if (const auto kw2 = infix_keyword(symbols[scan_down - 2])) {
+			if (kw != kw2) return ret;	// hold off, don't want to mess with precedence
+			scan_down -= 2;
+		}
+		break;
+	}
+
+	const size_t nonstrict_lb = scan_down - 1;
+	size_t nonstrict_ub = n;
+
+	size_t i = 0;
+	zaimoni::weakautovalarray_ptr_throws<MetaConcept*> args((n - nonstrict_lb) / 2 + 1);
+
+	size_t sweep = nonstrict_lb;
+	while (sweep <= n) {
+		UnwrapAllParentheses(symbols[sweep]);
+		if (!CanCoerceArgType(symbols[sweep], TruthValues)) return ret;
+		args[i++] = symbols[sweep];
+		sweep += 2;
+	}
+	for(decltype(auto) x : args) SUCCEED_OR_DIE(tval_coerce(x));
+
+	std::unique_ptr<MetaConnective> staging(new MetaConnective(args, (MetaConnectiveModes)(kw - LogicalAND_MC)));
+	sweep = nonstrict_lb;
+	while(sweep < n) symbols[sweep += 2] = nullptr;
+	symbols[nonstrict_lb] = staging.release();
+	symbols.DeleteNSlotsAt(n - nonstrict_lb, nonstrict_lb + 1);
+	if (0 < nonstrict_lb) ret.push_back(nonstrict_lb);
+
+	return ret;
+}
+
 std::vector<size_t> MetaConnective::parse(kuroda::parser<MetaConcept>::sequence& symbols, size_t n)
 {
 	assert(symbols.size() > n);
@@ -1069,33 +1115,17 @@ std::vector<size_t> MetaConnective::parse(kuroda::parser<MetaConcept>::sequence&
 	if (const auto kw = parse_infix_ok(symbols, n)) {
 		SUCCEED_OR_DIE(tval_coerce(symbols[n]));
 		SUCCEED_OR_DIE(tval_coerce(symbols[n - 2]));
-		size_t scandown = n - 2;
-		if (MetaConceptLookUp[kw].Bitmap1 & Transitive_LITBMP1MC) {	// respecify IFF parsing to be idiomatic equivalence relation 2020-08-25 zaimoni
-			while (2 <= scandown) {
-				const auto kw2 = infix_keyword(symbols[scandown - 1]);
-				if (kw2 != kw) break;
-				UnwrapAllParentheses(symbols[scandown - 2]);
-				if (!CanCoerceArgType(symbols[scandown - 2], TruthValues)) break;
-				scandown -= 2;
-				SUCCEED_OR_DIE(tval_coerce(symbols[scandown]));
-			}
-		}
-		zaimoni::weakautovalarray_ptr_throws<MetaConcept*> args((n - scandown) / 2 + 1);
-		ret.push_back(scandown);
-		size_t i = -1;
-		size_t sweep = scandown;
-		while (sweep <= n) {
-			args[++i] = symbols[sweep];
-			sweep += 2;
-		}
+		// 2-ary; relying on associativity to auto-cleanup in n-ary case
+		const size_t nonstrict_lb = n - 2;
+		zaimoni::weakautovalarray_ptr_throws<MetaConcept*> args(2);
+		ret.push_back(nonstrict_lb);
+		args[0] = symbols[n - 2];
+		args[1] = symbols[n];
+
 		std::unique_ptr<MetaConnective> staging(new MetaConnective(args, (MetaConnectiveModes)(kw - LogicalAND_MC)));
-		sweep = scandown + 2;
-		while (sweep <= n) {
-			symbols[sweep] = 0;
-			sweep += 2;
-		}
-		symbols[scandown] = staging.release();
-		symbols.DeleteNSlotsAt(n - scandown, scandown + 1);
+		symbols[n] = nullptr;
+		symbols[nonstrict_lb] = staging.release();
+		symbols.DeleteNSlotsAt(2, n - 1);
 		return ret;
 	}
 
@@ -1105,39 +1135,26 @@ std::vector<size_t> MetaConnective::parse(kuroda::parser<MetaConcept>::sequence&
 		SUCCEED_OR_DIE(LogicalOR_MC == kw);	// IMPLIES; don't handle anything else (yet)
 		SUCCEED_OR_DIE(tval_coerce(symbols[n]));
 		SUCCEED_OR_DIE(tval_coerce(symbols[n - 2]));
-		size_t scandown = n - 2;
+		const size_t nonstrict_lb = n - 2;
 		// technically IMPLIES is transitive; result is an AND of 2-ary OR clauses
-#if 0
-		if (MetaConceptLookUp[kw].Bitmap1 & Transitive_LITBMP1MC) {	// respecify IFF parsing to be idiomatic equivalence relation 2020-08-25 zaimoni
-			while (2 <= scandown) {
-				const auto kw2 = infix_keyword(symbols[scandown - 1]);
-				if (kw2 != kw) break;
-				UnwrapAllParentheses(symbols[scandown - 2]);
-				if (!CanCoerceArgType(symbols[scandown - 2], TruthValues)) break;
-				scandown -= 2;
-				SUCCEED_OR_DIE(tval_coerce(symbols[scandown]));
-			}
-		}
-#endif
+
 		zaimoni::weakautovalarray_ptr_throws<MetaConcept*> args(2);
-		ret.push_back(scandown);
-		args[0] = symbols[n - 2];
+		ret.push_back(nonstrict_lb);
+		args[0] = symbols[nonstrict_lb];
 		args[1] = symbols[n];
 		args[0]->SelfLogicalNOT();
+
 		std::unique_ptr<MetaConnective> staging(new MetaConnective(args, (MetaConnectiveModes)(kw - LogicalAND_MC)));
-		size_t sweep = scandown + 2;
-		while (sweep <= n) {
-			symbols[sweep] = 0;
-			sweep += 2;
-		}
-		symbols[scandown] = staging.release();
-		symbols.DeleteNSlotsAt(n - scandown, scandown + 1);
+		symbols[n] = nullptr;
+		symbols[nonstrict_lb] = staging.release();
+		symbols.DeleteNSlotsAt(2, n - 1);
 		return ret;
 	}
 
 	if (const auto node = IsArglist(symbols[n])) {
 		const auto kw = prefix_keyword(symbols[n - 1]);
 		if (!kw) return ret;
+		if (5 > node->size()) return ret; // all of the MetaConnective types have minimum arity 2
 		const auto raw_arglen = node->arglist_is_comma_separated();
 		bool is_malformed = !raw_arglen;
 		if (!is_malformed) {
@@ -1197,6 +1214,7 @@ kuroda::parser<MetaConcept>& Franci_parser()
 		ooao->register_build_nonterminal(handle_Comma);
 
 		ooao->register_right_edge_build_nonterminal(EqualRelation::rightmost_parse);
+		ooao->register_right_edge_build_nonterminal(MetaConnective::rightmost_parse);
 	}
 	return *ooao;
 }

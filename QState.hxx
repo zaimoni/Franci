@@ -20,8 +20,12 @@ class QuantifiedStatement final : public MetaConceptWithArgArray
 	QuantifiedStatement& operator=(const QuantifiedStatement& src);	// ACID
 
 public:
-	QuantifiedStatement() noexcept : MetaConceptWithArgArray(QuantifiedStatement_MC),QuantifiersExplicitlySorted('\x00') {}
-	QuantifiedStatement(MetaConcept**& src) noexcept : MetaConceptWithArgArray(QuantifiedStatement_MC, src), QuantifiersExplicitlySorted('\x00') {}
+	QuantifiedStatement() noexcept : MetaConceptWithArgArray(QuantifiedStatement_MC),QuantifiersExplicitlySorted('\x00') {
+		_sortQuantifiers();
+	}
+	QuantifiedStatement(MetaConcept**& src) noexcept : MetaConceptWithArgArray(QuantifiedStatement_MC, src), QuantifiersExplicitlySorted('\x00') {
+		_sortQuantifiers();
+	}
 	QuantifiedStatement(const QuantifiedStatement& src);
 	QuantifiedStatement(QuantifiedStatement&& src) = default;
 	QuantifiedStatement& operator=(QuantifiedStatement&& src) = default;
@@ -58,6 +62,7 @@ private:
 	// if these three succeed i.e. return true, ExperimentalArg0 is cleaned
 	bool ScreenVarList(const clock_t EvalTime0, bool DoNotExplain, MetaConcept**& VarList, const char* const FailureMessage, MetaConnective*& ExperimentalArg0);
 	virtual bool DelegateSelfEvaluate();		// same type
+	void _sortQuantifiers();
 	bool SortQuantifiers();
 };
 
