@@ -183,14 +183,17 @@ static auto to_lines(std::istream& in, formal::src_location& origin)
 }
 
 enum TG_modes {
-	TG_tokenized = 61,
+	TG_HTML_entity = 60,
+	TG_tokenized,
 	TG_inert_token,
 	TG_MAX
 };
 
 static_assert(sizeof(unsigned long long)* CHAR_BIT >= TG_MAX);
+static_assert(!(formal::Comment& (1ULL << TG_HTML_entity)));
 static_assert(!(formal::Comment& (1ULL << TG_tokenized)));
 static_assert(!(formal::Comment& (1ULL << TG_inert_token)));
+static_assert(!(formal::Error& (1ULL << TG_HTML_entity)));
 static_assert(!(formal::Error & (1ULL << TG_tokenized)));
 static_assert(!(formal::Error & (1ULL << TG_inert_token)));
 
@@ -202,9 +205,27 @@ static constexpr std::pair<std::string_view, int> reserved_atomic[] = {
 	{"}", 0},
 };
 
-size_t alphanumeric(const std::string_view& src)
+size_t is_alphabetic(const std::string_view& src)
+{
+	if (isalpha(static_cast<unsigned char>(src[0]))) return 1;
+	return 0;
+}
+
+size_t is_alphanumeric(const std::string_view& src)
 {
 	if (isalnum(static_cast<unsigned char>(src[0]))) return 1;
+	return 0;
+}
+
+size_t is_digit(const std::string_view& src)
+{
+	if (isdigit(static_cast<unsigned char>(src[0]))) return 1;
+	return 0;
+}
+
+size_t is_hex_digit(const std::string_view& src)
+{
+	if (isxdigit(static_cast<unsigned char>(src[0]))) return 1;
 	return 0;
 }
 
@@ -218,6 +239,37 @@ size_t issymbol(const std::string_view& src)
 	return 1;
 }
 
+size_t HTML_EntityLike(const std::string_view& src)
+{
+	if (3 > src.size() || '&' != src[0]) return 0;
+
+	auto working = src;
+	working.remove_prefix(1);
+
+	if (auto alphabetic_entity = kleene_star(working, is_alphabetic)) {
+		working.remove_prefix(alphabetic_entity->first.size());
+		if (working.empty() || ';' != working[0]) return 0;
+		return 2 + alphabetic_entity->first.size();
+	};
+
+	if (3 > working.size() || '#' != working[0]) return 0;
+	working.remove_prefix(1);
+
+	if (auto decimal_entity = kleene_star(working, is_digit)) {
+		working.remove_prefix(decimal_entity->first.size());
+		if (working.empty() || ';' != working[0]) return 0;
+		return 3 + decimal_entity->first.size();
+	};
+	if ('x' != working[0] || 2 > working.size()) return 0;
+	working.remove_prefix(1);
+
+	if (auto hexadecimal_entity = kleene_star(working, is_hex_digit)) {
+		working.remove_prefix(hexadecimal_entity->first.size());
+		if (working.empty() || ';' != working[0]) return 0;
+		return 4 + hexadecimal_entity->first.size();
+	};
+	return 0;
+}
 
 // lexing+preprocessing stage
 std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint)
@@ -268,8 +320,25 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 		}
 	}
 
+	if (auto html_entity = HTML_EntityLike(text)) {
+		auto remainder = text;
+		remainder.remove_prefix(html_entity);
+		ltrim(remainder);
+		if (!remainder.empty()) {
+			std::unique_ptr<formal::word> stage(new formal::word(std::shared_ptr<const std::string>(new std::string(remainder)), w->origin() + (text.size() - remainder.size())));
+			std::unique_ptr<formal::lex_node> node(new formal::lex_node(std::move(stage)));
+			src.insertNSlotsAt(1, viewpoint + 1);
+			src[viewpoint + 1] = node.release();
+		};
+
+		text.remove_suffix(text.size() - html_entity);
+		*w = formal::word(std::shared_ptr<const std::string>(new std::string(text)), w->origin(), w->code());
+		x->learn((1ULL << TG_HTML_entity) | (1ULL << TG_inert_token));
+		return ret;
+	}
+
 	// failover: alphanumeric blob
-	if (auto test = kleene_star(text, alphanumeric)) {
+	if (auto test = kleene_star(text, is_alphanumeric)) {
 		if (test->first.size() < text.size()) {
 			auto remainder = text;
 			remainder.remove_prefix(test->first.size());
