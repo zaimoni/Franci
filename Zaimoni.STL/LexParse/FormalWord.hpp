@@ -32,7 +32,11 @@ namespace formal {
 		src_location& operator+=(int delta) {
 			line_pos.second += delta;
 			return *this;
-		};
+		}
+
+		std::string to_s() const {
+			return std::string("(")+std::to_string(line_pos.first) + ',' + std::to_string(line_pos.second) + ')';
+		}
 	};
 
 	src_location operator+(src_location lhs, ptrdiff_t rhs) { return lhs += rhs; }

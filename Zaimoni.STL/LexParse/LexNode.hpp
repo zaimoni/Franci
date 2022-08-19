@@ -141,13 +141,13 @@ namespace formal {
 
 	formal::word* lex_node::post_anchor_word() const
 	{
-		if (auto x = std::get_if<std::unique_ptr<formal::word> >(&_anchor)) return x->get();
+		if (auto x = std::get_if<std::unique_ptr<formal::word> >(&_post_anchor)) return x->get();
 		return nullptr;
 	}
 
 	lex_node* lex_node::post_anchor_node() const
 	{
-		if (auto x = std::get_if<std::unique_ptr<lex_node> >(&_anchor)) return x->get();
+		if (auto x = std::get_if<std::unique_ptr<lex_node> >(&_post_anchor)) return x->get();
 		return nullptr;
 	}
 
@@ -222,11 +222,12 @@ namespace formal {
 					// new line.  \todo Ignore indentation for one-line comments, but not normal source code
 					dest << '\n';
 				}
-				else if (start.line_pos.first > track.line_pos.first) {
+				else if (start.line_pos.second > track.line_pos.second) {
 					// need whitespace to look like original code
-					dest << std::string(start.line_pos.first - track.line_pos.first, ' ');
+					dest << std::string(start.line_pos.second - track.line_pos.second, ' ');
 				}
 				dest << w->value();
+				track = w->after();
 			}
 			return;
 		}

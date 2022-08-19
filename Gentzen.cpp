@@ -70,7 +70,7 @@ static std::optional<std::pair<std::string_view, size_t> > kleene_star(const std
 	while (0 < len) {
 		++matched;
 		working.remove_prefix(len);
-		len = ok(src);
+		len = ok(working);
 	}
 
 	std::pair<std::string_view, size_t> ret(src, matched);
