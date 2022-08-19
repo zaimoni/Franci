@@ -126,7 +126,7 @@ public:
 	bool DestructiveEvaluateToSameType() final;	// overwrites itself iff returns true
 	void ConvertVariableToCurrentQuantification(MetaQuantifier& src) final;
 	bool HasArgRelatedToThisConceptBy(const MetaConcept& Target, LowLevelBinaryRelation* TargetRelation) const final;
-	virtual bool UsesQuantifierAux(const MetaQuantifier& x) const;
+	bool UsesQuantifierAux(const MetaQuantifier& x) const final;
 	virtual bool ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& lhs, const MetaConcept& rhs, LowLevelAction* RHSInducedActionOnArg, LowLevelBinaryRelation* TargetRelation);
 // type-specific functions
 	// QuantifiedStatement, MetaConnective are having access problems with these.

@@ -69,16 +69,16 @@ public:
 //	virtual bool DetectAntiIdempotent(const MetaConcept& Arg2) const;
 	void ConvertVariableToCurrentQuantification(MetaQuantifier& src) final;
 	bool HasArgRelatedToThisConceptBy(const MetaConcept& Target, LowLevelBinaryRelation* TargetRelation) const final;
-	virtual bool UsesQuantifierAux(const MetaQuantifier& x) const;
+	bool UsesQuantifierAux(const MetaQuantifier& x) const final;
 	virtual bool ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& lhs, const MetaConcept& rhs, LowLevelAction* RHSInducedActionOnArg, LowLevelBinaryRelation* TargetRelation);
 	// Next three routines really also need transitivity
 	bool OrderIndependentPairwiseRelation(const MetaConceptWith2Args& rhs, LowLevelBinaryRelation& TargetRelation) const;
-	bool ArgsPairwiseUnrelated(LowLevelBinaryRelation* TargetRelation) const {return !TargetRelation(*LHS_Arg1,*RHS_Arg2);};
+	bool ArgsPairwiseUnrelated(LowLevelBinaryRelation* TargetRelation) const {return !TargetRelation(*LHS_Arg1,*RHS_Arg2);}
 	bool ExactOrderPairwiseRelation(const MetaConceptWith2Args& rhs, LowLevelBinaryRelation* TargetRelation) const;
 	// type-specific routines
 	void ForceTotalLexicalArgOrder();
-	void TransferOutLHSAndNULL(MetaConcept*& dest) {LHS_Arg1.TransferOutAndNULL(dest);};
-	void TransferOutRHSAndNULL(MetaConcept*& dest) {RHS_Arg2.TransferOutAndNULL(dest);};
+	void TransferOutLHSAndNULL(MetaConcept*& dest) {LHS_Arg1.TransferOutAndNULL(dest);}
+	void TransferOutRHSAndNULL(MetaConcept*& dest) {RHS_Arg2.TransferOutAndNULL(dest);}
 protected:
 	void MoveIntoAux(MetaConceptWith2Args& dest);
 	virtual bool EqualAux2(const MetaConcept& rhs) const;
