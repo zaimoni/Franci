@@ -318,8 +318,8 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 // stub for more sophisticated error reporting
 static void error_report(formal::lex_node& fail, const std::string& err) {
 	auto loc = fail.origin();
-	std::wcerr << loc.path << "(" << loc.line_pos.first << "," << loc.line_pos.second << "): error : ";
-	std::cerr << err;
+	std::wcerr << loc.path->native();
+	std::cerr << loc.to_s() << ": error : " << err << '\n';
 	fail.learn(formal::Error);
 }
 
@@ -338,10 +338,10 @@ auto balanced_atomic_handler(const std::string_view& l_token, const std::string_
 		if (r_token != close_text) return ret;
 		ptrdiff_t ub = viewpoint;
 		while (0 <= --ub) {
-			decltype(auto) opening = src[viewpoint];
-			if (!(opening->code() & (1ULL << TG_inert_token))) return ret;	// our triggers are inert tokens
+			decltype(auto) opening = src[ub];
+			if (!(opening->code() & (1ULL << TG_inert_token))) continue;	// our triggers are inert tokens
 //			if (x->code() & formal::Error) return ret;	// do not try to process error tokens
-			if (1 != opening->is_pure_anchor()) return ret;	// we only try to manipulate things that don't have internal syntax
+			if (1 != opening->is_pure_anchor()) continue;	// we only try to manipulate things that don't have internal syntax
 
 			auto open_text = opening->anchor_word()->value();
 			if (r_token == open_text) { // oops, consecutive unmatched
@@ -355,6 +355,7 @@ auto balanced_atomic_handler(const std::string_view& l_token, const std::string_
 			}
 		}
 
+		error_report(*closing, std::string("unmatched '") + std::string(r_token) + "'");
 		return ret;
 	};
 }
