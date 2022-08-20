@@ -471,11 +471,6 @@ int main(int argc, char* argv[], char* envp[])
 		auto to_interpret = std::ifstream(*src.path);
 		if (!to_interpret.is_open()) continue;
 		auto lines = to_lines(to_interpret, src);
-		// debugging view
-		std::cout << std::to_string(lines.size()) << "\n";
-		for (decltype(auto) x : lines) {
-			std::cout << x->code() << ":" << x->origin().line_pos.first << ":" << x->value() << "\n";
-		}
 
 		kuroda::parser<formal::lex_node>::symbols stage;
 		auto wrapped = formal::lex_node::pop_front(lines);

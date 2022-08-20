@@ -35,7 +35,7 @@ namespace formal {
 		}
 
 		std::string to_s() const {
-			return std::string("(")+std::to_string(line_pos.first) + ',' + std::to_string(line_pos.second) + ')';
+			return std::string("(")+std::to_string(line_pos.first + 1) + ',' + std::to_string(line_pos.second + 1) + ')';
 		}
 	};
 
