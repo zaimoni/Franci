@@ -54,7 +54,7 @@ public:
 
 	bool UsesQuantifierAux(const MetaQuantifier& x) const override;
 
-	bool ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& lhs, const MetaConcept& rhs, LowLevelAction* RHSInducedActionOnArg, LowLevelBinaryRelation* TargetRelation) override
+	bool ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& lhs, const MetaConcept& rhs, LowLevelAction* RHSInducedActionOnArg, LowLevelBinaryRelation* TargetRelation) final
 	{
 		try {
 			if (TargetRelation(lhs, *Arg1)) RHSInducedActionOnArg(Arg1, rhs);

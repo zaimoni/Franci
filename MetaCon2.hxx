@@ -127,21 +127,21 @@ public:
 	void ConvertVariableToCurrentQuantification(MetaQuantifier& src) final;
 	bool HasArgRelatedToThisConceptBy(const MetaConcept& Target, LowLevelBinaryRelation* TargetRelation) const final;
 	bool UsesQuantifierAux(const MetaQuantifier& x) const final;
-	virtual bool ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& lhs, const MetaConcept& rhs, LowLevelAction* RHSInducedActionOnArg, LowLevelBinaryRelation* TargetRelation);
+	bool ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& lhs, const MetaConcept& rhs, LowLevelAction* RHSInducedActionOnArg, LowLevelBinaryRelation* TargetRelation) final;
 // type-specific functions
 	// QuantifiedStatement, MetaConnective are having access problems with these.
-	inline size_t ImageInferenceParameter1() const {return InferenceParameter1;};
-	inline size_t ImageInferenceParameter2() const {return InferenceParameter2;};
+	size_t ImageInferenceParameter1() const { return InferenceParameter1; }
+	size_t ImageInferenceParameter2() const { return InferenceParameter2; }
 	// CombinatorialLike is having access problems
-	inline void ReplaceArgArray(MetaConcept** src) {assert(src); ArgArray=src;};
-	inline void ReplaceArgArray(_meta_autoarray_ptr<MetaConcept*>& src) {assert(!src.empty()); src.MoveInto(ArgArray);};
-	inline void OverwriteAndNULL(MetaConcept**& dest) {dest = ArgArray.release();};
+	void ReplaceArgArray(MetaConcept** src) { assert(src); ArgArray = src; }
+	void ReplaceArgArray(_meta_autoarray_ptr<MetaConcept*>& src) { assert(!src.empty()); src.MoveInto(ArgArray); }
+	void OverwriteAndNULL(MetaConcept**& dest) { dest = ArgArray.release(); }
 	
 	bool ThisConceptUsesNon1stArg(const MetaConcept& Target) const;
 	bool ReplaceNon1stArgWith1stArgInThisConcept(MetaConcept*& dest) const;
 	// resume implementation in MetaCon2.cxx
-	inline void FastDeleteIdx(size_t i) {ArgArray.FastDeleteIdx(i);};
-	inline void DeleteIdx(size_t i) {ArgArray.DeleteIdx(i);};
+	void FastDeleteIdx(size_t i) { ArgArray.FastDeleteIdx(i); }
+	void DeleteIdx(size_t i) { ArgArray.DeleteIdx(i); }
 	void DeleteNSlotsAt(size_t n, size_t i);
 	void insertNSlotsAt(size_t n, size_t i);
 	bool InsertNSlotsAtV2(size_t n, size_t i);

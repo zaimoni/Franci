@@ -49,7 +49,7 @@ public:
 	virtual ~MetaConceptWith2Args() = default;
 //	virtual void CopyInto(MetaConcept*& dest) const = 0;	// can throw memory failure
 //	virtual void MoveInto(MetaConcept*& dest) = 0;	// can throw memory failure.  If it succeeds, it destroys the source.
-	inline void ForceCheckForEvaluation() const {IdxCurrentSelfEvalRule=None_SER;};
+	inline void ForceCheckForEvaluation() const { IdxCurrentSelfEvalRule = None_SER; }
 //  Type ID functions
 //	virtual const AbstractClass* UltimateType() const = 0;
 	size_t size() const final {return 2;};
@@ -70,7 +70,7 @@ public:
 	void ConvertVariableToCurrentQuantification(MetaQuantifier& src) final;
 	bool HasArgRelatedToThisConceptBy(const MetaConcept& Target, LowLevelBinaryRelation* TargetRelation) const final;
 	bool UsesQuantifierAux(const MetaQuantifier& x) const final;
-	virtual bool ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& lhs, const MetaConcept& rhs, LowLevelAction* RHSInducedActionOnArg, LowLevelBinaryRelation* TargetRelation);
+	bool ModifyArgWithRHSInducedActionWhenLHSRelatedToArg(const MetaConcept& lhs, const MetaConcept& rhs, LowLevelAction* RHSInducedActionOnArg, LowLevelBinaryRelation* TargetRelation) final;
 	// Next three routines really also need transitivity
 	bool OrderIndependentPairwiseRelation(const MetaConceptWith2Args& rhs, LowLevelBinaryRelation& TargetRelation) const;
 	bool ArgsPairwiseUnrelated(LowLevelBinaryRelation* TargetRelation) const {return !TargetRelation(*LHS_Arg1,*RHS_Arg2);}
