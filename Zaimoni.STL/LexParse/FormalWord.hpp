@@ -2,7 +2,6 @@
 #define ZAIMONI_STL_LEXPARSE_FORMAL_WORD_HPP 1
 
 #include <filesystem>
-#include <functional>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -39,8 +38,8 @@ namespace formal {
 		}
 	};
 
-	src_location operator+(src_location lhs, ptrdiff_t rhs) { return lhs += rhs; }
-	src_location operator+(ptrdiff_t lhs, src_location rhs) { return rhs += lhs; }
+	inline src_location operator+(src_location lhs, ptrdiff_t rhs) { return lhs += rhs; }
+	inline src_location operator+(ptrdiff_t lhs, src_location rhs) { return rhs += lhs; }
 
 	class word {
 	private:
@@ -49,12 +48,6 @@ namespace formal {
 		unsigned long long _code; // usually used as a bitmap
 
 	public:
-		// offset, size, code
-		using sub = std::tuple<ptrdiff_t,
-			std::variant<size_t, std::string_view>,
-			int>;
-		using lexed = std::optional<sub>;
-
 		word() = default;
 		word(const word& src) = default;
 		word(word&& src) = default;
@@ -78,16 +71,8 @@ namespace formal {
 			_token(src),
 			_code(code) {}
 
-		std::string_view value() const {
-			// std::visit failed, here
-			if (decltype(auto) test2 = std::get_if<std::shared_ptr<const std::string> >(&_token)) return (std::string_view)(*test2->get());
-			return std::get<std::string_view>(_token);
-		}
-
-		size_t size() const {
-			if (decltype(auto) test2 = std::get_if<std::shared_ptr<const std::string> >(&_token)) return test2->get()->size();
-			return std::get<std::string_view>(_token).size();
-		}
+		std::string_view value() const;
+		size_t size() const;
 
 		auto code() const { return _code; }
 		void interpret(unsigned long long src) { _code = src; }
@@ -95,49 +80,14 @@ namespace formal {
 		src_location origin() const { return _origin; }
 		src_location after() const { return _origin + size(); }
 
-		// maybe not strictly needed
-		lexed lex(std::function<lexed(std::string_view)> lex_rule) const { return lex_rule(value()); }
-
-		std::vector<word> split(const sub& src) {
-			std::vector<word> ret;
-			const auto offset = std::get<0>(src);
-			if (0<offset) ret.push_back(word(*this, 0, offset));
-
-			decltype(auto) want_this = std::get<1>(src);
-			auto _len = len(want_this);
-
-			if (auto non_owned = std::get_if<std::string_view>(&want_this)) {
-				ret.push_back(word(*non_owned, _origin + offset, std::get<2>(src)));
-			} else {
-				ret.push_back(word(*this, offset, _len, std::get<2>(src)));
-			}
-
-			const auto terminal = offset + _len;
-			const auto _size = size();
-			if (_size > terminal) ret.push_back(word(*this, terminal, _size-terminal));
-			return ret;
-		}
-
 	private:
-		static size_t len(const std::variant<size_t, std::string_view>& src) {
-			if (auto ret = std::get_if<size_t>(&src)) return *ret;
-			return std::get<std::string_view>(src).size();
-		}
-
-		std::shared_ptr<const std::string> slice(ptrdiff_t offset, size_t len) const {
-			auto src = value();
-			if (0 > offset) return nullptr;
-			if (0 >= len) return nullptr;
-			const auto _size = src.size();
-			if (_size <= offset) return nullptr;
-			if (auto ub = _size - offset; ub < len) len = ub;
-			return std::shared_ptr<const std::string>(new std::string(src.data() + offset, len));
-		}
+		static size_t len(const std::variant<size_t, std::string_view>& src);
+		std::shared_ptr<const std::string> slice(ptrdiff_t offset, size_t len) const;
 	};
 
 	// parsing does not belong here.
 	// programming languages need: leading, trailing
 	// math also needs formatting: superscript, subscript, ...
-}
+} // namespace formal
 
 #endif

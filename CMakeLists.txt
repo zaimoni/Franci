@@ -43,7 +43,7 @@ target_link_options(LogicC PRIVATE /FORCE:MULTIPLE)
 target_compile_definitions(LogicC PUBLIC LOGIC_DRIVER)
 
 add_executable(Gentzen Gentzen.cpp)
-target_link_libraries(Gentzen z_log_adapter z_stdio_log z_memory)
+target_link_libraries(Gentzen z_kuroda z_log_adapter z_stdio_log z_memory)
 target_link_options(Gentzen PRIVATE /FORCE:MULTIPLE)
 target_compile_definitions(Gentzen PUBLIC GENTZEN_DRIVER)
 
