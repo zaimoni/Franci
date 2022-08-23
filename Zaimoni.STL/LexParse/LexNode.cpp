@@ -38,6 +38,7 @@ namespace formal {
 	// intentionally use tail recursion here.
 	formal::src_location lex_node::origin(const lex_node* src)
 	{
+		if (!src) return formal::src_location();
 	restart:
 		if (!src->_prefix.empty()) {
 			src = src->_prefix.front();
@@ -52,7 +53,7 @@ namespace formal {
 		return formal::src_location();
 	}
 
-	formal::src_location lex_node::origin(const std::variant<std::unique_ptr<lex_node>, std::unique_ptr<formal::word> >& src)
+	formal::src_location lex_node::origin(const decltype(_anchor)& src)
 	{
 		if (auto x = std::get_if<std::unique_ptr<formal::word> >(&src)) {
 			if (auto y = x->get()) return y->origin();
@@ -121,10 +122,15 @@ namespace formal {
 		for (decltype(auto) x : src) to_s(dest, x, track);
 	}
 
-	void lex_node::to_s(std::ostream& dest, const std::variant<std::unique_ptr<lex_node>, std::unique_ptr<formal::word> >& src, formal::src_location& track)
+	void lex_node::to_s(std::ostream& dest, const decltype(_anchor)& src, formal::src_location& track)
 	{
-		if (auto x = std::get_if<std::unique_ptr<formal::word> >(&src)) {
-			if (auto w = x->get()) {
+		struct _to_s {
+			std::ostream& dest;
+			formal::src_location& track;
+
+			_to_s(std::ostream& dest, formal::src_location& track) noexcept : dest(dest), track(track) {}
+
+			auto operator()(const std::unique_ptr<word>& w) {
 				const auto start = w->origin();
 				if (start.line_pos.first != track.line_pos.first) {
 					// new line.  \todo Ignore indentation for one-line comments, but not normal source code
@@ -137,10 +143,19 @@ namespace formal {
 				dest << w->value();
 				track = w->after();
 			}
-			return;
-		}
-		auto lex = std::get<std::unique_ptr<lex_node> >(src).get();
-		if (lex) to_s(dest, lex, track);
+			auto operator()(const std::unique_ptr<lex_node>& x) {
+				if (auto lex = x.get()) return to_s(dest, lex, track);
+			}
+			auto operator()(const std::unique_ptr<parsed>& x) {
+				auto stage = x->to_s();
+				if (!stage.empty()) {
+					dest << stage;
+					track += stage.size();
+				}
+			}
+		};
+
+		std::visit(_to_s(dest, track), src);
 	}
 
 	int lex_node::classify(const decltype(_anchor)& src)
@@ -148,13 +163,14 @@ namespace formal {
 		struct _encode_anchor {
 			int operator()(const std::unique_ptr<word>& x) { return x ? 1 : 0; }
 			int operator()(const std::unique_ptr<lex_node>& x) { return x ? 2 : 0; }
+			int operator()(const std::unique_ptr<parsed>& x) { return x ? 3 : 0; }
 		};
 
 		static _encode_anchor ooao;
 		return std::visit(ooao, src);
 	}
 
-	void lex_node::reset(std::variant<std::unique_ptr<lex_node>, std::unique_ptr<formal::word> >& dest, lex_node*& src)
+	void lex_node::reset(decltype(_anchor)& dest, lex_node*& src)
 	{
 		assert(src);
 		switch (src->is_pure_anchor()) {
@@ -163,6 +179,9 @@ namespace formal {
 			break;
 		case 2:
 			dest = std::move(std::get<std::unique_ptr<lex_node> >(src->_anchor));
+			break;
+		case 3:
+			dest = std::move(std::get<std::unique_ptr<parsed> >(src->_anchor));
 			break;
 		default: // has internal structure; just capture it as-is
 			dest = std::unique_ptr<lex_node>(src);

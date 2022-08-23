@@ -23,9 +23,9 @@ namespace formal {
 		kuroda::parser<lex_node>::symbols _infix;
 		kuroda::parser<lex_node>::symbols _postfix;
 		std::variant<std::unique_ptr<lex_node>,
-			std::unique_ptr<formal::word> > _anchor;
-		std::variant<std::unique_ptr<lex_node>,
-			std::unique_ptr<formal::word> > _post_anchor;
+			std::unique_ptr<word>,
+			std::unique_ptr<parsed> > _anchor;
+		decltype(_anchor) _post_anchor;
 		unsigned long long _code; // usually used as a bitmap
 
 		lex_node(kuroda::parser<lex_node>::sequence& dest, size_t lb, size_t ub, unsigned long long code);	// slicing constructor
@@ -81,13 +81,13 @@ namespace formal {
 
 	private:
 		static formal::src_location origin(const lex_node* src);
-		static formal::src_location origin(const std::variant<std::unique_ptr<lex_node>, std::unique_ptr<formal::word> >& src);
+		static formal::src_location origin(const decltype(_anchor)& src);
 		static void to_s(std::ostream& dest, const lex_node* src, formal::src_location& track);
 		static void to_s(std::ostream& dest, const kuroda::parser<lex_node>::sequence& src, formal::src_location& track);
-		static void to_s(std::ostream& dest, const std::variant<std::unique_ptr<lex_node>, std::unique_ptr<formal::word> >& src, formal::src_location& track);
+		static void to_s(std::ostream& dest, const decltype(_anchor)& src, formal::src_location& track);
 
 		static int classify(const decltype(_anchor)& src);
-		static void reset(std::variant<std::unique_ptr<lex_node>, std::unique_ptr<formal::word> >& dest, lex_node*& src);
+		static void reset(decltype(_anchor)& dest, lex_node*& src);
 	};
 
 } // namespace formal
