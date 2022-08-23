@@ -57,10 +57,20 @@ namespace formal {
 		void interpret(unsigned long long src) { _code = src; }
 		void learn(unsigned long long src) { _code |= src; }
 
-		formal::word* anchor_word() const;
-		lex_node* anchor_node() const;
-		formal::word* post_anchor_word() const;
-		lex_node* post_anchor_node() const;
+		template<class Val>
+		Val* anchor() const requires requires { std::get_if<std::unique_ptr<Val> >(&_anchor); }
+		{
+			if (auto x = std::get_if<std::unique_ptr<Val> >(&_anchor)) return x->get();
+			return nullptr;
+		}
+
+		template<class Val>
+		Val* post_anchor() const requires requires { std::get_if<std::unique_ptr<Val> >(&_post_anchor); }
+		{
+			if (auto x = std::get_if<std::unique_ptr<Val> >(&_post_anchor)) return x->get();
+			return nullptr;
+		}
+
 		bool syntax_ok() const;
 		int is_pure_anchor() const; // C error code convention
 

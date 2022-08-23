@@ -43,11 +43,11 @@ namespace formal {
 			src = src->_prefix.front();
 			goto restart;
 		}
-		if (auto x = src->anchor_node()) {
+		if (auto x = src->anchor<lex_node>()) {
 			src = x;
 			goto restart;
 		}
-		if (auto x = src->anchor_word()) return x->origin();
+		if (auto x = src->anchor<word>()) return x->origin();
 		// We could try to go on, if our syntax is bad.
 		return formal::src_location();
 	}
@@ -59,30 +59,6 @@ namespace formal {
 			return formal::src_location();
 		}
 		return origin(std::get<std::unique_ptr<lex_node> >(src).get());
-	}
-
-	formal::word* lex_node::anchor_word() const
-	{
-		if (auto x = std::get_if<std::unique_ptr<formal::word> >(&_anchor)) return x->get();
-		return nullptr;
-	}
-
-	lex_node* lex_node::anchor_node() const
-	{
-		if (auto x = std::get_if<std::unique_ptr<lex_node> >(&_anchor)) return x->get();
-		return nullptr;
-	}
-
-	formal::word* lex_node::post_anchor_word() const
-	{
-		if (auto x = std::get_if<std::unique_ptr<formal::word> >(&_post_anchor)) return x->get();
-		return nullptr;
-	}
-
-	lex_node* lex_node::post_anchor_node() const
-	{
-		if (auto x = std::get_if<std::unique_ptr<lex_node> >(&_post_anchor)) return x->get();
-		return nullptr;
 	}
 
 	bool lex_node::syntax_ok() const

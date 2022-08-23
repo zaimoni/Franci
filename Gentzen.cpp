@@ -280,7 +280,7 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 	if (x->code() & (formal::Comment | (1ULL << TG_tokenized) | (1ULL << TG_inert_token))) return ret;	// do not try to lex comments, or already-tokenized
 	if (1 != x->is_pure_anchor()) return ret;	// we only try to manipulate things that don't have internal syntax
 
-	const auto w = x->anchor_word();
+	const auto w = x->anchor<formal::word>();
 	auto text = w->value();
 
 	auto text_size = text.size();
@@ -402,7 +402,7 @@ auto balanced_atomic_handler(const std::string_view& l_token, const std::string_
 		if (closing->code() & formal::Error) return ret;	// do not try to process error tokens
 		if (1 != closing->is_pure_anchor()) return ret;	// we only try to manipulate things that don't have internal syntax
 
-		auto close_text = closing->anchor_word()->value();
+		auto close_text = closing->anchor<formal::word>()->value();
 
 		if (r_token != close_text) return ret;
 		ptrdiff_t ub = viewpoint;
@@ -412,7 +412,7 @@ auto balanced_atomic_handler(const std::string_view& l_token, const std::string_
 //			if (x->code() & formal::Error) return ret;	// do not try to process error tokens
 			if (1 != opening->is_pure_anchor()) continue;	// we only try to manipulate things that don't have internal syntax
 
-			auto open_text = opening->anchor_word()->value();
+			auto open_text = opening->anchor<formal::word>()->value();
 			if (r_token == open_text) { // oops, consecutive unmatched
 				error_report(*closing, std::string("unmatched '") + std::string(r_token) + "'");
 				return ret;
