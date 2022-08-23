@@ -14,6 +14,8 @@ namespace formal {
 		virtual void CopyInto(parsed*& dest) const = 0;	// can throw memory failure
 		virtual void MoveInto(parsed*& dest) = 0;	// can throw memory failure.  If it succeeds, it destroys the source.
 
+		virtual src_location origin() const = 0;
+
 		virtual std::string to_s() const = 0;
 	};
 
@@ -30,14 +32,14 @@ namespace formal {
 
 		lex_node(kuroda::parser<lex_node>::sequence& dest, size_t lb, size_t ub, unsigned long long code);	// slicing constructor
 		// thin-wrapping constructors
-		lex_node(formal::word*& src, unsigned long long code = 0) noexcept : _anchor(std::unique_ptr<formal::word>(src)), _code(code) {
-			if (src->code() & formal::Comment) _code |= formal::Comment;
+		lex_node(word*& src, unsigned long long code = 0) noexcept : _anchor(std::unique_ptr<word>(src)), _code(code) {
+			if (src->code() & Comment) _code |= Comment;
 			src = nullptr;
 		}
 
 	public:
-		lex_node(std::unique_ptr<formal::word> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code) {
-			if (std::get<std::unique_ptr<formal::word> >(_anchor)->code() & formal::Comment) _code |= formal::Comment;
+		lex_node(std::unique_ptr<word> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code) {
+			if (std::get<std::unique_ptr<word> >(_anchor)->code() & Comment) _code |= Comment;
 		}
 
 		lex_node() noexcept : _code(0) {}
@@ -51,7 +53,7 @@ namespace formal {
 		// factory function: slices a lex_node out of dest, then puts the lex_node at index lb
 		static void slice(kuroda::parser<lex_node>::sequence& dest, size_t lb, size_t ub, unsigned long long code = 0);
 
-		formal::src_location origin() const { return origin(this); }
+		src_location origin() const { return origin(this); }
 
 		auto code() const { return _code; }
 		void interpret(unsigned long long src) { _code = src; }
@@ -80,11 +82,11 @@ namespace formal {
 		static std::ostream& to_s(std::ostream& dest, const kuroda::parser<lex_node>::sequence& src);
 
 	private:
-		static formal::src_location origin(const lex_node* src);
-		static formal::src_location origin(const decltype(_anchor)& src);
-		static void to_s(std::ostream& dest, const lex_node* src, formal::src_location& track);
-		static void to_s(std::ostream& dest, const kuroda::parser<lex_node>::sequence& src, formal::src_location& track);
-		static void to_s(std::ostream& dest, const decltype(_anchor)& src, formal::src_location& track);
+		static src_location origin(const lex_node* src);
+		static src_location origin(const decltype(_anchor)& src);
+		static void to_s(std::ostream& dest, const lex_node* src, src_location& track);
+		static void to_s(std::ostream& dest, const kuroda::parser<lex_node>::sequence& src, src_location& track);
+		static void to_s(std::ostream& dest, const decltype(_anchor)& src, src_location& track);
 
 		static int classify(const decltype(_anchor)& src);
 		static void reset(decltype(_anchor)& dest, lex_node*& src);

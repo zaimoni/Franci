@@ -36,7 +36,7 @@ namespace formal {
 	}
 
 	// intentionally use tail recursion here.
-	formal::src_location lex_node::origin(const lex_node* src)
+	src_location lex_node::origin(const lex_node* src)
 	{
 		if (!src) return formal::src_location();
 	restart:
@@ -53,13 +53,23 @@ namespace formal {
 		return formal::src_location();
 	}
 
-	formal::src_location lex_node::origin(const decltype(_anchor)& src)
+	src_location lex_node::origin(const decltype(_anchor)& src)
 	{
-		if (auto x = std::get_if<std::unique_ptr<formal::word> >(&src)) {
-			if (auto y = x->get()) return y->origin();
-			return formal::src_location();
-		}
-		return origin(std::get<std::unique_ptr<lex_node> >(src).get());
+		struct _origin {
+			auto operator()(const std::unique_ptr<word>& x) {
+				if (x) return x->origin();
+				return src_location();
+			}
+			auto operator()(const std::unique_ptr<lex_node>& x) { return origin(x.get()); }
+			auto operator()(const std::unique_ptr<parsed>& x) {
+				if (x) return x->origin();
+				return src_location();
+			}
+		};
+
+		static _origin ooao;
+
+		return std::visit(ooao, src);
 	}
 
 	bool lex_node::syntax_ok() const
@@ -108,7 +118,7 @@ namespace formal {
 		return dest;
 	};
 
-	void lex_node::to_s(std::ostream& dest, const lex_node* src, formal::src_location& track)
+	void lex_node::to_s(std::ostream& dest, const lex_node* src, src_location& track)
 	{
 		if (!src->_prefix.empty()) to_s(dest, src->_prefix, track);
 		to_s(dest, src->_anchor, track);
@@ -117,12 +127,12 @@ namespace formal {
 		if (!src->_postfix.empty()) to_s(dest, src->_postfix, track);
 	}
 
-	void lex_node::to_s(std::ostream& dest, const kuroda::parser<lex_node>::sequence& src, formal::src_location& track)
+	void lex_node::to_s(std::ostream& dest, const kuroda::parser<lex_node>::sequence& src, src_location& track)
 	{
 		for (decltype(auto) x : src) to_s(dest, x, track);
 	}
 
-	void lex_node::to_s(std::ostream& dest, const decltype(_anchor)& src, formal::src_location& track)
+	void lex_node::to_s(std::ostream& dest, const decltype(_anchor)& src, src_location& track)
 	{
 		struct _to_s {
 			std::ostream& dest;
@@ -175,7 +185,7 @@ namespace formal {
 		assert(src);
 		switch (src->is_pure_anchor()) {
 		case 1:
-			dest = std::move(std::get<std::unique_ptr<formal::word> >(src->_anchor));
+			dest = std::move(std::get<std::unique_ptr<word> >(src->_anchor));
 			break;
 		case 2:
 			dest = std::move(std::get<std::unique_ptr<lex_node> >(src->_anchor));
