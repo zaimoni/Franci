@@ -78,6 +78,67 @@ static std::optional<std::pair<std::string_view, size_t> > kleene_star(const std
 	return ret;
 }
 
+// prototype class -- extract to own files when stable
+
+class HTMLtag : public formal::parsed {
+	std::string _tag_name;
+	std::shared_ptr<const std::vector<std::pair<std::string, std::string> > > kv_pairs; // could use std::map instead
+	formal::src_location _origin;
+	unsigned long long _bitmap;
+
+	static constexpr const decltype(_bitmap) Start = (1ULL << 0);
+	static constexpr const decltype(_bitmap) End = (1ULL << 1);
+
+public:
+	enum class mode {
+		opening = Start,
+		closing = End,
+		self_closing = Start | End
+	};
+
+	HTMLtag() = delete;
+	HTMLtag(const HTMLtag& src) = default;
+	HTMLtag(HTMLtag&& src) = default;
+	HTMLtag& operator=(const HTMLtag& src) = default;
+	HTMLtag& operator=(HTMLtag&& src) = default;
+	~HTMLtag() = default;
+
+	HTMLtag(const std::string& tag, mode code, formal::src_location origin) : _tag_name(tag), _bitmap(decltype(_bitmap)(code)), _origin(origin) {}
+	HTMLtag(std::string&& tag, mode code, formal::src_location origin) noexcept : _tag_name(std::move(tag)), _bitmap(decltype(_bitmap)(code)), _origin(origin) {}
+
+	std::unique_ptr<parsed> clone() const override { return std::unique_ptr<parsed>(new HTMLtag(*this)); }
+	void CopyInto(parsed*& dest) const override { zaimoni::CopyInto(*this, dest); }	// polymorphic assignment
+	void MoveInto(parsed*& dest) override { zaimoni::MoveIntoV2(std::move(*this), dest); }	// polymorphic move
+
+	formal::src_location origin() const override { return _origin; }
+
+	std::string to_s() const override {
+		static constexpr const char* start_tag[] = {"<", "</", "<"};
+		static constexpr const char* end_tag[] = { ">", ">", " />" };
+		auto index = (_bitmap & (Start | End))-1;
+
+		std::string ret(start_tag[index]);
+		ret += _tag_name;
+		if (kv_pairs) {
+			for (decltype(auto) kv : *kv_pairs) {
+				ret += " ";
+				ret += kv.first;
+				if (!kv.second.empty()) {
+					ret += "\"";
+					ret += kv.second;
+					ret += "\"";
+				}
+			}
+		}
+		ret += end_tag[index];
+		return ret;
+	}
+
+};
+
+
+// end prototype class
+
 enum LG_modes {
 	LG_PP_like = 1,	// #-format; could be interpreted later for C preprocessor directives if we were so inclined
 	LG_CPP_like, // //-format

@@ -11,8 +11,8 @@ namespace formal {
 		virtual ~parsed() = default;
 
 		virtual std::unique_ptr<parsed> clone() const = 0;
-		virtual void CopyInto(parsed*& dest) const = 0;	// can throw memory failure
-		virtual void MoveInto(parsed*& dest) = 0;	// can throw memory failure.  If it succeeds, it destroys the source.
+		virtual void CopyInto(parsed*& dest) const = 0;	// polymorphic assignment
+		virtual void MoveInto(parsed*& dest) = 0;	// polymorphic move
 
 		virtual src_location origin() const = 0;
 
