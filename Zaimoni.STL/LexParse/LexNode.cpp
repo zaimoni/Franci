@@ -88,8 +88,8 @@ namespace formal {
 	bool lex_node::syntax_ok() const
 	{
 		// shallow test -- deep one is CPU-expensive
-		if (!anchor_word() && !anchor_node()) return false; // we always have a syntactic anchor
-		if (!_infix.empty() && !post_anchor_word() && !post_anchor_node()) return false; // if we have an infix sequence, we have a post-anchor token as well
+		if (!classify(_anchor)) return false; // we always have a syntactic anchor
+		if (!_infix.empty() && !classify(_post_anchor)) return false; // if we have an infix sequence, we have a post-anchor token as well
 		// \todo language-specific checks go here
 		return true;
 	}
@@ -100,10 +100,8 @@ namespace formal {
 		if (!_prefix.empty()) return 0;
 		if (!_infix.empty()) return 0;
 		if (!_postfix.empty()) return 0;
-		if (post_anchor_word()) return 0;
-		if (post_anchor_node()) return 0;
-		if (anchor_word()) return 1;
-		if (anchor_node()) return 2;
+		if (classify(_post_anchor)) return 0;
+		if (int code = classify(_anchor)) return code;
 		return -1;
 	}
 
@@ -169,6 +167,16 @@ namespace formal {
 		if (lex) to_s(dest, lex, track);
 	}
 
+	int lex_node::classify(const decltype(_anchor)& src)
+	{
+		struct _encode_anchor {
+			int operator()(const std::unique_ptr<word>& x) { return x ? 1 : 0; }
+			int operator()(const std::unique_ptr<lex_node>& x) { return x ? 2 : 0; }
+		};
+
+		static _encode_anchor ooao;
+		return std::visit(ooao, src);
+	}
 
 	void lex_node::reset(std::variant<std::unique_ptr<lex_node>, std::unique_ptr<formal::word> >& dest, lex_node*& src)
 	{

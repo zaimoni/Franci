@@ -6,6 +6,17 @@
 
 namespace formal {
 
+	// abstract interface.
+	struct parsed {
+		virtual ~parsed() = default;
+
+		virtual std::unique_ptr<parsed> clone() const = 0;
+		virtual void CopyInto(parsed*& dest) const = 0;	// can throw memory failure
+		virtual void MoveInto(parsed*& dest) = 0;	// can throw memory failure.  If it succeeds, it destroys the source.
+
+		virtual std::string to_s() const = 0;
+	};
+
 	class lex_node
 	{
 		kuroda::parser<lex_node>::symbols _prefix;
@@ -65,6 +76,7 @@ namespace formal {
 		static void to_s(std::ostream& dest, const kuroda::parser<lex_node>::sequence& src, formal::src_location& track);
 		static void to_s(std::ostream& dest, const std::variant<std::unique_ptr<lex_node>, std::unique_ptr<formal::word> >& src, formal::src_location& track);
 
+		static int classify(const decltype(_anchor)& src);
 		static void reset(std::variant<std::unique_ptr<lex_node>, std::unique_ptr<formal::word> >& dest, lex_node*& src);
 	};
 
