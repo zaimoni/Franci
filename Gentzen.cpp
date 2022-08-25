@@ -11,11 +11,34 @@
 #include <iostream>
 #include <string_view>
 
+#include "errcount.hpp"
+
 #ifdef ZAIMONI_HAS_MICROSOFT_IO_H
 #include <io.h>
 #else
 #include <unistd.h>
 #endif
+
+static error_counter<size_t> Errors(100, "too many errors");
+static error_counter<size_t> Warnings(1000, "too many warnings");
+
+// stub for more sophisticated error reporting
+static void error_report(const formal::src_location& loc, const std::string& err) {
+	std::wcerr << loc.path->native();
+	std::cerr << loc.to_s() << ": error : " << err << '\n';
+	++Errors;
+}
+
+static void error_report(formal::lex_node& fail, const std::string& err) {
+	error_report(fail.origin(), err);
+	fail.learn(formal::Error);
+}
+
+static void warning_report(const formal::src_location& loc, const std::string& warn) {
+	std::wcerr << loc.path->native();
+	std::cerr << loc.to_s() << ": warning : " << warn << '\n';
+	++Warnings;
+}
 
 const std::filesystem::path& self_path(const char* const _arg)
 {
@@ -94,7 +117,7 @@ static std::optional<std::pair<std::string_view, size_t> > kleene_star(const std
 	while (0 < len) {
 		++matched;
 		working.remove_prefix(len);
-		len = src.empty() ? 0 : ok(src);
+		len = src.empty() ? 0 : ok(working);
 	}
 
 	std::pair<std::string_view, size_t> ret(src, matched);
@@ -191,7 +214,9 @@ public:
 		}
 		if (working.starts_with("/>")) {
 			// self-closing tag.  Formal syntax error if both closing and self-closing.
-			// \todo warn if both closing and self-closing (i.e., coded as closing)
+			if (End == code) {
+				warning_report(w.origin(), "HTML-like tag is both closing, and self-closing");
+			}
 			std::unique_ptr<HTMLtag> ret(new HTMLtag(std::string(would_be_tag->first), (mode)code, w.origin()));
 			working.remove_prefix(2);
 			return std::pair(std::move(ret), src.size() - working.size());
@@ -205,7 +230,10 @@ public:
 		}
 
 		const auto would_be_first_key = kleene_star(working, is_alphabetic);
-		if (!would_be_first_key) return std::nullopt;	// \todo report syntax error
+		if (!would_be_first_key) {
+			error_report(w.origin(), "malformed HTML tag");
+			return std::nullopt;
+		}
 
 		return std::pair(leading_fragment, Start);	// we punt on handling start tags with key-value pairs
 	}
@@ -517,14 +545,6 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 	// failover: if we didn't handle it, pretend it's tokenized so we don't re-scan it
 	x->learn(1ULL << TG_tokenized);
 	return ret;
-}
-
-// stub for more sophisticated error reporting
-static void error_report(formal::lex_node& fail, const std::string& err) {
-	auto loc = fail.origin();
-	std::wcerr << loc.path->native();
-	std::cerr << loc.to_s() << ": error : " << err << '\n';
-	fail.learn(formal::Error);
 }
 
 auto balanced_atomic_handler(const std::string_view& l_token, const std::string_view& r_token)
