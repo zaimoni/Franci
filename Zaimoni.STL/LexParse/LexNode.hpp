@@ -41,6 +41,10 @@ namespace formal {
 		lex_node(std::unique_ptr<word> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code) {
 			if (std::get<std::unique_ptr<word> >(_anchor)->code() & Comment) _code |= Comment;
 		}
+		lex_node(parsed* src, unsigned long long code = 0) noexcept : _anchor(std::unique_ptr<parsed>(src)), _code(code) {}
+		lex_node(parsed*& src, unsigned long long code = 0) noexcept : _anchor(std::unique_ptr<parsed>(src)), _code(code) {
+			src = nullptr;
+		}
 
 		lex_node() noexcept : _code(0) {}
 		// \todo anchor constructor

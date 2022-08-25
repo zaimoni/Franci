@@ -62,15 +62,39 @@ static void trim(std::string_view& src) {
 	rtrim(src);
 }
 
+size_t is_alphabetic(const std::string_view& src)
+{
+	if (isalpha(static_cast<unsigned char>(src[0]))) return 1;
+	return 0;
+}
+
+size_t is_alphanumeric(const std::string_view& src)
+{
+	if (isalnum(static_cast<unsigned char>(src[0]))) return 1;
+	return 0;
+}
+
+size_t is_digit(const std::string_view& src)
+{
+	if (isdigit(static_cast<unsigned char>(src[0]))) return 1;
+	return 0;
+}
+
+size_t is_hex_digit(const std::string_view& src)
+{
+	if (isxdigit(static_cast<unsigned char>(src[0]))) return 1;
+	return 0;
+}
+
 static std::optional<std::pair<std::string_view, size_t> > kleene_star(const std::string_view& src, std::function<size_t(const std::string_view&)> ok) {
-	size_t len = ok(src);
+	size_t len = src.empty() ? 0 : ok(src);
 	if (0 >= len) return std::nullopt;
 	size_t matched = 0;
 	auto working = src;
 	while (0 < len) {
 		++matched;
 		working.remove_prefix(len);
-		len = ok(working);
+		len = src.empty() ? 0 : ok(src);
 	}
 
 	std::pair<std::string_view, size_t> ret(src, matched);
@@ -88,6 +112,9 @@ class HTMLtag : public formal::parsed {
 
 	static constexpr const decltype(_bitmap) Start = (1ULL << 0);
 	static constexpr const decltype(_bitmap) End = (1ULL << 1);
+
+	static constexpr const char* start_tag[] = { "<", "</", "<" };
+	static constexpr const char* end_tag[] = { ">", ">", " />" };
 
 public:
 	enum class mode {
@@ -113,8 +140,6 @@ public:
 	formal::src_location origin() const override { return _origin; }
 
 	std::string to_s() const override {
-		static constexpr const char* start_tag[] = {"<", "</", "<"};
-		static constexpr const char* end_tag[] = { ">", ">", " />" };
 		auto index = (_bitmap & (Start | End))-1;
 
 		std::string ret(start_tag[index]);
@@ -134,8 +159,57 @@ public:
 		return ret;
 	}
 
-};
+	static std::optional<std::variant<
+		std::pair<std::unique_ptr<HTMLtag>, size_t>,
+		std::pair<std::string_view, unsigned int>
+	> > parse(const formal::word& w)
+	{	// In practice, these tags can span multiple lines.  This is a prefilter
+		const auto src = w.value();
 
+		if (!src.starts_with("<")) return std::nullopt;
+		auto working = src;
+		size_t initial_len = 1;
+		unsigned int code = Start | End;
+		working.remove_prefix(1);
+		if (working.starts_with("/")) {
+			// terminal tag
+			working.remove_prefix(1);
+			code &= ~Start;
+			initial_len++;
+		}
+
+		if (working.empty()) return std::nullopt;
+		const auto would_be_tag = kleene_star(working, is_alphabetic);
+		if (!would_be_tag) return std::nullopt;
+		initial_len += would_be_tag->first.size();
+		auto leading_fragment = src;
+		leading_fragment.remove_suffix(src.size() - initial_len);
+		ltrim(working);
+		if (working.empty()) {
+			// need full parse
+			return std::pair(leading_fragment, code);
+		}
+		if (working.starts_with("/>")) {
+			// self-closing tag.  Formal syntax error if both closing and self-closing.
+			// \todo warn if both closing and self-closing (i.e., coded as closing)
+			std::unique_ptr<HTMLtag> ret(new HTMLtag(std::string(would_be_tag->first), (mode)code, w.origin()));
+			working.remove_prefix(2);
+			return std::pair(std::move(ret), src.size() - working.size());
+		}
+		if (working.starts_with(">")) {
+			// either start, or end tag.
+			if ((Start | End) == code) code = Start;
+			std::unique_ptr<HTMLtag> ret(new HTMLtag(std::string(would_be_tag->first), (mode)code, w.origin()));
+			working.remove_prefix(1);
+			return std::pair(std::move(ret), src.size() - working.size());
+		}
+
+		const auto would_be_first_key = kleene_star(working, is_alphabetic);
+		if (!would_be_first_key) return std::nullopt;	// \todo report syntax error
+
+		return std::pair(leading_fragment, Start);	// we punt on handling start tags with key-value pairs
+	}
+};
 
 // end prototype class
 
@@ -244,7 +318,8 @@ static auto to_lines(std::istream& in, formal::src_location& origin)
 }
 
 enum TG_modes {
-	TG_HTML_entity = 60,
+	TG_HTML_tag =59,
+	TG_HTML_entity,
 	TG_tokenized,
 	TG_inert_token,
 	TG_MAX
@@ -265,30 +340,6 @@ static constexpr std::pair<std::string_view, int> reserved_atomic[] = {
 	{"{", 1},
 	{"}", 0},
 };
-
-size_t is_alphabetic(const std::string_view& src)
-{
-	if (isalpha(static_cast<unsigned char>(src[0]))) return 1;
-	return 0;
-}
-
-size_t is_alphanumeric(const std::string_view& src)
-{
-	if (isalnum(static_cast<unsigned char>(src[0]))) return 1;
-	return 0;
-}
-
-size_t is_digit(const std::string_view& src)
-{
-	if (isdigit(static_cast<unsigned char>(src[0]))) return 1;
-	return 0;
-}
-
-size_t is_hex_digit(const std::string_view& src)
-{
-	if (isxdigit(static_cast<unsigned char>(src[0]))) return 1;
-	return 0;
-}
 
 size_t issymbol(const std::string_view& src)
 {
@@ -354,6 +405,7 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 			return ret;
 		}
 		*w = formal::word(std::string(text), w->origin() + (text_size - new_size), w->code());
+		text = w->value();
 		text_size = new_size;
 	}
 
@@ -396,6 +448,28 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 		*w = formal::word(std::shared_ptr<const std::string>(new std::string(text)), w->origin(), w->code());
 		x->learn((1ULL << TG_HTML_entity) | (1ULL << TG_inert_token));
 		return ret;
+	}
+
+	if (auto possible_tag = HTMLtag::parse(*w)) {
+		if (auto tag = std::get_if<std::pair<std::unique_ptr<HTMLtag>, size_t> >(&(*possible_tag))) {
+			auto prechop_size = text.size() - tag->second;
+			if (0 < prechop_size) {
+				auto remainder = text;
+				remainder.remove_prefix(prechop_size);
+				ltrim(remainder);
+				if (!remainder.empty()) {
+					std::unique_ptr<formal::word> stage(new formal::word(std::shared_ptr<const std::string>(new std::string(remainder)), w->origin() + (text.size() - remainder.size())));
+					std::unique_ptr<formal::lex_node> node(new formal::lex_node(std::move(stage)));
+					src.insertNSlotsAt(1, viewpoint + 1);
+					src[viewpoint + 1] = node.release();
+				};
+			}
+			std::unique_ptr<formal::lex_node> stage(new formal::lex_node(tag->first.release(), TG_tokenized | TG_HTML_tag));
+			delete src[viewpoint];
+			src[viewpoint] = stage.release();
+			return ret;
+		}
+		// \todo handle incomplete parse
 	}
 
 	// failover: alphanumeric blob
