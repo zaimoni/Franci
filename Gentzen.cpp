@@ -237,6 +237,90 @@ public:
 
 		return std::pair(leading_fragment, Start);	// we punt on handling start tags with key-value pairs
 	}
+
+	template<auto hint_code> requires(Start <= hint_code && (Start | End) >= hint_code)
+	static std::unique_ptr<HTMLtag> parse(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint, std::string_view hint) {
+		// invariants -- would be ok to hard-fail these
+		decltype(auto) x = src[viewpoint];
+		if (x->code() & (formal::Comment | (1ULL << TG_tokenized) | (1ULL << TG_inert_token))) return nullptr;	// do not try to lex comments, or already-tokenized
+		if (1 != x->is_pure_anchor()) return nullptr;	// we only try to manipulate things that don't have internal syntax
+
+		const auto w = x->anchor<formal::word>();
+		auto text = w->value();
+
+		if constexpr (Start == hint_code) {
+			if (!text.starts_with(hint)) return nullptr;
+		} else {
+			if (text != hint) return nullptr;
+		}
+		// end invariants check
+
+		auto tagname = hint;
+		if constexpr (End == hint_code) { tagname.remove_prefix(2); }
+		else { tagname.remove_prefix(1); }
+
+		decltype(viewpoint) scan = viewpoint;
+
+		if constexpr (Start == hint_code) {
+		} else if constexpr (End == hint_code) {
+			while (++scan < src.size()) {
+				decltype(auto) y = src[scan];
+				if (y->code() & formal::Comment) continue;	// ignore comments
+				if (y->code() & (1ULL << TG_inert_token)) {
+					error_report(*x, "HTML tag parse stopped by inert token");
+					return nullptr;
+				}
+				if (y->code() & (1ULL << TG_tokenized)) {
+					// this might need further work
+					error_report(*x, "HTML tag parse stopped by already-parsed token");
+					return nullptr;
+				}
+				if (1 != y->is_pure_anchor()) {
+					error_report(*x, "HTML tag parse stopped by already-parsed content");
+					return nullptr;	// we only try to manipulate things that don't have internal syntax
+				}
+
+				const auto z = y->anchor<formal::word>();
+				auto working = z->value();
+				ltrim(working);
+				if (working.empty()) {
+					src.DeleteIdx(scan--);
+					continue;
+				}
+
+				if (working.starts_with("/>")) {
+					// self-closing tag.  We incur a formal syntax error: both closing and self-closing.
+					warning_report(w->origin(), "HTML-like tag is both closing, and self-closing");
+					working.remove_prefix(2);
+					ltrim(working);
+					if (working.empty()) {
+						src.DeleteIdx(scan--);
+					} else {
+						*z = formal::word(std::shared_ptr<const std::string>(new std::string(working)), y->origin() + (z->value.size() - working.size()), z->code());
+					}
+					return new HTMLtag(std::string(tagname), (mode)hint_code, w->origin());
+				}
+				if (working.starts_with(">")) {
+					// either start, or end tag.
+					if ((Start | End) == code) code = Start;
+					working.remove_prefix(1);
+					ltrim(working);
+					if (working.empty()) {
+						src.DeleteIdx(scan--);
+					} else {
+						*z = formal::word(std::shared_ptr<const std::string>(new std::string(working)), y->origin() + (z->value.size() - working.size()), z->code());
+					}
+					return new HTMLtag(std::string(tagname), (mode)hint_code, w->origin());
+				}
+			}
+			warning_report(w->origin(), "incomplete HTML-like closing tag: completing");
+			return new HTMLtag(std::string(tagname), (mode)hint_code, w->origin());
+		} else /* if constexpr ((Start | End) == hint_code) */ {
+		}
+
+		return ret;
+	}
+
 };
 
 // end prototype class
