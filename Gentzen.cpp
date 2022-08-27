@@ -352,146 +352,6 @@ public:
 
 		return nullptr;
 	}
-
-	static std::optional<std::variant<
-		std::pair<std::unique_ptr<HTMLtag>, size_t>,
-		std::pair<std::string_view, unsigned int>
-	> > parse(const formal::word& w)
-	{	// In practice, these tags can span multiple lines.  This is a prefilter
-		const auto src = w.value();
-
-		if (!src.starts_with("<")) return std::nullopt;
-		auto working = src;
-		size_t initial_len = 1;
-		unsigned int code = Start | End;
-		working.remove_prefix(1);
-		if (working.starts_with("/")) {
-			// terminal tag
-			working.remove_prefix(1);
-			code &= ~Start;
-			initial_len++;
-		}
-
-		if (working.empty()) return std::nullopt;
-		const auto would_be_tag = kleene_star(working, is_alphabetic);
-		if (!would_be_tag) return std::nullopt;
-		initial_len += would_be_tag->first.size();
-		auto leading_fragment = src;
-		leading_fragment.remove_suffix(src.size() - initial_len);
-		ltrim(working);
-		if (working.empty()) {
-			// need full parse
-			return std::pair(leading_fragment, code);
-		}
-		if (working.starts_with("/>")) {
-			// self-closing tag.  Formal syntax error if both closing and self-closing.
-			if (End == code) {
-				warning_report(w.origin(), "HTML-like tag is both closing, and self-closing");
-			}
-			std::unique_ptr<HTMLtag> ret(new HTMLtag(std::string(would_be_tag->first), (mode)code, w.origin()));
-			working.remove_prefix(2);
-			return std::pair(std::move(ret), src.size() - working.size());
-		}
-		if (working.starts_with(">")) {
-			// either start, or end tag.
-			if ((Start | End) == code) code = Start;
-			std::unique_ptr<HTMLtag> ret(new HTMLtag(std::string(would_be_tag->first), (mode)code, w.origin()));
-			working.remove_prefix(1);
-			return std::pair(std::move(ret), src.size() - working.size());
-		}
-
-		const auto would_be_first_key = kleene_star(working, is_alphabetic);
-		if (!would_be_first_key) {
-			error_report(w.origin(), "malformed HTML tag");
-			return std::nullopt;
-		}
-
-		return std::pair(leading_fragment, Start);	// we punt on handling start tags with key-value pairs
-	}
-
-	template<auto hint_code> requires(Start <= hint_code && (Start | End) >= hint_code)
-	static std::unique_ptr<HTMLtag> parse(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint, std::string_view hint) {
-		// invariants -- would be ok to hard-fail these
-		decltype(auto) x = src[viewpoint];
-		if (x->code() & (formal::Comment | formal::Tokenized | formal::Inert_Token)) return nullptr;	// do not try to lex comments, or already-tokenized
-		if (1 != x->is_pure_anchor()) return nullptr;	// we only try to manipulate things that don't have internal syntax
-
-		const auto w = x->anchor<formal::word>();
-		auto text = w->value();
-
-		if constexpr (Start == hint_code) {
-			if (!text.starts_with(hint)) return nullptr;
-		} else {
-			if (text != hint) return nullptr;
-		}
-		// end invariants check
-
-		auto tagname = hint;
-		if constexpr (End == hint_code) { tagname.remove_prefix(2); }
-		else { tagname.remove_prefix(1); }
-
-		decltype(viewpoint) scan = viewpoint;
-
-		if constexpr (Start == hint_code) {
-		} else if constexpr (End == hint_code) {
-			while (++scan < src.size()) {
-				decltype(auto) y = src[scan];
-				if (y->code() & formal::Comment) continue;	// ignore comments
-				if (y->code() & formal::Inert_Token) {
-					error_report(*x, "HTML tag parse stopped by inert token");
-					return nullptr;
-				}
-				if (y->code() & formal::Tokenized) {
-					// this might need further work
-					error_report(*x, "HTML tag parse stopped by already-parsed token");
-					return nullptr;
-				}
-				if (1 != y->is_pure_anchor()) {
-					error_report(*x, "HTML tag parse stopped by already-parsed content");
-					return nullptr;	// we only try to manipulate things that don't have internal syntax
-				}
-
-				const auto z = y->anchor<formal::word>();
-				auto working = z->value();
-				ltrim(working);
-				if (working.empty()) {
-					src.DeleteIdx(scan--);
-					continue;
-				}
-
-				if (working.starts_with("/>")) {
-					// self-closing tag.  We incur a formal syntax error: both closing and self-closing.
-					warning_report(w->origin(), "HTML-like tag is both closing, and self-closing");
-					working.remove_prefix(2);
-					ltrim(working);
-					if (working.empty()) {
-						src.DeleteIdx(scan--);
-					} else {
-						*z = formal::word(std::shared_ptr<const std::string>(new std::string(working)), y->origin() + (z->value.size() - working.size()), z->code());
-					}
-					return new HTMLtag(std::string(tagname), (mode)hint_code, w->origin());
-				}
-				if (working.starts_with(">")) {
-					// either start, or end tag.
-					if ((Start | End) == code) code = Start;
-					working.remove_prefix(1);
-					ltrim(working);
-					if (working.empty()) {
-						src.DeleteIdx(scan--);
-					} else {
-						*z = formal::word(std::shared_ptr<const std::string>(new std::string(working)), y->origin() + (z->value.size() - working.size()), z->code());
-					}
-					return new HTMLtag(std::string(tagname), (mode)hint_code, w->origin());
-				}
-			}
-			warning_report(w->origin(), "incomplete HTML-like closing tag: completing");
-			return new HTMLtag(std::string(tagname), (mode)hint_code, w->origin());
-		} else /* if constexpr ((Start | End) == hint_code) */ {
-		}
-
-		return ret;
-	}
-
 };
 
 // end prototype class
@@ -733,26 +593,11 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 		return ret;
 	}
 
-	if (auto possible_tag = HTMLtag::parse(*w)) {
-		if (auto tag = std::get_if<std::pair<std::unique_ptr<HTMLtag>, size_t> >(&(*possible_tag))) {
-			auto prechop_size = text.size() - tag->second;
-			if (0 < prechop_size) {
-				auto remainder = text;
-				remainder.remove_prefix(prechop_size);
-				ltrim(remainder);
-				if (!remainder.empty()) {
-					std::unique_ptr<formal::word> stage(new formal::word(std::shared_ptr<const std::string>(new std::string(remainder)), w->origin() + (text.size() - remainder.size())));
-					std::unique_ptr<formal::lex_node> node(new formal::lex_node(std::move(stage)));
-					src.insertNSlotsAt(1, viewpoint + 1);
-					src[viewpoint + 1] = node.release();
-				};
-			}
-			std::unique_ptr<formal::lex_node> stage(new formal::lex_node(tag->first.release(), formal::Tokenized | TG_HTML_tag));
-			delete src[viewpoint];
-			src[viewpoint] = stage.release();
-			return ret;
-		}
-		// \todo handle incomplete parse
+	if (auto tag = HTMLtag::parse(src, viewpoint)) {
+		std::unique_ptr<formal::lex_node> stage(new formal::lex_node(tag.release(), TG_HTML_tag | formal::Tokenized));
+		delete src[viewpoint];
+		src[viewpoint] = stage.release();
+		return ret;
 	}
 
 	// failover: alphanumeric blob
@@ -897,7 +742,7 @@ int main(int argc, char* argv[], char* envp[])
 
 //	STRING_LITERAL_TO_STDOUT("End testing\n");
 //	if (!to_console) STRING_LITERAL_TO_STDOUT("</pre>\n");
-	return 0;	// success
+	return Errors.count() ? EXIT_FAILURE : EXIT_SUCCESS;
 };
 
 #endif
