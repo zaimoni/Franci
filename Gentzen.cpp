@@ -603,18 +603,18 @@ static auto to_lines(std::istream& in, formal::src_location& origin)
 enum TG_modes {
 	TG_HTML_tag =59,
 	TG_HTML_entity,
-	TG_tokenized,
-	TG_inert_token,
 	TG_MAX
 };
 
 static_assert(sizeof(unsigned long long)* CHAR_BIT >= TG_MAX);
-static_assert(!(formal::Comment& (1ULL << TG_HTML_entity)));
-static_assert(!(formal::Comment& (1ULL << TG_tokenized)));
-static_assert(!(formal::Comment& (1ULL << TG_inert_token)));
-static_assert(!(formal::Error& (1ULL << TG_HTML_entity)));
-static_assert(!(formal::Error & (1ULL << TG_tokenized)));
-static_assert(!(formal::Error & (1ULL << TG_inert_token)));
+static_assert(!(formal::Comment & (1ULL << TG_HTML_tag)));
+static_assert(!(formal::Comment & (1ULL << TG_HTML_tag)));
+static_assert(!(formal::Error & (1ULL << TG_HTML_tag)));
+static_assert(!(formal::Error & (1ULL << TG_HTML_tag)));
+static_assert(!(formal::Inert_Token & (1ULL << TG_HTML_tag)));
+static_assert(!(formal::Inert_Token & (1ULL << TG_HTML_tag)));
+static_assert(!(formal::Tokenized & (1ULL << TG_HTML_tag)));
+static_assert(!(formal::Tokenized & (1ULL << TG_HTML_tag)));
 
 // action coding: offset to parse at next
 static constexpr std::pair<std::string_view, int> reserved_atomic[] = {
