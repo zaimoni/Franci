@@ -128,8 +128,9 @@ static std::optional<std::pair<std::string_view, size_t> > kleene_star(const std
 // prototype class -- extract to own files when stable
 
 class HTMLtag : public formal::parsed {
+	using kv_pairs_t = std::vector < std::pair<std::string, std::string> >;
 	std::string _tag_name;
-	std::shared_ptr<const std::vector<std::pair<std::string, std::string> > > kv_pairs; // could use std::map instead
+	std::shared_ptr<const kv_pairs_t> kv_pairs; // could use std::map instead
 	formal::src_location _origin;
 	unsigned long long _bitmap;
 
@@ -140,7 +141,7 @@ class HTMLtag : public formal::parsed {
 	static constexpr const char* end_tag[] = { ">", ">", " />" };
 
 public:
-	enum class mode {
+	enum class mode : decltype(_bitmap) {
 		opening = Start,
 		closing = End,
 		self_closing = Start | End
@@ -153,8 +154,10 @@ public:
 	HTMLtag& operator=(HTMLtag&& src) = default;
 	~HTMLtag() = default;
 
-	HTMLtag(const std::string& tag, mode code, formal::src_location origin) : _tag_name(tag), _bitmap(decltype(_bitmap)(code)), _origin(origin) {}
-	HTMLtag(std::string&& tag, mode code, formal::src_location origin) noexcept : _tag_name(std::move(tag)), _bitmap(decltype(_bitmap)(code)), _origin(origin) {}
+	HTMLtag(const std::string& tag, mode code, formal::src_location origin) : _tag_name(tag), _origin(origin), _bitmap(decltype(_bitmap)(code)) {}
+	HTMLtag(std::string&& tag, mode code, formal::src_location origin) noexcept : _tag_name(std::move(tag)), _origin(origin), _bitmap(decltype(_bitmap)(code)) {}
+	HTMLtag(const std::string& tag, mode code, formal::src_location origin, decltype(kv_pairs) data) : _tag_name(tag), kv_pairs(data), _origin(origin), _bitmap(decltype(_bitmap)(code)) {}
+	HTMLtag(std::string&& tag, mode code, formal::src_location origin, decltype(kv_pairs) data) noexcept : _tag_name(std::move(tag)), kv_pairs(data), _origin(origin), _bitmap(decltype(_bitmap)(code)) {}
 
 	std::unique_ptr<parsed> clone() const override { return std::unique_ptr<parsed>(new HTMLtag(*this)); }
 	void CopyInto(parsed*& dest) const override { zaimoni::CopyInto(*this, dest); }	// polymorphic assignment
@@ -180,6 +183,174 @@ public:
 		}
 		ret += end_tag[index];
 		return ret;
+	}
+
+	static std::unique_ptr<HTMLtag> parse(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
+		// invariants -- would be ok to hard-fail these
+		const auto x = src[viewpoint];
+		if (x->code() & (formal::Comment | formal::Tokenized | formal::Inert_Token)) return nullptr;	// do not try to lex comments, or already-tokenized
+		if (1 != x->is_pure_anchor()) return nullptr;	// we only try to manipulate things that don't have internal syntax
+		// end invariants check
+
+		const auto w = x->anchor<formal::word>();
+		auto text = w->value();
+
+		if (!text.starts_with("<")) return nullptr;
+		auto working = text;
+		size_t initial_len = 1;
+		unsigned int code = Start | End;
+		working.remove_prefix(1);
+		if (working.starts_with("/")) {
+			// terminal tag
+			working.remove_prefix(1);
+			code &= ~Start;
+			initial_len++;
+		}
+
+		if (working.empty()) return nullptr;
+		const auto would_be_tag = kleene_star(working, is_alphabetic);
+		if (!would_be_tag) return nullptr;
+
+		kv_pairs_t kv_pairs;
+		std::vector<size_t> doomed;
+		bool seen_equals = false;
+		auto y = x;
+		size_t scan = viewpoint;
+		ltrim(working);
+
+		static auto can_parse = [&]() {
+			if (!working.empty()) return true;
+			doomed.push_back(scan);
+
+			while (src.size() > ++scan) {
+				y = src[viewpoint];
+				if (y->code() & formal::Comment) continue;	// ignore
+				if ((y->code() & (formal::Tokenized | formal::Inert_Token))
+					|| 1 != y->is_pure_anchor()) {
+					std::string err("HTML tag ");
+					err += would_be_tag->first;
+					err += " parse stopped by already-parsed content";
+					error_report(x->origin(), err);
+					return false;
+				}
+				working = y->anchor<formal::word>()->value();
+				ltrim(working);
+				if (!working.empty()) return true;
+				doomed.push_back(scan);
+			}
+			return false;
+		};
+
+		static auto chop_to_remainder = [&]() {
+			auto remainder = y->anchor<formal::word>()->value();
+			remainder.remove_prefix(remainder.size() - working.size());
+			ltrim(remainder);
+			if (!remainder.empty()) {
+				std::unique_ptr<formal::word> stage(new formal::word(std::shared_ptr<const std::string>(new std::string(remainder)), w->origin() + (text.size() - remainder.size())));
+				std::unique_ptr<formal::lex_node> node(new formal::lex_node(std::move(stage)));
+				if (viewpoint < scan) {
+					delete src[scan];
+					src[scan] = node.release();
+				} else {
+					src.insertNSlotsAt(1, viewpoint + 1);
+					src[viewpoint + 1] = node.release();
+				}
+			} else if (viewpoint < scan) src.DeleteIdx(scan);
+
+			while (!doomed.empty()) {
+				auto gone = doomed.back();
+				doomed.pop_back();
+				if (viewpoint < gone) src.DeleteIdx(gone);
+			};
+		};
+
+		while(can_parse()) {
+			bool stop_now = false;
+			if (working.starts_with("/>")) {
+				// self-closing tag.  Formal syntax error if both closing and self-closing.
+				if (End == code) {
+					warning_report(x->origin(), "HTML-like tag is both closing, and self-closing");
+				} else if (Start == code) {
+					warning_report(x->origin(), "HTML-like tag is both opening, and self-closing");
+				}
+				stop_now = true;
+				working.remove_prefix(2);
+			} else if (working.starts_with(">")) {
+				stop_now = true;
+				working.remove_prefix(1);
+			}
+			if (stop_now) {
+				if (End == code) { // closing tag: discard all key-value pairs
+					chop_to_remainder();
+					return std::unique_ptr<HTMLtag>(new HTMLtag(std::string(would_be_tag->first), mode::closing, w->origin()));
+				}
+				if (kv_pairs.empty()) { // no key-value pairs
+					chop_to_remainder();
+					return std::unique_ptr<HTMLtag>(new HTMLtag(std::string(would_be_tag->first), (mode)code, w->origin()));
+				};
+				chop_to_remainder();
+				return std::unique_ptr<HTMLtag>(new HTMLtag(std::string(would_be_tag->first), (mode)code, w->origin(), std::shared_ptr<const kv_pairs_t>(new kv_pairs_t(std::move(kv_pairs)))));
+			}
+			if (auto would_be_key = kleene_star(working, is_alphabetic)) {	// \todo not quite correct, but handles what is needed
+				if (seen_equals) {
+					kv_pairs.back().second = would_be_key->first;
+					seen_equals = false;
+				} else
+					kv_pairs.push_back(std::pair(std::string(would_be_key->first), std::string()));
+				working.remove_prefix(would_be_key->first.size());
+				ltrim(working);
+				continue;
+			}
+			if (working.starts_with("=")) {
+				if (seen_equals) {
+					warning_report(x->origin(), "HTML-like tag parse aborted: = =");
+					return nullptr;
+				}
+				if (kv_pairs.empty() || !kv_pairs.back().second.empty()) {
+					warning_report(x->origin(), "HTML-like tag parse aborted: key-less =");
+					return nullptr;
+				}
+				seen_equals = true;
+				working.remove_prefix(1);
+				continue;
+			}
+			if (seen_equals) {
+				// we don't handle multi-line values
+				if (working.starts_with('"')) {
+					auto n = working.find('"', 1);
+					if (std::string_view::npos != n) {
+						auto val = working;
+						if (val.size() > (n + 1)) val.remove_suffix(val.size() - (n + 1));
+						kv_pairs.back().second = std::string(val);
+						working.remove_prefix(n + 1);
+						seen_equals = false;
+						continue;
+					} else {
+						warning_report(x->origin(), "HTML-like tag parse aborted: unterminated \"...\"");
+						return nullptr;
+					}
+				}
+				if (working.starts_with('\'')) {
+					auto n = working.find('\'', 1);
+					if (std::string_view::npos != n) {
+						auto val = working;
+						if (val.size() > (n + 1)) val.remove_suffix(val.size() - (n + 1));
+						kv_pairs.back().second = std::string(val);
+						working.remove_prefix(n + 1);
+						seen_equals = false;
+						continue;
+					} else {
+						warning_report(x->origin(), "HTML-like tag parse aborted: unterminated '...'");
+						return nullptr;
+					}
+				}
+			}
+			warning_report(x->origin(), "HTML-like tag parse aborted: unclear how to proceed");
+			return nullptr;
+		}
+		if (src.size() > scan) return nullptr;
+
+		return nullptr;
 	}
 
 	static std::optional<std::variant<
@@ -242,7 +413,7 @@ public:
 	static std::unique_ptr<HTMLtag> parse(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint, std::string_view hint) {
 		// invariants -- would be ok to hard-fail these
 		decltype(auto) x = src[viewpoint];
-		if (x->code() & (formal::Comment | (1ULL << TG_tokenized) | (1ULL << TG_inert_token))) return nullptr;	// do not try to lex comments, or already-tokenized
+		if (x->code() & (formal::Comment | formal::Tokenized | formal::Inert_Token)) return nullptr;	// do not try to lex comments, or already-tokenized
 		if (1 != x->is_pure_anchor()) return nullptr;	// we only try to manipulate things that don't have internal syntax
 
 		const auto w = x->anchor<formal::word>();
@@ -266,11 +437,11 @@ public:
 			while (++scan < src.size()) {
 				decltype(auto) y = src[scan];
 				if (y->code() & formal::Comment) continue;	// ignore comments
-				if (y->code() & (1ULL << TG_inert_token)) {
+				if (y->code() & formal::Inert_Token) {
 					error_report(*x, "HTML tag parse stopped by inert token");
 					return nullptr;
 				}
-				if (y->code() & (1ULL << TG_tokenized)) {
+				if (y->code() & formal::Tokenized) {
 					// this might need further work
 					error_report(*x, "HTML tag parse stopped by already-parsed token");
 					return nullptr;
@@ -501,7 +672,7 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 	std::vector<size_t> ret;
 
 	decltype(auto) x = src[viewpoint];
-	if (x->code() & (formal::Comment | (1ULL << TG_tokenized) | (1ULL << TG_inert_token))) return ret;	// do not try to lex comments, or already-tokenized
+	if (x->code() & (formal::Comment | formal::Tokenized | formal::Inert_Token)) return ret;	// do not try to lex comments, or already-tokenized
 	if (1 != x->is_pure_anchor()) return ret;	// we only try to manipulate things that don't have internal syntax
 
 	const auto w = x->anchor<formal::word>();
@@ -524,7 +695,7 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 	for (decltype(auto) scan : reserved_atomic) {
 		if (scan.first == text) {
 			*w = formal::word(scan.first, w->origin(), w->code());	// force GC of std::shared_ptr
-			x->learn(1ULL << TG_inert_token);
+			x->learn(formal::Inert_Token);
 			if (1 != scan.second) ret.push_back(viewpoint + scan.second);
 			return ret;
 		}
@@ -539,7 +710,7 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 				src[viewpoint + 1] = node.release();
 			};
 			*w = formal::word(scan.first, w->origin(), w->code());	// force GC of std::shared_ptr
-			x->learn(1ULL << TG_inert_token);
+			x->learn(formal::Inert_Token);
 			if (1 != scan.second) ret.push_back(viewpoint + scan.second);
 			return ret;
 		}
@@ -558,7 +729,7 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 
 		text.remove_suffix(text.size() - html_entity);
 		*w = formal::word(std::shared_ptr<const std::string>(new std::string(text)), w->origin(), w->code());
-		x->learn((1ULL << TG_HTML_entity) | (1ULL << TG_inert_token));
+		x->learn((1ULL << TG_HTML_entity) | formal::Inert_Token);
 		return ret;
 	}
 
@@ -576,7 +747,7 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 					src[viewpoint + 1] = node.release();
 				};
 			}
-			std::unique_ptr<formal::lex_node> stage(new formal::lex_node(tag->first.release(), TG_tokenized | TG_HTML_tag));
+			std::unique_ptr<formal::lex_node> stage(new formal::lex_node(tag->first.release(), formal::Tokenized | TG_HTML_tag));
 			delete src[viewpoint];
 			src[viewpoint] = stage.release();
 			return ret;
@@ -598,10 +769,10 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 			};
 			text.remove_suffix(text.size() - test->first.size());
 			*w = formal::word(std::shared_ptr<const std::string>(new std::string(text)), w->origin());
-			x->learn(1ULL << TG_tokenized);
+			x->learn(formal::Tokenized);
 			return ret;
 		}
-		x->learn(1ULL << TG_tokenized);
+		x->learn(formal::Tokenized);
 		return ret;
 	}
 
@@ -619,15 +790,15 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 			};
 			text.remove_suffix(text.size() - test->first.size());
 			*w = formal::word(std::shared_ptr<const std::string>(new std::string(text)), w->origin());
-			x->learn(1ULL << TG_tokenized);
+			x->learn(formal::Tokenized);
 			return ret;
 		}
-		x->learn(1ULL << TG_tokenized);
+		x->learn(formal::Tokenized);
 		return ret;
 	}
 
 	// failover: if we didn't handle it, pretend it's tokenized so we don't re-scan it
-	x->learn(1ULL << TG_tokenized);
+	x->learn(formal::Tokenized);
 	return ret;
 }
 
@@ -637,7 +808,7 @@ auto balanced_atomic_handler(const std::string_view& l_token, const std::string_
 		std::vector<size_t> ret;
 
 		decltype(auto) closing = src[viewpoint];
-		if (!(closing->code() & (1ULL << TG_inert_token))) return ret;	// our triggers are inert tokens
+		if (!(closing->code() & formal::Inert_Token)) return ret;	// our triggers are inert tokens
 		if (closing->code() & formal::Error) return ret;	// do not try to process error tokens
 		if (1 != closing->is_pure_anchor()) return ret;	// we only try to manipulate things that don't have internal syntax
 
@@ -647,7 +818,7 @@ auto balanced_atomic_handler(const std::string_view& l_token, const std::string_
 		ptrdiff_t ub = viewpoint;
 		while (0 <= --ub) {
 			decltype(auto) opening = src[ub];
-			if (!(opening->code() & (1ULL << TG_inert_token))) continue;	// our triggers are inert tokens
+			if (!(opening->code() & formal::Inert_Token)) continue;	// our triggers are inert tokens
 //			if (x->code() & formal::Error) return ret;	// do not try to process error tokens
 			if (1 != opening->is_pure_anchor()) continue;	// we only try to manipulate things that don't have internal syntax
 
