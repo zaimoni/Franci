@@ -24,7 +24,8 @@ static error_counter<size_t> Warnings(1000, "too many warnings");
 
 // stub for more sophisticated error reporting
 static void error_report(const formal::src_location& loc, const std::string& err) {
-	std::wcerr << loc.path->native();
+	if (loc.path) std::wcerr << loc.path->native();
+	else std::cerr << "<unknown>";
 	std::cerr << loc.to_s() << ": error : " << err << '\n';
 	++Errors;
 }
@@ -35,7 +36,8 @@ static void error_report(formal::lex_node& fail, const std::string& err) {
 }
 
 static void warning_report(const formal::src_location& loc, const std::string& warn) {
-	std::wcerr << loc.path->native();
+	if (loc.path) std::wcerr << loc.path->native();
+	else std::cerr << "<unknown>";
 	std::cerr << loc.to_s() << ": warning : " << warn << '\n';
 	++Warnings;
 }
