@@ -219,6 +219,8 @@ public:
 		bool seen_equals = false;
 		auto y = x;
 		size_t scan = viewpoint;
+
+		working.remove_prefix(would_be_tag->first.size());
 		ltrim(working);
 
 		static auto can_parse = [&]() {
@@ -281,6 +283,7 @@ public:
 			} else if (working.starts_with(">")) {
 				stop_now = true;
 				working.remove_prefix(1);
+				if ((Start | End) == code) code = Start;
 			}
 			if (stop_now) {
 				if (End == code) { // closing tag: discard all key-value pairs
