@@ -163,6 +163,9 @@ public:
 	void CopyInto(parsed*& dest) const override { zaimoni::CopyInto(*this, dest); }	// polymorphic assignment
 	void MoveInto(parsed*& dest) override { zaimoni::MoveIntoV2(std::move(*this), dest); }	// polymorphic move
 
+	auto tag_type() const { return (mode)(_bitmap & (Start | End)); }
+	const std::string& tag_name() const { return _tag_name; }
+
 	formal::src_location origin() const override { return _origin; }
 
 	std::string to_s() const override {
@@ -684,6 +687,35 @@ auto balanced_atomic_handler(const std::string_view& l_token, const std::string_
 	};
 }
 
+auto balanced_html_tag(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
+	std::vector<size_t> ret;
+
+	decltype(auto) closing = src[viewpoint];
+	auto tag = dynamic_cast<HTMLtag*>(closing->anchor<formal::parsed>());
+	if (!tag) return ret;
+	if (HTMLtag::mode::closing != tag->tag_type()) return ret;
+
+	ptrdiff_t ub = viewpoint;
+	while (0 <= --ub) {
+		decltype(auto) opening = src[ub];
+		auto open_tag = dynamic_cast<HTMLtag*>(opening->anchor<formal::parsed>());
+		if (!open_tag) continue;
+		auto open_mode = open_tag->tag_type();
+		if (HTMLtag::mode::self_closing == open_mode) continue;
+		if (open_tag->tag_name() != tag->tag_name()) continue;
+		if (HTMLtag::mode::opening == open_mode) {
+			formal::lex_node::slice(src, ub, viewpoint);
+			ret.push_back(ub);
+			return ret;
+		}
+		// assume an unmatched closing tag of our type has itself failed to match
+		return ret;
+	}
+
+	error_report(*closing, std::string("unmatched </") + tag->tag_name() + ">");
+	return ret;
+}
+
 static auto& TokenGrammar() {
 	static std::unique_ptr<kuroda::parser<formal::lex_node> > ooao;
 	if (!ooao) {
@@ -691,6 +723,7 @@ static auto& TokenGrammar() {
 		ooao->register_build_nonterminal(tokenize);
 		ooao->register_build_nonterminal(balanced_atomic_handler(reserved_atomic[0].first, reserved_atomic[1].first));
 		ooao->register_build_nonterminal(balanced_atomic_handler(reserved_atomic[2].first, reserved_atomic[3].first));
+		ooao->register_build_nonterminal(balanced_html_tag);
 	};
 	return *ooao;
 }
