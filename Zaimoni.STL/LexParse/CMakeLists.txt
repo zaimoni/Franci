@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 
 add_library(z_csvtable STATIC CSVTable.cpp)
 # add_library(z_csvtable_iso STATIC CSVTable.cpp)	# doesn't build yet
-add_library(z_kuroda STATIC FormalWord.cpp LexNode.cpp)
+add_library(z_kuroda STATIC FormalWord.cpp LexNode.cpp string_view.cpp)
 add_library(z_langconf STATIC LangConf.cpp)
 add_library(z_langconf_iso STATIC LangConf.cpp)
 

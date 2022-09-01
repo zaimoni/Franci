@@ -126,4 +126,9 @@ namespace formal {
 
 } // namespace formal
 
+// hooks to be provided by the library user
+void error_report(const formal::src_location& loc, const std::string& err);
+void error_report(formal::lex_node& fail, const std::string& err);
+void warning_report(const formal::src_location& loc, const std::string& warn);
+
 #endif

@@ -3,13 +3,14 @@
 #include "Zaimoni.STL/LexParse/Kuroda.hpp"
 
 #ifdef GENTZEN_DRIVER
+#include "HTMLtag.hpp"
+#include "Zaimoni.STL/LexParse/string_view.hpp"
 #include "test_driver.h"
 #include "Zaimoni.STL/Pure.C/comptest.h"
 #include <filesystem>
 #include <memory>
 #include <fstream>
 #include <iostream>
-#include <string_view>
 
 #include "errcount.hpp"
 
@@ -23,19 +24,19 @@ static error_counter<size_t> Errors(100, "too many errors");
 static error_counter<size_t> Warnings(1000, "too many warnings");
 
 // stub for more sophisticated error reporting
-static void error_report(const formal::src_location& loc, const std::string& err) {
+void error_report(const formal::src_location& loc, const std::string& err) {
 	if (loc.path) std::wcerr << loc.path->native();
 	else std::cerr << "<unknown>";
 	std::cerr << loc.to_s() << ": error : " << err << '\n';
 	++Errors;
 }
 
-static void error_report(formal::lex_node& fail, const std::string& err) {
+void error_report(formal::lex_node& fail, const std::string& err) {
 	error_report(fail.origin(), err);
 	fail.learn(formal::Error);
 }
 
-static void warning_report(const formal::src_location& loc, const std::string& warn) {
+void warning_report(const formal::src_location& loc, const std::string& warn) {
 	if (loc.path) std::wcerr << loc.path->native();
 	else std::cerr << "<unknown>";
 	std::cerr << loc.to_s() << ": warning : " << warn << '\n';
@@ -71,60 +72,6 @@ static bool process_option(std::string_view arg)
 	}
 	// \todo actually implement
 	return true;
-}
-
-// whitespace trimming utilities
-static void ltrim(std::string_view& src) {
-	while (!src.empty() && isspace(static_cast<unsigned char>(src.front()))) src.remove_prefix(1);
-}
-
-static void rtrim(std::string_view& src) {
-	while(!src.empty() && isspace(static_cast<unsigned char>(src.back()))) src.remove_suffix(1);
-}
-
-static void trim(std::string_view& src) {
-	ltrim(src);
-	rtrim(src);
-}
-
-size_t is_alphabetic(const std::string_view& src)
-{
-	if (isalpha(static_cast<unsigned char>(src[0]))) return 1;
-	return 0;
-}
-
-size_t is_alphanumeric(const std::string_view& src)
-{
-	if (isalnum(static_cast<unsigned char>(src[0]))) return 1;
-	return 0;
-}
-
-size_t is_digit(const std::string_view& src)
-{
-	if (isdigit(static_cast<unsigned char>(src[0]))) return 1;
-	return 0;
-}
-
-size_t is_hex_digit(const std::string_view& src)
-{
-	if (isxdigit(static_cast<unsigned char>(src[0]))) return 1;
-	return 0;
-}
-
-static std::optional<std::pair<std::string_view, size_t> > kleene_star(const std::string_view& src, std::function<size_t(const std::string_view&)> ok) {
-	size_t len = src.empty() ? 0 : ok(src);
-	if (0 >= len) return std::nullopt;
-	size_t matched = 0;
-	auto working = src;
-	while (0 < len) {
-		++matched;
-		working.remove_prefix(len);
-		len = src.empty() ? 0 : ok(working);
-	}
-
-	std::pair<std::string_view, size_t> ret(src, matched);
-	ret.first.remove_suffix(working.size());
-	return ret;
 }
 
 // prototype class -- extract to own files when stable
@@ -202,243 +149,6 @@ namespace gentzen {
 } // end namespace gentzen
 
 // end prototype class
-
-// prototype class -- extract to own files when stable
-
-class HTMLtag : public formal::parsed {
-	using kv_pairs_t = std::vector < std::pair<std::string, std::string> >;
-	std::string _tag_name;
-	std::shared_ptr<const kv_pairs_t> kv_pairs; // could use std::map instead
-	formal::src_location _origin;
-	unsigned long long _bitmap;
-
-	static constexpr const decltype(_bitmap) Start = (1ULL << 0);
-	static constexpr const decltype(_bitmap) End = (1ULL << 1);
-
-	static constexpr const char* start_tag[] = { "<", "</", "<" };
-	static constexpr const char* end_tag[] = { ">", ">", " />" };
-
-public:
-	enum class mode : decltype(_bitmap) {
-		opening = Start,
-		closing = End,
-		self_closing = Start | End
-	};
-
-	HTMLtag() = delete;
-	HTMLtag(const HTMLtag& src) = default;
-	HTMLtag(HTMLtag&& src) = default;
-	HTMLtag& operator=(const HTMLtag& src) = default;
-	HTMLtag& operator=(HTMLtag&& src) = default;
-	~HTMLtag() = default;
-
-	HTMLtag(const std::string& tag, mode code, formal::src_location origin) : _tag_name(tag), _origin(origin), _bitmap(decltype(_bitmap)(code)) {}
-	HTMLtag(std::string&& tag, mode code, formal::src_location origin) noexcept : _tag_name(std::move(tag)), _origin(origin), _bitmap(decltype(_bitmap)(code)) {}
-	HTMLtag(const std::string& tag, mode code, formal::src_location origin, decltype(kv_pairs) data) : _tag_name(tag), kv_pairs(data), _origin(origin), _bitmap(decltype(_bitmap)(code)) {}
-	HTMLtag(std::string&& tag, mode code, formal::src_location origin, decltype(kv_pairs) data) noexcept : _tag_name(std::move(tag)), kv_pairs(data), _origin(origin), _bitmap(decltype(_bitmap)(code)) {}
-
-	std::unique_ptr<parsed> clone() const override { return std::unique_ptr<parsed>(new HTMLtag(*this)); }
-	void CopyInto(parsed*& dest) const override { zaimoni::CopyInto(*this, dest); }	// polymorphic assignment
-	void MoveInto(parsed*& dest) override { zaimoni::MoveIntoV2(std::move(*this), dest); }	// polymorphic move
-
-	auto tag_type() const { return (mode)(_bitmap & (Start | End)); }
-	const std::string& tag_name() const { return _tag_name; }
-
-	formal::src_location origin() const override { return _origin; }
-
-	std::string to_s() const override {
-		auto index = (_bitmap & (Start | End))-1;
-
-		std::string ret(start_tag[index]);
-		ret += _tag_name;
-		if (kv_pairs) {
-			for (decltype(auto) kv : *kv_pairs) {
-				ret += " ";
-				ret += kv.first;
-				if (!kv.second.empty()) {
-					ret += "\"";
-					ret += kv.second;
-					ret += "\"";
-				}
-			}
-		}
-		ret += end_tag[index];
-		return ret;
-	}
-
-	static std::unique_ptr<HTMLtag> parse(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
-		// invariants -- would be ok to hard-fail these
-		const auto x = src[viewpoint];
-		if (x->code() & (formal::Comment | formal::Tokenized | formal::Inert_Token)) return nullptr;	// do not try to lex comments, or already-tokenized
-		if (1 != x->is_pure_anchor()) return nullptr;	// we only try to manipulate things that don't have internal syntax
-		// end invariants check
-
-		const auto w = x->anchor<formal::word>();
-		auto text = w->value();
-
-		if (!text.starts_with("<")) return nullptr;
-		auto working = text;
-		size_t initial_len = 1;
-		unsigned int code = Start | End;
-		working.remove_prefix(1);
-		if (working.starts_with("/")) {
-			// terminal tag
-			working.remove_prefix(1);
-			code &= ~Start;
-			initial_len++;
-		}
-
-		if (working.empty()) return nullptr;
-		const auto would_be_tag = kleene_star(working, is_alphabetic);
-		if (!would_be_tag) return nullptr;
-
-		kv_pairs_t kv_pairs;
-		std::vector<size_t> doomed;
-		bool seen_equals = false;
-		auto y = x;
-		size_t scan = viewpoint;
-
-		working.remove_prefix(would_be_tag->first.size());
-		ltrim(working);
-
-		static auto can_parse = [&]() {
-			if (!working.empty()) return true;
-			doomed.push_back(scan);
-
-			while (src.size() > ++scan) {
-				y = src[viewpoint];
-				if (y->code() & formal::Comment) continue;	// ignore
-				if ((y->code() & (formal::Tokenized | formal::Inert_Token))
-					|| 1 != y->is_pure_anchor()) {
-					std::string err("HTML tag ");
-					err += would_be_tag->first;
-					err += " parse stopped by already-parsed content";
-					error_report(x->origin(), err);
-					return false;
-				}
-				working = y->anchor<formal::word>()->value();
-				ltrim(working);
-				if (!working.empty()) return true;
-				doomed.push_back(scan);
-			}
-			return false;
-		};
-
-		static auto chop_to_remainder = [&]() {
-			auto remainder = y->anchor<formal::word>()->value();
-			remainder.remove_prefix(remainder.size() - working.size());
-			ltrim(remainder);
-			if (!remainder.empty()) {
-				std::unique_ptr<formal::word> stage(new formal::word(std::shared_ptr<const std::string>(new std::string(remainder)), w->origin() + (text.size() - remainder.size())));
-				std::unique_ptr<formal::lex_node> node(new formal::lex_node(std::move(stage)));
-				if (viewpoint < scan) {
-					delete src[scan];
-					src[scan] = node.release();
-				} else {
-					src.insertNSlotsAt(1, viewpoint + 1);
-					src[viewpoint + 1] = node.release();
-				}
-			} else if (viewpoint < scan) src.DeleteIdx(scan);
-
-			while (!doomed.empty()) {
-				auto gone = doomed.back();
-				doomed.pop_back();
-				if (viewpoint < gone) src.DeleteIdx(gone);
-			};
-		};
-
-		while(can_parse()) {
-			bool stop_now = false;
-			if (working.starts_with("/>")) {
-				// self-closing tag.  Formal syntax error if both closing and self-closing.
-				if (End == code) {
-					warning_report(x->origin(), "HTML-like tag is both closing, and self-closing");
-				} else if (Start == code) {
-					warning_report(x->origin(), "HTML-like tag is both opening, and self-closing");
-				}
-				stop_now = true;
-				working.remove_prefix(2);
-			} else if (working.starts_with(">")) {
-				stop_now = true;
-				working.remove_prefix(1);
-				if ((Start | End) == code) code = Start;
-			}
-			if (stop_now) {
-				if (End == code) { // closing tag: discard all key-value pairs
-					chop_to_remainder();
-					return std::unique_ptr<HTMLtag>(new HTMLtag(std::string(would_be_tag->first), mode::closing, w->origin()));
-				}
-				if (kv_pairs.empty()) { // no key-value pairs
-					chop_to_remainder();
-					return std::unique_ptr<HTMLtag>(new HTMLtag(std::string(would_be_tag->first), (mode)code, w->origin()));
-				};
-				chop_to_remainder();
-				return std::unique_ptr<HTMLtag>(new HTMLtag(std::string(would_be_tag->first), (mode)code, w->origin(), std::shared_ptr<const kv_pairs_t>(new kv_pairs_t(std::move(kv_pairs)))));
-			}
-			if (auto would_be_key = kleene_star(working, is_alphabetic)) {	// \todo not quite correct, but handles what is needed
-				if (seen_equals) {
-					kv_pairs.back().second = would_be_key->first;
-					seen_equals = false;
-				} else
-					kv_pairs.push_back(std::pair(std::string(would_be_key->first), std::string()));
-				working.remove_prefix(would_be_key->first.size());
-				ltrim(working);
-				continue;
-			}
-			if (working.starts_with("=")) {
-				if (seen_equals) {
-					warning_report(x->origin(), "HTML-like tag parse aborted: = =");
-					return nullptr;
-				}
-				if (kv_pairs.empty() || !kv_pairs.back().second.empty()) {
-					warning_report(x->origin(), "HTML-like tag parse aborted: key-less =");
-					return nullptr;
-				}
-				seen_equals = true;
-				working.remove_prefix(1);
-				continue;
-			}
-			if (seen_equals) {
-				// we don't handle multi-line values
-				if (working.starts_with('"')) {
-					auto n = working.find('"', 1);
-					if (std::string_view::npos != n) {
-						auto val = working;
-						if (val.size() > (n + 1)) val.remove_suffix(val.size() - (n + 1));
-						kv_pairs.back().second = std::string(val);
-						working.remove_prefix(n + 1);
-						seen_equals = false;
-						continue;
-					} else {
-						warning_report(x->origin(), "HTML-like tag parse aborted: unterminated \"...\"");
-						return nullptr;
-					}
-				}
-				if (working.starts_with('\'')) {
-					auto n = working.find('\'', 1);
-					if (std::string_view::npos != n) {
-						auto val = working;
-						if (val.size() > (n + 1)) val.remove_suffix(val.size() - (n + 1));
-						kv_pairs.back().second = std::string(val);
-						working.remove_prefix(n + 1);
-						seen_equals = false;
-						continue;
-					} else {
-						warning_report(x->origin(), "HTML-like tag parse aborted: unterminated '...'");
-						return nullptr;
-					}
-				}
-			}
-			warning_report(x->origin(), "HTML-like tag parse aborted: unclear how to proceed");
-			return nullptr;
-		}
-		if (src.size() > scan) return nullptr;
-
-		return nullptr;
-	}
-};
-
-// end prototype class HTMLtag
 
 enum LG_modes {
 	LG_PP_like = 1,	// #-format; could be interpreted later for C preprocessor directives if we were so inclined
