@@ -80,7 +80,35 @@ namespace formal {
 		bool syntax_ok() const;
 		int is_pure_anchor() const; // C error code convention
 
+#define LEX_NODE_DEREF_BODY(SRC) \
+	if (SRC.empty()) return nullptr; \
+	const size_t strict_ub = SRC.size(); \
+	if (strict_ub > n) return SRC[n]; \
+	if (0 <= n) return nullptr; \
+	n = strict_ub + n; \
+	if (strict_ub > n) return SRC[n]; \
+	if (0 > n) n = strict_ub - n; \
+	if (strict_ub > n) return SRC[n]; \
+	return nullptr
+
+		const lex_node* prefix(ptrdiff_t n) const {
+			LEX_NODE_DEREF_BODY(_prefix);
+		}
+
+		const lex_node* infix(ptrdiff_t n) const {
+			LEX_NODE_DEREF_BODY(_infix);
+		}
+
+		const lex_node* postfix(ptrdiff_t n) const {
+			LEX_NODE_DEREF_BODY(_postfix);
+		}
+
+#undef LEX_NODE_DEREF_BODY
+
 		static std::unique_ptr<lex_node> pop_front(kuroda::parser<formal::word>::sequence& src);
+
+		template<class Ret>
+		auto is_ok(std::function<Ret(const lex_node&)> ok) const { return ok(*this); }
 
 		void to_s(std::ostream& dest) const;
 		static std::ostream& to_s(std::ostream& dest, const kuroda::parser<lex_node>::sequence& src);

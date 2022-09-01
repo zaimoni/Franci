@@ -129,6 +129,82 @@ static std::optional<std::pair<std::string_view, size_t> > kleene_star(const std
 
 // prototype class -- extract to own files when stable
 
+namespace gentzen {
+
+	class var {
+		unsigned long long _quant_code;
+		std::shared_ptr<const formal::parsed> _var;
+		std::shared_ptr<const formal::parsed> _domain;
+
+	public:
+		enum class quantifier {
+			Term = 0,
+			ForAll,
+			ThereIs
+		};
+
+		var() = delete; // empty variable doesn't make much sense
+		var(const var& src) = default;
+		var(var&& src) = default;
+		var& operator=(const var& src) = default;
+		var& operator=(var&& src) = default;
+		~var() = default;
+
+		static bool is_varname(const formal::lex_node& src) {
+			// normal case: no italics, bold etc but subscripting ok
+			// auto w = src.anchor<formal::word>();
+			// if (w)
+			return false;
+		}
+	};
+
+	class inference_rule {
+		std::string _name;
+		std::vector<std::shared_ptr<const formal::parsed> > _vars;
+		std::vector<std::shared_ptr<const formal::parsed> > _hypotheses;
+		std::vector<std::shared_ptr<const formal::parsed> > _conclusions;
+
+		// fact, hypothesis/conclusion, var assignments
+		using arg_match = std::tuple<std::weak_ptr<const formal::parsed>, std::shared_ptr<const formal::parsed>, std::vector<std::pair<std::shared_ptr<const formal::parsed>, std::weak_ptr<const formal::parsed> > > >;
+		std::vector<arg_match> _rete_alpha_memory;
+
+	public:
+		inference_rule() = delete; // empty inference rule doesn't make much sense
+		inference_rule(const inference_rule& src) = default;
+		inference_rule(inference_rule&& src) = default;
+		inference_rule& operator=(const inference_rule& src) = default;
+		inference_rule& operator=(inference_rule&& src) = default;
+		~inference_rule() = default;
+
+		inference_rule(std::vector<std::shared_ptr<const formal::parsed> >&& hypotheses, std::vector<std::shared_ptr<const formal::parsed> >&& conclusions, std::string&& name = std::string())
+			: _name(std::move(name)), _hypotheses(std::move(hypotheses)), _conclusions(std::move(conclusions)) {
+		}
+	};
+
+	class proof {
+
+	public:
+		enum class rationale {
+			Given = 0,
+			Hypothesis
+		};
+
+		proof() = default;
+		proof(const proof& src) = default;
+		proof(proof&& src) = default;
+		proof& operator=(const proof& src) = default;
+		proof& operator=(proof&& src) = default;
+		~proof() = default;
+
+
+	};
+
+} // end namespace gentzen
+
+// end prototype class
+
+// prototype class -- extract to own files when stable
+
 class HTMLtag : public formal::parsed {
 	using kv_pairs_t = std::vector < std::pair<std::string, std::string> >;
 	std::string _tag_name;
@@ -362,7 +438,7 @@ public:
 	}
 };
 
-// end prototype class
+// end prototype class HTMLtag
 
 enum LG_modes {
 	LG_PP_like = 1,	// #-format; could be interpreted later for C preprocessor directives if we were so inclined
