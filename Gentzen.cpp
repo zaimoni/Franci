@@ -97,12 +97,38 @@ namespace gentzen {
 		var& operator=(var&& src) = default;
 		~var() = default;
 
-		static bool is_varname(const formal::lex_node& src) {
-			// normal case: no italics, bold etc but subscripting ok
-			// auto w = src.anchor<formal::word>();
-			// if (w)
+		static bool legal_varname(const formal::lex_node& src) {
+			if (0 < src.prefix_size()) return false;  // no prefix in the parse, at all
+			if (auto tag = HTMLtag::is_balanced_pair(src)) {
+				if (*tag != "b" && *tag != "i") return false;
+				if (1 != src.infix_size()) return false;
+				decltype(auto) test = *src.infix(0);
+				if (1 != test.is_pure_anchor()) return false;
+				if (!legal_varname(*test.anchor<formal::word>())) return false;
+				const auto post_size = src.postfix_size();
+				if (1 < post_size) return false;
+				if (0 == post_size) return true;
+				if (decltype(auto) node = src.postfix(0)) return HTMLtag::is_balanced_pair(*node, "sub");
+				return false;
+			}
+			// normal case: no italics, bold etc but subscripting generally ok
+			if (0 < src.infix_size()) return false;
+			if (0 < src.postfix_size()) return false;
+			if (auto w = src.anchor<formal::word>()) {
+				if (!legal_varname(*w)) return false;
+			} else return false;
+			if (auto node = src.post_anchor<formal::lex_node>()) return HTMLtag::is_balanced_pair(*node, "sub");
+			if (src.post_anchor<formal::word>()) return false;
+			if (src.post_anchor<formal::parsed>()) return false;
+			return true;
+		}
+
+		static bool legal_varname(const formal::word& src) {
+			if (src.code() & HTMLtag::Entity) return true; // \todo check for "alphabetic-ness" of the underlying UNICODE code point
+			if (is_alphabetic(src.value())) return true; // first character only tested
 			return false;
 		}
+
 	};
 
 	class inference_rule {
@@ -255,19 +281,14 @@ static auto to_lines(std::istream& in, formal::src_location& origin)
 }
 
 enum TG_modes {
-	TG_HTML_tag =59,
-	TG_HTML_entity,
+	TG_HTML_tag =60,
 	TG_MAX
 };
 
 static_assert(sizeof(unsigned long long)* CHAR_BIT >= TG_MAX);
 static_assert(!(formal::Comment & (1ULL << TG_HTML_tag)));
-static_assert(!(formal::Comment & (1ULL << TG_HTML_tag)));
-static_assert(!(formal::Error & (1ULL << TG_HTML_tag)));
 static_assert(!(formal::Error & (1ULL << TG_HTML_tag)));
 static_assert(!(formal::Inert_Token & (1ULL << TG_HTML_tag)));
-static_assert(!(formal::Inert_Token & (1ULL << TG_HTML_tag)));
-static_assert(!(formal::Tokenized & (1ULL << TG_HTML_tag)));
 static_assert(!(formal::Tokenized & (1ULL << TG_HTML_tag)));
 
 // action coding: offset to parse at next
@@ -383,7 +404,8 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 
 		text.remove_suffix(text.size() - html_entity);
 		*w = formal::word(std::shared_ptr<const std::string>(new std::string(text)), w->origin(), w->code());
-		x->learn((1ULL << TG_HTML_entity) | formal::Inert_Token);
+		w->learn(HTMLtag::Entity);
+		x->learn(HTMLtag::Entity | formal::Inert_Token);
 		return ret;
 	}
 
@@ -479,6 +501,14 @@ auto balanced_atomic_handler(const std::string_view& l_token, const std::string_
 }
 
 auto balanced_html_tag(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
+	static constexpr const char* empty_visual_no_op[] = {
+		"span",
+		"sub",
+		"sup",
+		"b",
+		"i",
+	};
+
 	std::vector<size_t> ret;
 
 	decltype(auto) closing = src[viewpoint];
@@ -495,6 +525,16 @@ auto balanced_html_tag(kuroda::parser<formal::lex_node>::sequence& src, size_t v
 		if (HTMLtag::mode::self_closing == open_mode) continue;
 		if (open_tag->tag_name() != tag->tag_name()) continue;
 		if (HTMLtag::mode::opening == open_mode) {
+			// we understand that the following graphical tags no-op without content
+			for (decltype(auto) must_see : empty_visual_no_op) {
+				if (tag->tag_name() == must_see && 1 == viewpoint - ub) {
+					ret.push_back(ub);
+					src.DeleteIdx(viewpoint);
+					src.DeleteIdx(ub);
+					return ret;
+				}
+			}
+			// typically want to do this
 			formal::lex_node::slice(src, ub, viewpoint);
 			ret.push_back(ub);
 			return ret;

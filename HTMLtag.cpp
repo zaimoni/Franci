@@ -2,6 +2,26 @@
 
 #include "Zaimoni.STL/LexParse/string_view.hpp"
 
+const std::string* HTMLtag::is_balanced_pair(const formal::lex_node& src) {
+	auto leading_tag = dynamic_cast<HTMLtag*>(src.anchor<formal::parsed>());
+	if (!leading_tag) return nullptr;
+	if (HTMLtag::mode::opening != leading_tag->tag_type()) return nullptr;
+	auto trailing_tag = dynamic_cast<HTMLtag*>(src.post_anchor<formal::parsed>());
+	if (!trailing_tag) return nullptr;
+	if (HTMLtag::mode::opening != trailing_tag->tag_type() || trailing_tag->tag_name() != leading_tag->tag_name()) return nullptr;
+	return &trailing_tag->tag_name();
+}
+
+bool HTMLtag::is_balanced_pair(const formal::lex_node& src, const std::string& target) {
+	auto leading_tag = dynamic_cast<HTMLtag*>(src.anchor<formal::parsed>());
+	if (!leading_tag) return false;
+	if (HTMLtag::mode::opening != leading_tag->tag_type() || leading_tag->tag_name() != target) return false;
+	auto trailing_tag = dynamic_cast<HTMLtag*>(src.post_anchor<formal::parsed>());
+	if (!trailing_tag) return false;
+	if (HTMLtag::mode::opening != trailing_tag->tag_type() || trailing_tag->tag_name() != target) return false;
+	return true;
+}
+
 std::string HTMLtag::to_s() const {
 	static constexpr const char* start_tag[] = { "<", "</", "<" };
 	static constexpr const char* end_tag[] = { ">", ">", " />" };

@@ -20,6 +20,14 @@ public:
 			self_closing = Start | End
 	};
 
+	// if we are using HTML tags, we should also care about HTML entities
+	static constexpr const unsigned long long Entity = (1ULL << 1); // reserve this flag for both word and lex_node
+
+	static_assert(!(formal::Comment & Entity));
+	static_assert(!(formal::Error & Entity));
+	static_assert(!(formal::Inert_Token & Entity));
+	static_assert(!(formal::Tokenized & Entity));
+
 	HTMLtag() = delete;
 	HTMLtag(const HTMLtag& src) = default;
 	HTMLtag(HTMLtag&& src) = default;
@@ -41,6 +49,8 @@ public:
 
 	formal::src_location origin() const override { return _origin; }
 
+	static const std::string* is_balanced_pair(const formal::lex_node& src);
+	static bool is_balanced_pair(const formal::lex_node& src, const std::string& target);
 	std::string to_s() const override;
 	static std::unique_ptr<HTMLtag> parse(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint);
 };

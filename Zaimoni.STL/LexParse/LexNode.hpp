@@ -105,6 +105,10 @@ namespace formal {
 
 #undef LEX_NODE_DEREF_BODY
 
+		auto prefix_size() const { return _prefix.size(); }
+		auto infix_size() const { return _infix.size(); }
+		auto postfix_size() const { return _postfix.size(); }
+
 		static std::unique_ptr<lex_node> pop_front(kuroda::parser<formal::word>::sequence& src);
 
 		template<class Ret>
