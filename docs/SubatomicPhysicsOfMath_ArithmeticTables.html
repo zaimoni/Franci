@@ -360,7 +360,7 @@ We next recursively define multiplication &middot;:&#x2115; <span style="font:sa
 	<tr><td>4.</td><td></td><td>a &le; b & a &ne; b</td><td>Definition of &lt;</td></tr>
 	<tr><td>5.</td><td></td><td>a &le; b</td><td>Conjunction elimination on (4)</td></tr>
 	<tr><td>6.</td><td></td><td>a &ne; b</td><td>Conjunction elimination on (4)</td></tr>
-	<tr><td>7.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>c &isin; &#x2115;)(a+c = b)</td><td>Definition of &le;</td></tr>
+	<tr><td>7.</td><td></td><td>(&exist;c &isin; &#x2115;)(a+c = b)</td><td>Definition of &le;</td></tr>
 	<tr><td>8.</td><td></td><td>(t1 &#x2208; &#x2115;) & (a+t1 = b)</td><td>Existential instantiation</td></tr>
 	<tr><td>9.</td><td></td><td>t1 &#x2208; &#x2115;</td><td>Conjunction elimination on (8)</td></tr>
 	<tr><td>10.</td><td></td><td>a+t1 = b</td><td>Conjunction elimination on (8)</td></tr>
@@ -370,14 +370,14 @@ We next recursively define multiplication &middot;:&#x2115; <span style="font:sa
 	<tr><td>14.</td><td>t1 = 0 &#9500; a = b</td><td></td><td>Syntactical entailment introduction, (11) and (13) </td></tr>
 	<tr><td>15.</td><td></td><td>t1 &ne; 0</td><td><span style="background:yellow"><i>modus tollens</i> for &#9500;</span> (14) and (6)</td></tr>
 	<tr><td>16.</td><td></td><td>t1 &#x2208; &#x2115;\{0}</td><td>Definition of set difference \</td></tr>
-	<tr><td>17.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>d &isin; &#x2115;\{0})(a+d = b)</td><td>Existential instantiation</td></tr>
-	<tr><td>18.</td><td>a&lt;b &#9500; (<span style="transform:rotate(180deg);display:inline-block">E</span>d &isin; &#x2115;\{0})(a+d = b)</td><td></td><td>Syntactical entailment introduction, (3) and (17)</td></tr>
+	<tr><td>17.</td><td></td><td>(&exist;d &isin; &#x2115;\{0})(a+d = b)</td><td>Existential instantiation</td></tr>
+	<tr><td>18.</td><td>a&lt;b &#9500; (&exist;d &isin; &#x2115;\{0})(a+d = b)</td><td></td><td>Syntactical entailment introduction, (3) and (17)</td></tr>
 	<tr><th colspan="4">Reverse direction is similar technique but simpler</th></tr>
 	<tr><th colspan="4">Description of &lt;</th></tr>
-	<tr><th colspan="4">a&lt;b &#x27DB; (<span style="transform:rotate(180deg);display:inline-block">E</span>d &isin; &#x2115;\{0})(a+d = b)</th></tr>
+	<tr><th colspan="4">a&lt;b &#x27DB; (&exist;d &isin; &#x2115;\{0})(a+d = b)</th></tr>
 </table>
 <p>At this point, it matters that for both S<sub>Zermelo</sub>(x) := {x} and S<sub>Von Neumann</sub>(x) := x &#x222A; {x} that 
-	(<span style="transform:rotate(180deg);display:inline-block">A</span>x &isin; <b>Set</b>)(0 &ne; S(x)); that means 0=x is a <b>classical</b> logic statement 
+	(&forall;x &isin; <b>Set</b>)(0 &ne; S(x)); that means 0=x is a <b>classical</b> logic statement 
 	for x &isin; {0} &#x222A; Range(S), so we can use the classical logic version of <span style="background:yellow"><i>modus tollens</i> for &#9500;</span> regardless of our choice of truth-table described logic.</p>
 <table align="left">
 	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
@@ -451,7 +451,7 @@ We next recursively define multiplication &middot;:&#x2115; <span style="font:sa
 	<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
 	<tr><td>1.</td><td></td><td>A &#x2286; &#x2115;</td><td>Given</td></tr>
 	<tr><td>2.</td><td></td><td>&#x2205; &ne; A</td><td>Given</td></tr>
-	<tr><td>3.</td><td></td><td>L := {n &isin; &#x2115; : (<span style="transform:rotate(180deg);display:inline-block">A</span>a &isin; A)(n &le; a)}</td><td>Local definition: set of nonstrict lower bounds of A</td></tr>
+	<tr><td>3.</td><td></td><td>L := {n &isin; &#x2115; : (&forall;a &isin; A)(n &le; a)}</td><td>Local definition: set of nonstrict lower bounds of A</td></tr>
 	<tr><td>4.</td><td></td><td>0 &isin; L</td><td>0 is least bound of the natural numbers</td></tr>
 	<tr><td>5.</td><td></td><td>&#x2205; = A &#x2229; L</td><td>Hypothesis: A does not contain any of its lowest bounds</td></tr>
 	<tr><td>6.</td><td></td><td>b &isin; L</td><td>Hypothesis</td></tr>
@@ -468,10 +468,10 @@ We next recursively define multiplication &middot;:&#x2115; <span style="font:sa
 	<tr><td>16.</td><td></td><td>b+1+S<sup>-1</sup>(a<sub>1</sub>-b) = a<sub>1</sub></td><td>S<sup>-1</sup>(a)+1=a when 1&le;a on (15)</td></tr>
 	<tr><td>17.</td><td></td><td>S(b)+S<sup>-1</sup>(a<sub>1</sub>-b) = a<sub>1</sub></td><td>S(a)=a+1 on (16)</td></tr>
 	<tr><td>18.</td><td></td><td>S(b) &le; a<sub>1</sub></td><td>Definition of &lt; on (17)</td></tr>
-	<tr><td>19.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>a &isin; A)(S(b) &le; a)</td><td>Universal instantiation on (18)</td></tr>
+	<tr><td>19.</td><td></td><td>(&forall;a &isin; A)(S(b) &le; a)</td><td>Universal instantiation on (18)</td></tr>
 	<tr><td>20.</td><td></td><td>S(b) &isin; L</td><td>Definition of L on (19)</td></tr>
 	<tr><td>21.</td><td>b &isin; L &#9500; S(b) &isin; L</td><td></td><td>Syntactical entailment introduction, (6) and (20)</td></tr>
-	<tr><td>22.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>b &isin; &#x2115;)(b &isin; L)</td><td><i>axiom of (weak natural) induction</i>, (4) and (21)</td></tr>
+	<tr><td>22.</td><td></td><td>(&forall;b &isin; &#x2115;)(b &isin; L)</td><td><i>axiom of (weak natural) induction</i>, (4) and (21)</td></tr>
 	<tr><td>23.</td><td></td><td>&#x2115; &#x2286; L</td><td>Definition of &#x2286;</td></tr>
 	<tr><th colspan="4">~Intuitionistic</th></tr>
 	<tr><td>24.</td><td></td><td>&#x2115;=L</td><td>X &#x2286; {x<sub>0</sub> &isin; X : &phi;(x<sub>0</sub>)} &#9500; X={x &isin; X : &phi;(x)} on (3) and (18)</td></tr>
@@ -480,10 +480,10 @@ We next recursively define multiplication &middot;:&#x2115; <span style="font:sa
 	<tr><td>27.</td><td>&#x2205; = A &#x2229; L &#9500; &#x2205; = A</td><td></td><td>Syntactical entailment introduction, (5) and (26)</td></tr>
 	<tr><th colspan="4">Classical</th></tr>
 	<tr><td style="background:red">28.</td><td></td><td>&#x2205; &ne; A &#x2229; L</td><td>modus tollens for &#9500;, (27) and (2)</td></tr>
-	<tr><td>29.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>x &isin; <b>Set</b>)(x &isin; A &#x2229; L)</td><td>Definition of equality on (28)</td></tr>
+	<tr><td>29.</td><td></td><td>(&exist;x &isin; <b>Set</b>)(x &isin; A &#x2229; L)</td><td>Definition of equality on (28)</td></tr>
 	<tr><th colspan="4" align="center">A contains at least one of its lowest bounds</th></tr>
 	<tr><td colspan="4" align="center">With some extra work using existentiial instantiation and generalization, we can get</td></tr>
-	<tr><th colspan="4">(<span style="transform:rotate(180deg);display:inline-block">E</span>!x &isin; &#x2115;)(x &isin; A &#x2229; L)</th></tr>
+	<tr><th colspan="4">(&exist;!x &isin; &#x2115;)(x &isin; A &#x2229; L)</th></tr>
 </table>
 <p>For a non-empty subset A &#x2286; &#x2115;, if there exists b &isin; &#x2115; such that b &le; x for all x &isin; A, we say b is a lower bound of A.  A lower bound inf of A
 	for which inf &ge; b for any lower bound b, is said to be the greatest lower bound i.e. infimum of the subset A.</p>
@@ -499,9 +499,9 @@ We next recursively define multiplication &middot;:&#x2115; <span style="font:sa
 <p>It is <i>a priori</i> reasonable, that the given <i>&#x2205; &ne; A</i> is too weak for the non-classical logics.</p>
 -->
 <p>Proving that two nonstrict lower bounds of A, both in A, are equal is left as an exercise.</p>
-<p>For a domain of discourse A on which equality = is defined, we define (<span style="transform:rotate(180deg);display:inline-block">E</span>!x &isin; A) by the 
+<p>For a domain of discourse A on which equality = is defined, we define (&exist;!x &isin; A) by the 
 	syntactical equivalence schema</p>
-<p align="center">(<span style="transform:rotate(180deg);display:inline-block">E</span>x &isin; A)(&phi;(x)),(&phi;(x)=&phi;(y) &#9500; x=y) &#x27DB; (<span style="transform:rotate(180deg);display:inline-block">E</span>!x &isin; A)(&phi;(x))</p>
+<p align="center">(&exist;x &isin; A)(&phi;(x)),(&phi;(x)=&phi;(y) &#9500; x=y) &#x27DB; (<span style="transform:rotate(180deg);display:inline-block">E</span>!x &isin; A)(&phi;(x))</p>
 <p>(We would prefer to use := here to justify substitutions for non-classical logics, but that would require using an inference rule as an argument to logical and &.  I am staying within pre-existing notational abuses.)</p>
 <p>Note that the final listed step (24) is correct as-is for both the Von Neumann and Zermelo models of the natural numbers, even for the set theories with <i>ur-elements</i>.
 	This is reasonable, since both models work just fine in the set theories without <i>ur-elements</i>: they start with the empty set (which contains no elements at all), and both choices of the successor function S:<b>Set</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>Set</b> do not directly introduce <i>ur-elements</i>.

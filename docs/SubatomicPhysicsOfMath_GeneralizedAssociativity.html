@@ -47,7 +47,7 @@ the Tarksi-Grothendieck definition that needs a not-yet-introduced axiom to even
 <p>The usual workaround in abstract algebraic category theory, is to first look more carefully at the <i>axiom of class existence</i>:</p>
 <table align="center">
 	<tr><th>Von Neumann-Bernays-G&ouml;del, <i>class</i> existence, Classical Logic</th></tr>
-	<tr><td align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span> &phi;:<b>Set</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b>)(<span style="transform:rotate(180deg);display:inline-block">E</span>B &#x2208; <b>Class</b>)(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; B &hArr; &phi;(x))</td></tr>
+	<tr><td align="center">(&forall;&phi;:<b>Set</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b>)(&exist;B &#x2208; <b>Class</b>)(&forall;x &#x2208; <b>Set</b>)(x &#x2208; B &hArr; &phi;(x))</td></tr>
 </table>
 <p>The sole technicality preventing Russell's paradox, is that the mathematical collection whose existence is asserted, is not in the same domain of discourse, as the domain of the predicate.  Even though 
 	we do not have a good way of formalizing a successor function with domain and range domains of discourse, it is reasonable to expect that we can formalize a successor function for reserved 
@@ -59,7 +59,7 @@ the Tarksi-Grothendieck definition that needs a not-yet-introduced axiom to even
 </ul>
 <table align="center">
 	<tr><th><i>conglomerate</i> existence, Classical Logic</th></tr>
-	<tr><td align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>&phi;:<b>Class</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b>)(<span style="transform:rotate(180deg);display:inline-block">E</span>B &#x2208; <b>Conglomerate</b>)(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Class</b>)(x &#x2208; B &hArr; &phi;(x))</td></tr>
+	<tr><td align="center">(&forall;&phi;:<b>Class</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b>)(&exist;B &#x2208; <b>Conglomerate</b>)(&forall;x &#x2208; <b>Class</b>)(x &#x2208; B &hArr; &phi;(x))</td></tr>
 </table>
 <p>The usual adjustments for non-classical truth values, and to allow <i>ur-elements</i> as elements, work like they do on Von Neumann-Bernays-G&ouml;del <i>axiom of class existence</i>.  After mechanically verifying that 
  	the axioms that enable the Kuratowski definition of ordered pairs have direct parallels for <i>conglomerates</i>, we consider (<b>Class</b>, &#x2229;) and (<b>Class</b>, &#x222A;)
@@ -109,7 +109,7 @@ the Tarksi-Grothendieck definition that needs a not-yet-introduced axiom to even
 <table align="center">
 	<tr><th></th><th>Basis</th><th>Induction hypothesis</th></tr>
 	<tr><td>(weak) natural induction</td><td rowspan="2" valign="center">0 &isin; K i.e. &phi;(0)</td><td>n &isin; K i.e. &phi;(n)</td></tr>
-	<tr><td>strong natural induction</td><td>0...n &#x2286; K i.e. (<span style="transform:rotate(180deg);display:inline-block">A</span>k &isin; 0...n)(&phi;(k))</td></tr>
+	<tr><td>strong natural induction</td><td>0...n &#x2286; K i.e. (&forall;k &isin; 0...n)(&phi;(k))</td></tr>
 </table>
 <p>That the philosophically strong induction hypothesis syntactically entails the weak induction hypothesis, is one step: a use of universal instantiation.  The other direction,
 	is not as transparent: it relies on (proof left as exercise)</p>

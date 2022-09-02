@@ -57,7 +57,7 @@
 </ul>
 <p><b>TruthValued</b> is not formally describable.  It includes things like English sentences, indeed sentences in any natural language.</p>
 <table align="right">
-	<tr><td align="center" colspan="3">(<span style="transform:rotate(180deg);display:inline-block">A</span>P &#x2208; <b>TruthValued</b>)(<span style="transform:rotate(180deg);display:inline-block">E</span>t &#x2208; <b>TruthValues</b>)(P &#x21A6; t)</th>
+	<tr><td align="center" colspan="3">(&forall;P &#x2208; <b>TruthValued</b>)(<span style="transform:rotate(180deg);display:inline-block">E</span>t &#x2208; <b>TruthValues</b>)(P &#x21A6; t)</th>
 	<tr><th colspan="3">Principle of ...</th>
 	<tr><th style="background: #DDFFDD">Classical</th><th>bivalence</th><td><b>TruthValues</b> := {<i>false</i>, <i>true</i>}</td></tr>
 	<tr><th style="background: #DDDDFF">Kleene weak<br>Kleene strong<br>Lisp/Prolog</th><th>trivalence</th><td><b>TruthValues</b> := {<i>false</i>, <i>true</i>, <i>unknown</i>}</td></tr>
@@ -170,24 +170,24 @@
 	<tr><th></th><th colspan="2">a = b :=</th></tr>
 	<tr><th></th><th>Canonical</th><th>Rewritten with [<b>Truth</b>(A)=<b>Truth</b>(B)/A&hArr;B]</th></tr>
 	<tr valign="top"><td>Zermelo-Frankel</td><td>
-		(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b) & (<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; <b>Set</b>)(a &#x2208; y &hArr; b &#x2208; y)
+		(&forall;x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b) & (&forall;y &#x2208; <b>Set</b>)(a &#x2208; y &hArr; b &#x2208; y)
 	</td><td>
-		(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(<b>Truth</b>(x &#x2208; a)=<b>Truth</b>(x &#x2208; b)) & (<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; <b>Set</b>)(<b>Truth</b>(a &#x2208; y)=<b>Truth</b>(b &#x2208; y))
+		(&forall;x &#x2208; <b>Set</b>)(<b>Truth</b>(x &#x2208; a)=<b>Truth</b>(x &#x2208; b)) & (&forall;y &#x2208; <b>Set</b>)(<b>Truth</b>(a &#x2208; y)=<b>Truth</b>(b &#x2208; y))
 	</td></tr>
 	<tr valign="top"><td><nobr>Von Neumann-Bernays-G&ouml;del</nobr></td><td>
-		(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; A &hArr; x &#x2208; B)
+		(&forall;x &#x2208; <b>Set</b>)(x &#x2208; A &hArr; x &#x2208; B)
 	</td><td>
-		(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(<b>Truth</b>(x &#x2208; A)=<b>Truth</b>(x &#x2208; B))
+		(&forall;x &#x2208; <b>Set</b>)(<b>Truth</b>(x &#x2208; A)=<b>Truth</b>(x &#x2208; B))
 	</td></tr>
 	<tr valign="top"><td>Zermelo-Frankel <nobr>with ur-elements</nobr></td><td>
-		<nobr>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b)</nobr> & <nobr>(<span style="transform:rotate(180deg);display:inline-block">A</span>z &#x2208; <b>Ur</b>)(z &#x2208; a &hArr; z &#x2208; b)</nobr> & <nobr>(<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; <b>Set</b>)(a &#x2208; y &hArr; b &#x2208; y)</nobr>
+		<nobr>(&forall;x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b)</nobr> & <nobr>(&forall;z &#x2208; <b>Ur</b>)(z &#x2208; a &hArr; z &#x2208; b)</nobr> & <nobr>(&forall;y &#x2208; <b>Set</b>)(a &#x2208; y &hArr; b &#x2208; y)</nobr>
 	</td><td>
-		<nobr>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(<b>Truth</b>(x &#x2208; a)=<b>Truth</b>(x &#x2208; b))</nobr> & <nobr>(<span style="transform:rotate(180deg);display:inline-block">A</span>z &#x2208; <b>Ur</b>)(<b>Truth</b>(z &#x2208; a)=<b>Truth</b>(z &#x2208; b))</nobr> & <nobr>(<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; <b>Set</b>)(<b>Truth</b>(a &#x2208; y)=<b>Truth</b>(b &#x2208; y))</nobr>
+		<nobr>(&forall;x &#x2208; <b>Set</b>)(<b>Truth</b>(x &#x2208; a)=<b>Truth</b>(x &#x2208; b))</nobr> & <nobr>(&forall;z &#x2208; <b>Ur</b>)(<b>Truth</b>(z &#x2208; a)=<b>Truth</b>(z &#x2208; b))</nobr> & <nobr>(&forall;y &#x2208; <b>Set</b>)(<b>Truth</b>(a &#x2208; y)=<b>Truth</b>(b &#x2208; y))</nobr>
 	</td></tr>
 	<tr valign="top"><td><nobr>Von Neumann-Bernays-G&ouml;del</nobr> <nobr>with ur-elements</nobr></td><td>
-		(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; A &hArr; x &#x2208; B) & (<span style="transform:rotate(180deg);display:inline-block">A</span>z &#x2208; <b>Ur</b>)(z &#x2208; A &hArr; z &#x2208; B)
+		(&forall;x &#x2208; <b>Set</b>)(x &#x2208; A &hArr; x &#x2208; B) & (&forall;z &#x2208; <b>Ur</b>)(z &#x2208; A &hArr; z &#x2208; B)
 	</td><td>
-		(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(<b>Truth</b>(x &#x2208; A)=<b>Truth</b>(x &#x2208; B)) & (<span style="transform:rotate(180deg);display:inline-block">A</span>z &#x2208; <b>Ur</b>)(<b>Truth</b>(z &#x2208; A)=<b>Truth</b>(z &#x2208; B))
+		(&forall;x &#x2208; <b>Set</b>)(<b>Truth</b>(x &#x2208; A)=<b>Truth</b>(x &#x2208; B)) & (&forall;z &#x2208; <b>Ur</b>)(<b>Truth</b>(z &#x2208; A)=<b>Truth</b>(z &#x2208; B))
 	</td></tr>
 </table>
 <table align="right">
@@ -210,9 +210,9 @@
 	<tr><th colspan="4">Zermelo-Frankel, with or without ur-elements</th></tr>
 	<tr><td>3.</td><td></td><td>A &#x2208; <b>Set</b></td><td>(1) is defined</td></tr>
 	<tr><td>4.</td><td></td><td><b>Truth</b>(x &#x2208; A)&ne;<b>Truth</b>(y &#x2208; A)</td><td>(1) and (2)</td></tr>
-	<tr><td>5.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>z &#x2208; <b>Set</b>)(<b>Truth</b>(x &#x2208; z)&ne;<b>Truth</b>(y &#x2208; z))</td><td>Existential instantiation on (4)</td></tr>
-	<tr><td>6.</td><td></td><td>~(<span style="transform:rotate(180deg);display:inline-block">A</span>z &#x2208; <b>Set</b>)(~~(<b>Truth</b>(x &#x2208; z)=<b>Truth</b>(y &#x2208; z)))</td><td>Definition of <span style="transform:rotate(180deg);display:inline-block">E</span> on (5)</td></tr>
-	<tr><td>7.</td><td></td><td>~(<span style="transform:rotate(180deg);display:inline-block">A</span>z &#x2208; <b>Set</b>)(<b>Truth</b>(x &#x2208; z)=<b>Truth</b>(y &#x2208; z))</td><td>Remove double negation on (6)</td></tr>
+	<tr><td>5.</td><td></td><td>(&exist;z &#x2208; <b>Set</b>)(<b>Truth</b>(x &#x2208; z)&ne;<b>Truth</b>(y &#x2208; z))</td><td>Existential instantiation on (4)</td></tr>
+	<tr><td>6.</td><td></td><td>~(&forall;z &#x2208; <b>Set</b>)(~~(<b>Truth</b>(x &#x2208; z)=<b>Truth</b>(y &#x2208; z)))</td><td>Definition of <span style="transform:rotate(180deg);display:inline-block">E</span> on (5)</td></tr>
+	<tr><td>7.</td><td></td><td>~(&forall;z &#x2208; <b>Set</b>)(<b>Truth</b>(x &#x2208; z)=<b>Truth</b>(y &#x2208; z))</td><td>Remove double negation on (6)</td></tr>
 	<tr><th colspan="4">Zermelo-Frankel</th></tr>
 	<tr><td>8.</td><td></td><td>x &#x2208; <b>Set</b></td><td>(1) is defined</td></tr>
 	<tr><td>9.</td><td></td><td>y &#x2208; <b>Set</b></td><td>(2) is defined</td></tr>

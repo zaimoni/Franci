@@ -70,9 +70,9 @@
 <p align="center">a &#x2209; A := ~(a &#x2208; A)</p>
 <p>Our background logic does not have equality, so each set theory needs to define equality for its top-level domain of discourse.</p>
 <p>In practice, we will want variables constrained to range over a given mathematical collection, rather than an entire domain of discourse.  We introduce the syntax as:</p>
-<p align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>a &#x2208; A)</p>
+<p align="center">(&forall;a &#x2208; A)</p>
 <p>with intended interpretation "for all a in A" or "for all a that are elements of A", a universal quantifier over either the mathematical collection A, or a domain of discourse A.</p>
-<p align="center">(<span style="transform:rotate(180deg);display:inline-block">E</span>a &#x2208; A)</p>
+<p align="center">(&exist;a &#x2208; A)</p>
 <p>with intended interpretation "there is a in A" or "there is a element of A", an existential quantifier over the mathematical collection A, or a domain of discourse A</p>
 <p>For the quantified usages, the domain of discourse must be one recognized by the given set theory.</p>
 <p align="center">{a &#x2208; A : Z(a)}</p>
@@ -84,7 +84,7 @@
 <p>There is only one universe of discourse for Zermelo-Frankel set theory: sets.</p>
 
 <p>The typical definition of equality = for <i>set</i>s a, b is</p>
-<p align="center">a = b := (<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b) & (<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; <b>Set</b>)(a &#x2208; y &hArr; b &#x2208; y)</p>
+<p align="center">a = b := (&forall;x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b) & (&forall;y &#x2208; <b>Set</b>)(a &#x2208; y &hArr; b &#x2208; y)</p>
 <p>We are going to be very careful that <b>Set</b> is not a <i>set</i>.</p>
 
 <h2 id="NBG" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Von Neumann-Bernays-G&ouml;del &#x2208;</h2>
@@ -100,7 +100,7 @@
 	<p align="center">c &#x2208; {a | Z(a)} := Z(c)</p>
 <p>where c is a term not used in Z(a).</p>
 <p>Next, define <i>class</i> equality as follows:</p>
-<p align="center">A = B := (<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; A &hArr; x &#x2208; B)</p>
+<p align="center">A = B := (&forall;x &#x2208; <b>Set</b>)(x &#x2208; A &hArr; x &#x2208; B)</p>
 <p>where A and B are <i>class</i> terms i.e. A and B are <i>class</i>es.</p>
 <p>Our text is using classical logic.  The above definition does not act like classical logic for Belnap's 4-valued logic because <i>contradiction || unknown</i> evaluates to <i>true</i>.  
 	We expect the other non-classical logics under consideration to act like classical logic, in that for any given <i>set</i> x, the defining expression should not allow <i>unknown</i> or <i>contradiction</i> for 
@@ -111,13 +111,13 @@
 <p>with intended interpretation, "the set c such that Z(c), or else a".  Our text spends about three quarters of a hardcopy page (p. 49) on the technical advantages gained from the apparently
 	unnecessary parameter a.  It turns out the parameter a is what allows notating that the given <i>class</i> c is not a <i>set</i>.  Let Z(C) be a truth-valued expression taking a <i>class</i> C as a parameter. 
 We then introduce the syntactical entailment:</p>
-<p align="center">Z(C),(<span style="transform:rotate(180deg);display:inline-block">A</span>X &#x2208; <b>Class</b>)(Z(X) &rArr; X=C) &#9500; (<span style="transform:rotate(180deg);display:inline-block">A</span>a)(C=&iota;<sub>c</sub>(Z(c), a))</p>
+<p align="center">Z(C),(&forall;X &#x2208; <b>Class</b>)(Z(X) &rArr; X=C) &#9500; (&forall;a)(C=&iota;<sub>c</sub>(Z(c), a))</p>
 <p>with intended interpretation "if we have a truth-valued statement Z(C) about a given class C, and for all classes X, Z(X) nonstrictly implies X=C, then C is actually a set", and the axiom</p>
-<p align="center">&#9500; (<span style="transform:rotate(180deg);display:inline-block">E</span>C &#x2208; <b>Class</b>)(Z(C) & (<span style="transform:rotate(180deg);display:inline-block">A</span>X &#x2208; <b>Class</b>)(Z(X) &rArr; X=C)) || (<span style="transform:rotate(180deg);display:inline-block">A</span>a)(&iota;<sub>c</sub>(Z(c), a)=a)</p>
+<p align="center">&#9500; (&exist;C &#x2208; <b>Class</b>)(Z(C) & (&forall;X &#x2208; <b>Class</b>)(Z(X) &rArr; X=C)) || (&forall;a)(&iota;<sub>c</sub>(Z(c), a)=a)</p>
 <p>with intended interpretation "for any truth-valued expression Z with a class X as a parameter: there is a class C such that Z(C) is true and C is actually a set, or Z(X) does not describe a set.".  Strictly speaking we should be thinking of
 	a as a <i>class</i> rather than a <i>set</i> (as we have directly defined = for <i>class</i>es), contrary to our usual notational conventions here.  If the <i>class</i> C is not a <i>set</i>, we say C is a <i>proper class</i>.</p>
 <p>In particular, with the notation abuse previously mentioned, with this intended interpretation we have</p>
-<p align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>a)(C=&iota;<sub>c</sub>(Z(c), a)) &#x27DB; C &#x2208; <b>Set</b></p>
+<p align="center">(&forall;a)(C=&iota;<sub>c</sub>(Z(c), a)) &#x27DB; C &#x2208; <b>Set</b></p>
 <p>We are going to be very careful, that <b>Class</b> is not a <i>class</i>, and that <b>Set</b> is not a <i>set</i>.</p>
 <p>This definition of equality, looks incomplete compared to the Zermelo-Frankel definition of equality.  This reflects a different strategy when implementing the effect of an Axiom of Extensionality.</p>
 
@@ -127,14 +127,14 @@ We then introduce the syntactical entailment:</p>
 <p>with intended interpretation "a is an element of A".  a may be an <i>ur-element</i> term or a <i>set</i> term, while A is a <i>set</i> term.</p>
 
 <p>We then adapt our definition of equality = for <i>set</i>s a, b to</p>
-<p align="center">a = b := (<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b) & (<span style="transform:rotate(180deg);display:inline-block">A</span>z &#x2208; <b>Ur</b>)(z &#x2208; a &hArr; z &#x2208; b) & (<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; <b>Set</b>)(a &#x2208; y &hArr; b &#x2208; y)</p>
+<p align="center">a = b := (&forall;x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b) & (&forall;z &#x2208; <b>Ur</b>)(z &#x2208; a &hArr; z &#x2208; b) & (&forall;y &#x2208; <b>Set</b>)(a &#x2208; y &hArr; b &#x2208; y)</p>
 
 <h2 id="NBG-ur" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Von Neumann-Bernays-G&ouml;del &#x2208; with ur-elements</h2>
 <p>Here, we will have three universes of discourse: sets, classes, and ur-elements. We will have four syntaxes for the primitive truth-valued formula<p>
 <p align="center">a &#x2208; A</p>
 <p>with intended interpretation "a is an element of A".  a may be an <i>ur-element</i> term or a <i>set</i> term, while A may be a <i>set</i> term or a <i>class</i> term.</p>
 <p>We adjust our definition of class equality to:</p>
-<p align="center">A = B := (<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; A &hArr; x &#x2208; B) & (<span style="transform:rotate(180deg);display:inline-block">A</span>z &#x2208; <b>Ur</b>)(z &#x2208; A &hArr; z &#x2208; B)</p>
+<p align="center">A = B := (&forall;x &#x2208; <b>Set</b>)(x &#x2208; A &hArr; x &#x2208; B) & (&forall;z &#x2208; <b>Ur</b>)(z &#x2208; A &hArr; z &#x2208; B)</p>
 <p>Other strategic features (the class term operator and description operator) are as for the reference set theory Von Neumann-Bernays-G&ouml;del .</p>
 
 <h2 id="roadmap-equality" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Roadmap: verifying equality =</h2>
@@ -187,46 +187,46 @@ We then introduce the syntactical entailment:</p>
 
 <h2 id="extensionality-ZF" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Axiom of Extensionality: Zermelo-Frankel</h2>
 <p>For Zermelo-Frankel set theory, replacing logical and & in the definition of =, by nonstrict implication &rArr; in a key place suffices:</p>
-<p align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b) &rArr; (<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; <b>Set</b>)(a &#x2208; y &hArr; b &#x2208; y)</p>
+<p align="center">(&forall;x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b) &rArr; (&forall;y &#x2208; <b>Set</b>)(a &#x2208; y &hArr; b &#x2208; y)</p>
 <p>This respects our intuition about physical containers.  We axiomatically conclude that two collections are equal, if the much easier half (same elements) is verified.</p>
 <p>We don't yet have the machinery to prove <i style="background:yellow">uniform substitution given equality</i>.
 
 <h2 id="extensionality-ZF-ur" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Axiom of Extensionality: Zermelo-Frankel with ur-elements</h2>
 <p>We use the same heuristic, replacing logical and & with nonstrict implication &rArr;</p>
-<p align="center">((<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b) & (<span style="transform:rotate(180deg);display:inline-block">A</span>z &#x2208; <b>Ur</b>)(z &#x2208; a &hArr; z &#x2208; b)) &rArr; (<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; <b>Set</b>)(a &#x2208; y &hArr; b &#x2208; y)</p>
+<p align="center">(&forall;x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b) & (&forall;z &#x2208; <b>Ur</b>)(z &#x2208; a &hArr; z &#x2208; b)) &rArr; (&forall;y &#x2208; <b>Set</b>)(a &#x2208; y &hArr; b &#x2208; y)</p>
 <p>Technically, we have six choices here of where to place the &rArr; .  This is the only one that respects the plain English, in our roadmap.</p>
 
 <h2 id="extensionality-NBG" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Derivation of Extensionality: Von Neumann-Bernays-G&ouml;del</h2>
 <p>Cf. hardcopy page 52 and following of <a href="https://archive.org/details/axiomaticsettheo0000bern">Axiomatic Set Theory</a>.  Bernays takes <i style="background:yellow">uniform substitution given equality</i>,</p>
 <p align="center">a = b &#9500; Z(a) &rArr; Z(b)</p>
-<p>as an axiom, then substitutes Z(c) := (<span style="transform:rotate(180deg);display:inline-block">A</span>Y &#x2208; <b>Class</b>)(c &#x2208; Y) .</p>
+<p>as an axiom, then substitutes Z(c) := (&forall;Y &#x2208; <b>Class</b>)(c &#x2208; Y) .</p>
 <p>This does <b>not</b> work for <i>proper class</i> terms, since those are not syntactically allowed to be elements of classes.</p>
 <p>More explicitly:</p>
 <table align="center">
 	<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
 	<tr><td>1.</td><td></td><td>a = b</td><td>Hypothesis</td></tr>
 	<tr><td>2.</td><td></td><td>b = a</td><td>Symmetry of =</td></tr>
-	<tr><td>3.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>Y &#x2208; <b>Class</b>)(a &#x2208; Y) &rArr; (<span style="transform:rotate(180deg);display:inline-block">A</span>Y &#x2208; <b>Class</b>)(b &#x2208; Y)</td><td>uniform substitution given equality on (1); Z(c) &#x21A6; (<span style="transform:rotate(180deg);display:inline-block">A</span>Y &#x2208; <b>Class</b>)(c &#x2208; Y)</td></tr>
-	<tr><td>4.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>Y &#x2208; <b>Class</b>)(b &#x2208; Y) &rArr; (<span style="transform:rotate(180deg);display:inline-block">A</span>Y &#x2208; <b>Class</b>)(a &#x2208; Y)</td><td>uniform substitution given equality on (2); Z(c) &#x21A6; (<span style="transform:rotate(180deg);display:inline-block">A</span>Y &#x2208; <b>Class</b>)(c &#x2208; Y)</td></tr>
-	<tr><td>5.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>Y &#x2208; <b>Class</b>)(a &#x2208; Y) &hArr; (<span style="transform:rotate(180deg);display:inline-block">A</span>Y &#x2208; <b>Class</b>)(b &#x2208; Y)</td><td>Definition of &hArr; on (3),(4)</td></tr>
-	<tr><td>6.</td><td>a = b &#9500; (<span style="transform:rotate(180deg);display:inline-block">A</span>Y &#x2208; <b>Class</b>)(a &#x2208; Y) &hArr; (<span style="transform:rotate(180deg);display:inline-block">A</span>Y &#x2208; <b>Class</b>)(b &#x2208; Y)</td><td></td><td><span style="background:yellow">Syntactical entailment introduction</span> on (1), (5)</td></tr>
+	<tr><td>3.</td><td></td><td>(&forall;Y &#x2208; <b>Class</b>)(a &#x2208; Y) &rArr; (&forall;Y &#x2208; <b>Class</b>)(b &#x2208; Y)</td><td>uniform substitution given equality on (1); Z(c) &#x21A6; (&forall;Y &#x2208; <b>Class</b>)(c &#x2208; Y)</td></tr>
+	<tr><td>4.</td><td></td><td>(&forall;Y &#x2208; <b>Class</b>)(b &#x2208; Y) &rArr; (&forall;Y &#x2208; <b>Class</b>)(a &#x2208; Y)</td><td>uniform substitution given equality on (2); Z(c) &#x21A6; (&forall;Y &#x2208; <b>Class</b>)(c &#x2208; Y)</td></tr>
+	<tr><td>5.</td><td></td><td>(&forall;Y &#x2208; <b>Class</b>)(a &#x2208; Y) &hArr; (&forall;Y &#x2208; <b>Class</b>)(b &#x2208; Y)</td><td>Definition of &hArr; on (3),(4)</td></tr>
+	<tr><td>6.</td><td>a = b &#9500; (&forall;Y &#x2208; <b>Class</b>)(a &#x2208; Y) &hArr; (&forall;Y &#x2208; <b>Class</b>)(b &#x2208; Y)</td><td></td><td><span style="background:yellow">Syntactical entailment introduction</span> on (1), (5)</td></tr>
 	<tr><th colspan="4">Classical logic</th></tr>
-	<tr><td>6a.</td><td></td><td>(a = b) &rArr; ((<span style="transform:rotate(180deg);display:inline-block">A</span>Y &#x2208; <b>Class</b>)(a &#x2208; Y) &hArr; (<span style="transform:rotate(180deg);display:inline-block">A</span>Y &#x2208; <b>Class</b>)(b &#x2208; Y))</td><td>Implication introduction on (1), (5)</td></tr>
+	<tr><td>6a.</td><td></td><td>(a = b) &rArr; ((&forall;Y &#x2208; <b>Class</b>)(a &#x2208; Y) &hArr; (&forall;Y &#x2208; <b>Class</b>)(b &#x2208; Y))</td><td>Implication introduction on (1), (5)</td></tr>
 </table>
 <p>We then expand the Von Neumann-Bernays-G&ouml;del definition of a = b, to get something that looks like the Zermelo-Frankel extensionality axiom:
-<p align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b) &rArr; (<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; <b>Class</b>)(a &#x2208; y &hArr; b &#x2208; y)</p>
+<p align="center">(&forall;x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b) &rArr; (&forall;y &#x2208; <b>Class</b>)(a &#x2208; y &hArr; b &#x2208; y)</p>
 <p>More explicitly: The Von Neumann-Bernays-G&ouml;del definition of a = b introduces a syntactical equivalence</p>
-<p align=center>a = b &#x27DB; (<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b)</p>
+<p align=center>a = b &#x27DB; (&forall;x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b)</p>
 <p>which itself is built from two syntactical entailment (sub)rules.  Expanding the definition of a = b in the hypothesis of (6), corresponds to using the inference rule, <span style="background:yellow">invert using P &#9500; Q on the hypothesis of Q &rArr; R</span>, 
 with the syntactical entailment subrule</p>
-<p align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b) &#9500; a = b</p>
+<p align="center">(&forall;x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b) &#9500; a = b</p>
 <h2 id="extensionality-NBG-ur" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Derivation of Extensionality: Von Neumann-Bernays-G&ouml;del with ur-elements</h2>
 <p>Extensionality for <i>set</i> terms a, b has a closely comparable derivation, as for the no ur-elements case.  Expanding the definition of a = b yields</p>
-<p align="center">((<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b) & (<span style="transform:rotate(180deg);display:inline-block">A</span>z &#x2208; <b>Ur</b>)(z &#x2208; a &hArr; z &#x2208; b)) &rArr; (<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; <b>Class</b>)(a &#x2208; y &hArr; b &#x2208; y)</p>
+<p align="center">((&forall;x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b) & (&forall;z &#x2208; <b>Ur</b>)(z &#x2208; a &hArr; z &#x2208; b)) &rArr; (&forall;y &#x2208; <b>Class</b>)(a &#x2208; y &hArr; b &#x2208; y)</p>
 <p>Since <i>ur-elements</i> are not mathematical objects, any notion of equality = for <i>ur-elements</i> is an undefined binary predicate.  If we take the usual technique of logic with equality as 
 	axiomatic for <i>ur-elements</i>, then the six-line tabular demonstration for set terms is also valid for <i>ur-element</i> terms a, b,
 	giving an Extensionality result similar to that for <i>set</i> terms:</p>
-	<p align="center">a = b &rArr; (<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; <b>Class</b>)(a &#x2208; y &hArr; b &#x2208; y)</p>
+	<p align="center">a = b &rArr; (&forall;y &#x2208; <b>Class</b>)(a &#x2208; y &hArr; b &#x2208; y)</p>
 
 <h2 id="Belnap-fails-transitivity-of-equality" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Transitivity of defined = : Belnap failure</h2>
 <table align="right">
@@ -234,12 +234,12 @@ with the syntactical entailment subrule</p>
 <tr><th></th><th>Proposition</th><th>Rationale</th></tr>
 <tr><td>1.</td><td>a=b</td><td>Given</td></tr>
 <tr><td>2.</td><td>b=c</td><td>Given</td></tr>
-<tr><td>3.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b) & (<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; <b>Set</b>)(a &#x2208; y &hArr; b &#x2208; y)</td><td>Definition of <i>set</i> equality</td></tr>
-<tr><td>4.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>w &#x2208; <b>Set</b>)(w &#x2208; b &hArr; w &#x2208; c) & (<span style="transform:rotate(180deg);display:inline-block">A</span>z &#x2208; <b>Set</b>)(b &#x2208; z &hArr; c &#x2208; z)</td><td>Definition of <i>set</i> equality</td></tr>
-<tr><td>5.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b)</td><td>Conjunction elimination on (3)</td></tr>
-<tr><td>6.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; <b>Set</b>)(a &#x2208; y &hArr; b &#x2208; y)</td><td>Conjunction elimination on (3)</td></tr>
-<tr><td>7.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>w &#x2208; <b>Set</b>)(w &#x2208; b &hArr; w &#x2208; c)</td><td>Conjunction elimination on (4)</td></tr>
-<tr><td>8.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>z &#x2208; <b>Set</b>)(b &#x2208; z &hArr; c &#x2208; z)</td><td>Conjunction elimination on (4)</td></tr>
+<tr><td>3.</td><td>(&forall;x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b) & (&forall;y &#x2208; <b>Set</b>)(a &#x2208; y &hArr; b &#x2208; y)</td><td>Definition of <i>set</i> equality</td></tr>
+<tr><td>4.</td><td>(&forall;w &#x2208; <b>Set</b>)(w &#x2208; b &hArr; w &#x2208; c) & (&forall;z &#x2208; <b>Set</b>)(b &#x2208; z &hArr; c &#x2208; z)</td><td>Definition of <i>set</i> equality</td></tr>
+<tr><td>5.</td><td>(&forall;x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; b)</td><td>Conjunction elimination on (3)</td></tr>
+<tr><td>6.</td><td>(&forall;y &#x2208; <b>Set</b>)(a &#x2208; y &hArr; b &#x2208; y)</td><td>Conjunction elimination on (3)</td></tr>
+<tr><td>7.</td><td>(&forall;w &#x2208; <b>Set</b>)(w &#x2208; b &hArr; w &#x2208; c)</td><td>Conjunction elimination on (4)</td></tr>
+<tr><td>8.</td><td>(&forall;z &#x2208; <b>Set</b>)(b &#x2208; z &hArr; c &#x2208; z)</td><td>Conjunction elimination on (4)</td></tr>
 <tr><td>9.</td><td>(t1 &#x2208; <b>Set</b>) & (t1 &#x2208; a &hArr; t1 &#x2208; b)</td><td>Universal instantiation on (5)</td></tr>
 <tr><td>10.</td><td>(t1 &#x2208; <b>Set</b>) & (t1 &#x2208; b &hArr; t1 &#x2208; c)</td><td>Universal instantiation on (7)</td></tr>
 <tr><td>11.</td><td>(t2 &#x2208; <b>Set</b>) & (a &#x2208; t2 &hArr; b &#x2208; t2)</td><td>Universal instantiation on (6)</td></tr>
@@ -254,13 +254,13 @@ with the syntactical entailment subrule</p>
 <tr><td>20.</td><td>t2 &#x2208; <b>Set</b></td><td>Conjunction elimination on (11)</td></tr>
 <tr><td>21.</td><td>(t1 &#x2208; <b>Set</b>) & (t1 &#x2208; a &hArr; t1 &#x2208; c)</td><td>Conjunction introduction on (19),(15)</td></tr>
 <tr><td>22.</td><td>(t2 &#x2208; <b>Set</b>) & (a &#x2208; t2 &hArr; c &#x2208; t2)</td><td>Conjunction introduction on (20),(18)</td></tr>
-<tr><td>23.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>u &#x2208; <b>Set</b>)(u &#x2208; a &hArr; u &#x2208; c)</td><td>Universal instantiation on (21)</td></tr>
-<tr><td>24.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>v &#x2208; <b>Set</b>)(a &#x2208; v &hArr; c &#x2208; v)</td><td>Universal instantiation on (22)</td></tr>
-<tr><td>25.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>u &#x2208; <b>Set</b>)(u &#x2208; a &hArr; u &#x2208; c) & (<span style="transform:rotate(180deg);display:inline-block">A</span>v &#x2208; <b>Set</b>)(a &#x2208; v &hArr; c &#x2208; v)</td><td>Conjunction introduction on (23),(24)</td></tr>
+<tr><td>23.</td><td>(&forall;u &#x2208; <b>Set</b>)(u &#x2208; a &hArr; u &#x2208; c)</td><td>Universal generalization on (21)</td></tr>
+<tr><td>24.</td><td>(&forall;v &#x2208; <b>Set</b>)(a &#x2208; v &hArr; c &#x2208; v)</td><td>Universal generalization on (22)</td></tr>
+<tr><td>25.</td><td>(&forall;u &#x2208; <b>Set</b>)(u &#x2208; a &hArr; u &#x2208; c) & (&forall;v &#x2208; <b>Set</b>)(a &#x2208; v &hArr; c &#x2208; v)</td><td>Conjunction introduction on (23),(24)</td></tr>
 <tr><td>26.</td><td>a=c</td><td>Definition of <i>set</i> equality</td></tr>
 </table>
 <p>We have to be careful where not to reuse variable and term symbols here.  Strictly speaking, I should have listed that a, b, c were <i>set</i> terms on three Given lines, 
-just like t1 and t1 are explicitly <i>set</i> terms.</p>
+just like t<sub>1</sub> and t<sub>2</sub> are explicitly <i>set</i> terms.</p>
 <p>The other three set theories we are considering, have similar proofs, whose tabular representation is left as an exercise.  All changes follow from using the target set theory's definition of equality (including which terms are 
 	<i>class</i> terms or <i>set</i> terms).</p>
 <p>Since Belnap's four-valued logic does not have <i>transitivity of &hArr;</i>, that transitivity of (defined) <i>set</i> and <i>class</i> equality does <b>not</b> hold there: the definition of equality does not work as intended, under Belnap's logic, 
@@ -272,9 +272,9 @@ just like t1 and t1 are explicitly <i>set</i> terms.</p>
 <tr><th colspan="3">Zermelo-Frankel, Nonclassical logic</th></tr>
 <tr><th></th><th>Proposition</th><th>Rationale</th></tr>
 <tr><td>1.</td><td>a=a</td><td>Given</td></tr>
-<tr><td>2.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; a) & (<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; <b>Set</b>)(a &#x2208; y &hArr; a &#x2208; y)</td><td>Definition of <i>set</i> equality</td></tr>
-<tr><td>3.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; a)</td><td>Conjunction elimination on (2)</td></tr>
-<tr><td>4.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; <b>Set</b>)(a &#x2208; y &hArr; a &#x2208; y)</td><td>Conjunction elimination on (2)</td></tr>
+<tr><td>2.</td><td>(&forall;x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; a) & (&forall;y &#x2208; <b>Set</b>)(a &#x2208; y &hArr; a &#x2208; y)</td><td>Definition of <i>set</i> equality</td></tr>
+<tr><td>3.</td><td>(&forall;x &#x2208; <b>Set</b>)(x &#x2208; a &hArr; x &#x2208; a)</td><td>Conjunction elimination on (2)</td></tr>
+<tr><td>4.</td><td>(&forall;y &#x2208; <b>Set</b>)(a &#x2208; y &hArr; a &#x2208; y)</td><td>Conjunction elimination on (2)</td></tr>
 <tr><td>5.</td><td>(t1 &#x2208; <b>Set</b>) & (t1 &#x2208; a &hArr; t1 &#x2208; a)</td><td>Universal instantiation on (3)</td></tr>
 <tr><td>6.</td><td>(t1 &#x2208; <b>Set</b>) & (a &#x2208; t1 &hArr; a &#x2208; t1)</td><td>Universal instantiation on (4)</td></tr>
 <tr><td>7.</td><td>t1 &#x2208; a &hArr; t1 &#x2208; a</td><td>Conjunction elimination on (5)</td></tr>
@@ -284,7 +284,7 @@ just like t1 and t1 are explicitly <i>set</i> terms.</p>
 <tr><td>11.</td><td>t1 &#x2208; a &#x2228; t1 &#x2209; a</td><td>Constructive dilemma on <span style="background:yellow">intended interpretation of &#x2208;</span>, (9)</td></tr>
 <tr><td>12.</td><td>a &#x2208; t1 &#x2228; a &#x2209; t1</td><td>Constructive dilemma on <span style="background:yellow">intended interpretation of &#x2208;</span>, (10)</td></tr>
 <tr><td>13.</td><td>(t1 &#x2208; a &#x2228; t1 &#x2209; a) & (a &#x2208; t1 &#x2228; a &#x2209; t1)</td><td>Conjunction introduction on (11),(12)</td></tr>
-<tr><td>14.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>z &#x2208; <b>Set</b>)(z &#x2208; a &#x2228; z &#x2209; a) & (a &#x2208; z &#x2228; a &#x2209; z)</td><td>Universal generalization on (13)</td></tr>
+<tr><td>14.</td><td>(&forall;z &#x2208; <b>Set</b>)(z &#x2208; a &#x2228; z &#x2209; a) & (a &#x2208; z &#x2228; a &#x2209; z)</td><td>Universal generalization on (13)</td></tr>
 </table>
 <p>That is: for any logic we are considering, for any Zermelo-Frankel <i>set</i> a, a=a syntactically entails that for all sets z, both z &#x2208; a and a &#x2208; z have classical truth values.  We already had this for classical logic,
 	but this is a <b>significant</b> property for the non-classical logics we are considering.  This suggests we should consider an alterate definition that tolerates non-classical truth values, but our overview of
@@ -294,12 +294,12 @@ just like t1 and t1 are explicitly <i>set</i> terms.</p>
 <h2 id="shadows-of-logic" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear: both">Roadmap: Shadows of Logic</h2>
 <table align="left">
 	<tr><th>Logical connective</th><th></th><th>Typical symbolic notation (without ur-elements)</th><th>Intended interpretation</th></tr>
-	<tr><td rowspan="2">nonstrict implication &rArr;</td><td>A &#x2286; B :=&nbsp;</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; A &rArr; x &#x2208; B)</td><td>"A is a subset of B" (more generally, whatever mathematical collection type B is, A is a subcollection of)</td></tr>
-	<tr><td>B &#x2287; A :=&nbsp;</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; B &rArr; x &#x2208; A)</td><td>"A contains B"</td></tr>
-	<tr><td>logical negation ~</td><td><span style="text-decoration: overline">A</span></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2209; A)</td><td>"the complement of A"</td></tr>
-	<tr><td>logical and &</td><td>A &#x2229; B</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; A & x &#x2208; B)</td><td>"A intersect B", "intersection of A with B"</td></tr>
-	<tr><td>logical or &#x2228;</td><td>A &#x222A; B</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; A &#x2228; x &#x2208; B)</td><td>"A union B", "union of A with B"</td></tr>
-	<tr><td></td><td>&#x2205;</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2209; &#x2205;)</td><td>"the empty set" or "the null set"</td></tr>
+	<tr><td rowspan="2">nonstrict implication &rArr;</td><td>A &#x2286; B :=&nbsp;</td><td>(&forall;x &#x2208; <b>Set</b>)(x &#x2208; A &rArr; x &#x2208; B)</td><td>"A is a subset of B" (more generally, whatever mathematical collection type B is, A is a subcollection of)</td></tr>
+	<tr><td>B &#x2287; A :=&nbsp;</td><td>(&forall;x &#x2208; <b>Set</b>)(x &#x2208; B &rArr; x &#x2208; A)</td><td>"A contains B"</td></tr>
+	<tr><td>logical negation ~</td><td><span style="text-decoration: overline">A</span></td><td>(&forall;x &#x2208; <b>Set</b>)(x &#x2209; A)</td><td>"the complement of A"</td></tr>
+	<tr><td>logical and &</td><td>A &#x2229; B</td><td>(&forall;x &#x2208; <b>Set</b>)(x &#x2208; A & x &#x2208; B)</td><td>"A intersect B", "intersection of A with B"</td></tr>
+	<tr><td>logical or &#x2228;</td><td>A &#x222A; B</td><td>(&forall;x &#x2208; <b>Set</b>)(x &#x2208; A &#x2228; x &#x2208; B)</td><td>"A union B", "union of A with B"</td></tr>
+	<tr><td></td><td>&#x2205;</td><td>(&forall;x &#x2208; <b>Set</b>)(x &#x2209; &#x2205;)</td><td>"the empty set" or "the null set"</td></tr>
 	<tr><td></td><td><b>Set</b></td><td>{x | x=x }</td><td>Zermelo-Frankel set theory: the domain of discourse of <i>sets</i>, not a nameable mathematical collection.  Proper class for Von Neumann-Bernays-G&ouml;del.</td></tr>
 </table>
 <table align="right">

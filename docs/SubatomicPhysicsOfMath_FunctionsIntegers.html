@@ -331,8 +331,8 @@
 	<tr><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>A &#x2208; <b>Set</b>)(<span style="transform:rotate(180deg);display:inline-block">A</span>B &#x2208; <b>Ur</b>)(<span style="transform:rotate(180deg);display:inline-block">E</span>C &#x2208; <b>Set</b>)[(<span style="transform:rotate(180deg);display:inline-block">A</span>D &#x2208; <b>Set</b>)(D=A &rArr; D &#x2208; C) & (<span style="transform:rotate(180deg);display:inline-block">A</span>E &#x2208; <b>Ur</b>)(E=B &rArr; E &#x2208; C)]</td></tr>
 	<tr><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>A &#x2208; <b>Ur</b>)(<span style="transform:rotate(180deg);display:inline-block">A</span>B &#x2208; <b>Ur</b>)(<span style="transform:rotate(180deg);display:inline-block">E</span>C &#x2208; <b>Set</b>)(<span style="transform:rotate(180deg);display:inline-block">A</span>D &#x2208; <b>Ur</b>)((D=A &#x2228; D=B) &rArr; D &#x2208; C)</td></tr>
 	<tr><td rowspan="3" valign="center">Von Neumann-Bernays-G&ouml;del with ur-elements</td><td rowspan="3" valign="center">provable from class existence</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>A &#x2208; <b>Set</b>)(<span style="transform:rotate(180deg);display:inline-block">A</span>B &#x2208; <b>Set</b>)(<span style="transform:rotate(180deg);display:inline-block">E</span>C &#x2208; <b>Class</b>)(<span style="transform:rotate(180deg);display:inline-block">A</span>D &#x2208; <b>Set</b>)((D=A &#x2228; D=B) &rArr; D &#x2208; C)</td></tr>
-	<tr><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>A &#x2208; <b>Set</b>)(<span style="transform:rotate(180deg);display:inline-block">A</span>B &#x2208; <b>Ur</b>)(<span style="transform:rotate(180deg);display:inline-block">E</span>C &#x2208; <b>Class</b>)[(<span style="transform:rotate(180deg);display:inline-block">A</span>D &#x2208; <b>Set</b>)(D=A &rArr; D &#x2208; C) & (<span style="transform:rotate(180deg);display:inline-block">A</span>E &#x2208; <b>Ur</b>)(E=B &rArr; D &#x2208; C)]</td></tr>
-	<tr><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>A &#x2208; <b>Ur</b>)(<span style="transform:rotate(180deg);display:inline-block">A</span>B &#x2208; <b>Ur</b>)(<span style="transform:rotate(180deg);display:inline-block">E</span>C &#x2208; <b>Class</b>)(<span style="transform:rotate(180deg);display:inline-block">A</span>D &#x2208; <b>Ur</b>)((D=A &#x2228; D=B) &rArr; D &#x2208; C)</td></tr>
+	<tr><td>(&forall;A &isin; <b>Set</b>)(&forall;B &isin; <b>Ur</b>)(&exist;C &isin; <b>Class</b>)[(&forall;D &isin; <b>Set</b>)(D=A &rArr; D &isin; C) & (&forall;E &#x2208; <b>Ur</b>)(E=B &rArr; D &isin; C)]</td></tr>
+	<tr><td>(&forall;A &isin; <b>Ur</b>)(&forall;B &isin; <b>Ur</b>)(&exist;C &isin; <b>Class</b>)(&forall;D &isin; <b>Ur</b>)((D=A &#x2228; D=B) &rArr; D &isin; C)</td></tr>
 </table><p>The set theories with <i>ur-elements</i>, need three such axioms.</p>
 <p>The version named above, could return a mathematical collection that contains other elements.  However, the hypothesis Pairing<sub>A,B</sub>(D), when used as a predicate in the <i>subset axiom (schema)</i>,
 	constructs a mathematical collection that has just the two requested elements A, B.  We define {A,B} to be this mathematical collection obtained from the <i>subset axiom</i> by using the <i>axiom of pairing</i> predicate D=A &#x2228; D=B; on the set obtained from the <i>axiom of pairing</i>.  (Proving that the intermediate set from <i>axiom of pairing</i>, 
@@ -364,7 +364,7 @@
 	<tr><td>16.</td><td>t1 &#x2260; a &#9500; t1 &#x2208; {a} &hArr; t1 &#x2208; {a,a}</td><td></td><td>Transitivity of &#9500;, (8) and evaluating &hArr;</td></tr>
 	<tr><td>17.</td><td>t1 = a &#9500; t1 &#x2208; {a} &hArr; t1 &#x2208; {a,a}</td><td></td><td>Transitivity of &#9500;, (14) and evaluating &hArr;</td></tr>
 	<tr><td>18.</td><td></td><td>t1 &#x2208; {a} &hArr; t1 &#x2208; {a,a}</td><td>Proof by cases on (15) by (16) and (17)</td></tr>
-	<tr><td>19.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; {a} &hArr; x &#x2208; {a,a})</td><td>Universal instantiation on (18)</td></tr>
+	<tr><td>19.</td><td></td><td>(&forall;x &isin; <b>Set</b>)(x &isin; {a} &hArr; x &isin; {a,a})</td><td>Universal instantiation on (18)</td></tr>
 	<tr><td>20.</td><td></td><td>{a} = {a,a}</td><td>definition of equality =</td></tr>
 </table>
 
@@ -381,14 +381,14 @@
 <table align="right">
 	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>	
 	<tr><td>1.</td><td>{a}={x}</td><td>Given</td></tr>	
-	<tr><td>2.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>z1 &#x2208; <b>Set</b>)(z1 &#x2208; {a} &hArr; z1=a) & (a &#x2208; {a})</td><td>Intended interpretation of explicit enumeration notation</td></tr>
-	<tr><td>3.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>z2 &#x2208; <b>Set</b>)(z2 &#x2208; {x} &hArr; z2=x) & (x &#x2208; {x})</td><td>Intended interpretation of explicit enumeration notation</td></tr>
-	<tr><td>4.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>z1 &#x2208; <b>Set</b>)(z1 &#x2208; {a} &hArr; z1=a)</td><td>Conjunction elimination on (2)</td></tr>
-	<tr><td>5.</td><td>a &#x2208; {a}</td><td>Conjunction elimination on (2)</td></tr>
-	<tr><td>6.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>z2 &#x2208; <b>Set</b>)(z2 &#x2208; {x} &hArr; z2=x)</td><td>Conjunction elimination on (3)</td></tr>
+	<tr><td>2.</td><td>(&forall;z1 &isin; <b>Set</b>)(z1 &isin; {a} &hArr; z1=a) & (a &isin; {a})</td><td>Intended interpretation of explicit enumeration notation</td></tr>
+	<tr><td>3.</td><td>(&forall;z2 &isin; <b>Set</b>)(z2 &isin; {x} &hArr; z2=x) & (x &isin; {x})</td><td>Intended interpretation of explicit enumeration notation</td></tr>
+	<tr><td>4.</td><td>(&forall;z1 &isin; <b>Set</b>)(z1 &isin; {a} &hArr; z1=a)</td><td>Conjunction elimination on (2)</td></tr>
+	<tr><td>5.</td><td>a &isin; {a}</td><td>Conjunction elimination on (2)</td></tr>
+	<tr><td>6.</td><td>(&forall;z2 &isin; <b>Set</b>)(z2 &isin; {x} &hArr; z2=x)</td><td>Conjunction elimination on (3)</td></tr>
 	<tr style="background:#ccc"><td>7.</td><td>x &#x2208; {x}</td><td>Conjunction elimination on (3)</td></tr>
 	<tr><th colspan="3">Von Neumann-Bernays-G&ouml;del</th></tr>
-	<tr><td>8a.</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>z &#x2208; <b>Set</b>)(z &#x2208; {a} &hArr; z &#x2208; {x})</td><td>Definition of equality for sets</td></tr>
+	<tr><td>8a.</td><td>(&forall;z &isin; <b>Set</b>)(z &isin; {a} &hArr; z &isin; {x})</td><td>Definition of equality for sets</td></tr>
 	<tr><td>9a.</td><td>(a &#x2208; <b>Set</b>) & (a &#x2208; {a} &hArr; a &#x2208; {x})</td><td>Universal instantiation on (8a)</td></tr>
 	<tr><td>10a.</td><td>a &#x2208; <b>Set</b></td><td>Conjunction elimination on (9a)</td></tr>
 	<tr><td>11a.</td><td>a &#x2208; {a} &hArr; a &#x2208; {x}</td><td>Conjunction elimination on (9a)</td></tr>
@@ -411,7 +411,7 @@
 	<tr><td>8.</td><td>t1 &#x2208; {a,b} &#x27DB; t1 &#x2208; {b,a}</td><td></td><td>definition of syntactical equivalence on (7),(7a)</td></tr>
 	<tr><th colspan="4">Classical logic</th></tr>
 	<tr><td >9.</td><td></td><td>t1 &#x2208; {a,b} &hArr; t1 &#x2208; {b,a}</td><td>downgrade syntactical equivalence to &hArr; on (8)</td></tr>
-	<tr><td>10.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; {a,b} &hArr; x &#x2208; {b,a})</td><td>Universal instantiation on (9)</td></tr>
+	<tr><td>10.</td><td></td><td>(&forall;x &isin; <b>Set</b>)(x &isin; {a,b} &hArr; x &isin; {b,a})</td><td>Universal instantiation on (9)</td></tr>
 	<tr><td>21.</td><td></td><td>{a,b} = {b,a}</td><td>definition of equality =</td></tr>
 </table>
 <p>We verify that {a,b}={b,a} for the simplest case: Von Neumann-Bernays-G&ouml;del with classical logic.  I.e., the set {a,b} will pass as an unordered pair.  It is plausible 
@@ -450,10 +450,10 @@
 <table align="center">
 	<tr><th colspan="3"><a href="https://en.wikipedia.org/wiki/Axiom_of_union">Axiom of (absolute) Union</a></th></tr>
 	<tr><th colspan="3">Classical Logic</th></tr>
-	<tr><td>Zermelo-Frankel</td><td>Axiom</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>A &#x2208; <b>Set</b>)(<span style="transform:rotate(180deg);display:inline-block">E</span>B &#x2208; <b>Set</b>)(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; B &hArr; (<span style="transform:rotate(180deg);display:inline-block">E</span>D &#x2208; <b>Set</b>)(x &#x2208; D & D &#x2208; A))</td></tr>
-	<tr><td>Von Neumann-Bernays-G&ouml;del</td><td>Provable from class existence</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>A &#x2208; <b>Class</b>)(<span style="transform:rotate(180deg);display:inline-block">E</span>B &#x2208; <b>Class</b>)(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; B &hArr; (<span style="transform:rotate(180deg);display:inline-block">E</span>D &#x2208; <b>Set</b>)(x &#x2208; D & D &#x2208; A))</td></tr>
-	<tr><td>Zermelo-Frankel with <i>ur-elements</i></td><td>Axiom</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>A &#x2208; <b>Set</b>)(<span style="transform:rotate(180deg);display:inline-block">E</span>B &#x2208; <b>Set</b>)[(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; B &hArr; (<span style="transform:rotate(180deg);display:inline-block">E</span>D &#x2208; <b>Set</b>)(x &#x2208; D & D &#x2208; A)) & (<span style="transform:rotate(180deg);display:inline-block">A</span>u &#x2208; <b>Ur</b>)(u &#x2208; B &hArr; (<span style="transform:rotate(180deg);display:inline-block">E</span>E &#x2208; <b>Set</b>)(u &#x2208; E & E &#x2208; A))]</td></tr>
-	<tr><td>Von Neumann-Bernays-G&ouml;del with <i>ur-elements</i></td><td>Provable from class existence</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>A &#x2208; <b>Class</b>)(<span style="transform:rotate(180deg);display:inline-block">E</span>B &#x2208; <b>Class</b>)[(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; <b>Set</b>)(x &#x2208; B &hArr; (<span style="transform:rotate(180deg);display:inline-block">E</span>D &#x2208; <b>Set</b>)(x &#x2208; D & D &#x2208; A)) & (<span style="transform:rotate(180deg);display:inline-block">A</span>u &#x2208; <b>Ur</b>)(u &#x2208; B &hArr; (<span style="transform:rotate(180deg);display:inline-block">E</span>E &#x2208; <b>Set</b>)(u &#x2208; E & E &#x2208; A))]</td></tr>
+	<tr><td>Zermelo-Frankel</td><td>Axiom</td><td>(&forall;A &isin; <b>Set</b>)(&exist;B &isin; <b>Set</b>)(&forall;x &isin; <b>Set</b>)(x &isin; B &hArr; (&exist;D &isin; <b>Set</b>)(x &isin; D & D &isin; A))</td></tr>
+	<tr><td>Von Neumann-Bernays-G&ouml;del</td><td>Provable from class existence</td><td>(&forall;A &isin; <b>Class</b>)(&exist;B &#isin; <b>Class</b>)(&forall;x &isin; <b>Set</b>)(x &isin; B &hArr; (&exist;D &isin; <b>Set</b>)(x &isin; D & D &isin; A))</td></tr>
+	<tr><td>Zermelo-Frankel with <i>ur-elements</i></td><td>Axiom</td><td>(&forall;A &isin; <b>Set</b>)(&exist;B &isin; <b>Set</b>)[(&forall;x &isin; <b>Set</b>)(x &isin; B &hArr; (&exist;D &isin; <b>Set</b>)(x &isin; D & D &isin; A)) & (&forall;u &isin; <b>Ur</b>)(u &isin; B &hArr; (&exist;E &isin; <b>Set</b>)(u &isin; E & E &isin; A))]</td></tr>
+	<tr><td>Von Neumann-Bernays-G&ouml;del with <i>ur-elements</i></td><td>Provable from class existence</td><td>(&forall;A &isin; <b>Class</b>)(&exist;B &isin; <b>Class</b>)[(&forall;x &isin; <b>Set</b>)(x &isin; B &hArr; (&exist;D &isin; <b>Set</b>)(x &isin; D & D &isin; A)) & (&forall;u &isin; <b>Ur</b>)(u &isin; B &hArr; (&exist;E &isin; <b>Set</b>)(u &isin; E & E &isin; A))]</td></tr>
 </table>
 <p>We have the usual rewrite to equality of truth values, for the truth-table describable non-classical logics.</p>
 <p>The mathematical collection that the <i>axiom of (absolute) union</i> declares to exist, is called the absolute union of the mathematical collection A; the most terse notation is <big>&#x222A;</big>A.  It is often useful to
@@ -481,8 +481,8 @@ emphasize that A is playing the role of an "indexing collection", so a common al
 <table align="center">
 	<tr><th colspan="3"><a href="https://en.wikipedia.org/wiki/Axiom_of_power_set">Axiom of power set &#x1D4AB;(X)</a></th></tr>
 	<tr><th colspan="3">Classical Logic</th></tr>
-	<tr><td>Zermelo-Frankel, with or without <i>ur-elements</i></td><td>Axiom</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>X &#x2208; <b>Set</b>)(<span style="transform:rotate(180deg);display:inline-block">E</span>&#x1D4AB;(X) &#x2208; <b>Set</b>)(<span style="transform:rotate(180deg);display:inline-block">A</span>z &#x2208; <b>Set</b>)(z &#x2208; &#x1D4AB;(X) &hArr; z &#x2286; X)</td></tr>
-	<tr><td>Von Neumann-Bernays-G&ouml;del with or without <i>ur-elements</i></td><td>Provable from class existence</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>X &#x2208; <b>Class</b>)(<span style="transform:rotate(180deg);display:inline-block">E</span>&#x1D4AB;(X) &#x2208; <b>Class</b>)(<span style="transform:rotate(180deg);display:inline-block">A</span>z &#x2208; <b>Set</b>)(z &#x2208; &#x1D4AB;(X) &hArr; z &#x2286; X)</td></tr>
+	<tr><td>Zermelo-Frankel, with or without <i>ur-elements</i></td><td>Axiom</td><td>(&forall;X &isin; <b>Set</b>)(&exist;&#x1D4AB;(X) &isin; <b>Set</b>)(&forall;z &isin; <b>Set</b>)(z &isin; &#x1D4AB;(X) &hArr; z &#x2286; X)</td></tr>
+	<tr><td>Von Neumann-Bernays-G&ouml;del with or without <i>ur-elements</i></td><td>Provable from class existence</td><td>(&forall;X &isin; <b>Class</b>)(&exist;&#x1D4AB;(X) &isin; <b>Class</b>)(&forall;z &isin; <b>Set</b>)(z &isin; &#x1D4AB;(X) &hArr; z &#x2286; X)</td></tr>
 </table>
 <p>We intentionally do not inline the definition of subset &#x2286; into the <i>axiom of power set</i>, unlike our sources.  This lets our notation automatically pick up on how the definition of subset has to react to 
 	the set theory and logic.  The rewrite from &hArr; to truth-value equality = for the truth-table describable non-classical logics, is mechanical.</p>
@@ -499,10 +499,10 @@ emphasize that A is playing the role of an "indexing collection", so a common al
 	<li>We say that a relation r is from a mathematical collection X to a mathematical collection Y, if Domain(r) is a subcollection of X and Range(r) is a subcollection of Y; alternately, the relation r is of type X <span style="position:relative; top: -2px">&#x2192;</span> Y.
 		<p align="center">r:X <span style="position:relative; top: -2px">&#x2192;</span> Y := Domain(r) &#x2286; X & Range(r) &#x2286; Y</p></li>
 	<li>We say a relation r is right-unique i.e. is functional, if for any x in X there is at most one value it can evaluate to:
-		<p align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; X)(<span style="transform:rotate(180deg);display:inline-block">A</span>y<sub>0</sub> &#x2208; Y)(<span style="transform:rotate(180deg);display:inline-block">A</span>y<sub>1</sub> &#x2208; Y)((x,y<sub>0</sub>) &#x2208; r & (x,y<sub>1</sub>) &#x2208; r) &rArr; y<sub>0</sub>=y<sub>1</sub>) [classical]</p></li>
-		<p align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; X)(<span style="transform:rotate(180deg);display:inline-block">A</span>y<sub>0</sub> &#x2208; Y)(<span style="transform:rotate(180deg);display:inline-block">A</span>y<sub>1</sub> &#x2208; Y)((x,y<sub>0</sub>) &#x2208; r & (x,y<sub>1</sub>) &#x2208; r) &#9500; y<sub>0</sub>=y<sub>1</sub>) [nonclassical]</p></li>
+		<p align="center">(&forall;x &isin; X)(&forall;y<sub>0</sub> &isin; Y)(&forall;y<sub>1</sub> &isin; Y)((x,y<sub>0</sub>) &isin; r & (x,y<sub>1</sub>) &#x2208; r) &rArr; y<sub>0</sub>=y<sub>1</sub>) [classical]</p></li>
+		<p align="center">(&forall;x &isin; X)(&forall;y<sub>0</sub> &isin; Y)(&forall;y<sub>1</sub> &isin; Y)((x,y<sub>0</sub>) &isin; r & (x,y<sub>1</sub>) &#x2208; r) &#9500; y<sub>0</sub>=y<sub>1</sub>) [nonclassical]</p></li>
 	<li>We say a relation r is left-total, i.e. does not have an implicit domain restriction, if for any x in X there is at least one value it can evaluate to:
-		<p align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; X)(<span style="transform:rotate(180deg);display:inline-block">E</span>y &#x2208; Y)((x,y) &#x2208; r)</p></li>
+		<p align="center">(&forall;x &isin; X)(&exist;y &isin; Y)((x,y) &isin; r)</p></li>
 	<li>We say that a function f is a relation that is both left-total, and right-unique i.e. functional.</li>
 	<li>We say that a partial function f is a relation that is only right-unique i.e. functional.</li>
 	<li>For a partial function f, we define x &#x21A6;<sub>f</sub> y := (x,y) &#x2208; f.</li>
@@ -542,7 +542,7 @@ emphasize that A is playing the role of an "indexing collection", so a common al
 <p>There is more than one canonical model in the literature for the natural numbers.  Both models are considered to result in ordinal numbers, i.e. numbers whose primary attribute is ordering.</p>
 <table align="center">
 	<tr><th>Von Neumann</th><th>Zermelo</th></tr>
-	<tr><td colspan="2" align="center">0 := &#x2205;</td></tr>
+	<tr><td colspan="2" align="center">0 := &empty;</td></tr>
 	<tr><td>S(x) := x &#x222A; {x}</td><td>S(x) := {x}</td></tr>
 </table>
 <p>Both choices of S:<b>Set</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>Set</b> are Von Neumann-Bernays-G&ouml;del functions, but not Zermelo-Frankel functions (i.e., we have to use the domain of discourse notational abuse for Zermelo-Frankel set theory).  When checking 
@@ -554,7 +554,7 @@ emphasize that A is playing the role of an "indexing collection", so a common al
 	we introduce an axiom:</p>
 <table align="center">
 	<tr><th><a href="https://en.wikipedia.org/wiki/Axiom_of_infinity">Axiom of Infinity</a></th></tr>
-	<tr><td align="center">(<span style="transform:rotate(180deg);display:inline-block">E</span>I &#x2208; <b>Set</b>)(0 &#x2208; I & (<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208;  I)(S(x) &#x2208;  I))</tr>
+	<tr><td align="center">(&exist;I &isin; <b>Set</b>)(0 &isin; I & (&forall;x &isin; I)(S(x) &isin; I))</tr>
 </table>
 <p>We substitute into the <i>axiom of infinity</i>, whatever choice of 0 and S we made that implements the Peano axioms.</p>
 <p>If we care more about being explicitly constructive than having a formal notation as expressive as natural language, 
@@ -563,7 +563,7 @@ emphasize that A is playing the role of an "indexing collection", so a common al
 <p>We still need to extract the natural numbers &#x2115; from the <i>set</i> named by the <i>axiom of infinity</i>.  Let AxiomOfInfinity:<b>Set</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b> denote the predicate that
 	evaluates to <i>true</i> when a set instantiates the <i>axiom of infinity</i>.  Then, given a set I from the <i>axiom of infinity</i>, we want the elements of I that 
 	are elements of every inductive set named by the <i>axiom of infinity</i>:</p>
-<p align="center">&#x2115; := {x &#x2208; I: (<span style="transform:rotate(180deg);display:inline-block">A</span>J &#x2208; <b>Set</b>)(AxiomOfInfinity(J) &rArr; x &#x2208; J)}</p>
+<p align="center">&#x2115; := {x &#x2208; I: (&forall;J &isin; <b>Set</b>)(AxiomOfInfinity(J) &rArr; x &isin; J)}</p>
 <p>At this point, any instructions for re-verifying mathematics, starting from natural numbers, are implementable.  This includes practically all applied mathematics (including 
 	grade school arithmetic, calculus as taught to engineers, ....).</p>
 <p>A provable consequence from the construction of &#x2115; and the <i>axiom of (weak natural) induction</i>, is that &#x2115;\{0} &#x2286; Domain(S<sup>-1</sup>).  We also have &#x2115;\{0} = Domain(S<sup>-1</sup>) &#x2229; &#x2115;.</p>	

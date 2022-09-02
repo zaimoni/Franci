@@ -64,18 +64,18 @@ of the inference schemas of predicate calculus are derivable from the usual unde
 	<li>Tautologies: i.e., formulas constructed out of propositional variables A,B,C,... and logical connectives such that no matter
 		which truth values <i>true</i> and <i>false</i> are assigned to those variables, the formula evaluates to <i>true</i>.  (We expect no such formulas
 		to exist for the non-classical logics.  Thus, the use of any tautology is a strong hint that the proof is specific to classical logic.)</li>
-	<li>The four primary syntactical inference schemata for <a href="./SubatomicPhysicsOfMath.html#def-quantify">for <span style="transform:rotate(180deg);display:inline-block">A</span> and <span style="transform:rotate(180deg);display:inline-block">E</span>.</a></li>
+	<li>The four primary syntactical inference schemata for <a href="./SubatomicPhysicsOfMath.html#def-quantify">for &forall; and &exist;.</a></li>
 	<li><i>Modus ponens</i></li>
 </ol>
 <p>As our text was strictly using classical logic, there was no good editorial reason to go further there.  To use logic as a parameter for set theory,
 	we need to see how our reference non-classical logics vary from classical logic.  We summarize the second and third points as:</p>
 <table align="center">
 <tr><th></th><th>Name</th><th></th></tr>
-<tr align="center"><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>a)Z(a) := ~((<span style="transform:rotate(180deg);display:inline-block">A</span>a)~Z(a))</td><td></td><td>a is a bound variable due to the quantifier</td></tr>
-<tr align="center"><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>a)Z(a) &#9500; Z(t)</td><td>Universal instantiation</td><td>Z(a) may have implicitly used term t</td></tr>
-<tr align="center"><td>Z(t) &#9500; (<span style="transform:rotate(180deg);display:inline-block">E</span>a)Z(a)</td><td>Existential generalization</td><td><i>Z(t)</i>, and all notationally prior statements to <i>Z(t)</i>, must not have used symbol <i>a</i></td></tr>
-<tr align="center"><td>P &rArr; Z(t) &#9500; P &rArr; (<span style="transform:rotate(180deg);display:inline-block">A</span>a)Z(a)</td><td>Universal generalization</td><td><i>P &rArr; Z(t)</i>, and all notationally prior statements to <i>P &rArr; Z(t)</i>, must not have used symbol <i>a</i></td></tr>
-<tr align="center"><td>Z(t) &rArr; P &#9500; (<span style="transform:rotate(180deg);display:inline-block">E</span>a)Z(a) &rArr; A</td><td>Existential generalization</td><td><i>Z(t) &rArr; P</i>, and all notationally prior statements to <i>Z(t) &rArr; P</i>, must not have used symbol <i>a</i></td></tr>
+<tr align="center"><td>(&exist;a)Z(a) := ~((&forall;a)~Z(a))</td><td></td><td>a is a bound variable due to the quantifier</td></tr>
+<tr align="center"><td>(&forall;a)Z(a) &#9500; Z(t)</td><td>Universal instantiation</td><td>Z(a) may have implicitly used term t</td></tr>
+<tr align="center"><td>Z(t) &#9500; (&exist;a)Z(a)</td><td>Existential generalization</td><td><i>Z(t)</i>, and all notationally prior statements to <i>Z(t)</i>, must not have used symbol <i>a</i></td></tr>
+<tr align="center"><td>P &rArr; Z(t) &#9500; P &rArr; (&forall;a)Z(a)</td><td>Universal generalization</td><td><i>P &rArr; Z(t)</i>, and all notationally prior statements to <i>P &rArr; Z(t)</i>, must not have used symbol <i>a</i></td></tr>
+<tr align="center"><td>Z(t) &rArr; P &#9500; (&exist;a)Z(a) &rArr; A</td><td>Existential generalization</td><td><i>Z(t) &rArr; P</i>, and all notationally prior statements to <i>Z(t) &rArr; P</i>, must not have used symbol <i>a</i></td></tr>
 <tr align="center"><td>P, P &rArr; Q &#9500; Q</td><td><i>modus ponens</i></td><td></td></tr>
 </table>
 <p>In the above:</p>
@@ -1041,7 +1041,7 @@ In classical logic, this is known as <i>proof by contradiction</i>; other names 
 	order on domain of discourse truth-valued expressions), these proof-specific "relations" are third order on domain of discourse truth-valued expressions.</p>
 <p>The effect is to prove the induction step Q, for all instances that are reachable from the basis step(s) B, by repeated use of the successor statement "relation".  My intention is 
 	that this improvised definition, has all of weak natural induction, strong natural induction, finite induction, and transfinite induction as specializations.  That is, 
-	the intent is to allow proving a logical and & statement with potentially unbounded clauses(!).  This behavior is similar to the universal quantifier <span style="transform:rotate(180deg);display:inline-block">A</span>.</p>
+	the intent is to allow proving a logical and & statement with potentially unbounded clauses(!).  This behavior is similar to the universal quantifier &forall;.</p>
 <ul>
 	<li>The intended interpretation of <b>TruthValued</b>, is the domain of discourse of all syntactically truth-valued expressions.  (Whether these actually <b>have</b> truth values, i.e. are statements, depends on the logic applied to them.)</li>
 	<li>The intended interpretation of <b>TruthValues</b>, is the domain of discourse of all truth values for a given logic.</li>

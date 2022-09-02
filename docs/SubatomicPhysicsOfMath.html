@@ -60,7 +60,7 @@
 	<li><a href="#belnap-structural-inconsistency">Belnap: structural formal inconsistency</a></li>
 	<li><a href="#def-ns-implies">Definition of &rArr;, "nonstrictly implies"</a></li>
 	<li><a href="#desc-syntax-entailment">Description of &#9500;</a></li>
-	<li><a href="#def-quantify">Description of quantifiers <span style="transform:rotate(180deg);display:inline-block">A</span> and <span style="transform:rotate(180deg);display:inline-block">E</span></a></li>
+	<li><a href="#def-quantify">Description of quantifiers &forall; and &exist;</a></li>
 </ol></li>
 </ol>
 </span>
@@ -81,7 +81,7 @@
 		</ul></li>
 	<li>Undefined quantifiers
 		<ul>
-			<li><span style="transform:rotate(180deg);display:inline-block">A</span>, intended interpretation <nobr>"for all"</nobr></li>
+			<li>&forall;, intended interpretation <nobr>"for all"</nobr></li>
 		</ul>
 	<li>Undefined relations between statements
 		<ul>
@@ -92,7 +92,7 @@
 		<ul>
 			<li>An (unbounded) supply of symbols for logical variables, i.e. variables whose values are truth values.</li>
 			<li>An (unbounded) supply of symbols for terms, i.e. variables whose values are not truth values.</li>
-			<li><span style="transform:rotate(180deg);display:inline-block">E</span>, intended interpretation <nobr>"there is"</nobr></li>
+			<li>&exist;, intended interpretation <nobr>"there is"</nobr></li>
 			<li>Other infix binary operators, as required.  The ones we will rely on are:
 				<ul>
 					<li>|| i.e. &#x2228;, intended interpretation "or" (usual definition in terms of "and" and "not")</li>
@@ -410,21 +410,21 @@ rule applies.</li>
 	syntactical entailment and nonstrict implication, are different concepts.</p>
 <p>In general, when a truth-valued expression A is defined as a distinct truth-valued expression B, <i>A := B</i>, the intended interpretation is that we have a syntactical equivalence: both <i>A &#9500; B</i>
 	and <i>B &#9500; A</i> are usable syntactical inference rules.  We can define A &#x27DB; B, with intended interpretation "A and B are syntactically equivalent", as the preceding pair of syntactical entailments.</p>
-<h2 id="def-quantify" align="center" style="clear:both; margin-bottom: 0in; line-height: 100%; font-size: 14px">Worked exercise: quantifiers <span style="transform:rotate(180deg);display:inline-block">A</span> and <span style="transform:rotate(180deg);display:inline-block">E</span></h2>
+<h2 id="def-quantify" align="center" style="clear:both; margin-bottom: 0in; line-height: 100%; font-size: 14px">Worked exercise: quantifiers &forall; and &exist;</h2>
 <p>Here, we have to consider truth-valued expressions that, when expanded, actually use predicates and terms that are not truth-valued.  E.g., let Z(a) be a truth-valued expression that explicitly
-uses the non-truth-value term variable a, and let t be a term constant not used by the expansion of Z(a).  Taking <span style="transform:rotate(180deg);display:inline-block">A</span> as undefined, define <span style="transform:rotate(180deg);display:inline-block">E</span> as:</p>
-<p align=center>(<span style="transform:rotate(180deg);display:inline-block">E</span>a)Z(a) := ~((<span style="transform:rotate(180deg);display:inline-block">A</span>a)~Z(a))</p>
+uses the non-truth-value term variable a, and let t be a term constant not used by the expansion of Z(a).  Taking &forall; as undefined, define &exist; as:</p>
+<p align=center>(&exist;a)Z(a) := ~((&forall;a)~Z(a))</p>
 <p>Following <a href="https://archive.org/details/axiomaticsettheo0000bern">Bernays</a> p.47, we can take the following syntactical implications as axiomatic:</p>
-<p align=center>(<span style="transform:rotate(180deg);display:inline-block">A</span>a)Z(a) &#9500; Z(t)</p>
+<p align=center>(&forall;a)Z(a) &#9500; Z(t)</p>
 <p>with intended interpretation "'For all a, Z(a)' syntactically entails Z(t)", and</p>
-<p align=center>Z(t) &#9500; (<span style="transform:rotate(180deg);display:inline-block">E</span>a)Z(a)</p>
+<p align=center>Z(t) &#9500; (&exist;a)Z(a)</p>
 <p>with intended interpretation "Z(t) syntactically entails 'There is an a such that Z(a)'".  In these two schemata, a is a bound variable.</p>
 <p>This is the usual usage of &#9500; , "syntactically implies" -- to introduce axioms, or axiom schemata, that describe how undefined symbols behave.  Technically, these two are axiom schemata
 	rather than axioms -- there is nothing special about the symbols Z, t, or a other than their formal-language typing.  For these axiom schemata,
 	Z(t) is the expression resulting from substituting the term constant t for the term variable a everywhere in Z(a).  In particular, Z(t) does not use the term variable a.</p>
 <p>Bernays also recommends the following axiom schemata, where the propositional variable A's expansion does not use either the term variable a or the term constant t:</p>
-<p align=center>A &rArr; Z(t) &#9500; A &rArr; (<span style="transform:rotate(180deg);display:inline-block">A</span>a)Z(a)</p>
-<p align=center>Z(t) &rArr; A &#9500; (<span style="transform:rotate(180deg);display:inline-block">E</span>a)Z(a) &rArr; A</p>
+<p align=center>A &rArr; Z(t) &#9500; A &rArr; (&forall;a)Z(a)</p>
+<p align=center>Z(t) &rArr; A &#9500; (&exist;a)Z(a) &rArr; A</p>
 <p align="right" style="clear:right">Next: <a href="./SubatomicPhysicsOfMath_Logic.html">(Non)Classical Logic</a></p>
 </body>
 </html>

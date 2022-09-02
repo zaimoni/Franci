@@ -98,7 +98,7 @@
 	We interpret this as</p>
 <table align="center">
 	<tr><th colspan="3"><a href="https://en.wikipedia.org/wiki/Axiom_of_union">Axiom (schema) of Replacement</a></th></tr>
-	<tr><td align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>&phi;:<b>Set</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>Set</b>)(<span style="transform:rotate(180deg);display:inline-block">A</span>A &isin; { y &isin; <b>Set</b> : y &#x2286; Domain(&phi;) })(<big>&#x222A;</big><sub>x&isin;A</sub>&phi;(x) &isin; <b>Set</b>)</td></tr>
+	<tr><td align="center">(&forall;&phi;:<b>Set</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>Set</b>)(&forall;A &isin; { y &isin; <b>Set</b> : y &#x2286; Domain(&phi;) })(<big>&#x222A;</big><sub>x&isin;A</sub>&phi;(x) &isin; <b>Set</b>)</td></tr>
 </table>
 <p>Terser notation is possible, but hard to set up to not conflict with usage outside of set theory.  As with the <i>axiom (schema) of class existence</i>, we take &phi; to range over functions from <b>Set</b> into <b>Set</b>.  This axiom 
 	is common to both Zermelo-Frankel and Von-Neumann-Bernays-G&ouml;del set theories; its introduction is the key difference between Zermelo set theory, and Zermelo-Frankel set theory.</p>
@@ -306,11 +306,11 @@
 <p>We have already seen several examples of this, such as addition + and multiplication &middot; on the natural numbers.  The corresponding notations are (&#x2115;,+) and (&#x2115;,&middot;).</p>
 <p>The <i>closure axiom</i> enables other definitions.  In particular, we say that a binary function that satisifes the <i>closure axiom</i> for a <i>class</i> M, is 
 	associative when</p>
-<p align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>a &isin; M)(<span style="transform:rotate(180deg);display:inline-block">A</span>b &isin; M)(<span style="transform:rotate(180deg);display:inline-block">A</span>c &isin; M)(f(f(a,b),c))=(f(a,f(b,c)))</p>
+<p align="center">(&forall;a &isin; M)(&forall;b &isin; M)(&forall;c &isin; M)(f(f(a,b),c))=(f(a,f(b,c)))</p>
 <p>All of our prior references to associativity, other than those about logical connectives, can be read as referring to this definition.  As for logical connectives, in the set theories with ur-elements 
 	for each logical connective, there is a function that "acts like" that logical connective.  We impute properties of the "clone of logical connective" function, to the logical connective itself.</p>
 <p>We say that a binary function f that satisfies the <i>closure axiom</i> for a <i>class</i> M, has an identity e &isin; M when</p>
-<p align="center">(<span style="transform:rotate(180deg);display:inline-block">E</span>e &isin; M)(<span style="transform:rotate(180deg);display:inline-block">A</span>a &isin; M)(f(e,a)=a & f(a,e)=a)</p>
+<p align="center">(&exist;e &isin; M)(&forall;a &isin; M)(f(e,a)=a & f(a,e)=a)</p>
 <p>It is a routine exercise that if a binary function has an identity, that identity is unique.</p>
 <p>Now, review the definition of multiplication of natural numbers:</p>
 <table align="center">
