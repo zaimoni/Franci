@@ -8,7 +8,7 @@ const std::string* HTMLtag::is_balanced_pair(const formal::lex_node& src) {
 	if (HTMLtag::mode::opening != leading_tag->tag_type()) return nullptr;
 	auto trailing_tag = dynamic_cast<HTMLtag*>(src.post_anchor<formal::parsed>());
 	if (!trailing_tag) return nullptr;
-	if (HTMLtag::mode::opening != trailing_tag->tag_type() || trailing_tag->tag_name() != leading_tag->tag_name()) return nullptr;
+	if (HTMLtag::mode::closing != trailing_tag->tag_type() || trailing_tag->tag_name() != leading_tag->tag_name()) return nullptr;
 	return &trailing_tag->tag_name();
 }
 
@@ -18,7 +18,7 @@ bool HTMLtag::is_balanced_pair(const formal::lex_node& src, const std::string& t
 	if (HTMLtag::mode::opening != leading_tag->tag_type() || leading_tag->tag_name() != target) return false;
 	auto trailing_tag = dynamic_cast<HTMLtag*>(src.post_anchor<formal::parsed>());
 	if (!trailing_tag) return false;
-	if (HTMLtag::mode::opening != trailing_tag->tag_type() || trailing_tag->tag_name() != target) return false;
+	if (HTMLtag::mode::closing != trailing_tag->tag_type() || trailing_tag->tag_name() != target) return false;
 	return true;
 }
 
