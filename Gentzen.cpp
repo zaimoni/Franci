@@ -674,8 +674,8 @@ auto HTML_bind_to_preceding(kuroda::parser<formal::lex_node>::sequence& src, siz
 
 	if (0 >= viewpoint) return ret;
 
-	decltype(auto) balanced = src[viewpoint];
-	const auto tag = HTMLtag::is_balanced_pair(*balanced);
+//	decltype(auto) balanced = src[viewpoint]; // lambda capture of reference from [], only works once
+	const auto tag = HTMLtag::is_balanced_pair(*src[viewpoint]);
 	if (!tag) return ret;
 	for (decltype(auto) x : binds_to_predecessor) {
 		if (*tag == x) {
@@ -690,10 +690,10 @@ auto HTML_bind_to_preceding(kuroda::parser<formal::lex_node>::sequence& src, siz
 
 				decltype(auto) last_postfix = target->postfix(-1);
 				if (!last_postfix) {
-					if (target->set_null_post_anchor(balanced)) return target;
+					if (target->set_null_post_anchor(src[viewpoint])) return target;
 					// \todo? warn when auto-repairing this?
 					if (HTMLtag::is_balanced_pair(*target, *tag)) return (formal::lex_node*)nullptr;
-					target->push_back_postfix(balanced);
+					target->push_back_postfix(src[viewpoint]);
 					return target;
 				}
 				// \todo unclear how to proceed here (tensors?)
@@ -744,7 +744,6 @@ static auto& GentzenGrammar() {
 	return *ooao;
 }
 
-
 int main(int argc, char* argv[], char* envp[])
 {
 #ifdef ZAIMONI_HAS_MICROSOFT_IO_H
@@ -761,9 +760,9 @@ int main(int argc, char* argv[], char* envp[])
 #endif
 
 	int idx = 0;
-#if MOCK_TEST
+#ifdef MOCK_TEST
 	while (++idx < 2) {
-	formal::src_location src(std::pair(1, 0), std::shared_ptr<const std::filesystem::path>(new std::filesystem::path(".txt")));
+	formal::src_location src(std::pair(1, 0), std::shared_ptr<const std::filesystem::path>(new std::filesystem::path(MOCK_TEST)));
 #else
 	while (++idx < argc) {
 		if (process_option(argv[idx])) continue;
