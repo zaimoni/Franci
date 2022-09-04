@@ -456,7 +456,7 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 {
 	std::vector<size_t> ret;
 
-	decltype(auto) x = src[viewpoint];
+	const auto x = src[viewpoint];
 	if (x->code() & (formal::Comment | formal::Tokenized | formal::Inert_Token)) return ret;	// do not try to lex comments, or already-tokenized
 	if (1 != x->is_pure_anchor()) return ret;	// we only try to manipulate things that don't have internal syntax
 
@@ -756,12 +756,19 @@ int main(int argc, char* argv[], char* envp[])
 //	std::wcout << who_am_i.native() << "\n";
 //	std::wcout << std::filesystem::canonical(who_am_i.native()) << "\n";
 
+#ifndef MOCK_TEST
 	if (2 > argc) help();
+#endif
 
 	int idx = 0;
+#if MOCK_TEST
+	while (++idx < 2) {
+	formal::src_location src(std::pair(1, 0), std::shared_ptr<const std::filesystem::path>(new std::filesystem::path(".txt")));
+#else
 	while (++idx < argc) {
 		if (process_option(argv[idx])) continue;
 		formal::src_location src(std::pair(1, 0), std::shared_ptr<const std::filesystem::path>(new std::filesystem::path(argv[idx])));
+#endif
 		std::wcout << src.path->native() << "\n";
 		auto to_interpret = std::ifstream(*src.path);
 		if (!to_interpret.is_open()) continue;
