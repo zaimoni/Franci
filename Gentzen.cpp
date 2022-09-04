@@ -657,6 +657,71 @@ auto balanced_html_tag(kuroda::parser<formal::lex_node>::sequence& src, size_t v
 	return ret;
 }
 
+auto HTML_bind_to_preceding(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
+	static constexpr const char* binds_to_predecessor[] = {
+		"sub",
+		"sup"
+	};
+
+#if PROTOTYPE
+	static constexpr const char* visually_merges_with_predecessor[] = {
+		"b",
+		"i"
+	};
+#endif
+
+	std::vector<size_t> ret;
+
+	if (0 >= viewpoint) return ret;
+
+	decltype(auto) balanced = src[viewpoint];
+	const auto tag = HTMLtag::is_balanced_pair(*balanced);
+	if (!tag) return ret;
+	for (decltype(auto) x : binds_to_predecessor) {
+		if (*tag == x) {
+			static auto relink = [&](formal::lex_node* target) {
+				// don't mess with the balanced () {} parsing
+				if ((target->code() & formal::Inert_Token) && 1 == target->is_pure_anchor()) {
+					const auto text = target->anchor<formal::word>()->value();
+					for (decltype(auto) x : reserved_atomic) {
+						if (x.first == text) return (formal::lex_node*)nullptr;
+					}
+				}
+
+				decltype(auto) last_postfix = target->postfix(-1);
+				if (!last_postfix) {
+					if (target->set_null_post_anchor(balanced)) return target;
+					// \todo? warn when auto-repairing this?
+					if (HTMLtag::is_balanced_pair(*target, *tag)) return (formal::lex_node*)nullptr;
+					target->push_back_postfix(balanced);
+					return target;
+				}
+				// \todo unclear how to proceed here (tensors?)
+				return (formal::lex_node*)nullptr;
+			};
+
+			decltype(auto) bind_to = src[viewpoint-1];
+			if (formal::lex_node::rewrite(bind_to, relink)) {
+				ret.push_back(viewpoint - 1);
+				src.DeleteIdx(viewpoint);
+			}
+			return ret;
+		}
+	}
+
+#if PROTOTYPE
+	for (decltype(auto) x : visually_merges_with_predecessor) {
+		if (*tag == x) {
+			const auto merge_with = src[viewpoint - 1];
+			if (!HTMLtag::is_balanced_pair(*merge_with, *tag)) return ret;
+			// \todo consider blocking merge for style attribute differences?
+			// ...
+		}
+	}
+#endif
+	return ret;
+}
+
 static auto& TokenGrammar() {
 	static std::unique_ptr<kuroda::parser<formal::lex_node> > ooao;
 	if (!ooao) {
@@ -665,6 +730,7 @@ static auto& TokenGrammar() {
 		ooao->register_build_nonterminal(balanced_atomic_handler(reserved_atomic[0].first, reserved_atomic[1].first));
 		ooao->register_build_nonterminal(balanced_atomic_handler(reserved_atomic[2].first, reserved_atomic[3].first));
 		ooao->register_build_nonterminal(balanced_html_tag);
+		ooao->register_build_nonterminal(HTML_bind_to_preceding);
 	};
 	return *ooao;
 }

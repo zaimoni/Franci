@@ -106,6 +106,18 @@ namespace formal {
 		return ret;
 	}
 
+	bool lex_node::rewrite(lex_node*& target, std::function<lex_node* (lex_node* target)> op)
+	{
+		if (decltype(auto) dest = op(target)) {
+			if (target != dest) {
+				delete target;
+				target = dest;
+			}
+			return true;
+		}
+		return false;
+	}
+
 	void lex_node::to_s(std::ostream& dest) const
 	{
 		auto track = origin();

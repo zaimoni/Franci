@@ -77,6 +77,15 @@ namespace formal {
 			return nullptr;
 		}
 
+		bool set_null_post_anchor(lex_node*& src) {
+			if (post_anchor<word>()) return false;
+			if (post_anchor<lex_node>()) return false;
+			if (post_anchor<parsed>()) return false;
+			_post_anchor = std::unique_ptr<lex_node>(src);
+			src = nullptr;
+			return true;
+		}
+
 		bool syntax_ok() const;
 		int is_pure_anchor() const; // C error code convention
 
@@ -109,10 +118,19 @@ namespace formal {
 		auto infix_size() const { return _infix.size(); }
 		auto postfix_size() const { return _postfix.size(); }
 
+		void push_back_postfix(lex_node*& src) {
+			auto dest = _postfix.size();
+			_postfix.insertNSlotsAt(1, dest);
+			_postfix[dest] = src;
+			src = nullptr;
+		}
+
 		static std::unique_ptr<lex_node> pop_front(kuroda::parser<formal::word>::sequence& src);
 
 		template<class Ret>
 		auto is_ok(std::function<Ret(const lex_node&)> ok) const { return ok(*this); }
+
+		static bool rewrite(lex_node*& target, std::function<lex_node*(lex_node* target)> op);
 
 		void to_s(std::ostream& dest) const;
 		static std::ostream& to_s(std::ostream& dest, const kuroda::parser<lex_node>::sequence& src);
