@@ -7,6 +7,7 @@
 #include "Zaimoni.STL/LexParse/string_view.hpp"
 #include "test_driver.h"
 #include "Zaimoni.STL/Pure.C/comptest.h"
+#include <array>
 #include <filesystem>
 #include <memory>
 #include <fstream>
@@ -74,14 +75,123 @@ static bool process_option(std::string_view arg)
 	return true;
 }
 
+// from C:Z zero.h
+
+// https://devblogs.microsoft.com/oldnewthing/20200413-00/?p=103669 [Raymond Chen/"The Old New Thing"]
+template<typename T, typename...>
+using unconditional_t = T;
+
+template<typename T, T v, typename...>
+inline constexpr T unconditional_v = v;
+
+// https://artificial-mind.net/blog/2020/11/14/cpp17-consteval
+template <auto V>
+static constexpr const auto force_consteval = V;
+
+// end from C:Z zero.h
+
+// prototype lookup -- extract to own header when stable
+
+constexpr const std::pair<const char*, unsigned long long> HTML_entities[] = {
+	{"forall", 0x2200ULL},
+	{"exist", 0x2203ULL},
+	{"empty", 0x2205ULL},
+	{"isin", 0x2208ULL},
+	{nullptr, 0x2209ULL}
+};
+
+constexpr const std::pair<const char*, unsigned long long>* lookup_HTML_entity(const std::string_view& name)
+{
+	for (decltype(auto) x : HTML_entities) {
+		if (x.first && name == x.first) return &x;
+	}
+	return nullptr;
+}
+
+constexpr const std::pair<const char*, unsigned long long>* lookup_HTML_entity(unsigned long long codepoint)
+{
+	for (decltype(auto) x : HTML_entities) {
+		if (x.second == codepoint) return &x;
+	}
+	return nullptr;
+}
+
+static_assert(0x2200ULL == lookup_HTML_entity("forall")->second);
+static_assert(0x2200ULL == lookup_HTML_entity(0x2200ULL)->second);
+
+// end prototype lookup
+
 // prototype class -- extract to own files when stable
 
 namespace gentzen {
 
+	// still abstract
+	class domain {
+	protected:
+		domain() = default;
+
+	public:
+		domain(const domain& src) = default;
+		domain(domain&& src) = default;
+		domain& operator=(const domain& src) = default;
+		domain& operator=(domain&& src) = default;
+		~domain() = default;
+	};
+
+	class preaxiomatic final : public domain {
+		unsigned int _code; // beware type promotion
+
+		static auto& ref_names() {
+			static const std::array<std::string, 5> ooao = {
+				"<b>TruthValued</b>",
+				"<b>TruthValues</b>",
+				"<b>Set</b>",
+				"<b>Ur</b>",
+				"<b>Class</b>"
+			};
+
+			return ooao;
+		}
+
+	public:
+		enum class Domain {
+			TruthValued = 0,
+			TruthValues,
+			Set,
+			Ur,
+			Class
+		};
+
+		preaxiomatic() = delete; // empty variable doesn't make much sense
+		preaxiomatic(const preaxiomatic& src) = delete;
+		preaxiomatic(preaxiomatic&& src) = delete;
+		preaxiomatic& operator=(const preaxiomatic& src) = delete;
+		preaxiomatic& operator=(preaxiomatic&& src) = delete;
+		~preaxiomatic() = default;
+
+		static std::shared_ptr<const domain> get(Domain src) {
+			static std::shared_ptr<const domain> ooao[5];
+
+			decltype(auto) x = ooao[(unsigned int)src];
+			if (!x) x = std::shared_ptr<const domain>(new preaxiomatic(src));
+			return x;
+		}
+
+		std::string to_s() const {
+			decltype(auto) names = ref_names();
+			if (names.size() > _code) return names[_code];
+			return "<buggy>";
+		}
+
+	private:
+		preaxiomatic(Domain src) noexcept : _code((unsigned int)src) {}
+
+	};
+
 	class var {
 		unsigned long long _quant_code;
 		std::shared_ptr<const formal::parsed> _var;
-		std::shared_ptr<const formal::parsed> _domain;
+		std::shared_ptr<const domain> _domain;
 
 	public:
 		enum class quantifier {
