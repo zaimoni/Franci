@@ -314,20 +314,20 @@ contains at least one element, we say that X is non-empty.</p>
 </ul>
 <p>We now resume considering logics with non-classical truth values.</p>
 <p>For a mathematical collection X and a term a in a mathematical collection A, we say the constant function a<sub>X</sub>:X <span style="position:relative; top: -2px">&#x2192;</span> {a} has evaluation rule x &#x21A6; a for all x in X.  I.e.</p>
-<p align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>x &isin; X)(a<sub>X</sub>(x)=a)</p>
+<p align="center">(&forall;x &isin; X)(a<sub>X</sub>(x)=a)</p>
 <p>If X is the empty set &#x2205;, this is just another name for Empty<sub>&#x2205;,{a}</sub>.  It is a mechanical verification that if 
 	X contains two distinct elements x<sub>0</sub>, x<sub>1</sub>, then both a<sub>X</sub> is not injective; and a<sub>X</sub><sup>-1</sup> is a proper relation.
 	Likewise, if X is a singleton set, then a<sub>X</sub> is a bijection.  The extension of Range(a<sub>X</sub>)={a} to Y, gives a proper injection from 
 	the singleton set to Y when Y is not a singleton set. Summarizing below:</p>
 <table align="center">
 	<tr><th colspan="2">All singleton sets have the same cardinality</th></tr>
-	<tr><td align="right">(<span style="transform:rotate(180deg);display:inline-block">A</span>x &isin; <b>Set</b>)(<span style="transform:rotate(180deg);display:inline-block">A</span>y &isin; <b>Set</b>)</td><td align="left">(#{x}=#{y})</td></tr>
-	<tr><td align="right">(<span style="transform:rotate(180deg);display:inline-block">A</span>x &isin; <b>Set</b>)(<span style="transform:rotate(180deg);display:inline-block">A</span>y &isin; <b>Ur</b>)</td><td align="left">(#{x}=#{y})</td></tr>
-	<tr><td align="right">(<span style="transform:rotate(180deg);display:inline-block">A</span>x &isin; <b>Ur</b>)(<span style="transform:rotate(180deg);display:inline-block">A</span>y &isin; <b>Set</b>)</td><td align="left">(#{x}=#{y})</td></tr>
-	<tr><td align="right">(<span style="transform:rotate(180deg);display:inline-block">A</span>x &isin; <b>Ur</b>)(<span style="transform:rotate(180deg);display:inline-block">A</span>y &isin; <b>Ur</b>)</td><td align="left">(#{x}=#{y})</td></tr>
+	<tr><td align="right">(&forall;x &isin; <b>Set</b>)(&forall;y &isin; <b>Set</b>)</td><td align="left">(#{x}=#{y})</td></tr>
+	<tr><td align="right">(&forall;x &isin; <b>Set</b>)(&forall;y &isin; <b>Ur</b>)</td><td align="left">(#{x}=#{y})</td></tr>
+	<tr><td align="right">(&forall;x &isin; <b>Ur</b>)(&forall;y &isin; <b>Set</b>)</td><td align="left">(#{x}=#{y})</td></tr>
+	<tr><td align="right">(&forall;x &isin; <b>Ur</b>)(&forall;y &isin; <b>Ur</b>)</td><td align="left">(#{x}=#{y})</td></tr>
 	<tr><th colspan="2">Any non-empty class, that is not a singleton set, is larger than a singleton set</th></tr>
-	<tr><td align="right">(<span style="transform:rotate(180deg);display:inline-block">A</span>x &isin; <b>Set</b>)(<span style="transform:rotate(180deg);display:inline-block">A</span>Y &isin; <b>Class</b>)(<span style="transform:rotate(180deg);display:inline-block">E</span> y<sub>0</sub> &isin; Y)(<span style="transform:rotate(180deg);display:inline-block">E</span> y<sub>1</sub> &isin; Y)</td><td align="left">(y<sub>0</sub>&ne;y<sub>1</sub> &#9500; #{x} &lt; #Y)</td></tr>
-	<tr><td align="right">(<span style="transform:rotate(180deg);display:inline-block">A</span>x &isin; <b>Ur</b>)(<span style="transform:rotate(180deg);display:inline-block">A</span>Y &isin; <b>Class</b>)(<span style="transform:rotate(180deg);display:inline-block">E</span> y<sub>0</sub> &isin; Y)(<span style="transform:rotate(180deg);display:inline-block">E</span> y<sub>1</sub> &isin; Y)</td><td align="left">(y<sub>0</sub>&ne;y<sub>1</sub> &#9500; #{x} &lt; #Y)</td></tr>
+	<tr><td align="right">(&forall;x &isin; <b>Set</b>)(&forall;Y &isin; <b>Class</b>)(&exist;y<sub>0</sub> &isin; Y)(&exist;y<sub>1</sub> &isin; Y)</td><td align="left">(y<sub>0</sub>&ne;y<sub>1</sub> &#9500; #{x} &lt; #Y)</td></tr>
+	<tr><td align="right">(&forall;x &isin; <b>Ur</b>)(&forall;Y &isin; <b>Class</b>)(&exist;y<sub>0</sub> &isin; Y)(&exist;y<sub>1</sub> &isin; Y)</td><td align="left">(y<sub>0</sub>&ne;y<sub>1</sub> &#9500; #{x} &lt; #Y)</td></tr>
 </table>
 <p>In particular, we have</p>
 <table align="center">
@@ -337,9 +337,9 @@ contains at least one element, we say that X is non-empty.</p>
 	<tr><td align="right">X &isin; <b>Class</b> &#9500;&nbsp;</td><td>#0=#X &#x2228; #1=#X &#x2228; #1<#X</td></tr>
 </table>
 <p>Universal-instantiating the above for the Von Neumann model of &#x2115;, allows confirming by a universal generalization proof:</p>
-<p align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>n &isin; &#x2115;/{0,1})(#1 < #n)</p>
+<p align="center">(&forall;n &isin; &#x2115;/{0,1})(#1 < #n)</p>
 <p>Universal-instantiating the above for the Zermelo model for &#x2115;, instead yields, by universal generalization:</p>
-<p style="background:red" align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>m &isin; &#x2115;/{0})(<span style="transform:rotate(180deg);display:inline-block">A</span>n &isin; &#x2115;/{0})(#m = #n)</p>
+<p style="background:red" align="center">(&forall;m &isin; &#x2115;/{0})(&forall;n &isin; &#x2115;/{0})(#m = #n)</p>
 <p>This empirically falsifies the use of the Zermelo model of &#x2115;, for set-theoretic cardinality.  (Informally, the failure is that the Zermelo model for any non-zero natural number, is a singleton set.)</p>
 <p>More generally: any set-theoretic model of the natural numbers &#x2115; that is compatible with our definition of cardinal size:</p>
 <ul>
@@ -434,19 +434,19 @@ For equinumerosity of finite sets, this is a consequence of the definition of fi
 <p>Since any viable set-theoretic model of &#x2115; uses &#x2205; as its model of 0, and our definitions refer to both (arithmetic) product of  and Cartesian product, we verify that the empty set &#x2205; "acts like" an annhilator for the Cartesian product (details left as an exercise):</p>
 <table align="center">
 	<tr><th colspan="2">Our choice of <i>subset axiom</i></th></tr>
-	<tr><td align="right">(<span style="transform:rotate(180deg);display:inline-block">A</span>X &isin; <b>Class</b>)</td><td>(&#x2205; <span style="font:sans-serif; position:relative; top: -1px">x</span> X = &#x2205;)</td></tr>
-	<tr><td align="right">(<span style="transform:rotate(180deg);display:inline-block">A</span>X &isin; <b>Class</b>)</td><td>(X <span style="font:sans-serif; position:relative; top: -1px">x</span> &#x2205; is a <i>set-theoretic atom</i>)</td></tr>
+	<tr><td align="right">(&forall;X &isin; <b>Class</b>)</td><td>(&empty; <span style="font:sans-serif; position:relative; top: -1px">x</span> X = &empty;)</td></tr>
+	<tr><td align="right">(&forall;X &isin; <b>Class</b>)</td><td>(X <span style="font:sans-serif; position:relative; top: -1px">x</span> &empty; is a <i>set-theoretic atom</i>)</td></tr>
 </table>
 <p>So the empty function provides the required bijection for:</p>
 <table align="center">
-	<tr><td align="right">(<span style="transform:rotate(180deg);display:inline-block">A</span>X &isin; <b>Class</b>)</td><td>(#(&#x2205; <span style="font:sans-serif; position:relative; top: -1px">x</span> X) = #&#x2205;)</td></tr>
-	<tr><td align="right">(<span style="transform:rotate(180deg);display:inline-block">A</span>X &isin; <b>Class</b>)</td><td>(#(X <span style="font:sans-serif; position:relative; top: -1px">x</span> &#x2205;) = #&#x2205;)</td></tr>
+	<tr><td align="right">(&forall;X &isin; <b>Class</b>)</td><td>(#(&empty; <span style="font:sans-serif; position:relative; top: -1px">x</span> X) = #&empty;)</td></tr>
+	<tr><td align="right">(&forall;X &isin; <b>Class</b>)</td><td>(#(X <span style="font:sans-serif; position:relative; top: -1px">x</span> &empty;) = #&empty;)</td></tr>
 </table>
 <p>We then require a working definition of cardinal multiplication to fulfil</p>
 <p align="center">#&#x2205; &middot; #X = #&#x2205;<br />#X &middot; #&#x2205; = #&#x2205;</p>
 <p>We next consider a constant function X<sub>&#x2205;</sub>, which is defined as X <span style="font:sans-serif; position:relative; top: -1px">x</span> {&#x2205;}.  The evaluation rule x &#x21A6; (x, &#x2205;) on a given <i>class</i> X defines a bijection X <span style="position:relative; top: -2px">&#x2192;</span> X <span style="font:sans-serif; position:relative; top: -1px">x</span> {&#x2205;}.  Thus, we have</p>
 <table align="center">
-	<tr><td align="right">(<span style="transform:rotate(180deg);display:inline-block">A</span>X &isin; <b>Class</b>)</td><td>(#X = #(X <span style="font:sans-serif; position:relative; top: -1px">x</span> {&#x2205;}))</td></tr>
+	<tr><td align="right">(&forall;X &isin; <b>Class</b>)</td><td>(#X = #(X <span style="font:sans-serif; position:relative; top: -1px">x</span> {&empty;}))</td></tr>
 </table>
 <p>We then require a working definition of cardinal multiplication to fulfil</p>
 <p align="center">#X &middot; #{&#x2205;} = #(X <span style="font:sans-serif; position:relative; top: -1px">x</span> {&#x2205;})</p>
@@ -471,7 +471,7 @@ For equinumerosity of finite sets, this is a consequence of the definition of fi
 <p align="center">#X + #X = #({0, 1} <span style="font:sans-serif; position:relative; top: -1px">x</span> X) = #{0, 1} &middot; #X</p>
 <p>We already verified that the cartesian product of a singleton set with a class X, has the same cardinality as X.  Following prior art,
 	we require that if two mathematical collections X and Y are disjoint, then the cardinal size of their union is the sum of their cardinal sizes:</p>
-<p align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>X &isin; <b>Class</b>)(<span style="transform:rotate(180deg);display:inline-block">A</span>Y &isin; <b>Class</b>)(X and Y are disjoint &#9500; #X + #Y = #(X &#x222A; Y))</p>
+<p align="center">(&forall;X &isin; <b>Class</b>)(&forall;Y &isin; <b>Class</b>)(X and Y are disjoint &#9500; #X + #Y = #(X &#x222A; Y))</p>
 <p>The above axiom can be justified by using the identity bijection id<sub>X &#x222A; Y</sub>, and observing that (in classical logic) the restriction of id<sub>X &#x222A; Y</sub> to X is id<sub>X</sub>, and the 
 	restriction of id<sub>X &#x222A; Y</sub> to Y is id<sub>Y</sub>.  Alternately,</p>
 <table align="center">
@@ -559,11 +559,11 @@ For equinumerosity of finite sets, this is a consequence of the definition of fi
 	<tr><td colspan="3"></td><td>1.</td><td></td><td>X &isin; <b>Class</b></td><td>Given</td></tr>
 	<tr><td colspan="3"></td><td>2.</td><td></td><td>Y &isin; <b>Class</b></td><td>Given</td></tr>
 	<tr><td colspan="3"></td><td>3.</td><td></td><td>#X < #Y</td><td>Given</td></tr>
-	<tr><td colspan="3"></td><td>4.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>f &isin; <b>Function</b>(X,Y))(f is injective) & ~(<span style="transform:rotate(180deg);display:inline-block">E</span>g &isin; <b>Function</b>(Y,X))(g is injective)</td><td>Definition of #X < #Y</td></tr>
-	<tr><td colspan="3"></td><td>4a.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>f &isin; <b>Function</b>(X,Y))(f is injective)</td><td>Conjunction elimination on (4)</td></tr>
-	<tr><td colspan="3"></td><td>4b.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>g &isin; <b>Function</b>(Y,X))(g is not injective)</td><td>Conjunction elimination on (4)</td></tr>
+	<tr><td colspan="3"></td><td>4.</td><td></td><td>(&exist;f &isin; <b>Function</b>(X,Y))(f is injective) & (&forall;g &isin; <b>Function</b>(Y,X))(g is not injective)</td><td>Definition of #X < #Y</td></tr>
+	<tr><td colspan="3"></td><td>4a.</td><td></td><td>(&exist;f &isin; <b>Function</b>(X,Y))(f is injective)</td><td>Conjunction elimination on (4)</td></tr>
+	<tr><td colspan="3"></td><td>4b.</td><td></td><td>(&forall;g &isin; <b>Function</b>(Y,X))(g is not injective)</td><td>Conjunction elimination on (4)</td></tr>
 	<tr><th colspan="7">Next step uses a standard translation of technical English into symbolic math</th></tr>
-	<tr><td colspan="3"></td><td>5.</td><td></td><td>f<sub>0</sub> &isin; <b>Function</b>(X,Y) & (<span style="transform:rotate(180deg);display:inline-block">A</span>w &isin; Domain(f<sub>0</sub>))(<span style="transform:rotate(180deg);display:inline-block">A</span>z &isin; Domain(f<sub>0</sub>))(f<sub>0</sub>(w)=f<sub>0</sub>(z) &#9500; w=z)</td><td>Existential instantation on (4a)</td></tr>
+	<tr><td colspan="3"></td><td>5.</td><td></td><td>f<sub>0</sub> &isin; <b>Function</b>(X,Y) & (&forall;w &isin; Domain(f<sub>0</sub>))(&forall;z &isin; Domain(f<sub>0</sub>))(f<sub>0</sub>(w)=f<sub>0</sub>(z) &#9500; w=z)</td><td>Existential instantation on (4a)</td></tr>
 	<tr><th colspan="7">Our target statement is the basis step for a (weak) natural induction proof, #X + #1 &lt; #Y + #1</th></tr>
 	<tr><td colspan="3"></td><td>6.</td><td></td><td>f<sub>1</sub>:X <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x222A; {(1,1)} <span style="position:relative; top: -2px">&#x2192;</span> Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x222A; {(1,1)} := <b>IF</b>((z<sub>0</sub>, z<sub>1</sub>)=(1,1), (1,1), (f<sub>0</sub>(z<sub>0</sub>), 0))</td><td>Local definition of function f<sub>1</sub> (for existential instantiation)</td></tr>
 	<tr><td colspan="3"></td><td>6a.</td><td></td><td>Domain(f<sub>1</sub>) = X <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x222A; {(1,1)}</td><td>Definition of f<sub>1</sub> (6)</td></tr>
@@ -595,10 +595,10 @@ For equinumerosity of finite sets, this is a consequence of the definition of fi
 	<tr><td></td><td colspan="2" style="border-left: black 1px solid; border-bottom:black 1px solid"></td><td>k.</td><td></td><td>x<sub>0</sub> = x<sub>1</sub></td><td>Proof by cases: (10), (22), and (13)</td></tr>
 	<tr><td colspan="3"></td><td>k+1.</td><td>x<sub>0</sub> &isin; Domain(f<sub>1</sub>) & x<sub>1</sub> &isin; Domain(f<sub>1</sub>) & f<sub>1</sub>(x<sub>0</sub>)=f<sub>1</sub>(x<sub>1</sub>) &#9500; x<sub>0</sub> = x<sub>1</sub></td><td></td><td>Syntactical entailment introduction, (7) and (k)</td></tr>
 	<tr><td colspan="3"></td><td>k+2.</td><td>x<sub>0</sub> &isin; Domain(f<sub>1</sub>), x<sub>1</sub> &isin; Domain(f<sub>1</sub>), f<sub>1</sub>(x<sub>0</sub>)=f<sub>1</sub>(x<sub>1</sub>) &#9500; x<sub>0</sub> = x<sub>1</sub></td><td></td><td>Intended interpretation of &#9500; on (k+1)</td></tr>
-	<tr><td colspan="3"></td><td>k+3.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>w &isin; Domain(f<sub>1</sub>))(x<sub>1</sub> &isin; Domain(f<sub>1</sub>), f<sub>1</sub>(w)=f<sub>1</sub>(x<sub>1</sub>) &#9500; w = x<sub>1</sub>)</td><td>Universal instantiation on (k+2)</td></tr>
-	<tr><td colspan="3"></td><td>k+4.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>w &isin; Domain(f<sub>1</sub>))(<span style="transform:rotate(180deg);display:inline-block">A</span>z &isin; Domain(f<sub>1</sub>))(f<sub>1</sub>(w)=f<sub>1</sub>(z) &#9500; w = z)</td><td>Universal instantiation on (k+3)</td></tr>
+	<tr><td colspan="3"></td><td>k+3.</td><td></td><td>(&forall;w &isin; Domain(f<sub>1</sub>))(x<sub>1</sub> &isin; Domain(f<sub>1</sub>), f<sub>1</sub>(w)=f<sub>1</sub>(x<sub>1</sub>) &#9500; w = x<sub>1</sub>)</td><td>Universal instantiation on (k+2)</td></tr>
+	<tr><td colspan="3"></td><td>k+4.</td><td></td><td>(&forall;w &isin; Domain(f<sub>1</sub>))(&forall;z &isin; Domain(f<sub>1</sub>))(f<sub>1</sub>(w)=f<sub>1</sub>(z) &#9500; w = z)</td><td>Universal instantiation on (k+3)</td></tr>
 	<tr><th colspan="7">Now we translate the symbolic math to technical English, using the same standard translation as before</th></tr>
-	<tr><td colspan="3"></td><td>k+5.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>f &isin; <b>Function</b>(X <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x222A; {(1,1)}, Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x222A; {(1,1)}))(f is injective)</td><td>Existential instantiation, (6) and (k+4)</td></tr>
+	<tr><td colspan="3"></td><td>k+5.</td><td></td><td>(&exist;f &isin; <b>Function</b>(X <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x222A; {(1,1)}, Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x222A; {(1,1)}))(f is injective)</td><td>Existential instantiation, (6) and (k+4)</td></tr>
 	<!-- 3 nesting levels -->
 	<tr><td colspan="3" style="border-left: black 1px solid; border-top:black 1px solid"></td><td>n.</td><td></td><td>g<sub>1</sub> &isin; <b>Function</b>(Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x222A; {(1,1)},X <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x222A; {(1,1)})</td><td>Hypothesis (for universal instantiation)</td></tr>
 	<tr><td colspan="3" style="border-left: black 1px solid"></td><th colspan="4">We want to show g<sub>1</sub> is not injective.</th></tr>
@@ -665,7 +665,7 @@ For equinumerosity of finite sets, this is a consequence of the definition of fi
 	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid; border-bottom: black 1px solid"></td><td>s+13.</td><td></td><td>g<sub>1</sub> is not injective</td><td>Proof by cases: (q+2), (r+3), and (s+12)</td></tr>
 	<tr><td colspan="3" style="border-left: black 1px solid"></td><td>s+14.</td><td>(1,1) &isin; Range(g<sub>1</sub>) &#9500; g<sub>1</sub> is not injective</td><td></td><td>Syntactical entailment introduction, (q) and (s+13)</td></tr>
 	<tr><td colspan="3" style="border-left: black 1px solid; border-bottom: black 1px solid"></td><td>s+15.</td><td></td><td>g<sub>1</sub> is not injective</td><td>Proof by cases: (n+1), (n+25), (s+14)</td></tr>
-	<tr><td colspan="3"></td><td>s+16.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>g &isin; <b>Function</b>(Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x222A; {(1,1)},X <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x222A; {(1,1)}))(g is not injective)</td><td>Universal generalization, (n) and (s+15)</td></tr>
+	<tr><td colspan="3"></td><td>s+16.</td><td></td><td>(&forall;g &isin; <b>Function</b>(Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x222A; {(1,1)},X <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x222A; {(1,1)}))(g is not injective)</td><td>Universal generalization, (n) and (s+15)</td></tr>
 	<tr><td colspan="3"></td><td>s+17.</td><td></td><td>#(X <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x222A; {(1,1)}) < #(Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x222A; {(1,1)})</td><td>Conjunction introduction, (k+5) and (s+16), then definition of cardinal &lt;</td></tr>
 	<tr><td colspan="3"></td><td>s+18.</td><td></td><td>#(X <span style="font:sans-serif; position:relative; top: -1px">x</span> {0}) + #{(1,1)}) < #(Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0}) + #{(1,1)})</td><td>Cardinal + for disjoint sets on (s+17)</td></tr>
 	<tr><td colspan="3"></td><td>s+19.</td><td></td><td>#(X <span style="font:sans-serif; position:relative; top: -1px">x</span> {0}) + #1 < #(Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0}) + #1</td><td>cardinality of singleton set on (s+18)</td></tr>
@@ -692,22 +692,22 @@ For equinumerosity of finite sets, this is a consequence of the definition of fi
 <table align="center">
 	<tr><th></th><th colspan="2" style="border-bottom:black 1px solid">Notation</th></tr>
 	<tr><th>Technical English</th><th>Cardinal</th><th>Symbolic logic</th></tr>
-	<tr><td>X is a set-theoretic atom</td><td>0 = #X</td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>x &isin; <b>Set</b>)(~(x &isin; X &#x21A6; <i>true</i>)) & (<span style="transform:rotate(180deg);display:inline-block">A</span>u &isin; <b>Ur</b>)(~(u &isin; X &#x21A6; <i>true</i>))</td></tr>
-	<tr><td>X is non-empty</td><td>0 &lt; #X<br/>1 &le; #X</td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>x &isin; <b>Set</b>)(x &isin; X) &#x2228; (<span style="transform:rotate(180deg);display:inline-block">E</span>u &isin; <b>Ur</b>)(u &isin; X)</td></tr>
-	<tr><td>X is a (non-empty) singleton</td><td>1 = #X</td><td>X is non-empty & ((<span style="transform:rotate(180deg);display:inline-block">A</span>x &isin; <b>Set</b>)(<span style="transform:rotate(180deg);display:inline-block">A</span>y &isin; <b>Set</b>)(x&isin;X & y &isin; X &#9500; x=y) & (<span style="transform:rotate(180deg);display:inline-block">A</span>u &isin; <b>Ur</b>)(<span style="transform:rotate(180deg);display:inline-block">A</span>v &isin; <b>Ur</b>)(u&isin;X & v &isin; X &#9500; x=y))</td></tr>
-	<tr><td>X is a non-empty non-singleton</td><td>1 &lt; #X<br />2 &le; #X</td><td>X is non-empty & (<span style="transform:rotate(180deg);display:inline-block">E</span>x<sub>0</sub> &isin; X)(<span style="transform:rotate(180deg);display:inline-block">E</span>x<sub>1</sub> &isin; X)(x<sub>0</sub>&ne;x<sub>1</sub>)</td></tr>
+	<tr><td>X is a set-theoretic atom</td><td>0 = #X</td><td>(&forall;x &isin; <b>Set</b>)(~(x &isin; X &#x21A6; <i>true</i>)) & (&forall;u &isin; <b>Ur</b>)(~(u &isin; X &#x21A6; <i>true</i>))</td></tr>
+	<tr><td>X is non-empty</td><td>0 &lt; #X<br/>1 &le; #X</td><td>(&exist;x &isin; <b>Set</b>)(x &isin; X) &#x2228; (&exist;u &isin; <b>Ur</b>)(u &isin; X)</td></tr>
+	<tr><td>X is a (non-empty) singleton</td><td>1 = #X</td><td>X is non-empty & ((&forall;x &isin; <b>Set</b>)(&forall;y &isin; <b>Set</b>)(x&isin;X & y &isin; X &#9500; x=y) & (&forall;u &isin; <b>Ur</b>)(&forall;v &isin; <b>Ur</b>)(u&isin;X & v &isin; X &#9500; x=y))</td></tr>
+	<tr><td>X is a non-empty non-singleton</td><td>1 &lt; #X<br />2 &le; #X</td><td>X is non-empty & (&exist;x<sub>0</sub> &isin; X)(&exist;x<sub>1</sub> &isin; X)(x<sub>0</sub>&ne;x<sub>1</sub>)</td></tr>
 </table>
 
 <p style="clear:both">We do not address cardinal arithmetic for infinite sets, such as the natural numbers &#x2115;, at this time.  We need a proper mathematical model of proofs, to state 
 	the metaphysical assumptions needed to interpret cardinal arithmetic for infinite mathematical collections.</p>
 
 <h2 id="axiom-replacement" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Axiom (schema) of Replacement</h2>
-<p>We have just verified that the typical definition of cardinal size of mathematical collections, works for finite sets.  We now can provide a rationale for</p>
+<p>We have just verified that the typical definition of cardinal size of mathematical collections, works for finite sets.  We now can provide another rationale for</p>
 <table align="center">
 	<tr><th colspan="3"><a href="https://en.wikipedia.org/wiki/Axiom_schema_of_replacement">Axiom (schema) of Replacement</a></th></tr>
-	<tr><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>&phi; &isin; <b>FunctionPartial</b>(<b>Set</b>, <b>Set</b>))(<span style="transform:rotate(180deg);display:inline-block">A</span>A &isin; <b>Set</b>)(Range(&phi;|<sub>A</sub>) &isin; <b>Set</b>)</td></tr>
+	<tr><td>(&forall;&phi; &isin; <b>FunctionPartial</b>(<b>Set</b>, <b>Set</b>))(&forall;A &isin; <b>Set</b>)(Range(&phi;|<sub>A</sub>) &isin; <b>Set</b>)</td></tr>
 </table>
-<p>We have the usual conversion to a first-order axiom schema, from a second-order axiom, by making one copy for each (nameable) partial function &phi;.</p>
+<p>(The difference in notation, from our first informal rationale, is that we have now introduced notation for domain restriction of functions.)  We have the usual conversion to a first-order axiom schema, from a second-order axiom, by making one copy for each (nameable) partial function &phi;.</p>
 <p>Referring to the Kolmogorov rationale for Intuitionistic logic:</p>
 <ul>
 	<li>If we know how to evaluate a <i>partial function</i> &phi;:<b>Set</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>Set</b>, and</li>
