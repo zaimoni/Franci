@@ -7,7 +7,6 @@
 #include "Zaimoni.STL/LexParse/string_view.hpp"
 #include "test_driver.h"
 #include "Zaimoni.STL/Pure.C/comptest.h"
-#include <array>
 #include <filesystem>
 #include <memory>
 #include <fstream>
@@ -140,18 +139,14 @@ namespace gentzen {
 
 	class preaxiomatic final : public domain {
 		unsigned int _code; // beware type promotion
-
-		static auto& ref_names() {
-			static const std::array<std::string, 5> ooao = {
+		static constexpr const std::array<std::string_view, 5> names = {
 				"<b>TruthValued</b>",
 				"<b>TruthValues</b>",
 				"<b>Set</b>",
 				"<b>Ur</b>",
 				"<b>Class</b>"
-			};
-
-			return ooao;
-		}
+		};
+		static constexpr const std::array<std::string_view, 5> parsing = substr(names, 3, -4);
 
 	public:
 		enum class Domain {
@@ -178,9 +173,26 @@ namespace gentzen {
 		}
 
 		std::string to_s() const {
-			decltype(auto) names = ref_names();
-			if (names.size() > _code) return names[_code];
+			if (names.size() > _code) return std::string(names[_code]);
 			return "<buggy>";
+		}
+
+		static std::optional<Domain> parse(const formal::lex_node& src) {
+			if (!HTMLtag::is_balanced_pair(src, "b")) return std::nullopt;
+			if (0 < src.postfix_size()) return std::nullopt; // \todo extend to handle abstract algebraic category theory
+			if (1 != src.infix_size()) return std::nullopt;
+
+			decltype(auto) node = *src.infix(0);
+			if (1 != node.is_pure_anchor()) return std::nullopt;
+
+			const auto text = node.anchor<formal::word>()->value();
+			ptrdiff_t i = -1;
+			for (decltype(auto) x : parsing) {
+				++i;
+				if (text == x) return (Domain)(i);
+			}
+
+			return std::nullopt;
 		}
 
 	private:
