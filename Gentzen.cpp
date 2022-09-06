@@ -91,15 +91,15 @@ static constexpr const auto force_consteval = V;
 
 // prototype lookup -- extract to own header when stable
 
-constexpr const std::pair<const char*, unsigned long long> HTML_entities[] = {
+constexpr const std::pair<const char*, char32_t> HTML_entities[] = {
 	{"forall", 0x2200ULL},
 	{"exist", 0x2203ULL},
 	{"empty", 0x2205ULL},
 	{"isin", 0x2208ULL},
-	{nullptr, 0x2209ULL}
+	{nullptr, 0x2209ULL} // := ~(... &isin; ...) when ... &isin; ... is well-formed
 };
 
-constexpr const std::pair<const char*, unsigned long long>* lookup_HTML_entity(const std::string_view& name)
+constexpr const std::pair<const char*, char32_t>* lookup_HTML_entity(const std::string_view& name)
 {
 	for (decltype(auto) x : HTML_entities) {
 		if (x.first && name == x.first) return &x;
@@ -107,7 +107,7 @@ constexpr const std::pair<const char*, unsigned long long>* lookup_HTML_entity(c
 	return nullptr;
 }
 
-constexpr const std::pair<const char*, unsigned long long>* lookup_HTML_entity(unsigned long long codepoint)
+constexpr const std::pair<const char*, char32_t>* lookup_HTML_entity(char32_t codepoint)
 {
 	for (decltype(auto) x : HTML_entities) {
 		if (x.second == codepoint) return &x;
@@ -115,10 +115,40 @@ constexpr const std::pair<const char*, unsigned long long>* lookup_HTML_entity(u
 	return nullptr;
 }
 
-static_assert(0x2200ULL == lookup_HTML_entity("forall")->second);
-static_assert(0x2200ULL == lookup_HTML_entity(0x2200ULL)->second);
+static_assert(0x2200UL == lookup_HTML_entity("forall")->second);
+static_assert(0x2200UL == lookup_HTML_entity(0x2200UL)->second);
 
 // end prototype lookup
+
+std::optional<std::variant<std::string_view, char32_t> > interpret_HTML_entity(std::string_view src) {
+	if (3 > src.size()) return std::nullopt;
+	if (';' != src.back()) return std::nullopt;
+	src.remove_suffix(1);
+	if ('&' != src.front()) return std::nullopt;
+	src.remove_prefix(1);
+	if ('#' != src.front()) return src; // non-numeric
+	src.remove_prefix(1);
+	if (src.empty()) return std::nullopt;
+	if ('x' == src.front()) { // hexadecimal
+		src.remove_prefix(1);
+		if (src.empty()) return std::nullopt;
+		auto text = kleene_star(src, is_hex_digit);
+		if (!text || text->first != src) return std::nullopt;
+		try {
+			return std::stoul(std::string(src), nullptr, 16);
+		} catch (const std::exception& e) { // just eat the exception
+			return std::nullopt;
+		}
+	}
+	// decimal
+	auto text = kleene_star(src, is_digit);
+	if (!text || text->first != src) return std::nullopt;
+	try {
+		return std::stoul(std::string(src), nullptr, 10);
+	} catch (const std::exception& e) { // just eat the exception
+		return std::nullopt;
+	}
+}
 
 // prototype class -- extract to own files when stable
 
@@ -200,6 +230,7 @@ namespace gentzen {
 
 	};
 
+	// deferred: uniqueness quantification (unclear what data representation should be)
 	class var {
 		unsigned long long _quant_code;
 		std::shared_ptr<const formal::parsed> _var;
@@ -251,6 +282,39 @@ namespace gentzen {
 			return false;
 		}
 
+		static unsigned int legal_quantifier(const formal::lex_node& src) {
+			if (src.code() & HTMLtag::Entity) {
+				if (1 != src.is_pure_anchor()) return 0; // \todo invariant violation
+				return legal_quantifier(*src.anchor<formal::word>());
+			}
+
+			// \todo? visually, it is true that a span that rotates A or E 180-degrees "works" and we could accept that as an alternate encoding
+			// e.g, <span style="transform:rotate(180deg);display:inline-block">E</span>
+			return 0;
+		}
+
+		static unsigned int legal_quantifier(const formal::word& src) {
+			struct is_quantifier_entity {
+				int operator()(std::string_view src) {
+					if (lookup_HTML_entity("forall")->first == src) return (unsigned int)(quantifier::ForAll);
+					if (lookup_HTML_entity("exist")->first == src) return (unsigned int)(quantifier::ThereIs);
+					return 0;
+				}
+				int operator()(char32_t src) {
+					if (lookup_HTML_entity("forall")->second == src) return (unsigned int)(quantifier::ForAll);
+					if (lookup_HTML_entity("exist")->second == src) return (unsigned int)(quantifier::ThereIs);
+					return 0;
+				}
+			};
+
+			if (src.code() & HTMLtag::Entity) {
+				if (decltype(auto) test = interpret_HTML_entity(src.value())) {
+					return std::visit(is_quantifier_entity(), *test);
+				}
+				return 0;
+			}
+			return 0;
+		}
 	};
 
 	class inference_rule {
