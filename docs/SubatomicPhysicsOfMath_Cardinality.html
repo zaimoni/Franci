@@ -54,10 +54,10 @@ David Hume, <i>A Treatise of Human Nature</i> (1740)</blockquote>
 <p>We say that:</p>
 <ul>
 	<li>A relation r: X <span style="position:relative; top: -2px">&#x2192;</span> Y is <a href="https://en.wikipedia.org/wiki/Bijection,_injection_and_surjection">surjective</a>, when Range(f)=Y.
-		<p align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; Y)(<span style="transform:rotate(180deg);display:inline-block">E</span>x &#x2208; X)((x,y) &#x2208; r)</p>
+		<p align="center">(&forall;y &isin; Y)(&exist;x &isin; X)((x,y) &isin; r)</p>
 	</li>
 	<li>A partial function f: X <span style="position:relative; top: -2px">&#x2192;</span> Y is injective, when for all x,y in the domain of f, f(x)=f(y) nonstrictly implies x=y.  (This phrasing is for classical logic; the general case uses syntactical entailment.)
-		<p align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; Domain(f))(<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; Domain(f))(f(x)=f(y) &#9500; x=y)</p>
+		<p align="center">(&forall;x &isin; Domain(f))(&forall;y &isin; Domain(f))(f(x)=f(y) &#9500; x=y)</p>
 		We recognize this, as the converse of a consequence of the uniform substitution inference rule.
 	</li>
 	<li>A partial function f is bijective, when both f and f<sup>-1</sup> are injective.</li>
@@ -97,22 +97,22 @@ David Hume, <i>A Treatise of Human Nature</i> (1740)</blockquote>
 <h2 id="description-cardinality" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Description of cardinality #</h2>
 <p>We define</p>
 <table align="center">
-	<tr><td align="right"><nobr>#X = #Y :=&nbsp;</nobr></td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>f &isin; <b>Function</b>(X,Y))(Y=Range(f) & f is bijective)</td></tr>
-	<tr><td align="right"><nobr>#X &lt; #Y :=&nbsp;</nobr></td><td><nobr>(<span style="transform:rotate(180deg);display:inline-block">E</span>f &isin; <b>Function</b>(X,Y))(f is injective)</nobr> & <nobr>(<span style="transform:rotate(180deg);display:inline-block">A</span>g &isin; <b>Function</b>(Y,X))(g is not injective)</nobr></td></tr>
+	<tr><td align="right"><nobr>#X = #Y :=&nbsp;</nobr></td><td>(&exist;f &isin; <b>Function</b>(X,Y))(Y=Range(f) & f is bijective)</td></tr>
+	<tr><td align="right"><nobr>#X &lt; #Y :=&nbsp;</nobr></td><td><nobr>(&exist;f &isin; <b>Function</b>(X,Y))(f is injective)</nobr> & <nobr>(&forall;g &isin; <b>Function</b>(Y,X))(g is not injective)</nobr></td></tr>
 </table>
 <table align="right">
 	<tr><th></th><th>Proposition</th><th>Rationale</th></tr>
 	<tr><th colspan="3">Classical Logic</th></tr>
 	<tr><td>1.</td><td>g &isin; <b>Function</b>(Y,X)</td><td>Given</td></tr>
 	<tr><td>2.</td><td>g is not injective</td><td>Given</td></tr>
-	<tr><td>3.</td><td>~(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; Domain(g))(<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; Domain(g))(g(x)=g(y) &rArr; x=y)</td><td>Definition of injective function on (2)</td></tr>
-	<tr><td>4a.</td><td>~(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; Domain(g))~~(<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; Domain(g))(g(x)=g(y) &rArr; x=y)</td><td>Introduce double negation on (3)</td></tr>
-	<tr><td>4b.</td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>x &#x2208; Domain(g))~(<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; Domain(g))(g(x)=g(y) &rArr; x=y)</td><td>[(<span style="transform:rotate(180deg);display:inline-block">E</span>x &#x2208; Domain(g))/~(<span style="transform:rotate(180deg);display:inline-block">A</span>x &#x2208; Domain(g))~] by definition of <span style="transform:rotate(180deg);display:inline-block">A</span> of on (4a)</td></tr>
-	<tr><td>5a.</td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>x &#x2208; Domain(g))~(<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; Domain(g))~~(g(x)=g(y) &rArr; x=y)</td><td>Introduce double negation on (4b)</td></tr>
-	<tr><td>5b.</td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>x &#x2208; Domain(g))(<span style="transform:rotate(180deg);display:inline-block">E</span>y &#x2208; Domain(g))~(g(x)=g(y) &rArr; x=y)</td><td>[(<span style="transform:rotate(180deg);display:inline-block">E</span>y &#x2208; Domain(g))/~(<span style="transform:rotate(180deg);display:inline-block">A</span>y &#x2208; Domain(g))~] by definition of <span style="transform:rotate(180deg);display:inline-block">A</span> of on (5a)</td></tr>
-	<tr><td>6.</td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>x &#x2208; Domain(g))(<span style="transform:rotate(180deg);display:inline-block">E</span>y &#x2208; Domain(g))~(g(x)&ne;g(y) &#x2228; x=y)</td><td>definition of &rArr; on (5b)</td></tr>
+	<tr><td>3.</td><td>~(&forall;x &isin; Domain(g))(&forall;y &isin; Domain(g))(g(x)=g(y) &rArr; x=y)</td><td>Definition of injective function on (2)</td></tr>
+	<tr><td>4a.</td><td>~(&forall;x &isin; Domain(g))~~(&forall;y &isin; Domain(g))(g(x)=g(y) &rArr; x=y)</td><td>Introduce double negation on (3)</td></tr>
+	<tr><td>4b.</td><td>(&exist;x &isin; Domain(g))~(&forall;y &isin; Domain(g))(g(x)=g(y) &rArr; x=y)</td><td>[(&exist;x &isin; Domain(g))/~(&forall;x &isin; Domain(g))~] by definition of &exist; of on (4a)</td></tr>
+	<tr><td>5a.</td><td>(&exist;x &isin; Domain(g))~(&forall;y &isin; Domain(g))~~(g(x)=g(y) &rArr; x=y)</td><td>Introduce double negation on (4b)</td></tr>
+	<tr><td>5b.</td><td>(&exist;x &isin; Domain(g))(&exist;y &isin; Domain(g))~(g(x)=g(y) &rArr; x=y)</td><td>[(&exist;y &isin; Domain(g))/~(&forall;y &isin; Domain(g))~] by definition of &exist; of on (5a)</td></tr>
+	<tr><td>6.</td><td>(&exist;x &isin; Domain(g))(&exist;y &isin; Domain(g))~(g(x)&ne;g(y) &#x2228; x=y)</td><td>definition of &rArr; on (5b)</td></tr>
 	<tr><th colspan="3">Usual symbolic translation of "g is not injective"</th></tr>
-	<tr><td>7.</td><td>(<span style="transform:rotate(180deg);display:inline-block">E</span>x &#x2208; Domain(g))(<span style="transform:rotate(180deg);display:inline-block">E</span>y &#x2208; Domain(g))(g(x)=g(y) & x&ne;y)</td><td>De Morgan's Law on (6)</td></tr>
+	<tr><td>7.</td><td>(&exist;x &isin; Domain(g))(&exist;y &isin; Domain(g))(g(x)=g(y) & x&ne;y)</td><td>De Morgan's Law on (6)</td></tr>
 </table>
 <p>Our exact choice of definition of #X &lt; #Y, accounts for how we are compensating the definition of existential quantification for non-classical truth values.  While all steps in the derivation of 
 	the usual symbolic translation of <i>g is not injective</i> are fully reversible for classical logic, this is clearly not the case in the presence of non-classical truth values.</p>
@@ -155,7 +155,7 @@ David Hume, <i>A Treatise of Human Nature</i> (1740)</blockquote>
 	the Von Neumann-model natural number n itself contains n elements.  The empty set &#x2205; is deemed to be finite, with (cardinal) size 0.  Mathematical collections that are not finite, are said to be infinite.</p>
 <p>There are several weaker concepts of finiteness, that do not themselves require natural numbers to define.  We will not review them, at this time.</p>
 <p>With the above definitions, it is a mechanical exercise that</p>
-<p align="center">f &isin; <b>FunctionPartial</b>(X,Y) &#9500; (<span style="transform:rotate(180deg);display:inline-block">A</span>x &isin; X)(#f(x) = #&#x2205; &#x2228; #f(x) = #{&#x2205;})</b></p>
+<p align="center">f &isin; <b>FunctionPartial</b>(X,Y) &#9500; (&forall;x &isin; X)(#f(x) = #&#x2205; &#x2228; #f(x) = #{&#x2205;})</b></p>
 <h2 id="notation-surjective-left-total" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Surjective and left-total, are about notation</h2>
 <table align="right" cellspacing="0">
 	<tr><th colspan="2"></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
@@ -184,7 +184,7 @@ Unfortunately, a precise philosophical description of impredicativity has not be
 <table align="right" cellspacing="0">
 	<tr><th colspan="2"></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
 	<tr><td></td><td>1.</td><td></td><td>f:X <span style="position:relative; top: -2px">&#x2192;</span> Y is a non-empty partial function</td><td>Given</td></tr>
-	<tr><td></td><td>2.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>a<sub>0</sub> &isin; Domain(f))(<span style="transform:rotate(180deg);display:inline-block">A</span>a<sub>1</sub> &isin; Domain(f))(f(a<sub>0</sub>)=f(a<sub>1</sub>) &#9500; a<sub>0</sub>=a<sub>1</sub>)</td><td>Given: f is injective</td></tr>
+	<tr><td></td><td>2.</td><td></td><td>(&forall;a<sub>0</sub> &isin; Domain(f))(&forall;a<sub>1</sub> &isin; Domain(f))(f(a<sub>0</sub>)=f(a<sub>1</sub>) &#9500; a<sub>0</sub>=a<sub>1</sub>)</td><td>Given: f is injective</td></tr>
 
 	<tr><th colspan="5">The universally instantiated hypothesis, for f<sup>-1</sup> being functional:</th></tr>
 	<tr><td style="border-left: black 1px solid; border-top:black 1px solid">&nbsp;</td><td>3.</td><td></td><td>(y, x<sub>0</sub>) &isin; f<sup>-1</sup> & (y, x<sub>1</sub>) &isin; f<sup>-1</sup></td><td>Hypothesis (for universal generalization)</sub></td></tr>
@@ -198,15 +198,15 @@ Unfortunately, a precise philosophical description of impredicativity has not be
 	<tr><td style="border-left: black 1px solid"></td><td>6b.</td><td></td><td>f(x<sub>1</sub>) := y</td><td>(2) on (5b)</sub></td></tr>
 	<tr><td style="border-left: black 1px solid"></td><td>7b.</td><td></td><td>x<sub>1</sub> &isin; Range(f<sup>-1</sup>)</td><td>definition of Range(f<sup>-1</sup>) on (4b)</td></tr>
 
-	<tr><td style="border-left: black 1px solid"></td><td>9.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>a<sub>1</sub> &isin; Domain(f))(f(x<sub>0</sub>)=f(a<sub>1</sub>) &#9500; x<sub>0</sub>=a<sub>1</sub>)</td><td>Universal instantiation [x<sub>0</sub>/a<sub>0</sub>] on (2)</td></tr>
+	<tr><td style="border-left: black 1px solid"></td><td>9.</td><td></td><td>(&forall;a<sub>1</sub> &isin; Domain(f))(f(x<sub>0</sub>)=f(a<sub>1</sub>) &#9500; x<sub>0</sub>=a<sub>1</sub>)</td><td>Universal instantiation [x<sub>0</sub>/a<sub>0</sub>] on (2)</td></tr>
 	<tr><td style="border-left: black 1px solid"></td><td>10.</td><td>f(x<sub>0</sub>)=f(x<sub>1</sub>) &#9500; x<sub>0</sub>=x<sub>1</sub></td><td></td><td>Universal instantiation [x<sub>1</sub>/a<sub>1</sub>] on (9)</td></tr>
 	<tr><td style="border-left: black 1px solid"></td><td>11.</td><td>y=y &#9500; x<sub>0</sub>=x<sub>1</sub></td><td></td><td>[y/f(x<sub>0</sub>)][y/f(x<sub>1</sub>)] on (10) by (6a),(6b)</td></tr>
 	<tr><td style="border-left: black 1px solid"></td><td>12.</td><td></td><td>y=y</td><td>Reflexivity of =</sub></td></tr>
 	<tr><td style="border-left: black 1px solid; border-bottom:black 1px solid"></td><td>13.</td><td></td><td>x<sub>0</sub> = x<sub>1</sub></td><td><i>modus ponens</i> for &#9500;, (11) and (12)</td></tr>
 	<tr><td></td><td>14.</td><td><nobr>(y, x<sub>0</sub>) &isin; f<sup>-1</sup></nobr> & <nobr>(y, x<sub>1</sub>) &isin; f<sup>-1</sup></nobr> &#9500; <nobr>x<sub>0</sub> = x<sub>1</nobr></td><td></sub></td><td>Syntactical entailment introduction, (3) and (14)</td></tr>
-	<tr><td></td><td>15.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>z<sub>1</sub> &isin; Range(f<sup>-1</sup>))<nobr>((y, x<sub>0</sub>) &isin; f<sup>-1</sup></nobr> & <nobr>(y, z<sub>1</sub>) &isin; f<sup>-1</sup></nobr> &#9500; <nobr>x<sub>0</sub> = z<sub>1</sub>)</nobr></td><td>[z<sub>1</sub>/x<sub>1</sub>] Universal generalization, (14) and (7b)</td></tr>
-	<tr><td></td><td>16.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>z<sub>0</sub> &isin; Range(f<sup>-1</sup>))<nobr>(<span style="transform:rotate(180deg);display:inline-block">A</span>z<sub>1</sub> &isin; Range(f<sup>-1</sup>))</nobr><nobr>((y, z<sub>0</sub>) &isin; f<sup>-1</sup></nobr> & <nobr>(y, z<sub>1</sub>) &isin; f<sup>-1</sup></nobr> &#9500; <nobr>z<sub>0</sub> = z<sub>1</sub>)</nobr></td><td>[z<sub>0</sub>/x<sub>0</sub>] Universal generalization, (15) and (7a)</td></tr>
-	<tr><td></td><td>17.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>w &isin; Domain(f<sup>-1</sup>))<nobr>(<span style="transform:rotate(180deg);display:inline-block">A</span>z<sub>0</sub> &isin; Range(f<sup>-1</sup>))</nobr><nobr>(<span style="transform:rotate(180deg);display:inline-block">A</span>z<sub>1</sub> &isin; Range(f<sup>-1</sup>))</nobr><nobr>((w, z<sub>0</sub>) &isin; f<sup>-1</sup></nobr> & <nobr>(w, z<sub>1</sub>) &isin; f<sup>-1</sup></nobr> &#9500; <nobr>z<sub>0</sub> = z<sub>1</sub></nobr>)</td><td>[w/y] Universal generalization, (16) and (8a)</td></tr>
+	<tr><td></td><td>15.</td><td></td><td>(&forall;z<sub>1</sub> &isin; Range(f<sup>-1</sup>))<nobr>((y, x<sub>0</sub>) &isin; f<sup>-1</sup></nobr> & <nobr>(y, z<sub>1</sub>) &isin; f<sup>-1</sup></nobr> &#9500; <nobr>x<sub>0</sub> = z<sub>1</sub>)</nobr></td><td>[z<sub>1</sub>/x<sub>1</sub>] Universal generalization, (14) and (7b)</td></tr>
+	<tr><td></td><td>16.</td><td></td><td>(&forall;z<sub>0</sub> &isin; Range(f<sup>-1</sup>))<nobr>(&forall;z<sub>1</sub> &isin; Range(f<sup>-1</sup>))</nobr><nobr>((y, z<sub>0</sub>) &isin; f<sup>-1</sup></nobr> & <nobr>(y, z<sub>1</sub>) &isin; f<sup>-1</sup></nobr> &#9500; <nobr>z<sub>0</sub> = z<sub>1</sub>)</nobr></td><td>[z<sub>0</sub>/x<sub>0</sub>] Universal generalization, (15) and (7a)</td></tr>
+	<tr><td></td><td>17.</td><td></td><td>(&forall;w &isin; Domain(f<sup>-1</sup>))<nobr>(&forall;z<sub>0</sub> &isin; Range(f<sup>-1</sup>))</nobr><nobr>(&forall;z<sub>1</sub> &isin; Range(f<sup>-1</sup>))</nobr><nobr>((w, z<sub>0</sub>) &isin; f<sup>-1</sup></nobr> & <nobr>(w, z<sub>1</sub>) &isin; f<sup>-1</sup></nobr> &#9500; <nobr>z<sub>0</sub> = z<sub>1</sub></nobr>)</td><td>[w/y] Universal generalization, (16) and (8a)</td></tr>
 	<tr><th colspan="5">If f is a non-empty injective partial function, then <nobr>f<sup>-1</sup> : Domain(f<sup>-1</sup>) <span style="position:relative; top: -2px">&#x2192;</span> Range(f<sup>-1</sup>)</nobr> is a function</th></tr>
 	<tr><th colspan="5">The universally instantiated hypothesis, for f<sup>-1</sup> being injective:</th></tr>
 	<tr><td style="border-left: black 1px solid; border-top:black 1px solid"></td><td>18.</td><td></td><td>f<sup>-1</sup>(y<sub>0</sub>) = f<sup>-1</sup>(y<sub>1</sub>)</td><td>Hypothesis (for universal generalization)</sub></td></tr>
@@ -214,16 +214,16 @@ Unfortunately, a precise philosophical description of impredicativity has not be
 	<tr><td style="border-left: black 1px solid"></td><td>19b.</td><td></td><td>(y<sub>1</sub>, f<sup>-1</sup>(y<sub>1</sub>)) &isin; f<sup>-1</sup></td><td>Definition of function on (18)</td></tr>
 	<tr><td style="border-left: black 1px solid"></td><td>20a.</td><td></td><td>(f<sup>-1</sup>(y<sub>0</sub>), y<sub>0</sub>) &isin; f</td><td>Definition of inverse relation on (19a)</td></tr>
 	<tr><td style="border-left: black 1px solid"></td><td>20b.</td><td></td><td>(f<sup>-1</sup>(y<sub>1</sub>), y<sub>1</sub>) &isin; f</td><td>Definition of inverse relation on (19b)</td></tr>
-	<tr><td style="border-left: black 1px solid"></td><td>21.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>w &isin; Domain(f))<nobr>(<span style="transform:rotate(180deg);display:inline-block">A</span>z<sub>0</sub> &isin; Range(f))</nobr><nobr>(<span style="transform:rotate(180deg);display:inline-block">A</span>z<sub>1</sub> &isin; Range(f))</nobr><nobr>((w, z<sub>0</sub>) &isin; f</nobr> & <nobr>(w, z<sub>1</sub>) &isin; f</nobr> &#9500; <nobr>z<sub>0</sub> = z<sub>1</sub>)</nobr></td><td>definition of partial function on (1)</td></tr>
-	<tr><td style="border-left: black 1px solid"></td><td>22.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>z<sub>0</sub> &isin; Range(f))<nobr>(<span style="transform:rotate(180deg);display:inline-block">A</span>z<sub>1</sub> &isin; Range(f))</nobr><nobr>((f<sup>-1</sup>(y<sub>0</sub>), z<sub>0</sub>) &isin; f</nobr> & <nobr>(f<sup>-1</sup>(y<sub>0</sub>), z<sub>1</sub>) &isin; f</nobr> &#9500; <nobr>z<sub>0</sub> = z<sub>1</sub></nobr>)</td><td>Universal instantiation [f<sup>-1</sup>(y<sub>0</sub>)/w] on (21)</td></tr>
-	<tr><td style="border-left: black 1px solid"></td><td>23.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>z<sub>1</sub> &isin; Range(f))<nobr>((f<sup>-1</sup>(y<sub>0</sub>), y<sub>0</sub>) &isin; f</nobr> & <nobr>(f<sup>-1</sup>(y<sub>0</sub>), z<sub>1</sub>) &isin; f</nobr> &#9500; <nobr>y<sub>0</sub> = z<sub>1</sub>)</nobr></td><td>Universal instantiation [y<sub>0</sub>/z<sub>0</sub>] on (22)</td></tr>
+	<tr><td style="border-left: black 1px solid"></td><td>21.</td><td></td><td>(&forall;w &isin; Domain(f))<nobr>(&forall;z<sub>0</sub> &isin; Range(f))</nobr><nobr>(&forall;z<sub>1</sub> &isin; Range(f))</nobr><nobr>((w, z<sub>0</sub>) &isin; f</nobr> & <nobr>(w, z<sub>1</sub>) &isin; f</nobr> &#9500; <nobr>z<sub>0</sub> = z<sub>1</sub>)</nobr></td><td>definition of partial function on (1)</td></tr>
+	<tr><td style="border-left: black 1px solid"></td><td>22.</td><td></td><td>(&forall;z<sub>0</sub> &isin; Range(f))<nobr>(&forall;z<sub>1</sub> &isin; Range(f))</nobr><nobr>((f<sup>-1</sup>(y<sub>0</sub>), z<sub>0</sub>) &isin; f</nobr> & <nobr>(f<sup>-1</sup>(y<sub>0</sub>), z<sub>1</sub>) &isin; f</nobr> &#9500; <nobr>z<sub>0</sub> = z<sub>1</sub></nobr>)</td><td>Universal instantiation [f<sup>-1</sup>(y<sub>0</sub>)/w] on (21)</td></tr>
+	<tr><td style="border-left: black 1px solid"></td><td>23.</td><td></td><td>(&forall;z<sub>1</sub> &isin; Range(f))<nobr>((f<sup>-1</sup>(y<sub>0</sub>), y<sub>0</sub>) &isin; f</nobr> & <nobr>(f<sup>-1</sup>(y<sub>0</sub>), z<sub>1</sub>) &isin; f</nobr> &#9500; <nobr>y<sub>0</sub> = z<sub>1</sub>)</nobr></td><td>Universal instantiation [y<sub>0</sub>/z<sub>0</sub>] on (22)</td></tr>
 	<tr><td style="border-left: black 1px solid"></td><td>24.</td><td><nobr>(f<sup>-1</sup>(y<sub>0</sub>), y<sub>0</sub>) &isin; f</nobr> & <nobr>(f<sup>-1</sup>(y<sub>0</sub>), y<sub>1</sub>) &isin; f</nobr> &#9500; <nobr>y<sub>0</sub> = y<sub>1</sub></nobr></td><td></td><td>Universal instantiation [y<sub>1</sub>/z<sub>1</sub>] on (23)</td></tr>
 	<tr><td style="border-left: black 1px solid"></td><td>25.</td><td></td><td>(f<sup>-1</sup>(y<sub>0</sub>), y<sub>1</sub>) &isin; f</td><td>[f<sup>-1</sup>(y<sub>0</sub>)/f<sup>-1</sup>(y<sub>1</sub>)] by (18) on (20b)</td></tr>
 	<tr><td style="border-left: black 1px solid"></td><td>26.</td><td></td><td>(f<sup>-1</sup>(y<sub>0</sub>), y<sub>0</sub>) &isin; f & <nobr>(f<sup>-1</sup>(y<sub>0</sub>), y<sub>1</sub>) &isin; f</nobr></td><td>Conjunction introduction, (20a) and (25)</td></tr>
 	<tr><td style="border-left: black 1px solid; border-bottom:black 1px solid"></td><td>27.</td><td></td><td>y<sub>0</sub> = y<sub>1</sub></td><td>modus ponens for &#9500;, (24) and (26)</td></tr>
 	<tr><td></td><td>28.</td><td>f<sup>-1</sup>(y<sub>0</sub>) = f<sup>-1</sup>(y<sub>1</sub>) &#9500; <nobr>y<sub>0</sub> = y<sub>1</sub></nobr></td><td></td><td>syntactical entailment introduction, (18) and (27)</td></tr>
-	<tr><td></td><td>29.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>a<sub>1</sub> &isin; Domain(f<sup>-1</sup>))<nobr>(f<sup>-1</sup>(y<sub>0</sub>) = f<sup>-1</sup>(a<sub>1</sub>)</nobr> &#9500; <nobr>y<sub>0</sub> = a<sub>1</sub>)</nobr></td><td>universal generalization [a<sub>1</sub>/y<sub>1</sub>] on (28)</td></tr>
-	<tr><td></td><td>30.</td><td></td><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>a<sub>0</sub> &isin; Domain(f<sup>-1</sup>))<nobr>(<span style="transform:rotate(180deg);display:inline-block">A</span>a<sub>1</sub> &isin; Domain(f<sup>-1</sup>))</nobr><nobr>(f<sup>-1</sup>(a<sub>0</sub>) = f<sup>-1</sup>(a<sub>1</sub>)</nobr> &#9500; <nobr>a<sub>0</sub> = a<sub>1</sub>)</nobr></td><td>universal generalization [a<sub>0</sub>/y<sub>0</sub>] on (29)</td></tr>
+	<tr><td></td><td>29.</td><td></td><td>(&forall;a<sub>1</sub> &isin; Domain(f<sup>-1</sup>))<nobr>(f<sup>-1</sup>(y<sub>0</sub>) = f<sup>-1</sup>(a<sub>1</sub>)</nobr> &#9500; <nobr>y<sub>0</sub> = a<sub>1</sub>)</nobr></td><td>universal generalization [a<sub>1</sub>/y<sub>1</sub>] on (28)</td></tr>
+	<tr><td></td><td>30.</td><td></td><td>(&forall;a<sub>0</sub> &isin; Domain(f<sup>-1</sup>))<nobr>(&forall;a<sub>1</sub> &isin; Domain(f<sup>-1</sup>))</nobr><nobr>(f<sup>-1</sup>(a<sub>0</sub>) = f<sup>-1</sup>(a<sub>1</sub>)</nobr> &#9500; <nobr>a<sub>0</sub> = a<sub>1</sub>)</nobr></td><td>universal generalization [a<sub>0</sub>/y<sub>0</sub>] on (29)</td></tr>
 	<tr><th colspan="5">If f is a non-empty injective partial function, then <nobr>f<sup>-1</sup> : Domain(f<sup>-1</sup>) <span style="position:relative; top: -2px">&#x2192;</span> Range(f<sup>-1</sup>)</nobr> is injective</th></tr>
 </table>
 <p>We next verify that the inverse of an injective function, is itself an injective function.  (That is, if we have an injective partial function f:X <span style="position:relative; top: -2px">&#x2192;</span> Y, 
@@ -235,11 +235,11 @@ then f:Domain(f) <span style="position:relative; top: -2px">&#x2192;</span> Rang
 <table align="center">
 	<tr><th>Von Neumann model of &#x2115;</th></tr>
 	<tr><th>Classical logic</th></tr>
-	<tr><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>m &#x2208; &#x2115;)(<span style="transform:rotate(180deg);display:inline-block">A</span>n &isin; &#x2115;)(m = n &hArr; #m = #n)</td></tr>
-	<tr><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>m &#x2208; &#x2115;)(<span style="transform:rotate(180deg);display:inline-block">A</span>n &isin; &#x2115;)(m &lt; n &hArr; #m &lt; #n)</td></tr>
+	<tr><td>(&forall;m &isin; &#x2115;)(&forall;n &isin; &#x2115;)(m = n &hArr; #m = #n)</td></tr>
+	<tr><td>(&forall;m &isin; &#x2115;)(&forall;n &isin; &#x2115;)(m &lt; n &hArr; #m &lt; #n)</td></tr>
 	<tr><th>Nonclassical truth-value logics</th></tr>
-	<tr><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>m &#x2208; &#x2115;)(<span style="transform:rotate(180deg);display:inline-block">A</span>n &isin; &#x2115;)(m = n &#x27DB; #m = #n)</td></tr>
-	<tr><td>(<span style="transform:rotate(180deg);display:inline-block">A</span>m &#x2208; &#x2115;)(<span style="transform:rotate(180deg);display:inline-block">A</span>n &isin; &#x2115;)(m &lt; n &#x27DB; #m &lt; #n)</td></tr>
+	<tr><td>(&forall;m &isin; &#x2115;)(&forall;n &isin; &#x2115;)(m = n &#x27DB; #m = #n)</td></tr>
+	<tr><td>(&forall;m &isin; &#x2115;)(&forall;n &isin; &#x2115;)(m &lt; n &#x27DB; #m &lt; #n)</td></tr>
 </table>
 <p>We consider zero (whose model is the empty set &#x2205;) as a special case.  For any classes X and Y, we have an empty function:</p>
 <table align="center">
@@ -286,19 +286,19 @@ contains at least one element, we say that X is non-empty.</p>
 	Likewise, extending the range leaves <b>Empty<sub>&#x2205;,Y</sub></b> a proper, vacuous, injection so we have (#&#x2205; < #Y) for any class Y containing at least one element y<sub>0</sub>.</p>
 <table align="center">
 	<tr><th colspan="2">Classical logic</th></tr>
-	<tr><td align="right">(<span style="transform:rotate(180deg);display:inline-block">A</span>X &isin; <b>Class</b>\{&#x2205;})</td><td align="left">(~(#X < #&#x2205;))</td></tr>
-	<tr><td align="right">(<span style="transform:rotate(180deg);display:inline-block">A</span>X &isin; <b>Class</b>\{&#x2205;})</td><td align="left">(#&#x2205; < #X)</td></tr>
+	<tr><td align="right">(&forall;X &isin; <b>Class</b>\{&empty;})</td><td align="left">(~(#X < #&empty;))</td></tr>
+	<tr><td align="right">(&forall;X &isin; <b>Class</b>\{&empty;})</td><td align="left">(#&empty; < #X)</td></tr>
 	<tr><th colspan="2">Empirically require for a working non-classical logic set theory</th></tr>
-	<tr><td align="right">(<span style="transform:rotate(180deg);display:inline-block">A</span>X &isin; <b>Class</b>)</td><td align="left">((<span style="transform:rotate(180deg);display:inline-block">E</span>x  &isin; <b>Set</b>)(x &isin; X &#9500;  ~(#X < #&#x2205;))</td></tr>
-	<tr><td align="right">(<span style="transform:rotate(180deg);display:inline-block">A</span>X &isin; <b>Class</b>)</td><td align="left">((<span style="transform:rotate(180deg);display:inline-block">E</span>x  &isin; <b>Set</b>)(x &isin; X &#9500;  #&#x2205; < #X)</td></tr>
-	<tr><td align="right">(<span style="transform:rotate(180deg);display:inline-block">A</span>X &isin; <b>Class</b>)</td><td align="left">((<span style="transform:rotate(180deg);display:inline-block">E</span>x  &isin; <b>Ur</b>)(x &isin; X &#9500;  ~(#X < #&#x2205;))</td></tr>
-	<tr><td align="right">(<span style="transform:rotate(180deg);display:inline-block">A</span>X &isin; <b>Class</b>)</td><td align="left">((<span style="transform:rotate(180deg);display:inline-block">E</span>x  &isin; <b>Ur</b>)(x &isin; X &#9500;  #&#x2205; < #X)</td></tr>
-	<tr><td align="right">(<span style="transform:rotate(180deg);display:inline-block">A</span>X &isin; <b>Class</b>)</td><td align="left">(X is a set-theoretic atom &#x27DB; #&#x2205; = #X)</td></tr>
+	<tr><td align="right">(&forall;X &isin; <b>Class</b>)</td><td align="left">((&exist;x  &isin; <b>Set</b>)(x &isin; X &#9500;  ~(#X < #&empty;))</td></tr>
+	<tr><td align="right">(&forall;X &isin; <b>Class</b>)</td><td align="left">((&exist;x  &isin; <b>Set</b>)(x &isin; X &#9500;  #&empty; < #X)</td></tr>
+	<tr><td align="right">(&forall;X &isin; <b>Class</b>)</td><td align="left">((&exist;x  &isin; <b>Ur</b>)(x &isin; X &#9500;  ~(#X < #&empty;))</td></tr>
+	<tr><td align="right">(&forall;X &isin; <b>Class</b>)</td><td align="left">((&exist;x  &isin; <b>Ur</b>)(x &isin; X &#9500;  #&empty; < #X)</td></tr>
+	<tr><td align="right">(&forall;X &isin; <b>Class</b>)</td><td align="left">(X is a set-theoretic atom &#x27DB; #&empty; = #X)</td></tr>
 </table>
 <p>In particular, for the Von Neumann model of &#x2115; the above gives</p>
-<p align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>n &isin; &#x2115;\{0})(#0 &lt; #n)</p>
+<p align="center">(&forall;n &isin; &#x2115;\{0})(#0 &lt; #n)</p>
 <p>from which a universal instantiation/generalization argument gives</p>
-<p align="center">(<span style="transform:rotate(180deg);display:inline-block">A</span>n &isin; &#x2115;)(0 &lt; n &#x27DB; #0 &lt; #n)</p>
+<p align="center">(&forall;n &isin; &#x2115;)(0 &lt; n &#x27DB; #0 &lt; #n)</p>
 <p>I.e., the only choice of model for 0 in &#x2115;, that does what is needed for cardinal size of sets, is the empty set &#x2205;.</p>
 <p>For 0&le;m&lt;n &isin; &#x2115;, extending the range 0...m of the identity function id<sub>0...m</sub> to 0...n gives a proper injection from 0...m to 0...n .  It suffices to
 	prove no injective function from 0...n to 0...m exists.  (That this requires proof, may be seen by considering the Peano successor function S.  For any model of &#x2115;, the restriction of 
