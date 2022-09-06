@@ -940,6 +940,7 @@ int main(int argc, char* argv[], char* envp[])
 			TokenGrammar().append_to_parse(stage, wrapped.release());
 			wrapped = formal::lex_node::pop_front(lines);
 		};
+		if (0 >= Errors.count()) TokenGrammar().finite_parse(stage);
 		std::cout << std::to_string(stage.size()) << "\n";
 
 		formal::lex_node::to_s(std::cout, stage) << "\n";

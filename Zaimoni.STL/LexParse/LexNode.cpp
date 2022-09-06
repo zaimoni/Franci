@@ -158,8 +158,7 @@ namespace formal {
 				if (start.line_pos.first != track.line_pos.first) {
 					// new line.  \todo Ignore indentation for one-line comments, but not normal source code
 					dest << '\n';
-				}
-				else if (start.line_pos.second > track.line_pos.second) {
+				} else if (start.line_pos.second > track.line_pos.second) {
 					// need whitespace to look like original code
 					dest << std::string(start.line_pos.second - track.line_pos.second, ' ');
 				}
@@ -170,6 +169,15 @@ namespace formal {
 				if (auto lex = x.get()) return to_s(dest, lex, track);
 			}
 			auto operator()(const std::unique_ptr<parsed>& x) {
+				const auto start = x->origin();
+				if (start.line_pos.first != track.line_pos.first) {
+					// new line.  \todo Ignore indentation for one-line comments, but not normal source code
+					dest << '\n';
+				} else if (start.line_pos.second > track.line_pos.second) {
+					// need whitespace to look like original code
+					dest << std::string(start.line_pos.second - track.line_pos.second, ' ');
+				}
+
 				auto stage = x->to_s();
 				if (!stage.empty()) {
 					dest << stage;
