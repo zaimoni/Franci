@@ -57,7 +57,7 @@
 </ul>
 <p><b>TruthValued</b> is not formally describable.  It includes things like English sentences, indeed sentences in any natural language.</p>
 <table align="right">
-	<tr><td align="center" colspan="3">(&forall;P &#x2208; <b>TruthValued</b>)(<span style="transform:rotate(180deg);display:inline-block">E</span>t &#x2208; <b>TruthValues</b>)(P &#x21A6; t)</th>
+	<tr><td align="center" colspan="3">(&forall;P &isin; <b>TruthValued</b>)(&exist;t &isin; <b>TruthValues</b>)(P &#x21A6; t)</th>
 	<tr><th colspan="3">Principle of ...</th>
 	<tr><th style="background: #DDFFDD">Classical</th><th>bivalence</th><td><b>TruthValues</b> := {<i>false</i>, <i>true</i>}</td></tr>
 	<tr><th style="background: #DDDDFF">Kleene weak<br>Kleene strong<br>Lisp/Prolog</th><th>trivalence</th><td><b>TruthValues</b> := {<i>false</i>, <i>true</i>, <i>unknown</i>}</td></tr>
@@ -69,7 +69,7 @@
 </table>
 <p><nobr>In contrast, <b>TruthValues</b> is formally describable:</nobr> the truth values <i>true</i>, <i>false</i>, <i>unknown</i>, and <i>contradiction</i> are unequivocally <i>ur-elements</i>, 
 	rather than mathematical objects.  For the set theories with <i>ur-elements</i>, we can interpret the principle of bivalence/trivalence/tetravalence, into this new notation.</p>
-<p>Replacing logical or &#x2228; with the existence quantifier <span style="transform:rotate(180deg);display:inline-block">E</span>, is stronger for
+<p>Replacing logical or &#x2228; with the existence quantifier &exist;, is stronger for
 	Belnap's four-valued logic: it requires (P &#x21A6; t) &#x21A6; <i>true</i> for at least one of the truth values t directly, regardless of the logic applied.  (This already was 
 	inferable, for the other five truth table describable logics we are considering.)  The principle of non-contradiction then ensures that non-classical truth values are never allowed when evaluating P &#x21A6; t .
 	(Recall that truth-table calculations are an alternate notation, for classical logic reasoning about truth-table describable logics.)</p>
@@ -205,17 +205,17 @@
 </table>
 <table align="right">
 	<tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
-	<tr><td>1.</td><td></td><td>x &#x2208; A</td><td>Given</td></tr>
+	<tr><td>1.</td><td></td><td>x &isin; A</td><td>Given</td></tr>
 	<tr><td>2.</td><td></td><td>y &#x2209; A</td><td>Given</td></tr>
 	<tr><th colspan="4">Zermelo-Frankel, with or without ur-elements</th></tr>
-	<tr><td>3.</td><td></td><td>A &#x2208; <b>Set</b></td><td>(1) is defined</td></tr>
-	<tr><td>4.</td><td></td><td><b>Truth</b>(x &#x2208; A)&ne;<b>Truth</b>(y &#x2208; A)</td><td>(1) and (2)</td></tr>
-	<tr><td>5.</td><td></td><td>(&exist;z &#x2208; <b>Set</b>)(<b>Truth</b>(x &#x2208; z)&ne;<b>Truth</b>(y &#x2208; z))</td><td>Existential instantiation on (4)</td></tr>
-	<tr><td>6.</td><td></td><td>~(&forall;z &#x2208; <b>Set</b>)(~~(<b>Truth</b>(x &#x2208; z)=<b>Truth</b>(y &#x2208; z)))</td><td>Definition of <span style="transform:rotate(180deg);display:inline-block">E</span> on (5)</td></tr>
-	<tr><td>7.</td><td></td><td>~(&forall;z &#x2208; <b>Set</b>)(<b>Truth</b>(x &#x2208; z)=<b>Truth</b>(y &#x2208; z))</td><td>Remove double negation on (6)</td></tr>
+	<tr><td>3.</td><td></td><td>A &isin; <b>Set</b></td><td>(1) is defined</td></tr>
+	<tr><td>4.</td><td></td><td><b>Truth</b>(x &isin; A)&ne;<b>Truth</b>(y &isin; A)</td><td>(1) and (2)</td></tr>
+	<tr><td>5.</td><td></td><td>(&exist;z &isin; <b>Set</b>)(<b>Truth</b>(x &isin; z)&ne;<b>Truth</b>(y &isin; z))</td><td>Existential instantiation on (4)</td></tr>
+	<tr><td>6.</td><td></td><td>~(&forall;z &isin; <b>Set</b>)(~~(<b>Truth</b>(x &isin; z)=<b>Truth</b>(y &isin; z)))</td><td>Definition of &exist; on (5)</td></tr>
+	<tr><td>7.</td><td></td><td>~(&forall;z &isin; <b>Set</b>)(<b>Truth</b>(x &isin; z)=<b>Truth</b>(y &isin; z))</td><td>Remove double negation on (6)</td></tr>
 	<tr><th colspan="4">Zermelo-Frankel</th></tr>
-	<tr><td>8.</td><td></td><td>x &#x2208; <b>Set</b></td><td>(1) is defined</td></tr>
-	<tr><td>9.</td><td></td><td>y &#x2208; <b>Set</b></td><td>(2) is defined</td></tr>
+	<tr><td>8.</td><td></td><td>x &isin; <b>Set</b></td><td>(1) is defined</td></tr>
+	<tr><td>9.</td><td></td><td>y &isin; <b>Set</b></td><td>(2) is defined</td></tr>
 	<tr><td>10.</td><td></td><td>x &ne; y</td><td><b>Truth</b> definition of equality of <i>sets</i> and (7)</td></tr>
 	<tr><th colspan="4">Zermelo-Frankel with ur-elements</th></tr>
 	<tr><td>8a.</td><td></td><td>x &#x2208; <b>Set</b> &#x2228; x &#x2208; <b>Ur</b></td><td>(1) is defined</td></tr>

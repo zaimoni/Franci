@@ -173,9 +173,9 @@
 <table align="center">
 	<tr><th colspan="3"><a href="https://en.wikipedia.org/wiki/Axiom_schema_of_specification">Subset Axiom (schema)</a></th></tr>	
 	<tr><th colspan="3">Kleene strong, Kleene weak, Lisp/Prolog, Franci, Belnap</a></th></tr>
-	<tr><td>Zermelo-Frankel</td><td>Axiom (schema)</td><td>(&forall; &phi;:<b>Set</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b>)(&forall;A &isin; <b>Set</b>)(&exist;E</span>B &isin; <b>Set</b>)(&forall;x &isin; <b>Set</b>)(<b>Truth</b>(x &isin; B)=<b>Truth</b>(<b>IF</b>(x &isin; A &#x21A6; <i>true</i>, &phi;(x), x &isin; A)))</td></tr>
+	<tr><td>Zermelo-Frankel</td><td>Axiom (schema)</td><td>(&forall; &phi;:<b>Set</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b>)(&forall;A &isin; <b>Set</b>)(&exist;B &isin; <b>Set</b>)(&forall;x &isin; <b>Set</b>)(<b>Truth</b>(x &isin; B)=<b>Truth</b>(<b>IF</b>(x &isin; A &#x21A6; <i>true</i>, &phi;(x), x &isin; A)))</td></tr>
 	<tr><td>Von Neumann-Bernays-G&ouml;del</td><td>provable from class existence</td><td>(&forall; &phi;:<b>Set</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b>)(&forall;A &isin; <b>Class</b>)(&exist;B &isin; <b>Class</b>)(&forall;x &isin; <b>Set</b>)(<b>Truth</b>(x &isin; B)=<b>Truth</b>(<b>IF</b>(x &isin; A &#x21A6; <i>true</i>, &phi;(x), x &isin; A)))</td></tr>
-	<tr><td>Zermelo-Frankel with ur-elements</td><td>Axiom (schema)</td><td>(&forall; &phi;:<b>Set</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b>)(&forall; &psi;:<b>Ur</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b>)(&forall;A &isin; <b>Set</b>)(&exist;E</span>B &isin; <b>Set</b>)[(&forall;x &isin; <b>Set</b>)(<b>Truth</b>(x &isin; B)=<b>Truth</b>(<b>IF</b>(x &isin; A &#x21A6; <i>true</i>, &phi;(x), x &isin; A))) & (&forall;u &isin; <b>Ur</b>)(<b>Truth</b>(u &isin; B)=<b>Truth</b>(<b>IF</b>(u &isin; A &#x21A6; <i>true</i>, &phi;(u), u &isin; A)))]</td></tr>
+	<tr><td>Zermelo-Frankel with ur-elements</td><td>Axiom (schema)</td><td>(&forall; &phi;:<b>Set</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b>)(&forall; &psi;:<b>Ur</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b>)(&forall;A &isin; <b>Set</b>)(&exist;B &isin; <b>Set</b>)[(&forall;x &isin; <b>Set</b>)(<b>Truth</b>(x &isin; B)=<b>Truth</b>(<b>IF</b>(x &isin; A &#x21A6; <i>true</i>, &phi;(x), x &isin; A))) & (&forall;u &isin; <b>Ur</b>)(<b>Truth</b>(u &isin; B)=<b>Truth</b>(<b>IF</b>(u &isin; A &#x21A6; <i>true</i>, &phi;(u), u &isin; A)))]</td></tr>
 	<tr><td>Von Neumann-Bernays-G&ouml;del with ur-elements</td><td>provable from class existence</td><td>(&forall; &phi;:<b>Set</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b>)(&forall; &psi;:<b>Ur</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b>)(&forall;A &isin; <b>Class</b>)(&exist;B &isin; <b>Class</b>)[(&forall;x &isin; <b>Set</b>)(<b>Truth</b>(x &isin; B)=<b>Truth</b>(<b>IF</b>(x &isin; A &#x21A6; <i>true</i>, &phi;(x), x &isin; A))) & (&forall;u &isin; <b>Ur</b>)(<b>Truth</b>(u &isin; B)=<b>Truth</b>(<b>IF</b>(u &isin; A &#x21A6; <i>true</i>, &phi;(u), u &isin; A)))]</td></tr>
 </table>
 <p>We also have, as a routine exercise:</p>
@@ -221,7 +221,7 @@
 	<tr><th colspan="3"><a href="https://en.wikipedia.org/wiki/Axiom_of_empty_set">Axiom of Empty Set</a></th></tr>	
 	<tr><td>Zermelo-Frankel</td><td>Axiom</td><td>(&exist;y &isin; <b>Set</b>)(&forall;x &isin; <b>Set</b>)(~(x &isin; y))</td></tr>
 	<tr><td>Von Neumann-Bernays-G&ouml;del</td><td>provable from class existence</td><td>(&exist;y &isin; <b>Class</b>)(&forall;x &isin; <b>Set</b>)(~(x &isin; y))</td></tr>
-	<tr><td>Zermelo-Frankel with ur-elements</td><td>Axiom</td><td>(&exist;E</span>y &isin; <b>Set</b>)[(&forall;x &isin; <b>Set</b>)(~(x &isin; y)) & (&forall;u &isin; <b>Ur</b>)(~(u &isin; y))]</td></tr>
+	<tr><td>Zermelo-Frankel with ur-elements</td><td>Axiom</td><td>(&exist;y &isin; <b>Set</b>)[(&forall;x &isin; <b>Set</b>)(~(x &isin; y)) & (&forall;u &isin; <b>Ur</b>)(~(u &isin; y))]</td></tr>
 	<tr><td>Von Neumann-Bernays-G&ouml;del with ur-elements</td><td>provable from class existence</td><td>(&exist;y &isin; <b>Class</b>)[(&forall;x &isin; <b>Set</b>)(~(x &isin; y)) & (&forall;u &isin; <b>Ur</b>)(~(u &isin; y))]</td></tr>
 </table>
 <p>For the Von Neumann-Bernays-G&ouml;del set theories, we substitute the constant <i>false</i> predicate on the relevant domain(s) of discourse, into the class existence axiom.  It is a mechanical exercise 
@@ -457,9 +457,9 @@
 </table>
 <p>We have the usual rewrite to equality of truth values, for the truth-table describable non-classical logics.</p>
 <p>The mathematical collection that the <i>axiom of (absolute) union</i> declares to exist, is called the absolute union of the mathematical collection A; the most terse notation is <big>&#x222A;</big>A.  It is often useful to
-emphasize that A is playing the role of an "indexing collection", so a common alternate notation is <big>&#x222A;</big><sub>a<sub>i</sub>&#x2208;A</sub> a<sub>i</sub>.  We then define the union of the sets A and B, as A &#x222A; B := <big>&#x222A;</big>{A,B} .</p>
-<p>While it is tempting to write (<span style="transform:rotate(180deg);display:inline-block">E</span>D &#x2208; A) when phrasing the axiom, this has a "vacuous truth" problem when evaluating <big>&#x222A;</big>&#x2205;.  Sources that do 
-	this, conclude that <big>&#x222A;</big>&#x2205; = <b>Set</b>.  (Recall that <b>Set</b> is not a <i>set</i>.)</p>
+emphasize that A is playing the role of an "indexing collection", so a common alternate notation is <big>&#x222A;</big><sub>a<sub>i</sub>&isin;A</sub> a<sub>i</sub>.  We then define the union of the sets A and B, as A &#x222A; B := <big>&#x222A;</big>{A,B} .</p>
+<p>While it is tempting to write (&exist;D &isin; A) when phrasing the axiom, this has a "vacuous truth" problem when evaluating <big>&#x222A;</big>&empty;.  Sources that do 
+	this, conclude that <big>&#x222A;</big>&empty; = <b>Set</b>.  (Recall that <b>Set</b> is not a <i>set</i>.)</p>
 <table align="center">
 <tr><th colspan="3">Arithmetic table for <big>&#x222A;</big>A and A &#x222A; B</th></tr>
 <tr><td align="right"><big>&#x222A;</big>&#x2205; =&nbsp;</td><td>&#x2205;</td></tr>
@@ -494,8 +494,8 @@ emphasize that A is playing the role of an "indexing collection", so a common al
 <p>We now have the definitions to formally define <a href="https://en.wikipedia.org/wiki/Function_(mathematics)">functions</a>, and the notation we have been abusing earlier.</p>
 <ul>
 	<li>We say A relation r is a subcollection of the cartesian product X <span style="font:sans-serif; position:relative; top: -1px">x</span> Y: r &#x2286; X <span style="font:sans-serif; position:relative; top: -1px">x</span> Y .</li>
-	<li>We say that the domain of a relation r, is the mathematical collection of all x0 in X such that at least one ordered pair (x,y) has x0 as its first coordinate:<p align="center"> Domain(r) := {x0 &#x2208; X : (<span style="transform:rotate(180deg);display:inline-block">E</span>(x,y) &#x2208; r)(x0 = x)}</p></li>
-	<li>We say that the range of a relation r, is the mathematical collection of all y0 in Y such that at least one ordered pair (x,y) has y0 as its second coordinate:<p align="center"> Range(r) := {y0 &#x2208; Y : (<span style="transform:rotate(180deg);display:inline-block">E</span>(x,y) &#x2208; r)(y0 = y)}</p></li>
+	<li>We say that the domain of a relation r, is the mathematical collection of all x0 in X such that at least one ordered pair (x,y) has x0 as its first coordinate:<p align="center"> Domain(r) := {x0 &isin; X : (&exist;(x,y) &isin; r)(x0 = x)}</p></li>
+	<li>We say that the range of a relation r, is the mathematical collection of all y0 in Y such that at least one ordered pair (x,y) has y0 as its second coordinate:<p align="center"> Range(r) := {y0 &isin; Y : (&exist;(x,y) &isin; r)(y0 = y)}</p></li>
 	<li>We say that a relation r is from a mathematical collection X to a mathematical collection Y, if Domain(r) is a subcollection of X and Range(r) is a subcollection of Y; alternately, the relation r is of type X <span style="position:relative; top: -2px">&#x2192;</span> Y.
 		<p align="center">r:X <span style="position:relative; top: -2px">&#x2192;</span> Y := Domain(r) &#x2286; X & Range(r) &#x2286; Y</p></li>
 	<li>We say a relation r is right-unique i.e. is functional, if for any x in X there is at most one value it can evaluate to:
@@ -506,10 +506,10 @@ emphasize that A is playing the role of an "indexing collection", so a common al
 	<li>We say that a function f is a relation that is both left-total, and right-unique i.e. functional.</li>
 	<li>We say that a partial function f is a relation that is only right-unique i.e. functional.</li>
 	<li>For a partial function f, we define x &#x21A6;<sub>f</sub> y := (x,y) &#x2208; f.</li>
-	<li>We define the inverse relation r<sup>-1</sup> to a relation r &#x2286; X <span style="font:sans-serif; position:relative; top: -1px">x</span> Y as <p align="center">r<sup>-1</sup> := {(y,x) &#x2208; Y <span style="font:sans-serif; position:relative; top: -1px">x</span> X : (x,y) &#x2208; r}</p></li>
+	<li>We define the inverse relation r<sup>-1</sup> to a relation r &#x2286; X <span style="font:sans-serif; position:relative; top: -1px">x</span> Y as <p align="center">r<sup>-1</sup> := {(y,x) &isin; Y <span style="font:sans-serif; position:relative; top: -1px">x</span> X : (x,y) &isin; r}</p></li>
 	<li>We say that the composition of two relations r:X <span style="position:relative; top: -2px">&#x2192;</span> Y, s:Y <span style="position:relative; top: -2px">&#x2192;</span> Z is 
 		s o r:X <span style="position:relative; top: -2px">&#x2192;</span> Z, defined as 
-		<p align="center">s o r := {(x,z) &#x2208; X <span style="font:sans-serif; position:relative; top: -1px">x</span> Z : (<span style="transform:rotate(180deg);display:inline-block">E</span>y &#x2208; Y)((x,y) &#x2208; r & (y,z) &#x2208; s) }</p>
+		<p align="center">s o r := {(x,z) &#x2208; X <span style="font:sans-serif; position:relative; top: -1px">x</span> Z : (&exist;y &isin; Y)((x,y) &isin; r & (y,z) &isin; s) }</p>
 		s(r(x)) is an alternate syntax for (s o r)(x).</li>
 	<li>The image of a <i>class</i> or <i>set</i> A for a relation r, is defined as r(A) := {y &isin; Y : (x &isin; <b>Set</b>)(x &isin; A & (x,y) &isin; r) }.  This corresponds to 
 		pointwise evaluation of the relation r.  The preimage of r is defined as the image of the inverse relation r<sup>-1</sup>.</li>

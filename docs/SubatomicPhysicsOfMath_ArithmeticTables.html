@@ -333,7 +333,7 @@ We next recursively define multiplication &middot;:&#x2115; <span style="font:sa
 
 <h2 id="less-than-or-equal" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Total linear ordering &le;</h2>
 <p>We next define &le; for natural numbers a,b by</p>
-<p align="center">a &le; b := (<span style="transform:rotate(180deg);display:inline-block">E</span>c &isin; &#x2115;)(a+c = b)</p>
+<p align="center">a &le; b := (&exist;c &isin; &#x2115;)(a+c = b)</p>
 <p>If c exists, it is an easy verification (using the <i>cancellation rule for +</i>) that it is unique.  We can define the function 
 	b-a:{(a,b) &isin; &#x2115; <span style="font:sans-serif; position:relative; top: -1px">x</span> &#x2115; : a &le; b} <span style="position:relative; top: -2px">&#x2192;</span> &#x2115;
 	as having the value c, provided by using existential instantiation on the definition of a &le; b.  (Eliminating this restriction, is one motivation for extending the natural numbers to the integers.)</p>
@@ -501,7 +501,7 @@ We next recursively define multiplication &middot;:&#x2115; <span style="font:sa
 <p>Proving that two nonstrict lower bounds of A, both in A, are equal is left as an exercise.</p>
 <p>For a domain of discourse A on which equality = is defined, we define (&exist;!x &isin; A) by the 
 	syntactical equivalence schema</p>
-<p align="center">(&exist;x &isin; A)(&phi;(x)),(&phi;(x)=&phi;(y) &#9500; x=y) &#x27DB; (<span style="transform:rotate(180deg);display:inline-block">E</span>!x &isin; A)(&phi;(x))</p>
+<p align="center">(&exist;x &isin; A)(&phi;(x)),(&phi;(x)=&phi;(y) &#9500; x=y) &#x27DB; (&exist;!x &isin; A)(&phi;(x))</p>
 <p>(We would prefer to use := here to justify substitutions for non-classical logics, but that would require using an inference rule as an argument to logical and &.  I am staying within pre-existing notational abuses.)</p>
 <p>Note that the final listed step (24) is correct as-is for both the Von Neumann and Zermelo models of the natural numbers, even for the set theories with <i>ur-elements</i>.
 	This is reasonable, since both models work just fine in the set theories without <i>ur-elements</i>: they start with the empty set (which contains no elements at all), and both choices of the successor function S:<b>Set</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>Set</b> do not directly introduce <i>ur-elements</i>.
