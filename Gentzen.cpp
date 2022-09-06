@@ -150,6 +150,31 @@ std::optional<std::variant<std::string_view, char32_t> > interpret_HTML_entity(s
 	}
 }
 
+bool interpret_HTML_entity(std::string_view src, const std::string_view& ref) {
+	if (const auto test = interpret_HTML_entity(src)) {
+		if (auto x = std::get_if<std::string_view>(&(*test))) return ref == *x;
+		if (auto transcode = lookup_HTML_entity(std::get<char32_t>(*test))) return ref == transcode->first;
+	}
+	return false;
+}
+
+formal::word* interpret_HTML_entity(const formal::lex_node& src)
+{
+	if (src.code() & HTMLtag::Entity) {
+		if (1 != src.is_pure_anchor()) return nullptr; // \todo invariant violation
+		const auto ret = src.anchor<formal::word>();
+		if (ret->code() & HTMLtag::Entity) return ret;
+		// \todo invariant violation
+	}
+	return nullptr;
+}
+
+bool interpret_HTML_entity(const formal::lex_node& src, const std::string_view& ref)
+{
+	if (const auto w = interpret_HTML_entity(src)) return interpret_HTML_entity(w->value(), ref);
+	return false;
+}
+
 // prototype class -- extract to own files when stable
 
 namespace gentzen {
@@ -233,7 +258,7 @@ namespace gentzen {
 	// deferred: uniqueness quantification (unclear what data representation should be)
 	class var {
 		unsigned long long _quant_code;
-		std::shared_ptr<const formal::parsed> _var;
+		std::shared_ptr<const formal::lex_node> _var;
 		std::shared_ptr<const domain> _domain;
 
 	public:
@@ -283,10 +308,7 @@ namespace gentzen {
 		}
 
 		static unsigned int legal_quantifier(const formal::lex_node& src) {
-			if (src.code() & HTMLtag::Entity) {
-				if (1 != src.is_pure_anchor()) return 0; // \todo invariant violation
-				return legal_quantifier(*src.anchor<formal::word>());
-			}
+			if (const auto w = interpret_HTML_entity(src)) return legal_quantifier(*w);
 
 			// \todo? visually, it is true that a span that rotates A or E 180-degrees "works" and we could accept that as an alternate encoding
 			// e.g, <span style="transform:rotate(180deg);display:inline-block">E</span>
@@ -307,14 +329,73 @@ namespace gentzen {
 				}
 			};
 
-			if (src.code() & HTMLtag::Entity) {
-				if (decltype(auto) test = interpret_HTML_entity(src.value())) {
-					return std::visit(is_quantifier_entity(), *test);
-				}
-				return 0;
+			if (decltype(auto) test = interpret_HTML_entity(src.value())) {
+				return std::visit(is_quantifier_entity(), *test);
 			}
 			return 0;
 		}
+
+		// our syntax is: [quantifier] varname &isin; domain
+		static std::vector<size_t> reject_left_edge(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
+			std::vector<size_t> ret;
+			if (interpret_HTML_entity(*src[viewpoint], "isin")) {
+				// no room for variable to left
+				if (src[viewpoint]->code() & formal::Error) return ret;
+				error_report(*src[viewpoint], "&isin; cannot match variable to its left");
+			}
+			return ret;
+		}
+
+		static std::vector<size_t> reject_right_edge(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
+			std::vector<size_t> ret;
+			if (interpret_HTML_entity(*src[viewpoint], "isin")) {
+				// no room for variable to left
+				if (src[viewpoint]->code() & formal::Error) return ret;
+				error_report(*src[viewpoint], "&isin; cannot match domain to its right");
+			}
+			if (interpret_HTML_entity(*src[viewpoint], "forall")) {
+				// no room for variable to left
+				if (src[viewpoint]->code() & formal::Error) return ret;
+				error_report(*src[viewpoint], "&forall; cannot match variable to its right");
+			}
+			if (interpret_HTML_entity(*src[viewpoint], "exist")) {
+				// no room for variable to left
+				if (src[viewpoint]->code() & formal::Error) return ret;
+				error_report(*src[viewpoint], "&exist; cannot match variable to its right");
+			}
+			return ret;
+		}
+
+		static std::optional<std::pair<std::unique_ptr<var>, size_t> > parse(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
+			// our syntax is: [quantifier] varname &isin; domain
+			if (3 > src.size()) return std::nullopt;
+			if (!interpret_HTML_entity(*src[viewpoint - 1], "isin")) return std::nullopt;
+			if (!legal_varname(*src[viewpoint - 2])) return std::nullopt; // \todo handle more general well-formed expressions
+			auto domain = preaxiomatic::parse(*src[viewpoint]); // \todo handle more general domains of discourse
+			if (!domain) return std::nullopt;
+			auto quant_code = 3 < src.size() ? legal_quantifier(*src[viewpoint - 3]) : 0;
+			if (0 >= quant_code) {
+				// a term variable.
+				std::unique_ptr<var> stage(new var(src[viewpoint-2], preaxiomatic::get(*domain), quantifier::Term));
+				src.DeleteNSlotsAt(2, viewpoint - 1);
+				return std::pair<std::unique_ptr<var>, size_t>(std::move(stage), viewpoint - 2);
+			}
+			if ((decltype(quant_code))quantifier::ThereIs >= quant_code) {
+				// a quantified variable.
+				std::unique_ptr<var> stage(new var(src[viewpoint - 2], preaxiomatic::get(*domain), (quantifier)quant_code));
+				src.DeleteNSlotsAt(2, viewpoint - 1);
+				src.DeleteIdx(viewpoint-3);
+				return std::pair<std::unique_ptr<var>, size_t>(std::move(stage), viewpoint - 3);
+			}
+			// \todo? more advanced quantifiers?
+			return std::nullopt;
+		}
+
+private:
+		var(formal::lex_node*& name, std::shared_ptr<const domain> domain, quantifier quant)
+		: _quant_code((unsigned long long)quant), _var(name), _domain(domain) {
+			name = nullptr;
+		};
 	};
 
 	class inference_rule {
@@ -807,6 +888,10 @@ static auto& TokenGrammar() {
 		ooao->register_build_nonterminal(balanced_atomic_handler(reserved_atomic[2].first, reserved_atomic[3].first));
 		ooao->register_build_nonterminal(balanced_html_tag);
 		ooao->register_build_nonterminal(HTML_bind_to_preceding);
+
+		// \todo need local test cases for these
+		ooao->register_left_edge_build_nonterminal(gentzen::var::reject_left_edge);
+		ooao->register_right_edge_build_nonterminal(gentzen::var::reject_right_edge);
 	};
 	return *ooao;
 }
