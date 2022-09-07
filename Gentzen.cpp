@@ -394,6 +394,7 @@ namespace gentzen {
 			std::vector<size_t> ret;
 
 			if (3 > src.size()) return ret;
+			if (2 > viewpoint) return ret;
 			if (!interpret_HTML_entity(*src[viewpoint - 1], "isin")) return ret;
 			if (!legal_varname(*src[viewpoint - 2])) return ret; // \todo handle more general well-formed expressions
 			auto domain = preaxiomatic::parse(*src[viewpoint]); // \todo handle more general domains of discourse
@@ -923,6 +924,7 @@ static auto& TokenGrammar() {
 		ooao->register_build_nonterminal(HTML_bind_to_preceding);
 
 		// \todo need local test cases for these
+		ooao->register_build_nonterminal(gentzen::var::parse);
 		ooao->register_left_edge_build_nonterminal(gentzen::var::reject_left_edge);
 		ooao->register_right_edge_build_nonterminal(gentzen::var::reject_right_edge);
 	};
