@@ -54,6 +54,7 @@ std::unique_ptr<HTMLtag> HTMLtag::parse(kuroda::parser<formal::lex_node>::sequen
 
 	const auto w = x->anchor<formal::word>();
 	auto text = w->value();
+	const auto text_origin = x->origin();
 
 	if (!text.starts_with("<")) return nullptr;
 	auto working = text;
@@ -104,11 +105,14 @@ std::unique_ptr<HTMLtag> HTMLtag::parse(kuroda::parser<formal::lex_node>::sequen
 	};
 
 	static auto chop_to_remainder = [&]() {
-		auto remainder = y->anchor<formal::word>()->value();
+		const formal::word& w2 = *y->anchor<formal::word>();
+		auto remainder = w2.value();
+		const auto r_size = w2.size();
+		const auto r_origin = w2.origin();
 		remainder.remove_prefix(remainder.size() - working.size());
 		ltrim(remainder);
 		if (!remainder.empty()) {
-			std::unique_ptr<formal::word> stage(new formal::word(std::shared_ptr<const std::string>(new std::string(remainder)), w->origin() + (text.size() - remainder.size())));
+			std::unique_ptr<formal::word> stage(new formal::word(std::shared_ptr<const std::string>(new std::string(remainder)), r_origin + (r_size - remainder.size())));
 			std::unique_ptr<formal::lex_node> node(new formal::lex_node(std::move(stage)));
 			if (viewpoint < scan) {
 				delete src[scan];
@@ -133,10 +137,10 @@ std::unique_ptr<HTMLtag> HTMLtag::parse(kuroda::parser<formal::lex_node>::sequen
 		if (working.starts_with("/>")) {
 			// self-closing tag.  Formal syntax error if both closing and self-closing.
 			if (End == code) {
-				warning_report(x->origin(), "HTML-like tag is both closing, and self-closing");
+				warning_report(text_origin, "HTML-like tag is both closing, and self-closing");
 			}
 			else if (Start == code) {
-				warning_report(x->origin(), "HTML-like tag is both opening, and self-closing");
+				warning_report(text_origin, "HTML-like tag is both opening, and self-closing");
 			}
 			stop_now = true;
 			working.remove_prefix(2);
@@ -149,14 +153,14 @@ std::unique_ptr<HTMLtag> HTMLtag::parse(kuroda::parser<formal::lex_node>::sequen
 		if (stop_now) {
 			if (End == code) { // closing tag: discard all key-value pairs
 				chop_to_remainder();
-				return std::unique_ptr<HTMLtag>(new HTMLtag(std::string(would_be_tag->first), mode::closing, w->origin()));
+				return std::unique_ptr<HTMLtag>(new HTMLtag(std::string(would_be_tag->first), mode::closing, text_origin));
 			}
 			if (kv_pairs.empty()) { // no key-value pairs
 				chop_to_remainder();
-				return std::unique_ptr<HTMLtag>(new HTMLtag(std::string(would_be_tag->first), (mode)code, w->origin()));
+				return std::unique_ptr<HTMLtag>(new HTMLtag(std::string(would_be_tag->first), (mode)code, text_origin));
 			};
 			chop_to_remainder();
-			return std::unique_ptr<HTMLtag>(new HTMLtag(std::string(would_be_tag->first), (mode)code, w->origin(), std::shared_ptr<const kv_pairs_t>(new kv_pairs_t(std::move(kv_pairs)))));
+			return std::unique_ptr<HTMLtag>(new HTMLtag(std::string(would_be_tag->first), (mode)code, text_origin, std::shared_ptr<const kv_pairs_t>(new kv_pairs_t(std::move(kv_pairs)))));
 		}
 		if (auto would_be_key = kleene_star(working, is_alphabetic)) {	// \todo not quite correct, but handles what is needed
 			if (seen_equals) {
@@ -171,11 +175,11 @@ std::unique_ptr<HTMLtag> HTMLtag::parse(kuroda::parser<formal::lex_node>::sequen
 		}
 		if (working.starts_with("=")) {
 			if (seen_equals) {
-				warning_report(x->origin(), "HTML-like tag parse aborted: = =");
+				warning_report(text_origin, "HTML-like tag parse aborted: = =");
 				return nullptr;
 			}
 			if (kv_pairs.empty() || !kv_pairs.back().second.empty()) {
-				warning_report(x->origin(), "HTML-like tag parse aborted: key-less =");
+				warning_report(text_origin, "HTML-like tag parse aborted: key-less =");
 				return nullptr;
 			}
 			seen_equals = true;
@@ -193,9 +197,8 @@ std::unique_ptr<HTMLtag> HTMLtag::parse(kuroda::parser<formal::lex_node>::sequen
 					working.remove_prefix(n + 1);
 					seen_equals = false;
 					continue;
-				}
-				else {
-					warning_report(x->origin(), "HTML-like tag parse aborted: unterminated \"...\"");
+				} else {
+					warning_report(text_origin, "HTML-like tag parse aborted: unterminated \"...\"");
 					return nullptr;
 				}
 			}
@@ -208,14 +211,13 @@ std::unique_ptr<HTMLtag> HTMLtag::parse(kuroda::parser<formal::lex_node>::sequen
 					working.remove_prefix(n + 1);
 					seen_equals = false;
 					continue;
-				}
-				else {
-					warning_report(x->origin(), "HTML-like tag parse aborted: unterminated '...'");
+				} else {
+					warning_report(text_origin, "HTML-like tag parse aborted: unterminated '...'");
 					return nullptr;
 				}
 			}
 		}
-		warning_report(x->origin(), "HTML-like tag parse aborted: unclear how to proceed");
+		warning_report(text_origin, "HTML-like tag parse aborted: unclear how to proceed");
 		return nullptr;
 	}
 	if (src.size() > scan) return nullptr;
