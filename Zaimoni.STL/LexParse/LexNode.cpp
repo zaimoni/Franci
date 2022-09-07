@@ -118,6 +118,13 @@ namespace formal {
 		return false;
 	}
 
+	std::string lex_node::to_s() const
+	{
+		std::ostringstream stage;
+		to_s(stage);
+		return stage.str();
+	}
+
 	void lex_node::to_s(std::ostream& dest) const
 	{
 		auto track = origin();

@@ -132,6 +132,7 @@ namespace formal {
 
 		static bool rewrite(lex_node*& target, std::function<lex_node*(lex_node* target)> op);
 
+		std::string to_s() const;
 		void to_s(std::ostream& dest) const;
 		static std::ostream& to_s(std::ostream& dest, const kuroda::parser<lex_node>::sequence& src);
 

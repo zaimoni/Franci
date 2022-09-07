@@ -1,6 +1,4 @@
 #include "Zaimoni.STL/LexParse/LexNode.hpp"
-#include "Zaimoni.STL/LexParse/FormalWord.hpp"
-#include "Zaimoni.STL/LexParse/Kuroda.hpp"
 
 #ifdef GENTZEN_DRIVER
 #include "HTMLtag.hpp"
@@ -190,6 +188,8 @@ namespace gentzen {
 		domain& operator=(const domain& src) = default;
 		domain& operator=(domain&& src) = default;
 		~domain() = default;
+
+		virtual std::string to_s() const = 0;
 	};
 
 	class preaxiomatic final : public domain {
@@ -227,7 +227,7 @@ namespace gentzen {
 			return x;
 		}
 
-		std::string to_s() const {
+		std::string to_s() const override {
 			if (names.size() > _code) return std::string(names[_code]);
 			return "<buggy>";
 		}
@@ -256,7 +256,7 @@ namespace gentzen {
 	};
 
 	// deferred: uniqueness quantification (unclear what data representation should be)
-	class var {
+	class var : public formal::parsed {
 		unsigned long long _quant_code;
 		std::shared_ptr<const formal::lex_node> _var;
 		std::shared_ptr<const domain> _domain;
@@ -274,6 +274,29 @@ namespace gentzen {
 		var& operator=(const var& src) = default;
 		var& operator=(var&& src) = default;
 		~var() = default;
+
+		std::unique_ptr<formal::parsed> clone() const override { return std::unique_ptr<formal::parsed>(new var(*this)); }
+		void CopyInto(formal::parsed*& dest) const override { zaimoni::CopyInto(*this, dest); }
+		void MoveInto(formal::parsed*& dest) override { zaimoni::MoveIntoV2(std::move(*this), dest); }
+
+		formal::src_location origin() const override { return _var->origin(); }
+
+		std::string to_s() const override {
+			static constexpr const std::string_view ref[] = {
+				std::string_view(),
+				"&forall;",
+				"&exist;"
+			};
+
+			std::string ret;
+			if (force_consteval<std::end(ref) - std::begin(ref)> > _quant_code) { // invariant failure if this doesn't hold
+				ret += ref[_quant_code];
+			};
+			ret += _var->to_s();
+			ret += "&isin;";
+			ret += _domain->to_s();
+			return ret;
+		}
 
 		static bool legal_varname(const formal::lex_node& src) {
 			if (0 < src.prefix_size()) return false;  // no prefix in the parse, at all
@@ -366,29 +389,39 @@ namespace gentzen {
 			return ret;
 		}
 
-		static std::optional<std::pair<std::unique_ptr<var>, size_t> > parse(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
+		static std::vector<size_t> parse(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
 			// our syntax is: [quantifier] varname &isin; domain
-			if (3 > src.size()) return std::nullopt;
-			if (!interpret_HTML_entity(*src[viewpoint - 1], "isin")) return std::nullopt;
-			if (!legal_varname(*src[viewpoint - 2])) return std::nullopt; // \todo handle more general well-formed expressions
+			std::vector<size_t> ret;
+
+			if (3 > src.size()) return ret;
+			if (!interpret_HTML_entity(*src[viewpoint - 1], "isin")) return ret;
+			if (!legal_varname(*src[viewpoint - 2])) return ret; // \todo handle more general well-formed expressions
 			auto domain = preaxiomatic::parse(*src[viewpoint]); // \todo handle more general domains of discourse
-			if (!domain) return std::nullopt;
+			if (!domain) return ret;
 			auto quant_code = 3 < src.size() ? legal_quantifier(*src[viewpoint - 3]) : 0;
 			if (0 >= quant_code) {
 				// a term variable.
 				std::unique_ptr<var> stage(new var(src[viewpoint-2], preaxiomatic::get(*domain), quantifier::Term));
+				std::unique_ptr<formal::lex_node> relay(new formal::lex_node(stage.release()));
+				ret.push_back(viewpoint - 2);
 				src.DeleteNSlotsAt(2, viewpoint - 1);
-				return std::pair<std::unique_ptr<var>, size_t>(std::move(stage), viewpoint - 2);
+				delete src[viewpoint - 2];
+				src[viewpoint - 2] = relay.release();
+				return ret;
 			}
 			if ((decltype(quant_code))quantifier::ThereIs >= quant_code) {
 				// a quantified variable.
 				std::unique_ptr<var> stage(new var(src[viewpoint - 2], preaxiomatic::get(*domain), (quantifier)quant_code));
+				std::unique_ptr<formal::lex_node> relay(new formal::lex_node(stage.release()));
+				ret.push_back(viewpoint - 3);
 				src.DeleteNSlotsAt(2, viewpoint - 1);
 				src.DeleteIdx(viewpoint-3);
-				return std::pair<std::unique_ptr<var>, size_t>(std::move(stage), viewpoint - 3);
+				delete src[viewpoint - 3];
+				src[viewpoint - 3] = relay.release();
+				return ret;
 			}
 			// \todo? more advanced quantifiers?
-			return std::nullopt;
+			return ret;
 		}
 
 private:
