@@ -10,6 +10,8 @@
 #include <fstream>
 #include <iostream>
 
+#include <algorithm>
+
 #include "errcount.hpp"
 
 #ifdef ZAIMONI_HAS_MICROSOFT_IO_H
@@ -480,14 +482,17 @@ private:
 enum LG_modes {
 	LG_PP_like = 1,	// #-format; could be interpreted later for C preprocessor directives if we were so inclined
 	LG_CPP_like, // //-format
+	LG_Command,	// to the inference engine
 	LG_MAX
 };
 
 static_assert(sizeof(unsigned long long)*CHAR_BIT >= LG_MAX);
 static_assert(!(formal::Comment & (1ULL << LG_PP_like)));
-static_assert(!(formal::Comment & (1ULL << LG_CPP_like)));
 static_assert(!(formal::Error & (1ULL << LG_PP_like)));
+static_assert(!(formal::Comment & (1ULL << LG_CPP_like)));
 static_assert(!(formal::Error & (1ULL << LG_CPP_like)));
+static_assert(!(formal::Comment & (1ULL << LG_Command)));
+static_assert(!(formal::Error & (1ULL << LG_Command)));
 
 // note that we use # for set-theoretic cardinality, so this would not be correct at later stages
 bool IsOneLineComment(formal::word*& x) {
@@ -514,12 +519,68 @@ bool IsOneLineComment(formal::word*& x) {
 	return false;
 }
 
+namespace gentzen {
+
+	enum class command {
+		Axiom = 0,
+		Given,
+		Hypothesis
+	};
+
+	static constexpr const std::array<std::string_view, 3> command_text = {
+		// these configure the formal system
+		"Axiom",
+		// these feed lines into the current proof
+		"Given",
+		"Hypothesis"
+	};
+
+	static constexpr const auto command_first = substr(command_text, 0, 1);
+
+}
+
+bool IsGentzenCommand(formal::word*& x) {
+	auto test = x->value();
+	const size_t o_size = test.size();
+	ltrim(test);
+
+	if (!std::ranges::any_of(gentzen::command_first, [&](auto src) {return test.starts_with(src); })) return false;
+
+	if (const auto candidate = kleene_star(test, is_alphabetic)) {
+		if (!std::ranges::any_of(gentzen::command_first, [&](auto src) {return test == candidate->first; })) return false;
+		test.remove_prefix(candidate->first.size());
+		ltrim(test);
+		if (!test.starts_with(':')) return false;
+		test.remove_prefix(1);
+		ltrim(test);
+		if (test.empty()) { // no command content of note
+			delete x;
+			x = nullptr;
+			return true;
+		}
+
+		size_t delta = o_size - test.size();
+		delta -= candidate->first.size() + 1;
+
+		std::unique_ptr<std::string> stage(new std::string(candidate->first));
+		*stage += ':';
+		*stage += test;
+
+		static_assert(noexcept(noexcept(x->origin() + delta))); // would need a temporary if this failed
+
+		*x = formal::word(std::shared_ptr<const std::string>(stage.release()), x->origin() + delta, LG_Command);
+		return true;
+	}
+	return false;
+}
+
 // first stage is a very simple line-finder (pre-preprocessor, shell script, ...)
 static auto& LineGrammar() {
 	static std::unique_ptr<kuroda::parser<formal::word> > ooao;
 	if (!ooao) {
 		ooao = decltype(ooao)(new decltype(ooao)::element_type());
 		ooao->register_terminal(IsOneLineComment);
+		ooao->register_terminal(IsGentzenCommand);
 	};
 	return *ooao;
 }

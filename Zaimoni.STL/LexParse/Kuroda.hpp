@@ -68,8 +68,9 @@ namespace kuroda {
 
 		void append_to_parse(sequence& dest, T* src) {
 			if (!src) return;
-			size_t viewpoint = dest.size();
 			notice_terminal(src);
+			if (!src) return;
+			size_t viewpoint = dest.size();
 			dest.push_back(src);
 			do {
 				auto check_these = refine_parse(dest, viewpoint);
