@@ -378,9 +378,9 @@ namespace gentzen {
 		var& operator=(var&& src) = default;
 		~var() = default;
 
-		std::unique_ptr<formal::parsed> clone() const override { return std::unique_ptr<formal::parsed>(new var(*this)); }
-		void CopyInto(formal::parsed*& dest) const override { zaimoni::CopyInto(*this, dest); }
-		void MoveInto(formal::parsed*& dest) override { zaimoni::MoveIntoV2(std::move(*this), dest); }
+		std::unique_ptr<parsed> clone() const override { return std::unique_ptr<parsed>(new var(*this)); }
+		void CopyInto(parsed*& dest) const override { zaimoni::CopyInto(*this, dest); }
+		void MoveInto(parsed*& dest) override { zaimoni::MoveIntoV2(std::move(*this), dest); }
 
 		formal::src_location origin() const override { return _var->origin(); }
 
@@ -394,6 +394,8 @@ namespace gentzen {
 			ret += _domain->to_s();
 			return ret;
 		}
+
+		std::string name() const { return _var->to_s(); }
 
 		static bool legal_varname(const formal::lex_node& src) {
 			if (0 < src.prefix_size()) return false;  // no prefix in the parse, at all
@@ -551,6 +553,26 @@ private:
 		: _quant_code((unsigned long long)quant), _var(name), _domain(domain) {
 			name = nullptr;
 		};
+	};
+
+	class var_ref final : public formal::parsed {
+		std::shared_ptr<const var> _var;
+		formal::src_location _origin;
+
+	public:
+		var_ref() = delete;
+		var_ref(const var_ref& src) = default;
+		var_ref(var_ref&& src) = default;
+		var_ref& operator=(const var_ref& src) = default;
+		var_ref& operator=(var_ref&& src) = default;
+		~var_ref() = default;
+
+		std::unique_ptr<parsed> clone() const override { return std::unique_ptr<parsed>(new var_ref(*this)); }
+		void CopyInto(parsed*& dest) const override { zaimoni::CopyInto(*this, dest); }
+		void MoveInto(parsed*& dest) override { zaimoni::MoveIntoV2(std::move(*this), dest); }
+
+		formal::src_location origin() const override { return _origin; }
+		std::string to_s() const override { return _var->name(); }
 	};
 
 	class inference_rule {
