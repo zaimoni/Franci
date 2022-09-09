@@ -465,6 +465,33 @@ namespace gentzen {
 			return ret;
 		}
 
+		static std::vector<size_t> reject_adjacent(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
+			static constexpr const std::string_view trigger[] = { // \todo replace this w/compile time construction
+				"forall",
+				"exist",
+				"isin"
+			};
+
+			std::vector<size_t> ret;
+
+			if (2 > src.size()) return ret;
+			if (1 > viewpoint) return ret;
+
+			auto leading = std::ranges::find_if(trigger, [&](const std::string_view& tag) { return interpret_HTML_entity(*src[viewpoint - 1], tag); });
+			if (!leading) return ret;
+			auto trailing = std::ranges::find_if(trigger, [&](const std::string_view& tag) { return interpret_HTML_entity(*src[viewpoint], tag); });
+			if (!trailing) return ret;
+			if ((src[viewpoint - 1]->code() & formal::Error) && (src[viewpoint]->code() & formal::Error)) return ret;
+
+			std::string err(*leading);
+			err += ' ';
+			err += *trailing;
+			err += " : cannot parse to variable declaration";
+			error_report(*src[viewpoint-1], err);
+			src[viewpoint]->learn(formal::Error);
+			return ret;
+		}
+
 		static std::vector<size_t> parse(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
 			// our syntax is: [quantifier] varname &isin; domain
 			std::vector<size_t> ret;
@@ -472,6 +499,7 @@ namespace gentzen {
 			if (3 > src.size()) return ret;
 			if (2 > viewpoint) return ret;
 			if (!interpret_HTML_entity(*src[viewpoint - 1], "isin")) return ret;
+			if (src[viewpoint - 1]->code() & formal::Error) return ret;
 			if (!legal_varname(*src[viewpoint - 2])) return ret; // \todo handle more general well-formed expressions
 			auto domain = preaxiomatic::parse(*src[viewpoint]); // \todo handle more general domains of discourse
 			if (!domain) return ret;
@@ -1059,6 +1087,7 @@ static auto& TokenGrammar() {
 		ooao->register_build_nonterminal(HTML_bind_to_preceding);
 
 		// \todo need local test cases for these
+		ooao->register_build_nonterminal(gentzen::var::reject_adjacent);
 		ooao->register_build_nonterminal(gentzen::var::parse);
 		ooao->register_left_edge_build_nonterminal(gentzen::var::reject_left_edge);
 		ooao->register_right_edge_build_nonterminal(gentzen::var::reject_right_edge);
