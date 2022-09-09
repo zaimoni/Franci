@@ -9,6 +9,7 @@
 #include <memory>
 #include <fstream>
 #include <iostream>
+#include <span>
 
 #include <algorithm>
 
@@ -176,6 +177,79 @@ bool interpret_HTML_entity(const formal::lex_node& src, const std::string_view& 
 }
 
 // prototype class -- extract to own files when stable
+
+namespace formal {
+
+	// many programming languages have the notion of a token, i.e. formal word, that is a syntax error by construction
+	class is_wff { // is well-formed formula
+	public:
+		using subsequence = std::pair<size_t, std::span<formal::lex_node*> >;
+		using parse_t = std::function<subsequence()>;
+		using wff_t = std::pair<bool, std::string>;
+		using ret_t = std::optional<wff_t>;
+		using ret_parse_t = std::optional<std::pair<wff_t, parse_t> >;
+
+	private:
+		std::vector<std::function<ret_parse_t(subsequence src)> > _well_formed_span;
+		std::vector<std::function<ret_t(const formal::lex_node& src)> > _well_formed_lex_node;
+		std::vector<std::function<ret_t(const formal::parsed& src)> > _well_formed_parsed;
+		std::vector<std::function<ret_t(const formal::word& src)> > _well_formed_word;
+
+	public:
+		is_wff() = default;
+		is_wff(const is_wff& src) = default;
+		is_wff(is_wff&& src) = default;
+		is_wff& operator=(const is_wff& src) = default;
+		is_wff& operator=(is_wff&& src) = default;
+		~is_wff() = default;
+
+		// true, "": no comment, ok
+		// true, std::string: warning
+		// false, std:: string: error
+		// false, "": no comment, error
+
+		// thin forwarders for std::visit
+		ret_t operator()(std::unique_ptr<formal::word>& src) { return operator()(*src); }
+		ret_t operator()(std::unique_ptr<formal::lex_node>& src) { return operator()(*src); }
+		ret_t operator()(std::unique_ptr<formal::parsed>& src) { return operator()(*src); }
+
+		void register_handler(std::function<ret_parse_t(subsequence src)> x) { _well_formed_span.push_back(x); }
+		void register_handler(std::function<ret_t(const formal::lex_node& src)> x) { _well_formed_lex_node.push_back(x); }
+		void register_handler(std::function<ret_t(const formal::parsed& src)> x) { _well_formed_parsed.push_back(x); }
+		void register_handler(std::function<ret_t(const formal::word& src)> x) { _well_formed_word.push_back(x); }
+
+		// base cases
+		wff_t operator()(const formal::lex_node& src) {
+			for (decltype(auto) h : _well_formed_lex_node) {
+				if (auto ret = h(src)) return *ret;
+			}
+			return std::pair(false, std::string());
+		}
+
+		wff_t operator()(const formal::parsed& src) {
+			for (decltype(auto) h : _well_formed_parsed) {
+				if (auto ret = h(src)) return *ret;
+			}
+			return std::pair(false, std::string());
+		}
+
+		wff_t operator()(const formal::word& src) {
+			for (decltype(auto) h : _well_formed_word) {
+				if (auto ret = h(src)) return *ret;
+			}
+			return std::pair(true, std::string());
+		}
+
+		std::pair<wff_t, parse_t> operator()(subsequence src) {
+			for (decltype(auto) h : _well_formed_span) {
+				if (auto ret = h(src)) return *ret;
+			}
+			if (1 == src.second.size()) return std::pair(operator()(**src.second.begin()), parse_t());
+			return std::pair(std::pair(false, std::string()), parse_t());
+		}
+	};
+
+} // end namespace formal
 
 namespace gentzen {
 
