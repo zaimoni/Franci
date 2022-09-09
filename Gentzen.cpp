@@ -176,6 +176,25 @@ bool interpret_HTML_entity(const formal::lex_node& src, const std::string_view& 
 	return false;
 }
 
+template<size_t n>
+const std::string_view* interpret_HTML_entity(const formal::lex_node& src, const std::array<std::string_view, n>& ref)
+{
+	if (const auto w = interpret_HTML_entity(src)) {
+		for (decltype(auto) x : ref) {
+			if (auto test = interpret_HTML_entity(w->value(), x)) return &x;
+		}
+	}
+	return nullptr;
+}
+
+static std::string wrap_to_HTML_entity(const std::string_view& src) {
+	std::string ret;
+	if (!src.starts_with('&')) ret += '&';
+	ret += src;
+	if (!src.ends_with(';')) ret += ';';
+	return ret;
+};
+
 // prototype class -- extract to own files when stable
 
 namespace formal {
@@ -332,10 +351,18 @@ namespace gentzen {
 	};
 
 	// deferred: uniqueness quantification (unclear what data representation should be)
-	class var : public formal::parsed {
+	class var final : public formal::parsed {
 		unsigned long long _quant_code;
 		std::shared_ptr<const formal::lex_node> _var;
 		std::shared_ptr<const domain> _domain;
+
+		static constexpr const std::array<std::string_view, 3> to_s_aux = {
+			std::string_view(),
+			"&forall;",
+			"&exist;"
+		};
+		static constexpr const auto quantifier_HTML_entities = substr(perl::shift<1>(to_s_aux).second, 1, -1);
+		static constexpr const auto reserved_HTML_entities = perl::unshift(quantifier_HTML_entities, std::string_view("isin"));
 
 	public:
 		enum class quantifier {
@@ -358,15 +385,9 @@ namespace gentzen {
 		formal::src_location origin() const override { return _var->origin(); }
 
 		std::string to_s() const override {
-			static constexpr const std::string_view ref[] = {
-				std::string_view(),
-				"&forall;",
-				"&exist;"
-			};
-
 			std::string ret;
-			if (force_consteval<std::end(ref) - std::begin(ref)> > _quant_code) { // invariant failure if this doesn't hold
-				ret += ref[_quant_code];
+			if (force_consteval<std::end(to_s_aux) - std::begin(to_s_aux)> > _quant_code) { // invariant failure if this doesn't hold
+				ret += to_s_aux[_quant_code];
 			};
 			ret += _var->to_s();
 			ret += "&isin;";
@@ -416,14 +437,20 @@ namespace gentzen {
 
 		static unsigned int legal_quantifier(const formal::word& src) {
 			struct is_quantifier_entity {
-				int operator()(std::string_view src) {
-					if (lookup_HTML_entity("forall")->first == src) return (unsigned int)(quantifier::ForAll);
-					if (lookup_HTML_entity("exist")->first == src) return (unsigned int)(quantifier::ThereIs);
+				// std::ranges version false compile-errors (fake dangling iterator)
+				unsigned int operator()(std::string_view src) {
+					const auto origin = quantifier_HTML_entities.begin();
+					const auto ub = quantifier_HTML_entities.end();
+					// due to implementation of lookup_HTML_entity, identity lookup
+					auto test = std::find(origin, ub, src);
+					if (ub != test) return (test - origin) + 1;
 					return 0;
 				}
-				int operator()(char32_t src) {
-					if (lookup_HTML_entity("forall")->second == src) return (unsigned int)(quantifier::ForAll);
-					if (lookup_HTML_entity("exist")->second == src) return (unsigned int)(quantifier::ThereIs);
+				unsigned int operator()(char32_t src) {
+					const auto origin = quantifier_HTML_entities.begin();
+					const auto ub = quantifier_HTML_entities.end();
+					auto test = std::find_if(origin, ub, [&](const auto& x) { return lookup_HTML_entity(x)->second == src; });
+					if (ub != test) return (test - origin) + 1;
 					return 0;
 				}
 			};
@@ -447,45 +474,35 @@ namespace gentzen {
 
 		static std::vector<size_t> reject_right_edge(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
 			std::vector<size_t> ret;
-			if (interpret_HTML_entity(*src[viewpoint], "isin")) {
-				// no room for variable to left
-				if (src[viewpoint]->code() & formal::Error) return ret;
-				error_report(*src[viewpoint], "&isin; cannot match domain to its right");
+			if (src[viewpoint]->code() & formal::Error) return ret;
+
+			if (decltype(auto) fail = interpret_HTML_entity(*src[viewpoint], reserved_HTML_entities)) {
+				std::string err = wrap_to_HTML_entity(*fail);
+				err += " cannot match to its right";
+				error_report(*src[viewpoint], err);
 			}
-			if (interpret_HTML_entity(*src[viewpoint], "forall")) {
-				// no room for variable to left
-				if (src[viewpoint]->code() & formal::Error) return ret;
-				error_report(*src[viewpoint], "&forall; cannot match variable to its right");
-			}
-			if (interpret_HTML_entity(*src[viewpoint], "exist")) {
-				// no room for variable to left
-				if (src[viewpoint]->code() & formal::Error) return ret;
-				error_report(*src[viewpoint], "&exist; cannot match variable to its right");
-			}
+
 			return ret;
 		}
 
 		static std::vector<size_t> reject_adjacent(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
-			static constexpr const std::string_view trigger[] = { // \todo replace this w/compile time construction
-				"forall",
-				"exist",
-				"isin"
-			};
-
 			std::vector<size_t> ret;
 
 			if (2 > src.size()) return ret;
 			if (1 > viewpoint) return ret;
 
-			auto leading = std::ranges::find_if(trigger, [&](const std::string_view& tag) { return interpret_HTML_entity(*src[viewpoint - 1], tag); });
-			if (!leading) return ret;
-			auto trailing = std::ranges::find_if(trigger, [&](const std::string_view& tag) { return interpret_HTML_entity(*src[viewpoint], tag); });
-			if (!trailing) return ret;
+			const auto origin = reserved_HTML_entities.begin();
+			const auto ub = reserved_HTML_entities.end();
+
+			auto leading = std::find_if(origin, ub, [&](const std::string_view& tag) { return interpret_HTML_entity(*src[viewpoint - 1], tag); });
+			if (leading == ub) return ret;
+			auto trailing = std::find_if(origin, ub, [&](const std::string_view& tag) { return interpret_HTML_entity(*src[viewpoint], tag); });
+			if (trailing == ub) return ret;
 			if ((src[viewpoint - 1]->code() & formal::Error) && (src[viewpoint]->code() & formal::Error)) return ret;
 
-			std::string err(*leading);
+			std::string err = wrap_to_HTML_entity(*leading);
 			err += ' ';
-			err += *trailing;
+			err += wrap_to_HTML_entity(*trailing);
 			err += " : cannot parse to variable declaration";
 			error_report(*src[viewpoint-1], err);
 			src[viewpoint]->learn(formal::Error);

@@ -27,7 +27,7 @@ constexpr std::string_view substr(std::string_view src, size_t origin, ptrdiff_t
 
 // start compile-time only ... = map {...} analogs
 
-template<auto n>
+template<size_t n>
 consteval std::array<std::string_view, n> substr(const std::array<std::string_view, n>& src, size_t origin, ptrdiff_t len) {
 	std::array<std::string_view, n> ret;
 	ptrdiff_t i = -1;
@@ -36,6 +36,36 @@ consteval std::array<std::string_view, n> substr(const std::array<std::string_vi
 	};
 	return ret;
 }
+
+namespace perl {
+
+	template<size_t N, class T, size_t n> requires(1 <= N && N < n)
+		consteval auto shift(const std::array<T, n>& src) {
+		std::pair<std::array<T, N>, std::array<T, n - N> > ret;
+		ptrdiff_t i = -1;
+		for (decltype(auto) x : src) {
+			if (++i < N) ret.first[i] = x;
+			else ret.second[i - N] = x;
+		};
+		return ret;
+	}
+
+	template<class T, size_t n>
+	consteval auto push(const std::array<T, n>& dest, const T& src) {
+		std::array<T, n+1> ret(dest);
+		ret.back() = src;
+		return ret;
+	}
+
+	template<class T, size_t n>
+	consteval auto unshift(const std::array<T, n>& dest, const T& src) {
+		std::array<T, n + 1> ret;
+		std::copy_n(dest.begin(), n, ret.begin() + 1);
+		ret.front() = src;
+		return ret;
+	}
+}
+
 // end exemplars from Perl
 
 size_t is_alphabetic(const std::string_view& src);
