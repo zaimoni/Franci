@@ -204,15 +204,19 @@ namespace formal {
 	public:
 		using subsequence = std::pair<size_t, std::span<formal::lex_node*> >;
 		using parse_t = std::function<subsequence()>;
+
+		// true, "": no comment, ok
+		// true, std::string: warning
+		// false, std:: string: error
+		// false, "": no comment, error
 		using wff_t = std::pair<bool, std::string>;
-		using ret_t = std::optional<wff_t>;
 		using ret_parse_t = std::pair<wff_t, parse_t>;
 
 	private:
 		std::vector<std::function<std::optional<ret_parse_t>(subsequence src)> > _well_formed_span;
-		std::vector<std::function<ret_t(const formal::lex_node& src)> > _well_formed_lex_node;
-		std::vector<std::function<ret_t(const formal::parsed& src)> > _well_formed_parsed;
-		std::vector<std::function<ret_t(const formal::word& src)> > _well_formed_word;
+		std::vector<std::function<std::optional<wff_t>(const formal::lex_node& src)> > _well_formed_lex_node;
+		std::vector<std::function<std::optional<wff_t>(const formal::parsed& src)> > _well_formed_parsed;
+		std::vector<std::function<std::optional<wff_t>(const formal::word& src)> > _well_formed_word;
 
 	public:
 		is_wff() = default;
@@ -222,20 +226,15 @@ namespace formal {
 		is_wff& operator=(is_wff&& src) = default;
 		~is_wff() = default;
 
-		// true, "": no comment, ok
-		// true, std::string: warning
-		// false, std:: string: error
-		// false, "": no comment, error
-
 		// thin forwarders for std::visit
-		ret_t operator()(std::unique_ptr<formal::word>& src) { return operator()(*src); }
-		ret_t operator()(std::unique_ptr<formal::lex_node>& src) { return operator()(*src); }
-		ret_t operator()(std::unique_ptr<formal::parsed>& src) { return operator()(*src); }
+		std::optional<wff_t> operator()(std::unique_ptr<formal::word>& src) { return operator()(*src); }
+		std::optional<wff_t> operator()(std::unique_ptr<formal::lex_node>& src) { return operator()(*src); }
+		std::optional<wff_t> operator()(std::unique_ptr<formal::parsed>& src) { return operator()(*src); }
 
 		void register_handler(std::function<std::optional<ret_parse_t>(subsequence src)> x) { _well_formed_span.push_back(x); }
-		void register_handler(std::function<ret_t(const formal::lex_node& src)> x) { _well_formed_lex_node.push_back(x); }
-		void register_handler(std::function<ret_t(const formal::parsed& src)> x) { _well_formed_parsed.push_back(x); }
-		void register_handler(std::function<ret_t(const formal::word& src)> x) { _well_formed_word.push_back(x); }
+		void register_handler(std::function<std::optional<wff_t>(const formal::lex_node& src)> x) { _well_formed_lex_node.push_back(x); }
+		void register_handler(std::function<std::optional<wff_t>(const formal::parsed& src)> x) { _well_formed_parsed.push_back(x); }
+		void register_handler(std::function<std::optional<wff_t>(const formal::word& src)> x) { _well_formed_word.push_back(x); }
 
 		// base cases
 		wff_t operator()(const formal::lex_node& src) {
