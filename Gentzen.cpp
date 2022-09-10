@@ -206,10 +206,10 @@ namespace formal {
 		using parse_t = std::function<subsequence()>;
 		using wff_t = std::pair<bool, std::string>;
 		using ret_t = std::optional<wff_t>;
-		using ret_parse_t = std::optional<std::pair<wff_t, parse_t> >;
+		using ret_parse_t = std::pair<wff_t, parse_t>;
 
 	private:
-		std::vector<std::function<ret_parse_t(subsequence src)> > _well_formed_span;
+		std::vector<std::function<std::optional<ret_parse_t>(subsequence src)> > _well_formed_span;
 		std::vector<std::function<ret_t(const formal::lex_node& src)> > _well_formed_lex_node;
 		std::vector<std::function<ret_t(const formal::parsed& src)> > _well_formed_parsed;
 		std::vector<std::function<ret_t(const formal::word& src)> > _well_formed_word;
@@ -232,7 +232,7 @@ namespace formal {
 		ret_t operator()(std::unique_ptr<formal::lex_node>& src) { return operator()(*src); }
 		ret_t operator()(std::unique_ptr<formal::parsed>& src) { return operator()(*src); }
 
-		void register_handler(std::function<ret_parse_t(subsequence src)> x) { _well_formed_span.push_back(x); }
+		void register_handler(std::function<std::optional<ret_parse_t>(subsequence src)> x) { _well_formed_span.push_back(x); }
 		void register_handler(std::function<ret_t(const formal::lex_node& src)> x) { _well_formed_lex_node.push_back(x); }
 		void register_handler(std::function<ret_t(const formal::parsed& src)> x) { _well_formed_parsed.push_back(x); }
 		void register_handler(std::function<ret_t(const formal::word& src)> x) { _well_formed_word.push_back(x); }
@@ -259,10 +259,16 @@ namespace formal {
 			return std::pair(true, std::string());
 		}
 
-		std::pair<wff_t, parse_t> operator()(subsequence src) {
+		ret_parse_t operator()(subsequence src) {
+			std::optional<ret_parse_t> fallback;
 			for (decltype(auto) h : _well_formed_span) {
-				if (auto ret = h(src)) return *ret;
+				if (auto ret = h(src)) {
+					if (ret->first.first) return *ret;
+					if (!fallback) fallback = std::move(*ret);
+					else if (!fallback->second && ret->second) fallback = std::move(*ret);
+				};
 			}
+			if (fallback) return *fallback;
 			if (1 == src.second.size()) return std::pair(operator()(**src.second.begin()), parse_t());
 			return std::pair(std::pair(false, std::string()), parse_t());
 		}
@@ -693,6 +699,68 @@ namespace gentzen {
 			}
 			// \todo? more advanced quantifiers?
 			return ret;
+		}
+
+		static std::optional<formal::is_wff::ret_parse_t> wff(std::pair<size_t, std::span<formal::lex_node*> > src) {
+			// We don't have a good idea of transitivity here : x &isin; y &isin; z should not parse.
+			// (x &isin; y) &isin; <b>TruthValued</b> not only should parse, it should be an axiom built into the type system
+
+			ptrdiff_t anchor_at = -1;
+
+			ptrdiff_t i = src.second.size();
+			while (0 <= --i) {
+				if (interpret_HTML_entity(*src.second[i], "isin")) {
+					if (0 > anchor_at) anchor_at = i;
+					// not an error: x &isin; y & w &isin; z should parse as a 2-ary conjunction
+					else return std::nullopt;
+				}
+			};
+			if (0 > anchor_at) return std::nullopt;
+			const auto& anchor = *src.second[anchor_at];
+			if (anchor.code() & formal::Error) {
+				return formal::is_wff::ret_parse_t(std::pair(false, std::string()), nullptr);
+			}
+
+			if (0 == anchor_at) {
+				// might want to hard error for "final" parsing
+				size_t offset = src.first;
+				std::span<formal::lex_node*> target = src.second.first(1);
+				auto fail = [=]() {
+					std::pair<size_t, std::span<formal::lex_node*> > ret(offset, target);
+					ret.second.front()->learn(formal::Error);
+					return ret;
+				};
+				return formal::is_wff::ret_parse_t(std::pair(false, std::string("&isin; cannot match variable to its left")), fail);
+			}
+			if (src.second.size() - 1 == anchor_at) {
+				size_t offset = src.first + anchor_at;
+				std::span<formal::lex_node*> target = src.second.last(1);
+				auto fail = [=]() {
+					std::pair<size_t, std::span<formal::lex_node*> > ret(offset, target);
+					ret.second.front()->learn(formal::Error);
+					return ret;
+				};
+				// might want to hard error for "final" parsing
+				return formal::is_wff::ret_parse_t(std::pair(false, std::string("&isin; cannot match to its right")), fail);
+			}
+			// forward is the domain check
+			// backwards is the variable check
+			ptrdiff_t quantifier_at = anchor_at;
+			unsigned int quant_code = 0;
+			while (0 <= --quantifier_at) {
+				quant_code = legal_quantifier(*src.second[quantifier_at]);
+				if (0 < quant_code) break;
+			};
+
+			if (0 < quantifier_at) { // re-position
+				size_t offset = src.first + quantifier_at;
+				size_t len = src.second.size() - quantifier_at;
+				src = std::pair(offset, src.second.last(len));
+				anchor_at -= quantifier_at;
+				quantifier_at = 0;
+			}
+			// ...
+			return std::nullopt;
 		}
 
 private:
