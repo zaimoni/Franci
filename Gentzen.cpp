@@ -10,6 +10,7 @@
 #include <fstream>
 #include <iostream>
 #include <span>
+#include <initializer_list>
 #include <any>
 #include <tuple>
 
@@ -347,6 +348,8 @@ namespace gentzen {
 			return std::nullopt;
 		}
 
+		static constexpr auto to_s(Domain src) { return names[(size_t)src]; }
+
 		std::string to_s() const override {
 			if (names.size() > _code) return std::string(names[_code]);
 			return "<buggy>";
@@ -447,19 +450,113 @@ namespace gentzen {
 	static constexpr auto test4 = perl::enumerate<perl::count_if(preaxiomatic::Domain_values, preaxiomatic::Domain_values, is_properly_contained_in)>(preaxiomatic::Domain_values, preaxiomatic::Domain_values, is_properly_contained_in);
 	static_assert(std::end(test4) != std::find(test4.begin(), test4.end(), std::pair(preaxiomatic::Domain::TruthValues, preaxiomatic::Domain::TruthValued)));
 
-	class domain_param final : public std::variant<preaxiomatic::Domain, domain*> {
+	class domain_param final : public std::variant<preaxiomatic::Domain, unsigned long, domain*> {
+		using base = std::variant<preaxiomatic::Domain, unsigned long, domain*>;
+
 	public:
-		constexpr domain_param(preaxiomatic::Domain src) noexcept : std::variant<preaxiomatic::Domain, domain*>{src} {}
-		constexpr domain_param(domain* src) : std::variant<preaxiomatic::Domain, domain*>{ src } {
+		constexpr domain_param(preaxiomatic::Domain src) noexcept : base{src} {}
+		constexpr domain_param(domain* src) : base{src} {
 			if (!src) throw std::invalid_argument("null src");
 			if (auto ok = preaxiomatic::get(src)) *this = *ok;
 		}
 		constexpr domain_param(std::nullptr_t) noexcept = delete;
-		domain_param(const domain_param&) = default;
-		domain_param(domain_param&&) = default;
-		domain_param& operator=(const domain_param&) = default;
-		domain_param& operator=(domain_param&&) = default;
-		~domain_param() = default;
+		constexpr domain_param(const domain_param&) = default;
+		constexpr domain_param(domain_param&&) = default;
+		constexpr domain_param& operator=(const domain_param&) = default;
+		constexpr domain_param& operator=(domain_param&&) = default;
+		constexpr ~domain_param() = default;
+
+		constexpr domain_param(const std::initializer_list<preaxiomatic::Domain>& accept,
+			const std::initializer_list<preaxiomatic::Domain>& reject = {})
+		: base(0UL)
+		{
+			if (1 == accept.size() && std::empty(reject)) {
+				base::operator=(*accept.begin());
+				return;
+			}
+			base::operator=(encode(accept, reject));
+		}
+
+		constexpr std::optional<bool> accept(const domain_param& src) const {
+			return std::nullopt;
+		}
+
+	private:
+		static constexpr unsigned long encode_isin(preaxiomatic::Domain x) { return (unsigned long)x; }
+		static constexpr unsigned long encode_not_isin(preaxiomatic::Domain x) { return (unsigned long)x + preaxiomatic::Domain_values.size(); }
+
+		static constexpr unsigned long encode(const std::initializer_list<preaxiomatic::Domain>& accept,
+			const std::initializer_list<preaxiomatic::Domain>& reject) {
+
+			if (std::empty(accept)) throw std::invalid_argument("not in a preaxiomatic domain");
+			std::string err;
+			if (2 <= accept.size()) {
+				decltype(auto) x = std::data(accept);
+				ptrdiff_t n = accept.size();
+				while (1 <= --n) {
+					ptrdiff_t i = n;
+					while (0 <= --i) {
+						if (is_contained_in(x[i], x[n])) {
+							err = "Accepting ";
+							err += preaxiomatic::to_s(x[n]);
+							err += " makes accepting ";
+							err = preaxiomatic::to_s(x[i]);
+							err += " redundant.";
+							throw std::invalid_argument(std::move(err));
+						}
+						if (is_contained_in(x[n], x[i])) {
+							err = "Accepting ";
+							err += preaxiomatic::to_s(x[i]);
+							err += " makes accepting ";
+							err = preaxiomatic::to_s(x[n]);
+							err += " redundant.";
+							throw std::invalid_argument(std::move(err));
+						}
+						if (are_disjoint(x[i], x[n])) {
+							err = "Accepting both ";
+							err = preaxiomatic::to_s(x[i]);
+							err += " and ";
+							err += preaxiomatic::to_s(x[n]);
+							err += " is inconsistent.";
+							throw std::invalid_argument(std::move(err));
+						}
+					}
+				}
+			}
+			if (!std::empty(reject)) {
+				for (decltype(auto) ok : accept) {
+					for (decltype(auto) no : reject) {
+						if (is_contained_in(ok, no)) {
+							err += "Accepting ";
+							err = preaxiomatic::to_s(ok);
+							err += " is inconsistent with rejecting ";
+							err += preaxiomatic::to_s(no);
+							err += ".";
+							throw std::invalid_argument(std::move(err));
+						}
+						if (are_disjoint(ok, no)) {
+							err += "Accepting ";
+							err = preaxiomatic::to_s(ok);
+							err += " makes rejecting ";
+							err += preaxiomatic::to_s(no);
+							err += " redundant.";
+							throw std::invalid_argument(std::move(err));
+						}
+					}
+				}
+			}
+
+			unsigned long ret = 0;
+			for (decltype(auto) x : accept) {
+				ret += encode_isin(x);
+				ret *= force_consteval<2 * preaxiomatic::Domain_values.size()>;
+			};
+			for (decltype(auto) x : reject) {
+				ret += encode_not_isin(x);
+				ret *= force_consteval<2 * preaxiomatic::Domain_values.size()>;
+			};
+			return ret;
+		}
 	};
 
 	template<preaxiomatic::Domain D>
@@ -767,6 +864,8 @@ namespace gentzen {
 					if (validate) {
 						if (!*validate) return std::nullopt; // authority actively rejects truth-valued expressions as error
 					} else {
+						// see if the authority requires a mathematical object
+						validate = test(preaxiomatic::Domain::Ur);
 						// see if the authority accepts what we evaluate to
 						validate = test(preaxiomatic::Domain::TruthValues);
 						if (!validate || !*validate) return std::nullopt;
