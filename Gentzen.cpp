@@ -340,6 +340,13 @@ namespace gentzen {
 			return x;
 		}
 
+		static std::optional<Domain> get(domain* src) {
+			if (!src) return std::nullopt;
+
+			for (decltype(auto) x : Domain_values) if (src == get(x).get()) return x;
+			return std::nullopt;
+		}
+
 		std::string to_s() const override {
 			if (names.size() > _code) return std::string(names[_code]);
 			return "<buggy>";
@@ -439,6 +446,45 @@ namespace gentzen {
 	static constexpr auto test3 = perl::count_if(preaxiomatic::Domain_values, preaxiomatic::Domain_values, is_properly_contained_in);
 	static constexpr auto test4 = perl::enumerate<perl::count_if(preaxiomatic::Domain_values, preaxiomatic::Domain_values, is_properly_contained_in)>(preaxiomatic::Domain_values, preaxiomatic::Domain_values, is_properly_contained_in);
 	static_assert(std::end(test4) != std::find(test4.begin(), test4.end(), std::pair(preaxiomatic::Domain::TruthValues, preaxiomatic::Domain::TruthValued)));
+
+	class domain_param final : public std::variant<preaxiomatic::Domain, domain*> {
+	public:
+		constexpr domain_param(preaxiomatic::Domain src) noexcept : std::variant<preaxiomatic::Domain, domain*>{src} {}
+		constexpr domain_param(domain* src) : std::variant<preaxiomatic::Domain, domain*>{ src } {
+			if (!src) throw std::invalid_argument("null src");
+			if (auto ok = preaxiomatic::get(src)) *this = *ok;
+		}
+		constexpr domain_param(std::nullptr_t) noexcept = delete;
+		domain_param(const domain_param&) = default;
+		domain_param(domain_param&&) = default;
+		domain_param& operator=(const domain_param&) = default;
+		domain_param& operator=(domain_param&&) = default;
+		~domain_param() = default;
+	};
+
+	template<preaxiomatic::Domain D>
+	constexpr std::optional<bool> need_preaxiomatic(const domain_param& providing) {
+		if (auto pre_x = std::get_if<preaxiomatic::Domain>(&providing)) {
+			if (D == *pre_x) return true;
+			if (is_contained_in(*pre_x, D)) return true;
+			if (are_disjoint(*pre_x, D)) return false;
+		}
+		// \todo handle dynamic domains (we have normalized preaxiomatic domains)
+
+		return std::nullopt;
+	}
+
+	template<preaxiomatic::Domain D>
+	constexpr std::optional<bool> reject_preaxiomatic(const domain_param& providing) {
+		if (auto pre_x = std::get_if<preaxiomatic::Domain>(&providing)) {
+			if (D == *pre_x) return false;
+			if (is_contained_in(*pre_x, D)) return false;
+			if (are_disjoint(*pre_x, D)) return true;
+		}
+		// \todo handle dynamic domains (we have normalized preaxiomatic domains)
+
+		return std::nullopt;
+	}
 
 	// singleton
 	class preaxiomatic_domain_of {
@@ -710,6 +756,23 @@ namespace gentzen {
 			// (x &isin; y) &isin; <b>TruthValued</b> not only should parse, it should be an axiom built into the type system
 
 			auto& [origin, target, ok] = src;
+
+			// \todo need to be able to tell the testing function that we are:
+			// * truth-valued
+			// * not a truth value
+			// * not a set (our notation is a set, but we ourselves are not)
+			if (ok.has_value()) {
+				if (auto test = std::any_cast<decltype(need_preaxiomatic<preaxiomatic::Domain::TruthValued>)>(&ok)) {
+					auto validate = test(preaxiomatic::Domain::TruthValued);
+					if (validate) {
+						if (!*validate) return std::nullopt; // authority actively rejects truth-valued expressions as error
+					} else {
+						// see if the authority accepts what we evaluate to
+						validate = test(preaxiomatic::Domain::TruthValues);
+						if (!validate || !*validate) return std::nullopt;
+					}
+				}
+			}
 
 			ptrdiff_t anchor_at = -1;
 
