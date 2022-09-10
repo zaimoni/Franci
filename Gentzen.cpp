@@ -307,6 +307,14 @@ namespace gentzen {
 			Class
 		};
 
+		static constexpr const std::array<Domain, 5> Domain_values = {
+			Domain::TruthValued,
+			Domain::TruthValues,
+			Domain::Set,
+			Domain::Ur,
+			Domain::Class
+		};
+
 		preaxiomatic() = delete; // empty variable doesn't make much sense
 		preaxiomatic(const preaxiomatic& src) = delete;
 		preaxiomatic(preaxiomatic&& src) = delete;
@@ -348,6 +356,145 @@ namespace gentzen {
 	private:
 		preaxiomatic(Domain src) noexcept : _code((unsigned int)src) {}
 
+	};
+
+	constexpr bool is_properly_contained_in(preaxiomatic::Domain lhs, preaxiomatic::Domain rhs) {
+		switch (lhs) {
+		case preaxiomatic::Domain::TruthValues: return preaxiomatic::Domain::TruthValued == rhs || preaxiomatic::Domain::Ur == rhs;
+		case preaxiomatic::Domain::Set: return preaxiomatic::Domain::Class == rhs;
+		default: return false;
+		}
+	}
+
+	constexpr bool is_contained_in(preaxiomatic::Domain lhs, preaxiomatic::Domain rhs) {
+		if (lhs == rhs) return true;
+		return is_properly_contained_in(lhs, rhs);
+	}
+
+	constexpr bool are_disjoint(preaxiomatic::Domain lhs, preaxiomatic::Domain rhs) {
+		if (lhs == rhs) return false;
+		// to be constexpr this has to be duplicated; static auto lambda disallowed
+		if (is_properly_contained_in(lhs, rhs) || is_properly_contained_in(rhs, lhs)) return false;
+
+		// truth values pre-exist mathematical objects
+		if (is_contained_in(lhs, preaxiomatic::Domain::TruthValues) && is_contained_in(rhs, preaxiomatic::Domain::Class)) return true;
+		if (is_contained_in(rhs, preaxiomatic::Domain::TruthValues) && is_contained_in(lhs, preaxiomatic::Domain::Class)) return true;
+		// but *notations* are truth-valued
+		if (is_contained_in(lhs, preaxiomatic::Domain::TruthValued) && is_contained_in(preaxiomatic::Domain::Set, rhs)) return false;
+		if (is_contained_in(rhs, preaxiomatic::Domain::TruthValued) && is_contained_in(preaxiomatic::Domain::Set, lhs)) return false;
+		// no ur-element is a mathematical object
+		if (is_contained_in(lhs, preaxiomatic::Domain::Ur) && is_contained_in(rhs, preaxiomatic::Domain::Class)) return true;
+		if (is_contained_in(rhs, preaxiomatic::Domain::Ur) && is_contained_in(lhs, preaxiomatic::Domain::Class)) return true;
+
+		// derivable from above:
+		if (preaxiomatic::Domain::TruthValued == lhs && preaxiomatic::Domain::Ur == rhs) return false;
+		if (preaxiomatic::Domain::TruthValued == rhs && preaxiomatic::Domain::Ur == lhs) return false;
+		return false; // not really, but should not be reached
+	}
+
+	// these are rejected by the general implementation
+	static_assert(!are_disjoint(preaxiomatic::Domain::Class, preaxiomatic::Domain::Class));
+	static_assert(!are_disjoint(preaxiomatic::Domain::Class, preaxiomatic::Domain::Set));
+	static_assert(!are_disjoint(preaxiomatic::Domain::Set, preaxiomatic::Domain::Class));
+	static_assert(!are_disjoint(preaxiomatic::Domain::Set, preaxiomatic::Domain::Set));
+	static_assert(!are_disjoint(preaxiomatic::Domain::TruthValued, preaxiomatic::Domain::TruthValued));
+	static_assert(!are_disjoint(preaxiomatic::Domain::TruthValued, preaxiomatic::Domain::TruthValues));
+	static_assert(!are_disjoint(preaxiomatic::Domain::TruthValues, preaxiomatic::Domain::TruthValued));
+	static_assert(!are_disjoint(preaxiomatic::Domain::TruthValues, preaxiomatic::Domain::TruthValues));
+	static_assert(!are_disjoint(preaxiomatic::Domain::TruthValues, preaxiomatic::Domain::Ur));
+	static_assert(!are_disjoint(preaxiomatic::Domain::Ur, preaxiomatic::Domain::TruthValues));
+	static_assert(!are_disjoint(preaxiomatic::Domain::Ur, preaxiomatic::Domain::Ur));
+	// these are allowed by the general implementation
+	static_assert(!are_disjoint(preaxiomatic::Domain::Class, preaxiomatic::Domain::TruthValued));
+	static_assert(!are_disjoint(preaxiomatic::Domain::Set, preaxiomatic::Domain::TruthValued));
+	static_assert(!are_disjoint(preaxiomatic::Domain::TruthValued, preaxiomatic::Domain::Class));
+	static_assert(!are_disjoint(preaxiomatic::Domain::TruthValued, preaxiomatic::Domain::Set));
+	static_assert(are_disjoint(preaxiomatic::Domain::Class, preaxiomatic::Domain::Ur));
+	static_assert(are_disjoint(preaxiomatic::Domain::Set, preaxiomatic::Domain::Ur));
+	static_assert(are_disjoint(preaxiomatic::Domain::Ur, preaxiomatic::Domain::Class));
+	static_assert(are_disjoint(preaxiomatic::Domain::Ur, preaxiomatic::Domain::Set));
+	// above are a matter of how we formalize
+	static_assert(!are_disjoint(preaxiomatic::Domain::TruthValued, preaxiomatic::Domain::Ur));
+	static_assert(!are_disjoint(preaxiomatic::Domain::Ur, preaxiomatic::Domain::TruthValued));
+	// above is derivable
+	static_assert(are_disjoint(preaxiomatic::Domain::Class, preaxiomatic::Domain::TruthValues));
+	static_assert(are_disjoint(preaxiomatic::Domain::Set, preaxiomatic::Domain::TruthValues));
+	static_assert(are_disjoint(preaxiomatic::Domain::TruthValues, preaxiomatic::Domain::Class));
+	static_assert(are_disjoint(preaxiomatic::Domain::TruthValues, preaxiomatic::Domain::Set));
+
+	// classical logic cross-check: lift general implementation to static assertion
+	static constexpr const auto test1 = cartesian::product(preaxiomatic::Domain_values, preaxiomatic::Domain_values);
+	static constexpr auto test2 = perl::grep<perl::count_if(test1, is_properly_contained_in)>(test1, is_properly_contained_in);
+	static_assert(std::end(test2) != std::find(test2.begin(), test2.end(), std::pair(preaxiomatic::Domain::TruthValues, preaxiomatic::Domain::TruthValued)));
+	static constexpr auto test3 = perl::count_if(preaxiomatic::Domain_values, preaxiomatic::Domain_values, is_properly_contained_in);
+	static constexpr auto test4 = perl::enumerate<perl::count_if(preaxiomatic::Domain_values, preaxiomatic::Domain_values, is_properly_contained_in)>(preaxiomatic::Domain_values, preaxiomatic::Domain_values, is_properly_contained_in);
+	static_assert(std::end(test4) != std::find(test4.begin(), test4.end(), std::pair(preaxiomatic::Domain::TruthValues, preaxiomatic::Domain::TruthValued)));
+
+	// singleton
+	class preaxiomatic_domain_of {
+	private:
+		std::vector<std::function<std::optional<preaxiomatic::Domain>(const formal::lex_node& src)> > _handlers_lex_node;
+		std::vector<std::function<std::optional<preaxiomatic::Domain>(const formal::parsed& src)> > _handlers_parsed;
+		std::vector<std::function<std::optional<preaxiomatic::Domain>(const formal::word& src)> > _handlers_word;
+
+		preaxiomatic_domain_of() = default;
+		preaxiomatic_domain_of(const preaxiomatic_domain_of&) = delete;
+		preaxiomatic_domain_of(preaxiomatic_domain_of&&) = delete;
+		preaxiomatic_domain_of& operator=(const preaxiomatic_domain_of&) = delete;
+		preaxiomatic_domain_of& operator=(preaxiomatic_domain_of&&) = delete;
+		~preaxiomatic_domain_of() = default;
+	public:
+		preaxiomatic_domain_of& get() {
+			static preaxiomatic_domain_of ooao;
+
+			return ooao;
+		}
+
+		// std::visit support
+		std::optional<preaxiomatic::Domain> operator()(const std::unique_ptr<formal::lex_node>& src) {
+			if (src) return operator()(*src);
+			return std::nullopt;
+		}
+		std::optional<preaxiomatic::Domain> operator()(const std::unique_ptr<formal::parsed>& src) {
+			if (src) return operator()(*src);
+			return std::nullopt;
+		}
+		std::optional<preaxiomatic::Domain> operator()(const std::unique_ptr<formal::word>& src) {
+			if (src) return operator()(*src);
+			return std::nullopt;
+		}
+
+		std::optional<preaxiomatic::Domain> operator()(const formal::lex_node& src) {
+			for (decltype(auto) h : _handlers_lex_node) {
+				if (auto ret = h(src)) return ret;
+			};
+			return std::nullopt;
+		}
+
+		std::optional<preaxiomatic::Domain> operator()(const formal::parsed& src) {
+			for (decltype(auto) h : _handlers_parsed) {
+				if (auto ret = h(src)) return ret;
+			};
+			return std::nullopt;
+		}
+
+		std::optional<preaxiomatic::Domain> operator()(const formal::word& src) {
+			for (decltype(auto) h : _handlers_word) {
+				if (auto ret = h(src)) return ret;
+			};
+			return std::nullopt;
+		}
+
+		void register_handler(decltype(_handlers_lex_node)::value_type src) { _handlers_lex_node.push_back(std::move(src)); }
+		void register_handler(decltype(_handlers_parsed)::value_type src) { _handlers_parsed.push_back(std::move(src)); }
+		void register_handler(decltype(_handlers_word)::value_type src) { _handlers_word.push_back(std::move(src)); }
+
+		bool force(const preaxiomatic::Domain target, formal::lex_node*& src) {
+			if (auto test = operator()(*src)) { // already typed
+				if (target == *test) return true;
+			}
+			return false;
+		}
 	};
 
 	// deferred: uniqueness quantification (unclear what data representation should be)
@@ -575,11 +722,14 @@ private:
 		std::string to_s() const override { return _var->name(); }
 	};
 
+	// \todo syntactical equivalence will be its own type, even though it's very similar
 	class inference_rule {
 		std::string _name;
-		std::vector<std::shared_ptr<const formal::parsed> > _vars;
+		std::vector<std::shared_ptr<const var> > _vars;
 		std::vector<std::shared_ptr<const formal::parsed> > _hypotheses;
 		std::vector<std::shared_ptr<const formal::parsed> > _conclusions;
+
+		using uniform_substitution_t = std::vector<std::pair<std::shared_ptr<const var>, std::weak_ptr<formal::parsed> > >;
 
 		// fact, hypothesis/conclusion, var assignments
 		using arg_match = std::tuple<std::weak_ptr<const formal::parsed>, std::shared_ptr<const formal::parsed>, std::vector<std::pair<std::shared_ptr<const formal::parsed>, std::weak_ptr<const formal::parsed> > > >;
