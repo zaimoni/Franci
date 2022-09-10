@@ -200,6 +200,40 @@ static std::string wrap_to_HTML_entity(const std::string_view& src) {
 
 // prototype class -- extract to own files when stable
 
+namespace zaimoni {
+	template<class T, size_t n>
+	class stack {
+		std::array<T, n> _x;
+		size_t ub;
+	public:
+		constexpr stack() noexcept : ub(0) {}
+		constexpr stack(const stack&) = default;
+		constexpr stack(stack&&) = default;
+		constexpr stack& operator=(const stack&) = default;
+		constexpr stack& operator=(stack&&) = default;
+		constexpr ~stack() = default;
+
+		constexpr void clear() { ub = 0; }
+		constexpr bool empty() const { return 0 == ub; }
+		constexpr size_t size() const { return ub; }
+		constexpr T& operator[](size_t N) { return _x[N]; }
+		constexpr const T& operator[](size_t N) const { return _x[N]; }
+
+		constexpr auto begin() { return _x.begin(); }
+		constexpr auto begin() const { return _x.begin(); }
+		constexpr auto end() { return _x.begin()+ub; }
+		constexpr auto end() const { return _x.begin() + ub; }
+
+		constexpr void push_back(const T& src) { _x[++ub] = src; }
+		constexpr void push_back(T&& src) { _x[++ub] = std::move(src); }
+	};
+
+}
+
+// end prototype class
+
+// prototype class -- extract to own files when stable
+
 namespace formal {
 
 	// many programming languages have the notion of a token, i.e. formal word, that is a syntax error by construction
@@ -452,6 +486,7 @@ namespace gentzen {
 
 	class domain_param final : public std::variant<preaxiomatic::Domain, unsigned long, domain*> {
 		using base = std::variant<preaxiomatic::Domain, unsigned long, domain*>;
+		using listing = zaimoni::stack<preaxiomatic::Domain, preaxiomatic::Domain_values.size()>;
 
 	public:
 		constexpr domain_param(preaxiomatic::Domain src) noexcept : base{src} {}
@@ -478,6 +513,42 @@ namespace gentzen {
 		}
 
 		constexpr std::optional<bool> accept(const domain_param& src) const {
+			listing my_require;
+			listing my_reject;
+			listing src_provides;
+			listing src_does_not_provide;
+
+			decode(my_require, my_reject);
+			src.decode(src_provides, src_does_not_provide);
+
+			for (decltype(auto) have : src_provides) {
+				for (decltype(auto) no : my_reject) if (no == have) return false;
+				for (decltype(auto) want : my_require) if (want == have) return true;
+			}
+
+			for (decltype(auto) no : my_reject) {
+				for (decltype(auto) want : my_require) {
+					if (is_contained_in(want, no)) {
+						for (decltype(auto) have : src_provides) {
+							if (is_contained_in(have, want)) return true;
+							if (is_contained_in(have, no)) return false;
+						}
+					}
+					if (is_contained_in(no, want)) {
+						for (decltype(auto) have : src_provides) {
+							if (is_contained_in(have, no)) return false;
+							if (is_contained_in(have, want)) return true;
+						}
+					}
+				}
+			}
+
+			for (decltype(auto) want : my_require) {
+				for (decltype(auto) have : src_provides) {
+					if (is_contained_in(have, want)) return true;
+				}
+			}
+
 			return std::nullopt;
 		}
 
@@ -488,7 +559,6 @@ namespace gentzen {
 		static constexpr unsigned long encode(const std::initializer_list<preaxiomatic::Domain>& accept,
 			const std::initializer_list<preaxiomatic::Domain>& reject) {
 
-			if (std::empty(accept)) throw std::invalid_argument("not in a preaxiomatic domain");
 			std::string err;
 			if (2 <= accept.size()) {
 				decltype(auto) x = std::data(accept);
@@ -512,52 +582,62 @@ namespace gentzen {
 							err += " redundant.";
 							throw std::invalid_argument(std::move(err));
 						}
-						if (are_disjoint(x[i], x[n])) {
-							err = "Accepting both ";
-							err = preaxiomatic::to_s(x[i]);
-							err += " and ";
-							err += preaxiomatic::to_s(x[n]);
-							err += " is inconsistent.";
-							throw std::invalid_argument(std::move(err));
-						}
-					}
-				}
-			}
-			if (!std::empty(reject)) {
-				for (decltype(auto) ok : accept) {
-					for (decltype(auto) no : reject) {
-						if (is_contained_in(ok, no)) {
-							err += "Accepting ";
-							err = preaxiomatic::to_s(ok);
-							err += " is inconsistent with rejecting ";
-							err += preaxiomatic::to_s(no);
-							err += ".";
-							throw std::invalid_argument(std::move(err));
-						}
-						if (are_disjoint(ok, no)) {
-							err += "Accepting ";
-							err = preaxiomatic::to_s(ok);
-							err += " makes rejecting ";
-							err += preaxiomatic::to_s(no);
-							err += " redundant.";
-							throw std::invalid_argument(std::move(err));
-						}
 					}
 				}
 			}
 
-			unsigned long ret = 0;
+			for (decltype(auto) want : accept) {
+				for (decltype(auto) no : reject) {
+					if (want == no) {
+						err = "Both accepting and rejecting ";
+						err += preaxiomatic::to_s(want);
+						err += " is paradoxical.";
+						throw std::invalid_argument(std::move(err));
+					}
+
+				}
+			}
+
+			unsigned long ret = 1;
 			for (decltype(auto) x : accept) {
-				ret += encode_isin(x);
 				ret *= force_consteval<2 * preaxiomatic::Domain_values.size()>;
+				ret += encode_isin(x);
 			};
 			for (decltype(auto) x : reject) {
-				ret += encode_not_isin(x);
 				ret *= force_consteval<2 * preaxiomatic::Domain_values.size()>;
+				ret += encode_not_isin(x);
 			};
 			return ret;
 		}
+ 
+		constexpr void decode(listing& accept, listing& reject) const {
+			struct interpret {
+				listing& ok;
+				listing& no;
+
+				constexpr interpret(listing& ok, listing& no) noexcept : ok(ok), no(no) {}
+
+				constexpr void operator()(preaxiomatic::Domain src) {
+					ok.push_back(src);
+				}
+				constexpr void operator()(unsigned long src) {
+					while (1 < src) {
+						auto code = src % force_consteval<2 * preaxiomatic::Domain_values.size()>;
+						src /= force_consteval<2 * preaxiomatic::Domain_values.size()>;
+						if (preaxiomatic::Domain_values.size() > code) ok.push_back((preaxiomatic::Domain)code);
+						else no.push_back((preaxiomatic::Domain)(code - preaxiomatic::Domain_values.size()));
+					}
+				}
+				constexpr void operator()(domain* src) {}
+			};
+
+			std::visit(interpret(accept, reject), *this);
+		}
 	};
+
+	constexpr auto isin_test = domain_param({preaxiomatic::Domain::TruthValued, preaxiomatic::Domain::Ur}, {preaxiomatic::Domain::TruthValues});
+	constexpr auto domain_test = domain_param({}, { preaxiomatic::Domain::Ur });
+	constexpr auto element_test = domain_param({ preaxiomatic::Domain::Set, preaxiomatic::Domain::Ur }, { preaxiomatic::Domain::Class });
 
 	template<preaxiomatic::Domain D>
 	constexpr std::optional<bool> need_preaxiomatic(const domain_param& providing) {
