@@ -10,6 +10,8 @@
 #include <fstream>
 #include <iostream>
 #include <span>
+#include <any>
+#include <tuple>
 
 #include <algorithm>
 
@@ -202,8 +204,10 @@ namespace formal {
 	// many programming languages have the notion of a token, i.e. formal word, that is a syntax error by construction
 	class is_wff { // is well-formed formula
 	public:
-		using subsequence = std::pair<size_t, std::span<formal::lex_node*> >;
-		using parse_t = std::function<subsequence()>;
+		// offset, change target, constraint (usually some sort of std::function using language-specific types)
+		using subsequence = std::tuple<size_t, std::span<formal::lex_node*>, std::any >;
+		using change_target = std::pair<size_t, std::span<formal::lex_node*> >;
+		using parse_t = std::function<change_target()>;
 
 		// true, "": no comment, ok
 		// true, std::string: warning
@@ -268,8 +272,9 @@ namespace formal {
 				};
 			}
 			if (fallback) return *fallback;
-			if (1 == src.second.size()) return std::pair(operator()(**src.second.begin()), parse_t());
-			return std::pair(std::pair(false, std::string()), parse_t());
+			decltype(auto) target = std::get<1>(src);
+			if (1 == target.size()) return ret_parse_t(operator()(**target.begin()), nullptr);
+			return ret_parse_t(std::pair(false, std::string()), nullptr);
 		}
 	};
 
@@ -700,42 +705,44 @@ namespace gentzen {
 			return ret;
 		}
 
-		static std::optional<formal::is_wff::ret_parse_t> wff(std::pair<size_t, std::span<formal::lex_node*> > src) {
+		static std::optional<formal::is_wff::ret_parse_t> wff(formal::is_wff::subsequence src) {
 			// We don't have a good idea of transitivity here : x &isin; y &isin; z should not parse.
 			// (x &isin; y) &isin; <b>TruthValued</b> not only should parse, it should be an axiom built into the type system
 
+			auto& [origin, target, ok] = src;
+
 			ptrdiff_t anchor_at = -1;
 
-			ptrdiff_t i = src.second.size();
+			ptrdiff_t i = target.size();
 			while (0 <= --i) {
-				if (interpret_HTML_entity(*src.second[i], "isin")) {
+				if (interpret_HTML_entity(*target[i], "isin")) {
 					if (0 > anchor_at) anchor_at = i;
 					// not an error: x &isin; y & w &isin; z should parse as a 2-ary conjunction
 					else return std::nullopt;
 				}
 			};
 			if (0 > anchor_at) return std::nullopt;
-			const auto& anchor = *src.second[anchor_at];
+			const auto& anchor = *target[anchor_at];
 			if (anchor.code() & formal::Error) {
 				return formal::is_wff::ret_parse_t(std::pair(false, std::string()), nullptr);
 			}
 
 			if (0 == anchor_at) {
 				// might want to hard error for "final" parsing
-				size_t offset = src.first;
-				std::span<formal::lex_node*> target = src.second.first(1);
+				size_t offset = origin;
+				std::span<formal::lex_node*> dest = target.first(1);
 				auto fail = [=]() {
-					std::pair<size_t, std::span<formal::lex_node*> > ret(offset, target);
+					formal::is_wff::change_target ret(offset, dest);
 					ret.second.front()->learn(formal::Error);
 					return ret;
 				};
 				return formal::is_wff::ret_parse_t(std::pair(false, std::string("&isin; cannot match variable to its left")), fail);
 			}
-			if (src.second.size() - 1 == anchor_at) {
-				size_t offset = src.first + anchor_at;
-				std::span<formal::lex_node*> target = src.second.last(1);
+			if (target.size() - 1 == anchor_at) {
+				size_t offset = origin + anchor_at;
+				std::span<formal::lex_node*> dest = target.last(1);
 				auto fail = [=]() {
-					std::pair<size_t, std::span<formal::lex_node*> > ret(offset, target);
+					formal::is_wff::change_target ret(offset, dest);
 					ret.second.front()->learn(formal::Error);
 					return ret;
 				};
@@ -747,14 +754,14 @@ namespace gentzen {
 			ptrdiff_t quantifier_at = anchor_at;
 			unsigned int quant_code = 0;
 			while (0 <= --quantifier_at) {
-				quant_code = legal_quantifier(*src.second[quantifier_at]);
+				quant_code = legal_quantifier(*target[quantifier_at]);
 				if (0 < quant_code) break;
 			};
 
 			if (0 < quantifier_at) { // re-position
-				size_t offset = src.first + quantifier_at;
-				size_t len = src.second.size() - quantifier_at;
-				src = std::pair(offset, src.second.last(len));
+				size_t len = target.size() - quantifier_at;
+				target = target.last(len);
+				origin += quantifier_at;
 				anchor_at -= quantifier_at;
 				quantifier_at = 0;
 			}
