@@ -3,6 +3,7 @@
 #ifdef GENTZEN_DRIVER
 #include "HTMLtag.hpp"
 #include "Zaimoni.STL/LexParse/string_view.hpp"
+#include "Zaimoni.STL/stack.hpp"
 #include "test_driver.h"
 #include "Zaimoni.STL/Pure.C/comptest.h"
 #include <filesystem>
@@ -197,40 +198,6 @@ static std::string wrap_to_HTML_entity(const std::string_view& src) {
 	if (!src.ends_with(';')) ret += ';';
 	return ret;
 };
-
-// prototype class -- extract to own files when stable
-
-namespace zaimoni {
-	template<class T, size_t n>
-	class stack {
-		std::array<T, n> _x;
-		size_t ub;
-	public:
-		constexpr stack() noexcept : _x(),ub(0) {}
-		constexpr stack(const stack&) = default;
-		constexpr stack(stack&&) = default;
-		constexpr stack& operator=(const stack&) = default;
-		constexpr stack& operator=(stack&&) = default;
-		constexpr ~stack() = default;
-
-		constexpr void clear() { ub = 0; }
-		constexpr bool empty() const { return 0 == ub; }
-		constexpr size_t size() const { return ub; }
-		constexpr T& operator[](size_t N) { return _x[N]; }
-		constexpr const T& operator[](size_t N) const { return _x[N]; }
-
-		constexpr auto begin() { return _x.begin(); }
-		constexpr auto begin() const { return _x.begin(); }
-		constexpr auto end() { return _x.begin() + ub + 1; }
-		constexpr auto end() const { return _x.begin() + ub + 1; }
-
-		constexpr void push_back(const T& src) { _x[ub++] = src; }
-		constexpr void push_back(T&& src) { _x[ub++] = std::move(src); }
-	};
-
-}
-
-// end prototype class
 
 // prototype class -- extract to own files when stable
 
