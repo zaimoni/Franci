@@ -206,7 +206,7 @@ namespace zaimoni {
 		std::array<T, n> _x;
 		size_t ub;
 	public:
-		constexpr stack() noexcept : ub(0) {}
+		constexpr stack() noexcept : _x(),ub(0) {}
 		constexpr stack(const stack&) = default;
 		constexpr stack(stack&&) = default;
 		constexpr stack& operator=(const stack&) = default;
@@ -221,11 +221,11 @@ namespace zaimoni {
 
 		constexpr auto begin() { return _x.begin(); }
 		constexpr auto begin() const { return _x.begin(); }
-		constexpr auto end() { return _x.begin()+ub; }
-		constexpr auto end() const { return _x.begin() + ub; }
+		constexpr auto end() { return _x.begin() + ub + 1; }
+		constexpr auto end() const { return _x.begin() + ub + 1; }
 
-		constexpr void push_back(const T& src) { _x[++ub] = src; }
-		constexpr void push_back(T&& src) { _x[++ub] = std::move(src); }
+		constexpr void push_back(const T& src) { _x[ub++] = src; }
+		constexpr void push_back(T&& src) { _x[ub++] = std::move(src); }
 	};
 
 }
@@ -512,18 +512,26 @@ namespace gentzen {
 			base::operator=(encode(accept, reject));
 		}
 
-		constexpr std::optional<bool> accept(const domain_param& src) const {
-			listing my_require;
-			listing my_reject;
-			listing src_provides;
-			listing src_does_not_provide;
+		// diagnostic
+		constexpr unsigned long raw_code() const {
+			if (auto ret = std::get_if<unsigned long>(this)) return *ret;
+			return 0;
+		}
 
-			decode(my_require, my_reject);
-			src.decode(src_provides, src_does_not_provide);
+		constexpr std::optional<bool> accept(const domain_param& src) const {
+			auto my_code = raw_code();
+			auto src_code = src.raw_code();
+
+			const auto [my_require, my_reject] = decode();
+			const auto [src_provides, src_does_not_provide] = src.decode();
 
 			for (decltype(auto) have : src_provides) {
 				for (decltype(auto) no : my_reject) if (no == have) return false;
 				for (decltype(auto) want : my_require) if (want == have) return true;
+			}
+
+			for (decltype(auto) want : my_require) {
+				for (decltype(auto) no : src_does_not_provide) if (want == no) return false;
 			}
 
 			for (decltype(auto) no : my_reject) {
@@ -540,12 +548,6 @@ namespace gentzen {
 							if (is_contained_in(have, want)) return true;
 						}
 					}
-				}
-			}
-
-			for (decltype(auto) want : my_require) {
-				for (decltype(auto) have : src_provides) {
-					if (is_contained_in(have, want)) return true;
 				}
 			}
 
@@ -610,34 +612,42 @@ namespace gentzen {
 			return ret;
 		}
  
-		constexpr void decode(listing& accept, listing& reject) const {
+		constexpr std::pair<listing, listing> decode() const {
 			struct interpret {
-				listing& ok;
-				listing& no;
-
-				constexpr interpret(listing& ok, listing& no) noexcept : ok(ok), no(no) {}
-
-				constexpr void operator()(preaxiomatic::Domain src) {
+				constexpr auto operator()(preaxiomatic::Domain src) {
+					listing ok;
 					ok.push_back(src);
+					return std::pair<listing, listing>(ok, listing());
 				}
-				constexpr void operator()(unsigned long src) {
+				constexpr auto operator()(unsigned long src) {
+					listing ok, no;
 					while (1 < src) {
 						auto code = src % force_consteval<2 * preaxiomatic::Domain_values.size()>;
 						src /= force_consteval<2 * preaxiomatic::Domain_values.size()>;
 						if (preaxiomatic::Domain_values.size() > code) ok.push_back((preaxiomatic::Domain)code);
 						else no.push_back((preaxiomatic::Domain)(code - preaxiomatic::Domain_values.size()));
 					}
+					return std::pair(ok, no);
 				}
-				constexpr void operator()(domain* src) {}
+				constexpr auto operator()(domain* src) { return std::pair<listing, listing>(); }
 			};
 
-			std::visit(interpret(accept, reject), *this);
+			return std::visit(interpret(), *this);
 		}
 	};
 
 	constexpr auto isin_test = domain_param({preaxiomatic::Domain::TruthValued, preaxiomatic::Domain::Ur}, {preaxiomatic::Domain::TruthValues});
 	constexpr auto domain_test = domain_param({}, { preaxiomatic::Domain::Ur });
 	constexpr auto element_test = domain_param({ preaxiomatic::Domain::Set, preaxiomatic::Domain::Ur }, { preaxiomatic::Domain::Class });
+
+	constexpr auto isin_code = isin_test.raw_code();
+	constexpr auto domain_code = domain_test.raw_code();
+	constexpr auto element_code = element_test.raw_code();
+
+	static_assert(domain_test.accept(isin_test));
+	static_assert(!*domain_test.accept(isin_test));
+	static_assert(element_test.accept(isin_test));
+	static_assert(*element_test.accept(isin_test));
 
 	template<preaxiomatic::Domain D>
 	constexpr std::optional<bool> need_preaxiomatic(const domain_param& providing) {
