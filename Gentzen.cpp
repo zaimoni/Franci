@@ -317,7 +317,9 @@ namespace formal {
 
 namespace gentzen {
 
-	// this has to be formal::parsed so we can reserve the notations for pre-axiomatic domains of discourse
+	formal::is_wff syntax_check;
+
+	// this has to be formal::parsed because it has to handle set-builder notation
 	class domain : public formal::parsed {
 	protected:
 		domain() = default;
@@ -328,6 +330,8 @@ namespace gentzen {
 		domain& operator=(const domain& src) = default;
 		domain& operator=(domain&& src) = default;
 		~domain() = default;
+
+		virtual void MoveInto(domain*& dest) = 0;	// polymorphic move
 	};
 
 	class preaxiomatic final : public domain {
@@ -384,6 +388,7 @@ namespace gentzen {
 		std::unique_ptr<parsed> clone() const override { throw std::logic_error("no cloning preaxiomatic"); }
 		void CopyInto(parsed*& dest) const override { throw std::logic_error("no CopyInto for preaxiomatic"); }
 		void MoveInto(parsed*& dest) override { throw std::logic_error("no MoveInto for preaxiomatic"); }
+		void MoveInto(domain*& dest) override { throw std::logic_error("no MoveInto for preaxiomatic"); }
 
 		formal::src_location origin() const override { return formal::src_location(); }
 
@@ -987,7 +992,76 @@ namespace gentzen {
 				anchor_at -= quantifier_at;
 				quantifier_at = 0;
 			}
-			// ...
+
+			std::optional<std::variant<domain*, preaxiomatic::Domain> > interpret_domain(nullptr);
+			if (anchor_at + 2 == target.size()) {
+				decltype(auto) domain_src = *target[anchor_at + 1];
+				if (auto preax = preaxiomatic::parse(domain_src)) {
+					interpret_domain = *preax;
+				} else if (3 == domain_src.is_pure_anchor()) {
+					if (auto test = dynamic_cast<domain*>(domain_src.anchor<formal::parsed>())) {
+						interpret_domain = test;
+					}
+				}
+			} /* else { // \todo ask gentzen::syntax_check
+			} */
+			if (!interpret_domain) return std::nullopt;
+
+			formal::lex_node* elt = nullptr;
+			if (2 == anchor_at - quantifier_at) {
+				decltype(auto) element_src = *target[anchor_at - 1];
+				if (legal_varname(element_src)) elt = &element_src;
+				/* else {
+				} */
+			} /* else { // \todo ask gentzen::syntax_check
+			} */
+
+			if (!elt) return std::nullopt;
+
+			struct decode_domain {
+				std::shared_ptr<const domain> operator()(domain* src) {
+					domain* stage = nullptr;
+					src->MoveInto(stage);
+					return std::shared_ptr<const domain>(src);
+				}
+				std::shared_ptr<const domain> operator()(preaxiomatic::Domain src) { return preaxiomatic::get(src); }
+			};
+
+			if (0 >= quant_code) {
+				if (1 != anchor_at) throw new std::exception("tracing");
+				// a term variable.
+				auto rewrite = [=, d_src=*interpret_domain, origin=origin, target=target]() {
+					std::unique_ptr<var> stage(new var(target[anchor_at - 1], std::visit(decode_domain(), d_src), quantifier::Term));
+					std::unique_ptr<formal::lex_node> relay(new formal::lex_node(stage.release()));
+					for (decltype(auto) x : target) {
+						if (x) {
+							delete x;
+							x = nullptr;
+						};
+					}
+					target.front() = relay.release();
+					return formal::is_wff::change_target(origin, target);
+				};
+				return formal::is_wff::ret_parse_t(std::pair(true, std::string()), rewrite);
+			}
+			if ((decltype(quant_code))quantifier::ThereIs >= quant_code) {
+				if (2 != anchor_at) throw new std::exception("tracing");
+				// a quantified variable.
+				auto rewrite = [=, d_src = *interpret_domain, origin = origin, target = target]() {
+					std::unique_ptr<var> stage(new var(target[anchor_at - 1], std::visit(decode_domain(), d_src), (quantifier)quant_code));
+					std::unique_ptr<formal::lex_node> relay(new formal::lex_node(stage.release()));
+					for (decltype(auto) x : target) {
+						if (x) {
+							delete x;
+							x = nullptr;
+						};
+					}
+					target.front() = relay.release();
+					return formal::is_wff::change_target(origin, target);
+				};
+				return formal::is_wff::ret_parse_t(std::pair(true, std::string()), rewrite);
+			}
+
 			return std::nullopt;
 		}
 
