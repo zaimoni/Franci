@@ -317,8 +317,8 @@ namespace formal {
 
 namespace gentzen {
 
-	// still abstract
-	class domain {
+	// this has to be formal::parsed so we can reserve the notations for pre-axiomatic domains of discourse
+	class domain : public formal::parsed {
 	protected:
 		domain() = default;
 
@@ -328,8 +328,6 @@ namespace gentzen {
 		domain& operator=(const domain& src) = default;
 		domain& operator=(domain&& src) = default;
 		~domain() = default;
-
-		virtual std::string to_s() const = 0;
 	};
 
 	class preaxiomatic final : public domain {
@@ -381,6 +379,13 @@ namespace gentzen {
 			for (decltype(auto) x : Domain_values) if (src == get(x).get()) return x;
 			return std::nullopt;
 		}
+
+		// these don't work
+		std::unique_ptr<parsed> clone() const override { throw std::logic_error("no cloning preaxiomatic"); }
+		void CopyInto(parsed*& dest) const override { throw std::logic_error("no CopyInto for preaxiomatic"); }
+		void MoveInto(parsed*& dest) override { throw std::logic_error("no MoveInto for preaxiomatic"); }
+
+		formal::src_location origin() const override { return formal::src_location(); }
 
 		static constexpr auto to_s(Domain src) { return names[(size_t)src]; }
 
