@@ -636,43 +636,6 @@ namespace gentzen {
 		}
 	};
 
-	constexpr auto isin_test = domain_param({preaxiomatic::Domain::TruthValued, preaxiomatic::Domain::Ur}, {preaxiomatic::Domain::TruthValues});
-	constexpr auto domain_test = domain_param({}, { preaxiomatic::Domain::Ur });
-	constexpr auto element_test = domain_param({ preaxiomatic::Domain::Set, preaxiomatic::Domain::Ur }, { preaxiomatic::Domain::Class });
-
-	constexpr auto isin_code = isin_test.raw_code();
-	constexpr auto domain_code = domain_test.raw_code();
-	constexpr auto element_code = element_test.raw_code();
-
-	static_assert(domain_test.accept(isin_test));
-	static_assert(!*domain_test.accept(isin_test));
-	static_assert(element_test.accept(isin_test));
-	static_assert(*element_test.accept(isin_test));
-
-	template<preaxiomatic::Domain D>
-	constexpr std::optional<bool> need_preaxiomatic(const domain_param& providing) {
-		if (auto pre_x = std::get_if<preaxiomatic::Domain>(&providing)) {
-			if (D == *pre_x) return true;
-			if (is_contained_in(*pre_x, D)) return true;
-			if (are_disjoint(*pre_x, D)) return false;
-		}
-		// \todo handle dynamic domains (we have normalized preaxiomatic domains)
-
-		return std::nullopt;
-	}
-
-	template<preaxiomatic::Domain D>
-	constexpr std::optional<bool> reject_preaxiomatic(const domain_param& providing) {
-		if (auto pre_x = std::get_if<preaxiomatic::Domain>(&providing)) {
-			if (D == *pre_x) return false;
-			if (is_contained_in(*pre_x, D)) return false;
-			if (are_disjoint(*pre_x, D)) return true;
-		}
-		// \todo handle dynamic domains (we have normalized preaxiomatic domains)
-
-		return std::nullopt;
-	}
-
 	// singleton
 	class preaxiomatic_domain_of {
 	private:
@@ -944,21 +907,23 @@ namespace gentzen {
 
 			auto& [origin, target, ok] = src;
 
+			constexpr auto isin_type = domain_param({ preaxiomatic::Domain::TruthValued, preaxiomatic::Domain::Ur }, { preaxiomatic::Domain::TruthValues });
+			constexpr auto domain_ok = domain_param({}, { preaxiomatic::Domain::Ur });
+			constexpr auto element_ok = domain_param({ preaxiomatic::Domain::Set, preaxiomatic::Domain::Ur }, { preaxiomatic::Domain::Class });
+
+			static_assert(domain_ok.accept(isin_type));
+			static_assert(!*domain_ok.accept(isin_type));
+			static_assert(element_ok.accept(isin_type));
+			static_assert(*element_ok.accept(isin_type));
+
 			// \todo need to be able to tell the testing function that we are:
 			// * truth-valued
 			// * not a truth value
 			// * not a set (our notation is a set, but we ourselves are not)
 			if (ok.has_value()) {
-				if (auto test = std::any_cast<decltype(need_preaxiomatic<preaxiomatic::Domain::TruthValued>)>(&ok)) {
-					auto validate = test(preaxiomatic::Domain::TruthValued);
-					if (validate) {
-						if (!*validate) return std::nullopt; // authority actively rejects truth-valued expressions as error
-					} else {
-						// see if the authority requires a mathematical object
-						validate = test(preaxiomatic::Domain::Ur);
-						// see if the authority accepts what we evaluate to
-						validate = test(preaxiomatic::Domain::TruthValues);
-						if (!validate || !*validate) return std::nullopt;
+				if (auto test = std::any_cast<domain_param>(&ok)) {
+					if (auto verify = test->accept(isin_type)) {
+						if (!*verify) return std::nullopt;
 					}
 				}
 			}
