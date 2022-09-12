@@ -700,11 +700,19 @@ namespace gentzen {
 		}
 	};
 
+	// local refinement -- more API that we need, but a generic formal language doesn't
+	struct Gentzen : public formal::parsed {
+		virtual domain_param element_of() const = 0;
+		virtual domain_param syntax() const = 0;
+	};
+
 	// deferred: uniqueness quantification (unclear what data representation should be)
-	class var final : public formal::parsed {
+	class var final : public Gentzen {
 		unsigned long long _quant_code;
 		std::shared_ptr<const formal::lex_node> _var;
 		std::shared_ptr<const domain> _domain;
+
+		static constexpr auto my_syntax = domain_param({ preaxiomatic::Domain::TruthValued, preaxiomatic::Domain::Ur }, { preaxiomatic::Domain::TruthValues });
 
 		static constexpr const std::array<std::string_view, 3> to_s_aux = {
 			std::string_view(),
@@ -746,6 +754,8 @@ namespace gentzen {
 		}
 
 		std::string name() const { return _var->to_s(); }
+		domain_param element_of() const override { return domain_param(_domain.get()); }
+		domain_param syntax() const override { return my_syntax; }
 
 		static bool legal_varname(const formal::lex_node& src) {
 			if (0 < src.prefix_size()) return false;  // no prefix in the parse, at all
@@ -867,14 +877,13 @@ namespace gentzen {
 
 			auto& [origin, target, ok] = src;
 
-			constexpr auto isin_type = domain_param({ preaxiomatic::Domain::TruthValued, preaxiomatic::Domain::Ur }, { preaxiomatic::Domain::TruthValues });
 			constexpr auto domain_ok = domain_param({}, { preaxiomatic::Domain::Ur });
 			constexpr auto element_ok = domain_param({ preaxiomatic::Domain::Set, preaxiomatic::Domain::Ur }, { preaxiomatic::Domain::Class });
 
-			static_assert(domain_ok.accept(isin_type));
-			static_assert(!*domain_ok.accept(isin_type));
-			static_assert(element_ok.accept(isin_type));
-			static_assert(*element_ok.accept(isin_type));
+			static_assert(domain_ok.accept(my_syntax));
+			static_assert(!*domain_ok.accept(my_syntax));
+			static_assert(element_ok.accept(my_syntax));
+			static_assert(*element_ok.accept(my_syntax));
 
 			// need to be able to tell the testing function that we are:
 			// * truth-valued
@@ -882,7 +891,7 @@ namespace gentzen {
 			// * not a set (our notation is a set, but we ourselves are not)
 			if (ok.has_value()) {
 				if (auto test = std::any_cast<domain_param>(&ok)) {
-					if (auto verify = test->accept(isin_type)) {
+					if (auto verify = test->accept(my_syntax)) {
 						if (!*verify) return std::nullopt;
 					}
 				}
@@ -1024,7 +1033,7 @@ private:
 		};
 	};
 
-	class var_ref final : public formal::parsed {
+	class var_ref final : public Gentzen {
 		std::shared_ptr<const var> _var;
 		formal::src_location _origin;
 
@@ -1042,6 +1051,9 @@ private:
 
 		formal::src_location origin() const override { return _origin; }
 		std::string to_s() const override { return _var->name(); }
+
+		domain_param element_of() const override { return _var->element_of(); }
+		domain_param syntax() const override { return _var->element_of(); }
 
 		static std::unique_ptr<var_ref> improvise(formal::lex_node*& name, std::shared_ptr<const domain> domain) {
 			const auto origin = name->origin();
