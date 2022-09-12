@@ -215,7 +215,7 @@ namespace formal {
 		// true, std::string: warning
 		// false, std:: string: error
 		// false, "": no comment, error
-		using wff_t = std::pair<bool, std::string>;
+		using wff_t = std::pair<bool, std::pair<formal::src_location, std::string> >;
 		using ret_parse_t = std::pair<wff_t, parse_t>;
 
 	private:
@@ -232,6 +232,26 @@ namespace formal {
 		is_wff& operator=(is_wff&& src) = default;
 		~is_wff() = default;
 
+		static auto no_msg() {
+			static const auto ooao = std::pair(formal::src_location(), std::string());
+			return ooao;
+		}
+
+		static wff_t no_op() {
+			static const wff_t ooao = wff_t(false, no_msg());
+			return ooao;
+		}
+
+		static wff_t proceed() {
+			static const wff_t ooao = wff_t(true, no_msg());
+			return ooao;
+		}
+
+		static ret_parse_t no_parse() {
+			static const ret_parse_t ooao = ret_parse_t(no_op(), nullptr);
+			return ooao;
+		}
+
 		// thin forwarders for std::visit
 		std::optional<wff_t> operator()(std::unique_ptr<formal::word>& src) { return operator()(*src); }
 		std::optional<wff_t> operator()(std::unique_ptr<formal::lex_node>& src) { return operator()(*src); }
@@ -247,21 +267,21 @@ namespace formal {
 			for (decltype(auto) h : _well_formed_lex_node) {
 				if (auto ret = h(src)) return *ret;
 			}
-			return std::pair(false, std::string());
+			return no_op();
 		}
 
 		wff_t operator()(const formal::parsed& src) {
 			for (decltype(auto) h : _well_formed_parsed) {
 				if (auto ret = h(src)) return *ret;
 			}
-			return std::pair(false, std::string());
+			return no_op();
 		}
 
 		wff_t operator()(const formal::word& src) {
 			for (decltype(auto) h : _well_formed_word) {
 				if (auto ret = h(src)) return *ret;
 			}
-			return std::pair(true, std::string());
+			return no_op();
 		}
 
 		ret_parse_t operator()(subsequence src) {
@@ -276,7 +296,7 @@ namespace formal {
 			if (fallback) return *fallback;
 			decltype(auto) target = std::get<1>(src);
 			if (1 == target.size()) return ret_parse_t(operator()(**target.begin()), nullptr);
-			return ret_parse_t(std::pair(false, std::string()), nullptr);
+			return ret_parse_t(no_op(), nullptr);
 		}
 	};
 
@@ -918,30 +938,27 @@ namespace gentzen {
 			if (0 > anchor_at) return std::nullopt;
 			const auto& anchor = *target[anchor_at];
 			if (anchor.code() & formal::Error) {
-				return formal::is_wff::ret_parse_t(std::pair(false, std::string()), nullptr);
+				return formal::is_wff::no_parse();
 			}
 
 			if (0 == anchor_at) {
 				// might want to hard error for "final" parsing
-				size_t offset = origin;
-				std::span<formal::lex_node*> dest = target.first(1);
-				auto fail = [=]() {
+				auto fail = [offset=origin, dest = target.first(1)]() {
 					formal::is_wff::change_target ret(offset, dest);
+					error_report(*ret.second.front(), "&isin; cannot match variable to its left");
 					ret.second.front()->learn(formal::Error);
 					return ret;
 				};
-				return formal::is_wff::ret_parse_t(std::pair(false, std::string("&isin; cannot match variable to its left")), fail);
+				return formal::is_wff::ret_parse_t(formal::is_wff::no_op(), fail);
 			}
 			if (target.size() - 1 == anchor_at) {
-				size_t offset = origin + anchor_at;
-				std::span<formal::lex_node*> dest = target.last(1);
-				auto fail = [=]() {
+				auto fail = [offset = origin + anchor_at, dest = target.last(1)]() {
 					formal::is_wff::change_target ret(offset, dest);
 					ret.second.front()->learn(formal::Error);
 					return ret;
 				};
 				// might want to hard error for "final" parsing
-				return formal::is_wff::ret_parse_t(std::pair(false, std::string("&isin; cannot match to its right")), fail);
+				return formal::is_wff::ret_parse_t(std::pair(false, std::pair(anchor.origin(), std::string("&isin; cannot match to its right"))), fail);
 			}
 			// forward is the domain check
 			// backwards is the variable check
@@ -1009,7 +1026,7 @@ namespace gentzen {
 					target.front() = relay.release();
 					return formal::is_wff::change_target(origin, target);
 				};
-				return formal::is_wff::ret_parse_t(std::pair(true, std::string()), rewrite);
+				return formal::is_wff::ret_parse_t(formal::is_wff::proceed(), rewrite);
 			}
 			if ((decltype(quant_code))quantifier::ThereIs >= quant_code) {
 				if (2 != anchor_at) throw new std::exception("tracing");
@@ -1026,7 +1043,7 @@ namespace gentzen {
 					target.front() = relay.release();
 					return formal::is_wff::change_target(origin, target);
 				};
-				return formal::is_wff::ret_parse_t(std::pair(true, std::string()), rewrite);
+				return formal::is_wff::ret_parse_t(formal::is_wff::proceed(), rewrite);
 			}
 
 			return std::nullopt;
@@ -1602,6 +1619,35 @@ auto HTML_bind_to_preceding(kuroda::parser<formal::lex_node>::sequence& src, siz
 	return ret;
 }
 
+auto check_for_gentzen_wellformed(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
+	std::vector<size_t> ret;
+
+// using subsequence = std::tuple<size_t, std::span<formal::lex_node*>, std::any >;
+	auto test2 = gentzen::syntax_check(formal::is_wff::subsequence(0, std::span(src.begin(), viewpoint + 1), std::any()));
+
+//		using change_target = std::pair<size_t, std::span<formal::lex_node*> >;
+//		using parse_t = std::function<change_target()>;
+//		using wff_t = std::pair<bool, std::pair<formal::src_location, std::string> >;
+//	using ret_parse_t = std::pair<wff_t, parse_t>;
+	if (!test2.first.second.second.empty()) {
+		if (test2.first.first) {
+			warning_report(test2.first.second.first, test2.first.second.second);
+		} else {
+			error_report(test2.first.second.first, test2.first.second.second);
+		}
+	}
+	if (test2.second) {
+		auto changed = test2.second();
+		if (1 < changed.second.size()) {
+			if (changed.second[0] == src[changed.first]) {
+				src.DeleteNSlotsAt(changed.second.size()-1, changed.first + 1);
+			} else {
+				// invariant violation
+			}
+		}
+	}
+}
+
 static auto& TokenGrammar() {
 	static std::unique_ptr<kuroda::parser<formal::lex_node> > ooao;
 	if (!ooao) {
@@ -1611,6 +1657,8 @@ static auto& TokenGrammar() {
 		ooao->register_build_nonterminal(balanced_atomic_handler(reserved_atomic[2].first, reserved_atomic[3].first));
 		ooao->register_build_nonterminal(balanced_html_tag);
 		ooao->register_build_nonterminal(HTML_bind_to_preceding);
+
+		gentzen::syntax_check.register_handler(gentzen::var::wff);
 
 		// \todo need local test cases for these
 		ooao->register_build_nonterminal(gentzen::var::reject_adjacent);
