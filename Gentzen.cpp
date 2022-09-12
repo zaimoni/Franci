@@ -1012,6 +1012,11 @@ namespace gentzen {
 			return std::nullopt;
 		}
 
+		static std::unique_ptr<var> improvise(formal::lex_node*& name, std::shared_ptr<const domain> domain, quantifier quant) {
+			if (!var::legal_varname(*name)) return nullptr;
+			return std::unique_ptr<var>(new var(name, domain, quant));
+		}
+
 private:
 		var(formal::lex_node*& name, std::shared_ptr<const domain> domain, quantifier quant)
 		: _quant_code((unsigned long long)quant), _var(name), _domain(domain) {
@@ -1037,6 +1042,17 @@ private:
 
 		formal::src_location origin() const override { return _origin; }
 		std::string to_s() const override { return _var->name(); }
+
+		static std::unique_ptr<var_ref> improvise(formal::lex_node*& name, std::shared_ptr<const domain> domain) {
+			const auto origin = name->origin();
+			decltype(auto) stage = var::improvise(name, domain, var::quantifier::Term);
+			if (!stage) return nullptr;
+			return std::unique_ptr<var_ref>(new var_ref(std::shared_ptr<const var>(stage.release()), origin));
+		}
+
+	private:
+		var_ref(const std::shared_ptr<const var>& src, const formal::src_location& origin) noexcept : _var(src), _origin(origin) {}
+
 	};
 
 	// \todo syntactical equivalence will be its own type, even though it's very similar
