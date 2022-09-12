@@ -861,43 +861,6 @@ namespace gentzen {
 			return ret;
 		}
 
-		static std::vector<size_t> parse(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
-			// our syntax is: [quantifier] varname &isin; domain
-			std::vector<size_t> ret;
-
-			if (3 > src.size()) return ret;
-			if (2 > viewpoint) return ret;
-			if (!interpret_HTML_entity(*src[viewpoint - 1], "isin")) return ret;
-			if (src[viewpoint - 1]->code() & formal::Error) return ret;
-			if (!legal_varname(*src[viewpoint - 2])) return ret; // \todo handle more general well-formed expressions
-			auto domain = preaxiomatic::parse(*src[viewpoint]); // \todo handle more general domains of discourse
-			if (!domain) return ret;
-			auto quant_code = 3 < src.size() ? legal_quantifier(*src[viewpoint - 3]) : 0;
-			if (0 >= quant_code) {
-				// a term variable.
-				std::unique_ptr<var> stage(new var(src[viewpoint-2], preaxiomatic::get(*domain), quantifier::Term));
-				std::unique_ptr<formal::lex_node> relay(new formal::lex_node(stage.release()));
-				ret.push_back(viewpoint - 2);
-				src.DeleteNSlotsAt(2, viewpoint - 1);
-				delete src[viewpoint - 2];
-				src[viewpoint - 2] = relay.release();
-				return ret;
-			}
-			if ((decltype(quant_code))quantifier::ThereIs >= quant_code) {
-				// a quantified variable.
-				std::unique_ptr<var> stage(new var(src[viewpoint - 2], preaxiomatic::get(*domain), (quantifier)quant_code));
-				std::unique_ptr<formal::lex_node> relay(new formal::lex_node(stage.release()));
-				ret.push_back(viewpoint - 3);
-				src.DeleteNSlotsAt(2, viewpoint - 1);
-				src.DeleteIdx(viewpoint-3);
-				delete src[viewpoint - 3];
-				src[viewpoint - 3] = relay.release();
-				return ret;
-			}
-			// \todo? more advanced quantifiers?
-			return ret;
-		}
-
 		static std::optional<formal::is_wff::ret_parse_t> wff(formal::is_wff::subsequence src) {
 			// We don't have a good idea of transitivity here : x &isin; y &isin; z should not parse.
 			// (x &isin; y) &isin; <b>TruthValued</b> not only should parse, it should be an axiom built into the type system
@@ -913,7 +876,7 @@ namespace gentzen {
 			static_assert(element_ok.accept(isin_type));
 			static_assert(*element_ok.accept(isin_type));
 
-			// \todo need to be able to tell the testing function that we are:
+			// need to be able to tell the testing function that we are:
 			// * truth-valued
 			// * not a truth value
 			// * not a set (our notation is a set, but we ourselves are not)
@@ -977,7 +940,7 @@ namespace gentzen {
 				quantifier_at = 0;
 			}
 
-			std::optional<std::variant<domain*, preaxiomatic::Domain> > interpret_domain(nullptr);
+			std::optional<std::variant<domain*, preaxiomatic::Domain> > interpret_domain;
 			if (anchor_at + 2 == target.size()) {
 				decltype(auto) domain_src = *target[anchor_at + 1];
 				if (auto preax = preaxiomatic::parse(domain_src)) {
@@ -1637,7 +1600,9 @@ auto check_for_gentzen_wellformed(kuroda::parser<formal::lex_node>::sequence& sr
 		}
 	}
 	if (test2.second) {
+		ret.push_back(0);
 		auto changed = test2.second();
+		ret[0] = changed.first;
 		if (1 < changed.second.size()) {
 			if (changed.second[0] == src[changed.first]) {
 				src.DeleteNSlotsAt(changed.second.size()-1, changed.first + 1);
@@ -1646,6 +1611,7 @@ auto check_for_gentzen_wellformed(kuroda::parser<formal::lex_node>::sequence& sr
 			}
 		}
 	}
+	return ret;
 }
 
 static auto& TokenGrammar() {
@@ -1662,9 +1628,10 @@ static auto& TokenGrammar() {
 
 		// \todo need local test cases for these
 		ooao->register_build_nonterminal(gentzen::var::reject_adjacent);
-		ooao->register_build_nonterminal(gentzen::var::parse);
 		ooao->register_left_edge_build_nonterminal(gentzen::var::reject_left_edge);
 		ooao->register_right_edge_build_nonterminal(gentzen::var::reject_right_edge);
+
+		ooao->register_right_edge_build_nonterminal(check_for_gentzen_wellformed);
 	};
 	return *ooao;
 }
