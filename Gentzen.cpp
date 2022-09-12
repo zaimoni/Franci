@@ -364,7 +364,7 @@ namespace gentzen {
 			return x;
 		}
 
-		static std::optional<Domain> get(domain* src) {
+		static std::optional<Domain> get(const domain* src) {
 			if (!src) return std::nullopt;
 
 			for (decltype(auto) x : Domain_values) if (src == get(x).get()) return x;
@@ -481,13 +481,13 @@ namespace gentzen {
 	static constexpr auto test4 = perl::enumerate<perl::count_if(preaxiomatic::Domain_values, preaxiomatic::Domain_values, is_properly_contained_in)>(preaxiomatic::Domain_values, preaxiomatic::Domain_values, is_properly_contained_in);
 	static_assert(std::end(test4) != std::find(test4.begin(), test4.end(), std::pair(preaxiomatic::Domain::TruthValues, preaxiomatic::Domain::TruthValued)));
 
-	class domain_param final : public std::variant<preaxiomatic::Domain, unsigned long, domain*> {
-		using base = std::variant<preaxiomatic::Domain, unsigned long, domain*>;
+	class domain_param final : public std::variant<preaxiomatic::Domain, unsigned long, const domain*> {
+		using base = std::variant<preaxiomatic::Domain, unsigned long, const domain*>;
 		using listing = zaimoni::stack<preaxiomatic::Domain, preaxiomatic::Domain_values.size()>;
 
 	public:
 		constexpr domain_param(preaxiomatic::Domain src) noexcept : base{src} {}
-		constexpr domain_param(domain* src) : base{src} {
+		constexpr domain_param(const domain* src) : base{src} {
 			if (!src) throw std::invalid_argument("null src");
 			if (auto ok = preaxiomatic::get(src)) *this = *ok;
 		}
@@ -626,7 +626,7 @@ namespace gentzen {
 					}
 					return std::pair(ok, no);
 				}
-				constexpr auto operator()(domain* src) { return std::pair<listing, listing>(); }
+				constexpr auto operator()(const domain* src) { return std::pair<listing, listing>(); }
 			};
 
 			return std::visit(interpret(), *this);
