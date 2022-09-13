@@ -123,6 +123,13 @@ constexpr const std::pair<const char*, char32_t>* lookup_HTML_entity(char32_t co
 static_assert(0x2200UL == lookup_HTML_entity("forall")->second);
 static_assert(0x2200UL == lookup_HTML_entity(0x2200UL)->second);
 
+constexpr auto lookup_HTML_entity(const std::variant<std::string_view, char32_t>& name)
+{
+	if (auto text = std::get_if<std::string_view>(&name)) return lookup_HTML_entity(*text);
+	return lookup_HTML_entity(std::get<char32_t>(name));
+}
+
+
 // end prototype lookup
 
 std::optional<std::variant<std::string_view, char32_t> > interpret_HTML_entity(std::string_view src) {
@@ -700,6 +707,154 @@ namespace gentzen {
 		}
 	};
 
+	// should only need one of these per formal language
+	// handles common issues with infix/prefix/postfix reserved keywords
+	class argument_enforcer final
+	{
+		static constexpr const unsigned int require_left = (1U << 0);
+		static constexpr const unsigned int require_right = (1U << 1);
+		static_assert(!(require_left & require_right));
+
+		std::vector<std::pair<std::string_view, unsigned int> > _reserved_HTML_named_entities;
+		std::vector<std::pair<char32_t, unsigned int> > _reserved_HTML_numeric_entities;
+
+		argument_enforcer() = default;
+	public:
+		argument_enforcer(const argument_enforcer&) = delete;
+		argument_enforcer(argument_enforcer&&) = delete;
+		argument_enforcer& operator=(const argument_enforcer&) = delete;
+		argument_enforcer& operator=(argument_enforcer&&) = delete;
+		~argument_enforcer() = default;
+
+		static argument_enforcer& get() {
+			static argument_enforcer ooao;
+			return ooao;
+		}
+
+		void reserve_HTML_entity(bool want_left, const std::string_view& src, bool want_right) {
+			for (decltype(auto) x : _reserved_HTML_named_entities) if (src == x.first) continue;
+			if (auto test = lookup_HTML_entity(src)) {
+				ptrdiff_t i = _reserved_HTML_numeric_entities.size();
+				while (0 <= --i) {
+					if (test->second == _reserved_HTML_numeric_entities[i].first) {
+						_reserved_HTML_numeric_entities.erase(_reserved_HTML_numeric_entities.begin() + i);
+						break;
+					}
+				}
+			}
+			_reserved_HTML_named_entities.push_back(std::pair(src, (want_left ? require_left : 0U) | (want_right ? require_right : 0U)));
+		}
+
+		void reserve_HTML_entity(bool want_left, char32_t src, bool want_right) {
+			for (decltype(auto) x : _reserved_HTML_numeric_entities) if (src == x.first) continue;
+			if (auto test = lookup_HTML_entity(src)) {
+				ptrdiff_t i = _reserved_HTML_named_entities.size();
+				while (0 <= --i) {
+					if (test->first == _reserved_HTML_named_entities[i].first) return;
+				}
+			}
+			_reserved_HTML_numeric_entities.push_back(std::pair(src, (want_left ? require_left : 0U) | (want_right ? require_right : 0U)));
+		}
+
+		static std::vector<size_t> reject_left_edge(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
+			std::vector<size_t> ret;
+			if (src[viewpoint]->code() & formal::Error) return ret;
+
+			if (auto node = interpret_HTML_entity(*src[viewpoint])) {
+				if (auto tag = interpret_HTML_entity(node->value())) {
+					if (_reject_left_edge(*tag)) {
+						std::string err(node->value());
+						err += "cannot match to its left";
+						error_report(*src[viewpoint], err);
+						return ret;
+					}
+				}
+			}
+			return ret;
+		}
+
+		static std::vector<size_t> reject_right_edge(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
+			std::vector<size_t> ret;
+			if (src[viewpoint]->code() & formal::Error) return ret;
+
+			if (auto node = interpret_HTML_entity(*src[viewpoint])) {
+				if (auto tag = interpret_HTML_entity(node->value())) {
+					if (_reject_right_edge(*tag)) {
+						std::string err(node->value());
+						err += "cannot match to its right";
+						error_report(*src[viewpoint], err);
+						return ret;
+					}
+				}
+			}
+
+			return ret;
+		}
+
+		static std::vector<size_t> reject_adjacent(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
+			std::vector<size_t> ret;
+
+			if (1 > viewpoint) return ret;
+			if ((src[viewpoint]->code() & formal::Error) && (src[viewpoint - 1]->code() & formal::Error)) return ret;
+
+			auto l_node = interpret_HTML_entity(*src[viewpoint - 1]);
+			if (!l_node) return ret;
+			auto r_node = interpret_HTML_entity(*src[viewpoint]);
+			if (!r_node) return ret;
+			auto l_tag = interpret_HTML_entity(l_node->value());
+			if (!l_tag) return ret;
+			auto r_tag = interpret_HTML_entity(r_node->value());
+			if (!r_tag) return ret;
+			if (_reject_right_edge(*l_tag) && _reject_left_edge(*r_tag)) {
+				std::string err(l_node->value());
+				err += ' ';
+				err += r_node->value();
+				err += " : ";
+				err += "cannot parse";
+				error_report(*src[viewpoint - 1], err);
+				src[viewpoint]->learn(formal::Error);
+				return ret;
+			}
+
+			return ret;
+		}
+
+	private:
+		static bool _reject_left_edge(const std::variant<std::string_view, char32_t>& tag) {
+			const auto& ooao = get();
+			if (auto entity = lookup_HTML_entity(tag)) {
+				if (entity->first) {
+					for (decltype(auto) x : ooao._reserved_HTML_named_entities) {
+						if ((x.second & require_left) && x.first == entity->first) return true;
+					};
+					return false;
+				}
+				for (decltype(auto) x : ooao._reserved_HTML_numeric_entities) {
+					if ((x.second & require_left) && x.first == entity->second) return true;
+				};
+				return false;
+			}
+			return false;
+		}
+
+		static bool _reject_right_edge(const std::variant<std::string_view, char32_t>& tag) {
+			const auto& ooao = get();
+			if (auto entity = lookup_HTML_entity(tag)) {
+				if (entity->first) {
+					for (decltype(auto) x : ooao._reserved_HTML_named_entities) {
+						if ((x.second & require_right) && x.first == entity->first) return true;
+					};
+					return false;
+				}
+				for (decltype(auto) x : ooao._reserved_HTML_numeric_entities) {
+					if ((x.second & require_right) && x.first == entity->second) return true;
+				};
+				return false;
+			}
+			return false;
+		}
+	};
+
 	// local refinement -- more API that we need, but a generic formal language doesn't
 	struct Gentzen : public formal::parsed {
 		virtual domain_param element_of() const = 0;
@@ -824,52 +979,10 @@ namespace gentzen {
 		}
 
 		// our syntax is: [quantifier] varname &isin; domain
-		static std::vector<size_t> reject_left_edge(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
-			std::vector<size_t> ret;
-			if (interpret_HTML_entity(*src[viewpoint], "isin")) {
-				// no room for variable to left
-				if (src[viewpoint]->code() & formal::Error) return ret;
-				error_report(*src[viewpoint], "&isin; cannot match variable to its left");
-			}
-			return ret;
-		}
-
-		static std::vector<size_t> reject_right_edge(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
-			std::vector<size_t> ret;
-			if (src[viewpoint]->code() & formal::Error) return ret;
-
-			if (decltype(auto) fail = interpret_HTML_entity(*src[viewpoint], reserved_HTML_entities)) {
-				std::string err = wrap_to_HTML_entity(*fail);
-				err += " cannot match to its right";
-				error_report(*src[viewpoint], err);
-			}
-
-			return ret;
-		}
-
-		static std::vector<size_t> reject_adjacent(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
-			std::vector<size_t> ret;
-
-			if (2 > src.size()) return ret;
-			if (1 > viewpoint) return ret;
-
-			const auto origin = reserved_HTML_entities.begin();
-			const auto ub = reserved_HTML_entities.end();
-
-			auto leading = std::find_if(origin, ub, [&](const std::string_view& tag) { return interpret_HTML_entity(*src[viewpoint - 1], tag); });
-			if (leading == ub) return ret;
-			auto trailing = std::find_if(origin, ub, [&](const std::string_view& tag) { return interpret_HTML_entity(*src[viewpoint], tag); });
-			if (trailing == ub) return ret;
-			if ((src[viewpoint - 1]->code() & formal::Error) && (src[viewpoint]->code() & formal::Error)) return ret;
-
-			std::string err = wrap_to_HTML_entity(*leading);
-			err += ' ';
-			err += wrap_to_HTML_entity(*trailing);
-			err += " : cannot parse to variable declaration";
-			error_report(*src[viewpoint-1], err);
-			src[viewpoint]->learn(formal::Error);
-			return ret;
-		}
+		static void init(argument_enforcer& dest) {
+			for (decltype(auto) x : quantifier_HTML_entities) dest.reserve_HTML_entity(false, x, true);
+			dest.reserve_HTML_entity(true, "isin", true);
+		};
 
 		static std::optional<formal::is_wff::ret_parse_t> wff(formal::is_wff::subsequence src) {
 			// We don't have a good idea of transitivity here : x &isin; y &isin; z should not parse.
@@ -1653,11 +1766,12 @@ static auto& TokenGrammar() {
 		ooao->register_build_nonterminal(HTML_bind_to_preceding);
 
 		gentzen::syntax_check.register_handler(gentzen::var::wff);
+		gentzen::var::init(gentzen::argument_enforcer::get());
 
 		// \todo need local test cases for these
-		ooao->register_build_nonterminal(gentzen::var::reject_adjacent);
-		ooao->register_left_edge_build_nonterminal(gentzen::var::reject_left_edge);
-		ooao->register_right_edge_build_nonterminal(gentzen::var::reject_right_edge);
+		ooao->register_build_nonterminal(gentzen::argument_enforcer::reject_adjacent);
+		ooao->register_left_edge_build_nonterminal(gentzen::argument_enforcer::reject_left_edge);
+		ooao->register_right_edge_build_nonterminal(gentzen::argument_enforcer::reject_right_edge);
 
 		ooao->register_right_edge_build_nonterminal(check_for_gentzen_wellformed);
 	};
