@@ -856,9 +856,14 @@ namespace gentzen {
 	};
 
 	// local refinement -- more API that we need, but a generic formal language doesn't
+	class var;
+
 	struct Gentzen : public formal::parsed {
 		virtual domain_param element_of() const = 0;
 		virtual domain_param syntax() const = 0;
+
+		// not really const; just mostly used during construction
+		[[nodiscard]] virtual bool normalize_vars(std::vector<std::shared_ptr<const var> >& catalog) const = 0;
 	};
 
 	// deferred: uniqueness quantification (unclear what data representation should be)
@@ -911,6 +916,9 @@ namespace gentzen {
 		std::string name() const { return _var->to_s(); }
 		domain_param element_of() const override { return domain_param(_domain.get()); }
 		domain_param syntax() const override { return my_syntax; }
+		bool normalize_vars(std::vector<std::shared_ptr<const var> >& catalog) const override { return false; }
+
+		quantifier quantified() const { return (quantifier)_quant_code; }
 
 		static bool legal_varname(const formal::lex_node& src) {
 			if (0 < src.prefix_size()) return false;  // no prefix in the parse, at all
@@ -1167,6 +1175,47 @@ private:
 
 		domain_param element_of() const override { return _var->element_of(); }
 		domain_param syntax() const override { return _var->element_of(); }
+		bool normalize_vars(std::vector<std::shared_ptr<const var> >& catalog) const override {
+			const std::string my_name = _var->name();
+			const domain_param my_domain = _var->element_of();
+			var::quantifier my_q = _var->quantified();
+
+			for (decltype(auto) x : catalog) {
+				if (x.get() == _var.get()) return false;
+				const std::string my_name = x->name();
+				if (my_name == x->name()) {
+					// lexical match but not same
+					// as we improvise to term quantification, it is ok to update that to the catalog version
+					if (var::quantifier::Term != my_q && x->quantified() != my_q) {
+						std::string err("parse ambiguity: ");
+						err += my_name;
+						err += " has inconsistent quantifications";
+						throw std::pair(_origin, err);
+					}
+
+					const domain_param x_domain = _var->element_of();
+					if (my_domain == x_domain) {
+						const_cast<std::shared_ptr<const var>&>(_var) = x;
+						return false;
+					}
+
+					// \todo if our domain *contains* the reference domain, update as above
+					// \todo if our domain *is contained* in the reference domain, update the catalog (and return true)
+					// \todo if our domain *is disjoint*, hard error
+					// \todo otherwise, take intersection of domains and update both us and the catalog (and return true)
+
+					std::string err("don't know how to reconcile domains ");
+					err += my_name;
+					err += " and ";
+					err += x->name();
+					throw std::pair(_origin, err);
+				}
+			}
+
+			// not in catalog.
+			catalog.push_back(_var);
+			return false;
+		}
 
 		static std::unique_ptr<var_ref> improvise(formal::lex_node*& name, std::shared_ptr<const domain> domain) {
 			const auto origin = name->origin();
@@ -1184,13 +1233,19 @@ private:
 	class inference_rule {
 		std::string _name;
 		std::vector<std::shared_ptr<const var> > _vars;
-		std::vector<std::shared_ptr<const formal::parsed> > _hypotheses;
-		std::vector<std::shared_ptr<const formal::parsed> > _conclusions;
+		std::vector<std::shared_ptr<const Gentzen> > _hypotheses;
+		std::vector<std::shared_ptr<const Gentzen> > _conclusions;
 
-		using uniform_substitution_t = std::vector<std::pair<std::shared_ptr<const var>, std::weak_ptr<formal::parsed> > >;
+		// key: hypotheses/conclusions
+		// values: statements (when sub-proof is destucted, its statements will go null)
+		using pattern_t = std::vector<std::pair<std::shared_ptr<const Gentzen>, std::weak_ptr<Gentzen> > >;
 
-		// fact, hypothesis/conclusion, var assignments
-		using arg_match = std::tuple<std::weak_ptr<const formal::parsed>, std::shared_ptr<const formal::parsed>, std::vector<std::pair<std::shared_ptr<const formal::parsed>, std::weak_ptr<const formal::parsed> > > >;
+		// key: placeholder variables
+		// values: statements (when sub-proof is destucted, its statements will go null)
+		using uniform_substitution_t = std::vector<std::pair<std::shared_ptr<const var>, std::weak_ptr<Gentzen> > >;
+
+		// hypothesis pattern match, conclusion pattern match, uniform substitution used
+		using arg_match = std::tuple<pattern_t, pattern_t, uniform_substitution_t >;
 		std::vector<arg_match> _rete_alpha_memory;
 
 	public:
@@ -1201,19 +1256,44 @@ private:
 		inference_rule& operator=(inference_rule&& src) = default;
 		~inference_rule() = default;
 
-		inference_rule(std::vector<std::shared_ptr<const formal::parsed> >&& hypotheses, std::vector<std::shared_ptr<const formal::parsed> >&& conclusions, std::string&& name = std::string())
+		inference_rule(decltype(_hypotheses)&& hypotheses, decltype(_conclusions)&& conclusions, std::string&& name = std::string())
 			: _name(std::move(name)), _hypotheses(std::move(hypotheses)), _conclusions(std::move(conclusions)) {
+retry:
+			bool want_retry = false;
+			for (decltype(auto) p : _hypotheses) {
+				want_retry = p->normalize_vars(_vars);
+			}
+
+			const size_t n = _vars.size();
+			for (decltype(auto) q : _conclusions) {
+				want_retry = q->normalize_vars(_vars);
+			}
+
+			if (0 < n && n < _vars.size()) {
+				// let axioms through, but otherwise require relevance per Belnap
+				std::string err("inference rule '");
+				err += _name;
+				err += "' lacks relevance: ";
+				err += std::to_string(n);
+				err += " variables in hypothes(es), and ";
+				err += std::to_string(_vars.size() - n);
+				err += " more variables in conclusion(s) ";
+				throw std::pair(formal::src_location(), err);
+			}
+			if (want_retry) goto retry;
 		}
 	};
 
 	class proof {
-
-	public:
 		enum class rationale {
 			Given = 0,
 			Hypothesis
 		};
 
+		std::vector<std::shared_ptr<const var> > _vars; // global working variable catalog
+		std::vector<std::shared_ptr<proof> > _testing;  // sub-proofs that Franci has not yet committed to using
+
+	public:
 		proof() = default;
 		proof(const proof& src) = default;
 		proof(proof&& src) = default;
