@@ -213,8 +213,8 @@ namespace formal {
 	// many programming languages have the notion of a token, i.e. formal word, that is a syntax error by construction
 	class is_wff { // is well-formed formula
 	public:
-		// offset, change target, constraint (usually some sort of std::function using language-specific types)
-		using subsequence = std::tuple<size_t, std::span<formal::lex_node*>, std::any >;
+		// offset, change target, constraints (usually some sort of std::function using language-specific types)
+		using subsequence = std::tuple<size_t, std::span<formal::lex_node*>, std::vector<std::any> >;
 		using change_target = std::pair<size_t, std::span<formal::lex_node*> >;
 		using parse_t = std::function<change_target()>;
 
@@ -996,7 +996,7 @@ namespace gentzen {
 			// We don't have a good idea of transitivity here : x &isin; y &isin; z should not parse.
 			// (x &isin; y) &isin; <b>TruthValued</b> not only should parse, it should be an axiom built into the type system
 
-			auto& [origin, target, ok] = src;
+			auto& [origin, target, demand] = src;
 
 			constexpr auto domain_ok = domain_param({}, { preaxiomatic::Domain::Ur });
 			constexpr auto element_ok = domain_param({ preaxiomatic::Domain::Set, preaxiomatic::Domain::Ur }, { preaxiomatic::Domain::Class });
@@ -1010,7 +1010,8 @@ namespace gentzen {
 			// * truth-valued
 			// * not a truth value
 			// * not a set (our notation is a set, but we ourselves are not)
-			if (ok.has_value()) {
+			for (decltype(auto) ok : demand) {
+				if (!ok.has_value()) continue;
 				if (auto test = std::any_cast<domain_param>(&ok)) {
 					if (auto verify = test->accept(my_syntax)) {
 						if (!*verify) return std::nullopt;
@@ -1807,7 +1808,7 @@ auto check_for_gentzen_wellformed(kuroda::parser<formal::lex_node>::sequence& sr
 	std::vector<size_t> ret;
 
 // using subsequence = std::tuple<size_t, std::span<formal::lex_node*>, std::any >;
-	auto test2 = gentzen::syntax_check(formal::is_wff::subsequence(0, std::span(src.begin(), viewpoint + 1), std::any()));
+	auto test2 = gentzen::syntax_check(formal::is_wff::subsequence(0, std::span(src.begin(), viewpoint + 1), std::vector<std::any>()));
 
 //		using change_target = std::pair<size_t, std::span<formal::lex_node*> >;
 //		using parse_t = std::function<change_target()>;
