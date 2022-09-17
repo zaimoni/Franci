@@ -101,7 +101,8 @@ constexpr const std::pair<const char*, char32_t> HTML_entities[] = {
 	{"exist", 0x2203ULL},
 	{"empty", 0x2205ULL},
 	{"isin", 0x2208ULL},
-	{nullptr, 0x2209ULL} // := ~(... &isin; ...) when ... &isin; ... is well-formed
+	{nullptr, 0x2209ULL}, // := ~(... &isin; ...) when ... &isin; ... is well-formed
+	{nullptr, 9500ULL} // syntactically entails
 };
 
 constexpr const std::pair<const char*, char32_t>* lookup_HTML_entity(const std::string_view& name)
@@ -170,6 +171,14 @@ bool interpret_HTML_entity(std::string_view src, const std::string_view& ref) {
 	return false;
 }
 
+bool interpret_HTML_entity(std::string_view src, char32_t ref) {
+	if (const auto test = interpret_HTML_entity(src)) {
+		if (auto x = std::get_if<char32_t>(&(*test))) return ref == *x;
+		if (auto transcode = lookup_HTML_entity(std::get<std::string_view>(*test))) return ref == transcode->second;
+	}
+	return false;
+}
+
 formal::word* interpret_HTML_entity(const formal::lex_node& src)
 {
 	if (src.code() & HTMLtag::Entity) {
@@ -182,6 +191,12 @@ formal::word* interpret_HTML_entity(const formal::lex_node& src)
 }
 
 bool interpret_HTML_entity(const formal::lex_node& src, const std::string_view& ref)
+{
+	if (const auto w = interpret_HTML_entity(src)) return interpret_HTML_entity(w->value(), ref);
+	return false;
+}
+
+bool interpret_HTML_entity(const formal::lex_node& src, char32_t ref)
 {
 	if (const auto w = interpret_HTML_entity(src)) return interpret_HTML_entity(w->value(), ref);
 	return false;
@@ -1249,6 +1264,9 @@ private:
 		using arg_match = std::tuple<pattern_t, pattern_t, uniform_substitution_t >;
 		std::vector<arg_match> _rete_alpha_memory;
 
+		static constexpr auto my_syntax = domain_param({ preaxiomatic::Domain::TruthValued, preaxiomatic::Domain::Ur }, { preaxiomatic::Domain::TruthValues });
+		static constexpr const char32_t reserved_HTML_entities[] = { 9500ULL };
+
 	public:
 		inference_rule() = delete; // empty inference rule doesn't make much sense
 		inference_rule(const inference_rule& src) = default;
@@ -1282,6 +1300,53 @@ retry:
 				throw std::pair(formal::src_location(), err);
 			}
 			if (want_retry) goto retry;
+		}
+
+/*
+		&#9500; is an expression-stopper but doesn't actually need arguments on either side (it needs them on *one* side, but
+		either would do.
+		',' does require arguments on both sides, but is a plain character
+		static void init(argument_enforcer& dest) {
+			for (decltype(auto) x : quantifier_HTML_entities) dest.reserve_HTML_entity(false, x, true);
+			dest.reserve_HTML_entity(true, "isin", true);
+		};
+*/
+
+		static std::optional<formal::is_wff::ret_parse_t> wff(formal::is_wff::subsequence src) {
+			auto& [origin, target, demand] = src;
+
+			constexpr auto statement_ok = domain_param(preaxiomatic::Domain::TruthValued);
+
+			static_assert(statement_ok.accept(my_syntax));
+
+			for (decltype(auto) ok : demand) {
+				if (!ok.has_value()) continue;
+				if (auto test = std::any_cast<domain_param>(&ok)) {
+					if (auto verify = test->accept(my_syntax)) {
+						if (!*verify) return std::nullopt;
+					}
+				}
+			}
+
+			ptrdiff_t anchor_at = -1;
+
+			ptrdiff_t i = target.size();
+			while (0 <= --i) {
+				if (interpret_HTML_entity(*target[i], 9500ULL)) {
+					if (0 > anchor_at) anchor_at = i;
+					// not an error: x &#9500; y & w &#9500; z should parse as a 2-ary conjunction
+					else return std::nullopt;
+				}
+			};
+			if (0 > anchor_at) return std::nullopt;
+			const auto& anchor = *target[anchor_at];
+			if (anchor.code() & formal::Error) {
+				return formal::is_wff::no_parse();
+			}
+
+			// ...
+
+			return std::nullopt;
 		}
 	};
 
