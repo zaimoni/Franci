@@ -221,6 +221,14 @@ static std::string wrap_to_HTML_entity(const std::string_view& src) {
 	return ret;
 };
 
+static std::optional<std::string_view> interpret_inert_word(const formal::lex_node& src)
+{
+	if (1 != src.is_pure_anchor()) return std::nullopt;
+	const auto w = src.anchor<formal::word>();
+	if (w->code() & formal::Inert_Token) return w->value();
+	return std::nullopt;
+}
+
 // prototype class -- extract to own files when stable
 
 namespace formal {
@@ -732,6 +740,7 @@ namespace gentzen {
 
 		std::vector<std::pair<std::string_view, unsigned int> > _reserved_HTML_named_entities;
 		std::vector<std::pair<char32_t, unsigned int> > _reserved_HTML_numeric_entities;
+		std::vector<std::pair<std::string_view, unsigned int> > _reserved_tokens;
 
 		argument_enforcer() = default;
 	public:
@@ -771,19 +780,22 @@ namespace gentzen {
 			_reserved_HTML_numeric_entities.push_back(std::pair(src, (want_left ? require_left : 0U) | (want_right ? require_right : 0U)));
 		}
 
+		void reserve_token(bool want_left, const std::string_view& src, bool want_right) {
+			for (decltype(auto) x : _reserved_tokens) if (src == x.first) continue;
+			_reserved_tokens.push_back(std::pair(src, (want_left ? require_left : 0U) | (want_right ? require_right : 0U)));
+		}
+
 		static std::vector<size_t> reject_left_edge(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
 			std::vector<size_t> ret;
 			if (src[viewpoint]->code() & formal::Error) return ret;
 
-			if (auto node = interpret_HTML_entity(*src[viewpoint])) {
-				if (auto tag = interpret_HTML_entity(node->value())) {
-					if (_reject_left_edge(*tag)) {
-						std::string err(node->value());
-						err += "cannot match to its left";
-						error_report(*src[viewpoint], err);
-						return ret;
-					}
+			if (auto reserved = interpret_reserved(*src[viewpoint])) {
+				if (_reject_left_edge(reserved->first)) {
+					std::string err(reserved->second);
+					err += "cannot match to its left";
+					error_report(*src[viewpoint], err);
 				}
+				return ret;
 			}
 			return ret;
 		}
@@ -792,15 +804,13 @@ namespace gentzen {
 			std::vector<size_t> ret;
 			if (src[viewpoint]->code() & formal::Error) return ret;
 
-			if (auto node = interpret_HTML_entity(*src[viewpoint])) {
-				if (auto tag = interpret_HTML_entity(node->value())) {
-					if (_reject_right_edge(*tag)) {
-						std::string err(node->value());
-						err += "cannot match to its right";
-						error_report(*src[viewpoint], err);
-						return ret;
-					}
+			if (auto reserved = interpret_reserved(*src[viewpoint])) {
+				if (_reject_right_edge(reserved->first)) {
+					std::string err(reserved->second);
+					err += "cannot match to its right";
+					error_report(*src[viewpoint], err);
 				}
+				return ret;
 			}
 
 			return ret;
@@ -812,29 +822,40 @@ namespace gentzen {
 			if (1 > viewpoint) return ret;
 			if ((src[viewpoint]->code() & formal::Error) && (src[viewpoint - 1]->code() & formal::Error)) return ret;
 
-			auto l_node = interpret_HTML_entity(*src[viewpoint - 1]);
-			if (!l_node) return ret;
-			auto r_node = interpret_HTML_entity(*src[viewpoint]);
-			if (!r_node) return ret;
-			auto l_tag = interpret_HTML_entity(l_node->value());
-			if (!l_tag) return ret;
-			auto r_tag = interpret_HTML_entity(r_node->value());
-			if (!r_tag) return ret;
-			if (_reject_right_edge(*l_tag) && _reject_left_edge(*r_tag)) {
-				std::string err(l_node->value());
+			auto l_reserved = interpret_reserved(*src[viewpoint - 1]);
+			if (!l_reserved) return ret;
+			auto r_reserved = interpret_reserved(*src[viewpoint]);
+			if (!r_reserved) return ret;
+
+			if (_reject_right_edge(l_reserved->first) && _reject_left_edge(r_reserved->first)) {
+				std::string err(l_reserved->second);
 				err += ' ';
-				err += r_node->value();
+				err += r_reserved->second;
 				err += " : ";
 				err += "cannot parse";
 				error_report(*src[viewpoint - 1], err);
 				src[viewpoint]->learn(formal::Error);
-				return ret;
 			}
-
 			return ret;
 		}
 
 	private:
+		static std::optional<std::pair<std::variant<std::string_view, std::variant<std::string_view, char32_t> >, std::string_view> > interpret_reserved(const formal::lex_node& src) {
+			if (auto inert = interpret_inert_word(src)) return std::pair(*inert, *inert);
+			if (auto node = interpret_HTML_entity(src)) {
+				if (auto tag = interpret_HTML_entity(node->value())) return std::pair(*tag, node->value());
+			}
+			return std::nullopt;
+		}
+
+		static bool _reject_left_edge(const std::string_view& tag) {
+			const auto& ooao = get();
+			for (decltype(auto) x : ooao._reserved_tokens) {
+				if ((x.second & require_left) && x.first == tag) return true;
+			};
+			return false;
+		}
+
 		static bool _reject_left_edge(const std::variant<std::string_view, char32_t>& tag) {
 			const auto& ooao = get();
 			if (auto entity = lookup_HTML_entity(tag)) {
@@ -852,6 +873,11 @@ namespace gentzen {
 			return false;
 		}
 
+		static bool _reject_left_edge(const std::variant<std::string_view, std::variant<std::string_view, char32_t> >& src) {
+			if (auto inert = std::get_if<0>(&src)) return _reject_left_edge(*inert);
+			return _reject_left_edge(std::get<1>(src));
+		}
+
 		static bool _reject_right_edge(const std::variant<std::string_view, char32_t>& tag) {
 			const auto& ooao = get();
 			if (auto entity = lookup_HTML_entity(tag)) {
@@ -867,6 +893,19 @@ namespace gentzen {
 				return false;
 			}
 			return false;
+		}
+
+		static bool _reject_right_edge(const std::string_view& tag) {
+			const auto& ooao = get();
+			for (decltype(auto) x : ooao._reserved_tokens) {
+				if ((x.second & require_right) && x.first == tag) return true;
+			};
+			return false;
+		}
+
+		static bool _reject_right_edge(const std::variant<std::string_view, std::variant<std::string_view, char32_t> >& src) {
+			if (auto inert = std::get_if<0>(&src)) return _reject_right_edge(*inert);
+			return _reject_right_edge(std::get<1>(src));
 		}
 	};
 
@@ -1311,6 +1350,9 @@ retry:
 			dest.reserve_HTML_entity(true, "isin", true);
 		};
 */
+		static void init(argument_enforcer& dest) {
+			dest.reserve_token(true, ",", true);
+		};
 
 		static std::optional<formal::is_wff::ret_parse_t> wff(formal::is_wff::subsequence src) {
 			auto& [origin, target, demand] = src;
@@ -1554,6 +1596,7 @@ static constexpr std::pair<std::string_view, int> reserved_atomic[] = {
 	{")", 0},
 	{"{", 1},
 	{"}", 0},
+	{",", 1},
 };
 
 size_t issymbol(const std::string_view& src)
@@ -1913,6 +1956,7 @@ static auto& TokenGrammar() {
 
 		gentzen::syntax_check.register_handler(gentzen::var::wff);
 		gentzen::var::init(gentzen::argument_enforcer::get());
+		gentzen::inference_rule::init(gentzen::argument_enforcer::get());
 
 		// \todo need local test cases for these
 		ooao->register_build_nonterminal(gentzen::argument_enforcer::reject_adjacent);
