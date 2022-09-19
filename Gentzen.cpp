@@ -97,12 +97,12 @@ static constexpr const auto force_consteval = V;
 // prototype lookup -- extract to own header when stable
 
 constexpr const std::pair<const char*, char32_t> HTML_entities[] = {
-	{"forall", 0x2200ULL},
-	{"exist", 0x2203ULL},
-	{"empty", 0x2205ULL},
-	{"isin", 0x2208ULL},
-	{nullptr, 0x2209ULL}, // := ~(... &isin; ...) when ... &isin; ... is well-formed
-	{nullptr, 9500ULL} // syntactically entails
+	{"forall", 0x2200UL},
+	{"exist", 0x2203UL},
+	{"empty", 0x2205UL},
+	{"isin", 0x2208UL},
+	{nullptr, 0x2209UL}, // := ~(... &isin; ...) when ... &isin; ... is well-formed
+	{nullptr, 9500UL} // syntactically entails
 };
 
 constexpr const std::pair<const char*, char32_t>* lookup_HTML_entity(const std::string_view& name)
@@ -738,9 +738,15 @@ namespace gentzen {
 		static constexpr const unsigned int require_right = (1U << 1);
 		static_assert(!(require_left & require_right));
 
+		// these always need arguments to either side, in some sense
 		std::vector<std::pair<std::string_view, unsigned int> > _reserved_HTML_named_entities;
 		std::vector<std::pair<char32_t, unsigned int> > _reserved_HTML_numeric_entities;
 		std::vector<std::pair<std::string_view, unsigned int> > _reserved_tokens;
+
+		// these don't reliably need arguments, but do stop parsing of arguments
+		std::vector<std::pair<std::string_view, unsigned int> > _stop_parse_HTML_named_entities;
+		std::vector<std::pair<char32_t, unsigned int> > _stop_parse_HTML_numeric_entities;
+		std::vector<std::pair<std::string_view, unsigned int> > _stop_parse_tokens;
 
 		argument_enforcer() = default;
 	public:
@@ -785,6 +791,36 @@ namespace gentzen {
 			_reserved_tokens.push_back(std::pair(src, (want_left ? require_left : 0U) | (want_right ? require_right : 0U)));
 		}
 
+		void stop_parse_HTML_entity(bool want_left, const std::string_view& src, bool want_right) {
+			for (decltype(auto) x : _stop_parse_HTML_named_entities) if (src == x.first) continue;
+			if (auto test = lookup_HTML_entity(src)) {
+				ptrdiff_t i = _stop_parse_HTML_numeric_entities.size();
+				while (0 <= --i) {
+					if (test->second == _stop_parse_HTML_numeric_entities[i].first) {
+						_stop_parse_HTML_numeric_entities.erase(_stop_parse_HTML_numeric_entities.begin() + i);
+						break;
+					}
+				}
+			}
+			_stop_parse_HTML_named_entities.push_back(std::pair(src, (want_left ? require_left : 0U) | (want_right ? require_right : 0U)));
+		}
+
+		void stop_parse_HTML_entity(bool want_left, char32_t src, bool want_right) {
+			for (decltype(auto) x : _stop_parse_HTML_numeric_entities) if (src == x.first) continue;
+			if (auto test = lookup_HTML_entity(src)) {
+				ptrdiff_t i = _stop_parse_HTML_named_entities.size();
+				while (0 <= --i) {
+					if (test->first == _stop_parse_HTML_named_entities[i].first) return;
+				}
+			}
+			_stop_parse_HTML_numeric_entities.push_back(std::pair(src, (want_left ? require_left : 0U) | (want_right ? require_right : 0U)));
+		}
+
+		void stop_parse_token(bool want_left, const std::string_view& src, bool want_right) {
+			for (decltype(auto) x : _stop_parse_tokens) if (src == x.first) continue;
+			_stop_parse_tokens.push_back(std::pair(src, (want_left ? require_left : 0U) | (want_right ? require_right : 0U)));
+		}
+
 		static std::vector<size_t> reject_left_edge(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
 			std::vector<size_t> ret;
 			if (src[viewpoint]->code() & formal::Error) return ret;
@@ -827,7 +863,10 @@ namespace gentzen {
 			auto r_reserved = interpret_reserved(*src[viewpoint]);
 			if (!r_reserved) return ret;
 
-			if (_reject_right_edge(l_reserved->first) && _reject_left_edge(r_reserved->first)) {
+			const bool rejectLeftEdge = _reject_left_edge(r_reserved->first);
+
+			if (   (_reject_right_edge(l_reserved->first) && (rejectLeftEdge || _no_parse_through_left_edge(r_reserved->first)))
+				|| (rejectLeftEdge && _no_parse_through_right_edge(l_reserved->first))) {
 				std::string err(l_reserved->second);
 				err += ' ';
 				err += r_reserved->second;
@@ -906,6 +945,66 @@ namespace gentzen {
 		static bool _reject_right_edge(const std::variant<std::string_view, std::variant<std::string_view, char32_t> >& src) {
 			if (auto inert = std::get_if<0>(&src)) return _reject_right_edge(*inert);
 			return _reject_right_edge(std::get<1>(src));
+		}
+
+		static bool _no_parse_through_left_edge(const std::string_view& tag) {
+			const auto& ooao = get();
+			for (decltype(auto) x : ooao._stop_parse_tokens) {
+				if ((x.second & require_left) && x.first == tag) return true;
+			};
+			return false;
+		}
+
+		static bool _no_parse_through_left_edge(const std::variant<std::string_view, char32_t>& tag) {
+			const auto& ooao = get();
+			if (auto entity = lookup_HTML_entity(tag)) {
+				if (entity->first) {
+					for (decltype(auto) x : ooao._stop_parse_HTML_named_entities) {
+						if ((x.second & require_left) && x.first == entity->first) return true;
+					};
+					return false;
+				}
+				for (decltype(auto) x : ooao._stop_parse_HTML_numeric_entities) {
+					if ((x.second & require_left) && x.first == entity->second) return true;
+				};
+				return false;
+			}
+			return false;
+		}
+
+		static bool _no_parse_through_left_edge(const std::variant<std::string_view, std::variant<std::string_view, char32_t> >& src) {
+			if (auto inert = std::get_if<0>(&src)) return _no_parse_through_left_edge(*inert);
+			return _no_parse_through_left_edge(std::get<1>(src));
+		}
+
+		static bool _no_parse_through_right_edge(const std::variant<std::string_view, char32_t>& tag) {
+			const auto& ooao = get();
+			if (auto entity = lookup_HTML_entity(tag)) {
+				if (entity->first) {
+					for (decltype(auto) x : ooao._stop_parse_HTML_named_entities) {
+						if ((x.second & require_right) && x.first == entity->first) return true;
+					};
+					return false;
+				}
+				for (decltype(auto) x : ooao._stop_parse_HTML_numeric_entities) {
+					if ((x.second & require_right) && x.first == entity->second) return true;
+				};
+				return false;
+			}
+			return false;
+		}
+
+		static bool _no_parse_through_right_edge(const std::string_view& tag) {
+			const auto& ooao = get();
+			for (decltype(auto) x : ooao._stop_parse_tokens) {
+				if ((x.second & require_right) && x.first == tag) return true;
+			};
+			return false;
+		}
+
+		static bool _no_parse_through_right_edge(const std::variant<std::string_view, std::variant<std::string_view, char32_t> >& src) {
+			if (auto inert = std::get_if<0>(&src)) return _no_parse_through_right_edge(*inert);
+			return _no_parse_through_right_edge(std::get<1>(src));
 		}
 	};
 
@@ -1284,6 +1383,7 @@ private:
 
 	};
 
+	// This type is related to the Malinkowski entailments as well
 	// \todo syntactical equivalence will be its own type, even though it's very similar
 	class inference_rule {
 		std::string _name;
@@ -1304,7 +1404,7 @@ private:
 		std::vector<arg_match> _rete_alpha_memory;
 
 		static constexpr auto my_syntax = domain_param({ preaxiomatic::Domain::TruthValued, preaxiomatic::Domain::Ur }, { preaxiomatic::Domain::TruthValues });
-		static constexpr const char32_t reserved_HTML_entities[] = { 9500ULL };
+		static constexpr const char32_t reserved_HTML_entities[] = { 9500UL };
 
 	public:
 		inference_rule() = delete; // empty inference rule doesn't make much sense
@@ -1352,6 +1452,10 @@ retry:
 */
 		static void init(argument_enforcer& dest) {
 			dest.reserve_token(true, ",", true);
+			// UNICODE thinks this is a box-drawing glyph;
+			// looks like what Standard Encyclopedia of Philosophy uses (the UNICODE blessed entities are for provability,
+			// not syntactical entailment)
+			dest.stop_parse_HTML_entity(true, 9500UL, true);
 		};
 
 		static std::optional<formal::is_wff::ret_parse_t> wff(formal::is_wff::subsequence src) {
@@ -1374,7 +1478,7 @@ retry:
 
 			ptrdiff_t i = target.size();
 			while (0 <= --i) {
-				if (interpret_HTML_entity(*target[i], 9500ULL)) {
+				if (interpret_HTML_entity(*target[i], 9500UL)) {
 					if (0 > anchor_at) anchor_at = i;
 					// not an error: x &#9500; y & w &#9500; z should parse as a 2-ary conjunction
 					else return std::nullopt;
