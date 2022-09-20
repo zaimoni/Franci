@@ -821,6 +821,20 @@ namespace gentzen {
 			_stop_parse_tokens.push_back(std::pair(src, (want_left ? require_left : 0U) | (want_right ? require_right : 0U)));
 		}
 
+		static bool rejectLeftEdge(formal::lex_node& src) {
+			if (src.code() & formal::Error) return true;
+
+			if (auto reserved = interpret_reserved(src)) {
+				if (_reject_left_edge(reserved->first)) {
+					std::string err(reserved->second);
+					err += "cannot match to its left";
+					error_report(src, err);
+				}
+				return true;
+			}
+			return false;
+		}
+
 		static std::vector<size_t> reject_left_edge(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
 			std::vector<size_t> ret;
 			if (src[viewpoint]->code() & formal::Error) return ret;
@@ -850,6 +864,20 @@ namespace gentzen {
 			}
 
 			return ret;
+		}
+
+		static bool rejectRightEdge(formal::lex_node& src) {
+			if (src.code() & formal::Error) return true;
+
+			if (auto reserved = interpret_reserved(src)) {
+				if (_reject_right_edge(reserved->first)) {
+					std::string err(reserved->second);
+					err += "cannot match to its right";
+					error_report(src, err);
+				}
+				return true;
+			}
+			return false;
 		}
 
 		static std::vector<size_t> reject_adjacent(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
@@ -1483,6 +1511,7 @@ retry:
 					// not an error: x &#9500; y & w &#9500; z should parse as a 2-ary conjunction
 					else return std::nullopt;
 				}
+				// todo: reject syntactical equivalence, and the Malinkoski variants (equal precedence)
 			};
 			if (0 > anchor_at) return std::nullopt;
 			const auto& anchor = *target[anchor_at];
@@ -1490,9 +1519,76 @@ retry:
 				return formal::is_wff::no_parse();
 			}
 
+			// \todo build sub-parse targets (origin, target pairs)
+			std::vector<std::pair<size_t, std::span<formal::lex_node*> > > antecedents;
+			std::vector<std::pair<size_t, std::span<formal::lex_node*> > > consequences;
+
+			// \todo need flag indicating hypothetical parse
+			// \todo set up common demand for all sub-parse targets
+
 			// ...
 
 			return std::nullopt;
+		}
+
+	private:
+		// these two likely belong elsewhere
+		static std::optional<std::vector<std::pair<size_t, std::span<formal::lex_node*> > > > find_prefix_CSV_args(const std::span<formal::lex_node*>& src, ptrdiff_t origin, bool hypothetical = false)
+		{
+			std::vector<std::pair<size_t, std::span<formal::lex_node*> > > ret;
+			const auto& syntax = argument_enforcer::get();
+			std::pair<ptrdiff_t, ptrdiff_t> scan(origin, origin);
+			while (0 <= --scan.second) {
+				if (auto text = interpret_inert_word(*src[scan.second])) {
+					if ("," == *text) {
+						if (!(src[scan.second]->code() & formal::Error) && !hypothetical) {
+							error_report(*src[scan.second], "',' will not parse at right edge of a subexpression");
+						}
+						return std::nullopt;
+					}
+				}
+				if (argument_enforcer::rejectRightEdge(*src[scan.second])) {
+					if (!(src[scan.second]->code() & formal::Error) && !hypothetical) {
+						error_report(*src[scan.second], " : will not parse at right edge of an subexpression");
+					}
+					return std::nullopt;
+				}
+				scan.first = scan.second;
+				while (0 < --scan.first) {
+					if (auto text = interpret_inert_word(*src[scan.first])) {
+						if ("," == *text) {
+							if (src[scan.first]->code() & formal::Error) return std::nullopt;
+							if (argument_enforcer::rejectLeftEdge(*src[scan.first + 1])) {
+								if (!(src[scan.first + 1]->code() & formal::Error) && !hypothetical) {
+									error_report(*src[scan.first + 1], " : will not parse at left edge of an subexpression");
+									src[scan.first]->learn(formal::Error);
+								}
+								return std::nullopt;
+							}
+							ret.push_back(std::pair(scan.first+1, src.subspan(scan.first + 1, (scan.second - scan.first) + 1)));
+							scan.second = scan.first;
+							break;
+						}
+					}
+				};
+				// fall-through
+				if (auto text = interpret_inert_word(*src[0])) {
+					if ("," == *text) {
+						if (!(src[0]->code() & formal::Error) && !hypothetical) {
+							error_report(*src[0], "',' will not parse at left edge of an subexpression");
+						}
+						return std::nullopt;
+					}
+				}
+				if (argument_enforcer::rejectLeftEdge(*src[0])) {
+					if (!(src[0]->code() & formal::Error) && !hypothetical) {
+						error_report(*src[0], " : will not parse at left edge of an subexpression");
+					}
+					return std::nullopt;
+				}
+				ret.push_back(std::pair(0, src.subspan(0, scan.second + 1)));
+			};
+			return ret;
 		}
 	};
 
