@@ -1064,6 +1064,9 @@ namespace gentzen {
 		static constexpr const auto reserved_HTML_entities = perl::unshift(quantifier_HTML_entities, std::string_view("isin"));
 
 	public:
+		using cache_t = std::vector<std::shared_ptr<const var> >;
+		using live_caches_t = std::vector<cache_t*>;
+
 		enum class quantifier {
 			Term = 0,
 			ForAll,
@@ -1415,7 +1418,7 @@ private:
 	// \todo syntactical equivalence will be its own type, even though it's very similar
 	class inference_rule {
 		std::string _name;
-		std::vector<std::shared_ptr<const var> > _vars;
+		var::cache_t _vars;
 		std::vector<std::shared_ptr<const Gentzen> > _hypotheses;
 		std::vector<std::shared_ptr<const Gentzen> > _conclusions;
 
@@ -1666,7 +1669,7 @@ retry:
 			Hypothesis
 		};
 
-		std::vector<std::shared_ptr<const var> > _vars; // global working variable catalog
+		var::cache_t _vars; // global working variable catalog
 		std::vector<std::shared_ptr<proof> > _testing;  // sub-proofs that Franci has not yet committed to using
 
 	public:
