@@ -1327,6 +1327,27 @@ namespace gentzen {
 			return std::nullopt;
 		}
 
+		bool is_compatible(std::shared_ptr<const domain>& domain) const {
+			if (_domain.get() == domain.get()) return true;
+			// disjoint: hard-reject
+			// _domain subset domain: ok, but replace domain with ourselves (stricter than requested)
+			// * but: our one caller doesn't actually use domain
+			// domain subset _domain: this is a constraint forcing: do not handle this here (would be invalid to constraint-force
+			// outside of a a subproof, for instance
+			// proper intersection: constraint forcing, see above
+			return false;
+		}
+
+		static std::optional<std::shared_ptr<const var> > lookup(const formal::lex_node& src, const live_caches_t& catalog) {
+			const std::string find_me = src.to_s();
+			for (decltype(auto) ref : catalog) {
+				for (decltype(auto) old_var : *ref) {
+					if (find_me == old_var->name()) return old_var;
+				}
+			}
+			return std::nullopt;
+		}
+
 		static std::unique_ptr<var> improvise(formal::lex_node*& name, std::shared_ptr<const domain> domain, quantifier quant) {
 			if (!var::legal_varname(*name)) return nullptr;
 			return std::unique_ptr<var>(new var(name, domain, quant));
@@ -1402,16 +1423,26 @@ private:
 			return false;
 		}
 
-		static std::unique_ptr<var_ref> improvise(formal::lex_node*& name, std::shared_ptr<const domain> domain) {
+		static std::unique_ptr<var_ref> improvise(formal::lex_node*& name, std::shared_ptr<const domain> domain, const var::live_caches_t& catalog) {
 			const auto origin = name->origin();
+			if (decltype(auto) test = var::lookup(*name, catalog)) {
+				// \todo: check for compatible domain
+				if ((*test)->is_compatible(domain)) return std::unique_ptr<var_ref>(new var_ref(std::move(*test), origin));
+			}
+
 			decltype(auto) stage = var::improvise(name, domain, var::quantifier::Term);
 			if (!stage) return nullptr;
-			return std::unique_ptr<var_ref>(new var_ref(std::shared_ptr<const var>(stage.release()), origin));
+
+			// catalog.back() needs to be unchanged if a memory allocation fails
+			std::shared_ptr<const var> new_var(stage.release());
+			std::unique_ptr<var_ref> ret(new var_ref(new_var, origin));
+			catalog.back()->push_back(std::move(new_var));
+			return ret;
 		}
 
 	private:
 		var_ref(const std::shared_ptr<const var>& src, const formal::src_location& origin) noexcept : _var(src), _origin(origin) {}
-
+		var_ref(std::shared_ptr<const var>&& src, const formal::src_location& origin) noexcept : _var(std::move(src)), _origin(origin) {}
 	};
 
 	// This type is related to the Malinkowski entailments as well
