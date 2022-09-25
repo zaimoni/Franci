@@ -166,7 +166,7 @@ std::optional<std::variant<std::string_view, char32_t> > interpret_HTML_entity(s
 bool interpret_HTML_entity(std::string_view src, const std::string_view& ref) {
 	if (const auto test = interpret_HTML_entity(src)) {
 		if (auto x = std::get_if<std::string_view>(&(*test))) return ref == *x;
-		if (auto transcode = lookup_HTML_entity(std::get<char32_t>(*test))) return ref == transcode->first;
+		if (auto transcode = lookup_HTML_entity(std::get<char32_t>(*test))) return transcode->first && ref == transcode->first;
 	}
 	return false;
 }
