@@ -1569,6 +1569,22 @@ retry:
 			// * require TruthValued arguments
 			our_requirements.push_back(std::any(statement_ok));
 			// * add our variable cache to the list of caches to check against
+			var::live_caches_t stage;
+			for (decltype(auto) ok : demand) {
+				if (!ok.has_value()) continue;
+				if (auto test = std::any_cast<var::live_caches_t>(&ok)) {
+					stage = *test;	// value copy intentional
+					break;
+				}
+			}
+
+			var::cache_t new_vars;
+			stage.push_back(&new_vars);
+			bool final_parse = true;
+			for (decltype(auto) target : *antecedents) {
+			}
+			for (decltype(auto) target : *consequences) {
+			}
 
 			// ...
 
