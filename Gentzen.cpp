@@ -1447,7 +1447,7 @@ private:
 
 	// This type is related to the Malinkowski entailments as well
 	// \todo syntactical equivalence will be its own type, even though it's very similar
-	class inference_rule {
+	class inference_rule final : public Gentzen {
 		std::string _name;
 		var::cache_t _vars;
 		std::vector<std::shared_ptr<const Gentzen> > _hypotheses;
@@ -1501,6 +1501,30 @@ retry:
 				throw std::pair(formal::src_location(), err);
 			}
 			if (want_retry) goto retry;
+		}
+
+		std::unique_ptr<parsed> clone() const override { return std::unique_ptr<parsed>(new inference_rule(*this)); }
+		void CopyInto(parsed*& dest) const override { zaimoni::CopyInto(*this, dest); }
+		void MoveInto(parsed*& dest) override { zaimoni::MoveIntoV2(std::move(*this), dest); }
+		formal::src_location origin() const override {
+			if (!_hypotheses.empty()) return _hypotheses.front()->origin();
+			if (!_conclusions.empty()) return _conclusions.front()->origin(); // \todo fix
+			return formal::src_location();
+		}
+
+		std::string to_s() const override {
+			std::string ret;
+			// ... 
+			return ret;
+		}
+
+		domain_param element_of() const override { return my_syntax; }
+		domain_param syntax() const override { return my_syntax; }
+
+		// not really const; just mostly used during construction
+		[[nodiscard]] bool normalize_vars(std::vector<std::shared_ptr<const var> >& catalog) const override {
+			// \todo implement
+			return false;
 		}
 
 /*
@@ -1706,6 +1730,33 @@ retry:
 				}
 				ret.push_back(std::pair(0, src.subspan(0, scan.second + 1)));
 			};
+			return ret;
+		}
+
+		static bool requires_parentheses(const Gentzen* src) {
+			// inference rules and syntactical equivalences need help
+			if (dynamic_cast<const inference_rule*>(src)) return true;
+			return false;
+		}
+
+		static std::vector<std::string> to_s(const std::vector<std::shared_ptr<const Gentzen> >& src)
+		{
+			std::vector<std::string> ret;
+			ret.reserve(src.size());
+			for (decltype(auto) x : src) {
+				if (0 == x.use_count()) {
+					ret.push_back(std::string());
+					continue;
+				}
+				if (requires_parentheses(x.get())) {
+					std::string stage("(");
+					stage += x->to_s();
+					ret.push_back(stage+")");
+				} else {
+					ret.push_back(x->to_s());
+				}
+			}
+
 			return ret;
 		}
 	};
