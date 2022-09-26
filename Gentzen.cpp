@@ -1514,7 +1514,36 @@ retry:
 
 		std::string to_s() const override {
 			std::string ret;
-			// ... 
+
+			std::vector<std::string> stage;
+			if (!_hypotheses.empty()) {
+				stage = to_s(_hypotheses);
+				while (!stage.empty()) {
+					ret += std::move(stage.front());
+					if (1 == stage.size()) {
+						decltype(stage)().swap(stage);
+						ret += ", ";
+					} else {
+						stage.erase(stage.begin());
+						ret += ' ';
+					}
+				}
+			}
+			ret += "&#9500;";
+			if (!_conclusions.empty()) {
+				stage = to_s(_conclusions);
+				while (!stage.empty()) {
+					ret += ' ';
+					ret += std::move(stage.front());
+					if (1 == stage.size()) {
+						decltype(stage)().swap(stage);
+					} else {
+						stage.erase(stage.begin());
+						ret += ',';
+					}
+				}
+			}
+
 			return ret;
 		}
 
