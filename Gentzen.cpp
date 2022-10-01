@@ -1576,7 +1576,7 @@ retry:
 		static std::optional<formal::is_wff::ret_parse_t> wff(formal::is_wff::subsequence src) {
 			auto& [origin, target, demand] = src;
 
-			constexpr auto statement_ok = domain_param(preaxiomatic::Domain::TruthValued);
+			constexpr auto statement_ok = domain_param({ preaxiomatic::Domain::TruthValued }, { preaxiomatic::Domain::TruthValues });
 
 			static_assert(statement_ok.accept(my_syntax));
 
@@ -1618,8 +1618,10 @@ retry:
 
 			// \todo need flag indicating hypothetical parse
 			// \todo set up common demand for all sub-parse targets
-			std::vector<std::any> our_requirements;
-			// * require TruthValued arguments
+			formal::is_wff::subsequence parse_this;
+			decltype(auto) our_requirements = std::get<2>(parse_this);
+
+			// * require strictly TruthValued arguments
 			our_requirements.push_back(std::any(statement_ok));
 			// * add our variable cache to the list of caches to check against
 			var::live_caches_t stage;
@@ -1631,12 +1633,73 @@ retry:
 				}
 			}
 
+			bool parse_failed = false;
 			var::cache_t new_vars;
 			stage.push_back(&new_vars);
-			bool final_parse = true;
 			for (decltype(auto) target : *antecedents) {
+				if (1 == target.second.size() && 3 == target.second.front()->is_pure_anchor()) continue;
+				std::get<0>(parse_this) = origin + target.first;
+				std::get<1>(parse_this) = target.second;
+				formal::is_wff::ret_parse_t test = syntax_check(parse_this);
+				if (!test.first.first) parse_failed = true;
+				if (test.second) return test;	// caller decides whether to execute
+				// \todo would not want to warn/error when hypothetical
+				if (!test.first.second.second.empty()) {
+					if (test.first.first) {
+						warning_report(test.first.second.first, test.first.second.second);
+					} else {
+						error_report(test.first.second.first, test.first.second.second);
+					}
+				}
 			}
 			for (decltype(auto) target : *consequences) {
+				if (1 == target.second.size() && 3 == target.second.front()->is_pure_anchor()) continue;
+				std::get<0>(parse_this) = origin + target.first;
+				std::get<1>(parse_this) = target.second;
+				formal::is_wff::ret_parse_t test = syntax_check(parse_this);
+				if (!test.first.first) parse_failed = true;
+				if (test.second) return test;	// caller decides whether to execute
+				// \todo would not want to warn/error when hypothetical
+				if (!test.first.second.second.empty()) {
+					if (test.first.first) {
+						warning_report(test.first.second.first, test.first.second.second);
+					} else {
+						error_report(test.first.second.first, test.first.second.second);
+					}
+				}
+			}
+
+			// at this point we are parse-stable
+			if (parse_failed) {
+				target[anchor_at]->learn(formal::Error);
+				return formal::is_wff::no_parse();	// \todo should parse to an "error blob"
+			}
+
+			bool proceed = true;
+			for (decltype(auto) target : *antecedents) {
+				if (1 == target.second.size() && 3 == target.second.front()->is_pure_anchor()) {
+					if (decltype(auto) x = dynamic_cast<Gentzen*>(target.second.front()->anchor<formal::parsed>())) {
+						if (statement_ok.accept(x->syntax())) continue;
+					}
+				}
+				proceed = false;
+				break;
+			}
+			if (proceed) {
+				for (decltype(auto) target : *consequences) {
+					if (1 == target.second.size() && 3 == target.second.front()->is_pure_anchor()) {
+						if (decltype(auto) x = dynamic_cast<Gentzen*>(target.second.front()->anchor<formal::parsed>())) {
+							if (statement_ok.accept(x->syntax())) continue;
+						}
+					}
+					proceed = false;
+					break;
+				}
+			}
+
+			if (!proceed) {
+				target[anchor_at]->learn(formal::Error); // \todo should mention why
+				return formal::is_wff::no_parse();	// \todo should parse to an "error blob"
 			}
 
 			// ...
