@@ -73,6 +73,7 @@
 		<ul>
 			<li>true, intended (English) interpretation "true"</li>
 			<li>false, intended interpretation "false"</li>
+
 		</ul></li>
 	<li>Undefined logical operators
 		<ul>
@@ -103,7 +104,7 @@
 </ul>
 <p>One might think one could replace the undefined symbols & and ~ with a single undefined symbol for a universal logic gate (say, NAND or NOR) but this is less readable. We still need one unary predicate and one binary predicate, even if they have the same symbol.</p>
 <p>However, there are two non-classical truth values of interest:
-	contradiction (from Kripke's strong three-valued logic, also used by Bernap's 4-valued logic), and
+	contradiction (from Kleene's i.e. Kripke's strong three-valued logic, also used by Belnap's 4-valued logic), and
 	unknown (from Bernap's 4-valued logic).  So that is the first of three parameters for set theory: which logic to use.</p>
 
 <h2 id="def-is-member-of" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Parameter: definition of &#x2208;</h2>
@@ -217,7 +218,7 @@ incompatible English interpretations), we can take it as an undefined truth valu
 	<tr align="right"><th>true</th><td>false</td><td>true</td></tr>
 </table>	
 </span>
-<p>The intended interpretation of <i>A & B</i> is "A, and B" where A and B are propositional variables that themselves are to be replaced with specific sentences, or formulas with 
+<p><nobr>The intended interpretation</nobr> of <i>A & B</i> is "A, and B" where A and B are propositional variables that themselves are to be replaced with specific sentences, or formulas with 
 	truth values.  We have several accepted ways of generalizing classical logic, which only has the truth values <i>true</i> and <i>false</i></p>
 <p>Belnap designed his four-valued logic to interpret <i>unknown</i> as "no data", and <i>contradiction</i> as "different sources assert true, and false."
 	This lends itself to two partial orderings.  One is an information ordering where <i>unknown</i> is minimal, and <i>contradiction</i> is maximal.
@@ -289,7 +290,7 @@ incompatible English interpretations), we can take it as an undefined truth valu
 		<tr align="right"><th>true</th><td>true</td><td>true</td></tr>
 	</table>	
 </span>
-<p>The intended interpretation of <i>A || B</i> i.e. <i>A &#x2228; B</i> is "A, or B" where A and B are propositional variables that themselves are to be replaced with specific sentences, or formulas with 
+<p><nobr>The intended interpretation</nobr> of <i>A || B</i> i.e. <i>A &#x2228; B</i> is "A, or B" where A and B are propositional variables that themselves are to be replaced with specific sentences, or formulas with 
 	truth values.  Grammatically, this is "inclusive or" rather than "exclusive or", that is A and B both <i>true</i> is allowed when <i>A || B</i> is <i>true</i></p>
 <p>We have the same intended interpretations for the truth values and logical connectives of each of the six logics, as before.</p>
 <p>Belnap's four-valued logic does not appear to be implementing plain English, instead going for an abstract algebraic structural feature.
@@ -408,7 +409,7 @@ rule applies.</li>
 <p>None of these examples are valid for the other five logics we are considering here.</p>
 <p>Historically, &#9500; was originally defined in terms of &rArr; .  However, even with only two truth values G&ouml;del's Second Incompleteness Theorem states that
 	syntactical entailment and nonstrict implication, are different concepts.</p>
-<p>In general, when a truth-valued expression A is defined as a distinct truth-valued expression B, <i>A := B</i>, the intended interpretation is that we have a syntactical equivalence: both <i>A &#9500; B</i>
+<p>In general, when a truth-valued expression A is defined as a distinct truth-valued expression B, <i>A := B</i>, the intended interpretation is that A and B are identical for all purposes.  In particular, we have a syntactical equivalence: both <i>A &#9500; B</i>
 	and <i>B &#9500; A</i> are usable syntactical inference rules.  We can define A &#x27DB; B, with intended interpretation "A and B are syntactically equivalent", as the preceding pair of syntactical entailments.</p>
 <h2 id="def-quantify" align="center" style="clear:both; margin-bottom: 0in; line-height: 100%; font-size: 14px">Worked exercise: quantifiers &forall; and &exist;</h2>
 <p>Here, we have to consider truth-valued expressions that, when expanded, actually use predicates and terms that are not truth-valued.  E.g., let Z(a) be a truth-valued expression that explicitly
