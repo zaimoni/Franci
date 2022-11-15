@@ -35,7 +35,7 @@
 		<li><a href="#intersection-set-difference">Intersection and set difference: A &#x2229; B, A\B</a></li>
 		<li><a href="#axiom-pairing">Axiom of Pairing</a></li>
 		<li><a href="#union">Union: A &#x222A; B</a></li>
-		<li><a href="#cartesian-product">Cartesian product: X <span style="font:sans-serif; position:relative; top: -1px">x</span> Y</a></li>
+		<li><a href="#cartesian-product">Cartesian product: X &#xD7; Y</a></li>
 		<li><a href="#function-relation">Functions and relations</a></li>
 		<li><a href="#peano-natural-numbers">Peano axioms for natural numbers &#x2115;</a></li>
 	</ol>
@@ -472,10 +472,10 @@ emphasize that A is playing the role of an "indexing collection", so a common al
 <!-- want: commutativity laws -->
 <!-- want: set-difference laws -->
 <!-- intentionally do not cover symmetric set difference: that is not part of a sprint. -->
-<h2 id="cartesian-product" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Cartesian product: X <span style="font:sans-serif; position:relative; top: -1px">x</span> Y</h2>
+<h2 id="cartesian-product" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Cartesian product: X &#xD7; Y</h2>
 <p>Loosely speaking, we want to define a function f as a special subset of the set of all ordered pairs, whose first coordinate is from the domain Domain(f), and whose second coordinate is 
 	from the range Range(f).  Following prior art, we want to define the Cartesian product of two sets X,Y as</p>
-<p align="center">X <span style="font:sans-serif; position:relative; top: -1px">x</span> Y := {(x,y) : x &#x2208; X & y &#x2208; Y}</p>
+<p align="center">X &#xD7; Y := {(x,y) : x &#x2208; X & y &#x2208; Y}</p>
 <p>The above is not actually a definition, yet: we have not yet guaranteed that there is a <i>set</i> that contains those ordered pairs (x,y).  Details depend on the exact definition of ordered pair.</p>
 <p>For the Kuratowski definition of ordered pair, the coordinates x,y encoded as {x}, {x,y} are both subsets of X &#x222A; Y.  So it would suffice if the mathematical collection of all subsets of a set, was itself a set.</p>
 <table align="center">
@@ -488,12 +488,12 @@ emphasize that A is playing the role of an "indexing collection", so a common al
 	the set theory and logic.  The rewrite from &hArr; to truth-value equality = for the truth-table describable non-classical logics, is mechanical.</p>
 <p>Two <i>sets</i> identified by this axiom are provably equal, so this states that for any <i>set</i> X, "the mathematical collection of 'all subsets of X'" is itself a <i>set</i>.  We reserve the notation &#x1D4AB;(X) for the result of evaluating this axiom.  The cartesian product is then defined using
 	the <i>subset axiom (schema)</i> as</p>
-<p align="center">X <span style="font:sans-serif; position:relative; top: -1px">x</span> Y := {(x,y) &#x2208; &#x1D4AB;(&#x1D4AB;(X &#x222A; Y)) : x &#x2208; X & y &#x2208; Y}</p>
+<p align="center">X &#xD7; Y := {(x,y) &#x2208; &#x1D4AB;(&#x1D4AB;(X &#x222A; Y)) : x &#x2208; X & y &#x2208; Y}</p>
 <p>The <i>axiom of power set</i> is avoided in some alternative set theories, e.g. Kripke-Platek, for being impredicative i.e. self-referential.  These set theories use other techniques for ensuring the Cartesian product exists.</p>
 <h2 id="function-relation" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Functions and relations</h2>
 <p>We now have the definitions to formally define <a href="https://en.wikipedia.org/wiki/Function_(mathematics)">functions</a>, and the notation we have been abusing earlier.</p>
 <ul>
-	<li>We say A relation r is a subcollection of the cartesian product X <span style="font:sans-serif; position:relative; top: -1px">x</span> Y: r &#x2286; X <span style="font:sans-serif; position:relative; top: -1px">x</span> Y .</li>
+	<li>We say A relation r is a subcollection of the cartesian product X &#xD7; Y: r &#x2286; X &#xD7; Y .</li>
 	<li>We say that the domain of a relation r, is the mathematical collection of all x0 in X such that at least one ordered pair (x,y) has x0 as its first coordinate:<p align="center"> Domain(r) := {x0 &isin; X : (&exist;(x,y) &isin; r)(x0 = x)}</p></li>
 	<li>We say that the range of a relation r, is the mathematical collection of all y0 in Y such that at least one ordered pair (x,y) has y0 as its second coordinate:<p align="center"> Range(r) := {y0 &isin; Y : (&exist;(x,y) &isin; r)(y0 = y)}</p></li>
 	<li>We say that a relation r is from a mathematical collection X to a mathematical collection Y, if Domain(r) is a subcollection of X and Range(r) is a subcollection of Y; alternately, the relation r is of type X <span style="position:relative; top: -2px">&#x2192;</span> Y.
@@ -506,10 +506,10 @@ emphasize that A is playing the role of an "indexing collection", so a common al
 	<li>We say that a function f is a relation that is both left-total, and right-unique i.e. functional.</li>
 	<li>We say that a partial function f is a relation that is only right-unique i.e. functional.</li>
 	<li>For a partial function f, we define x &#x21A6;<sub>f</sub> y := (x,y) &#x2208; f.</li>
-	<li>We define the inverse relation r<sup>-1</sup> to a relation r &#x2286; X <span style="font:sans-serif; position:relative; top: -1px">x</span> Y as <p align="center">r<sup>-1</sup> := {(y,x) &isin; Y <span style="font:sans-serif; position:relative; top: -1px">x</span> X : (x,y) &isin; r}</p></li>
+	<li>We define the inverse relation r<sup>-1</sup> to a relation r &#x2286; X &#xD7; Y as <p align="center">r<sup>-1</sup> := {(y,x) &isin; Y &#xD7; X : (x,y) &isin; r}</p></li>
 	<li>We say that the composition of two relations r:X <span style="position:relative; top: -2px">&#x2192;</span> Y, s:Y <span style="position:relative; top: -2px">&#x2192;</span> Z is 
 		s o r:X <span style="position:relative; top: -2px">&#x2192;</span> Z, defined as 
-		<p align="center">s o r := {(x,z) &#x2208; X <span style="font:sans-serif; position:relative; top: -1px">x</span> Z : (&exist;y &isin; Y)((x,y) &isin; r & (y,z) &isin; s) }</p>
+		<p align="center">s o r := {(x,z) &#x2208; X &#xD7; Z : (&exist;y &isin; Y)((x,y) &isin; r & (y,z) &isin; s) }</p>
 		s(r(x)) is an alternate syntax for (s o r)(x).</li>
 	<li>The image of a <i>class</i> or <i>set</i> A for a relation r, is defined as r(A) := {y &isin; Y : (x &isin; <b>Set</b>)(x &isin; A & (x,y) &isin; r) }.  This corresponds to 
 		pointwise evaluation of the relation r.  The preimage of r is defined as the image of the inverse relation r<sup>-1</sup>.</li>

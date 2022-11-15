@@ -83,10 +83,10 @@ David Hume, <i>A Treatise of Human Nature</i> (1740)</blockquote>
 <p>Our notation to date, has been relying on natural language context to discriminate between relations and functions, etc.  We reserve the following notations 
 	for mathematical collections X, Y:</p>
 <ul>
-	<li><b>RelationPartial</b>(X,Y) := { r &#x2286; X <span style="font:sans-serif; position:relative; top: -1px">x</span> Y : r is a partial relation}</b></li>
-	<li><b>Relation</b>(X,Y) := { r &#x2286; X <span style="font:sans-serif; position:relative; top: -1px">x</span> Y : r is a relation}</b></li>
-	<li><b>FunctionPartial</b>(X,Y) := { f &#x2286; X <span style="font:sans-serif; position:relative; top: -1px">x</span> Y : f is a partial function}</b></li>
-	<li><b>Function</b>(X,Y) := { f &#x2286; X <span style="font:sans-serif; position:relative; top: -1px">x</span> Y : f is a function}</b></li>
+	<li><b>RelationPartial</b>(X,Y) := { r &#x2286; X &#xD7; Y : r is a partial relation}</b></li>
+	<li><b>Relation</b>(X,Y) := { r &#x2286; X &#xD7; Y : r is a relation}</b></li>
+	<li><b>FunctionPartial</b>(X,Y) := { f &#x2286; X &#xD7; Y : f is a partial function}</b></li>
+	<li><b>Function</b>(X,Y) := { f &#x2286; X &#xD7; Y : f is a function}</b></li>
 </ul>
 <p>At this point, we have formalized the above for <i>classes</i> X,Y.  For our choice of <i>subset axiom</i>, we have:</p>
 <ul>
@@ -141,7 +141,7 @@ David Hume, <i>A Treatise of Human Nature</i> (1740)</blockquote>
 		the Zermelo-Frankel set theories, and we need the <i>conglomerate</i> definition for <b>Class</b> to be a namable mathematical collection.)  We say that when #X = #Y, that X and Y 
 		are equinumerous.</li>
 	<li>For a relation r:X <span style="position:relative; top: -2px">&#x2192;</span> Y, the definition of the inverse relation r<sup>-1</sup> entails a bijective function: <nobr>#r = #r<sup>-1</sup>.</nobr>  As a special case, we 
-		have <nobr>#(X <span style="font:sans-serif; position:relative; top: -1px">x</span> Y) = #(Y <span style="font:sans-serif; position:relative; top: -1px">x</span> X).</nobr></li>
+		have <nobr>#(X &#xD7; Y) = #(Y &#xD7; X).</nobr></li>
 </ul>
 <p>The above definition of <i>equinumerous</i>, was first proposed by Georg Cantor in the 1880's.  The classical paradoxes of naive set theory are now generally considered 
 	to be from applying the <i>axiom of unrestricted comprehension</i>, to this definition.</p>
@@ -160,13 +160,13 @@ David Hume, <i>A Treatise of Human Nature</i> (1740)</blockquote>
 <table align="right" cellspacing="0">
 	<tr><th colspan="2"></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
 	<tr><td></td><td>1.</td><td></td><td>r:X <span style="position:relative; top: -2px">&#x2192;</span> Y is a partial relation</td><td>Given</td></tr>
-	<tr><td></td><td>2.</td><td></td><td>r &#x2286; X <span style="font:sans-serif; position:relative; top: -1px">x</span> Y</td><td>Definition of partial relation</td></tr>
+	<tr><td></td><td>2.</td><td></td><td>r &#x2286; X &#xD7; Y</td><td>Definition of partial relation</td></tr>
 	<tr><td style="border-left: black 1px solid; border-top:black 1px solid">&nbsp;</td><td>3.</td><td></td><td>(x<sub>0</sub>, y<sub>0</sub>) &isin; r</td><td>Hypothesis</td></tr>
 	<tr><td style="border-left: black 1px solid"></td><td>4.</td><td></td><td>x<sub>0</sub> &isin; Domain(r)</td><td>Definition of Domain(r)</td></tr>
 	<tr><td style="border-left: black 1px solid"></td><td>5.</td><td></td><td>y<sub>0</sub> &isin; Range(r)</td><td>Definition of Range(r)</td></tr>
-	<tr><td style="border-left: black 1px solid; border-bottom:black 1px solid"></td><td>6.</td><td></td><td>(x<sub>0</sub>, y<sub>0</sub>) &isin; Domain(r) <span style="font:sans-serif; position:relative; top: -1px">x</span> Range(r)</td><td>Definition of Cartesian product</td></tr>
-	<tr><td></td><td>7.</td><td>(x<sub>0</sub>, y<sub>0</sub>) &isin; r &#9500; (x<sub>0</sub>, y<sub>0</sub>) &isin; Domain(r) <span style="font:sans-serif; position:relative; top: -1px">x</span> Range(r)</td><td></td><td>Syntactical entailment introduction, (3) and (6)</td></tr>
-	<tr><td></td><td>8.</td><td></td><td>r &#x2286; Domain(r) <span style="font:sans-serif; position:relative; top: -1px">x</span> Range(r)</td><td>Definition of &#x2286;</td></tr>
+	<tr><td style="border-left: black 1px solid; border-bottom:black 1px solid"></td><td>6.</td><td></td><td>(x<sub>0</sub>, y<sub>0</sub>) &isin; Domain(r) &#xD7; Range(r)</td><td>Definition of Cartesian product</td></tr>
+	<tr><td></td><td>7.</td><td>(x<sub>0</sub>, y<sub>0</sub>) &isin; r &#9500; (x<sub>0</sub>, y<sub>0</sub>) &isin; Domain(r) &#xD7; Range(r)</td><td></td><td>Syntactical entailment introduction, (3) and (6)</td></tr>
+	<tr><td></td><td>8.</td><td></td><td>r &#x2286; Domain(r) &#xD7; Range(r)</td><td>Definition of &#x2286;</td></tr>
 	<tr><th colspan="5">r:Domain(r) <span style="position:relative; top: -2px">&#x2192;</span> Range(r) is both left-total and surjective, even though 
 		neither can be said of r:X <span style="position:relative; top: -2px">&#x2192;</span> Y</th></tr>
 </table>
@@ -177,7 +177,7 @@ David Hume, <i>A Treatise of Human Nature</i> (1740)</blockquote>
 Unfortunately, a precise philosophical description of impredicativity has not been reached, since the idea was first entertained in the 1890s, and named by Henri Poincar&eacute; and Bertand Russell ~1906.</p>
 <p>The glaring problem with this notation, is that both Domain(r) and Range(r) are evaluating functions on the partial relation r itself.  That is, we cannot use this notation to 
 	<i>define</i> r, as that would be a circular definition.  (A working definition of impredicativity, is required to say that a circular definition is impredicative.)</p>
-<p align="center"><b>Truth</b>((x<sub>0</sub>, y<sub>0</sub>) &isin; X <span style="font:sans-serif; position:relative; top: -1px">x</span> Y)=<b>Truth</b>((x<sub>0</sub>, y<sub>0</sub>) &isin; Domain(r) <span style="font:sans-serif; position:relative; top: -1px">x</span> Range(r))</p>
+<p align="center"><b>Truth</b>((x<sub>0</sub>, y<sub>0</sub>) &isin; X &#xD7; Y)=<b>Truth</b>((x<sub>0</sub>, y<sub>0</sub>) &isin; Domain(r) &#xD7; Range(r))</p>
 <p>depends on a proper choice of the <i>subset axiom (schema)</i>, to work in the presence of non-classical truth values.  We do not review what goes wrong with 
 	a more typical definition of the <i>subset axiom (schema)</i>, at this time.</p>
 
@@ -409,8 +409,8 @@ contains at least one element, we say that X is non-empty.</p>
 	<tr><td align="right">f &#x25B7; Domain(g) is not injective, g|<sub>Range(f)</sub> is injective &#9500;</td><td>g|<sub>Range(f)</sub> o (f &#x25B7; Domain(g)) is not injective</td></tr>
 	<tr><td align="right">f &#x25B7; Domain(g) is not injective, g|<sub>Range(f)</sub> is not injective &#9500;</td><td>g|<sub>Range(f)</sub> o (f &#x25B7; Domain(g)) is not injective</td></tr>
 	<tr><th colspan="2" align="center">Projections</th></tr>
-	<tr><td align="right">(Projection<sub>0</sub><sup>-1</sup> &#x25B7; X <span style="font:sans-serif; position:relative; top: -1px">x</span> {a}) &isin;&nbsp;</td><td><b>Function</b>(X, X <span style="font:sans-serif; position:relative; top: -1px">x</span> {a})</td></tr>
-	<tr><td align="right">(Projection<sub>1</sub><sup>-1</sup> &#x25B7; {a} <span style="font:sans-serif; position:relative; top: -1px">x</span> X) &isin;&nbsp;</td><td><b>Function</b>(X, {a} <span style="font:sans-serif; position:relative; top: -1px">x</span> X)</td></tr>
+	<tr><td align="right">(Projection<sub>0</sub><sup>-1</sup> &#x25B7; X &#xD7; {a}) &isin;&nbsp;</td><td><b>Function</b>(X, X &#xD7; {a})</td></tr>
+	<tr><td align="right">(Projection<sub>1</sub><sup>-1</sup> &#x25B7; {a} &#xD7; X) &isin;&nbsp;</td><td><b>Function</b>(X, {a} &#xD7; X)</td></tr>
 </table>
 <p>The first of these, is enough like <i>associativity</i> that we define</p>
 <p align="center">A &#x25C1; r &#x25B7; B := (A &#x25C1; r) &#x25B7; B</p>
@@ -434,41 +434,41 @@ For equinumerosity of finite sets, this is a consequence of the definition of fi
 <p>Since any viable set-theoretic model of &#x2115; uses &#x2205; as its model of 0, and our definitions refer to both (arithmetic) product of  and Cartesian product, we verify that the empty set &#x2205; "acts like" an annhilator for the Cartesian product (details left as an exercise):</p>
 <table align="center">
 	<tr><th colspan="2">Our choice of <i>subset axiom</i></th></tr>
-	<tr><td align="right">(&forall;X &isin; <b>Class</b>)</td><td>(&empty; <span style="font:sans-serif; position:relative; top: -1px">x</span> X = &empty;)</td></tr>
-	<tr><td align="right">(&forall;X &isin; <b>Class</b>)</td><td>(X <span style="font:sans-serif; position:relative; top: -1px">x</span> &empty; is a <i>set-theoretic atom</i>)</td></tr>
+	<tr><td align="right">(&forall;X &isin; <b>Class</b>)</td><td>(&empty; &#xD7; X = &empty;)</td></tr>
+	<tr><td align="right">(&forall;X &isin; <b>Class</b>)</td><td>(X &#xD7; &empty; is a <i>set-theoretic atom</i>)</td></tr>
 </table>
 <p>So the empty function provides the required bijection for:</p>
 <table align="center">
-	<tr><td align="right">(&forall;X &isin; <b>Class</b>)</td><td>(#(&empty; <span style="font:sans-serif; position:relative; top: -1px">x</span> X) = #&empty;)</td></tr>
-	<tr><td align="right">(&forall;X &isin; <b>Class</b>)</td><td>(#(X <span style="font:sans-serif; position:relative; top: -1px">x</span> &empty;) = #&empty;)</td></tr>
+	<tr><td align="right">(&forall;X &isin; <b>Class</b>)</td><td>(#(&empty; &#xD7; X) = #&empty;)</td></tr>
+	<tr><td align="right">(&forall;X &isin; <b>Class</b>)</td><td>(#(X &#xD7; &empty;) = #&empty;)</td></tr>
 </table>
 <p>We then require a working definition of cardinal multiplication to fulfil</p>
 <p align="center">#&#x2205; &middot; #X = #&#x2205;<br />#X &middot; #&#x2205; = #&#x2205;</p>
-<p>We next consider a constant function X<sub>&#x2205;</sub>, which is defined as X <span style="font:sans-serif; position:relative; top: -1px">x</span> {&#x2205;}.  The evaluation rule x &#x21A6; (x, &#x2205;) on a given <i>class</i> X defines a bijection X <span style="position:relative; top: -2px">&#x2192;</span> X <span style="font:sans-serif; position:relative; top: -1px">x</span> {&#x2205;}.  Thus, we have</p>
+<p>We next consider a constant function X<sub>&#x2205;</sub>, which is defined as X &#xD7; {&#x2205;}.  The evaluation rule x &#x21A6; (x, &#x2205;) on a given <i>class</i> X defines a bijection X <span style="position:relative; top: -2px">&#x2192;</span> X &#xD7; {&#x2205;}.  Thus, we have</p>
 <table align="center">
-	<tr><td align="right">(&forall;X &isin; <b>Class</b>)</td><td>(#X = #(X <span style="font:sans-serif; position:relative; top: -1px">x</span> {&empty;}))</td></tr>
+	<tr><td align="right">(&forall;X &isin; <b>Class</b>)</td><td>(#X = #(X &#xD7; {&empty;}))</td></tr>
 </table>
 <p>We then require a working definition of cardinal multiplication to fulfil</p>
-<p align="center">#X &middot; #{&#x2205;} = #(X <span style="font:sans-serif; position:relative; top: -1px">x</span> {&#x2205;})</p>
-<p align="center">#{&#x2205;} &middot; #X = #({&#x2205;} <span style="font:sans-serif; position:relative; top: -1px">x</span> X)</p>
+<p align="center">#X &middot; #{&#x2205;} = #(X &#xD7; {&#x2205;})</p>
+<p align="center">#{&#x2205;} &middot; #X = #({&#x2205;} &#xD7; X)</p>
 <p>Substituting in the Von Neumann model for &#x2115;, it is a mechanical exercise that for all n &isin; &#x2115;</p>
 <p align="center">#0 &middot; #n = #(0 &middot; n)
 	<br />#n &middot; #0 = #(n &middot; 0)
 	<br />#1 &middot; #n = #(1 &middot; n)
 	<br />#n &middot; #1 = #(n &middot; 1)</p>
 <p><a href="https://en.wikipedia.org/wiki/Occam%27s_razor">Ockham's Razor</a> suggests that the typical definition of cardinal multiplication is simplest, in that it both has a short notation, and fulfils the instances of our requirements, we already have:</p>
-<p align="center">#X &middot; #Y := #(X <span style="font:sans-serif; position:relative; top: -1px">x</span> Y)</p>
+<p align="center">#X &middot; #Y := #(X &#xD7; Y)</p>
 <p>We cross-check that this definition makes sense, by confirming that, for all natural numbers m,n:</p>
 <p align="center">#m &middot; #n = #(m&middot;n)</p>
-<p>m=0 or n=0 ends up being a special case, using an empty function.  Otherwise, it suffices to construct a bijection from 0...m&middot;n-1, onto 0...m-1 <span style="font:sans-serif; position:relative; top: -1px">x</span> 0...n-1 .  (The division algorithm allows defining this bijection, which is left as an exercise.)</p>
+<p>m=0 or n=0 ends up being a special case, using an empty function.  Otherwise, it suffices to construct a bijection from 0...m&middot;n-1, onto 0...m-1 &#xD7; 0...n-1 .  (The division algorithm allows defining this bijection, which is left as an exercise.)</p>
 
 <h2 id="algebraic-homomorphism-add" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Verifying # &lt; agrees with &#x2115; &lt; : #m + #n = #(m+n)</h2>
 <p>We next consider the arithmetic identity,</p>
 <p align="center">n+n = 2&middot;n</p>
 <p>recalling that the Von Neumann model of 2 is {&#x2205;, {&#x2205;}} i.e. {0,1}.  Since for any given <i>class</i> X,</p>
-<p align="center">{0, 1} <span style="font:sans-serif; position:relative; top: -1px">x</span> X = ({0} <span style="font:sans-serif; position:relative; top: -1px">x</span> X) &#x222A; ({1} <span style="font:sans-serif; position:relative; top: -1px">x</span> X)</p>
+<p align="center">{0, 1} &#xD7; X = ({0} &#xD7; X) &#x222A; ({1} &#xD7; X)</p>
 <p>We expect a working definition of cardinal addition to satisfy</p>
-<p align="center">#X + #X = #({0, 1} <span style="font:sans-serif; position:relative; top: -1px">x</span> X) = #{0, 1} &middot; #X</p>
+<p align="center">#X + #X = #({0, 1} &#xD7; X) = #{0, 1} &middot; #X</p>
 <p>We already verified that the cartesian product of a singleton set with a class X, has the same cardinality as X.  Following prior art,
 	we require that if two mathematical collections X and Y are disjoint, then the cardinal size of their union is the sum of their cardinal sizes:</p>
 <p align="center">(&forall;X &isin; <b>Class</b>)(&forall;Y &isin; <b>Class</b>)(X and Y are disjoint &#9500; #X + #Y = #(X &#x222A; Y))</p>
@@ -489,7 +489,7 @@ For equinumerosity of finite sets, this is a consequence of the definition of fi
 <p>Likewise, associativity of &#x222A; is enough to verify associativity of cardinal addition for pairwise disjoint mathematical collections:</p>
 <p align="center">(#X + #Y) + #Z = #X + (#Y + #Z)</p>
 <p>For a finite sequence of sets (X<sub>i</sub>)<sub>i=0...n</sub>, the above definition allows inductively defining:</p>
-<p align="center">&Sigma;<sub>i=0...n</sub> #X<sub>i</sub> = #(<big>&#x222A;</big><sub>i=0...n</sub> {i} <span style="font:sans-serif; position:relative; top: -1px">x</span> X<sub>i</sub>)</p>
+<p align="center">&Sigma;<sub>i=0...n</sub> #X<sub>i</sub> = #(<big>&#x222A;</big><sub>i=0...n</sub> {i} &#xD7; X<sub>i</sub>)</p>
 <p>It is then a mechanical exercise to verify generalized associativity of cardinal addition.  We haven't done the required formalization for 
 	finite sequences of <i>classes</i>. (Recall that this requires the <i>conglomerate</i> definition and axioms).  However, manually doing
 	a similar technique gives associativity of cardinal addition for <i>classes</i>.</p>
@@ -565,8 +565,8 @@ For equinumerosity of finite sets, this is a consequence of the definition of fi
 	<tr><th colspan="7">Next step uses a standard translation of technical English into symbolic math</th></tr>
 	<tr><td colspan="3"></td><td>5.</td><td></td><td>f<sub>0</sub> &isin; <b>Function</b>(X,Y) & (&forall;w &isin; Domain(f<sub>0</sub>))(&forall;z &isin; Domain(f<sub>0</sub>))(f<sub>0</sub>(w)=f<sub>0</sub>(z) &#9500; w=z)</td><td>Existential instantation on (4a)</td></tr>
 	<tr><th colspan="7">Our target statement is the basis step for a (weak) natural induction proof, #X + #1 &lt; #Y + #1</th></tr>
-	<tr><td colspan="3"></td><td>6.</td><td></td><td>f<sub>1</sub>:X <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x222A; {(1,1)} <span style="position:relative; top: -2px">&#x2192;</span> Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x222A; {(1,1)} := <b>IF</b>((z<sub>0</sub>, z<sub>1</sub>)=(1,1), (1,1), (f<sub>0</sub>(z<sub>0</sub>), 0))</td><td>Local definition of function f<sub>1</sub> (for existential instantiation)</td></tr>
-	<tr><td colspan="3"></td><td>6a.</td><td></td><td>Domain(f<sub>1</sub>) = X <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x222A; {(1,1)}</td><td>Definition of f<sub>1</sub> (6)</td></tr>
+	<tr><td colspan="3"></td><td>6.</td><td></td><td>f<sub>1</sub>:X &#xD7; {0} &#x222A; {(1,1)} <span style="position:relative; top: -2px">&#x2192;</span> Y &#xD7; {0} &#x222A; {(1,1)} := <b>IF</b>((z<sub>0</sub>, z<sub>1</sub>)=(1,1), (1,1), (f<sub>0</sub>(z<sub>0</sub>), 0))</td><td>Local definition of function f<sub>1</sub> (for existential instantiation)</td></tr>
+	<tr><td colspan="3"></td><td>6a.</td><td></td><td>Domain(f<sub>1</sub>) = X &#xD7; {0} &#x222A; {(1,1)}</td><td>Definition of f<sub>1</sub> (6)</td></tr>
 	<!-- 2 nesting levels -->
 	<tr><td></td><td colspan="2" style="border-left: black 1px solid; border-top:black 1px solid">&nbsp;</td><td>7.</td><td></td><td>x<sub>0</sub> &isin; Domain(f<sub>1</sub>) & x<sub>1</sub> &isin; Domain(f<sub>1</sub>) & f<sub>1</sub>(x<sub>0</sub>)=f<sub>1</sub>(x<sub>1</sub>)</td><td>Hypothesis (want to show f<sub>1</sub> is injective)</td></tr>
 	<tr><td></td><td colspan="2" style="border-left: black 1px solid"></td><td>8a.</td><td></td><td>f<sub>1</sub>(x<sub>0</sub>)=f<sub>1</sub>(x<sub>1</sub>)</td><td>Conjunction elimination on (7)</td></tr>
@@ -583,8 +583,8 @@ For equinumerosity of finite sets, this is a consequence of the definition of fi
 	<tr><td></td><td style="border-left: black 1px solid"></td><td style="border-left: black 1px solid; border-bottom:black 1px solid">&nbsp;</td><td>13.</td><td></td><td>x<sub>0</sub> = x<sub>1</sub></td><td>Transitivity of = on (12a), (12b)</td></tr>
 	<tr><td></td><td colspan="2" style="border-left: black 1px solid"></td><td>14.</td><td>f<sub>1</sub>(x<sub>0</sub>) = (1,1) &#9500; x<sub>0</sub> = x<sub>1</sub></td><td></td><td>Syntactical entailment introduction, (11a) and (13)</td></tr>
 	<tr><td></td><td style="border-left: black 1px solid"></td><td style="border-left: black 1px solid; border-top:black 1px solid">&nbsp;</td><td>15.</td><td></td><td>f<sub>1</sub>(x<sub>0</sub>) &ne; (1,1)</td><td>Hypothesis</td></tr>
-	<tr><td></td><td style="border-left: black 1px solid"></td><td style="border-left: black 1px solid"></td><td>16.</td><td></td><td>z<sub>0</sub> &isin; X <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} & f<sub>1</sub>(x<sub>0</sub>) = (f<sub>0</sub>(z<sub>0</sub>), 0)</td><td>Definition of f<sub>1</sub> (6) on (15)</td></tr>
-<!--	<tr><td>m+2a.</td><td></td><td>z<sub>0</sub> &isin; X <span style="font:sans-serif; position:relative; top: -1px">x</span> {0}</td><td>Conjunction elimination on (16)</td></tr> -->
+	<tr><td></td><td style="border-left: black 1px solid"></td><td style="border-left: black 1px solid"></td><td>16.</td><td></td><td>z<sub>0</sub> &isin; X &#xD7; {0} & f<sub>1</sub>(x<sub>0</sub>) = (f<sub>0</sub>(z<sub>0</sub>), 0)</td><td>Definition of f<sub>1</sub> (6) on (15)</td></tr>
+<!--	<tr><td>m+2a.</td><td></td><td>z<sub>0</sub> &isin; X &#xD7; {0}</td><td>Conjunction elimination on (16)</td></tr> -->
 	<tr><td></td><td style="border-left: black 1px solid"></td><td style="border-left: black 1px solid"></td><td>17.</td><td></td><td>f<sub>1</sub>(x<sub>0</sub>) = (f<sub>0</sub>(z<sub>0</sub>), 0)</td><td>Conjunction elimination on (16)</td></tr>
 	<tr><td></td><td style="border-left: black 1px solid"></td><td style="border-left: black 1px solid"></td><td>18.</td><td></td><td>f<sub>1</sub>(x<sub>1</sub>) = (f<sub>0</sub>(z<sub>0</sub>), 0)</td><td>[f<sub>1</sub>(x<sub>1</sub>)/f<sub>1</sub>(x<sub>0</sub>)] on (17) by (8a)]</td></tr>
 	<tr><td></td><td style="border-left: black 1px solid"></td><td style="border-left: black 1px solid"></td><th colspan="4">This also uses the second "tag" coordinate to know how to evaluate f<sub>1</sub><sup>-1</sup>; requires f<sub>0</sub> to be injective (need f<sub>0</sub><sup>-1</sup>(z<sub>0</sub>) =  z<sub>0</sub>, not just z<sub>0</sub> &isin; f<sub>0</sub><sup>-1</sup>(z<sub>0</sub>))</th></tr>
@@ -598,20 +598,20 @@ For equinumerosity of finite sets, this is a consequence of the definition of fi
 	<tr><td colspan="3"></td><td>k+3.</td><td></td><td>(&forall;w &isin; Domain(f<sub>1</sub>))(x<sub>1</sub> &isin; Domain(f<sub>1</sub>), f<sub>1</sub>(w)=f<sub>1</sub>(x<sub>1</sub>) &#9500; w = x<sub>1</sub>)</td><td>Universal instantiation on (k+2)</td></tr>
 	<tr><td colspan="3"></td><td>k+4.</td><td></td><td>(&forall;w &isin; Domain(f<sub>1</sub>))(&forall;z &isin; Domain(f<sub>1</sub>))(f<sub>1</sub>(w)=f<sub>1</sub>(z) &#9500; w = z)</td><td>Universal instantiation on (k+3)</td></tr>
 	<tr><th colspan="7">Now we translate the symbolic math to technical English, using the same standard translation as before</th></tr>
-	<tr><td colspan="3"></td><td>k+5.</td><td></td><td>(&exist;f &isin; <b>Function</b>(X <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x222A; {(1,1)}, Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x222A; {(1,1)}))(f is injective)</td><td>Existential instantiation, (6) and (k+4)</td></tr>
+	<tr><td colspan="3"></td><td>k+5.</td><td></td><td>(&exist;f &isin; <b>Function</b>(X &#xD7; {0} &#x222A; {(1,1)}, Y &#xD7; {0} &#x222A; {(1,1)}))(f is injective)</td><td>Existential instantiation, (6) and (k+4)</td></tr>
 	<!-- 3 nesting levels -->
-	<tr><td colspan="3" style="border-left: black 1px solid; border-top:black 1px solid"></td><td>n.</td><td></td><td>g<sub>1</sub> &isin; <b>Function</b>(Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x222A; {(1,1)},X <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x222A; {(1,1)})</td><td>Hypothesis (for universal instantiation)</td></tr>
+	<tr><td colspan="3" style="border-left: black 1px solid; border-top:black 1px solid"></td><td>n.</td><td></td><td>g<sub>1</sub> &isin; <b>Function</b>(Y &#xD7; {0} &#x222A; {(1,1)},X &#xD7; {0} &#x222A; {(1,1)})</td><td>Hypothesis (for universal instantiation)</td></tr>
 	<tr><td colspan="3" style="border-left: black 1px solid"></td><th colspan="4">We want to show g<sub>1</sub> is not injective.</th></tr>
 	<tr><td colspan="3" style="border-left: black 1px solid"></td><th colspan="4">~Intuitionistic?</th></tr>
 	<tr><td colspan="3" style="border-left: black 1px solid"></td><td>n+1.</td><td></td><td>~((1,1) &isin; Range(g<sub>1</sub>)  &#x21A6; <i>true</i>) &#x2228; ((1,1) &isin; Range(g<sub>1</sub>)  &#x21A6; <i>true</i>)</td><td>Law of Excluded Middle (classical logic statement about non-classical truth-valued logic)</td></tr>
 	<tr><td colspan="3" style="border-left: black 1px solid"></td><th colspan="4">Set up to use proof by cases on (n+1)</th></tr>
 	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid; border-top:black 1px solid"></td><td>n+2.</td><td></td><td>~((1,1) &isin; Range(g<sub>1</sub>)  &#x21A6; <i>true</i>)</td><td>Hypothesis</td></tr>
 	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+3.</td><td></td><td>g<sub>1</sub> = g<sub>1</sub> &#x25B7; Range(g<sub>1</sub>)\{(1,1)}</td><td>Definition of &#x25B7; on (n+2)</td></tr>
-	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+3a.</td><td></td><td>Range(g<sub>1</sub>) &#x2286; X  <span style="font:sans-serif; position:relative; top: -1px">x</span> {0}</td><td>(n) and (n+2)</td></tr>
-	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+4.</td><td></td><td>(Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x25C1; g<sub>1</sub>) &isin; <b>Function</b>(Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0}, X <span style="font:sans-serif; position:relative; top: -1px">x</span> {0})</td><td>Definition of &#x25C1; on (n), (n+3)</td></tr>
-	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+5.</td><td></td><td>Projection<sub>0</sub> <span style="font:sans-serif; position:relative; top: -1px">o</span> (Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x25C1; g<sub>1</sub>) &isin; <b>Function</b>(Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0}, X)</td><td>Definition of Projection<sub>0</sub>, on (n+4)</td></tr>
-	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+6.</td><td></td><td>Projection<sub>0</sub> <span style="font:sans-serif; position:relative; top: -1px">o</span> (Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x25C1; g<sub>1</sub>) <span style="font:sans-serif; position:relative; top: -1px">o</span> (Projection<sub>0</sub><sup>-1</sup> &#x25B7; Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0}) &isin; <b>Function</b>(Y, X)</td><td>Definition of &#x25C1;, &#x25B7; on (n+5)</td></tr>
-	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+7.</td><td></td><td>g<sub>2</sub> := Projection<sub>0</sub> <span style="font:sans-serif; position:relative; top: -1px">o</span> (Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x25C1; g<sub>1</sub>) <span style="font:sans-serif; position:relative; top: -1px">o</span> (Projection<sub>0</sub><sup>-1</sup> &#x25B7; Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0})</td><td>Local definition</td></tr>
+	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+3a.</td><td></td><td>Range(g<sub>1</sub>) &#x2286; X  &#xD7; {0}</td><td>(n) and (n+2)</td></tr>
+	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+4.</td><td></td><td>(Y &#xD7; {0} &#x25C1; g<sub>1</sub>) &isin; <b>Function</b>(Y &#xD7; {0}, X &#xD7; {0})</td><td>Definition of &#x25C1; on (n), (n+3)</td></tr>
+	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+5.</td><td></td><td>Projection<sub>0</sub> <span style="font:sans-serif; position:relative; top: -1px">o</span> (Y &#xD7; {0} &#x25C1; g<sub>1</sub>) &isin; <b>Function</b>(Y &#xD7; {0}, X)</td><td>Definition of Projection<sub>0</sub>, on (n+4)</td></tr>
+	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+6.</td><td></td><td>Projection<sub>0</sub> <span style="font:sans-serif; position:relative; top: -1px">o</span> (Y &#xD7; {0} &#x25C1; g<sub>1</sub>) <span style="font:sans-serif; position:relative; top: -1px">o</span> (Projection<sub>0</sub><sup>-1</sup> &#x25B7; Y &#xD7; {0}) &isin; <b>Function</b>(Y, X)</td><td>Definition of &#x25C1;, &#x25B7; on (n+5)</td></tr>
+	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+7.</td><td></td><td>g<sub>2</sub> := Projection<sub>0</sub> <span style="font:sans-serif; position:relative; top: -1px">o</span> (Y &#xD7; {0} &#x25C1; g<sub>1</sub>) <span style="font:sans-serif; position:relative; top: -1px">o</span> (Projection<sub>0</sub><sup>-1</sup> &#x25B7; Y &#xD7; {0})</td><td>Local definition</td></tr>
 	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+8.</td><td></td><td>g<sub>2</sub>  &isin; <b>Function</b>(Y, X)</td><td>[g<sub>2</sub>/...] by (n+7) on (n+6)</td></tr>
 	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><th colspan="4">Next step uses a standard translation of technical English into symbolic math</th></tr>
 	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+9.</td><td></td><td>(&exist;w &isin; Y)(&exist;z &isin; Y)(w &ne; z & g<sub>2</sub>(w)=g<sub>2</sub>(z))</td><td>Universal instantiation of (4b) on (n+8)</td></tr>
@@ -623,14 +623,14 @@ For equinumerosity of finite sets, this is a consequence of the definition of fi
 	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+11b.</td><td></td><td>y<sub>0</sub> &ne; y<sub>1</sub> & g<sub>2</sub>(y<sub>0</sub>)=g<sub>2</sub>(y<sub>1</sub>)</td><td>Conjunction elimination on (n+11)</td></tr>
 	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+12a.</td><td></td><td>y<sub>0</sub> &ne; y<sub>1</sub></td><td>Conjunction elimination on (n+11b)</td></tr>
 	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+12b.</td><td></td><td>g<sub>2</sub>(y<sub>0</sub>)=g<sub>2</sub>(y<sub>1</sub>)</td><td>Conjunction elimination on (n+11b)</td></tr>
-	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+13.</td><td></td><td><nobr>(Projection<sub>0</sub> <span style="font:sans-serif; position:relative; top: -1px">o</span> (Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x25C1; g<sub>1</sub>) <span style="font:sans-serif; position:relative; top: -1px">o</span> (Projection<sub>0</sub><sup>-1</sup> &#x25B7; Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0}))(y<sub>0</sub>)</nobr>=<nobr>(Projection<sub>0</sub> <span style="font:sans-serif; position:relative; top: -1px">o</span> (Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x25C1; g<sub>1</sub>) <span style="font:sans-serif; position:relative; top: -1px">o</span> (Projection<sub>0</sub><sup>-1</sup> &#x25B7; Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0}))(y<sub>1</sub>)</nobr></td><td>[.../g<sub>2</sub>] by (n+7) on (n+12b)</td></tr>
-	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+14.</td><td></td><td><nobr>(Projection<sub>0</sub> <span style="font:sans-serif; position:relative; top: -1px">o</span> (Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x25C1; g<sub>1</sub>))((y<sub>0</sub>,0))</nobr>=<nobr>(Projection<sub>0</sub> <span style="font:sans-serif; position:relative; top: -1px">o</span> (Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x25C1; g<sub>1</sub>))((y<sub>1</sub>, 0))</nobr></td><td>Evaluate Projection<sub>0</sub><sup>-1</sup> &#x25B7; Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0}) on both sides of (n+13)</td></tr>
-	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+15.</td><td></td><td><nobr>x<sub>2</sub> := (Projection<sub>0</sub> <span style="font:sans-serif; position:relative; top: -1px">o</span> (Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x25C1; g<sub>1</sub>))((y<sub>0</sub>,0))</nobr></td><td>Local definition</td></tr>
-	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+15a.</td><td></td><td><nobr>x<sub>2</sub> = (Projection<sub>0</sub> <span style="font:sans-serif; position:relative; top: -1px">o</span> (Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x25C1; g<sub>1</sub>))((y<sub>1</sub>,0))</nobr></td><td>[x<sub>2</sub>/...] on (n+14) by (n+15)</td></tr>
-	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+16.</td><td></td><td>(x<sub>2</sub>, 0) = (Projection<sub>0</sub><sup>-1</sup> &#x25B7; X  <span style="font:sans-serif; position:relative; top: -1px">x</span> {0})(x<sub>2</sub>)</td><td>Evaluate ...</td></tr>
-	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+17a.</td><td></td><td>(x<sub>2</sub>, 0) = (Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x25C1; g<sub>1</sub>)((y<sub>0</sub>,0))</td><td>left-compose function Projection<sub>0</sub><sup>-1</sup> &#x25B7; X  <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} on (n+15) </td></tr>
-	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+17b.</td><td></td><td>(x<sub>2</sub>, 0) = (Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x25C1; g<sub>1</sub>)((y<sub>1</sub>,0))</td><td>left-compose function Projection<sub>0</sub><sup>-1</sup> &#x25B7; X  <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} on (n+15a)</td></tr>
-	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+18.</td><td></td><td>(Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x25C1; g<sub>1</sub>)((y<sub>0</sub>,0)) = (Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x25C1; g<sub>1</sub>)((y<sub>1</sub>,0))</td><td>Transitivity of =, (n+17a) and (n+17b)</td></tr>
+	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+13.</td><td></td><td><nobr>(Projection<sub>0</sub> <span style="font:sans-serif; position:relative; top: -1px">o</span> (Y &#xD7; {0} &#x25C1; g<sub>1</sub>) <span style="font:sans-serif; position:relative; top: -1px">o</span> (Projection<sub>0</sub><sup>-1</sup> &#x25B7; Y &#xD7; {0}))(y<sub>0</sub>)</nobr>=<nobr>(Projection<sub>0</sub> <span style="font:sans-serif; position:relative; top: -1px">o</span> (Y &#xD7; {0} &#x25C1; g<sub>1</sub>) <span style="font:sans-serif; position:relative; top: -1px">o</span> (Projection<sub>0</sub><sup>-1</sup> &#x25B7; Y &#xD7; {0}))(y<sub>1</sub>)</nobr></td><td>[.../g<sub>2</sub>] by (n+7) on (n+12b)</td></tr>
+	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+14.</td><td></td><td><nobr>(Projection<sub>0</sub> <span style="font:sans-serif; position:relative; top: -1px">o</span> (Y &#xD7; {0} &#x25C1; g<sub>1</sub>))((y<sub>0</sub>,0))</nobr>=<nobr>(Projection<sub>0</sub> <span style="font:sans-serif; position:relative; top: -1px">o</span> (Y &#xD7; {0} &#x25C1; g<sub>1</sub>))((y<sub>1</sub>, 0))</nobr></td><td>Evaluate Projection<sub>0</sub><sup>-1</sup> &#x25B7; Y &#xD7; {0}) on both sides of (n+13)</td></tr>
+	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+15.</td><td></td><td><nobr>x<sub>2</sub> := (Projection<sub>0</sub> <span style="font:sans-serif; position:relative; top: -1px">o</span> (Y &#xD7; {0} &#x25C1; g<sub>1</sub>))((y<sub>0</sub>,0))</nobr></td><td>Local definition</td></tr>
+	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+15a.</td><td></td><td><nobr>x<sub>2</sub> = (Projection<sub>0</sub> <span style="font:sans-serif; position:relative; top: -1px">o</span> (Y &#xD7; {0} &#x25C1; g<sub>1</sub>))((y<sub>1</sub>,0))</nobr></td><td>[x<sub>2</sub>/...] on (n+14) by (n+15)</td></tr>
+	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+16.</td><td></td><td>(x<sub>2</sub>, 0) = (Projection<sub>0</sub><sup>-1</sup> &#x25B7; X  &#xD7; {0})(x<sub>2</sub>)</td><td>Evaluate ...</td></tr>
+	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+17a.</td><td></td><td>(x<sub>2</sub>, 0) = (Y &#xD7; {0} &#x25C1; g<sub>1</sub>)((y<sub>0</sub>,0))</td><td>left-compose function Projection<sub>0</sub><sup>-1</sup> &#x25B7; X  &#xD7; {0} on (n+15) </td></tr>
+	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+17b.</td><td></td><td>(x<sub>2</sub>, 0) = (Y &#xD7; {0} &#x25C1; g<sub>1</sub>)((y<sub>1</sub>,0))</td><td>left-compose function Projection<sub>0</sub><sup>-1</sup> &#x25B7; X  &#xD7; {0} on (n+15a)</td></tr>
+	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+18.</td><td></td><td>(Y &#xD7; {0} &#x25C1; g<sub>1</sub>)((y<sub>0</sub>,0)) = (Y &#xD7; {0} &#x25C1; g<sub>1</sub>)((y<sub>1</sub>,0))</td><td>Transitivity of =, (n+17a) and (n+17b)</td></tr>
 	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+19.</td><td></td><td>g<sub>1</sub>((y<sub>0</sub>,0)) = g<sub>1</sub>((y<sub>1</sub>,0))</td><td>Remove common domain restriction from (n+18)</td></tr>
 	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+20.</td><td></td><td>(y<sub>0</sub>, 0) &ne; (y<sub>1</sub>, 0)</td><td>Definition of ordered pair =, (n+12a)</td></tr>
 	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid"></td><td>n+21.</td><td></td><td>(y<sub>0</sub>, 0) &ne; (y<sub>1</sub>, 0) & g<sub>1</sub>((y<sub>0</sub>,0)) = g<sub>1</sub>((y<sub>1</sub>,0))</td><td>Conjunction introduction, (n+20) and (n+19)</td></tr>
@@ -665,10 +665,10 @@ For equinumerosity of finite sets, this is a consequence of the definition of fi
 	<tr><td style="border-left: black 1px solid"></td><td colspan="2" style="border-left: black 1px solid; border-bottom: black 1px solid"></td><td>s+13.</td><td></td><td>g<sub>1</sub> is not injective</td><td>Proof by cases: (q+2), (r+3), and (s+12)</td></tr>
 	<tr><td colspan="3" style="border-left: black 1px solid"></td><td>s+14.</td><td>(1,1) &isin; Range(g<sub>1</sub>) &#9500; g<sub>1</sub> is not injective</td><td></td><td>Syntactical entailment introduction, (q) and (s+13)</td></tr>
 	<tr><td colspan="3" style="border-left: black 1px solid; border-bottom: black 1px solid"></td><td>s+15.</td><td></td><td>g<sub>1</sub> is not injective</td><td>Proof by cases: (n+1), (n+25), (s+14)</td></tr>
-	<tr><td colspan="3"></td><td>s+16.</td><td></td><td>(&forall;g &isin; <b>Function</b>(Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x222A; {(1,1)},X <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x222A; {(1,1)}))(g is not injective)</td><td>Universal generalization, (n) and (s+15)</td></tr>
-	<tr><td colspan="3"></td><td>s+17.</td><td></td><td>#(X <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x222A; {(1,1)}) < #(Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0} &#x222A; {(1,1)})</td><td>Conjunction introduction, (k+5) and (s+16), then definition of cardinal &lt;</td></tr>
-	<tr><td colspan="3"></td><td>s+18.</td><td></td><td>#(X <span style="font:sans-serif; position:relative; top: -1px">x</span> {0}) + #{(1,1)}) < #(Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0}) + #{(1,1)})</td><td>Cardinal + for disjoint sets on (s+17)</td></tr>
-	<tr><td colspan="3"></td><td>s+19.</td><td></td><td>#(X <span style="font:sans-serif; position:relative; top: -1px">x</span> {0}) + #1 < #(Y <span style="font:sans-serif; position:relative; top: -1px">x</span> {0}) + #1</td><td>cardinality of singleton set on (s+18)</td></tr>
+	<tr><td colspan="3"></td><td>s+16.</td><td></td><td>(&forall;g &isin; <b>Function</b>(Y &#xD7; {0} &#x222A; {(1,1)},X &#xD7; {0} &#x222A; {(1,1)}))(g is not injective)</td><td>Universal generalization, (n) and (s+15)</td></tr>
+	<tr><td colspan="3"></td><td>s+17.</td><td></td><td>#(X &#xD7; {0} &#x222A; {(1,1)}) < #(Y &#xD7; {0} &#x222A; {(1,1)})</td><td>Conjunction introduction, (k+5) and (s+16), then definition of cardinal &lt;</td></tr>
+	<tr><td colspan="3"></td><td>s+18.</td><td></td><td>#(X &#xD7; {0}) + #{(1,1)}) < #(Y &#xD7; {0}) + #{(1,1)})</td><td>Cardinal + for disjoint sets on (s+17)</td></tr>
+	<tr><td colspan="3"></td><td>s+19.</td><td></td><td>#(X &#xD7; {0}) + #1 < #(Y &#xD7; {0}) + #1</td><td>cardinality of singleton set on (s+18)</td></tr>
 	<tr><td colspan="3"></td><td>s+20.</td><td></td><td>#X + #1 < #Y + #1</td><td>Cardinality of cartesian product with a singleton set on (s+19)</td></tr>
 	<tr><th colspan="7">Basis step for (weak) natural induction: #X < #Y &#9500; #X + #1 < #Y + #1</th></tr>
 </table>
