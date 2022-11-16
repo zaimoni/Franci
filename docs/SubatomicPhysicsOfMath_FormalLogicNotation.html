@@ -1,0 +1,307 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=windows-1252"/>
+	<title>Subatomic Physics of Math: Formal Notation</title>
+	<style type="text/css">
+		@page { margin: 0.79in }
+		p { margin-bottom: 0.1in; line-height: 120% }
+		a:link { so-language: zxx }
+		* {
+            font-family: "Liberation Serif", serif
+        }
+	</style>
+</head>
+<body lang="en-US" dir="ltr">
+<div style="position:fixed; top:0.5em; left:0.5em; background:white"><a href="./">Home</a> &gt; <a href="./SubatomicPhysicsOfMath_GeneralizedAssociativity.html">Generalized Associativity</a></div>
+<h1 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 16px">Subatomic Physics of Math: Formal Notation</h1>
+<span style="border: 1px solid black; display:block; float:right">
+	<ol type="I">
+		<li><a href="#metaphysics-of-proofs">Metaphysics of Proofs</a></li>
+		<li><a href="#cartesian-product">Extending Cartesian products</a></li>
+		<li><a href="#substitutions">Revisiting substitutions</a></li>
+		<li><a href="#intuitionistic-logic">Intuitionistic logic</a></li>
+	</ol>
+</span>
+<p>We recall that truth tables are a relatively terse format for representing classical-logic reasoning about logics where all statements have truth values.  The truth table format 
+	<b>also</b> represents mathematical functions with range truth values.  In the general case, we would need some inductive definitions yet to be introduced.</p>
+<p>Now that we have set theories with <i>ur-elements</i>, it seems reasonable that we can have a partial function with domain <b>TruthValued</b>, and range finite sequences of textual glyphs.  (This uses our notational abuses, as <b>TruthValued</b> is already known to be 
+	an unformalizable domain of discourse.  The range is defined for set theories with <i>ur-elements</i>.)  We then can interpret all of uniform substitutions, simultaneous substitutions, and non-uniform substitutions, 
+	as partial functions with domain and range finite sequences of textual glyphs, i.e. notation.  By analogy with how we defined decimal numerals for natural numbers, if we 
+	have a Kuroda grammar for the notation, we then can use the grammar to parse the notation, then use the parse to recover a statement in <b>TruthValued</b>.</p>
+<p>This is the point of the formalist approach to mathematics: we can make mathematical reasoning more verifiable, by reducing it to physical manipulations of notation.</p>
+<p>We say that <b>Notation</b>, is the <i>proper class</i> of all finite sequences of textual glyphs.  We intentionally do not include the empty word in <b>Notation</b>.</p>
+<p>For a given formal grammar K, we say <b>Notation</b><sub>K</sub> is the language that is unambiguously parsed by K.</p>
+<p>We expect that there is a Kuroda grammar for the formal notation for everything we have reviewed so far.  In particular, this grammar can 
+	parse variables, and what domain those variables are in (either mathematical domain, or domain of discourse).</p>
+
+<h2 id="metaphysics-of-proofs" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Metaphysics of Proofs</h2>
+<p>The Gentzen-style notation we have been using in tabular form, looks like each line can be modeled as a finite sequence of textual glyphs if 
+	we allow formatting (such as <sub>subscripting</sub>, or <b>bold</b> text) to be textual glyphs as well.  That is, each line has a mathematical model in <b>Notation</b>.  Furthermore, the logic used 
+	to evaluate glyph equality has only classical truth values; a truth value of <i>unknown</i> or <i>contradiction</i> makes that line of the proof unusuable, i.e. invalid.</p>
+<p>The table format itself, looks like a finite sequence of lines in <b>Notation</b>.  We expect each formally justified step to correspond to the evaluation of a partial function whose 
+	range is in <b>Notation</b>, and whose domain should be contained in the cartesian product of a small number of instances of <b>Notation</b>.  (Note: in our sprint for functions and arithmetic, we only needed working definitions for 
+	functions with one, or two, arguments.</p>
+<p>Ch. 4, "Effectively Axiomatized Theories", of <a href="https://www.logicmatters.net/resources/pdfs/godelbook/GodelBookLM.pdf">An Introduction to
+	G&ouml;del's Theorems</a> by Peter Smith, confirms the above impressions.</p>
+<p>We have already reviewed one formal grammar, for natural number numerals.  It is traditional to reserve the decimal digit glyphs 0...9 for 
+	natural number numerals, as a building block for other things we wish to parse.  In particular, we can describe our historical syntax for both quantified and term variables, 
+	as starting with a single alphabetic glyph, optionally followed by a subscripted natural number numeral, quantified variable, or term variable.</p>
+<p>With this in mind, let's review <i>modus ponens</i>:</p>
+<p align="center">P &rArr; Q, P &#9500; Q</p>
+<p>We expect a formal grammar to parse this as:</p>
+<ul>
+	<li>P and Q, are distinct propositional variables.  The simultaneous substitution of any two statements in <b>TruthValued</b>, for P and Q, is itself a specific instance 
+		of <i>modus ponens</i>.</li>
+	<li>We are using the glyph &#9500; as a lower precedence than the glyph , .  In turn, the glyph , has a lower precedence than the glyph &rArr;.  The variables P and Q have very high 
+		precedence when parsing (i.e., is parsed "before" the expressions using them).</li>
+</ul>
+<p>However, we have implicitly been using the fact that <b>some</b> truth-valued expressions, have a formal notation.  Likewise, some sets (e.g., the empty set) have a formal notation.  That is, for any given choice of notation, we have a partial relation <b>TruthValued</b><span style="position:relative; top: -2px">&#x2192;</span> <b>Notation</b>.  (The inverse being a partial function, 
+depends on the parse being unambiguous.)</p>
+<p>This allows interpreting <i>modus ponens</i> in at least two ways:</p>
+<ul>
+	<li><b>TruthValued</b> &#xD7; <b>TruthValued</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValued</b></li>
+	<li><b>Notation</b> &#xD7; <b>Notation</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>Notation</b></li>
+</ul>
+<p>That is, the partial relation that translates truth-valued expressions to formal notation, preserves the inference rule <i>modus ponens</i>.  (Actually, we try to use one that preserves all valid inference rules whatsoever.)  Since 
+	<b>TruthValued</b> can use any target logic as an (implicit) parameter, while <b>Notation</b> can only use a logic with classical truth values: we can use
+	classical logic reasoning about <b>Notation</b> to make inferences about any target logic's truth-valued expressions.</p>
+<p>We have such a logic: classical logic.  With a proper mathematical model of notation, we could also follow instructions for how Intuitonistic logic is traditionally defined.</p>
+
+<p>Our sources advise us that in the early 1930's, Alfred Tarksi published the <a href="https://en.wikipedia.org/wiki/Tarski%27s_undefinability_theorem">Undefinability of Truth</a> theorem &mdash; that is, 
+	a formal theory T with both a <i>G&ouml;del numbering</i>, and notation for logical negation ~, 
+	the theory T cannot represent a predicate on its <i>G&ouml;del numbers</i> that is true if and only if the statements, representated by the notations, are true for the formal theory T.)  Saul Kripke's theory of
+	truth describes an inductive procedure for a workaround, around Tarksi's undefinability theorem.  We presume a formal theory includes, but has more to its definition than, a formal grammar.</p>
+<p>(Forward-referencing terms not yet defined: a <i>G&ouml;del numbering</i> is an injective function from <b>Notation<sub>T</sub></b> into &#x2115;, whose domain is <b>Notation<sub>T</sub></b>.)</p>
+
+<h2 id="cartesian-product" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Extending Cartesian products</h2>
+<p>For a finite sequence (X<sub>k</sub>)<sub>k=m...n</sub> of <i>sets</i>, we define the (n-ary) Cartesian product</p>
+<p align="center">&#xD7;<sub>k=1...n</sub> X<sub>k</sub></p>
+<p>or, alternately, </p>
+<p align="center">X<sub>1</sub> &#xD7; ... &#xD7; X<sub>n</sub></p>
+<p>as</p>
+<ul>
+	<li>X<sub>1</sub> when 1=n</li>
+	<li>X<sub>1</sub> &#xD7; X<sub>2</sub> when 2=n</li>
+	<li>(&#xD7;k=m...n-1</sub> X<sub>k</sub>) &#xD7; X<sub>n</sub> otherwise</li>
+</ul>
+<p>To handle classes rather than sets in the finite sequence, we would need to have a parallel definition of finite sequence involving a <i>conglomerate</i> range, which can contain <i>proper classes</i> as elements.  While such definitions would work, we'll avoid that level of detail.</p>
+<p>A similar inductive definition strategy, defines ordered n-tuples in terms of ordered pairs.  Just like ordered pairs are the elements of a Cartesian product, ordered n-tuples are the 
+	elements of an n-ary Cartesian product.</p>
+<p>When all of the X<sub>k</sub> in the defining finite sequence for the Cartesian product are the same mathematical collection X, we consider X<sup>n</sup> to be the nth Cartesian power of X.  Comparing with the definition of exponentiation for natural numbers,
+	we see that the Cartesian product, viewed as a function <b>Class</b> &#xD7; <b>Class</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>Class</b>, doesn't have an identity element &mdash; but does have an annihilator, the empty set &#x2205;.
+	We do not formally define the Cartesian power X<sup>0</sup>.  We do reserve the option to extend formulas using Cartesian products, to handle X<sup>0</sup> as convenient.
+	(That the Cartesian power notation conflicts with exponentiation a<sup>n</sup> of natural numbers a to the power n, is inconvenient.  Fortunately, the contexts in 
+	which one would want to both use the Cartesian power of a model's set representing a natural number, and also exponentiate the natural number itself, are exceedingly rare.)</p>
+<p>The prefix notation for function evaluation we have been using, appears to be first naming the function, then an ordered n-tuple of the arguments of the function where n=1 or n=2.  We say a function whose domain is contained in an n-ary Cartesian product, 
+	has arity n.</p>
+
+<p>Now that we have defined n-ary Cartesian products, the syntactical entailment connective &#9500; itself can be replicated as an <i>ur-element</i> function schema.  By itself this doesn't 
+	fully mathematically model <i>modus ponens</i>, but it seems reasonable that a formal grammar would implicitly define functions that test for the structure of statements.  <i>A priori</i>, this does not look like a quick strategy.</p>
+<p>What about defining an <i>ur-element</i> set theoretic function &isin;:<b>Set</b> &#xD7; <b>Class</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b>, with evaluation rule using the undefined predicate &isin;: (x,X) &#x21A6;<sub>&isin;</sub> x &isin; X?</p>
+<ul>
+	<li>The principle of bivalence/trivalence/tetravalence is what makes this a function, rather than a partial function.</li>
+	<li>This looks like a circular definition, but it is not: we are defining a truth-valued function, in terms of an undefined predicate.</li>
+	<li>We would need to have a definition of the Cartesian product of a <i>proper class</i> and a <i>proper conglomerate</i>.  (The result, would be a <i>proper conglomerate</i>.)</li>
+</ul>
+
+<h2 id="substitutions" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Revisiting substitutions</h2>
+<p>We next consider how to partially <a href="https://www.planetmath.org/substitutionsinpropositionallogic">formalize substitutions</a> <a href="http://intrologic.stanford.edu/extras/equality.html">justified by equality</a>.  We start with the simplest case: uniform substitutions from a syntactical variable, to an expression in the same domain of discourse as the variable.</p>
+<p>Informally, what we want to do for this is:</p>
+<ul>
+	<li>Enumerate all instances of the syntactical variable, or term, to be replaced in the notation P: the substitution source A.</li>
+	<li>All textual glyphs that are not part of the syntactical variable, are to be left unchanged.</li>
+	<li>Each subsequence of textual glyphs that is the syntactical variable, is to be replaced with the sequence of textual glyphs that represents the expression: the substitution destination B.</li>
+	<li>Whether a pair of parentheses around the expression, is needed to avoid breaking the parse, depends on details.  It should always be safe to include the pair of parentheses, and then remove later if they are not needed.</li>
+</ul>
+<p>We recognize the first step, as an instance of Hume's principle, gives a finite sequence (A)<sub>i=1...n</sub> of the finite sequence of textual glyphs A.  The textual glyphs of P <b>not</b> mentioned in (A)<sub>i=1...n</sub>,
+	are themselves a finite sequence (Z<sub>k</sub>)<sub>k=0...n</sub>; some of the Z<sub>k</sub> may be empty functions.  That is, the formal grammar is used to interpret P as the concatenation of</p>
+	<p align="center">Z<sub>0</sub> A Z<sub>1</sub> ... A Z<sub>n</sub>.</p>
+<p>A simultaneous substitution, has a (finite) set of substitution sources {C<sub>0</sub> ... C<sub>m</sub>}; the corresponding finite sequence (A<sub>i</sub>)<sub>i=1...n</sub> of 
+	substitution sources in the notation P, has A<sub>i</sub> &isin; {C<sub>0</sub> ... C<sub>m</sub>} for all i in 1...n.</p>
+<p>For each substitution source C<sub>j</sub>, a uniform substitution has one substitution destination B<sub>j</sub>.  A non-uniform substitution instead has a (finite)
+	set of substitution destinations {D<sub>j<sub>0</sub></sub>, ..., D<sub>j<sub>p</sub></sub>}.  While the identity function id always defines a valid substitution, this is mainly of use 
+	in non-uniform substitutions where we want only some instances of the substitution source, to be rewritten to a different substitution destination.</p>
+<p>The practicality of the above, depends critically on <b>Notation</b><sub>K</sub> being parsable by its formal (Kuroda) grammar K "fast enough to be useful".</p>
+<p>We note that any particular uniform (simultaneous) substitution defines an injection <b>Notation</b><sub>K</sub> <span style="position:relative; top: -2px">&#x2192;</span> <b>Notation</b><sub>K</sub> .  For a non-uniform substitution, this is 
+	only a partial injection: we have to domain-restrict to those notations, that parse as having the exact (finite) sequence to substitute on.</p>
+<!--
+	At this point, we could replicate the entire formal buildout of logic, set theory, and the natural numbers to date, using mathematical modeling of notation in place of the 
+	philosophically justified notation we have been using.
+-->
+
+<h2 id="intuitionistic-logic" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Intuitionistic logic</h2>
+<p>We now can formally define <a href="https://en.wikipedia.org/wiki/Intuitionistic_logic">constructive logic</a>, i.e. <a href="https://plato.stanford.edu/entries/intuitionistic-logic-development/">intuitionistic logic</a>.  Following Heyting, we start by modifying the Komolgorov rationale 
+to refer to proofs, rather than problems and solutions.</p>
+<table align="center">
+	<tr><th colspan="4">Axioms of Intuitionistic Logic</th></tr>
+	<tr><th>Inference rule</th><th></th><th>Classical logic</th><th></th><th>Rationale</th></tr>
+	<tr><td>(A &#9500; B), A &#9500; B</td><td rowspan="2">MP</td><td rowspan="2"><i>modus ponens</i></td><td rowspan="2" colspan="2"></td></tr>
+	<tr><td>A &rArr; B, A &#9500; B</td></tr>
+	<tr><td>A & B &#9500; A</td><td>AND-1</td><td rowspan="2">Conjunction elimination</td><td rowspan="3">(H1)</td><td rowspan="3">A proof of A & B, is given by presenting a proof of A and a proof of B.</td></tr>
+	<tr><td>A & B &#9500; B</td><td>AND-2</td></tr>
+	<tr><td>A &#9500; (B &#9500; <nobr>A & B)</nobr></td><td>AND-3</td><td>Conjunction introduction</td></tr>
+	<tr><td>A &#9500; A &#x2228; B</td><td>OR-1</td><td rowspan="2">Disjunction introduction</td><td rowspan="3">(H2)</td><td rowspan="3">A proof of A &#x2228; B is given by presenting either a proof of A, or a proof of B.</td></tr>
+	<tr><td>B &#9500; A &#x2228; B</td><td>OR-2</td></tr>
+	<tr><td>(A &rArr; C) &#9500; <nobr>(B &rArr; C</nobr> &#9500; <nobr>(A &#x2228; B) &rArr; C)</nobr></td><td>OR-3</td><td>Proof by cases</td></tr>
+	<tr><td>B &#9500; A &rArr; B</td><td>THEN-1</td><td></td><td rowspan="2">(H3)</td><td rowspan="2">A proof of A &rArr; B, is a construction which permits us to transform any proof of A into a proof of B.</td></tr>
+	<tr><td>(A &#9500; B &rArr; C) &#9500; (A &rArr; B &#9500; <nobr>A &rArr; C)</nobr></td><td><nobr>THEN-2</nobr></td><td></td></tr>
+	<tr><td>~A := A &rArr; &#x22A5;</td><td></td><td></td><td rowspan="2">(H4)</td><td rowspan="2">Absurdity &#x22A5; (contradiction) has no proof.  A proof of ~A, is a construction which transforms any hypothetical proof of A into a proof of a contradiction.</td></tr>
+	<tr><td>&#x22A5; &#9500; A</td><td>FALSE</td><td>Principle of explosion</td></tr>
+	<tr><td>t&isin;D &rArr; A(t) &#9500; (&forall;x&isin;D)A(x)</td><td>&forall;-GEN</td><td>Universal generalization</td><td rowspan="2">(H5)</td><td rowspan="2">A proof of (&forall;x&isin;D)A(x) is a construction which transforms a proof of d&isin;D, into a proof of A(d)</td></tr>
+	<tr><td>t&isin;D, (&forall;x&isin;D)A(x) &#9500; A(t) </td><td>PRED-1</td><td>Universal instantiation; t must be free for substitution for x in A(t)</td></tr>
+	<tr><td>t&isin;D, A(t) &#9500; (&exist;x&isin;D)A(x)</td><td>PRED-2</td><td>Existential generalization; t must be free for substitution for x in A(t)</td><td rowspan="2">(H6)</td><td rowspan="2">A proof of (&exist;x&isin;D)A(x) is given by providing t&isin;D, and a proof of A(t).</td></tr>
+	<tr><td>t&isin;D, A(t) &rArr; B &#9500; (&exist;x&isin;D)(A(x) &rArr; B)</td><td>&exist;-GEN</td><td></td></tr>
+</table>
+<p>The inference rule column, are Gentzen-format notations for the axioms that interpret the Heyting rationale for Intuitonistic logic.</p>
+<p>The rationale and axioms do not reference non-classical truth values.  However, the rationale for logical or &#x2228; <b>explicitly proscribes</b> the Law of the Excluded Middle, i.e. principle of bivalance:</p>
+<p align="center">&#9500; P &#x2228; ~P</p>
+<p>This is not rejected outright (intuitionistic logic is intended to be the constructive part of classical logic), but is intentionally unprovable.  It is reasonable to say that for all five of the non-classical truth value logics we are considering,
+	their Intuitionistic version has the corresponding principle of n-valence unprovable.</p>
+<p>So the intended interpretations here are distinct from those we have reviewed earlier:</p>
+<ul>
+	<li>Nonstrict implication &rArr; can be thought of as a function, or algorithm, that takes a proof of a truth-valued expression A, and returns a proof of a truth-valued expression B.</li>
+	<li>Syntactical entailment &#9500;, can be thought of as reason to believe such a proof exists.</li>
+</ul>
+<p>The other glaring difference, is that Intuitionistic logic doesn't have the familiar existential instantiation inference rule.</p>
+<p>In a more general i.e. philosophical context, we could substitute "evidence" for "proof".  One interpretation of The formalist program for mathematics, 
+	proposes that the ultimate cross-check of a natural-language proof, is to translate it to a formal language.  We'll look specifically 
+	at translating to a Gentzen-format proof, i.e. a finite sequence of notations, with additional notations specifying which inference rule justified substitutions 
+	were used at each stage.  Each line of a Gentzen-format (or Fitch-format) proof corresponds to an ordered pair of notations.</p>
+<ul>
+	<li>The first element of the ordered pair, is the notation that evaluates to <i>true</i>, interpreted as the statement whose truth is asserted.</li>
+	<li>The second element of the ordered pair, is the notation documenting the inference rule, and the substitutions of true-evaluating notations into the inference rule, that give the statement that is <i>true</i>.</li>
+</ul>
+
+<h2 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">&#x21A6; and &isin; for non-formalizable domains of discourse</h2>
+<p>We take <b>TruthValued</b>, the domain of discourse of all truth-valued statements, as our primary example.  Another important example, is the domain of discourse of possible worlds.  (This is key to 
+	Saul Kripke's possible-worlds interpretation of modal logic, which is closely related to meta-mathematical model theory.) In both cases,
+	we have a natural language expressible idea of what it means to be in the domain of discourse.  If we take D to be a notation for a non-formalized domain of discourse, and copy what we have done 
+	for the various set theories:</p>
+<table align="center">
+	<tr><th></th><th>Intended interpretation</th><th>If D were a formalized domain of discourse (e.g., Set)</th></tr>
+	<tr><td align="right">d &isin; D</td><td>d is in the domain of discourse D</td><td>d is a term variable</td></tr>
+	<tr><td align="right">(&forall;d &isin; D)</td><td>For all d in the domain of discourse D</td><td>d is a universally quantified variable</td></tr>
+	<tr><td align="right">(&exist;d &isin; D)</td><td>There exists d in the domain of discourse D</td><td>d is an existentially quantified variable</td></tr>
+</table>	
+<p>Next, we recall that the evaluation rule notation doesn't, by itself, name the domain of discourse it is being evaluated on.  We start with two cases where the intended interpretation looks very reasonable:</p>
+<ul>
+	<li>x &#x21A6; x, with intended interpretation "x evaluates to x"</li>
+	<li>For a given term variable d, x &#x21A6; d with intended interpretation "x evaluates to d"</li>
+</ul>
+<p>Recall that in set theory, we had to provide a mathematical collection X as the domain for both of these.  The resulting functions were the identity function id<sub>X</sub>,
+	and the constant function d<sub>X</sub>.  The evaluation rule, fulfils the Kolmogorov rationale for Intuitionistic logic.</p>
+<p>For now, we will consider the non-mathematically modeled instances of these non-formalizable domains of discourse, to be ur-elements.  (Formal notations, e.g. 
+	the lines for the Gentzen-style proofs, as finite sequences of textual glyphs are in <b>Set</b> rather than <b>Ur</b>.)
+<p>The above five intended interpretations of notations, do allow an alternative strategy: translate the axioms of set theory, using these 
+	intended interpretations, to get a theory of collections of non-formalizable domains of discourse.
+	(Philosophically, a quantified variable is one order higher than the corresponding term variable.
+	This would cause technical issues similar to those incurred by <i>Principia Mathematica</i>'s type-theoretic approach
+	&mdash; x &isin; x typically would be disallowed outright, as generally a collection of non-formalized objects
+	in a domain of discourse D, is itself positively not in that domain of discourse D.)</p>
+<p>We now consider the axioms of set theory that involve existential quantification, and thus need specific justification for Intuitonistic logics:</p>
+<ul>
+	<li>Von Neumann-Bernays-G&ouml;del <i>class</i> existence: If both <b>Set</b> and the function &phi;:&phi;:<b>Set</b> <span style="position:relative; top: -2px">&#x2192;</span> <b>TruthValues</b> was known to be effectively constructively computable, 
+		this would be fine.  We'd need to formalize what a constructively computable function, was.</li>
+	<li>Subset axiom (schema): Similar restrictions as above.  The need for ur-elements to mathematically model notation, means <b>Ur</b> may actually be easier to 
+		justify than <b>Set</b>.</li>
+	<li>Axiom (schema) of Replacement: Similar restrictions as above.</li>
+	<li>Axiom of empty set: This is acceptable. We could proceed by defining x&isin;&empty; := <i>false</i>|<sub><b>Set</b></sub> for x&isin;<b>Set</b>, and similarly for x&isin;<b>Ur</b>.</li>
+	<li>Axiom of (absolute) Union: We expect this to be problematic, for infinite indexing sets.  We might be fine with recognizing whether a specific set is an element of an infinite set,
+		without agreeing that actually examining every element of that infinite set is feasible.</li>
+	<li>Axiom of Power set: We expect this to be problematic, when taking the power set of an infinite set.  It is unclear, in advance, that all subsets of
+		the natural numbers &#x2115; should be constructively computable &mdash; even if &#x2115; should turn out to be constructively computable.</li>
+	<li>Axiom of Infinity: We expect this to be problematic, for much the same rationale as the Axiom of (absolute) Union.</li>
+</ul>
+<!--
+	In particular, functions defined by the two above evaluation rules are formalizable even for non-formalizable domains of discourse D.
+	Furthermore, this formalization does not require a concept analogous to ordered pair.   ....
+	[Alternate rationale for axiom of empty set]
+  -->
+
+<h2 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Revisiting the cut rule: a mechanistic proof strategy</h2>
+<table align="right" cellspacing="0">
+	<tr><th colspan="2"></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td>&nbsp;</td><td>1.</td><td>P<sub>0</sub> &#9500; P<sub>1</sub></td><td></td><td>Given</td></tr>
+	<tr><td></td><td>2.</td><td>P<sub>1</sub> &#9500; P<sub>2</sub></td><td></td><td>Given</td></tr>
+	<tr><td style="border-left: black 1px solid; border-top: black 1px solid"></td><td>3.</td><td></td><td>P<sub>0</sub></td><td>Hypothesis</td></tr>
+	<tr><td style="border-left: black 1px solid"></td><td>4.</td><td></td><td>P<sub>1</sub></td><td><i>modus ponens</i> on (1) and (3)</td></tr>
+	<tr><td style="border-left: black 1px solid; border-bottom: black 1px solid"></td><td>5.</td><td></td><td>P<sub>2</sub></td><td><i>modus ponens</i> on (2) and (4)</td></tr>
+	<tr><td></td><td>6.</td><td>P<sub>0</sub> &#9500; P<sub>2</sub></td><td></td><td>Syntactical entailment introduction, (3) and (5)</td></tr>
+	<tr><th colspan="5">Cut rule: (P<sub>0</sub> &#9500; P<sub>1</sub>), (P<sub>1</sub> &#9500; P<sub>2</sub>) &#9500; (P<sub>0</sub> &#9500; P<sub>2</sub>)</th></tr>
+</table>
+<p>When following instructions for formalizing logic (specifically, the propositional calculus) from natural language, what was important was the rationales -- why
+	we can accept the descriptions as reasonable.  The approach we take when mathematically modeling, what we have already done in natural language, will be different.</p>
+<p>Philosophically, between the Inference Rule and Proposition columns:</p>
+<ul>
+	<li>The Fitch-style formatted proof for the cut rule, depicts a finite sequence of six notations, and their rationales.</li>
+	<li>The operational role of Given and Hypothesis rationales appears very similar.</li>
+	<li>The implied domain of discourse for the propositional variables, is the non-formalizable <b>TruthValued</b>, truth-valued statements.</li>
+	<li>Since the syntactical entailment inference rule, and classical logic's implication introduction inference rule, both need to know the nearest preceding line that is a Hypothesis, 
+		the mathematical model for a Gentzen-format proof must actually be a finite sequence of ordered pairs, where the first coordinate is the notation and the 
+		second coordinate represents the rationale.</li>
+</ul>
+<p><i>modus ponens</i> itself, looks like it can be explicitly notated with our conventions as an axiom, rather than the usual axiom schema:</p>
+<p align="center">(&forall;P<sub>0</sub> &isin; <b>TruthValued</b>)(&forall;P<sub>1</sub> &isin; <b>TruthValued</b>)((P<sub>0</sub> &#9500; P<sub>1</sub>), P<sub>0</sub> &#9500; P<sub>1</sub>)</p>
+<p>Here, we interpret &isin; <b>TruthValued</b> as "in the domain of discourse of truth-valued expressions", even though said domain of discourse is non-formalizable.</p>
+<p>So the uses of <i>modus ponens</i> can be viewed either as-is (copies made from an axiom schema), or concealing two universal instantiations of an axiom to make that copy.</p>
+<p>This suggests that <i>universal instantiation</i> must be an axiom schema.  The axiom version, cannot be used without invoking itself.</p>
+<p>We also have been accepting single-glyph non-uniform substitutions [(..., &#9500;)/(&#9500;,&#9500;)] of <i>modus ponens</i>, as <i>modus ponens</i> instances.</p>
+<p>Now, how would we informally describe an algorithm that identifies the cut rule as a candidate inference rule to prove from <i>modus ponens</i>, and then prove it?</p>
+<p>Interpreting the <a href="https://en.wikipedia.org/wiki/Rete_algorithm">Rete algorithm</a>, we see that we can associate the <i>modus ponens</i> axiom schema 
+	with a finite sequence of partial matches to the schema.  Since the corresponding axiom has two universal quantifiers, we start by introducing three propositional variables
+	P<sub>0</sub>, P<sub>1</sub>, P<sub>2</sub>.  So we want two hypotheses, using all three propositional variables, that have some relevance to each other (in Belnap's sense) and that appear as hypotheses 
+	in <i>modus ponens</i>.</p>
+<ul>
+	<li>two hypotheses,</li>
+	<li>using all three propositional variables,</li>
+	<li>that have some relevance (in Belnap's sense),</li>
+	<li>that partially match <i>modus ponens, and </i></li>
+	<li>do not fully match <i>modus ponens</i>.</li>
+</ul>
+<p>It is a mechanical exercise that both hypotheses must be of the form A &#9500; B.  We can use simultaneous substitutions to get the candidate list down to:</p>
+<ul>
+	<li>P<sub>0</sub> &#9500; P<sub>1</sub>, P<sub>0</sub> &#9500; P<sub>2</sub></li>
+	<li>P<sub>0</sub> &#9500; P<sub>1</sub>, P<sub>1</sub> &#9500; P<sub>2</sub></li>
+	<li>P<sub>0</sub> &#9500; P<sub>2</sub>, P<sub>1</sub> &#9500; P<sub>2</sub></li>
+</ul>
+<p>We work how the algorithm proceeds for the second case (the Givens for the cut rule).  The Rete algorithm says that when the attempted Fitch-style format proof has just two lines, the corresponding partial matches
+	for <i>modus ponens</i> are:</p>
+<p align="center">
+	<span style="background-color: #9F9">P<sub>0</sub> &#9500; P<sub>1</sub></span>, P<sub>0</sub> &#9500; P<sub>1</sub><br />
+	<span style="background-color: #9F9">P<sub>1</sub> &#9500; P<sub>2</sub></span>, P<sub>1</sub> &#9500; P<sub>2</sub>
+</p>
+<p>The missing hypotheses of these partial matches, P<sub>0</sub> and P<sub>1</sub>, are our candidates for the third Hypothesis line.  However, P<sub>1</sub> also 
+	appears as the conclusion of a partial match, so we remove that as a Hypothesis line candidate.  With only one candidate remaining, it doesn't matter 
+	what our "search strategy" is.  After appending the Hypothesis line to the finite sequence of notations (and starting the Fitch notation for hypothetical reasoning), the partial match listing is:</p>
+<p align="center">
+	<span style="background-color: #9F9">P<sub>0</sub> &#9500; P<sub>1</sub></span>, <span style="background-color: #9F9">P<sub>0</sub></span> &#9500; P<sub>1</sub><br />
+	<span style="background-color: #9F9">P<sub>1</sub> &#9500; P<sub>2</sub></span>, P<sub>1</sub> &#9500; P<sub>2</sub>
+</p>
+<p>Now, this time all of the hypotheses, of one of the <i>modus ponens</i> rules, are matched: its conclusion P<sub>1</sub> is a candidate for the next line 
+	of the Gentzen-format proof.</p>
+
+<p>The Rete algorithm also requires maintaining a partial match listing for the syntactical entailment inference rule.  This inference rule works on proofs, not statements (and so cannot populate the initial candidates for Givens).  This now 
+		has one full match, assuming we have defined:</p>
+<ul>
+	<li>a function LastUnclosedHypothesis(proof) from finite sequences of proof notations, to notations for statements, and</li>
+	<li>a function LastStatement(proof) from finite sequences of proof notations, to notations for statements</li>
+</ul>
+<p>The schema for syntactical entailment would then be (ignoring the question of what it means for a proof to be <i>true</i>)</p>
+<p align="center">proof &#9500; (LastUnclosedHypothesis(proof) &#9500; LastStatement(proof))</p>
+<p>This generated no partial matches for the first two lines, as those lines were not in the domain of LastUnclosedHypothesis (the hypothesis was introduced on the third line).  When including the 
+	third line, this does generate a full match &mdash; whose conclusion is an instance of the identity inference rule schema, P<sub>0</sub> &#9500; P<sub>0</sub>.</p>
+<p>As the only candidate, we append the one full match for <i>modus ponens</i> as the next line of the proof, and remove the rule from the partial match catalog for <i>modus ponens</i>. 	  The partial match listing is now:</p>
+<p align="center">
+	<span style="background-color: #9F9">P<sub>1</sub> &#9500; P<sub>2</sub></span>, <span style="background-color: #9F9">P<sub>1</sub></span> &#9500; P<sub>2</sub>
+</p>
+<p>The corresponding instance of syntactical entailment, is still a full match: its conclusion P<sub>1</sub> &#9500; P<sub>2</sub>, is a Given.
+<p>Again, there is only one partial match (for <i>modus ponens</i>), so we append its conclusion as the next line of the proof.
+	We now have no partial matches for <i>modus ponens</i>, but one for syntactical entailment:</p>
+<p align="center">
+	<span style="background-color: #9F9">proof</span> &#9500; (P<sub>0</sub> &#9500; P<sub>2</sub>)</sub>
+</p>
+<p>We then append P<sub>0</sub> &#9500; P<sub>2</sub>, with the syntactical entailment rationale, as the next line of the proof.  There are now 
+	no partial matches available.</p>
+</body>
+</html>
