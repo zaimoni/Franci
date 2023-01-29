@@ -394,7 +394,7 @@ namespace gentzen {
 			return x;
 		}
 
-		static std::optional<Domain> get(const domain* src) {
+		static constexpr std::optional<Domain> get(const domain* src) {
 			if (!src) return std::nullopt;
 
 			for (decltype(auto) x : Domain_values) if (src == get(x).get()) return x;
@@ -1856,11 +1856,17 @@ retry:
 	class proof {
 		enum class rationale {
 			Given = 0,
-			Hypothesis
+			Hypothesis,
+			Inference
 		};
 
 		var::cache_t _vars; // global working variable catalog
 		std::vector<std::shared_ptr<proof> > _testing;  // sub-proofs that Franci has not yet committed to using
+
+		// want to allow non-uniform simultaneious substitutions when linking up inference rule
+		using line = std::pair<std::shared_ptr<Gentzen>, std::tuple<rationale, std::shared_ptr<inference_rule> /* , std::unique_ptr<inference_rule::pattern_t> */ > >;
+
+		std::vector<std::pair<line, std::shared_ptr<proof> > > _proof; // proof is for implication introduction, syntactical entailment introduction, etc.
 
 	public:
 		proof() = default;
