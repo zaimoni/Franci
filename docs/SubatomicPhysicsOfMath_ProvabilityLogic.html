@@ -1,0 +1,282 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=windows-1252"/>
+	<title>Subatomic Physics of Math: Formal Notation</title>
+	<style type="text/css">
+		@page { margin: 0.79in }
+		p { margin-bottom: 0.1in; line-height: 120% }
+		a:link { so-language: zxx }
+		* {
+            font-family: "Liberation Serif", serif
+        }
+	</style>
+</head>
+<body lang="en-US" dir="ltr">
+<div style="position:fixed; top:0.5em; left:0.5em; background:white"><a href="./">Home</a> &gt; <a href="SubatomicPhysicsOfMath_Cardinality.html">Cardinality</a></div>
+<h1 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 16px">Subatomic Physics of Math: Provability Logic</h1>
+<span style="border: 1px solid black; display:block; float:left; margin-right: 20px; padding: 5px">
+	<b>Mathematically modeling mathematical notation, e.g. proofs</b>
+	<ol type="I">
+		<li><a href="./SubatomicPhysicsOfMath_FormalLogicNotation.html">Formal Notation</a></li>
+		<li><a href="./SubatomicPhysicsOfMath_ProvabilityLogic.html">Provability Logic</a></li>
+	</ol>
+</span>
+<span style="border: 1px solid black; display:block; float:right">
+	<ol type="I">
+		<li><a href="#kripke-semantics">Kripke i.e. relational semantics</a></li>
+		<li><a href="#normal-modal-logics">Normal modal logics</a></li>
+		<li><a href="#godel-lob-logic">G&ouml;del-L&ouml;b logic</a></li>
+		<li><a href="#paraconsistent">Paraconsistent logic: defusing the Principle of Explosion</a></li>
+		<li><a href="#metaphysics-formal-systems">Metaphysics of formal systems</a></li>
+	</ol>
+</span>
+<p>Following prior art, we consider a specialization of modal logic to the existence (or lack thereof) of proofs.
+	  We start by <a href="https://en.wikipedia.org/wiki/Kripke_semantics">defining</a> what notations are allowed for the simplest case, 
+	propositional modal logic:</p>
+<ul>
+	<li>A supply of propositional variables, and a bijection domain &#x2115; and range propositional variable notations.  We say that for a bijection f with domain &#x2115;, that 
+		Range(f) is countably infinite.</li>
+	<li>We assume a base logic (our authorities typically use classical or intuitionistic logic), that provides the inference rules and logical connectives to be used with the propositional variables.  This implicitly defines 
+		the non-modal truth-valued notations.</li>
+	<li>The modal operator &#x25FB;, is a (partial?) function with domain truth-valued notations, and range <b>TruthValues</b>.</li>
+	<li>The modal operator &#x25CA;, is tradtionally defined as ~&#x25FB;~ for classical logic.  We expect, by analogy with &forall; and &exist;, that this will need adjustment in the presence of non-classical truth values.</li>
+</ul>
+<p>What is not obvious <i>a priori</i>, is that this notational system has <b>many</b> intended interpretations.  Modal logic is usually introduced as the logic of possibility, 
+	with &#x25FB; having intended interpretation "necessarily" and &#x25CA; having the intended interpretation "possibly".</p>
+<p>We say that the legal notations implicitly defined by the above, is <b>Notation</b><sub>modal</sub>.  It is reasonable that there is a formal grammar corresponding to the above.</p>
+
+<h2 id="kripke-semantics" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Kripke i.e. relational semantics</h2>
+<p>Rather than take &#x25FB; to be an undefined predicate, we define both &#x25FB;, and semantic entailment &#x255E; as follows:</p>
+<ul>
+	<li>We say a Kripke frame, i.e. relational frame, is an ordered pair (<i>W</i>, <i>R</i>) where <i>W</i>&isin;<b>Set</b>, <i>R</i> &isin; <b>Function</b>(W<sup>2</sup>, <b>TruthValues</b>).  We say that the elements w of <i>W</i> are <i>nodes</i>, or <i>worlds</i>.  <i>R</i> is taken to use infix notation, and is said to be the accessiblity relation.</li>
+	<li>We say a Kripke model is an ordered triple (<i>W</i>, <i>R</i>, &#x255E;) where (<i>W</i>, <i>R</i>) is a Kripke frame, and &#x255E; &isin; <b>Function</b>(<i>W</i> &#xD7; <b>Notation</b><sub>modal</sub>, <b>TruthValues</b>).  &#x255E; uses infix notation, like &#9500;.  We require 
+		that:
+	<ul>
+		<li><b>Truth</b>(w &#x255E; ~A)=~<b>Truth</b>(w &#x255E; A)</li>
+		<li><b>Truth</b>(w &#x255E; A & B)=<b>Truth</b>(w &#x255E; A) & <b>Truth</b>(w &#x255E; B), and similarly for other infix binary logical connectives</li>
+	</ul>
+	</li>
+</ul>
+<p>These requirements interpret that &#x255E; is completely determined by its values on propositional variables; this is a structural induction definition.  We then define</p>
+<p align="center">w &#x255E; &#x25FB;A := (&forall;u &isin; {x &isin; <i>W</i> : w R x})(u &#x255E; A)</p>
+<p>The classical logic definition of &exist; then yields</p>
+<p align="center"><b>Truth</b>(w &#x255E; &#x25CA; A) = <b>Truth</b>((&exist;u &isin; {x &isin; <i>W</i> : w R x})(u &#x255E; A))</p>
+<p>To make the non-classical truth value workarounds for &exist; apply as-is here, we define</p>
+<p align="center">w &#x255E; &#x25CA; A := (&exist;u &isin; {x &isin; <i>W</i> : w R x})(u &#x255E; A)</p>
+<p>Alternate readings of w &#x255E; A in the non-applied mathematical field of model theory, include "w satisfies A", "A is satisfied in w", or "w forces A".  &#x255E; is also known as the "satisfaction relation", "evaluation", or "forcing relation".</p>
+<p>We then say a formula A &isin; <b>Notation</b><sub>modal</sub> is valid in:</p>
+<ul>
+	<li>A model (<i>W</i>, <i>R</i>, &#x255E;) when (&forall;w &isin; W)(w &#x255E; A)</li>
+	<li>A frame (<i>W</i>, <i>R</i>) when A is valid for all choices of &#x255E; (consistent with the current axioms, including those beyond the ones mentioned already)</li>
+	<li>A class C of frames or models, when A is valid for each c&isin;C.</li>
+</ul>
+<p>The definition of validity of A in a frame, is sensitive to set-theoretic axioms; this controls which functions may be said to exist.  In general, there are 
+	candidates for &#x255E; that exist for classical logic, but not Intuitionistic logic.</p>
+
+<h2 id="normal-modal-logics" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Normal modal logics</h2>
+<p>Following prior art, we say that if a modal logic satisfies two additional axioms, that it is a <a href="https://en.wikipedia.org/wiki/Normal_modal_logic">normal modal logic</a>:</p>
+<ul>
+	<li>&#x25FB;(A &rArr; B) &#9500;  &#x25FB;A &rArr; &#x25FB;B : Kripke schema, or distribution axiom</li>
+	<li>(&#9500; A) &#9500; (&#9500; &#x25FB;A) : Necessitation rule</li>
+</ul>
+<p>Two important intended interpretations of modal logic are typically not normal: deontic logic ("logic of ethics or obligations"), and epistemic logic ("logic of knowledge").</p>
+<p>We can conflate a modal logic, with a mathematical collection L of its formulas.  For now, assume classical logic.  If we 
+	require that:</p>
+<ul>
+	<li>All propositional logic tautologies are in L.  (More specifically, their notations).</li>
+	<li>All instances of the Kripke schema are in L.</li>
+	<li>L is closed under <i>modus ponens</i>: (P &rArr; Q)&isin;L, P&isin;L &#9500; Q &isin; L</li>
+	<li>L is closed under the necessitation rule</li>
+</ul>
+<p>We then define <b>K</b> as the intersection of all such L.  This has the same conceptual issues, as proving the natural numbers &#x2115; are a <i>set</i> from the Axiom of Infinity.</p>
+
+<h2 id="godel-lob-logic" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">G&ouml;del-L&ouml;b logic</h2>
+<p>We have not yet built out the tools to re-derive L&ouml;b's theorem (which is a statement about G&ouml;del number-encoded provability statements by Peano arithmetic, about Peano arithmetic.)  The corresponding 
+	modal logic axiom is L&ouml;b's axiom (schema):</p>
+<p align="center"> &#x25FB;(&#x25FB;P &rArr; P) &#9500; &#x25FB;P</p>
+<p>If we include all instances of L&ouml;b's axiom in the procedure used to construct <b>K</b>, we end up with what is traditionally defined as <b>GL</b>.</p>
+<p>The intended interpretation here, is:</p>
+<ul>
+	<li>&#x25FB;P has intended interpretation "It is provable that P"</li>
+	<li>&#x25CA;P has intended interpretation "It is consistent that P"</li>
+</ul>
+<p>Here, both of the target logic, and the axiom system, are implicit parameters.  <a href="https://plato.stanford.edu/entries/wittgenstein-mathematics/">Ludwig Wittgenstein</a> would have rejected this, for much the same rationale 
+that he rejected the G&ouml;del Incompleteness theorems: to say that no truth value for a formal notation is provable, would mean in his metaphysics that it wasn't even a formal notation even if it was otherwise syntactically valid.</p>
+<p>A typical notation for L&ouml;b's theorem is:</p>
+<p align="center">(PA &#9500; Prov(P) &rArr; P) &#9500; (PA &#9500; P)</p>
+<p>"PA" is an abbreviation for "Peano arithmetic"; Prov(P) is a predicate that is true if and only if P has a (Genzten-format) proof in Peano arithmetic.  We have not done the required work 
+	for Godel's incompleteness theorems and Gentzen's relative consistency proof of Peano arithmetic, but Prov(P) is closely related to the predicate used in those theorems.</p>
+<p>So, it looks like if we are using classical logic and the Peano arithmetic axioms to define &#x25FB;, that we have both:</p>
+<ul>
+	<li><b>Truth</b>(&#x25FB;P) = <b>Truth</b>(PA &#9500; P)</li>
+	<li><b>Truth</b>(&#x25FB;P) = <b>Truth</b>(Prov(P))</li>
+</ul>
+<p>So it appears Prov(P) is just (PA &#9500; P), so L&ouml;b's axiom directly interprets L&ouml;b's theorem: "If it is provable, that if P is provable then P, then it is provable that P".
+	(<a href="https://en.wikipedia.org/wiki/Hilbert%E2%80%93Bernays_provability_conditions">There is more going on here</a>; technically we have a predicate Prov(n) with domain &#x2115;.  A G&ouml;del encoding with domain Peano arithmetic statements, and range &#x2115; is used to define Prov(P) from Prov(n).)</p>
+<p>The necessitation rule, here interprets as "an axiom is self-proving".  (The Gentzen-format proof of an axiom is one line: the axiom itself.)
+<p>We suppose that a formal system can be axiomatized as an ordered triple (<i>grammar</i>, <i>logic</i>, <i>axioms</i>) where the extra-logical <i>axioms</i> itself is a <i>set</i> of Gentzen-format</p>
+<ul>
+<li>axioms &#9500; A, and </li>
+<li>axiom schemata t<sub>0</sub>&isin;D<sub>0</sub>, ... t<sub>n</sub>&isin;D<sub>n</sub> &#9500; A(t<sub>0</sub>, ..., t<sub>n</sub>), where all term variables in the hypothesis are used in the consequence.</li>
+</ul>
+<p>Since the formal <i>grammar</i> both must be the same for both <i>logic</i>, <i>axioms</i>, and often is the most verbose part of the triple, we often elide this parameter and 
+	just refer to (<i>logic</i>, <i>axioms</i>).  In contrast, we are not as finicky regarding how the logic is described; both truth table, and axiomatic, descriptions are acceptable.  Then we take (<i>logic</i>, <i>axioms</i>) to be a parameter for both &#x25FB; and &#x25CA;.  If we need to explicitly notate this parameter,
+	we use subscripting: &#x25FB;<sub>(<i>logic</i>, <i>axioms</i>)</sub> and &#x25CA;<sub>(<i>logic</i>, <i>axioms</i>)</sub></p>
+<p>Two common abbreviations in the literature are PA for Peano arithmetic (classical logic, Peano axioms), and HA for Heyting arithmetic (Intuitionistic logic, Peano axioms).</p>
+<p>We define the following technical English for two-valued logics:</p>
+<ul>
+	<li>P is independent of (<i>logic</i>, <i>axioms</i>) := &#x25CA;<sub>(<i>logic</i>, <i>axioms</i>)</sub>P &  &#x25CA;<sub>(<i>logic</i>, <i>axioms</i>)</sub>~P</li>
+	<li>(<i>logic</i>, <i>axioms</i>) is consistent := (&forall;P &isin; <b>Notation</b>)(~(&#x25FB;<sub>(<i>logic</i>, <i>axioms</i>)</sub>P & ~&#x25FB;<sub>(<i>logic</i>, <i>axioms</i>)</sub>P))</li>
+	<li>(<i>logic</i>, <i>axioms</i>) is complete := (&forall;P &isin; <b>Notation</b>)(&#x25FB;<sub>(<i>logic</i>, <i>axioms</i>)</sub>P &#x2228; ~&#x25FB;<sub>(<i>logic</i>, <i>axioms</i>)</sub>P)</li>
+</ul>
+<p>Defining inconsistent and incomplete formal systems, and extending these definitions to handle non-classical truth values, can be done with the techniques we have already used.</p>
+<p>We will not try to prove G&ouml;del's First Incompleteness theorem at this time, but we can informally state its modern refinement now: any formal system (<i>logic</i>, <i>axioms</i>) that 
+	models "enough of" Peano arithmetic (or Heyting arithmetic) to encode its proof existence as arithmetic, is at least one of inconsistent or incomplete.</p>
+<p>We note that:</p>
+<ul>
+	<li>If P is independent of (<i>logic</i>, <i>axioms</i>), then both (<i>logic</i>, <i>axioms</i> &#x222A; {P}) and (<i>logic</i>, <i>axioms</i> &#x222A; {~P}) are formal systems that strictly extend (<i>logic</i>, <i>axioms</i>).</li>
+	<li>If &#x25FB;<sub>(<i>logic</i>, <i>axioms</i>)</sub>P<sub>0</sub>, then <b>Truth</b>(&#x25FB;<sub>(<i>logic</i>, <i>axioms</i>)</sub>P)=<b>Truth</b>(&#x25FB;<sub>(<i>logic</i>, <i>axioms</i> &#x222A; {P<sub>0</sub>})</sub>P).  That is, the extended formal system doesn't prove any new statements.</li>
+	<li>If &#x25FB;<sub>(<i>logic</i>, <i>axioms</i>)</sub>~P<sub>0</sub>, then (<i>logic</i>, <i>axioms</i> &#x222A; {P<sub>0</sub>}) is inconsistent.</li>
+</ul>
+<p>We recall that Intuitionistic logic rejects the Law of the Excluded Middle.  From the canonical formalization of the Heyting rationale, it is reasonable that the 
+	real problem is existential quantification without an evaluation rule.  We should have, for classical logic,</p>
+<p align="center">(&exist;t &isin; {<i>true</i>, <i>false</i>})(P &#x21A6; t) &#x27DB; P &#x2228; ~P</p>
+<p>This is a special case of a general technique of rewriting universal and existential quantification for finite domains of discourse.  A weak natural induction proof against notation gives:</p>
+<table align="center">
+<tr><th colspan="2">All six truth-table describable logics we are considering</th></tr>
+<tr><td align="right">(&forall;x &isin; {x<sub>0</sub>, ..., x<sub>n</sub>})P(x) &#x27DB;&nbsp;</td><td>P(x<sub>0</sub>) & ... & P(x<sub>n</sub>)</td></tr>
+<tr><th colspan="2">Classical, Kleene strong three-valued logic, Franci</th></tr>
+<tr><td align="right">(&exist;x &isin; {x<sub>0</sub>, ..., x<sub>n</sub>})P(x) &#x27DB;&nbsp;</td><td>P(x<sub>0</sub>) &#x2228; ... &#x2228; P(x<sub>n</sub>)</td></tr>
+</table>
+<p>The existential rewrite fails for Kleene weak three-valued logic and Lisp/Prolog logic due to <i>unknown</i> &#x2228; <i>true</i> &#x21A6; <i>unknown</i>.  The failure of the rewrite for Belnap's four-valued logic, is 
+due to <i>unknown</i> &#x2228; <i>contradiction</i> &#x21A6; <i>true</i>.</p>
+<p>The Heyting rationale predates G&ouml;del-L&ouml;b logic, in the literature, by several decades.  We interpret the rejection of the Law of the Excluded Middle, as</p>
+<p align="center">~&#x25FB;(&#9500; (&exist;t &isin; {<i>true</i>, <i>false</i>})(P &#x21A6; t))</p>
+<p>i.e.</p>
+<p align="center">~&#x25FB;(&#9500; P &or; ~P)</p>
+<p align="center">~&#x25FB;(P &or; ~P)</p>
+
+<!-- Intuitionistic logic: while P &#9500; ~~P and ~~~P &#9500; ~P should be covered, they do not illustrate provability logic -->
+<table align="right" cellspacing="0">
+	<tr><th colspan="6">Intuitionistic Logic</th></tr>
+	<tr><th colspan="3"></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td rowspan="3" colspan="2"></td><td>1.</td><td>(P &rArr; C) &#9500; ((B &rArr; C) &#9500; ((P &#x2228; B) &rArr; C))</td><td></td><td>Proof by cases</td></tr>
+	<tr><td>2.</td><td>P &rArr; C, B &rArr; C &#9500; (P &#x2228; B) &rArr; C</td><td></td><td>Intended interpretation of &#9500; on (2)</td></tr>
+	<tr><td>3.</td><td>(P &rArr; C) & (B &rArr; C) &#9500; (P &#x2228; B) &rArr; C</td><td></td><td>Intended interpretation of &#9500; on (3)</td></tr>
+	<tr><td style="border-left: 1px solid black; border-top: 1px solid black" colspan="2"></td><td>4.</td><td></td><td>(P &#x2228; B) &rArr; C</td><td>Hypothesis</td></tr>
+	<tr><td style="border-left: 1px solid black" rowspan="9"></td><td style="border-left: 1px solid black; border-top: 1px solid black"></td><td>b.</td><td></td><td>P</td><td>Hypothesis</td></tr>
+	<tr><td style="border-left: 1px solid black" rowspan="2"></td><td>b+1.</td><td></td><td>P &#x2228; B</td><td>Disjunction introduction on (b)</td></tr>
+	<tr><td>b+2.</td><td></td><td>C</td><td><i>modus ponens</i>, (a) and (b+1)</td></tr>
+	<tr><td style="border-left: 1px solid black; border-bottom: 1px solid black"></td><td>b+3.</td><td></td><td>P &rArr; C</td><td>Implication introduction, (b) and (b+2)</td></tr>
+	<tr><td style="border-left: 1px solid black; border-top: 1px solid black"></td><td>c.</td><td></td><td>B</td><td>Hypothesis</td></tr>
+	<tr><td style="border-left: 1px solid black" rowspan="3"></td><td>c+1.</td><td></td><td>P &#x2228; B</td><td>Disjunction introduction on (c)</td></tr>
+	<tr><td>c+2.</td><td></td><td>C</td><td><i>modus ponens</i>, (a) and (c+1)</td></tr>
+	<tr><td>c+3.</td><td></td><td>B &rArr; C</td><td>Implication introduction, (b) and (b+2)</td></tr>
+	<tr><td style="border-left: 1px solid black; border-bottom: 1px solid black"></td><td>c+4.</td><td></td><td>(P &rArr; C) & (B &rArr; C)</td><td>Conjunction introduction, (b+3) and (c+3)</td></tr>
+	<tr><td style="border-left: 1px solid black; border-bottom: 1px solid black" colspan="2"></td><td>c+5.</td><td>(P &#x2228; B) &rArr; C &#9500; (P &rArr; C) & (B &rArr; C)</td><td></td><td>Syntactical entailment introduction, (4) and (c+4)</td></tr>
+	<tr><td colspan="2"></td><td>4.</td><td>(P &rArr; C) & (B &rArr; C) &#x27DB; (P &#x2228; B) &rArr; C</td><td></td><td>Definition of &#x27DB;, (3) and (c+5)</td></tr>
+	<tr><th colspan="4">Alternate proof by cases</th></tr>
+</table>
+<p>We next consider how to <a href="https://math.stackexchange.com/questions/4002953/prove-double-negation-of-lem-in-intuitionistic-logic">prove</a> that the double negation removal inference rule,</p>
+	<center>~~P &#9500; P</center>
+<p>is invalid for Intuitionistic logic.  It would suffice if the <a href="https://en.wikipedia.org/wiki/Double-negation_translation">Glivenko's theorem translation</a> of the Law of the Excluded Middle,</p>
+<center>~~(P &or; ~P)</center>
+<p>were provable in Intuitionistic logic.  Keeping in mind that ~A := A &rArr; &#x22A5; for Intuitionistic logic, I construct the proof backwards.</p>
+<p style="clear:both">&nbsp;</p>
+<table align="right" cellspacing="0" style="clear:both">
+	<tr><th colspan="4">Intuitionistic Logic</th></tr>
+	<tr><th colspan="2"></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td></td><td>1.</td><td>(P &rArr; C) & ((P &rArr; C) &rArr; C) &#x27DB; (P &#x2228; (P &rArr; C)) &rArr; C</td><td>[P &rArr; C/B] on alternate proof by cases</td></tr>
+	<tr><td style="border-left: 1px solid black; border-top: 1px solid black"></td><td>2.</td><td>(P &#x2228; (P &rArr; C)) &rArr; C</td><td>Hypothesis</td></tr>
+	<tr><td style="border-left: 1px solid black" rowspan="4"></td><td>3.</td><td>(P &rArr; C) & ((P &rArr; C) &rArr; C)</td><td><i>modus ponens</i> for &#x27DB;, (1) and (2)</td></tr>
+	<tr><td>4.</td><td>P &rArr; C</td><td>Conjunction elimination, (3)</td></tr>
+	<tr><td>5.</td><td>(P &rArr; C) &rArr; C</td><td>Conjunction elimination, (3)</td></tr>
+	<tr><td>6.</td><td>C</td><td><i>modus ponens</i>, (5) and (4)</td></tr>
+	<tr><td style="border-left: 1px solid black; border-bottom: 1px solid black"></td><td>7.</td><td>((P &#x2228; (P &rArr; C)) &rArr; C) &rArr; C</td><td>Implication introduction, (2) and (6)</td></tr>
+	<tr><td rowspan="7"></td><td>8.</td><td>((P &or; (P &rArr; &#x22A5;)) &rArr; &#x22A5;) &rArr; &#x22A5;</td><td>[&#x22A5;/C] on (7)</td></tr>
+	<tr><td>9.</td><td>((P &or; ~P) &rArr; &#x22A5;) &rArr; &#x22A5;</td><td>definition of ~ on (8)</td></tr>
+	<tr><td>10.</td><td>~(P &or; ~P) &rArr; &#x22A5;</td><td>definition of ~ on (9)</td></tr>
+	<tr><td>11.</td><td>~~(P &or; ~P)</td><td>definition of ~ on (10)</td></tr>
+	<tr><td>11a.</td><td>&#x25FB;(&#9500; ~~(P &or; ~P))</td><td>(11) has been proven</td></tr>
+	<tr><td>12.</td><td>~&#x25FB;(&#9500; P &or; ~P)</td><td>Law of Excluded Middle cannot be proven</td></tr>
+	<tr><td>13.</td><td>~&#x25FB;(&#9500; (~~Q &#9500; Q))</td><td>Double negation elimination cannot be proven: (12) and (11a), [P &or; ~P/Q]</td></tr>
+</table>
+<p>We start by inferring a more useful formulation, of the Intuitionistic proof by cases inference rule.  From this, we derive an 
+	Intuitionistic tautology, whose specialization with absurdity &#x22A5; gives the Glivenko translation of the Law of the Excluded Middle.  (We do not go into details here. 
+	Glivenko's theorem states that any classical propositional logic statement Q is provable, if and only if the Intuitionistic propositional logic statement ~~Q is provable.  This requires modification 
+	in the presence of quantifiers.)</p>
+
+<h2 id="paraconsistent" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Paraconsistent logic: defusing the Principle of Explosion</h2>
+<table align="right" cellspacing="0">
+	<tr><th colspan="4">Classical Logic</th></tr>
+	<tr><th colspan="2"></th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td style="border-left:solid 1px black; border-top: solid 1px black"></td><td>1.</td><td>P & ~P</td><td>Hypothesis</td></tr>
+	<tr><td style="border-left:solid 1px black" rowspan="4"></td><td>2a.</td><td>P</td><td>(left) Conjunction elimination on (1)</td></tr>
+	<tr><td>2b.</td><td>~P</td><td>(right) Conjunction elimination on (1)</td></tr>
+	<tr><td>3.</td><td>P &#x2228; Q</td><td>(left) Disjunction introduction on (2a)</td></tr>
+	<tr><td>4.</td><td>Q</td><td>(Left) or elimination, (3) and (2b)</td></tr>
+	<tr><td style="border-bottom:solid 1px black; border-top: solid 1px black"></td><td>5.</td><td>(P & ~P) &rArr; Q</td><td>Implication introduction, (1) and (4)</td></tr>
+</table>
+<p>The principle of explosion, makes the formal logics we have been reviewing unsuitable for reasoning with self-contradictory premises.  The key 
+	idea for paraconsistent logic, is simply <a href="https://en.wikipedia.org/wiki/Paraconsistent_logic">not having</a> <a href="https://iep.utm.edu/para-log/">the Principle of Explosion</a> <a href="https://plato.stanford.edu/entries/logic-paraconsistent/">as an inference rule</a>.  We interpret this in G&ouml;del-L&ouml;b logic as</p>
+<p align="center">~&#x25FB;(&#9500; <i>false</i> &rArr; Q)</p>
+<p>While in our initial truth-table motivated review of logic this was computable, it is possible to get similar results with just inference rules.  For the moment, we ignore 
+	that a never-<i>true</i> statement is illegal as a hypothesis.  When interpreting natural language into symbolic notation, we may very well not <b>know</b> that we are 
+	trying to interpret a never-<i>true</i> statement.</p>
+<p>Recall (from our overview of logic), that logical and & is closely related to the working set of facts, for the Rete algorithm.  So the hypothesis P & ~P represents 
+	a self-contradictory knowledge (or belief) that P evaluates to both <i>true</i>, and <i>false</i>.</p>
+<p>Generally speaking, we very much want <i>modus ponens</i>, and the conjunction elimination and introduction inference rules.  We also want the syntactical entailment introduction rule, and its 
+	cognate inference rule for classical logic, implication introduction.  So, if the above classical logic proof is to be invalid for a paraconsistent logic, 
+	one of the two remaining inference rules must itself be invalid.  (This is an active research topic, so there is not yet a consensus on how this is to be done.)
+	More explicitly, it is incorrect in meaning to or-eliminate the proposition used to create the logical or statement itself.  We just cannot represent that, 
+	in the truth-functional logics we have been considering.</p>
+<p>This is closely related to the <a href="https://plato.stanford.edu/entries/knowledge-analysis/#GettProb">Gettier paradox</a> in epistemic logic (the logic of knowledge, yet another application of modal logic).
+	We see, from our authorities, that the canonical technique for constructing an instance of the Gettier paradox, is to compute a true logical or statement from a false premise (believed to be true), by disjunction introduction 
+	where the introduced statement is true.  For example:</p>
+<blockquote>Imagine that we are seeking water on a hot day. We suddenly see water, or so we think. In fact, we are not seeing water but a mirage, but when we reach the spot, we are lucky and find water right there under a rock. Can we say that we had genuine knowledge of water? The answer seems to be negative, for we were just lucky.<br>&mdash;(Indian philosopher Dharmottara, c. 770 AD/CE)</blockquote>
+<p>If we do not want to interpret how we think into formal notation, another option in the literature is to discard conjunction introduction:</p>
+<center>~&#x25FB;(A, B &#9500; A & B)</center>
+<p>This was first developed as <i>discussive logic</i>, by Ja&sacute;kowski student of Lukasiewicz.  Ja&sacute;kowski's intended interpretation, was a conversation between individuals who are individually self-consistent, 
+but whose beliefs are incompatible.</p>
+
+<h2 id="metaphysics-formal-systems" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Metaphysics of formal systems</h2>
+<p>Reviewing what we have just seen: an <i>ur-element</i> set theory using only classical truth values, can mathematically model the notation for Gentzen-format formal systems directly, as an ordered pair (<i>logic</i>, <i>axioms</i>) using a common formal grammar.
+	This relies on finite sequences of textual glyphs (which are indexed by intervals in the natural numbers &#x2115;).  Furthermore, we have examples of logics that 
+	require Gentzen-format notation to formalize, as the natural language rationales are not precise enough: Intuitionistic i.e. constructive logic, and the paraconsistent logics.</p>
+<p>So, my first impression is that while both constructive logic, and the paraconsistent logics, are interesting for understanding the rationale, that they themselves are 
+	"heavy" compared to truth-table describable logics for formalizing set theory.</p>
+<p>On what grounds can we say that there is something "beyond the notation"?  E.g.</p>
+<ul>
+	<li>Are the properties of classical logic, dependent on how classical logic is described?  Does it matter whether the description is in natural language, or Gentzen format?</li>
+	<li>Are the properties of &#x2115;, dependent on the notation used to formalize &#x2115;?</li>
+	<li>In particular: does the choice of textual glyphs matter, when formalizing the above using Gentzen-format notation?</li>
+</ul>
+<p>For the last point, the usual approach in higher mathematics, is to interpret a <a href="https://en.wikipedia.org/wiki/Caesar_cipher">Caesar cipher</a> for formal systems.  We start by enumerating the textual glyphs actually used in the formal <i>grammar</i> for (<i>grammar</i>, <i>logic</i>, <i>axioms</i>).  In practice, this is a finite <i>set</i> {g<sub>1</sub>, ..., g<sub>n</sub>}.
+We then consider injections from {g<sub>1</sub>, ..., g<sub>n</sub>} into textual glyphs</p>
+<center><i>encode</i><sub>0</sub>:{g<sub>1</sub>, ..., g<sub>n</sub>} <span style="position:relative; top: -2px">&#x2192;</span> <b>Ur</b></center>
+<p>We already verified that the range restriction <i>encode</i><sub>0</sub> &#x25B7; Range(<i>encode</i>), is a bijection.</p>
+<p>For all natural numbers n, we then recursively define <i>encode</i><sub>n+1</sub>, for finite sequences in the domain of <i>encode</i><sub>n</sub>, as</p>
+<center><i>encode</i><sub>n+1</sub>((w<sub>k</sub>)<sub>i=0..m</sub>) := (<i>encode</i><sub>n</sub>(w<sub>k</sub>))<sub>i=0..m</sub><br>
+	<i>encode</i> := <big>&#x222A;</big><sub>n &isin; &#x2115;</sub> <i>encode</i><sub>n</sub> for x &isin; <big>&#x222A;</big><sub>n &isin; &#x2115;</sub> Domain(<i>encode</i>)<br>
+	<i>encode</i>((w<sub>k</sub>)<sub>i=0..m</sub>) := (<i>encode</i>(w<sub>k</sub>))<sub>k=0...m</sub> if not defined above, and <i>encode</i>(w<sub>k</sub>) is defined for all k &isin; 0...m</center>
+<p>The second definition, views a function as a subset of the Cartesian product of its domain and range.</p>
+<p>That is: given a formal system (<i>grammar</i>, <i>logic</i>, <i>axioms</i>), and any bijection <i>encode</i><sub>0</sub> whose domain is the textual glyphs used to notate the formal <i>grammar</i>, and whose range is in textual glyphs,
+	we can use <i>encode</i> to simultaneous-substitute all of the textual glyphs, computing a formal system (<i>encode</i>(<i>grammar</i>), <i>encode</i>(<i>logic</i>), <i>encode</i>(<i>axioms</i>)).  Furthermore, <i>encode</i> also will translate Gentzen-format proofs for 
+	(<i>grammar</i>, <i>logic</i>, <i>axioms</i>), into Gentzen-format proofs for (<i>encode</i>(<i>grammar</i>), <i>encode</i>(<i>logic</i>), <i>encode</i>(<i>axioms</i>)).</p>
+<p>This leads to the following tacit metaphysical assumption, underlying all of (mainstream) mathematical practice:</p>
+<center>(<i>grammar</i>, <i>logic</i>, <i>axioms</i>) and (<i>encode</i>(<i>grammar</i>), <i>encode</i>(<i>logic</i>), <i>encode</i>(<i>axioms</i>)), formally define the same formal system.</center>
+<p>That is, a simultaneous substitution of the textual glyphs, does not change the formalization of anything that contains no textual glyphs.  If, in addition, our sense-experience 
+	is correct that textual glyphs are not mathematical objects, then:</p>
+<ul>
+	<li>The choice of textual glyphs in formalizing a set theory without <i>ur-elements</i>, cannot change either the set theory, or any mathematical object 
+		defined in that set theory.</li>
+	<li>In particular, since both Peano arithmetic (classical logic &#x2115;) and Heyting arithmetic (Intuitionistic logic &#x2115;) can be formalized without using ur-elements, the textual glyphs used to formalize these 
+		arithmetics does not change what is being formalized.</li>
+</ul>
+<p>This makes a mathematical irrealist description, in technical philosophical English, so difficult that some (in particular, Wittgenstein after his mentoring by Brouwer) simply outright 
+	reject the above metaphysical assumption.  (Recall that a mathematical irrealist thinks any particular mathematical object does not exist, before it is described.  Yet if 
+	the usual practice of mathemticians is correct, it doesn't matter <b>which</b> textual glyphs are used in the formal description!  Any choice of glyphs that formalizes both classical logic and the 
+	(second-order) Peano axioms will describe Peano arithmetic, and likewise for Heyting arithmetic.)</p>
+</body>
+</html>
