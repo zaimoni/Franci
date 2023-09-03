@@ -80,7 +80,7 @@ subset(const std::vector<T>& lhs, const std::vector<T>& rhs)
 	const bool lt_possible = lhs_ub <= rhs_ub;
 	const bool gt_possible = lhs_ub >= rhs_ub;
 	if (0 == lhs_ub) return (0 == rhs_ub) ? std::partial_ordering::equivalent : std::partial_ordering::less;
-	if (0 == rhs_ub) return std::pair(std::partial_ordering::greater, std::vector<std::pair<size_t, size_t> >(;
+	if (0 == rhs_ub) return std::pair(std::partial_ordering::greater, std::vector<std::pair<size_t, size_t> >());
 	std::vector<std::pair<size_t, size_t> > injection(lt_possible ? lhs_ub : rhs_ub);
 	size_t n = 0;
 	if (lt_possible) {
@@ -102,7 +102,7 @@ subset(const std::vector<T>& lhs, const std::vector<T>& rhs)
 		}
 		return std::pair(std::partial_ordering::greater, std::move(injection));
 	}
-//	return std::partial_ordering::unordered;
+	return std::partial_ordering::unordered;
 }
 
 template<class T>
@@ -497,7 +497,7 @@ namespace enumerated {
 		static bool destructive_union(elts& host, const std::vector<V>& src) {
 			bool changed = false;
 			for (decltype(auto) x : src) {
-				if (std::ranges::any_of(host, [&x](auto y) { return x == y })) continue;
+				if (std::ranges::any_of(host, [&x](auto y) { return x == y; })) continue;
 				host.push_back(x);
 				changed = true;
 			}
@@ -536,6 +536,8 @@ namespace enumerated {
 	template<class T>
 	std::vector<std::string> to_string_vector(const std::vector<T>& src) requires requires(std::vector<std::string> test) { test.push_back(to_string(*src.begin())); }
 	{
+		using std::to_string;
+
 		std::vector<std::string> ret;
 		ret.reserve(src.size());
 		for (decltype(auto) x : src) ret.push_back(to_string(x));
@@ -547,7 +549,12 @@ namespace enumerated {
 	{
 		std::vector<std::string> ret;
 		ret.reserve(src.size());
+#if DECLTYPE_AUTO_WORKS
 		for (decltype(auto) x : src) ret.push_back(display_as_ordered_tuple(to_string_vector(x)));
+#else
+		ptrdiff_t i = -1;
+		while(++i < src.size()) ret.push_back(display_as_ordered_tuple(to_string_vector(src[i])));
+#endif
 		return ret;
 	}
 

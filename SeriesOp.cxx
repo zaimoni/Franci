@@ -38,6 +38,7 @@
 #include "SeriesOp.hxx"
 #include "Keyword1.hxx"
 #include "LowRel.hxx"
+#include <memory>
 
 SeriesOperation::EvaluateToOtherRule SeriesOperation::EvaluateRuleLookup[MaxEvalRuleIdx_ER]
   =	{

@@ -7,6 +7,7 @@
 #include "Global.hxx"
 #include <functional>
 #include <utility>
+#include <string>
 
 enum LinguisticType_LT	{
 						CommonNoun_LT	=	0x00000001,

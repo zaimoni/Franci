@@ -31,9 +31,15 @@ template<size_t n>
 consteval std::array<std::string_view, n> substr(const std::array<std::string_view, n>& src, size_t origin, ptrdiff_t len) {
 	std::array<std::string_view, n> ret;
 	ptrdiff_t i = -1;
+#if DECLTYPE_AUTO_WORKS
 	for (decltype(auto) x : src) {
 		ret[++i] = substr(x, origin, len);
 	};
+#else
+	while (++i < src.size()) {
+		ret[i] = substr(src[i], origin, len);
+	}
+#endif
 	return ret;
 }
 
