@@ -1,0 +1,337 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=windows-1252"/>
+	<title>Subatomic Physics of Math: Map for Formalizing Notation</title>
+	<style type="text/css">
+		@page { margin: 0.79in }
+		p { margin-bottom: 0.1in; line-height: 120% }
+		a:link { so-language: zxx }
+		* {
+            font-family: "Liberation Serif", serif
+        }
+	</style>
+<script type="text/javascript">
+(function (global) {
+    const _noop = function () { }
+    const local_alert = global.alert ? global.alert : _noop;
+
+    if (!global.document) {
+        local_alert("no document property: further JS won't work");
+        return;
+    }
+    if (!global.document.createElement) {
+        local_alert("no document.querySelectorAll property: further JS won't work");
+        return;
+    }
+    if (!global.document.querySelectorAll) {
+        local_alert("no document.querySelectorAll property: further JS won't work");
+        return;
+    }
+    if (!global.Array.isArray) {
+        local_alert("no Array.isArray function: further JS won't work");
+        return;
+    }
+
+    function is_string(x) {
+        "use strict";
+        var type_x = typeof (x);
+        if ("string" === type_x) return true;
+        if ("object" === type_x) {
+            return x instanceof global.String;
+        }
+        return false;
+    }
+
+    // want to know if countup loop is valid
+    function is_countloop_valid(x) {
+        "use strict";
+        if (global.Array.isArray(x)) return true;
+        if (x instanceof global.NodeList) return true;
+        return false;
+    }
+
+    function DOMappend(dest_zq, src) {
+        "use strict";
+        if (src instanceof global.Node) {
+            dest_zq.push(src);
+            return true;
+        }
+        if (is_countloop_valid(src)) {
+            const ub = src.length;
+            let i = 0;
+            while (i < ub) DOMappend(dest_zq, src[i++]);
+            return true;
+        }
+        return false;
+    }
+
+    // returns something array-ish
+    global.ZQuery = function (selector, context) {
+        if (!selector) return;
+        if (is_string(selector)) {
+            selector = selector.trim();
+
+            if ('<' === selector[0]) {
+                const staging = global.document.createElement('span');
+                staging.innerHTML = selector;
+                DOMappend(this, staging.childNodes);
+                return;
+            } else {
+                // selector-ish
+                if ("undefined" === typeof (context)) context = global.document;
+                if (context.querySelectorAll) {
+                    try {
+                        DOMappend(this, context.querySelectorAll(selector));
+                        return;
+                    } catch (e) {
+                        local_alert("illegal selector: " + selector);
+                        throw e; // unlike C++, this does not lose call chain information
+                    }
+                }
+            }
+        } else if (selector instanceof global.ZQuery) {
+            // value copy construction
+            const ub = selector.length;
+            let n = 0;
+            this.length = ub;
+            while (n < ub) {
+                this[n] = selector[n];
+                n++;
+            };
+            return;
+        } else if (DOMappend(this, selector)) return;
+        throw new Error("unhandled selector");
+    };
+
+    global.ZQuery.prototype = Object.create(global.Array.prototype);
+    global.ZQuery.prototype.constructor = global.ZQuery;
+    global.ZQuery.prototype.noop = _noop;
+
+    global.ZQuery.prototype.base_map = global.ZQuery.prototype.map; // just in case we need Array.map
+
+    // ideally Element fn(Element, index)
+    global.ZQuery.prototype.map = function(callback) {
+        "use strict";
+        const ub = this.length;
+        const staging = [];
+        let n = 0;
+        while (n < ub) {
+            const src = this[n++];
+            if (null === src) continue;
+            if ("undefined" === typeof(src)) continue;
+            DOMappend(staging, callback(src, n - 1));
+        }
+        return new ZQuery(staging);
+    }
+
+    function DOMparent(src) {
+        "use strict";
+        if (src.parentElement) return src.parentElement;
+        if (src.parentNode) return src.parentNode;
+        return null;
+    }
+
+    global.ZQuery.prototype.parent = function () {
+        "use strict";
+        return this.map(DOMparent);
+    }
+
+    function DOMancestor_match(src, selector) {
+        "use strict";
+        while (src) {
+            if (src.matches && src.matches(selector)) return src; // can throw, but want to fix the selector rather than cruise on
+            if (src.parentElement) src = src.parentElement;
+            else if (src.parentNode) src = src.parentNode;
+            else break;
+        }
+        return null;
+    }
+
+    global.ZQuery.prototype.closest = function (selector) {
+        "use strict";
+        return this.map(function (src) { return DOMancestor_match(src, selector); });
+    }
+
+    global.ZQuery.prototype.css = function (attr, value) {
+        const ub = this.length;
+        if (0 >= ub) return;
+        if ("undefined" === typeof (value) || null === value) {
+            const st = global.window.getComputedStyle(test);
+            if (attr in st) return st[attr];
+            // \todo interpose CSS -> JavaScript translation here
+            return;
+        }
+        let n = 0;
+        while (ub > n) {
+            const test = this[n++];
+            if (test.style) test.style[attr] = value;
+        }
+    }
+})(this);
+</script>
+</head>
+<body lang="en-US" dir="ltr">
+<div style="position:fixed; top:0.5em; left:0.5em; background:white"><a href="./">Home</a> &gt; <a href="SubatomicPhysicsOfMath_Cardinality.html">Cardinality</a></div>
+<h1 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 16px">Subatomic Physics of Math: Map for Formalizing Notation</h1>
+<span style="border: 1px solid black; display:block; float:left; margin-right: 20px; padding: 5px">
+	<b>Mathematically modeling mathematical notation, e.g. proofs</b>
+	<ol type="I">
+		<li><a href="./SubatomicPhysicsOfMath_FormalLogicNotation.html">Formal Notation</a></li>
+		<li><a href="./SubatomicPhysicsOfMath_ProvabilityLogic.html">Provability Logic</a></li>
+		<li><b>Map for Formalizing Notation</b></li>
+	</ol>
+</span>
+<span style="border: 1px solid black; display:block; float:right">
+	<ol type="I">
+		<li><a href="#primitive-recursion">Primitive recursive functions</a></li>
+		<li><a href="#metaphysics-pr">Metaphysics of primitive recursive functions</a></li>
+		<li><a href="#metaphysics-nonformalizable">Metaphysics of collections, of non-formalizable domains of discourse</a></li>
+	</ol>
+</span>
+
+<p>We review what we previously learned about formal notation, as an <i>ur-element</i> mathematical object.  It is a routine exercise that both the 
+	Zermelo and Von Neumann set-theoretic models of &#x2115; contain no <i>ur-elements</i>, i.e.</p>
+<p align="center">(&forall;n &isin; &#x2115;)(n &notin; <b>Ur</b>)</p>
+<p>That is, if we reject Max Tegmark's mathematical universe hypothesis, the notation by which we reason about mathematical objects that do not use ur-elements, cannot itself be any 
+	any of the mathematical objects formalized by that notation.  The circular reasoning problems with the formal description of notation, are thus restricted to the formal description of finite sequences.  We do not address the philosophical and formal issues with accepting 
+	the mathematical universe hypothesis, which requires textual glyphs to be mathematical objects.</p>
+<div align="center"><select id="philosophy">
+	<option value="mathematical-universe">Mathematical Universe Hypothesis</option>
+	<option value="mathematical-platonism" selected>Mathematical Platonism</option>
+	<option value="mathematical-irrealism">Mathematical Irrealism</option>
+</select></div>
+<script type="text/javascript">
+	(function(){
+		let x = new ZQuery('#philosophy')[0];
+		x.onchange = function(){
+			let target = this.value;
+			(new ZQuery('.mathematical-universe')).css('display',target==='mathematical-universe' ? 'block' : 'none');
+			(new ZQuery('.mathematical-platonism')).css('display',target==='mathematical-platonism' ? 'block' : 'none');
+			(new ZQuery('.mathematical-irrealism')).css('display',target==='mathematical-irrealism' ? 'block' : 'none');
+
+		};
+	})();
+</script>
+<div class="mathematical-universe" style="clear:both; display:none" align="center"><img src="NotationFormalizationTegmark.dot.svg"></div>
+<div class="mathematical-platonism" style="clear:both" align="center"><img src="NotationFormalizationPlatonism.dot.svg"></div>
+<div class="mathematical-irrealism" style="clear:both; display:none" align="center"><img src="NotationFormalizationWittgenstein.dot.svg"></div>
+<p>I provide diagrams for three philosophies; the select control chooses which philosophy to display diagrams for.</p>
+<p>We have not reviewed lambda calculus properly.  The two general strategies for formalization are to either define functions in terms of mathematical containers (set theory), or define mathematical containers in terms of functions (lambda calculus).  We have been following instructions for the formally easiest approach 
+	to mathematical containers (Von Neumann-Bernays-G&ouml;del set theory).  The diagram mentions lambda calculus, for completeness.</p>
+<p>We also observe, that anything that is part of the formalization of finite sequences would have two instances, when extending the graph.  E.g., we introduced the 
+	notation for finite sequences, when formalizing finite sequences.</p>
+<p>A mathematical irrealist such as Wittgenstein, to avoid circular reasoning from notation causing mathematics to exist, needs to distinguish between physical, non-formalized notation
+	and mathematically modeled notation.  (We started with non-formalized notation; it just "so happens" that there is no visual difference between non-formalized notation, and mathematically modeled notation.)</p>
+<p>We consider the identity inference rule.  To be used as non-formalized notation, substitution into</p>
+<p align="center">A &#9500; A</p>
+<p>needs to be done by physical copying, rather than subsequence extraction and sequence concatentation.</p>
+<h2 id="primitive-recursion" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Primitive recursive functions</h2>
+<p>Following prior art, we define <a href="https://en.wikipedia.org/wiki/Primitive_recursive_function">primitive recursive functions</a> with domain &#x2115;<sup>k</sup>, where 1&lt;k&isin;&#x2115;, as follows.  (We shall review some rationales for this definition, shortly.)</p>
+<p style="clear:both">Our intended basis cases, for a structural induction definition, are:</p>
+<ol>
+	<li>For n&isin;&#x2115;, the constant function n<sub>&#x2115;<sup>k</sup></sub> is a primitive recursive function.</li>
+	<li>The Peano successor function S, restricted to &#x2115;, is a primitive recursive function.</li>
+	<li>For 1&le;i&le;k, the projection function Projection<sub>i</sub> restricted to &#x2115;<sup>k</sup>, is a primitive recursive function.</li>
+</ol>
+<p>We note that in all cases, the range of the basis case functions is a subset of &#x2115;.</p>
+<p>The two inductive definition steps are defined as:</p>
+<ol start="4">
+	<li>For 1&le;m&isin;&#x2115; and 1&le;n&isin;&#x2115;, if h is an n-ary primitive recursive function and (g<sub>1</sub>, ..., g<sub>n</sub>) is an ordered n-tuple of primitive recursive functions of arity m, then 
+		h o (g<sub>1</sub>, ..., g<sub>n</sub>) is a primitive recursive function with domain &#x2115;<sup>m</sup>.</li>
+	<li>We define the primitive recursion function (of functions) as follows.  For 1&le;n, let g be an n-ary primitive recursive function and 
+		h be an (n+2)-ary primitive recursive function.  We define Primitive<sub>g,h</sub> to be an (n+1)-ary function:
+		<ol>
+			<li>Primitive<sub>g,h</sub>(0, x<sub>1</sub>, ..., x<sub>n</sub>) := g(x<sub>1</sub>, ..., x<sub>n</sub>)</li>
+			<li>Primitive<sub>g,h</sub>(S(y), x<sub>1</sub>, ..., x<sub>n</sub>) := h(y, f(y, x<sub>1</sub>, ..., x<sub>n</sub>), x<sub>1</sub>, ..., x<sub>n</sub>)</li>
+		</ol>
+		We say that Primitive<sub>g,h</sub>, is a primitive recursive function.</li>
+</ol>
+<p>Informally, we recognize the above definition can be interpreted into pseudocode for a C-like programming language:</p>
+<pre style="font-family:monospace">
+unsigned Primitive_g_h(unsigned y, unsigned x1, ..., unsigned xn) {
+	unsigned ret = g(x1, ..., xn);
+	for(int i=1; i<=y; i++) { // this loop iterates 0 times for y=0
+		ret = h(i, ret, x1, ..., xn);
+	}
+	return ret
+}
+</pre>
+<p>So the primitive recursive functions, should be an easily visualized kind of computable function.  The applied mathematical discipline for this, is 
+	computational complexity theory.  The mathematical collection of all primitive recursive functions, is often abbreviated as PR for computational complexity theory.</p>
+<p>For a C#-like language, the corresponding pseudocode would be</p>
+<pre style="font-family:monospace">
+	unsigned Primitive_g_h(unsigned y, unsigned x1, ..., unsigned xn) {
+		unsigned ret = g(x1, ..., xn);
+		foreach(var i in 1...y) { // this loop iterates 0 times for y=0
+			ret = h(i, ret, x1, ..., xn);
+		}
+		return ret
+	}
+</pre>
+<p>Note: if we were to replace the mathematical collection 1...y with the infinite mathematical collection &#x2115;, 
+	the loop would not terminate.  We would need to account for this, when formalizing computational complexity theory.</p>
+
+<h2 id="metaphysics-pr" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Metaphysics of primitive recursive functions</h2>
+<p>In general, structural inductive definitions use the <a href="https://www.logical-fallacy.com/articles/fallacy-of-composition/#ignoring-emergence">ignoring emergence variant fallacy of composition</a>,
+	as a formal definition.  We note, after a cursory inspection of the above definition of primitive recursive functions:</p>
+<ul>
+	<li>The first and third basis cases, rely on n-ary ordered tuples.  That is, their formalization relies on the definition of n-ary Cartesian product.</li>
+	<li>Likewise, both of the inductive definition steps rely on n-ary ordered tuples.</li>
+	<li>There should be a weak natural induction proof, that all primitive recursive functions have a mathematical range that is a subset of &#x2115;.</li>
+</ul>
+<p>We do not go into the details here, but the original G&ouml;del's Incompleteness theorems used only primitive recursive functions for their 
+	G&ouml;del encodings.  Primitive recursive arithmetic also is generally considered Intuitionistically valid, i.e. these functions are generally considered 
+	explicitly constructed.  This suggests that the standard Heyting rationale for Intuitionistic logic, doesn't formalize everything needed.</p>
+<p>We interpret a special case each, of the first and third basis cases, into Gentzen-format notation as</p>
+<table align="center">
+	<tr><td align="right">n&isin;&#x2115;&nbsp;</td><td align="left">&#9500; n<sub>&#x2115;</sub>&isin;Function(&#x2115;, {n})</td></tr>
+	<tr><td align="right">&nbsp;</td><td align="left">&#9500; id|<sub>&#x2115;</sub> &isin; Function(&#x2115;, &#x2115;) </td></tr>
+</table>
+<p>Recalling that the corresponding evaluation rules are <i>x &#x21A6; n</i> and <i>x &#x21A6; x</i>, it would be notationally convenient to explicitly use within a Gentzen-format notation.  However, evaluation rules do not specify their domain.</p>
+<p>Of the notations we have already formalized, the most relevant ones are for domain restriction.  We would like the following to be defined:</p>
+<table align="center" style="background:orange">
+	<tr><td align="right">n&isin;&#x2115;&nbsp;</td><td align="left">&#9500; (x &#x21A6; n)|<sub>&#x2115;</sub> &isin; Function(&#x2115;, {n})</td></tr>
+	<tr><td align="right">&nbsp;</td><td align="left">&#9500; (x &#x21A6; x)|<sub>&#x2115;</sub> &isin; Function(&#x2115;, &#x2115;) </td></tr>
+</table>
+<p>We did not do this earlier when verifying the usual definitions for cardinal size of sets, because our authorities did not.</p>
+<p>We say that the domain restriction of an evaluation rule R to a mathematical collection D, R|<sub>D</sub>, defines a partial function whose domain is contained in D.  If 
+	the evaluation rule is defined for all d&isin;D, then a function whose domain is D is defined.</p>
+<p>However, as a matter of intended interpretation both the constant evaluation rule <i>x &#x21A6; n</i>, and the identity evaluation rule <i>x &#x21A6; x</i>, make 
+	sense with non-formalizable domains of discourse.  They also fulfil the Kolmogorov rationale's "solutions to problems".</p>
+
+<h2 id="metaphysics-nonformalizable" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Metaphysics of collections, of non-formalizable domains of discourse</h2>
+<p>This leads us to consider extending the notation of set theory, to handle non-formalizable domains of discourse.  That is, we want to handle any situation where the Kolmogorov rationale for 
+	Intuitionistic logic makes sense.  We duplicate some definitions we introduced earlier.</p>
+<ul>
+	<li>We say that the notation d&isin;D is syntactically valid, when
+		<ul>
+			<li>D is a notation for a (philosophical) domain of discourse, and</li>
+			<li>d is either a term variable, or a well-formed formula <i>wff</i> for some formal grammar.</li>
+		</ul>
+		The intended interpretation is "d is in the domain of discourse D", or "d is a D".</li>
+	<li>Given a well-formed formula <i>wff</i> for some formal grammar, we say that <i>x &#x21A6; wff</i> notates an evaluation rule.  The intended intepretation is "x evaluates to wff".  We observe that 
+		x is a free variable, i.e. does not have an associated domain of discourse.</li>
+	<li>We say that <i>x &#x21A6; x</i> is the identity evaluation rule.  The intended intepretation is "x evaluates to x"</li>
+	<li>For d&isin;D, we say <i>x &#x21A6; d</i> is a constant evaluation rule.  The intended intepretation is "x evaluates to d".</li>
+	<li>For a domain of discourse D, and evaluation rule <i>x &#x21A6; wff</i>, (<i>x &#x21A6; wff</i>)|<sub>D</sub> has intended interpretation "x evaluates to wff on D", or "<i>x &#x21A6; wff</i> restricted to domain of discourse D".</li>
+</ul>
+<p>It is a mechanical exercise that when D is a mathematical collection for which partial functions have been defined, that (<i>x &#x21A6; wff</i>)|<sub>D</sub> is a partial function whose domain is all d&isin;D for which <i>wff</i> is syntactically valid.
+	For the identity and constant evaluation rules, the partial function so named is actually a (total) function.</p>
+<p>Furthermore, we see that the domain restriction of the identity evaluation rule is unconditionally syntactically valid, 
+	and that the domain restriction of a constant evaluation rule depends only on the syntactical validity of the constant being evaluated to.  In particular, we 
+	have:</p>
+<table align="center">
+	<tr><td align="right">d&isin;<b>Set</b>, E&isin;<b>Class</b></td><td align="left">&#9500; (x &#x21A6; d)|<sub>E</sub> &isin; Function(E, {d})</td></tr>
+	<tr><td align="right">E&isin;<b>Class</b></td><td align="left">&#9500; (x &#x21A6; x)|<sub>E</sub> &isin; Function(E, E) </td></tr>
+</table>	
+<p>We would like the following to be defined for all domains of discourse, both formalized and non-formalizable:</p>
+<table align="center" style="background:orange">
+	<tr><td align="right">d&isin;D, E is a domain of discourse</td><td align="left">&#9500; (x &#x21A6; d)|<sub>E</sub> &isin; Function(E, {d})</td></tr>
+	<tr><td align="right">E is a domain of discourse</td><td align="left">&#9500; (x &#x21A6; x)|<sub>E</sub> &isin; Function(E, E) </td></tr>
+</table>	
+<p>The notations to be defined, are {d} and Function(..., ...). {d} should notate a collection of things in the domain of discourse of D, containing only d.
+	Even though these notations are not defined, they are still described enough to be part of a ur-element mathematical structure of Gentzen-format proofs.
+	That is, we have a strategy for formalizing reasoning about non-formalizable domains of discourse.</p>
+</body>
+</html>

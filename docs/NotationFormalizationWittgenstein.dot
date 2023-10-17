@@ -1,0 +1,31 @@
+strict digraph {
+    Ur [label=<<B>Ur</B>&nbsp;(ur-elements)>]
+    TextualGlyph [label="Textual glyphs"]
+    FiniteSequence [label="Finite Sequences"]
+    FormalLanguage [label="Formal Languages"]
+    FormalAlphabet [label="Alphabet &Sigma;"]
+    FormalWord [label="Word"]
+    Notation [label="(mathematically modeled) Notation"]
+    SetTheoryLambdaCalculus [label="set theory or lambda calculus"]
+    PhysicalNotation [label="non-formalized physical notation"]
+    Logic [label="logic"]
+
+    PhysicalNotation->Logic
+
+    Logic->SetTheoryLambdaCalculus
+    Ur -> TextualGlyph
+    {TextualGlyph, SetTheoryLambdaCalculus} -> FormalAlphabet
+    TextualGlyph -> PhysicalNotation
+    {FormalAlphabet FiniteSequence } -> FormalWord -> FormalLanguage -> Notation
+
+    SetTheoryLambdaCalculus -> FiniteSequence
+
+    PhysicalNotation_FiniteSequence [label="Physical notation for Finite Sequences"]
+    Notation_FiniteSequence [label="Notation for Finite Sequences"]
+    PhysicalNotation -> PhysicalNotation_FiniteSequence -> FiniteSequence
+    {Notation FiniteSequence } -> Notation_FiniteSequence
+
+    subgraph clusterNotationFiniteSequence {
+        PhysicalNotation_FiniteSequence FiniteSequence Notation_FiniteSequence
+    }
+}
