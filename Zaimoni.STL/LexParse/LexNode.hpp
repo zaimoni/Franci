@@ -26,7 +26,8 @@ namespace formal {
 		kuroda::parser<lex_node>::symbols _postfix;
 		std::variant<std::unique_ptr<lex_node>,
 			std::unique_ptr<word>,
-			std::unique_ptr<parsed> > _anchor;
+			std::unique_ptr<parsed>,
+		    std::shared_ptr<const parsed>> _anchor;
 		decltype(_anchor) _post_anchor;
 		unsigned long long _code; // usually used as a bitmap
 
@@ -77,6 +78,14 @@ namespace formal {
 			return nullptr;
 		}
 
+		template<>
+		const parsed* c_anchor<parsed>() const
+		{
+			if (auto x = std::get_if<std::unique_ptr<parsed> >(&_anchor)) return x->get();
+			if (auto x = std::get_if<std::shared_ptr<const parsed> >(&_anchor)) return x->get();
+			return nullptr;
+		}
+
 		template<class Val>
 		Val* post_anchor() const requires requires { std::get_if<std::unique_ptr<Val> >(&_post_anchor); }
 		{
@@ -88,6 +97,14 @@ namespace formal {
 		const Val* c_post_anchor() const requires requires { std::get_if<std::unique_ptr<Val> >(&_post_anchor); }
 		{
 			if (auto x = std::get_if<std::unique_ptr<Val> >(&_post_anchor)) return x->get();
+			return nullptr;
+		}
+
+		template<>
+		const parsed* c_post_anchor<parsed>() const
+		{
+			if (auto x = std::get_if<std::unique_ptr<parsed> >(&_post_anchor)) return x->get();
+			if (auto x = std::get_if<std::shared_ptr<const parsed> >(&_post_anchor)) return x->get();
 			return nullptr;
 		}
 

@@ -66,6 +66,10 @@ namespace formal {
 				if (x) return x->origin();
 				return src_location();
 			}
+			auto operator()(const std::shared_ptr<const parsed>& x) {
+				if (x) return x->origin();
+				return src_location();
+			}
 		};
 
 		static _origin ooao;
@@ -191,6 +195,23 @@ namespace formal {
 					track += stage.size();
 				}
 			}
+			auto operator()(const std::shared_ptr<const parsed>& x) {
+				const auto start = x->origin();
+				if (start.line_pos.first != track.line_pos.first) {
+					// new line.  \todo Ignore indentation for one-line comments, but not normal source code
+					dest << '\n';
+				}
+				else if (start.line_pos.second > track.line_pos.second) {
+					// need whitespace to look like original code
+					dest << std::string(start.line_pos.second - track.line_pos.second, ' ');
+				}
+
+				auto stage = x->to_s();
+				if (!stage.empty()) {
+					dest << stage;
+					track += stage.size();
+				}
+			}
 		};
 
 		std::visit(_to_s(dest, track), src);
@@ -202,6 +223,7 @@ namespace formal {
 			int operator()(const std::unique_ptr<word>& x) { return x ? 1 : 0; }
 			int operator()(const std::unique_ptr<lex_node>& x) { return x ? 2 : 0; }
 			int operator()(const std::unique_ptr<parsed>& x) { return x ? 3 : 0; }
+			int operator()(const std::shared_ptr<const parsed>& x) { return x ? 4 : 0; }
 		};
 
 		static _encode_anchor ooao;
