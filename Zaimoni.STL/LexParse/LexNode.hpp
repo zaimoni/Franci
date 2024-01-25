@@ -46,6 +46,7 @@ namespace formal {
 		lex_node(parsed*& src, unsigned long long code = 0) noexcept : _anchor(std::unique_ptr<parsed>(src)), _code(code) {
 			src = nullptr;
 		}
+		lex_node(std::shared_ptr<const parsed> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code) {}
 
 		lex_node() noexcept : _code(0) {}
 		// \todo anchor constructor
@@ -157,6 +158,7 @@ namespace formal {
 		}
 
 		static std::unique_ptr<lex_node> pop_front(kuroda::parser<formal::word>::sequence& src);
+		static std::unique_ptr<lex_node> pop_front(kuroda::parser<formal::lex_node>::sequence& src);
 
 		template<class Ret>
 		auto is_ok(std::function<Ret(const lex_node&)> ok) const { return ok(*this); }

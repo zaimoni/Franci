@@ -110,6 +110,19 @@ namespace formal {
 		return ret;
 	}
 
+	std::unique_ptr<lex_node> lex_node::pop_front(kuroda::parser<formal::lex_node>::sequence& src)
+	{
+		std::unique_ptr<lex_node> ret;
+		while (!src.empty() && !ret) {
+			if (decltype(auto) x = src.front()) {
+				ret = decltype(ret)(x);
+				src.front() = nullptr;
+			}
+			src.FastDeleteIdx(0);
+		};
+		return ret;
+	}
+
 	bool lex_node::rewrite(lex_node*& target, std::function<lex_node* (lex_node* target)> op)
 	{
 		if (decltype(auto) dest = op(target)) {
@@ -180,7 +193,13 @@ namespace formal {
 				if (auto lex = x.get()) return to_s(dest, lex, track);
 			}
 			auto operator()(const std::unique_ptr<parsed>& x) {
-				const auto start = x->origin();
+				auto start = x->origin();
+				if (!start.path && track.path) {
+					// default value
+					start = track;
+					start += 1;
+				}
+
 				if (start.line_pos.first != track.line_pos.first) {
 					// new line.  \todo Ignore indentation for one-line comments, but not normal source code
 					dest << '\n';
@@ -196,7 +215,13 @@ namespace formal {
 				}
 			}
 			auto operator()(const std::shared_ptr<const parsed>& x) {
-				const auto start = x->origin();
+				auto start = x->origin();
+				if (!start.path && track.path) {
+					// default value
+					start = track;
+					start += 1;
+				}
+
 				if (start.line_pos.first != track.line_pos.first) {
 					// new line.  \todo Ignore indentation for one-line comments, but not normal source code
 					dest << '\n';

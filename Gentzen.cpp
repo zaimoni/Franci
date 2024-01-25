@@ -434,6 +434,16 @@ namespace gentzen {
 			return std::nullopt;
 		}
 
+		static bool parse_lex(formal::lex_node*& src) {
+			if (auto stage = parse(*src)) {
+				auto relay = std::make_unique<formal::lex_node>(get(*stage), formal::Inert_Token);
+				delete src;
+				src = relay.release();
+				return true;
+			}
+			return false;
+		}
+
 	private:
 		preaxiomatic(Domain src) noexcept : _code((unsigned int)src) {}
 
@@ -2315,6 +2325,7 @@ auto balanced_html_tag(kuroda::parser<formal::lex_node>::sequence& src, size_t v
 			}
 			// typically want to do this
 			formal::lex_node::slice(src, ub, viewpoint);
+			gentzen::preaxiomatic::parse_lex(src[ub]);
 			ret.push_back(ub);
 			return ret;
 		}
@@ -2452,8 +2463,30 @@ static auto& GentzenGrammar() {
 	static std::unique_ptr<kuroda::parser<formal::lex_node> > ooao;
 	if (!ooao) {
 		ooao = decltype(ooao)(new decltype(ooao)::element_type());
+
+//		ooao->register_terminal(gentzen::preaxiomatic::parse_lex); // not here for CPU/RAM efficiency
 	};
 	return *ooao;
+}
+
+static auto apply_grammar(kuroda::parser<formal::lex_node>& grammar, std::unique_ptr<formal::lex_node> wrapped)
+{
+	kuroda::parser<formal::lex_node>::symbols stage;
+	grammar.append_to_parse(stage, wrapped.release());
+	return stage;
+}
+
+
+template<class T>
+static auto apply_grammar(kuroda::parser<formal::lex_node>& grammar, typename kuroda::parser<T>::symbols& lines)
+{
+	kuroda::parser<formal::lex_node>::symbols stage;
+	auto wrapped = formal::lex_node::pop_front(lines);
+	while (wrapped) {
+		grammar.append_to_parse(stage, wrapped.release());
+		wrapped = formal::lex_node::pop_front(lines);
+	};
+	return stage;
 }
 
 int main(int argc, char* argv[], char* envp[])
@@ -2485,16 +2518,19 @@ int main(int argc, char* argv[], char* envp[])
 		if (!to_interpret.is_open()) continue;
 		auto lines = to_lines(to_interpret, src);
 
-		kuroda::parser<formal::lex_node>::symbols stage;
-		auto wrapped = formal::lex_node::pop_front(lines);
-		while (wrapped) {
-			TokenGrammar().append_to_parse(stage, wrapped.release());
-			wrapped = formal::lex_node::pop_front(lines);
-		};
-		if (0 >= Errors.count()) TokenGrammar().finite_parse(stage);
-		std::cout << std::to_string(stage.size()) << "\n";
+		// intent is one line, one statement
+		while (!lines.empty()) {
+			auto stage = apply_grammar(TokenGrammar(), formal::lex_node::pop_front(lines));
+			if (0 >= Errors.count()) TokenGrammar().finite_parse(stage);
+			std::cout << std::to_string(stage.size()) << "\n";
+			formal::lex_node::to_s(std::cout, stage) << "\n";
+			if (0 < Errors.count()) continue;
 
-		formal::lex_node::to_s(std::cout, stage) << "\n";
+			auto interpreted = apply_grammar<formal::lex_node>(GentzenGrammar(), stage);
+			if (0 >= Errors.count()) GentzenGrammar().finite_parse(interpreted);
+			std::cout << std::to_string(interpreted.size()) << "\n";
+			formal::lex_node::to_s(std::cout, interpreted) << "\n";
+		}
 	}
 
 //	if (!to_console) STRING_LITERAL_TO_STDOUT("<pre>\n");
