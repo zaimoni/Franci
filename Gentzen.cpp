@@ -1124,9 +1124,9 @@ namespace gentzen {
 			if (auto w = src.c_anchor<formal::word>()) {
 				if (!legal_varname(*w)) return false;
 			} else return false;
-			if (auto node = src.post_anchor<formal::lex_node>()) return HTMLtag::is_balanced_pair(*node, "sub");
-			if (src.post_anchor<formal::word>()) return false;
-			if (src.post_anchor<formal::parsed>()) return false;
+			if (auto node = src.c_post_anchor<formal::lex_node>()) return HTMLtag::is_balanced_pair(*node, "sub");
+			if (src.c_post_anchor<formal::word>()) return false;
+			if (src.c_post_anchor<formal::parsed>()) return false;
 			return true;
 		}
 

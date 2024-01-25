@@ -84,10 +84,17 @@ namespace formal {
 			return nullptr;
 		}
 
+		template<class Val>
+		const Val* c_post_anchor() const requires requires { std::get_if<std::unique_ptr<Val> >(&_post_anchor); }
+		{
+			if (auto x = std::get_if<std::unique_ptr<Val> >(&_post_anchor)) return x->get();
+			return nullptr;
+		}
+
 		bool set_null_post_anchor(lex_node*& src) {
-			if (post_anchor<word>()) return false;
-			if (post_anchor<lex_node>()) return false;
-			if (post_anchor<parsed>()) return false;
+			if (c_post_anchor<word>()) return false;
+			if (c_post_anchor<lex_node>()) return false;
+			if (c_post_anchor<parsed>()) return false;
 			_post_anchor = std::unique_ptr<lex_node>(src);
 			src = nullptr;
 			return true;
