@@ -36,7 +36,7 @@ public:
 	bool DumpASCIIFile(const char* const Filename);	// writes entire ASCII file from object
 
 protected:
-	std::string to_s_aux() const override { return nullptr; }	// \todo implement
+	std::string to_s_aux() const override { return std::string(); }	// \todo implement
 	void _forceStdForm() override {}
 
 	virtual void DiagnoseInferenceRules() const;	// This is *not* the Interface!

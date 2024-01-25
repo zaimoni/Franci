@@ -71,6 +71,13 @@ namespace formal {
 		}
 
 		template<class Val>
+		const Val* c_anchor() const requires requires { std::get_if<std::unique_ptr<Val> >(&_anchor); }
+		{
+			if (auto x = std::get_if<std::unique_ptr<Val> >(&_anchor)) return x->get();
+			return nullptr;
+		}
+
+		template<class Val>
 		Val* post_anchor() const requires requires { std::get_if<std::unique_ptr<Val> >(&_post_anchor); }
 		{
 			if (auto x = std::get_if<std::unique_ptr<Val> >(&_post_anchor)) return x->get();

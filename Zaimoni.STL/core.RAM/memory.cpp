@@ -52,17 +52,22 @@
 #undef ZAIMONI_STL_IN_MEMORY_CPP
 
 #ifdef __cplusplus
-// #define USE_CPP_EXCEPTIONS 1
+//#define USE_CPP_EXCEPTIONS 1
+#define USE_CPP_STACKTRACE 1
 
 #include "../OS/AIMutex.hpp"	// pulls in Windows.h
 #ifdef USE_CPP_EXCEPTIONS
 #include <stdexcept>
+#elif USE_CPP_STACKTRACE
+#include <stacktrace>
 #endif
 #elif defined(_WIN32)
 #include <WINDOWS.H>
 #else
 #error("Error: headers for memory.cpp not implemented.")
 #endif
+
+#define INVALID_FREE_NOP 1
 
 // OPTIMIZATION NOTES:
 // EVERYTHING NOT BOOTSTRAP IS TIME-CRITICAL
@@ -155,6 +160,10 @@ inline void ReportError(const char* const FatalErrorMessage)
 static void __ReportErrorAndCrash(const char* const FatalErrorMessage)
 {	// FORMALLY CORRECT: Kenneth Boyd, 11/15/1999
 	ReportError(FatalErrorMessage);
+#if USE_CPP_STACKTRACE
+	auto trace = std::stacktrace::current();
+	ReportError(to_string(trace).c_str());
+#endif
 #ifdef __cplusplus
 	RAMBlock.UnLock();
 #endif
@@ -767,8 +776,16 @@ void __cdecl free(void* memblock)
 #endif
 		size_t CurrIdx = __IdxOfPointerInPtrList(memblock,CountPointersAllocated,RawBlock.records);
 		if (!CurrIdx)
+#if INVALID_FREE_NOP
+			return;
+#else
 			// error reporting
+#ifdef USE_CPP_EXCEPTIONS
+			throw std::logic_error(FreeNonNULLInvalid);
+#else
 			__ReportErrorAndCrash(FreeNonNULLInvalid);
+#endif
+#endif
 		__MetaFree(CurrIdx);
 		if (CurrIdx>CountPointersAllocated)
 			// we deleted the lowest memory block.  We need to check whether we have

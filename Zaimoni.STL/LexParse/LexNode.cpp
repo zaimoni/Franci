@@ -44,12 +44,12 @@ namespace formal {
 			src = src->_prefix.front();
 			goto restart;
 		}
-		if (auto x = src->anchor<lex_node>()) {
+		if (auto x = src->c_anchor<lex_node>()) {
 			src = x;
 			goto restart;
 		}
-		if (auto x = src->anchor<word>()) return x->origin();
-		if (auto x = src->anchor<formal::parsed>()) return x->origin();
+		if (auto x = src->c_anchor<word>()) return x->origin();
+		if (auto x = src->c_anchor<formal::parsed>()) return x->origin();
 		// We could try to go on, if our syntax is bad.
 		return formal::src_location();
 	}

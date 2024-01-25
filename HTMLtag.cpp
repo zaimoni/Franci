@@ -3,7 +3,7 @@
 #include "Zaimoni.STL/LexParse/string_view.hpp"
 
 const std::string* HTMLtag::is_balanced_pair(const formal::lex_node& src) {
-	auto leading_tag = dynamic_cast<HTMLtag*>(src.anchor<formal::parsed>());
+	auto leading_tag = dynamic_cast<const HTMLtag*>(src.c_anchor<formal::parsed>());
 	if (!leading_tag) return nullptr;
 	if (HTMLtag::mode::opening != leading_tag->tag_type()) return nullptr;
 	auto trailing_tag = dynamic_cast<HTMLtag*>(src.post_anchor<formal::parsed>());
@@ -13,7 +13,7 @@ const std::string* HTMLtag::is_balanced_pair(const formal::lex_node& src) {
 }
 
 bool HTMLtag::is_balanced_pair(const formal::lex_node& src, const std::string& target) {
-	auto leading_tag = dynamic_cast<HTMLtag*>(src.anchor<formal::parsed>());
+	auto leading_tag = dynamic_cast<const HTMLtag*>(src.c_anchor<formal::parsed>());
 	if (!leading_tag) return false;
 	if (HTMLtag::mode::opening != leading_tag->tag_type() || leading_tag->tag_name() != target) return false;
 	auto trailing_tag = dynamic_cast<HTMLtag*>(src.post_anchor<formal::parsed>());
@@ -52,7 +52,7 @@ std::unique_ptr<HTMLtag> HTMLtag::parse(kuroda::parser<formal::lex_node>::sequen
 	if (1 != x->is_pure_anchor()) return nullptr;	// we only try to manipulate things that don't have internal syntax
 	// end invariants check
 
-	const auto w = x->anchor<formal::word>();
+	const auto w = x->c_anchor<formal::word>();
 	auto text = w->value();
 	const auto text_origin = x->origin();
 
@@ -96,7 +96,7 @@ std::unique_ptr<HTMLtag> HTMLtag::parse(kuroda::parser<formal::lex_node>::sequen
 				error_report(x->origin(), err);
 				return false;
 			}
-			working = y->anchor<formal::word>()->value();
+			working = y->c_anchor<formal::word>()->value();
 			ltrim(working);
 			if (!working.empty()) return true;
 			doomed.push_back(scan);
@@ -105,7 +105,7 @@ std::unique_ptr<HTMLtag> HTMLtag::parse(kuroda::parser<formal::lex_node>::sequen
 	};
 
 	static auto chop_to_remainder = [&]() {
-		const formal::word& w2 = *y->anchor<formal::word>();
+		const formal::word& w2 = *y->c_anchor<formal::word>();
 		auto remainder = w2.value();
 		const auto r_size = w2.size();
 		const auto r_origin = w2.origin();

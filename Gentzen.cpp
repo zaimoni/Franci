@@ -179,11 +179,11 @@ bool interpret_HTML_entity(std::string_view src, char32_t ref) {
 	return false;
 }
 
-formal::word* interpret_HTML_entity(const formal::lex_node& src)
+const formal::word* interpret_HTML_entity(const formal::lex_node& src)
 {
 	if (src.code() & HTMLtag::Entity) {
 		if (1 != src.is_pure_anchor()) return nullptr; // \todo invariant violation
-		const auto ret = src.anchor<formal::word>();
+		const auto ret = src.c_anchor<formal::word>();
 		if (ret->code() & HTMLtag::Entity) return ret;
 		// \todo invariant violation
 	}
@@ -224,7 +224,7 @@ static std::string wrap_to_HTML_entity(const std::string_view& src) {
 static std::optional<std::string_view> interpret_inert_word(const formal::lex_node& src)
 {
 	if (1 != src.is_pure_anchor()) return std::nullopt;
-	const auto w = src.anchor<formal::word>();
+	const auto w = src.c_anchor<formal::word>();
 	if (w->code() & formal::Inert_Token) return w->value();
 	return std::nullopt;
 }
@@ -424,7 +424,7 @@ namespace gentzen {
 			decltype(auto) node = *src.infix(0);
 			if (1 != node.is_pure_anchor()) return std::nullopt;
 
-			const auto text = node.anchor<formal::word>()->value();
+			const auto text = node.c_anchor<formal::word>()->value();
 			ptrdiff_t i = -1;
 			for (decltype(auto) x : parsing) {
 				++i;
@@ -1111,7 +1111,7 @@ namespace gentzen {
 				if (1 != src.infix_size()) return false;
 				decltype(auto) test = *src.infix(0);
 				if (1 != test.is_pure_anchor()) return false;
-				if (!legal_varname(*test.anchor<formal::word>())) return false;
+				if (!legal_varname(*test.c_anchor<formal::word>())) return false;
 				const auto post_size = src.postfix_size();
 				if (1 < post_size) return false;
 				if (0 == post_size) return true;
@@ -1121,7 +1121,7 @@ namespace gentzen {
 			// normal case: no italics, bold etc but subscripting generally ok
 			if (0 < src.infix_size()) return false;
 			if (0 < src.postfix_size()) return false;
-			if (auto w = src.anchor<formal::word>()) {
+			if (auto w = src.c_anchor<formal::word>()) {
 				if (!legal_varname(*w)) return false;
 			} else return false;
 			if (auto node = src.post_anchor<formal::lex_node>()) return HTMLtag::is_balanced_pair(*node, "sub");
@@ -1678,7 +1678,7 @@ retry:
 			bool proceed = true;
 			for (decltype(auto) target : *antecedents) {
 				if (1 == target.second.size() && 3 == target.second.front()->is_pure_anchor()) {
-					if (decltype(auto) x = dynamic_cast<Gentzen*>(target.second.front()->anchor<formal::parsed>())) {
+					if (decltype(auto) x = dynamic_cast<const Gentzen*>(target.second.front()->c_anchor<formal::parsed>())) {
 						if (statement_ok.accept(x->syntax())) continue;
 					}
 				}
@@ -1688,7 +1688,7 @@ retry:
 			if (proceed) {
 				for (decltype(auto) target : *consequences) {
 					if (1 == target.second.size() && 3 == target.second.front()->is_pure_anchor()) {
-						if (decltype(auto) x = dynamic_cast<Gentzen*>(target.second.front()->anchor<formal::parsed>())) {
+						if (decltype(auto) x = dynamic_cast<const Gentzen*>(target.second.front()->c_anchor<formal::parsed>())) {
 							if (statement_ok.accept(x->syntax())) continue;
 						}
 					}
@@ -1993,9 +1993,21 @@ template<bool C_Shell_Line_Continue=true>
 static auto to_lines(std::istream& in, formal::src_location& origin)
 {
 	kuroda::parser<formal::word>::symbols ret;
-	while (in.good()) {
+	const auto _origin = in.tellg();
+	in.seekg(0, std::ios_base::end);
+	const auto _final = in.tellg();
+	in.seekg(_origin);
+
+	while (in.good() && _final != in.tellg()) {
 		std::unique_ptr<std::string> next(new std::string());
 		std::getline(in, *next);
+
+		if (next->empty()) {
+			next.reset(); // try to trigger crash-out here if RAM corruption
+			origin.line_pos.first++;
+			origin.line_pos.second = 0;
+			continue;
+		}
 		// if the target language uses the C/shell line continue character, we have to catch that here
 		// use C++23 version
 		std::optional<std::string_view> line_continue;
@@ -2240,7 +2252,7 @@ auto balanced_atomic_handler(const std::string_view& l_token, const std::string_
 		if (closing->code() & formal::Error) return ret;	// do not try to process error tokens
 		if (1 != closing->is_pure_anchor()) return ret;	// we only try to manipulate things that don't have internal syntax
 
-		auto close_text = closing->anchor<formal::word>()->value();
+		auto close_text = closing->c_anchor<formal::word>()->value();
 
 		if (r_token != close_text) return ret;
 		ptrdiff_t ub = viewpoint;
@@ -2250,7 +2262,7 @@ auto balanced_atomic_handler(const std::string_view& l_token, const std::string_
 //			if (x->code() & formal::Error) return ret;	// do not try to process error tokens
 			if (1 != opening->is_pure_anchor()) continue;	// we only try to manipulate things that don't have internal syntax
 
-			auto open_text = opening->anchor<formal::word>()->value();
+			auto open_text = opening->c_anchor<formal::word>()->value();
 			if (r_token == open_text) { // oops, consecutive unmatched
 				error_report(*closing, std::string("unmatched '") + std::string(r_token) + "'");
 				return ret;
@@ -2279,14 +2291,14 @@ auto balanced_html_tag(kuroda::parser<formal::lex_node>::sequence& src, size_t v
 	std::vector<size_t> ret;
 
 	decltype(auto) closing = src[viewpoint];
-	auto tag = dynamic_cast<HTMLtag*>(closing->anchor<formal::parsed>());
+	auto tag = dynamic_cast<const HTMLtag*>(closing->c_anchor<formal::parsed>());
 	if (!tag) return ret;
 	if (HTMLtag::mode::closing != tag->tag_type()) return ret;
 
 	ptrdiff_t ub = viewpoint;
 	while (0 <= --ub) {
 		decltype(auto) opening = src[ub];
-		auto open_tag = dynamic_cast<HTMLtag*>(opening->anchor<formal::parsed>());
+		auto open_tag = dynamic_cast<const HTMLtag*>(opening->c_anchor<formal::parsed>());
 		if (!open_tag) continue;
 		auto open_mode = open_tag->tag_type();
 		if (HTMLtag::mode::self_closing == open_mode) continue;
@@ -2339,7 +2351,7 @@ auto HTML_bind_to_preceding(kuroda::parser<formal::lex_node>::sequence& src, siz
 			static auto relink = [&](formal::lex_node* target) {
 				// don't mess with the balanced () {} parsing
 				if ((target->code() & formal::Inert_Token) && 1 == target->is_pure_anchor()) {
-					const auto text = target->anchor<formal::word>()->value();
+					const auto text = target->c_anchor<formal::word>()->value();
 					for (decltype(auto) x : reserved_atomic) {
 						if (x.first == text) return (formal::lex_node*)nullptr;
 					}
