@@ -3,6 +3,7 @@
 
 #include "Kuroda.hpp"
 #include "FormalWord.hpp"
+#include "../COW.hpp"
 
 namespace formal {
 
@@ -24,10 +25,10 @@ namespace formal {
 		kuroda::parser<lex_node>::symbols _prefix;
 		kuroda::parser<lex_node>::symbols _infix;
 		kuroda::parser<lex_node>::symbols _postfix;
-		std::variant<std::unique_ptr<lex_node>,
-			std::unique_ptr<word>,
-			std::unique_ptr<parsed>,
-		    std::shared_ptr<const parsed>> _anchor;
+		std::variant<zaimoni::COW<lex_node>,
+			zaimoni::COW<word>,
+			zaimoni::COW<parsed>,
+			std::shared_ptr<const parsed> > _anchor;
 		decltype(_anchor) _post_anchor;
 		unsigned long long _code; // usually used as a bitmap
 
@@ -40,19 +41,19 @@ namespace formal {
 
 	public:
 		lex_node(std::unique_ptr<word> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code) {
-			if (std::get<std::unique_ptr<word> >(_anchor)->code() & Comment) _code |= Comment;
+			if (std::get<zaimoni::COW<word> >(_anchor)->code() & Comment) _code |= Comment;
 		}
-		lex_node(parsed* src, unsigned long long code = 0) noexcept : _anchor(std::unique_ptr<parsed>(src)), _code(code) {}
-		lex_node(parsed*& src, unsigned long long code = 0) noexcept : _anchor(std::unique_ptr<parsed>(src)), _code(code) {
+		lex_node(parsed* src, unsigned long long code = 0) noexcept : _anchor(zaimoni::COW<parsed>(src)), _code(code) {}
+		lex_node(parsed*& src, unsigned long long code = 0) noexcept : _anchor(zaimoni::COW<parsed>(src)), _code(code) {
 			src = nullptr;
 		}
 		lex_node(std::shared_ptr<const parsed> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code) {}
 
 		lex_node() noexcept : _code(0) {}
 		// \todo anchor constructor
-		lex_node(const lex_node& src) = delete;
+		lex_node(const lex_node& src) = default;
 		lex_node(lex_node&& src) = default;
-		lex_node& operator=(const lex_node& src) = delete;
+		lex_node& operator=(const lex_node& src) = default;
 		lex_node& operator=(lex_node&& src) = default;
 		virtual ~lex_node() = default;
 
@@ -66,45 +67,45 @@ namespace formal {
 		void learn(unsigned long long src) { _code |= src; }
 
 		template<class Val>
-		Val* anchor() const requires requires { std::get_if<std::unique_ptr<Val> >(&_anchor); }
+		Val* anchor() requires requires { std::get_if<zaimoni::COW<Val> >(&_anchor); }
 		{
-			if (auto x = std::get_if<std::unique_ptr<Val> >(&_anchor)) return x->get();
+			if (auto x = std::get_if<zaimoni::COW<Val> >(&_anchor)) return x->get();
 			return nullptr;
 		}
 
 		template<class Val>
-		const Val* c_anchor() const requires requires { std::get_if<std::unique_ptr<Val> >(&_anchor); }
+		const Val* c_anchor() const requires requires { std::get_if<zaimoni::COW<Val> >(&_anchor); }
 		{
-			if (auto x = std::get_if<std::unique_ptr<Val> >(&_anchor)) return x->get();
+			if (auto x = std::get_if<zaimoni::COW<Val> >(&_anchor)) return x->get();
 			return nullptr;
 		}
 
 		template<>
 		const parsed* c_anchor<parsed>() const
 		{
-			if (auto x = std::get_if<std::unique_ptr<parsed> >(&_anchor)) return x->get();
+			if (auto x = std::get_if<zaimoni::COW<parsed> >(&_anchor)) return x->get_c();
 			if (auto x = std::get_if<std::shared_ptr<const parsed> >(&_anchor)) return x->get();
 			return nullptr;
 		}
 
 		template<class Val>
-		Val* post_anchor() const requires requires { std::get_if<std::unique_ptr<Val> >(&_post_anchor); }
+		Val* post_anchor() requires requires { std::get_if<zaimoni::COW<Val> >(&_post_anchor); }
 		{
-			if (auto x = std::get_if<std::unique_ptr<Val> >(&_post_anchor)) return x->get();
+			if (auto x = std::get_if<zaimoni::COW<Val> >(&_post_anchor)) return x->get();
 			return nullptr;
 		}
 
 		template<class Val>
-		const Val* c_post_anchor() const requires requires { std::get_if<std::unique_ptr<Val> >(&_post_anchor); }
+		const Val* c_post_anchor() const requires requires { std::get_if<zaimoni::COW<Val> >(&_post_anchor); }
 		{
-			if (auto x = std::get_if<std::unique_ptr<Val> >(&_post_anchor)) return x->get();
+			if (auto x = std::get_if<zaimoni::COW<Val> >(&_post_anchor)) return x->get();
 			return nullptr;
 		}
 
 		template<>
 		const parsed* c_post_anchor<parsed>() const
 		{
-			if (auto x = std::get_if<std::unique_ptr<parsed> >(&_post_anchor)) return x->get();
+			if (auto x = std::get_if<zaimoni::COW<parsed> >(&_post_anchor)) return x->get_c();
 			if (auto x = std::get_if<std::shared_ptr<const parsed> >(&_post_anchor)) return x->get();
 			return nullptr;
 		}

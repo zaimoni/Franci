@@ -1463,6 +1463,9 @@ private:
 		std::vector<std::shared_ptr<const Gentzen> > _hypotheses;
 		std::vector<std::shared_ptr<const Gentzen> > _conclusions;
 
+		std::vector<kuroda::parser<formal::lex_node>::symbols> _lexical_hypotheses;
+		std::vector<kuroda::parser<formal::lex_node>::symbols> _lexical_conclusions;
+
 		// key: hypotheses/conclusions
 		// values: statements (when sub-proof is destucted, its statements will go null)
 		using pattern_t = std::vector<std::pair<std::shared_ptr<const Gentzen>, std::weak_ptr<Gentzen> > >;
@@ -1477,6 +1480,10 @@ private:
 
 		static constexpr auto my_syntax = domain_param({ preaxiomatic::Domain::TruthValued, preaxiomatic::Domain::Ur }, { preaxiomatic::Domain::TruthValues });
 		static constexpr const char32_t reserved_HTML_entities[] = { 9500UL };
+
+		inference_rule(decltype(_lexical_hypotheses)&& hypotheses, decltype(_lexical_conclusions)&& conclusions)
+			: _lexical_hypotheses(std::move(hypotheses)), _lexical_conclusions(std::move(conclusions)) {
+		}
 
 	public:
 		inference_rule() = delete; // empty inference rule doesn't make much sense
@@ -1715,6 +1722,82 @@ retry:
 			// ...
 
 			return std::nullopt;
+		}
+
+		static std::vector<size_t> global_parse(kuroda::parser<formal::lex_node>::sequence& tokens, size_t n) {
+			std::vector<size_t> ret;
+
+			bool err = false;
+			std::optional<size_t> found;
+			ptrdiff_t ub = tokens.size();
+			while (0 <= --ub) {
+				if (interpret_HTML_entity(*tokens[ub], 9500UL)) {
+					if (found) {
+						if (!err) error_report(*tokens[*found], "non-associative ambiguous parse: &#9500;");
+						err = true;
+						error_report(*tokens[ub], "non-associative ambiguous parse: &#9500;");
+					} else found = ub;
+				}
+			}
+			if (err) return ret;
+			if (!found) return ret;
+
+			constexpr const std::string_view comma(",");
+
+			std::vector<kuroda::parser<formal::lex_node>::symbols> hypothesis_like;
+			std::vector<kuroda::parser<formal::lex_node>::symbols> conclusion_like;
+
+			if (0 < ub) {
+				ptrdiff_t scan = -1;
+				ptrdiff_t origin = 0;
+				while (++scan < ub) {
+					if (const auto x = tokens[scan]->c_anchor<formal::word>()) {
+						if (comma == x->value()) {
+							if (scan == origin) {
+								error_report(*tokens[scan], ", delimits missing argument for &#9500;");
+							} else {
+								const auto delta = scan - origin;
+								hypothesis_like.emplace_back(delta);
+								std::copy_n(&tokens[scan], delta, hypothesis_like.back().begin());
+								std::fill_n(&tokens[scan], delta, nullptr);
+							}
+							origin = scan + 1;
+						}
+					}
+				}
+			}
+			if (tokens.size() - 1 > ub) {
+				ptrdiff_t scan = ub;
+				ptrdiff_t origin = ub+1;
+				while (++scan < tokens.size()) {
+					if (const auto x = tokens[scan]->c_anchor<formal::word>()) {
+						if (comma == x->value()) {
+							if (scan == origin) {
+								error_report(*tokens[scan], ", delimits missing argument for &#9500;");
+							} else {
+								const auto delta = scan - origin;
+								conclusion_like.emplace_back(delta);
+								std::copy_n(&tokens[scan], delta, conclusion_like.back().begin());
+								std::fill_n(&tokens[scan], delta, nullptr);
+							}
+							origin = scan + 1;
+						}
+					}
+				}
+			}
+
+			const bool no_args = hypothesis_like.empty() && conclusion_like.empty();
+
+			auto stage = std::unique_ptr<inference_rule>(new inference_rule(std::move(hypothesis_like), std::move(conclusion_like)));
+			auto stage2 = std::make_unique<formal::lex_node>(stage.release());
+			tokens.DeleteNSlotsAt(tokens.size() - 1, 1);
+			delete tokens[0];
+			tokens[0] = stage2.release();
+			ret.push_back(0);
+			if (no_args) {
+				error_report(*tokens[0], "no-argument &#9500;");
+				return ret;
+			}
 		}
 
 	private:
@@ -2548,12 +2631,22 @@ int main(int argc, char* argv[], char* envp[])
 		// intent is one line, one statement
 		while (!lines.empty()) {
 			auto stage = apply_grammar(TokenGrammar(), formal::lex_node::pop_front(lines));
-			if (0 >= Errors.count()) TokenGrammar().finite_parse(stage);
+			try {
+				if (0 >= Errors.count()) TokenGrammar().finite_parse(stage);
+			} catch (std::exception& e) {
+				std::cout << "Token finite parse: " << e.what() << "\n";
+				return 3;
+			}
 			std::cout << std::to_string(stage.size()) << "\n";
 			formal::lex_node::to_s(std::cout, stage) << "\n";
 			if (0 < Errors.count()) continue;
 
-			GentzenGrammar().finite_parse(stage);
+			try {
+				GentzenGrammar().finite_parse(stage);
+			} catch (std::exception& e) {
+				std::cout << "Gentzen finite parse: " << e.what() << "\n";
+				return 3;
+			}
 			std::cout << std::to_string(stage.size()) << "\n";
 			formal::lex_node::to_s(std::cout, stage) << "\n";
 		}

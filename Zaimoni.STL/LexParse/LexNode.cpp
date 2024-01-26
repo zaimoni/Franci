@@ -57,16 +57,12 @@ namespace formal {
 	src_location lex_node::origin(const decltype(_anchor)& src)
 	{
 		struct _origin {
-			auto operator()(const std::unique_ptr<word>& x) {
+			auto operator()(const zaimoni::COW<word>& x) {
 				if (x) return x->origin();
 				return src_location();
 			}
-			auto operator()(const std::unique_ptr<lex_node>& x) { return origin(x.get()); }
-			auto operator()(const std::unique_ptr<parsed>& x) {
-				if (x) return x->origin();
-				return src_location();
-			}
-			auto operator()(const std::shared_ptr<const parsed>& x) {
+			auto operator()(const zaimoni::COW<lex_node>& x) { return origin(x.get()); }
+			auto operator()(const zaimoni::COW<parsed>& x) {
 				if (x) return x->origin();
 				return src_location();
 			}
@@ -211,7 +207,7 @@ namespace formal {
 
 			_to_s(std::ostream& dest, formal::src_location& track) noexcept : dest(dest), track(track) {}
 
-			auto operator()(const std::unique_ptr<word>& w) {
+			auto operator()(const zaimoni::COW<word>& w) {
 				const auto start = w->origin();
 				if (start.line_pos.first != track.line_pos.first) {
 					// new line.  \todo Ignore indentation for one-line comments, but not normal source code
@@ -223,10 +219,10 @@ namespace formal {
 				dest << w->value();
 				track = w->after();
 			}
-			auto operator()(const std::unique_ptr<lex_node>& x) {
+			auto operator()(const zaimoni::COW<lex_node>& x) {
 				if (auto lex = x.get()) return to_s(dest, lex, track);
 			}
-			auto operator()(const std::unique_ptr<parsed>& x) {
+			auto operator()(const zaimoni::COW<parsed>& x) {
 				auto start = x->origin();
 				if (!start.path && track.path) {
 					// default value
@@ -238,29 +234,6 @@ namespace formal {
 					// new line.  \todo Ignore indentation for one-line comments, but not normal source code
 					dest << '\n';
 				} else if (start.line_pos.second > track.line_pos.second) {
-					// need whitespace to look like original code
-					dest << std::string(start.line_pos.second - track.line_pos.second, ' ');
-				}
-
-				auto stage = x->to_s();
-				if (!stage.empty()) {
-					dest << stage;
-					track += stage.size();
-				}
-			}
-			auto operator()(const std::shared_ptr<const parsed>& x) {
-				auto start = x->origin();
-				if (!start.path && track.path) {
-					// default value
-					start = track;
-					start += 1;
-				}
-
-				if (start.line_pos.first != track.line_pos.first) {
-					// new line.  \todo Ignore indentation for one-line comments, but not normal source code
-					dest << '\n';
-				}
-				else if (start.line_pos.second > track.line_pos.second) {
 					// need whitespace to look like original code
 					dest << std::string(start.line_pos.second - track.line_pos.second, ' ');
 				}
@@ -279,9 +252,9 @@ namespace formal {
 	int lex_node::classify(const decltype(_anchor)& src)
 	{
 		struct _encode_anchor {
-			int operator()(const std::unique_ptr<word>& x) { return x ? 1 : 0; }
-			int operator()(const std::unique_ptr<lex_node>& x) { return x ? 2 : 0; }
-			int operator()(const std::unique_ptr<parsed>& x) { return x ? 3 : 0; }
+			int operator()(const zaimoni::COW<word>& x) { return x ? 1 : 0; }
+			int operator()(const zaimoni::COW<lex_node>& x) { return x ? 2 : 0; }
+			int operator()(const zaimoni::COW<parsed>& x) { return x ? 3 : 0; }
 			int operator()(const std::shared_ptr<const parsed>& x) { return x ? 4 : 0; }
 		};
 
@@ -294,13 +267,13 @@ namespace formal {
 		assert(src);
 		switch (src->is_pure_anchor()) {
 		case 1:
-			dest = std::move(std::get<std::unique_ptr<word> >(src->_anchor));
+			dest = std::move(std::get<zaimoni::COW<word> >(src->_anchor));
 			break;
 		case 2:
-			dest = std::move(std::get<std::unique_ptr<lex_node> >(src->_anchor));
+			dest = std::move(std::get<zaimoni::COW<lex_node> >(src->_anchor));
 			break;
 		case 3:
-			dest = std::move(std::get<std::unique_ptr<parsed> >(src->_anchor));
+			dest = std::move(std::get<zaimoni::COW<parsed> >(src->_anchor));
 			break;
 		default: // has internal structure; just capture it as-is
 			dest = std::unique_ptr<lex_node>(src);
