@@ -42,8 +42,11 @@ namespace kuroda {
 		std::vector<rewriter> left_edge_build_nonterminal;
 		std::vector<rewriter> right_edge_build_nonterminal;
 
+		bool (*sub_recursion_ok)(const T& src);
+
 	public:
-		parser() = default;
+		parser() : sub_recursion_ok(nullptr) {};
+		parser(decltype(sub_recursion_ok) sub_recursion_ok) : sub_recursion_ok(sub_recursion_ok) {};
 		parser(const parser& src) = default;
 		parser(parser && src) = default;
 		parser& operator=(const parser& src) = default;
@@ -65,6 +68,8 @@ namespace kuroda {
 
 		void register_right_edge_build_nonterminal(const rewriter& x) { right_edge_build_nonterminal.push_back(x); }
 		void register_right_edge_build_nonterminal(rewriter&& x) { right_edge_build_nonterminal.push_back(std::move(x)); }
+
+		bool want_sub_recursion(const T& src) { return sub_recursion_ok && sub_recursion_ok(src); }
 
 		void append_to_parse(sequence& dest, T* src) {
 			if (!src) return;
@@ -100,15 +105,17 @@ namespace kuroda {
 			return ret;
 		}
 
-		void finite_parse(sequence& dest) {
-			if (dest.empty()) return;
+		bool finite_parse(sequence& dest) {
+			if (dest.empty()) return false;
 			size_t viewpoint = 0;
+			bool changed = false;
 restart:
 			do {
 				auto check_these = refine_parse(dest, viewpoint);
 				if (!check_these.empty()) {
 					if (2 <= check_these.size()) std::sort(check_these.begin(), check_these.end());
 					viewpoint = check_these.front() - 1; // will be correct after end-of-loop increment
+					changed = true;
 					continue;
 				}
 			} while (dest.size() > ++viewpoint);
@@ -117,6 +124,7 @@ restart:
 			if (!check_these.empty()) {
 				if (2 <= check_these.size()) std::sort(check_these.begin(), check_these.end());
 				viewpoint = check_these.front();
+				changed = true;
 				goto restart;
 			}
 			}
@@ -125,9 +133,21 @@ restart:
 			if (!check_these.empty()) {
 				if (2 <= check_these.size()) std::sort(check_these.begin(), check_these.end());
 				viewpoint = check_these.front();
+				changed = true;
 				goto restart;
 			}
 			}
+			return changed;
+		}
+
+		std::optional<size_t> recurse(sequence& tokens) {
+			std::optional<size_t> ret;
+
+			ptrdiff_t ub = tokens.size();
+			while (0 <= --ub) {
+				if (T::recurse(*this, tokens[ub])) ret = ub;
+			}
+			return ret;
 		}
 
 	private:

@@ -2252,6 +2252,14 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 	return ret;
 }
 
+static bool is_balanced_pair(const formal::lex_node& src, const std::string_view& l_token, const std::string_view& r_token) {
+	auto leading_tag = src.c_anchor<formal::word>();
+	if (!leading_tag || leading_tag->value()!=l_token) return false;
+	auto trailing_tag = src.c_post_anchor<formal::word>();
+	if (!trailing_tag || trailing_tag->value() != r_token) return false;
+	return true;
+}
+
 auto balanced_atomic_handler(const std::string_view& l_token, const std::string_view& r_token)
 {
 	return [=](kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
@@ -2458,13 +2466,32 @@ static auto& TokenGrammar() {
 	return *ooao;
 }
 
+// we don't consider {} purely grouping, as it can be used in both set theory and as a Poisson bracket
+// we do consider balanced HTML tags as grouping due to formattng effects
+static bool infix_recursion_ok(const formal::lex_node& src)
+{
+	return HTMLtag::is_balanced_pair(src)
+		|| is_balanced_pair(src, reserved_atomic[0].first, reserved_atomic[1].first); // ()
+}
+
+static auto recurse_grammar(kuroda::parser<formal::lex_node>& grammar) {
+	kuroda::parser<formal::lex_node>::rewriter ret = [&grammar](kuroda::parser<formal::lex_node>::sequence& tokens, size_t ub) {
+		std::vector<size_t> ret;
+		if (auto changed = grammar.recurse(tokens)) ret.push_back(*changed);
+		return ret;
+		};
+	return ret;
+}
+
 // main language syntax
 static auto& GentzenGrammar() {
 	static std::unique_ptr<kuroda::parser<formal::lex_node> > ooao;
 	if (!ooao) {
-		ooao = decltype(ooao)(new decltype(ooao)::element_type());
+		ooao = decltype(ooao)(new decltype(ooao)::element_type(infix_recursion_ok));
 
-//		ooao->register_terminal(gentzen::preaxiomatic::parse_lex); // not here for CPU/RAM efficiency
+		// we do not register terminals for the Gentzen grammar.
+
+		ooao->register_right_edge_build_nonterminal(recurse_grammar(*ooao)); // CPU-expensive, so last
 	};
 	return *ooao;
 }
@@ -2526,10 +2553,9 @@ int main(int argc, char* argv[], char* envp[])
 			formal::lex_node::to_s(std::cout, stage) << "\n";
 			if (0 < Errors.count()) continue;
 
-			auto interpreted = apply_grammar<formal::lex_node>(GentzenGrammar(), stage);
-			if (0 >= Errors.count()) GentzenGrammar().finite_parse(interpreted);
-			std::cout << std::to_string(interpreted.size()) << "\n";
-			formal::lex_node::to_s(std::cout, interpreted) << "\n";
+			GentzenGrammar().finite_parse(stage);
+			std::cout << std::to_string(stage.size()) << "\n";
+			formal::lex_node::to_s(std::cout, stage) << "\n";
 		}
 	}
 

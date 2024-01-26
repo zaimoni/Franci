@@ -29,7 +29,7 @@ namespace formal {
 		const auto audit = dest.size();	// remove before commit
 		const size_t delta = ub - lb;
 
-		std::unique_ptr<lex_node> stage(new lex_node(lex_node(dest, lb, ub, code)));
+		std::unique_ptr<lex_node> stage(new lex_node(dest, lb, ub, code));
 		dest[lb] = stage.release();
 		dest.DeleteNSlotsAt(delta, lb + 1);
 		SUCCEED_OR_DIE(audit == dest.size() + delta);
@@ -123,6 +123,11 @@ namespace formal {
 		return ret;
 	}
 
+	bool lex_node::recurse(kuroda::parser<formal::lex_node>& grammar) {
+		if (_infix.empty()) return false;
+		return grammar.finite_parse(_infix);
+	}
+
 	bool lex_node::rewrite(lex_node*& target, std::function<lex_node* (lex_node* target)> op)
 	{
 		if (decltype(auto) dest = op(target)) {
@@ -133,6 +138,35 @@ namespace formal {
 			return true;
 		}
 		return false;
+	}
+
+	bool lex_node::recurse(kuroda::parser<formal::lex_node>& grammar, formal::lex_node* src) {
+		bool updated = false;
+	restart:
+		if ((formal::Error | formal::Inert_Token) & src->code()) return updated;
+
+		if (grammar.want_sub_recursion(*src)) {
+			if (src->recurse(grammar)) updated = true;
+		} else {
+			if (!src->_infix.empty() && grammar.recurse(src->_infix)) updated=true;
+		}
+		if (!src->_prefix.empty() && grammar.recurse(src->_prefix)) updated = true;
+		if (!src->_postfix.empty() && grammar.recurse(src->_postfix)) updated = true;
+
+		// tail recursion
+		auto anchor = src->anchor<formal::lex_node>();
+		if (auto p_anchor = src->post_anchor<formal::lex_node>()) {
+			if (!anchor) {
+				src = p_anchor;
+				goto restart;
+			}
+			if (recurse(grammar, p_anchor)) updated = true;
+		}
+		if (anchor) {
+			src = anchor;
+			goto restart;
+		}
+		return updated;
 	}
 
 	std::string lex_node::to_s() const
