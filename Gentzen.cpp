@@ -1533,32 +1533,17 @@ retry:
 			std::string ret;
 
 			std::vector<std::string> stage;
-			if (!_hypotheses.empty()) {
-				stage = to_s(_hypotheses);
-				while (!stage.empty()) {
-					ret += std::move(stage.front());
-					if (1 == stage.size()) {
-						decltype(stage)().swap(stage);
-						ret += ", ";
-					} else {
-						stage.erase(stage.begin());
-						ret += ' ';
-					}
-				}
-			}
+			if (!_hypotheses.empty()) ret += join(to_s(_hypotheses), ", ");
+			if (!_lexical_hypotheses.empty()) ret += join(to_s(_lexical_hypotheses), ", ");
+			ret += ' ';
 			ret += "&#9500;";
 			if (!_conclusions.empty()) {
-				stage = to_s(_conclusions);
-				while (!stage.empty()) {
-					ret += ' ';
-					ret += std::move(stage.front());
-					if (1 == stage.size()) {
-						decltype(stage)().swap(stage);
-					} else {
-						stage.erase(stage.begin());
-						ret += ',';
-					}
-				}
+				ret += ' ';
+				ret += join(to_s(_conclusions), ", ");
+			}
+			if (!_lexical_conclusions.empty()) {
+				ret += ' ';
+				ret += join(to_s(_lexical_conclusions), ", ");
 			}
 
 			return ret;
@@ -1747,10 +1732,10 @@ retry:
 			std::vector<kuroda::parser<formal::lex_node>::symbols> hypothesis_like;
 			std::vector<kuroda::parser<formal::lex_node>::symbols> conclusion_like;
 
-			if (0 < ub) {
+			if (0 < *found) {
 				ptrdiff_t scan = -1;
 				ptrdiff_t origin = 0;
-				while (++scan < ub) {
+				while (++scan < *found) {
 					if (const auto x = tokens[scan]->c_anchor<formal::word>()) {
 						if (comma == x->value()) {
 							if (scan == origin) {
@@ -1758,17 +1743,23 @@ retry:
 							} else {
 								const auto delta = scan - origin;
 								hypothesis_like.emplace_back(delta);
-								std::copy_n(&tokens[scan], delta, hypothesis_like.back().begin());
-								std::fill_n(&tokens[scan], delta, nullptr);
+								std::copy_n(&tokens[origin], delta, hypothesis_like.back().begin());
+								std::fill_n(&tokens[origin], delta, nullptr);
 							}
 							origin = scan + 1;
 						}
 					}
 				}
+				if (scan == *found && origin<scan) {
+					const auto delta = scan - origin;
+					hypothesis_like.emplace_back(delta);
+					std::copy_n(&tokens[origin], delta, hypothesis_like.back().begin());
+					std::fill_n(&tokens[origin], delta, nullptr);
+				}
 			}
-			if (tokens.size() - 1 > ub) {
-				ptrdiff_t scan = ub;
-				ptrdiff_t origin = ub+1;
+			if (tokens.size() - 1 > *found) {
+				ptrdiff_t scan = *found;
+				ptrdiff_t origin = *found + 1;
 				while (++scan < tokens.size()) {
 					if (const auto x = tokens[scan]->c_anchor<formal::word>()) {
 						if (comma == x->value()) {
@@ -1777,12 +1768,18 @@ retry:
 							} else {
 								const auto delta = scan - origin;
 								conclusion_like.emplace_back(delta);
-								std::copy_n(&tokens[scan], delta, conclusion_like.back().begin());
-								std::fill_n(&tokens[scan], delta, nullptr);
+								std::copy_n(&tokens[origin], delta, conclusion_like.back().begin());
+								std::fill_n(&tokens[origin], delta, nullptr);
 							}
 							origin = scan + 1;
 						}
 					}
+				}
+				if (scan == tokens.size() && origin < scan) {
+					const auto delta = scan - origin;
+					conclusion_like.emplace_back(delta);
+					std::copy_n(&tokens[origin], delta, conclusion_like.back().begin());
+					std::fill_n(&tokens[origin], delta, nullptr);
 				}
 			}
 
@@ -1794,13 +1791,25 @@ retry:
 			delete tokens[0];
 			tokens[0] = stage2.release();
 			ret.push_back(0);
-			if (no_args) {
-				error_report(*tokens[0], "no-argument &#9500;");
-				return ret;
-			}
+			if (no_args) error_report(*tokens[0], "no-argument &#9500;");
+			return ret;
 		}
 
 	private:
+		static std::string join(std::vector<std::string>&& src, const std::string_view& glue) {
+			std::string ret;
+			while (!src.empty()) {
+				ret += std::move(src.front());
+				if (1 == src.size()) {
+					std::remove_reference_t<decltype(src)>().swap(src);
+				} else {
+					src.erase(src.begin());
+					ret += glue;
+				}
+			}
+			return ret;
+		}
+
 		// these two likely belong elsewhere
 		static std::optional<std::vector<std::pair<size_t, std::span<formal::lex_node*> > > > find_prefix_CSV_args(const std::span<formal::lex_node*>& src, ptrdiff_t origin, bool hypothetical = false)
 		{
@@ -1924,6 +1933,12 @@ retry:
 			return false;
 		}
 
+		static bool requires_parentheses(const parsed* src) {
+			// inference rules and syntactical equivalences need help
+			if (dynamic_cast<const inference_rule*>(src)) return true;
+			return false;
+		}
+
 		static std::vector<std::string> to_s(const std::vector<std::shared_ptr<const Gentzen> >& src)
 		{
 			std::vector<std::string> ret;
@@ -1942,6 +1957,45 @@ retry:
 				}
 			}
 
+			return ret;
+		}
+
+		static std::vector<std::string> to_s(const kuroda::parser<formal::lex_node>::symbols& src)
+		{
+			std::vector<std::string> ret;
+			ret.reserve(src.size());
+			for (decltype(auto) x : src) {
+				if (requires_parentheses(x->c_anchor<parsed>())) {
+					std::string stage("(");
+					stage += x->to_s();
+					ret.push_back(stage + ")");
+				} else {
+					ret.push_back(x->to_s());
+				}
+			}
+
+			return ret;
+		}
+
+		static std::vector<std::string> to_s(const std::vector<kuroda::parser<formal::lex_node>::symbols>& src)
+		{
+			std::vector<std::string> ret;
+			ret.reserve(src.size());
+
+			for (decltype(auto) lexical : src) {
+				std::string stage;
+				auto tokens = to_s(lexical);
+				if (!tokens.empty()) {
+					stage = std::move(tokens.front());
+					tokens.erase(tokens.begin());
+					while (!tokens.empty()) {
+						stage += ' ';
+						stage += tokens.front();
+						tokens.erase(tokens.begin());
+					}
+				}
+				ret.push_back(stage);
+			}
 			return ret;
 		}
 	};
@@ -2574,6 +2628,7 @@ static auto& GentzenGrammar() {
 
 		// we do not register terminals for the Gentzen grammar.
 
+		ooao->register_right_edge_build_nonterminal(gentzen::inference_rule::global_parse);
 		ooao->register_right_edge_build_nonterminal(recurse_grammar(*ooao)); // CPU-expensive, so last
 	};
 	return *ooao;
@@ -2630,6 +2685,7 @@ int main(int argc, char* argv[], char* envp[])
 
 		// intent is one line, one statement
 		while (!lines.empty()) {
+			try {
 			auto stage = apply_grammar(TokenGrammar(), formal::lex_node::pop_front(lines));
 			try {
 				if (0 >= Errors.count()) TokenGrammar().finite_parse(stage);
@@ -2649,6 +2705,10 @@ int main(int argc, char* argv[], char* envp[])
 			}
 			std::cout << std::to_string(stage.size()) << "\n";
 			formal::lex_node::to_s(std::cout, stage) << "\n";
+			} catch (std::exception& e) {
+				std::cout << "line iteration body: " << e.what() << "\n";
+				return 3;
+			}
 		}
 	}
 
