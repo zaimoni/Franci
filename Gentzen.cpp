@@ -1487,6 +1487,7 @@ private:
 		std::vector<arg_match> _rete_alpha_memory;
 
 		static constexpr auto my_syntax = domain_param({ preaxiomatic::Domain::TruthValued, preaxiomatic::Domain::Ur }, { preaxiomatic::Domain::TruthValues });
+		static constexpr auto arg_spec = domain_param({ preaxiomatic::Domain::TruthValued }, { preaxiomatic::Domain::TruthValues });
 		static constexpr const char32_t reserved_HTML_entities[] = { 9500UL };
 
 		inference_rule(decltype(_lexical_hypotheses)&& hypotheses, decltype(_lexical_conclusions)&& conclusions)
@@ -1749,11 +1750,39 @@ retry:
 				for (decltype(auto) phrase : _lexical_hypotheses) {
 					if (GentzenGrammar().finite_parse(phrase)) updated = true;
 				}
+				do {
+					if (1 < _lexical_hypotheses.front().size()) break;
+					if (!_lexical_hypotheses.front().front()->is_pure_anchor()) break;
+					if (auto test = static_cast<const Gentzen*>(_lexical_hypotheses.front().front()->c_anchor<formal::parsed>())) {
+						if (arg_spec.accept(test->syntax())) {
+							auto stage = test->clone();
+							std::shared_ptr<const Gentzen> stage2(static_cast<Gentzen*>(stage.release()));
+							_hypotheses.push_back(stage2);
+							_lexical_hypotheses.erase(_lexical_hypotheses.begin());
+							continue;
+						}
+					}
+					break;
+				} while(!_lexical_hypotheses.empty());
 			}
 			if (!_lexical_conclusions.empty()) {
 				for (decltype(auto) phrase : _lexical_conclusions) {
 					if (GentzenGrammar().finite_parse(phrase)) updated = true;
 				}
+				do {
+					if (1 < _lexical_conclusions.front().size()) break;
+					if (!_lexical_conclusions.front().front()->is_pure_anchor()) break;
+					if (auto test = static_cast<const Gentzen*>(_lexical_conclusions.front().front()->c_anchor<formal::parsed>())) {
+						if (arg_spec.accept(test->syntax())) {
+							auto stage = test->clone();
+							std::shared_ptr<const Gentzen> stage2(static_cast<Gentzen*>(stage.release()));
+							_conclusions.push_back(stage2);
+							_lexical_conclusions.erase(_lexical_conclusions.begin());
+							continue;
+						}
+					}
+					break;
+				} while (!_lexical_conclusions.empty());
 			}
 			return updated;
 		}
