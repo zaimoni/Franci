@@ -229,6 +229,29 @@ static std::optional<std::string_view> interpret_inert_word(const formal::lex_no
 	return std::nullopt;
 }
 
+static constexpr const std::string_view comma(",");
+
+// action coding: offset to parse at next
+static constexpr std::pair<std::string_view, int> reserved_atomic[] = {
+	{"(", 1},
+	{")", 0},
+	{"{", 1},
+	{"}", 0},
+	{"[", 1},
+	{"]", 0},
+	{",", 1},
+};
+
+size_t issymbol(const std::string_view& src)
+{
+	if (isalnum(static_cast<unsigned char>(src[0]))) return 0;
+	if (isspace(static_cast<unsigned char>(src[0]))) return 0;
+	for (decltype(auto) x : reserved_atomic) {
+		if (src.starts_with(x.first)) return 0;
+	}
+	return 1;
+}
+
 // prototype class -- extract to own files when stable
 
 namespace formal {
@@ -1628,8 +1651,6 @@ retry:
 			if (err) return ret;
 			if (!found) return ret;
 
-			constexpr const std::string_view comma(",");
-
 			std::vector<kuroda::parser<formal::lex_node>::symbols> hypothesis_like;
 			std::vector<kuroda::parser<formal::lex_node>::symbols> conclusion_like;
 
@@ -2195,25 +2216,6 @@ static_assert(!(formal::Error & (1ULL << TG_HTML_tag)));
 static_assert(!(formal::Inert_Token & (1ULL << TG_HTML_tag)));
 static_assert(!(formal::Tokenized & (1ULL << TG_HTML_tag)));
 
-// action coding: offset to parse at next
-static constexpr std::pair<std::string_view, int> reserved_atomic[] = {
-	{"(", 1},
-	{")", 0},
-	{"{", 1},
-	{"}", 0},
-	{",", 1},
-};
-
-size_t issymbol(const std::string_view& src)
-{
-	if (isalnum(static_cast<unsigned char>(src[0]))) return 0;
-	if (isspace(static_cast<unsigned char>(src[0]))) return 0;
-	for (decltype(auto) x : reserved_atomic) {
-		if (src.starts_with(x.first)) return 0;
-	}
-	return 1;
-}
-
 size_t HTML_EntityLike(const std::string_view& src)
 {
 	if (3 > src.size() || '&' != src[0]) return 0;
@@ -2557,6 +2559,7 @@ static auto& TokenGrammar() {
 		ooao->register_build_nonterminal(tokenize);
 		ooao->register_build_nonterminal(balanced_atomic_handler(reserved_atomic[0].first, reserved_atomic[1].first));
 		ooao->register_build_nonterminal(balanced_atomic_handler(reserved_atomic[2].first, reserved_atomic[3].first));
+		ooao->register_build_nonterminal(balanced_atomic_handler(reserved_atomic[4].first, reserved_atomic[5].first));
 		ooao->register_build_nonterminal(balanced_html_tag);
 		ooao->register_build_nonterminal(HTML_bind_to_preceding);
 
