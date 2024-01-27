@@ -52,6 +52,7 @@ public:
 	static const std::string* is_balanced_pair(const formal::lex_node& src);
 	static bool is_balanced_pair(const formal::lex_node& src, const std::string& target);
 	std::string to_s() const override;
+	unsigned int precedence() const override { return 0; }
 	static std::unique_ptr<HTMLtag> parse(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint);
 };
 

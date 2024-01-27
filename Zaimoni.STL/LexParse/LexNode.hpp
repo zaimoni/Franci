@@ -18,6 +18,7 @@ namespace formal {
 		virtual src_location origin() const = 0;
 
 		virtual std::string to_s() const = 0;
+		virtual unsigned int precedence() const = 0;
 	};
 
 	class lex_node
@@ -151,6 +152,11 @@ namespace formal {
 		auto infix_size() const { return _infix.size(); }
 		auto postfix_size() const { return _postfix.size(); }
 
+		// unsure if these are actually a good idea
+		auto& prefix() const { return _prefix; }
+		auto& infix() const { return _infix; }
+		auto& postfix() const { return _postfix; }
+
 		void push_back_postfix(lex_node*& src) {
 			auto dest = _postfix.size();
 			_postfix.insertNSlotsAt(1, dest);
@@ -171,6 +177,11 @@ namespace formal {
 		std::string to_s() const;
 		void to_s(std::ostream& dest) const;
 		static std::ostream& to_s(std::ostream& dest, const kuroda::parser<lex_node>::sequence& src);
+
+		unsigned int precedence() const;
+
+		bool is_balanced_pair(const std::string_view& l_token, const std::string_view& r_token) const;
+		static bool remove_outer_parentheses(kuroda::parser<formal::lex_node>::symbols& target);
 
 	private:
 		static src_location origin(const lex_node* src);

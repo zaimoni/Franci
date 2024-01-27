@@ -332,6 +332,8 @@ namespace formal {
 
 } // end namespace formal
 
+static kuroda::parser<formal::lex_node>& GentzenGrammar();
+
 namespace gentzen {
 
 	formal::is_wff syntax_check;
@@ -415,6 +417,8 @@ namespace gentzen {
 			if (names.size() > _code) return std::string(names[_code]);
 			return "<buggy>";
 		}
+
+		unsigned int precedence() const override { return 0; }
 
 		static std::optional<Domain> parse(const formal::lex_node& src) {
 			if (!HTMLtag::is_balanced_pair(src, "b")) return std::nullopt;
@@ -1107,6 +1111,8 @@ namespace gentzen {
 			return ret;
 		}
 
+		unsigned int precedence() const override { return 0; }
+
 		std::string name() const { return _var->to_s(); }
 		domain_param element_of() const override { return domain_param(_domain.get()); }
 		domain_param syntax() const override { return my_syntax; }
@@ -1389,6 +1395,8 @@ private:
 		formal::src_location origin() const override { return _origin; }
 		std::string to_s() const override { return _var->name(); }
 
+		unsigned int precedence() const override { return 0; }
+
 		domain_param element_of() const override { return _var->element_of(); }
 		domain_param syntax() const override { return _var->element_of(); }
 		bool normalize_vars(std::vector<std::shared_ptr<const var> >& catalog) const override {
@@ -1531,22 +1539,48 @@ retry:
 
 		std::string to_s() const override {
 			std::string ret;
+			enum { trace_to_s = 0 };
 
 			std::vector<std::string> stage;
-			if (!_hypotheses.empty()) ret += join(to_s(_hypotheses), ", ");
-			if (!_lexical_hypotheses.empty()) ret += join(to_s(_lexical_hypotheses), ", ");
+			if (!_hypotheses.empty()) {
+				if constexpr (trace_to_s) std::cout << "hypotheses: " << _hypotheses.size() << "\n";
+				ret += join(to_s(_hypotheses), ", ");
+			}
+			if (!_lexical_hypotheses.empty()) {
+				if constexpr (trace_to_s) {
+					std::cout << "lexical hypotheses: " << _lexical_hypotheses.size() << "\n";
+					for (decltype(auto) text : _lexical_hypotheses) {
+						overview(text, "lexical hypothesis");
+					}
+				}
+				if (!_hypotheses.empty()) ret += ", ";
+				ret += join(to_s(_lexical_hypotheses), ", ");
+			}
 			ret += ' ';
 			ret += "&#9500;";
 			if (!_conclusions.empty()) {
+				if constexpr (trace_to_s) std::cout << "conclusions: " << _conclusions.size() << "\n";
 				ret += ' ';
 				ret += join(to_s(_conclusions), ", ");
 			}
 			if (!_lexical_conclusions.empty()) {
-				ret += ' ';
+				if constexpr (trace_to_s) {
+					std::cout << "lexical conclusions: " << _lexical_conclusions.size() << "\n";
+					for (decltype(auto) text : _lexical_conclusions) {
+						overview(text, "lexical conclusion");
+					}
+				}
+				ret += (_conclusions.empty()) ? " " : ", ";
 				ret += join(to_s(_lexical_conclusions), ", ");
 			}
 
 			return ret;
+		}
+
+		constexpr unsigned int precedence() const override { return (unsigned int)(-1); }
+
+		static bool requires_parentheses(const parsed* src) {
+			return src && (unsigned int)(-1) <= src->precedence();
 		}
 
 		domain_param element_of() const override { return my_syntax; }
@@ -1650,8 +1684,15 @@ retry:
 			}
 
 			const bool no_args = hypothesis_like.empty() && conclusion_like.empty();
+			if (!hypothesis_like.empty()) {
+				for (decltype(auto) phrase : hypothesis_like) formal::lex_node::remove_outer_parentheses(phrase);
+			}
+			if (!conclusion_like.empty()) {
+				for (decltype(auto) phrase : conclusion_like) formal::lex_node::remove_outer_parentheses(phrase);
+			}
 
 			auto stage = std::unique_ptr<inference_rule>(new inference_rule(std::move(hypothesis_like), std::move(conclusion_like)));
+			while(stage->Gentzen_parse_args());
 			auto stage2 = std::make_unique<formal::lex_node>(stage.release());
 			tokens.DeleteNSlotsAt(tokens.size() - 1, 1);
 			delete tokens[0];
@@ -1662,6 +1703,61 @@ retry:
 		}
 
 	private:
+		static void overview(const formal::lex_node& src, const std::string& label) {
+			if (!src.prefix().empty()) overview(src.prefix(), label + " prefix");
+			if (auto test = src.c_anchor<parsed>()) std::cout << "parsed anchor " << label << ": " << test->to_s() << "\n";
+			if (auto test = src.c_anchor<formal::lex_node>()) {
+				std::cout << "lex_node anchor: " << test->to_s() << "\n";
+				overview(*test, label + " anchor");
+			}
+			if (auto test = src.c_anchor<formal::word>()) {
+				std::cout << "word anchor: " << test->value() << "\n";
+			}
+			if (!src.infix().empty()) overview(src.infix(), label + " infix");
+			if (auto test = src.c_post_anchor<parsed>()) std::cout << "parsed post-anchor " << label << ": " << test->to_s() << "\n";
+			if (auto test = src.c_post_anchor<formal::lex_node>()) {
+				std::cout << "lex_node post-anchor: " << test->to_s() << "\n";
+				overview(*test, label + " post-anchor");
+			}
+			if (auto test = src.c_post_anchor<formal::word>()) {
+				std::cout << "word post-anchor: " << test->value() << "\n";
+			}
+			if (!src.postfix().empty()) overview(src.postfix(), label + " postfix");
+		}
+
+		static void overview(const kuroda::parser<formal::lex_node>::sequence& src, const std::string& label) {
+			std::cout << label << ": " << src.size() << "\n";
+			for (decltype(auto) x : src) overview(*x, label);
+		}
+
+		static bool remove_outer_parentheses(formal::lex_node*& x) {
+			if (x->is_balanced_pair("(", ")")) {
+				if (x->prefix().empty() && x->postfix().empty() && 1 == x->infix().size()) {
+					auto stage = x->infix()[0];
+					x->infix()[0] = nullptr;
+					delete x;
+					x = stage;
+					return true;
+				}
+			}
+			return false;
+		}
+
+		bool Gentzen_parse_args() {
+			bool updated = false;
+			if (!_lexical_hypotheses.empty()) {
+				for (decltype(auto) phrase : _lexical_hypotheses) {
+					if (GentzenGrammar().finite_parse(phrase)) updated = true;
+				}
+			}
+			if (!_lexical_conclusions.empty()) {
+				for (decltype(auto) phrase : _lexical_conclusions) {
+					if (GentzenGrammar().finite_parse(phrase)) updated = true;
+				}
+			}
+			return updated;
+		}
+
 		static std::string join(std::vector<std::string>&& src, const std::string_view& glue) {
 			std::string ret;
 			while (!src.empty()) {
@@ -1791,18 +1887,6 @@ retry:
 				ret.push_back(std::pair(0, src.subspan(0, scan.second + 1)));
 			};
 			return ret;
-		}
-
-		static bool requires_parentheses(const Gentzen* src) {
-			// inference rules and syntactical equivalences need help
-			if (dynamic_cast<const inference_rule*>(src)) return true;
-			return false;
-		}
-
-		static bool requires_parentheses(const parsed* src) {
-			// inference rules and syntactical equivalences need help
-			if (dynamic_cast<const inference_rule*>(src)) return true;
-			return false;
 		}
 
 		static std::vector<std::string> to_s(const std::vector<std::shared_ptr<const Gentzen> >& src)
@@ -2255,14 +2339,6 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 	return ret;
 }
 
-static bool is_balanced_pair(const formal::lex_node& src, const std::string_view& l_token, const std::string_view& r_token) {
-	auto leading_tag = src.c_anchor<formal::word>();
-	if (!leading_tag || leading_tag->value()!=l_token) return false;
-	auto trailing_tag = src.c_post_anchor<formal::word>();
-	if (!trailing_tag || trailing_tag->value() != r_token) return false;
-	return true;
-}
-
 auto balanced_atomic_handler(const std::string_view& l_token, const std::string_view& r_token)
 {
 	return [=](kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
@@ -2474,7 +2550,7 @@ static auto& TokenGrammar() {
 static bool infix_recursion_ok(const formal::lex_node& src)
 {
 	return HTMLtag::is_balanced_pair(src)
-		|| is_balanced_pair(src, reserved_atomic[0].first, reserved_atomic[1].first); // ()
+		|| src.is_balanced_pair(reserved_atomic[0].first, reserved_atomic[1].first); // ()
 }
 
 static auto recurse_grammar(kuroda::parser<formal::lex_node>& grammar) {
@@ -2487,7 +2563,7 @@ static auto recurse_grammar(kuroda::parser<formal::lex_node>& grammar) {
 }
 
 // main language syntax
-static auto& GentzenGrammar() {
+static kuroda::parser<formal::lex_node>& GentzenGrammar() {
 	static std::unique_ptr<kuroda::parser<formal::lex_node> > ooao;
 	if (!ooao) {
 		ooao = decltype(ooao)(new decltype(ooao)::element_type(infix_recursion_ok));

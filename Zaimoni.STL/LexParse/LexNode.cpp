@@ -249,6 +249,32 @@ namespace formal {
 		std::visit(_to_s(dest, track), src);
 	}
 
+	unsigned int lex_node::precedence() const
+	{
+		return 0;
+	}
+
+	bool lex_node::is_balanced_pair(const std::string_view& l_token, const std::string_view& r_token) const {
+		auto leading_tag = c_anchor<formal::word>();
+		if (!leading_tag || leading_tag->value() != l_token) return false;
+		auto trailing_tag = c_post_anchor<formal::word>();
+		if (!trailing_tag || trailing_tag->value() != r_token) return false;
+		return true;
+	}
+
+	bool lex_node::remove_outer_parentheses(kuroda::parser<formal::lex_node>::symbols& target) {
+		if (1 == target.size() && target.front()->prefix().empty()
+			&& target.front()->postfix().empty() && !target.front()->infix().empty()
+			&& target.front()->is_balanced_pair("(", ")")) {
+			kuroda::parser<formal::lex_node>::symbols stage;
+
+			stage.swap(target.front()->_infix);
+			stage.swap(target);
+			return true;
+		}
+		return false;
+	}
+
 	int lex_node::classify(const decltype(_anchor)& src)
 	{
 		struct _encode_anchor {
