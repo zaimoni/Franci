@@ -179,33 +179,35 @@ bool interpret_HTML_entity(std::string_view src, char32_t ref) {
 	return false;
 }
 
-const formal::word* interpret_HTML_entity(const formal::lex_node& src)
+const formal::word* is_parsed_HTML_entity(const formal::word* x)
 {
-	if (src.code() & HTMLtag::Entity) {
-		if (1 != src.is_pure_anchor()) return nullptr; // \todo invariant violation
-		const auto ret = src.c_anchor<formal::word>();
-		if (ret->code() & HTMLtag::Entity) return ret;
-		// \todo invariant violation
-	}
+	if (!x || !(x->code() & HTMLtag::Entity)) return nullptr;
+	return x;
+}
+
+const formal::word* is_parsed_HTML_entity(const formal::lex_node& src)
+{
+	if (1 != src.is_pure_anchor()) return nullptr;
+	if (auto test = is_parsed_HTML_entity(src.c_anchor<formal::word>())) return test;
 	return nullptr;
 }
 
-bool interpret_HTML_entity(const formal::lex_node& src, const std::string_view& ref)
+bool is_parsed_HTML_entity(const formal::lex_node& src, const std::string_view& ref)
 {
-	if (const auto w = interpret_HTML_entity(src)) return interpret_HTML_entity(w->value(), ref);
+	if (const auto w = is_parsed_HTML_entity(src)) return interpret_HTML_entity(w->value(), ref);
 	return false;
 }
 
-bool interpret_HTML_entity(const formal::lex_node& src, char32_t ref)
+bool is_parsed_HTML_entity(const formal::lex_node& src, char32_t ref)
 {
-	if (const auto w = interpret_HTML_entity(src)) return interpret_HTML_entity(w->value(), ref);
+	if (const auto w = is_parsed_HTML_entity(src)) return interpret_HTML_entity(w->value(), ref);
 	return false;
 }
 
 template<size_t n>
-const std::string_view* interpret_HTML_entity(const formal::lex_node& src, const std::array<std::string_view, n>& ref)
+const std::string_view* is_parsed_HTML_entity(const formal::lex_node& src, const std::array<std::string_view, n>& ref)
 {
-	if (const auto w = interpret_HTML_entity(src)) {
+	if (const auto w = is_parsed_HTML_entity(src)) {
 		for (decltype(auto) x : ref) {
 			if (auto test = interpret_HTML_entity(w->value(), x)) return &x;
 		}
@@ -951,7 +953,7 @@ namespace gentzen {
 	private:
 		static std::optional<std::pair<std::variant<std::string_view, std::variant<std::string_view, char32_t> >, std::string_view> > interpret_reserved(const formal::lex_node& src) {
 			if (auto inert = interpret_inert_word(src)) return std::pair(*inert, *inert);
-			if (auto node = interpret_HTML_entity(src)) {
+			if (auto node = is_parsed_HTML_entity(src)) {
 				if (auto tag = interpret_HTML_entity(node->value())) return std::pair(*tag, node->value());
 			}
 			return std::nullopt;
@@ -1181,7 +1183,7 @@ namespace gentzen {
 		}
 
 		static unsigned int legal_quantifier(const formal::lex_node& src) {
-			if (const auto w = interpret_HTML_entity(src)) return legal_quantifier(*w);
+			if (const auto w = is_parsed_HTML_entity(src)) return legal_quantifier(*w);
 
 			// \todo? visually, it is true that a span that rotates A or E 180-degrees "works" and we could accept that as an alternate encoding
 			// e.g, <span style="transform:rotate(180deg);display:inline-block">E</span>
@@ -1251,7 +1253,7 @@ namespace gentzen {
 
 			ptrdiff_t i = target.size();
 			while (0 <= --i) {
-				if (interpret_HTML_entity(*target[i], "isin")) {
+				if (is_parsed_HTML_entity(*target[i], "isin")) {
 					if (0 > anchor_at) anchor_at = i;
 					// not an error: x &isin; y & w &isin; z should parse as a 2-ary conjunction
 					else return std::nullopt;
@@ -1695,7 +1697,7 @@ retry:
 			const auto starting_errors = Errors.count();
 
 			auto args = formal::lex_node::split(tokens, [](const formal::lex_node& x) {
-				return interpret_HTML_entity(x, 9500UL);
+				return is_parsed_HTML_entity(x, 9500UL);
 			});
 			if (args.second.empty()) return ret;
 
