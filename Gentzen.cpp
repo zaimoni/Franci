@@ -242,6 +242,11 @@ static constexpr std::pair<std::string_view, int> reserved_atomic[] = {
 	{",", 1},
 };
 
+bool detect_comma(const formal::lex_node& src) {
+	if (const auto x = src.c_anchor<formal::word>()) return comma == x->value();
+	return false;
+}
+
 size_t issymbol(const std::string_view& src)
 {
 	if (isalnum(static_cast<unsigned char>(src[0]))) return 0;
@@ -1636,74 +1641,55 @@ retry:
 		static std::vector<size_t> global_parse(kuroda::parser<formal::lex_node>::sequence& tokens, size_t n) {
 			std::vector<size_t> ret;
 
-			bool err = false;
-			std::optional<size_t> found;
-			ptrdiff_t ub = tokens.size();
-			while (0 <= --ub) {
-				if (interpret_HTML_entity(*tokens[ub], 9500UL)) {
-					if (found) {
-						if (!err) error_report(*tokens[*found], "non-associative ambiguous parse: &#9500;");
-						err = true;
-						error_report(*tokens[ub], "non-associative ambiguous parse: &#9500;");
-					} else found = ub;
+			const auto starting_errors = Errors.count();
+
+			auto args = formal::lex_node::split(tokens, [](const formal::lex_node& x) {
+				return interpret_HTML_entity(x, 9500UL);
+			});
+			if (args.second.empty()) return ret;
+
+			const auto origin = args.first; // backward compatibility
+
+			if (2 < args.second.size()) {
+				for (decltype(auto) fail : args.second) {
+					if (origin != &(*fail.begin())) {
+						formal::lex_node& err = **(&(*fail.begin()) - 1);
+						if (!(err.code() & formal::Error)) error_report(err, "non-associative ambiguous parse: &#9500;");
+					}
 				}
+				return ret;
 			}
-			if (err) return ret;
-			if (!found) return ret;
 
-			std::vector<kuroda::parser<formal::lex_node>::symbols> hypothesis_like;
-			std::vector<kuroda::parser<formal::lex_node>::symbols> conclusion_like;
-
-			if (0 < *found) {
-				ptrdiff_t scan = -1;
-				ptrdiff_t origin = 0;
-				while (++scan < *found) {
-					if (const auto x = tokens[scan]->c_anchor<formal::word>()) {
-						if (comma == x->value()) {
-							if (scan == origin) {
-								error_report(*tokens[scan], ", delimits missing argument for &#9500;");
-							} else {
-								const auto delta = scan - origin;
-								hypothesis_like.emplace_back(delta);
-								std::copy_n(&tokens[origin], delta, hypothesis_like.back().begin());
-								std::fill_n(&tokens[origin], delta, nullptr);
-							}
-							origin = scan + 1;
+			auto weak_hypothesis_like = formal::lex_node::split(args.second[0], args.first, detect_comma);
+			if (weak_hypothesis_like.second.empty()) weak_hypothesis_like.second.push_back(args.second[0]);
+			else {
+				for (decltype(auto) x : weak_hypothesis_like.second) {
+					if (x.empty()) {
+						if (origin != &(*x.begin())) {
+							formal::lex_node& err = **(&(*x.begin()) - 1);
+							if (!(err.code() & formal::Error)) error_report(err, ", delimits missing argument for &#9500;");
 						}
 					}
 				}
-				if (scan == *found && origin<scan) {
-					const auto delta = scan - origin;
-					hypothesis_like.emplace_back(delta);
-					std::copy_n(&tokens[origin], delta, hypothesis_like.back().begin());
-					std::fill_n(&tokens[origin], delta, nullptr);
-				}
 			}
-			if (tokens.size() - 1 > *found) {
-				ptrdiff_t scan = *found;
-				ptrdiff_t origin = *found + 1;
-				while (++scan < tokens.size()) {
-					if (const auto x = tokens[scan]->c_anchor<formal::word>()) {
-						if (comma == x->value()) {
-							if (scan == origin) {
-								error_report(*tokens[scan], ", delimits missing argument for &#9500;");
-							} else {
-								const auto delta = scan - origin;
-								conclusion_like.emplace_back(delta);
-								std::copy_n(&tokens[origin], delta, conclusion_like.back().begin());
-								std::fill_n(&tokens[origin], delta, nullptr);
-							}
-							origin = scan + 1;
+
+			auto weak_conclusion_like = formal::lex_node::split(args.second[0], args.first, detect_comma);
+			if (weak_conclusion_like.second.empty()) weak_conclusion_like.second.push_back(args.second[1]);
+			else {
+				for (decltype(auto) x : weak_conclusion_like.second) {
+					if (x.empty()) {
+						if (origin != &(*x.begin())) {
+							formal::lex_node& err = **(&(*x.begin()) - 1);
+							if (!(err.code() & formal::Error)) error_report(err, ", delimits missing argument for &#9500;");
 						}
 					}
 				}
-				if (scan == tokens.size() && origin < scan) {
-					const auto delta = scan - origin;
-					conclusion_like.emplace_back(delta);
-					std::copy_n(&tokens[origin], delta, conclusion_like.back().begin());
-					std::fill_n(&tokens[origin], delta, nullptr);
-				}
 			}
+
+			if (starting_errors < Errors.count()) return ret;
+
+			decltype(_lexical_hypotheses) hypothesis_like = formal::lex_node::move_per_spec(weak_hypothesis_like.second);
+			decltype(_lexical_conclusions) conclusion_like = formal::lex_node::move_per_spec(weak_conclusion_like.second);
 
 			const bool no_args = hypothesis_like.empty() && conclusion_like.empty();
 			if (!hypothesis_like.empty()) {

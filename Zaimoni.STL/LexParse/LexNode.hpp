@@ -4,6 +4,7 @@
 #include "Kuroda.hpp"
 #include "FormalWord.hpp"
 #include "../COW.hpp"
+#include <span>
 
 namespace formal {
 
@@ -182,6 +183,9 @@ namespace formal {
 
 		bool is_balanced_pair(const std::string_view& l_token, const std::string_view& r_token) const;
 		static bool remove_outer_parentheses(kuroda::parser<formal::lex_node>::symbols& target);
+		static std::pair<lex_node**, std::vector<std::span<lex_node*, std::dynamic_extent> > > split(kuroda::parser<lex_node>::sequence& src, std::function<bool(const lex_node&)> ok);
+		static std::pair<lex_node**, std::vector<std::span<lex_node*, std::dynamic_extent> > > split(const std::span<lex_node*, std::dynamic_extent>& src, lex_node** origin, std::function<bool(const lex_node&)> ok);
+		static std::vector<kuroda::parser<lex_node>::symbols> move_per_spec(const std::vector<std::span<lex_node*, std::dynamic_extent> >& src);
 
 	private:
 		static src_location origin(const lex_node* src);
