@@ -1371,6 +1371,57 @@ namespace gentzen {
 			return std::nullopt;
 		}
 
+#if PROTOTYPE
+		static std::vector<size_t> global_parse(kuroda::parser<formal::lex_node>::sequence& tokens, size_t n) {
+			std::vector<size_t> ret;
+
+			const auto starting_errors = Errors.count();
+
+			auto args = formal::lex_node::split(tokens, [](const formal::lex_node& x) {
+				return interpret_HTML_entity(x, "isin");
+				});
+			if (args.second.empty()) return ret;
+
+			const auto origin = args.first; // backward compatibility
+
+			if (2 < args.second.size()) {
+				for (decltype(auto) fail : args.second) {
+					if (origin != &(*fail.begin())) {
+						formal::lex_node& err = **(&(*fail.begin()) - 1);
+						if (!(err.code() & formal::Error)) error_report(err, "non-associative ambiguous parse: &isin;");
+					}
+				}
+				return ret;
+			}
+
+			decltype(auto) anchor = args.second[0].empty() ? origin : (&(args.second[0].back()) + 1);
+			const domain* have_domain = nullptr;
+			bool have_var = false;
+			unsigned int quantifier_code = 0;
+
+			if (args.second[0].empty()) {
+				if (!((*anchor)->code() & formal::Error)) error_report(**anchor, "&isin; cannot match to its left");
+			} else {
+				have_var = legal_varname(*args.second[0].back());
+				quantifier_code = legal_quantifier(*args.second[0].front());
+			};
+			if (args.second[1].empty()) {
+				if (!((*anchor)->code() & formal::Error)) error_report(**anchor, "&isin; cannot match to its right");
+			} else {
+				// \todo would like to "see through" grouping parentheses, but not ordered tuples
+				have_domain = dynamic_cast<const domain*>(args.second[1].front()->c_anchor<formal::parsed>()));
+			}
+
+			// ...
+
+			if (starting_errors < Errors.count()) return ret;
+
+			// ...
+
+			return ret;
+		}
+#endif
+
 		bool is_compatible(std::shared_ptr<const domain>& domain) const {
 			if (_domain.get() == domain.get()) return true;
 			// disjoint: hard-reject
@@ -2202,36 +2253,36 @@ static_assert(!(formal::Error & (1ULL << TG_HTML_tag)));
 static_assert(!(formal::Inert_Token & (1ULL << TG_HTML_tag)));
 static_assert(!(formal::Tokenized & (1ULL << TG_HTML_tag)));
 
-size_t HTML_EntityLike(const std::string_view& src)
+std::optional<std::string_view> HTML_EntityLike(const std::string_view& src)
 {
-	if (3 > src.size() || '&' != src[0]) return 0;
+	if (3 > src.size() || '&' != src[0]) return std::nullopt;
 
 	auto working = src;
 	working.remove_prefix(1);
 
 	if (auto alphabetic_entity = kleene_star(working, is_alphabetic)) {
 		working.remove_prefix(alphabetic_entity->first.size());
-		if (working.empty() || ';' != working[0]) return 0;
-		return 2 + alphabetic_entity->first.size();
+		if (working.empty() || ';' != working[0]) return std::nullopt;
+		return src.substr(0, 2 + alphabetic_entity->first.size());
 	};
 
-	if (3 > working.size() || '#' != working[0]) return 0;
+	if (3 > working.size() || '#' != working[0]) return std::nullopt;
 	working.remove_prefix(1);
 
 	if (auto decimal_entity = kleene_star(working, is_digit)) {
 		working.remove_prefix(decimal_entity->first.size());
-		if (working.empty() || ';' != working[0]) return 0;
-		return 3 + decimal_entity->first.size();
+		if (working.empty() || ';' != working[0]) return std::nullopt;
+		return src.substr(0, 3 + decimal_entity->first.size());
 	};
-	if ('x' != working[0] || 2 > working.size()) return 0;
+	if ('x' != working[0] || 2 > working.size()) return std::nullopt;
 	working.remove_prefix(1);
 
 	if (auto hexadecimal_entity = kleene_star(working, is_hex_digit)) {
 		working.remove_prefix(hexadecimal_entity->first.size());
-		if (working.empty() || ';' != working[0]) return 0;
-		return 4 + hexadecimal_entity->first.size();
+		if (working.empty() || ';' != working[0]) return std::nullopt;
+		return src.substr(0, 4 + hexadecimal_entity->first.size());
 	};
-	return 0;
+	return std::nullopt;
 }
 
 // lexing+preprocessing stage
@@ -2286,7 +2337,7 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 
 	if (auto html_entity = HTML_EntityLike(text)) {
 		auto remainder = text;
-		remainder.remove_prefix(html_entity);
+		remainder.remove_prefix(html_entity->size());
 		ltrim(remainder);
 		if (!remainder.empty()) {
 			std::unique_ptr<formal::word> stage(new formal::word(std::shared_ptr<const std::string>(new std::string(remainder)), w->origin() + (text.size() - remainder.size())));
@@ -2295,8 +2346,7 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 			src[viewpoint + 1] = node.release();
 		};
 
-		text.remove_suffix(text.size() - html_entity);
-		*w = formal::word(std::shared_ptr<const std::string>(new std::string(text)), w->origin(), w->code());
+		*w = formal::word(std::shared_ptr<const std::string>(new std::string(*html_entity)), w->origin(), w->code());
 		w->learn(HTMLtag::Entity);
 		x->learn(HTMLtag::Entity | formal::Inert_Token);
 		return ret;
