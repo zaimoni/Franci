@@ -1097,6 +1097,14 @@ namespace gentzen {
 		std::shared_ptr<const formal::lex_node> _var;
 		std::shared_ptr<const domain> _domain;
 
+		static constexpr const unsigned long long LexQuantifier = (1ULL << 2); // reserve this flag for both word and lex_node
+
+		static_assert(!(formal::Comment & LexQuantifier));
+		static_assert(!(formal::Error & LexQuantifier));
+		static_assert(!(formal::Inert_Token & LexQuantifier));
+		static_assert(!(formal::Tokenized & LexQuantifier));
+		static_assert(!(HTMLtag::Entity & LexQuantifier));
+
 		static constexpr auto my_syntax = domain_param({ preaxiomatic::Domain::TruthValued, preaxiomatic::Domain::Ur }, { preaxiomatic::Domain::TruthValues });
 
 		static constexpr const std::array<std::string_view, 3> to_s_aux = {
@@ -1370,6 +1378,25 @@ namespace gentzen {
 			}
 
 			return std::nullopt;
+		}
+
+		static std::vector<size_t> quantifier_bind_global(kuroda::parser<formal::lex_node>::sequence& tokens, size_t n) {
+			std::vector<size_t> ret;
+
+			ptrdiff_t scan = -1;
+			while (++scan < tokens.size()-1) {
+				const auto q_code = legal_quantifier(*tokens[scan]);
+				if (!q_code) continue;
+				if (legal_varname(*tokens[scan + 1])) {
+					if (tokens[scan]->set_null_post_anchor(tokens[scan + 1])) {
+						tokens[scan]->learn(formal::Inert_Token | LexQuantifier);
+						ret.push_back(scan);
+						tokens.DeleteIdx(scan + 1);
+					}
+				}
+			}
+
+			return ret;
 		}
 
 #if PROTOTYPE
@@ -2628,7 +2655,8 @@ static kuroda::parser<formal::lex_node>& GentzenGrammar() {
 
 		// we do not register terminals for the Gentzen grammar.
 
-		ooao->register_right_edge_build_nonterminal(gentzen::inference_rule::global_parse);
+		ooao->register_right_edge_build_nonterminal(gentzen::inference_rule::global_parse); // early as these are extremely high precedence
+		ooao->register_right_edge_build_nonterminal(gentzen::var::quantifier_bind_global); // must happen after var names are decorated with HTML
 		ooao->register_right_edge_build_nonterminal(recurse_grammar(*ooao)); // CPU-expensive, so last
 	};
 	return *ooao;
