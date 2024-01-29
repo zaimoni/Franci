@@ -135,6 +135,7 @@ namespace formal {
 	if (strict_ub > n) return SRC[n]; \
 	return nullptr
 
+#if OBSOLETE
 		const lex_node* prefix(ptrdiff_t n) const {
 			LEX_NODE_DEREF_BODY(_prefix);
 		}
@@ -142,6 +143,7 @@ namespace formal {
 		const lex_node* infix(ptrdiff_t n) const {
 			LEX_NODE_DEREF_BODY(_infix);
 		}
+#endif
 
 		const lex_node* postfix(ptrdiff_t n) const {
 			LEX_NODE_DEREF_BODY(_postfix);
@@ -149,11 +151,6 @@ namespace formal {
 
 #undef LEX_NODE_DEREF_BODY
 
-		auto prefix_size() const { return _prefix.size(); }
-		auto infix_size() const { return _infix.size(); }
-		auto postfix_size() const { return _postfix.size(); }
-
-		// unsure if these are actually a good idea
 		auto& prefix() const { return _prefix; }
 		auto& infix() const { return _infix; }
 		auto& postfix() const { return _postfix; }

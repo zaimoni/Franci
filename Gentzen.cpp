@@ -452,10 +452,10 @@ namespace gentzen {
 
 		static std::optional<Domain> parse(const formal::lex_node& src) {
 			if (!HTMLtag::is_balanced_pair(src, "b")) return std::nullopt;
-			if (0 < src.postfix_size()) return std::nullopt; // \todo extend to handle abstract algebraic category theory
-			if (1 != src.infix_size()) return std::nullopt;
+			if (!src.postfix().empty()) return std::nullopt; // \todo extend to handle abstract algebraic category theory
+			if (1 != src.infix().size()) return std::nullopt;
 
-			decltype(auto) node = *src.infix(0);
+			decltype(auto) node = *src.infix().front();
 			if (1 != node.is_pure_anchor()) return std::nullopt;
 
 			const auto text = node.c_anchor<formal::word>()->value();
@@ -1151,22 +1151,21 @@ namespace gentzen {
 		quantifier quantified() const { return (quantifier)_quant_code; }
 
 		static bool legal_varname(const formal::lex_node& src) {
-			if (0 < src.prefix_size()) return false;  // no prefix in the parse, at all
+			if (!src.prefix().empty()) return false;  // no prefix in the parse, at all
 			if (auto tag = HTMLtag::is_balanced_pair(src)) {
 				if (*tag != "b" && *tag != "i") return false;
-				if (1 != src.infix_size()) return false;
-				decltype(auto) test = *src.infix(0);
+				if (1 != src.infix().size()) return false;
+				decltype(auto) test = *src.infix().front();
 				if (1 != test.is_pure_anchor()) return false;
 				if (!legal_varname(*test.c_anchor<formal::word>())) return false;
-				const auto post_size = src.postfix_size();
+				const auto post_size = src.postfix().size();
 				if (1 < post_size) return false;
 				if (0 == post_size) return true;
-				if (decltype(auto) node = src.postfix(0)) return HTMLtag::is_balanced_pair(*node, "sub");
-				return false;
+				return HTMLtag::is_balanced_pair(*src.postfix().front(), "sub");
 			}
 			// normal case: no italics, bold etc but subscripting generally ok
-			if (0 < src.infix_size()) return false;
-			if (0 < src.postfix_size()) return false;
+			if (!src.infix().empty()) return false;
+			if (!src.postfix().empty()) return false;
 			if (auto w = src.c_anchor<formal::word>()) {
 				if (!legal_varname(*w)) return false;
 			} else return false;
@@ -1678,10 +1677,6 @@ retry:
 		&#9500; is an expression-stopper but doesn't actually need arguments on either side (it needs them on *one* side, but
 		either would do.
 		',' does require arguments on both sides, but is a plain character
-		static void init(argument_enforcer& dest) {
-			for (decltype(auto) x : quantifier_HTML_entities) dest.reserve_HTML_entity(false, x, true);
-			dest.reserve_HTML_entity(true, "isin", true);
-		};
 */
 		static void init(argument_enforcer& dest) {
 			dest.reserve_token(true, ",", true);
