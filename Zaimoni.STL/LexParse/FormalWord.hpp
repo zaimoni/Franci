@@ -43,7 +43,7 @@ namespace formal {
 	inline src_location operator+(src_location lhs, ptrdiff_t rhs) { return lhs += rhs; }
 	inline src_location operator+(ptrdiff_t lhs, src_location rhs) { return rhs += lhs; }
 
-	class word {
+	class word final {
 	private:
 		src_location _origin;
 		std::variant<std::string_view, std::shared_ptr<const std::string> > _token;

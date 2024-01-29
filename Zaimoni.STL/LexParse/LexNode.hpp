@@ -22,7 +22,7 @@ namespace formal {
 		virtual unsigned int precedence() const = 0;
 	};
 
-	class lex_node
+	class lex_node final
 	{
 		kuroda::parser<lex_node>::symbols _prefix;
 		kuroda::parser<lex_node>::symbols _infix;

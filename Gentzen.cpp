@@ -1093,6 +1093,14 @@ namespace gentzen {
 
 	// deferred: uniqueness quantification (unclear what data representation should be)
 	class var final : public Gentzen {
+	public:
+		enum class quantifier {
+			Term = 0,
+			ForAll,
+			ThereIs
+		};
+
+	private:
 		unsigned long long _quant_code;
 		std::shared_ptr<const formal::lex_node> _var;
 		std::shared_ptr<const domain> _domain;
@@ -1115,15 +1123,11 @@ namespace gentzen {
 		static constexpr const auto quantifier_HTML_entities = substr(perl::shift<1>(to_s_aux).second, 1, -1);
 		static constexpr const auto reserved_HTML_entities = perl::unshift(quantifier_HTML_entities, std::string_view("isin"));
 
+		var(quantifier code, std::shared_ptr<const formal::lex_node> name, std::shared_ptr<const domain> domain)
+			: _quant_code((decltype(_quant_code))code), _var(name), _domain(domain) {}
 	public:
 		using cache_t = std::vector<std::shared_ptr<const var> >;
 		using live_caches_t = std::vector<cache_t*>;
-
-		enum class quantifier {
-			Term = 0,
-			ForAll,
-			ThereIs
-		};
 
 		var() = delete; // empty variable doesn't make much sense
 		var(const var& src) = default;
@@ -1401,12 +1405,14 @@ namespace gentzen {
 
 #if PROTOTYPE
 		static std::vector<size_t> global_parse(kuroda::parser<formal::lex_node>::sequence& tokens, size_t n) {
+			enum { trace_parse = 1 };
+
 			std::vector<size_t> ret;
 
 			const auto starting_errors = Errors.count();
 
 			auto args = formal::lex_node::split(tokens, [](const formal::lex_node& x) {
-				return interpret_HTML_entity(x, "isin");
+				return is_parsed_HTML_entity(x, "isin");
 				});
 			if (args.second.empty()) return ret;
 
@@ -1423,26 +1429,39 @@ namespace gentzen {
 			}
 
 			decltype(auto) anchor = args.second[0].empty() ? origin : (&(args.second[0].back()) + 1);
-			const domain* have_domain = nullptr;
+			std::shared_ptr<const domain> have_domain;
 			bool have_var = false;
+			bool have_quantifier = false;
 			unsigned int quantifier_code = 0;
 
 			if (args.second[0].empty()) {
 				if (!((*anchor)->code() & formal::Error)) error_report(**anchor, "&isin; cannot match to its left");
 			} else {
-				have_var = legal_varname(*args.second[0].back());
-				quantifier_code = legal_quantifier(*args.second[0].front());
+				have_quantifier = (args.second[0].back()->code() & var::LexQuantifier);
+				if (have_quantifier) {
+					quantifier_code = legal_quantifier(*args.second[0].back()->c_anchor<formal::word>());
+				} else {
+					have_var = legal_varname(*args.second[0].back());
+				}
 			};
 			if (args.second[1].empty()) {
 				if (!((*anchor)->code() & formal::Error)) error_report(**anchor, "&isin; cannot match to its right");
 			} else {
 				// \todo would like to "see through" grouping parentheses, but not ordered tuples
-				have_domain = dynamic_cast<const domain*>(args.second[1].front()->c_anchor<formal::parsed>()));
+				have_domain = args.second[1].front()->shared_anchor<domain>();
 			}
 
-			// ...
+			if constexpr (trace_parse) {
+				std::cout << "var::global_parse: " << have_var << " " << have_quantifier << " " << quantifier_code << " " << (bool)have_domain << "\n";
+			}
 
 			if (starting_errors < Errors.count()) return ret;
+
+			if (have_domain) {
+				if (have_var) {
+				} else if (0 < quantifier_code) {
+				}
+			}
 
 			// ...
 
@@ -2657,6 +2676,8 @@ static kuroda::parser<formal::lex_node>& GentzenGrammar() {
 
 		ooao->register_right_edge_build_nonterminal(gentzen::inference_rule::global_parse); // early as these are extremely high precedence
 		ooao->register_right_edge_build_nonterminal(gentzen::var::quantifier_bind_global); // must happen after var names are decorated with HTML
+//		ooao->register_right_edge_build_nonterminal(gentzen::var::global_parse); // requires gentzen::var::quantifier_bind_global before it
+
 		ooao->register_right_edge_build_nonterminal(recurse_grammar(*ooao)); // CPU-expensive, so last
 	};
 	return *ooao;
