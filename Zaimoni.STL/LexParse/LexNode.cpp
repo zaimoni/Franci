@@ -124,6 +124,18 @@ namespace formal {
 		return grammar.finite_parse(_infix);
 	}
 
+	bool lex_node::rewrite(lex_node** target, std::function<lex_node* (lex_node* target)> op)
+	{
+		if (decltype(auto) dest = op(*target)) {
+			if (*target != dest) {
+				delete *target;
+				*target = dest;
+			}
+			return true;
+		}
+		return false;
+	}
+
 	bool lex_node::rewrite(lex_node*& target, std::function<lex_node* (lex_node* target)> op)
 	{
 		if (decltype(auto) dest = op(target)) {
@@ -261,6 +273,17 @@ namespace formal {
 		if (!trailing_tag || trailing_tag->value() != r_token) return false;
 		return true;
 	}
+
+	lex_node** lex_node::find_binding_predecessor(lex_node** src) {
+		if (!src) return nullptr;
+restart:
+		if (!(*src)->_postfix.empty()) {
+			src = &((*src)->_postfix.back());
+			goto restart;
+		}
+		return src;
+	}
+
 
 	bool lex_node::remove_outer_parentheses(kuroda::parser<formal::lex_node>::symbols& target) {
 		bool ret = false;

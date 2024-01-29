@@ -124,6 +124,7 @@ namespace formal {
 		bool syntax_ok() const;
 		int is_pure_anchor() const; // C error code convention
 
+#if OBSOLETE
 #define LEX_NODE_DEREF_BODY(SRC) \
 	if (SRC.empty()) return nullptr; \
 	const size_t strict_ub = SRC.size(); \
@@ -135,7 +136,6 @@ namespace formal {
 	if (strict_ub > n) return SRC[n]; \
 	return nullptr
 
-#if OBSOLETE
 		const lex_node* prefix(ptrdiff_t n) const {
 			LEX_NODE_DEREF_BODY(_prefix);
 		}
@@ -143,24 +143,17 @@ namespace formal {
 		const lex_node* infix(ptrdiff_t n) const {
 			LEX_NODE_DEREF_BODY(_infix);
 		}
-#endif
 
 		const lex_node* postfix(ptrdiff_t n) const {
 			LEX_NODE_DEREF_BODY(_postfix);
 		}
 
 #undef LEX_NODE_DEREF_BODY
+#endif
 
 		auto& prefix() const { return _prefix; }
 		auto& infix() const { return _infix; }
 		auto& postfix() const { return _postfix; }
-
-		void push_back_postfix(lex_node*& src) {
-			auto dest = _postfix.size();
-			_postfix.insertNSlotsAt(1, dest);
-			_postfix[dest] = src;
-			src = nullptr;
-		}
 
 		static std::unique_ptr<lex_node> pop_front(kuroda::parser<formal::word>::sequence& src);
 		static std::unique_ptr<lex_node> pop_front(kuroda::parser<formal::lex_node>::sequence& src);
@@ -169,6 +162,7 @@ namespace formal {
 		template<class Ret>
 		auto is_ok(std::function<Ret(const lex_node&)> ok) const { return ok(*this); }
 
+		static bool rewrite(lex_node** target, std::function<lex_node* (lex_node* target)> op);
 		static bool rewrite(lex_node*& target, std::function<lex_node*(lex_node* target)> op);
 		static bool recurse(kuroda::parser<formal::lex_node>& grammar, formal::lex_node* src);
 
@@ -179,6 +173,8 @@ namespace formal {
 		unsigned int precedence() const;
 
 		bool is_balanced_pair(const std::string_view& l_token, const std::string_view& r_token) const;
+		static lex_node** find_binding_predecessor(lex_node** src);
+
 		static bool remove_outer_parentheses(kuroda::parser<formal::lex_node>::symbols& target);
 		static std::pair<lex_node**, std::vector<std::span<lex_node*, std::dynamic_extent> > > split(kuroda::parser<lex_node>::sequence& src, std::function<bool(const lex_node&)> ok);
 		static std::pair<lex_node**, std::vector<std::span<lex_node*, std::dynamic_extent> > > split(const std::span<lex_node*, std::dynamic_extent>& src, lex_node** origin, std::function<bool(const lex_node&)> ok);

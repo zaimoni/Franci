@@ -2519,19 +2519,12 @@ auto HTML_bind_to_preceding(kuroda::parser<formal::lex_node>::sequence& src, siz
 					}
 				}
 
-				decltype(auto) last_postfix = target->postfix(-1);
-				if (!last_postfix) {
-					if (target->set_null_post_anchor(src[viewpoint])) return target;
-					// \todo? warn when auto-repairing this?
-					if (HTMLtag::is_balanced_pair(*target, *tag)) return (formal::lex_node*)nullptr;
-					target->push_back_postfix(src[viewpoint]);
-					return target;
-				}
-				// \todo unclear how to proceed here (tensors?)
-				return (formal::lex_node*)nullptr;
+				if (target->set_null_post_anchor(src[viewpoint])) return target;
+				// \todo suffixing to () [] {} should be fine
+				return (formal::lex_node *)nullptr;
 			};
 
-			decltype(auto) bind_to = src[viewpoint-1];
+			decltype(auto) bind_to = formal::lex_node::find_binding_predecessor(src.begin()+(viewpoint-1));
 			if (formal::lex_node::rewrite(bind_to, relink)) {
 				ret.push_back(viewpoint - 1);
 				src.DeleteIdx(viewpoint);
