@@ -27,6 +27,7 @@ namespace formal {
 		kuroda::parser<lex_node>::symbols _prefix;
 		kuroda::parser<lex_node>::symbols _infix;
 		kuroda::parser<lex_node>::symbols _postfix;
+		std::vector<kuroda::parser<lex_node>::symbols> _fragments;
 		std::variant<zaimoni::COW<lex_node>,
 			zaimoni::COW<word>,
 			zaimoni::COW<parsed>,

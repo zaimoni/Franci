@@ -77,7 +77,15 @@ namespace formal {
 	{
 		// shallow test -- deep one is CPU-expensive
 		if (!classify(_anchor)) return false; // we always have a syntactic anchor
-		if (!_infix.empty() && !classify(_post_anchor)) return false; // if we have an infix sequence, we have a post-anchor token as well
+		if (!_fragments.empty()) {
+			if (!_prefix.empty()) return false;
+			if (!_infix.empty()) return false;
+			if (!_postfix.empty()) return false;
+			if (classify(_post_anchor)) return false;
+		} else {
+			if (!_infix.empty() && !classify(_post_anchor)) return false; // if we have an infix sequence, we have a post-anchor token as well
+		}
+
 		// \todo language-specific checks go here
 		return true;
 	}
@@ -88,6 +96,7 @@ namespace formal {
 		if (!_prefix.empty()) return 0;
 		if (!_infix.empty()) return 0;
 		if (!_postfix.empty()) return 0;
+		if (!_fragments.empty()) return 0;
 		if (classify(_post_anchor)) return 0;
 		if (int code = classify(_anchor)) return code;
 		return -1;
@@ -160,6 +169,16 @@ namespace formal {
 
 	void lex_node::to_s(std::ostream& dest, const lex_node* src)
 	{
+		if (!src->_fragments.empty()) {
+			bool is_first = true;
+			for (decltype(auto) x : src->_fragments) {
+				if (!is_first) to_s(dest, src->_anchor);
+				is_first = false;
+				to_s(dest, x);
+			}
+			return;
+		}
+
 		if (!src->_prefix.empty()) to_s(dest, src->_prefix);
 		to_s(dest, src->_anchor);
 		if (!src->_infix.empty()) to_s(dest, src->_infix);
