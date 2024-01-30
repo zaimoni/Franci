@@ -1403,8 +1403,6 @@ namespace gentzen {
 			return ret;
 		}
 
-#define VAR_GLOBAL_PARSE 1
-#if VAR_GLOBAL_PARSE
 		static std::vector<size_t> global_parse(kuroda::parser<formal::lex_node>::sequence& tokens, size_t n) {
 			enum { trace_parse = 0 };
 
@@ -1485,7 +1483,6 @@ namespace gentzen {
 
 			return ret;
 		}
-#endif
 
 		bool is_compatible(std::shared_ptr<const domain>& domain) const {
 			if (_domain.get() == domain.get()) return true;
@@ -2694,9 +2691,7 @@ static kuroda::parser<formal::lex_node>& GentzenGrammar() {
 
 		ooao->register_right_edge_build_nonterminal(gentzen::inference_rule::global_parse); // early as these are extremely high precedence
 		ooao->register_right_edge_build_nonterminal(gentzen::var::quantifier_bind_global); // must happen after var names are decorated with HTML
-#if VAR_GLOBAL_PARSE
 		ooao->register_right_edge_build_nonterminal(gentzen::var::global_parse); // requires gentzen::var::quantifier_bind_global before it
-#endif
 
 		ooao->register_right_edge_build_nonterminal(recurse_grammar(*ooao)); // CPU-expensive, so last
 	};
