@@ -65,6 +65,8 @@ namespace formal {
 		// factory function: slices a lex_node out of dest, then puts the lex_node at index lb
 		static void slice(kuroda::parser<lex_node>::sequence& dest, size_t lb, size_t ub, unsigned long long code = 0);
 
+		void set_fragments(decltype(_fragments) && src) { _fragments = std::move(src); }
+
 		src_location origin() const { return origin(this); }
 
 		auto code() const { return _code; }
@@ -193,6 +195,7 @@ namespace formal {
 		auto& prefix() const { return _prefix; }
 		auto& infix() const { return _infix; }
 		auto& postfix() const { return _postfix; }
+		auto& fragments() const { return _fragments; }
 
 		static std::unique_ptr<lex_node> pop_front(kuroda::parser<formal::word>::sequence& src);
 		static std::unique_ptr<lex_node> pop_front(kuroda::parser<formal::lex_node>::sequence& src);
