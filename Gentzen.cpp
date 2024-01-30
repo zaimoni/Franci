@@ -1417,12 +1417,12 @@ namespace gentzen {
 				});
 			if (args.second.empty()) return ret;
 
-			const auto origin = args.first; // backward compatibility
+			decltype(auto) origin = *args.first; // backward compatibility
 
 			if (2 < args.second.size()) {
 				for (decltype(auto) fail : args.second) {
-					if (origin != &(*fail.begin())) {
-						formal::lex_node& err = **(&(*fail.begin()) - 1);
+					if (auto loc = formal::lex_node::where_is(origin, fail)) {
+						formal::lex_node& err = *origin[loc -1];
 						if (!(err.code() & formal::Error)) error_report(err, "non-associative ambiguous parse: &isin;");
 					}
 				}
@@ -1760,12 +1760,12 @@ retry:
 			});
 			if (args.second.empty()) return ret;
 
-			const auto origin = args.first; // backward compatibility
+			decltype(auto) origin = *args.first; // backward compatibility
 
 			if (2 < args.second.size()) {
 				for (decltype(auto) fail : args.second) {
-					if (origin != &(*fail.begin())) {
-						formal::lex_node& err = **(&(*fail.begin()) - 1);
+					if (const auto loc = formal::lex_node::where_is(origin, fail)) {
+						formal::lex_node& err = *origin[loc - 1];
 						if (!(err.code() & formal::Error)) error_report(err, "non-associative ambiguous parse: &#9500;");
 					}
 				}

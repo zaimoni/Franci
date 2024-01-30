@@ -212,8 +212,10 @@ namespace formal {
 		static lex_node** find_binding_predecessor(lex_node** src);
 
 		static bool remove_outer_parentheses(kuroda::parser<formal::lex_node>::symbols& target);
-		static std::pair<lex_node**, std::vector<std::span<lex_node*, std::dynamic_extent> > > split(kuroda::parser<lex_node>::sequence& src, std::function<bool(const lex_node&)> ok);
-		static std::pair<lex_node**, std::vector<std::span<lex_node*, std::dynamic_extent> > > split(const std::span<lex_node*, std::dynamic_extent>& src, lex_node** origin, std::function<bool(const lex_node&)> ok);
+		static std::pair<kuroda::parser<lex_node>::sequence*, std::vector<std::span<lex_node*, std::dynamic_extent> > > split(kuroda::parser<lex_node>::sequence& src, std::function<bool(const lex_node&)> ok);
+		static std::pair<kuroda::parser<lex_node>::sequence*, std::vector<std::span<lex_node*, std::dynamic_extent> > > split(const std::span<lex_node*, std::dynamic_extent>& src, kuroda::parser<lex_node>::sequence* origin, std::function<bool(const lex_node&)> ok);
+
+		static auto where_is(const kuroda::parser<lex_node>::sequence& src, const std::span<lex_node*, std::dynamic_extent>& view) { return &(*view.begin()) - &(*src.begin()); }
 
 		static std::vector<kuroda::parser<lex_node>::symbols> move_per_spec(const std::vector<std::span<lex_node*, std::dynamic_extent> >& src);
 

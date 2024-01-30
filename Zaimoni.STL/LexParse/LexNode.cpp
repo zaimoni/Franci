@@ -299,10 +299,10 @@ restart:
 		return ret;
 	}
 
-	std::pair<lex_node**, std::vector<std::span<lex_node*, std::dynamic_extent> > > lex_node::split(kuroda::parser<lex_node>::sequence& src, std::function<bool(const lex_node&)> ok)
+	std::pair<kuroda::parser<lex_node>::sequence*, std::vector<std::span<lex_node*, std::dynamic_extent> > > lex_node::split(kuroda::parser<lex_node>::sequence& src, std::function<bool(const lex_node&)> ok)
 	{
-		std::pair<lex_node**, std::vector<std::span<lex_node*, std::dynamic_extent> > > ret;
-		ret.first = src.begin();
+		std::pair<kuroda::parser<lex_node>::sequence*, std::vector<std::span<lex_node*, std::dynamic_extent> > > ret;
+		ret.first = &src;
 
 		std::vector<size_t> indexes;
 
@@ -334,9 +334,9 @@ restart:
 		return ret;
 	}
 
-	std::pair<lex_node**, std::vector<std::span<lex_node*, std::dynamic_extent> > > lex_node::split(const std::span<lex_node*, std::dynamic_extent>& src, lex_node** const start, std::function<bool(const lex_node&)> ok)
+	std::pair<kuroda::parser<lex_node>::sequence*, std::vector<std::span<lex_node*, std::dynamic_extent> > > lex_node::split(const std::span<lex_node*, std::dynamic_extent>& src, kuroda::parser<lex_node>::sequence* const start, std::function<bool(const lex_node&)> ok)
 	{
-		std::pair<lex_node**, std::vector<std::span<lex_node*, std::dynamic_extent> > > ret;
+		std::pair<kuroda::parser<lex_node>::sequence*, std::vector<std::span<lex_node*, std::dynamic_extent> > > ret;
 		ret.first = start;
 		std::vector<size_t> indexes;
 
