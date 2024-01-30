@@ -1413,13 +1413,13 @@ namespace gentzen {
 			auto args = formal::lex_node::split(tokens, [](const formal::lex_node& x) {
 				return is_parsed_HTML_entity(x, "isin");
 				});
-			if (args.second.empty()) return ret;
+			if (args.empty()) return ret;
 
-			decltype(auto) origin = *args.first; // backward compatibility
+			decltype(auto) origin = *args.front().first; // backward compatibility
 
-			if (2 < args.second.size()) {
-				for (decltype(auto) fail : args.second) {
-					if (auto loc = formal::lex_node::where_is(origin, fail)) {
+			if (2 < args.size()) {
+				for (decltype(auto) fail : args) {
+					if (auto loc = formal::lex_node::where_is(fail)) {
 						formal::lex_node& err = *origin[loc -1];
 						if (!(err.code() & formal::Error)) error_report(err, "non-associative ambiguous parse: &isin;");
 					}
@@ -1427,27 +1427,29 @@ namespace gentzen {
 				return ret;
 			}
 
-			decltype(auto) anchor = args.second[0].empty() ? origin : (&(args.second[0].back()) + 1);
+			decltype(auto) anchor = args[0].second.empty() ? origin : (&(args[0].second.back()) + 1);
 			std::shared_ptr<const domain> have_domain;
 			bool have_var = false;
 			bool have_quantifier = false;
 			unsigned int quantifier_code = 0;
 
-			if (args.second[0].empty()) {
+			auto& lhs = args[0].second;
+			if (lhs.empty()) {
 				if (!((*anchor)->code() & formal::Error)) error_report(**anchor, "&isin; cannot match to its left");
 			} else {
-				have_quantifier = (args.second[0].back()->code() & var::LexQuantifier);
+				have_quantifier = (lhs.back()->code() & var::LexQuantifier);
 				if (have_quantifier) {
-					quantifier_code = legal_quantifier(*args.second[0].back()->c_anchor<formal::word>());
+					quantifier_code = legal_quantifier(*lhs.back()->c_anchor<formal::word>());
 				} else {
-					have_var = legal_varname(*args.second[0].back());
+					have_var = legal_varname(*lhs.back());
 				}
 			};
-			if (args.second[1].empty()) {
+			auto& rhs = args[1].second;
+			if (rhs.empty()) {
 				if (!((*anchor)->code() & formal::Error)) error_report(**anchor, "&isin; cannot match to its right");
 			} else {
 				// \todo would like to "see through" grouping parentheses, but not ordered tuples
-				have_domain = args.second[1].front()->shared_anchor<domain>();
+				have_domain = rhs.front()->shared_anchor<domain>();
 			}
 
 			if constexpr (trace_parse) {
@@ -1456,23 +1458,23 @@ namespace gentzen {
 
 			if (starting_errors < Errors.count()) return ret;
 
-			if (have_domain && 1==args.second[1].size() && 1 == args.second[0].size()) {
+			if (have_domain && 1 == rhs.size() && 1 == lhs.size()) {
 				if (have_var) {
-					const auto rescan = args.second[0].size() - 1;
+					const auto rescan = lhs.size() - 1;
 					ret.push_back(rescan);
-					auto relay = std::unique_ptr<var>(new var(quantifier::Term, std::shared_ptr<const formal::lex_node>(args.second[0].back()), have_domain));
-					args.second[0].back() = nullptr;
+					auto relay = std::unique_ptr<var>(new var(quantifier::Term, std::shared_ptr<const formal::lex_node>(lhs.back()), have_domain));
+					lhs.back() = nullptr;
 					auto relay2 = std::make_unique<formal::lex_node>(relay.release());
-					tokens.DeleteNSlotsAt(2, args.second[0].size());
+					tokens.DeleteNSlotsAt(2, lhs.size());
 					delete tokens[rescan];
 					tokens[rescan] = relay2.release();
 					return ret;
 				} else if (0 < quantifier_code) {
-					const auto rescan = args.second[0].size() - 1;
+					const auto rescan = lhs.size() - 1;
 					ret.push_back(rescan);
-					auto relay = std::unique_ptr<var>(new var((quantifier)quantifier_code, std::shared_ptr<const formal::lex_node>(args.second[0].back()->release_post_anchor<formal::lex_node>()), have_domain));
+					auto relay = std::unique_ptr<var>(new var((quantifier)quantifier_code, std::shared_ptr<const formal::lex_node>(lhs.back()->release_post_anchor<formal::lex_node>()), have_domain));
 					auto relay2 = std::make_unique<formal::lex_node>(relay.release());
-					tokens.DeleteNSlotsAt(2, args.second[0].size());
+					tokens.DeleteNSlotsAt(2, lhs.size());
 					delete tokens[rescan];
 					tokens[rescan] = relay2.release();
 					return ret;
@@ -1755,13 +1757,13 @@ retry:
 			auto args = formal::lex_node::split(tokens, [](const formal::lex_node& x) {
 				return is_parsed_HTML_entity(x, 9500UL);
 			});
-			if (args.second.empty()) return ret;
+			if (args.empty()) return ret;
 
-			decltype(auto) origin = *args.first; // backward compatibility
+			decltype(auto) origin = *args.front().first; // backward compatibility
 
-			if (2 < args.second.size()) {
-				for (decltype(auto) fail : args.second) {
-					if (const auto loc = formal::lex_node::where_is(origin, fail)) {
+			if (2 < args.size()) {
+				for (decltype(auto) fail : args) {
+					if (const auto loc = formal::lex_node::where_is(fail)) {
 						formal::lex_node& err = *origin[loc - 1];
 						if (!(err.code() & formal::Error)) error_report(err, "non-associative ambiguous parse: &#9500;");
 					}
@@ -1769,26 +1771,26 @@ retry:
 				return ret;
 			}
 
-			auto weak_hypothesis_like = formal::lex_node::split(args.second[0], args.first, detect_comma);
-			if (weak_hypothesis_like.second.empty()) weak_hypothesis_like.second.push_back(args.second[0]);
+			auto weak_hypothesis_like = formal::lex_node::split(args[0], detect_comma);
+			if (weak_hypothesis_like.empty()) weak_hypothesis_like.push_back(args[0]);
 			else {
-				for (decltype(auto) x : weak_hypothesis_like.second) {
-					if (x.empty()) {
-						if (origin != &(*x.begin())) {
-							formal::lex_node& err = **(&(*x.begin()) - 1);
+				for (decltype(auto) x : weak_hypothesis_like) {
+					if (x.second.empty()) {
+						if (origin != &(*x.second.begin())) {
+							formal::lex_node& err = **(&(*x.second.begin()) - 1);
 							if (!(err.code() & formal::Error)) error_report(err, ", delimits missing argument for &#9500;");
 						}
 					}
 				}
 			}
 
-			auto weak_conclusion_like = formal::lex_node::split(args.second[0], args.first, detect_comma);
-			if (weak_conclusion_like.second.empty()) weak_conclusion_like.second.push_back(args.second[1]);
+			auto weak_conclusion_like = formal::lex_node::split(args[1], detect_comma);
+			if (weak_conclusion_like.empty()) weak_conclusion_like.push_back(args[1]);
 			else {
-				for (decltype(auto) x : weak_conclusion_like.second) {
-					if (x.empty()) {
-						if (origin != &(*x.begin())) {
-							formal::lex_node& err = **(&(*x.begin()) - 1);
+				for (decltype(auto) x : weak_conclusion_like) {
+					if (x.second.empty()) {
+						if (origin != &(*x.second.begin())) {
+							formal::lex_node& err = **(&(*x.second.begin()) - 1);
 							if (!(err.code() & formal::Error)) error_report(err, ", delimits missing argument for &#9500;");
 						}
 					}
@@ -1797,8 +1799,8 @@ retry:
 
 			if (starting_errors < Errors.count()) return ret;
 
-			decltype(_lexical_hypotheses) hypothesis_like = formal::lex_node::move_per_spec(weak_hypothesis_like.second);
-			decltype(_lexical_conclusions) conclusion_like = formal::lex_node::move_per_spec(weak_conclusion_like.second);
+			decltype(_lexical_hypotheses) hypothesis_like = formal::lex_node::move_per_spec(weak_hypothesis_like);
+			decltype(_lexical_conclusions) conclusion_like = formal::lex_node::move_per_spec(weak_conclusion_like);
 
 			const bool no_args = hypothesis_like.empty() && conclusion_like.empty();
 			if (!hypothesis_like.empty()) {

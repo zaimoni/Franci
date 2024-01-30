@@ -248,11 +248,9 @@ restart:
 		return ret;
 	}
 
-	std::pair<kuroda::parser<lex_node>::sequence*, std::vector<std::span<lex_node*, std::dynamic_extent> > > lex_node::split(kuroda::parser<lex_node>::sequence& src, std::function<bool(const lex_node&)> ok)
+	std::vector<lex_node::edit_span> lex_node::split(kuroda::parser<lex_node>::sequence& src, std::function<bool(const lex_node&)> ok)
 	{
-		std::pair<kuroda::parser<lex_node>::sequence*, std::vector<std::span<lex_node*, std::dynamic_extent> > > ret;
-		ret.first = &src;
-
+		std::vector<edit_span> ret;
 		std::vector<size_t> indexes;
 
 		size_t n = 0;
@@ -264,10 +262,10 @@ restart:
 		size_t origin = 0;
 		for (const auto i : indexes) {
 			if (origin < i) {
-				const auto delta = i - origin;
-				ret.second.emplace_back(&(src[origin]), delta);
+				const auto local_delta = i - origin;
+				ret.emplace_back(&src, std::span<lex_node*, std::dynamic_extent>(src.begin() + origin, local_delta));
 			} else {
-				ret.second.emplace_back(&(src[origin]), 0);
+				ret.emplace_back(&src, std::span<lex_node*, std::dynamic_extent>(src.begin() + origin, 0));
 			}
 			origin = i+1;
 		}
@@ -275,63 +273,62 @@ restart:
 		(decltype(indexes)()).swap(indexes);
 
 		if (origin < src.size()) {
-			const auto delta = src.size() - origin;
-			ret.second.emplace_back(&(src[origin]), delta);
+			const auto local_delta = src.size() - origin;
+			ret.emplace_back(&src, std::span<lex_node*, std::dynamic_extent>(src.begin() + origin, local_delta));
 		} else {
-			ret.second.emplace_back(&(src[origin]), 0);
+			ret.emplace_back(&src, std::span<lex_node*, std::dynamic_extent>(src.begin() + origin, 0));
 		}
 		return ret;
 	}
 
-	std::pair<kuroda::parser<lex_node>::sequence*, std::vector<std::span<lex_node*, std::dynamic_extent> > > lex_node::split(const std::span<lex_node*, std::dynamic_extent>& src, kuroda::parser<lex_node>::sequence* const start, std::function<bool(const lex_node&)> ok)
+	std::vector<lex_node::edit_span> lex_node::split(const edit_span& src, std::function<bool(const lex_node&)> ok)
 	{
-		std::pair<kuroda::parser<lex_node>::sequence*, std::vector<std::span<lex_node*, std::dynamic_extent> > > ret;
-		ret.first = start;
+		std::vector<lex_node::edit_span> ret;
 		std::vector<size_t> indexes;
+		const auto delta = where_is(src);
 
 		size_t n = 0;
-		while (src.size() > n) {
-			if (ok(*(src[n++]))) indexes.push_back(n - 1);
+		while (src.second.size() > n) {
+			if (ok(*(src.second[n++]))) indexes.push_back(n - 1);
 		}
 		if (indexes.empty()) return ret;
 
 		size_t origin = 0;
 		for (const auto i : indexes) {
 			if (origin < i) {
-				const auto delta = i - origin;
-				ret.second.emplace_back(&(src[origin]), delta);
+				const auto local_delta = i - origin;
+				ret.emplace_back(src.first, std::span<lex_node*, std::dynamic_extent>(src.first->begin() + delta + origin, local_delta));
 			} else {
-				ret.second.emplace_back(&(src[origin]), 0);
+				ret.emplace_back(src.first, std::span<lex_node*, std::dynamic_extent>(src.first->begin() + delta + origin, 0));
 			}
 			origin = i + 1;
 		}
 
 		(decltype(indexes)()).swap(indexes);
 
-		if (origin < src.size()) {
-			const auto delta = src.size() - origin;
-			ret.second.emplace_back(&(src[origin]), delta);
+		if (origin < src.second.size()) {
+			const auto local_delta = src.second.size() - origin;
+			ret.emplace_back(src.first, std::span<lex_node*, std::dynamic_extent>(src.first->begin() + delta + origin, local_delta));
 		} else {
-			ret.second.emplace_back(&(src[origin]), 0);
+			ret.emplace_back(src.first, std::span<lex_node*, std::dynamic_extent>(src.first->begin() + delta + origin, 0));
 		}
 		return ret;
 	}
 
-	std::vector<kuroda::parser<lex_node>::symbols> lex_node::move_per_spec(const std::vector<std::span<lex_node*, std::dynamic_extent> >& src)
+	std::vector<kuroda::parser<lex_node>::symbols> lex_node::move_per_spec(const std::vector<edit_span>& src)
 	{
 		std::vector<kuroda::parser<lex_node>::symbols> ret;
 		ret.reserve(src.size());
 
 		for (decltype(auto) x : src) {
-			if (x.empty()) continue;
-			ret.emplace_back(x.size());
-			std::copy_n(x.begin(), x.size(), ret.back().begin());
-			std::fill_n(&(*x.begin()), x.size(), nullptr);
+			if (x.second.empty()) continue;
+			ret.emplace_back(x.second.size());
+			std::copy_n(x.second.begin(), x.second.size(), ret.back().begin());
+			std::fill_n(&(*x.second.begin()), x.second.size(), nullptr);
 		}
 
 		return ret;
 	}
-
 
 	int lex_node::classify(const decltype(_anchor)& src)
 	{

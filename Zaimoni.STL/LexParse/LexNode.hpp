@@ -43,6 +43,8 @@ namespace formal {
 		}
 
 	public:
+		using edit_span = std::pair<kuroda::parser<lex_node>::sequence*, std::span<lex_node*, std::dynamic_extent> >;
+
 		lex_node(std::unique_ptr<word> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code) {
 			if (std::get<zaimoni::COW<word> >(_anchor)->code() & Comment) _code |= Comment;
 		}
@@ -211,12 +213,12 @@ namespace formal {
 		static lex_node** find_binding_predecessor(lex_node** src);
 
 		static bool remove_outer_parentheses(kuroda::parser<formal::lex_node>::symbols& target);
-		static std::pair<kuroda::parser<lex_node>::sequence*, std::vector<std::span<lex_node*, std::dynamic_extent> > > split(kuroda::parser<lex_node>::sequence& src, std::function<bool(const lex_node&)> ok);
-		static std::pair<kuroda::parser<lex_node>::sequence*, std::vector<std::span<lex_node*, std::dynamic_extent> > > split(const std::span<lex_node*, std::dynamic_extent>& src, kuroda::parser<lex_node>::sequence* origin, std::function<bool(const lex_node&)> ok);
+		static std::vector<edit_span> split(kuroda::parser<lex_node>::sequence& src, std::function<bool(const lex_node&)> ok);
+		static std::vector<edit_span> split(const edit_span& src, std::function<bool(const lex_node&)> ok);
 
-		static auto where_is(const kuroda::parser<lex_node>::sequence& src, const std::span<lex_node*, std::dynamic_extent>& view) { return &(*view.begin()) - &(*src.begin()); }
+		static auto where_is(const edit_span& view) { return &(*view.second.begin()) - &(*view.first->begin()); }
 
-		static std::vector<kuroda::parser<lex_node>::symbols> move_per_spec(const std::vector<std::span<lex_node*, std::dynamic_extent> >& src);
+		static std::vector<kuroda::parser<lex_node>::symbols> move_per_spec(const std::vector<edit_span>& src);
 
 	private:
 		static src_location origin(const lex_node* src);
