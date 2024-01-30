@@ -90,6 +90,7 @@ namespace formal {
 			return nullptr;
 		}
 
+
 		template<class Val>
 		Val* post_anchor() requires requires { std::get_if<zaimoni::COW<Val> >(&_post_anchor); }
 		{
@@ -109,6 +110,15 @@ namespace formal {
 		{
 			if (auto x = std::get_if<zaimoni::COW<parsed> >(&_post_anchor)) return x->get_c();
 			if (auto x = std::get_if<std::shared_ptr<const parsed> >(&_post_anchor)) return x->get();
+			return nullptr;
+		}
+
+		template<class T>
+		std::shared_ptr<const T> shared_anchor() = delete;
+
+		template<std::derived_from<formal::parsed> T>
+		std::shared_ptr<const T> shared_anchor() {
+			if (auto x = std::get_if<std::shared_ptr<const parsed> >(&_post_anchor)) return std::dynamic_pointer_cast<const T>(*x);
 			return nullptr;
 		}
 

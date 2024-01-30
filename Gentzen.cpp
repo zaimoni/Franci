@@ -1403,7 +1403,8 @@ namespace gentzen {
 			return ret;
 		}
 
-#if PROTOTYPE
+// #define VAR_GLOBAL_PARSE 1
+#if VAR_GLOBAL_PARSE
 		static std::vector<size_t> global_parse(kuroda::parser<formal::lex_node>::sequence& tokens, size_t n) {
 			enum { trace_parse = 1 };
 
@@ -1430,6 +1431,7 @@ namespace gentzen {
 
 			decltype(auto) anchor = args.second[0].empty() ? origin : (&(args.second[0].back()) + 1);
 			std::shared_ptr<const domain> have_domain;
+			const domain* have_domain2 = nullptr;
 			bool have_var = false;
 			bool have_quantifier = false;
 			unsigned int quantifier_code = 0;
@@ -1449,10 +1451,11 @@ namespace gentzen {
 			} else {
 				// \todo would like to "see through" grouping parentheses, but not ordered tuples
 				have_domain = args.second[1].front()->shared_anchor<domain>();
+				have_domain2 = dynamic_cast<const domain*>(args.second[1].front()->c_anchor<formal::parsed>());
 			}
 
 			if constexpr (trace_parse) {
-				std::cout << "var::global_parse: " << have_var << " " << have_quantifier << " " << quantifier_code << " " << (bool)have_domain << "\n";
+				std::cout << "var::global_parse: " << have_var << " " << have_quantifier << " " << quantifier_code << " " << (bool)have_domain << " " << (bool)have_domain2 << "\n";
 			}
 
 			if (starting_errors < Errors.count()) return ret;
@@ -2676,7 +2679,9 @@ static kuroda::parser<formal::lex_node>& GentzenGrammar() {
 
 		ooao->register_right_edge_build_nonterminal(gentzen::inference_rule::global_parse); // early as these are extremely high precedence
 		ooao->register_right_edge_build_nonterminal(gentzen::var::quantifier_bind_global); // must happen after var names are decorated with HTML
-//		ooao->register_right_edge_build_nonterminal(gentzen::var::global_parse); // requires gentzen::var::quantifier_bind_global before it
+#if VAR_GLOBAL_PARSE
+		ooao->register_right_edge_build_nonterminal(gentzen::var::global_parse); // requires gentzen::var::quantifier_bind_global before it
+#endif
 
 		ooao->register_right_edge_build_nonterminal(recurse_grammar(*ooao)); // CPU-expensive, so last
 	};
