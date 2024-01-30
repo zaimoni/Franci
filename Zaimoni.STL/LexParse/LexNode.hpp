@@ -118,7 +118,24 @@ namespace formal {
 
 		template<std::derived_from<formal::parsed> T>
 		std::shared_ptr<const T> shared_anchor() {
-			if (auto x = std::get_if<std::shared_ptr<const parsed> >(&_post_anchor)) return std::dynamic_pointer_cast<const T>(*x);
+			if (auto x = std::get_if<std::shared_ptr<const parsed> >(&_anchor)) {
+				if (auto test = dynamic_cast<const T*>(x->get())) {
+					return std::shared_ptr<const T>(*x, test);
+				}
+			}
+			return nullptr;
+		}
+
+		template<class T>
+		std::shared_ptr<const T> shared_post_anchor() = delete;
+
+		template<std::derived_from<formal::parsed> T>
+		std::shared_ptr<const T> shared_post_anchor() {
+			if (auto x = std::get_if<std::shared_ptr<const parsed> >(&_post_anchor)) {
+				if (auto test = dynamic_cast<const T*>(x->get())) {
+					return std::shared_ptr<const T>(*x, test);
+				}
+			}
 			return nullptr;
 		}
 
