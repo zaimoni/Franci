@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include <functional>
+#include <span>
 
 /*
 https://en.wikipedia.org/wiki/Kuroda_normal_form:
@@ -29,9 +30,10 @@ namespace kuroda {
 //		using sequence = std::vector<std::unique_ptr<T> >;
 		using sequence = zaimoni::_meta_autoarray_ptr<T*>;
 		using symbols = zaimoni::autovalarray_ptr_throws<T*>;
-		using weak_symbols = zaimoni::weakautoarray_ptr_throws<T*>;
 //		using symbols = std::vector<std::unique_ptr<T> >;
 		using rewriter = std::function<std::vector<size_t>(sequence&, size_t)>;
+		using edit_span = std::pair<sequence*, std::span<T*, std::dynamic_extent> >;
+		using global_rewriter = std::function<bool(edit_span&)>;
 		// hinting (using a return value of rewriter) looked interesting but in practice it doesn't work (many parse rules work from
 		// the same rightmost token trigger for efficiency reasons)
 
@@ -42,6 +44,8 @@ namespace kuroda {
 		std::vector<rewriter> build_nonterminal;
 		std::vector<rewriter> left_edge_build_nonterminal;
 		std::vector<rewriter> right_edge_build_nonterminal;
+
+		std::vector<global_rewriter> global_build;
 
 	public:
 		parser() = default;
@@ -66,6 +70,9 @@ namespace kuroda {
 
 		void register_right_edge_build_nonterminal(const rewriter& x) { right_edge_build_nonterminal.push_back(x); }
 		void register_right_edge_build_nonterminal(rewriter&& x) { right_edge_build_nonterminal.push_back(std::move(x)); }
+
+		void register_global_build(const global_rewriter& x) { global_build.push_back(x); }
+		void register_global_build(global_rewriter&& x) { global_build.push_back(std::move(x)); }
 
 		void append_to_parse(sequence& dest, T* src) {
 			if (!src) return;
@@ -134,6 +141,13 @@ restart:
 			}
 			}
 			return changed;
+		}
+
+		bool finite_parse(edit_span& dest) {
+			for (decltype(auto) rule : global_build) {
+				if (rule(dest)) return true;
+			}
+			return false;
 		}
 
 	private:
