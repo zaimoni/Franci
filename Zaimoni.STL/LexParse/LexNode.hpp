@@ -220,9 +220,8 @@ namespace formal {
 	private:
 		static src_location origin(const lex_node* src);
 		static src_location origin(const decltype(_anchor)& src);
-		static void to_s(std::ostream& dest, const lex_node* src, src_location& track);
-		static void to_s(std::ostream& dest, const kuroda::parser<lex_node>::sequence& src, src_location& track);
-		static void to_s(std::ostream& dest, const decltype(_anchor)& src, src_location& track);
+		static void to_s(std::ostream& dest, const lex_node* src);
+		static void to_s(std::ostream& dest, const decltype(_anchor)& src);
 
 		static int classify(const decltype(_anchor)& src);
 		static void reset(decltype(_anchor)& dest, lex_node*& src);

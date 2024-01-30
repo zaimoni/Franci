@@ -150,81 +150,45 @@ namespace formal {
 		return stage.str();
 	}
 
-	void lex_node::to_s(std::ostream& dest) const
-	{
-		auto track = origin();
-		to_s(dest, this, track);
-	}
+	void lex_node::to_s(std::ostream& dest) const { to_s(dest, this); }
 
 	std::ostream& lex_node::to_s(std::ostream& dest, const kuroda::parser<lex_node>::sequence& src)
 	{
-		auto track = origin(src.front());
-		to_s(dest, src, track);
+		for (decltype(auto) x : src) to_s(dest, x);
 		return dest;
 	};
 
-	void lex_node::to_s(std::ostream& dest, const lex_node* src, src_location& track)
+	void lex_node::to_s(std::ostream& dest, const lex_node* src)
 	{
-		if (!src->_prefix.empty()) to_s(dest, src->_prefix, track);
-		to_s(dest, src->_anchor, track);
-		if (!src->_infix.empty()) to_s(dest, src->_infix, track);
-		to_s(dest, src->_post_anchor, track);
-		if (!src->_postfix.empty()) to_s(dest, src->_postfix, track);
+		if (!src->_prefix.empty()) to_s(dest, src->_prefix);
+		to_s(dest, src->_anchor);
+		if (!src->_infix.empty()) to_s(dest, src->_infix);
+		to_s(dest, src->_post_anchor);
+		if (!src->_postfix.empty()) to_s(dest, src->_postfix);
 	}
 
-	void lex_node::to_s(std::ostream& dest, const kuroda::parser<lex_node>::sequence& src, src_location& track)
-	{
-		for (decltype(auto) x : src) to_s(dest, x, track);
-	}
-
-	void lex_node::to_s(std::ostream& dest, const decltype(_anchor)& src, src_location& track)
+	void lex_node::to_s(std::ostream& dest, const decltype(_anchor)& src)
 	{
 		struct _to_s {
 			std::ostream& dest;
-			formal::src_location& track;
 
-			_to_s(std::ostream& dest, formal::src_location& track) noexcept : dest(dest), track(track) {}
+			_to_s(std::ostream& dest) noexcept : dest(dest) {}
 
 			auto operator()(const zaimoni::COW<word>& w) {
 				const auto start = w->origin();
-				if (start.line_pos.first != track.line_pos.first) {
-					// new line.  \todo Ignore indentation for one-line comments, but not normal source code
-					dest << '\n';
-				} else if (start.line_pos.second > track.line_pos.second) {
-					// need whitespace to look like original code
-					dest << std::string(start.line_pos.second - track.line_pos.second, ' ');
-				}
 				dest << w->value();
-				track = w->after();
 			}
 			auto operator()(const zaimoni::COW<lex_node>& x) {
-				if (auto lex = x.get()) return to_s(dest, lex, track);
+				if (auto lex = x.get()) return to_s(dest, lex);
 			}
 			auto operator()(const zaimoni::COW<parsed>& x) {
-				auto start = x->origin();
-				if (!start.path && track.path) {
-					// default value
-					start = track;
-					start += 1;
-				}
-
-				if (start.line_pos.first != track.line_pos.first) {
-					// new line.  \todo Ignore indentation for one-line comments, but not normal source code
-					dest << '\n';
-				} else if (start.line_pos.second > track.line_pos.second) {
-					// need whitespace to look like original code
-					dest << std::string(start.line_pos.second - track.line_pos.second, ' ');
-				}
-
 				auto stage = x->to_s();
-				if (!stage.empty()) {
-					dest << stage;
-					track += stage.size();
-				}
+				if (!stage.empty()) dest << stage;
 			}
 		};
 
-		std::visit(_to_s(dest, track), src);
+		std::visit(_to_s(dest), src);
+		dest << " ";
 	}
 
 	unsigned int lex_node::precedence() const
