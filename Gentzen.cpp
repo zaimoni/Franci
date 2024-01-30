@@ -2664,36 +2664,17 @@ static auto& TokenGrammar() {
 	return *ooao;
 }
 
-// we don't consider {} purely grouping, as it can be used in both set theory and as a Poisson bracket
-// we do consider balanced HTML tags as grouping due to formattng effects
-static bool infix_recursion_ok(const formal::lex_node& src)
-{
-	return HTMLtag::is_balanced_pair(src)
-		|| src.is_balanced_pair(reserved_atomic[0].first, reserved_atomic[1].first); // ()
-}
-
-static auto recurse_grammar(kuroda::parser<formal::lex_node>& grammar) {
-	kuroda::parser<formal::lex_node>::rewriter ret = [&grammar](kuroda::parser<formal::lex_node>::sequence& tokens, size_t ub) {
-		std::vector<size_t> ret;
-		if (auto changed = grammar.recurse(tokens)) ret.push_back(*changed);
-		return ret;
-		};
-	return ret;
-}
-
 // main language syntax
 static kuroda::parser<formal::lex_node>& GentzenGrammar() {
 	static std::unique_ptr<kuroda::parser<formal::lex_node> > ooao;
 	if (!ooao) {
-		ooao = decltype(ooao)(new decltype(ooao)::element_type(infix_recursion_ok));
+		ooao = decltype(ooao)(new decltype(ooao)::element_type());
 
 		// we do not register terminals for the Gentzen grammar.
 
 		ooao->register_right_edge_build_nonterminal(gentzen::inference_rule::global_parse); // early as these are extremely high precedence
 		ooao->register_right_edge_build_nonterminal(gentzen::var::quantifier_bind_global); // must happen after var names are decorated with HTML
 		ooao->register_right_edge_build_nonterminal(gentzen::var::global_parse); // requires gentzen::var::quantifier_bind_global before it
-
-		ooao->register_right_edge_build_nonterminal(recurse_grammar(*ooao)); // CPU-expensive, so last
 	};
 	return *ooao;
 }

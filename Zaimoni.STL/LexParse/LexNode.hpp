@@ -193,14 +193,12 @@ namespace formal {
 
 		static std::unique_ptr<lex_node> pop_front(kuroda::parser<formal::word>::sequence& src);
 		static std::unique_ptr<lex_node> pop_front(kuroda::parser<formal::lex_node>::sequence& src);
-		bool recurse(kuroda::parser<formal::lex_node>& grammar);
 
 		template<class Ret>
 		auto is_ok(std::function<Ret(const lex_node&)> ok) const { return ok(*this); }
 
 		static bool rewrite(lex_node** target, std::function<lex_node* (lex_node* target)> op);
 		static bool rewrite(lex_node*& target, std::function<lex_node*(lex_node* target)> op);
-		static bool recurse(kuroda::parser<formal::lex_node>& grammar, formal::lex_node* src);
 
 		std::string to_s() const;
 		void to_s(std::ostream& dest) const;

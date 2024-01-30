@@ -43,11 +43,8 @@ namespace kuroda {
 		std::vector<rewriter> left_edge_build_nonterminal;
 		std::vector<rewriter> right_edge_build_nonterminal;
 
-		bool (*sub_recursion_ok)(const T& src);
-
 	public:
-		parser() : sub_recursion_ok(nullptr) {};
-		parser(decltype(sub_recursion_ok) sub_recursion_ok) : sub_recursion_ok(sub_recursion_ok) {};
+		parser() = default;
 		parser(const parser& src) = default;
 		parser(parser && src) = default;
 		parser& operator=(const parser& src) = default;
@@ -69,8 +66,6 @@ namespace kuroda {
 
 		void register_right_edge_build_nonterminal(const rewriter& x) { right_edge_build_nonterminal.push_back(x); }
 		void register_right_edge_build_nonterminal(rewriter&& x) { right_edge_build_nonterminal.push_back(std::move(x)); }
-
-		bool want_sub_recursion(const T& src) { return sub_recursion_ok && sub_recursion_ok(src); }
 
 		void append_to_parse(sequence& dest, T* src) {
 			if (!src) return;
@@ -139,16 +134,6 @@ restart:
 			}
 			}
 			return changed;
-		}
-
-		std::optional<size_t> recurse(sequence& tokens) {
-			std::optional<size_t> ret;
-
-			ptrdiff_t ub = tokens.size();
-			while (0 <= --ub) {
-				if (T::recurse(*this, tokens[ub])) ret = ub;
-			}
-			return ret;
 		}
 
 	private:
