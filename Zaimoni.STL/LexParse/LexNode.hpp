@@ -148,6 +148,15 @@ namespace formal {
 			return true;
 		}
 
+		template<class T>
+		T* release_post_anchor() = delete;
+
+		template<>
+		formal::lex_node* release_post_anchor<formal::lex_node>() {
+			if (auto x = std::get_if<zaimoni::COW<formal::lex_node> >(&_post_anchor)) return x->release();
+			return nullptr;
+		}
+
 		bool syntax_ok() const;
 		int is_pure_anchor() const; // C error code convention
 
@@ -205,6 +214,7 @@ namespace formal {
 		static bool remove_outer_parentheses(kuroda::parser<formal::lex_node>::symbols& target);
 		static std::pair<lex_node**, std::vector<std::span<lex_node*, std::dynamic_extent> > > split(kuroda::parser<lex_node>::sequence& src, std::function<bool(const lex_node&)> ok);
 		static std::pair<lex_node**, std::vector<std::span<lex_node*, std::dynamic_extent> > > split(const std::span<lex_node*, std::dynamic_extent>& src, lex_node** origin, std::function<bool(const lex_node&)> ok);
+
 		static std::vector<kuroda::parser<lex_node>::symbols> move_per_spec(const std::vector<std::span<lex_node*, std::dynamic_extent> >& src);
 
 	private:

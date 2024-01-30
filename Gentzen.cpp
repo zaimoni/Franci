@@ -1403,10 +1403,10 @@ namespace gentzen {
 			return ret;
 		}
 
-// #define VAR_GLOBAL_PARSE 1
+#define VAR_GLOBAL_PARSE 1
 #if VAR_GLOBAL_PARSE
 		static std::vector<size_t> global_parse(kuroda::parser<formal::lex_node>::sequence& tokens, size_t n) {
-			enum { trace_parse = 1 };
+			enum { trace_parse = 0 };
 
 			std::vector<size_t> ret;
 
@@ -1431,7 +1431,6 @@ namespace gentzen {
 
 			decltype(auto) anchor = args.second[0].empty() ? origin : (&(args.second[0].back()) + 1);
 			std::shared_ptr<const domain> have_domain;
-			const domain* have_domain2 = nullptr;
 			bool have_var = false;
 			bool have_quantifier = false;
 			unsigned int quantifier_code = 0;
@@ -1451,18 +1450,34 @@ namespace gentzen {
 			} else {
 				// \todo would like to "see through" grouping parentheses, but not ordered tuples
 				have_domain = args.second[1].front()->shared_anchor<domain>();
-				have_domain2 = dynamic_cast<const domain*>(args.second[1].front()->c_anchor<formal::parsed>());
 			}
 
 			if constexpr (trace_parse) {
-				std::cout << "var::global_parse: " << have_var << " " << have_quantifier << " " << quantifier_code << " " << (bool)have_domain << " " << (bool)have_domain2 << "\n";
+				std::cout << "var::global_parse: " << have_var << " " << have_quantifier << " " << quantifier_code << " " << (bool)have_domain << "\n";
 			}
 
 			if (starting_errors < Errors.count()) return ret;
 
-			if (have_domain) {
+			if (have_domain && 1==args.second[1].size() && 1 == args.second[0].size()) {
 				if (have_var) {
+					const auto rescan = args.second[0].size() - 1;
+					ret.push_back(rescan);
+					auto relay = std::unique_ptr<var>(new var(quantifier::Term, std::shared_ptr<const formal::lex_node>(args.second[0].back()), have_domain));
+					args.second[0].back() = nullptr;
+					auto relay2 = std::make_unique<formal::lex_node>(relay.release());
+					tokens.DeleteNSlotsAt(2, args.second[0].size());
+					delete tokens[rescan];
+					tokens[rescan] = relay2.release();
+					return ret;
 				} else if (0 < quantifier_code) {
+					const auto rescan = args.second[0].size() - 1;
+					ret.push_back(rescan);
+					auto relay = std::unique_ptr<var>(new var((quantifier)quantifier_code, std::shared_ptr<const formal::lex_node>(args.second[0].back()->release_post_anchor<formal::lex_node>()), have_domain));
+					auto relay2 = std::make_unique<formal::lex_node>(relay.release());
+					tokens.DeleteNSlotsAt(2, args.second[0].size());
+					delete tokens[rescan];
+					tokens[rescan] = relay2.release();
+					return ret;
 				}
 			}
 
