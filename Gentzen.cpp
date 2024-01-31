@@ -1414,6 +1414,7 @@ namespace gentzen {
 			if (args.empty()) return false;
 
 			decltype(auto) origin = *args.front().first; // backward compatibility
+			const auto offset = formal::lex_node::where_is(tokens);
 
 			if (2 < args.size()) {
 				for (decltype(auto) fail : args) {
@@ -1458,22 +1459,29 @@ namespace gentzen {
 
 			if (have_domain && 1 == rhs.size() && 1 == lhs.size()) {
 				if (have_var) {
-					const auto rescan = lhs.size() - 1;
+					const auto rescan = offset + lhs.size() - 1;
+					if constexpr (trace_parse) {
+						std::cout << "var::global_parse: " << rescan << " " << offset << " " << lhs.size() << " " << rhs.size() << " " << tokens.first->size() << "\n";
+					}
 					auto relay = std::unique_ptr<var>(new var(quantifier::Term, std::shared_ptr<const formal::lex_node>(lhs.back()), have_domain));
 					lhs.back() = nullptr;
 					auto relay2 = std::make_unique<formal::lex_node>(relay.release());
-					const auto dest = lhs.size() - 1;
+					decltype(auto) dest = (*tokens.first)[rescan];
+					delete dest;
+					dest = relay2.release();
 					tokens.first->DeleteNSlotsAt(2, rescan+1);
-					delete (*tokens.first)[rescan];
-					(*tokens.first)[rescan] = relay2.release();
+					if constexpr (trace_parse) {
+						std::cout << "var::global_parse: term variable ok\n";
+					}
 					return true;
 				} else if (0 < quantifier_code) {
-					const auto rescan = lhs.size() - 1;
+					const auto rescan = offset + lhs.size() - 1;
 					auto relay = std::unique_ptr<var>(new var((quantifier)quantifier_code, std::shared_ptr<const formal::lex_node>(lhs.back()->release_post_anchor<formal::lex_node>()), have_domain));
 					auto relay2 = std::make_unique<formal::lex_node>(relay.release());
+					decltype(auto) dest = (*tokens.first)[rescan];
+					delete dest;
+					dest = relay2.release();
 					tokens.first->DeleteNSlotsAt(2, rescan + 1);
-					delete (*tokens.first)[rescan];
-					(*tokens.first)[rescan] = relay2.release();
 					return true;
 				}
 			}
@@ -1744,8 +1752,56 @@ retry:
 			dest.stop_parse_HTML_entity(true, 9500UL, true);
 		};
 
-		static std::vector<size_t> global_parse(kuroda::parser<formal::lex_node>::sequence& tokens, size_t n) {
-			std::vector<size_t> ret;
+		// arguably should be elsewhere
+		static bool interpret_substatement(formal::lex_node::edit_span& view)
+		{
+			enum { trace_parse = 0 };
+
+			if constexpr (trace_parse) {
+				std::cout << "inference_rule::interpret_substatement: " << view.second.size() << "\n";
+			}
+
+			switch (view.second.size()) {
+			case 0: return false;
+			case 1: {
+				decltype(auto) dest = view.second.front();
+redo_outer_parens:
+				if (dest->has_outer_parentheses()) {
+					decltype(auto) parsing = &static_cast<kuroda::parser<formal::lex_node>::sequence&>(const_cast<kuroda::parser<formal::lex_node>::symbols&>(dest->infix()));
+					switch (parsing->size()) {
+					case 0: return false;
+					case 1: {
+						formal::lex_node* test = parsing->front();
+						parsing->front() = nullptr;
+						delete dest; // invalidates variable parsing
+						dest = test;
+						goto redo_outer_parens;
+					}
+					default: { // in this context, an ordered tuple would be a syntax error
+						formal::lex_node::edit_span stage(parsing, std::span<formal::lex_node*, std::dynamic_extent>(parsing->begin(), parsing->size()));
+						if (GentzenGrammar().finite_parse(stage)) return true;
+					}
+					}
+				}
+			}
+				  break;
+			default:
+				if constexpr (trace_parse) {
+					std::cout << "inference_rule::interpret_substatement: attemptng GentzenGrammar().finite_parse(view)\n";
+				}
+				if (GentzenGrammar().finite_parse(view)) {
+					std::cout << "inference_rule::interpret_substatement: GentzenGrammar().finite_parse(view) successful\n";
+					return true;
+				}
+				if constexpr (trace_parse) {
+					std::cout << "inference_rule::interpret_substatement: GentzenGrammar().finite_parse(view) ok\n";
+				}
+			}
+			return false;
+		}
+
+		static bool global_parse(const kuroda::parser<formal::lex_node>::edit_span& tokens) {
+			enum { trace_parse = 0 };
 
 			const auto starting_errors = Errors.count();
 
@@ -1753,9 +1809,10 @@ restart:
 			auto args = formal::lex_node::split(tokens, [](const formal::lex_node& x) {
 				return is_parsed_HTML_entity(x, 9500UL);
 			});
-			if (args.empty()) return ret;
+			if (args.empty()) return false;
 
 			decltype(auto) origin = *args.front().first; // backward compatibility
+			const auto offset = formal::lex_node::where_is(tokens);
 
 			if (2 < args.size()) {
 				for (decltype(auto) fail : args) {
@@ -1764,7 +1821,7 @@ restart:
 						if (!(err.code() & formal::Error)) error_report(err, "non-associative ambiguous parse: &#9500;");
 					}
 				}
-				return ret;
+				return false;
 			}
 
 			auto weak_hypothesis_like = formal::lex_node::split(args[0], detect_comma);
@@ -1793,35 +1850,35 @@ restart:
 				}
 			}
 
-			if (starting_errors < Errors.count()) return ret;
+			if (starting_errors < Errors.count()) return false;
+
+			if constexpr (trace_parse) {
+				std::cout << "inference_rule::global_parse: " << weak_hypothesis_like.size() << " " << weak_conclusion_like.size() << "\n";
+			}
 
 			for (decltype(auto) view : weak_hypothesis_like) {
-				if (1 < view.second.size() && GentzenGrammar().finite_parse(view)) goto restart;
+				if (interpret_substatement(view)) return true;
 			}
 			for (decltype(auto) view : weak_conclusion_like) {
-				if (1 < view.second.size() && GentzenGrammar().finite_parse(view)) goto restart;
+				if (interpret_substatement(view)) return true;
+			}
+			if constexpr (trace_parse) {
+				std::cout << "inference_rule::global_parse: interpret_substatement ok\n";
 			}
 
 			decltype(_lexical_hypotheses) hypothesis_like = formal::lex_node::move_per_spec(weak_hypothesis_like);
 			decltype(_lexical_conclusions) conclusion_like = formal::lex_node::move_per_spec(weak_conclusion_like);
 
 			const bool no_args = hypothesis_like.empty() && conclusion_like.empty();
-			if (!hypothesis_like.empty()) {
-				for (decltype(auto) phrase : hypothesis_like) formal::lex_node::remove_outer_parentheses(phrase);
-			}
-			if (!conclusion_like.empty()) {
-				for (decltype(auto) phrase : conclusion_like) formal::lex_node::remove_outer_parentheses(phrase);
-			}
 
 			auto stage = std::unique_ptr<inference_rule>(new inference_rule(std::move(hypothesis_like), std::move(conclusion_like)));
 			while(stage->Gentzen_parse_args());
 			auto stage2 = std::make_unique<formal::lex_node>(stage.release());
-			tokens.DeleteNSlotsAt(tokens.size() - 1, 1);
-			delete tokens[0];
-			tokens[0] = stage2.release();
-			ret.push_back(0);
-			if (no_args) error_report(*tokens[0], "no-argument &#9500;");
-			return ret;
+			tokens.first->DeleteNSlotsAt(tokens.second.size() - 1, offset + 1);
+			delete (*tokens.first)[offset];
+			(*tokens.first)[offset] = stage2.release();
+			if (no_args) error_report(*(*tokens.first)[offset], "no-argument &#9500;");
+			return true;
 		}
 
 	private:
@@ -1919,123 +1976,6 @@ restart:
 					ret += glue;
 				}
 			}
-			return ret;
-		}
-
-		// these two likely belong elsewhere
-		static std::optional<std::vector<std::pair<size_t, std::span<formal::lex_node*> > > > find_prefix_CSV_args(const std::span<formal::lex_node*>& src, ptrdiff_t origin, bool hypothetical = false)
-		{
-			std::vector<std::pair<size_t, std::span<formal::lex_node*> > > ret;
-			const auto& syntax = argument_enforcer::get();
-			std::pair<ptrdiff_t, ptrdiff_t> scan(origin, origin);
-			while (0 <= --scan.second) {
-				if (auto text = interpret_inert_word(*src[scan.second])) {
-					if ("," == *text) {
-						if (!(src[scan.second]->code() & formal::Error) && !hypothetical) {
-							error_report(*src[scan.second], "',' will not parse at right edge of a subexpression");
-						}
-						return std::nullopt;
-					}
-				}
-				if (argument_enforcer::rejectRightEdge(*src[scan.second])) {
-					if (!(src[scan.second]->code() & formal::Error) && !hypothetical) {
-						error_report(*src[scan.second], " : will not parse at right edge of an subexpression");
-					}
-					return std::nullopt;
-				}
-				scan.first = scan.second;
-				while (0 < --scan.first) {
-					if (auto text = interpret_inert_word(*src[scan.first])) {
-						if ("," == *text) {
-							if (src[scan.first]->code() & formal::Error) return std::nullopt;
-							if (argument_enforcer::rejectLeftEdge(*src[scan.first + 1])) {
-								if (!(src[scan.first + 1]->code() & formal::Error) && !hypothetical) {
-									error_report(*src[scan.first + 1], " : will not parse at left edge of an subexpression");
-									src[scan.first]->learn(formal::Error);
-								}
-								return std::nullopt;
-							}
-							ret.push_back(std::pair(scan.first+1, src.subspan(scan.first + 1, (scan.second - scan.first) + 1)));
-							scan.second = scan.first;
-							break;
-						}
-					}
-				};
-				// fall-through
-				if (auto text = interpret_inert_word(*src[0])) {
-					if ("," == *text) {
-						if (!(src[0]->code() & formal::Error) && !hypothetical) {
-							error_report(*src[0], "',' will not parse at left edge of an subexpression");
-						}
-						return std::nullopt;
-					}
-				}
-				if (argument_enforcer::rejectLeftEdge(*src[0])) {
-					if (!(src[0]->code() & formal::Error) && !hypothetical) {
-						error_report(*src[0], " : will not parse at left edge of an subexpression");
-					}
-					return std::nullopt;
-				}
-				ret.push_back(std::pair(0, src.subspan(0, scan.second + 1)));
-			};
-			return ret;
-		}
-
-		static std::optional<std::vector<std::pair<size_t, std::span<formal::lex_node*> > > > find_postfix_CSV_args(const std::span<formal::lex_node*>& src, ptrdiff_t origin, bool hypothetical = false)
-		{
-			std::vector<std::pair<size_t, std::span<formal::lex_node*> > > ret;
-			const auto& syntax = argument_enforcer::get();
-			std::pair<ptrdiff_t, ptrdiff_t> scan(origin, origin);
-			while (src.size() > ++scan.second) {
-				if (auto text = interpret_inert_word(*src[scan.second])) {
-					if ("," == *text) {
-						if (!(src[scan.second]->code() & formal::Error) && !hypothetical) {
-							error_report(*src[scan.second], "',' will not parse at left edge of a subexpression");
-						}
-						return std::nullopt;
-					}
-				}
-				if (argument_enforcer::rejectLeftEdge(*src[scan.second])) {
-					if (!(src[scan.second]->code() & formal::Error) && !hypothetical) {
-						error_report(*src[scan.second], " : will not parse at left edge of an subexpression");
-					}
-					return std::nullopt;
-				}
-				scan.first = scan.second;
-				while (src.size() > ++scan.first) {
-					if (auto text = interpret_inert_word(*src[scan.first])) {
-						if ("," == *text) {
-							if (src[scan.first]->code() & formal::Error) return std::nullopt;
-							if (argument_enforcer::rejectRightEdge(*src[scan.first + 1])) {
-								if (!(src[scan.first + 1]->code() & formal::Error) && !hypothetical) {
-									error_report(*src[scan.first + 1], " : will not parse at right edge of an subexpression");
-									src[scan.first]->learn(formal::Error);
-								}
-								return std::nullopt;
-							}
-							ret.push_back(std::pair(scan.first + 1, src.subspan(scan.first + 1, (scan.second - scan.first) + 1)));
-							scan.second = scan.first;
-							break;
-						}
-					}
-				};
-				// fall-through
-				if (auto text = interpret_inert_word(**src.end())) {
-					if ("," == *text) {
-						if (!(src[0]->code() & formal::Error) && !hypothetical) {
-							error_report(*src[0], "',' will not parse at right edge of an subexpression");
-						}
-						return std::nullopt;
-					}
-				}
-				if (argument_enforcer::rejectRightEdge(**src.end())) {
-					if (!(src[0]->code() & formal::Error) && !hypothetical) {
-						error_report(*src[0], " : will not parse at right edge of an subexpression");
-					}
-					return std::nullopt;
-				}
-				ret.push_back(std::pair(0, src.subspan(0, scan.second + 1)));
-			};
 			return ret;
 		}
 
@@ -2677,9 +2617,9 @@ static kuroda::parser<formal::lex_node>& GentzenGrammar() {
 
 		// we do not register terminals for the Gentzen grammar.
 
-		ooao->register_right_edge_build_nonterminal(gentzen::inference_rule::global_parse); // early as these are extremely high precedence
 		ooao->register_right_edge_build_nonterminal(gentzen::var::quantifier_bind_global); // must happen after var names are decorated with HTML
 
+		ooao->register_global_build(gentzen::inference_rule::global_parse); // early as these are extremely high precedence
 		ooao->register_global_build(gentzen::var::global_parse);
 	};
 	return *ooao;

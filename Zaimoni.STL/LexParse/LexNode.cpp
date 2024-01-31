@@ -233,12 +233,15 @@ restart:
 		return src;
 	}
 
+	bool lex_node::has_outer_parentheses() const
+	{
+		return  _prefix.empty() && _postfix.empty() && is_balanced_pair("(", ")");
+	}
 
 	bool lex_node::remove_outer_parentheses(kuroda::parser<formal::lex_node>::symbols& target) {
 		bool ret = false;
-		while (   1 == target.size() && target.front()->prefix().empty()
-			   && target.front()->postfix().empty() && !target.front()->infix().empty()
-			   && target.front()->is_balanced_pair("(", ")")) {
+		while (   1 == target.size() && !target.front()->infix().empty()
+			   && target.front()->has_outer_parentheses()) {
 			kuroda::parser<formal::lex_node>::symbols stage;
 
 			stage.swap(target.front()->_infix);

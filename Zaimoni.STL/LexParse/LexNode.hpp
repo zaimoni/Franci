@@ -215,6 +215,7 @@ namespace formal {
 		bool is_balanced_pair(const std::string_view& l_token, const std::string_view& r_token) const;
 		static lex_node** find_binding_predecessor(lex_node** src);
 
+		bool has_outer_parentheses() const;
 		static bool remove_outer_parentheses(kuroda::parser<formal::lex_node>::symbols& target);
 		static std::vector<edit_span> split(kuroda::parser<lex_node>::sequence& src, std::function<bool(const lex_node&)> ok);
 		static std::vector<edit_span> split(const edit_span& src, std::function<bool(const lex_node&)> ok);
