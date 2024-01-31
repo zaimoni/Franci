@@ -1403,90 +1403,7 @@ namespace gentzen {
 			return ret;
 		}
 
-		static std::vector<size_t> global_parse(kuroda::parser<formal::lex_node>::sequence& tokens, size_t n) {
-			enum { trace_parse = 0 };
-
-			std::vector<size_t> ret;
-
-			const auto starting_errors = Errors.count();
-
-			auto args = formal::lex_node::split(tokens, [](const formal::lex_node& x) {
-				return is_parsed_HTML_entity(x, "isin");
-				});
-			if (args.empty()) return ret;
-
-			decltype(auto) origin = *args.front().first; // backward compatibility
-
-			if (2 < args.size()) {
-				for (decltype(auto) fail : args) {
-					if (auto loc = formal::lex_node::where_is(fail)) {
-						formal::lex_node& err = *origin[loc -1];
-						if (!(err.code() & formal::Error)) error_report(err, "non-associative ambiguous parse: &isin;");
-					}
-				}
-				return ret;
-			}
-
-			decltype(auto) anchor = args[0].second.empty() ? origin : (&(args[0].second.back()) + 1);
-			std::shared_ptr<const domain> have_domain;
-			bool have_var = false;
-			bool have_quantifier = false;
-			unsigned int quantifier_code = 0;
-
-			auto& lhs = args[0].second;
-			if (lhs.empty()) {
-				if (!((*anchor)->code() & formal::Error)) error_report(**anchor, "&isin; cannot match to its left");
-			} else {
-				have_quantifier = (lhs.back()->code() & var::LexQuantifier);
-				if (have_quantifier) {
-					quantifier_code = legal_quantifier(*lhs.back()->c_anchor<formal::word>());
-				} else {
-					have_var = legal_varname(*lhs.back());
-				}
-			};
-			auto& rhs = args[1].second;
-			if (rhs.empty()) {
-				if (!((*anchor)->code() & formal::Error)) error_report(**anchor, "&isin; cannot match to its right");
-			} else {
-				// \todo would like to "see through" grouping parentheses, but not ordered tuples
-				have_domain = rhs.front()->shared_anchor<domain>();
-			}
-
-			if constexpr (trace_parse) {
-				std::cout << "var::global_parse: " << have_var << " " << have_quantifier << " " << quantifier_code << " " << (bool)have_domain << "\n";
-			}
-
-			if (starting_errors < Errors.count()) return ret;
-
-			if (have_domain && 1 == rhs.size() && 1 == lhs.size()) {
-				if (have_var) {
-					const auto rescan = lhs.size() - 1;
-					ret.push_back(rescan);
-					auto relay = std::unique_ptr<var>(new var(quantifier::Term, std::shared_ptr<const formal::lex_node>(lhs.back()), have_domain));
-					lhs.back() = nullptr;
-					auto relay2 = std::make_unique<formal::lex_node>(relay.release());
-					tokens.DeleteNSlotsAt(2, lhs.size());
-					delete tokens[rescan];
-					tokens[rescan] = relay2.release();
-					return ret;
-				} else if (0 < quantifier_code) {
-					const auto rescan = lhs.size() - 1;
-					ret.push_back(rescan);
-					auto relay = std::unique_ptr<var>(new var((quantifier)quantifier_code, std::shared_ptr<const formal::lex_node>(lhs.back()->release_post_anchor<formal::lex_node>()), have_domain));
-					auto relay2 = std::make_unique<formal::lex_node>(relay.release());
-					tokens.DeleteNSlotsAt(2, lhs.size());
-					delete tokens[rescan];
-					tokens[rescan] = relay2.release();
-					return ret;
-				}
-			}
-
-			// ...
-
-			return ret;
-		}
-
-		static bool global_parse2(kuroda::parser<formal::lex_node>::edit_span& tokens) {
+		static bool global_parse(const kuroda::parser<formal::lex_node>::edit_span& tokens) {
 			enum { trace_parse = 0 };
 
 			const auto starting_errors = Errors.count();
@@ -1832,6 +1749,7 @@ retry:
 
 			const auto starting_errors = Errors.count();
 
+restart:
 			auto args = formal::lex_node::split(tokens, [](const formal::lex_node& x) {
 				return is_parsed_HTML_entity(x, 9500UL);
 			});
@@ -1876,6 +1794,13 @@ retry:
 			}
 
 			if (starting_errors < Errors.count()) return ret;
+
+			for (decltype(auto) view : weak_hypothesis_like) {
+				if (1 < view.second.size() && GentzenGrammar().finite_parse(view)) goto restart;
+			}
+			for (decltype(auto) view : weak_conclusion_like) {
+				if (1 < view.second.size() && GentzenGrammar().finite_parse(view)) goto restart;
+			}
 
 			decltype(_lexical_hypotheses) hypothesis_like = formal::lex_node::move_per_spec(weak_hypothesis_like);
 			decltype(_lexical_conclusions) conclusion_like = formal::lex_node::move_per_spec(weak_conclusion_like);
@@ -2754,9 +2679,8 @@ static kuroda::parser<formal::lex_node>& GentzenGrammar() {
 
 		ooao->register_right_edge_build_nonterminal(gentzen::inference_rule::global_parse); // early as these are extremely high precedence
 		ooao->register_right_edge_build_nonterminal(gentzen::var::quantifier_bind_global); // must happen after var names are decorated with HTML
-		ooao->register_right_edge_build_nonterminal(gentzen::var::global_parse); // requires gentzen::var::quantifier_bind_global before it
 
-		ooao->register_global_build(gentzen::var::global_parse2);
+		ooao->register_global_build(gentzen::var::global_parse);
 	};
 	return *ooao;
 }
@@ -2825,7 +2749,9 @@ int main(int argc, char* argv[], char* envp[])
 			if (0 < Errors.count()) continue;
 
 			try {
-				GentzenGrammar().finite_parse(stage);
+				do {
+					GentzenGrammar().finite_parse(stage);
+				} while (GentzenGrammar().finite_parse(kuroda::parser<formal::lex_node>::edit_span(&stage, std::span(stage.begin(), stage.size()))));
 			} catch (std::exception& e) {
 				std::cout << "Gentzen finite parse: " << e.what() << "\n";
 				return 3;

@@ -33,7 +33,7 @@ namespace kuroda {
 //		using symbols = std::vector<std::unique_ptr<T> >;
 		using rewriter = std::function<std::vector<size_t>(sequence&, size_t)>;
 		using edit_span = std::pair<sequence*, std::span<T*, std::dynamic_extent> >;
-		using global_rewriter = std::function<bool(edit_span&)>;
+		using global_rewriter = std::function<bool(const edit_span&)>;
 		// hinting (using a return value of rewriter) looked interesting but in practice it doesn't work (many parse rules work from
 		// the same rightmost token trigger for efficiency reasons)
 
@@ -143,7 +143,7 @@ restart:
 			return changed;
 		}
 
-		bool finite_parse(edit_span& dest) {
+		bool finite_parse(const edit_span& dest) {
 			for (decltype(auto) rule : global_build) {
 				if (rule(dest)) return true;
 			}
