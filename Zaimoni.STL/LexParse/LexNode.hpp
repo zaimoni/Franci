@@ -43,7 +43,7 @@ namespace formal {
 		}
 
 	public:
-		using edit_span = std::pair<kuroda::parser<lex_node>::sequence*, std::span<lex_node*, std::dynamic_extent> >;
+		using edit_span = kuroda::parser<lex_node>::edit_span;
 
 		lex_node(std::unique_ptr<word> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code) {
 			if (std::get<zaimoni::COW<word> >(_anchor)->code() & Comment) _code |= Comment;

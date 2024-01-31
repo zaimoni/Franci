@@ -1486,6 +1486,84 @@ namespace gentzen {
 			return ret;
 		}
 
+		static bool global_parse2(kuroda::parser<formal::lex_node>::edit_span& tokens) {
+			enum { trace_parse = 0 };
+
+			const auto starting_errors = Errors.count();
+
+			auto args = formal::lex_node::split(tokens, [](const formal::lex_node& x) {
+				return is_parsed_HTML_entity(x, "isin");
+				});
+			if (args.empty()) return false;
+
+			decltype(auto) origin = *args.front().first; // backward compatibility
+
+			if (2 < args.size()) {
+				for (decltype(auto) fail : args) {
+					if (auto loc = formal::lex_node::where_is(fail)) {
+						formal::lex_node& err = *origin[loc - 1];
+						if (!(err.code() & formal::Error)) error_report(err, "non-associative ambiguous parse: &isin;");
+					}
+				}
+				return false;
+			}
+
+			decltype(auto) anchor = args[0].second.empty() ? origin : (&(args[0].second.back()) + 1);
+			std::shared_ptr<const domain> have_domain;
+			bool have_var = false;
+			bool have_quantifier = false;
+			unsigned int quantifier_code = 0;
+
+			auto& lhs = args[0].second;
+			if (lhs.empty()) {
+				if (!((*anchor)->code() & formal::Error)) error_report(**anchor, "&isin; cannot match to its left");
+			} else {
+				have_quantifier = (lhs.back()->code() & var::LexQuantifier);
+				if (have_quantifier) {
+					quantifier_code = legal_quantifier(*lhs.back()->c_anchor<formal::word>());
+				} else {
+					have_var = legal_varname(*lhs.back());
+				}
+			};
+			auto& rhs = args[1].second;
+			if (rhs.empty()) {
+				if (!((*anchor)->code() & formal::Error)) error_report(**anchor, "&isin; cannot match to its right");
+			} else {
+				// \todo would like to "see through" grouping parentheses, but not ordered tuples
+				have_domain = rhs.front()->shared_anchor<domain>();
+			}
+
+			if constexpr (trace_parse) {
+				std::cout << "var::global_parse: " << have_var << " " << have_quantifier << " " << quantifier_code << " " << (bool)have_domain << "\n";
+			}
+
+			if (starting_errors < Errors.count()) return false;
+
+			if (have_domain && 1 == rhs.size() && 1 == lhs.size()) {
+				if (have_var) {
+					const auto rescan = lhs.size() - 1;
+					auto relay = std::unique_ptr<var>(new var(quantifier::Term, std::shared_ptr<const formal::lex_node>(lhs.back()), have_domain));
+					lhs.back() = nullptr;
+					auto relay2 = std::make_unique<formal::lex_node>(relay.release());
+					const auto dest = lhs.size() - 1;
+					tokens.first->DeleteNSlotsAt(2, rescan+1);
+					delete (*tokens.first)[rescan];
+					(*tokens.first)[rescan] = relay2.release();
+					return true;
+				} else if (0 < quantifier_code) {
+					const auto rescan = lhs.size() - 1;
+					auto relay = std::unique_ptr<var>(new var((quantifier)quantifier_code, std::shared_ptr<const formal::lex_node>(lhs.back()->release_post_anchor<formal::lex_node>()), have_domain));
+					auto relay2 = std::make_unique<formal::lex_node>(relay.release());
+					tokens.first->DeleteNSlotsAt(2, rescan + 1);
+					delete (*tokens.first)[rescan];
+					(*tokens.first)[rescan] = relay2.release();
+					return true;
+				}
+			}
+
+			return false;
+		}
+
 		bool is_compatible(std::shared_ptr<const domain>& domain) const {
 			if (_domain.get() == domain.get()) return true;
 			// disjoint: hard-reject
@@ -2677,6 +2755,8 @@ static kuroda::parser<formal::lex_node>& GentzenGrammar() {
 		ooao->register_right_edge_build_nonterminal(gentzen::inference_rule::global_parse); // early as these are extremely high precedence
 		ooao->register_right_edge_build_nonterminal(gentzen::var::quantifier_bind_global); // must happen after var names are decorated with HTML
 		ooao->register_right_edge_build_nonterminal(gentzen::var::global_parse); // requires gentzen::var::quantifier_bind_global before it
+
+		ooao->register_global_build(gentzen::var::global_parse2);
 	};
 	return *ooao;
 }
