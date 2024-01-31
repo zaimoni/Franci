@@ -1790,7 +1790,9 @@ redo_outer_parens:
 					std::cout << "inference_rule::interpret_substatement: attemptng GentzenGrammar().finite_parse(view)\n";
 				}
 				if (GentzenGrammar().finite_parse(view)) {
-					std::cout << "inference_rule::interpret_substatement: GentzenGrammar().finite_parse(view) successful\n";
+					if constexpr (trace_parse) {
+						std::cout << "inference_rule::interpret_substatement: GentzenGrammar().finite_parse(view) successful\n";
+					}
 					return true;
 				}
 				if constexpr (trace_parse) {
@@ -1804,6 +1806,8 @@ redo_outer_parens:
 			enum { trace_parse = 0 };
 
 			const auto starting_errors = Errors.count();
+			const bool is_full_parse = tokens.first->begin() == &(*tokens.second.begin())
+				                    && tokens.first->size()  ==    tokens.second.size();
 
 restart:
 			auto args = formal::lex_node::split(tokens, [](const formal::lex_node& x) {
@@ -1857,10 +1861,28 @@ restart:
 			}
 
 			for (decltype(auto) view : weak_hypothesis_like) {
-				if (interpret_substatement(view)) return true;
+				if (interpret_substatement(view)) {
+					if (is_full_parse) {
+						const_cast<kuroda::parser<formal::lex_node>::edit_span&>(tokens) = kuroda::parser<formal::lex_node>::to_editspan(*tokens.first);
+						if constexpr (trace_parse) {
+							std::cout << "inference_rule::global_parse: restarting (hypothesis)\n";
+						}
+						goto restart;
+					}
+					return true;
+				}
 			}
 			for (decltype(auto) view : weak_conclusion_like) {
-				if (interpret_substatement(view)) return true;
+				if (interpret_substatement(view)) {
+					if (is_full_parse) {
+						const_cast<kuroda::parser<formal::lex_node>::edit_span&>(tokens) = kuroda::parser<formal::lex_node>::to_editspan(*tokens.first);
+						if constexpr (trace_parse) {
+							std::cout << "inference_rule::global_parse: restarting (conclusion)\n";
+						}
+						goto restart;
+					}
+					return true;
+				}
 			}
 			if constexpr (trace_parse) {
 				std::cout << "inference_rule::global_parse: interpret_substatement ok\n";
@@ -2691,7 +2713,7 @@ int main(int argc, char* argv[], char* envp[])
 			try {
 				do {
 					GentzenGrammar().finite_parse(stage);
-				} while (GentzenGrammar().finite_parse(kuroda::parser<formal::lex_node>::edit_span(&stage, std::span(stage.begin(), stage.size()))));
+				} while (GentzenGrammar().finite_parse(kuroda::parser<formal::lex_node>::to_editspan(stage)));
 			} catch (std::exception& e) {
 				std::cout << "Gentzen finite parse: " << e.what() << "\n";
 				return 3;

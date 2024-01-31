@@ -74,6 +74,10 @@ namespace kuroda {
 		void register_global_build(const global_rewriter& x) { global_build.push_back(x); }
 		void register_global_build(global_rewriter&& x) { global_build.push_back(std::move(x)); }
 
+		static auto to_editspan(kuroda::parser<T>::sequence& stage) {
+			return edit_span(&stage, std::span(stage.begin(), stage.size()));
+		}
+
 		void append_to_parse(sequence& dest, T* src) {
 			if (!src) return;
 			notice_terminal(src);
