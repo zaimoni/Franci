@@ -27,6 +27,7 @@ public:
 	static_assert(!(formal::Error & Entity));
 	static_assert(!(formal::Inert_Token & Entity));
 	static_assert(!(formal::Tokenized & Entity));
+	static_assert(!(formal::RequestNormalization & Entity));
 
 	HTMLtag() = delete;
 	HTMLtag(const HTMLtag& src) = default;

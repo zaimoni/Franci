@@ -1465,7 +1465,7 @@ namespace gentzen {
 					}
 					auto relay = std::unique_ptr<var>(new var(quantifier::Term, std::shared_ptr<const formal::lex_node>(lhs.back()), have_domain));
 					lhs.back() = nullptr;
-					auto relay2 = std::make_unique<formal::lex_node>(relay.release());
+					auto relay2 = std::make_unique<formal::lex_node>(relay.release(), formal::RequestNormalization);
 					decltype(auto) dest = (*tokens.first)[rescan];
 					delete dest;
 					dest = relay2.release();
@@ -1477,7 +1477,7 @@ namespace gentzen {
 				} else if (0 < quantifier_code) {
 					const auto rescan = offset + lhs.size() - 1;
 					auto relay = std::unique_ptr<var>(new var((quantifier)quantifier_code, std::shared_ptr<const formal::lex_node>(lhs.back()->release_post_anchor<formal::lex_node>()), have_domain));
-					auto relay2 = std::make_unique<formal::lex_node>(relay.release());
+					auto relay2 = std::make_unique<formal::lex_node>(relay.release(), formal::RequestNormalization);
 					decltype(auto) dest = (*tokens.first)[rescan];
 					delete dest;
 					dest = relay2.release();
@@ -1487,6 +1487,11 @@ namespace gentzen {
 			}
 
 			return false;
+		}
+
+		static std::shared_ptr<const var> WantsToMakeVarRefs(formal::lex_node* x) {
+			if (x->code() & formal::RequestNormalization) return x->shared_anchor<var>();
+			return std::shared_ptr<const var>();
 		}
 
 		bool is_compatible(std::shared_ptr<const domain>& domain) const {
@@ -2268,7 +2273,7 @@ static auto to_lines(std::istream& in, formal::src_location& origin)
 }
 
 enum TG_modes {
-	TG_HTML_tag =60,
+	TG_HTML_tag = 59,
 	TG_MAX
 };
 
@@ -2277,6 +2282,7 @@ static_assert(!(formal::Comment & (1ULL << TG_HTML_tag)));
 static_assert(!(formal::Error & (1ULL << TG_HTML_tag)));
 static_assert(!(formal::Inert_Token & (1ULL << TG_HTML_tag)));
 static_assert(!(formal::Tokenized & (1ULL << TG_HTML_tag)));
+static_assert(!(formal::RequestNormalization & (1ULL << TG_HTML_tag)));
 
 std::optional<std::string_view> HTML_EntityLike(const std::string_view& src)
 {
