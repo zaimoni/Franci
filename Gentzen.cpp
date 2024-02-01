@@ -1463,7 +1463,7 @@ namespace gentzen {
 					if constexpr (trace_parse) {
 						std::cout << "var::global_parse: " << rescan << " " << offset << " " << lhs.size() << " " << rhs.size() << " " << tokens.first->size() << "\n";
 					}
-					auto relay = std::unique_ptr<var>(new var(quantifier::Term, std::shared_ptr<const formal::lex_node>(lhs.back()), have_domain));
+					auto relay = std::unique_ptr<const var>(new var(quantifier::Term, std::shared_ptr<const formal::lex_node>(lhs.back()), have_domain));
 					lhs.back() = nullptr;
 					auto relay2 = std::make_unique<formal::lex_node>(relay.release(), formal::RequestNormalization);
 					decltype(auto) dest = (*tokens.first)[rescan];
@@ -1476,7 +1476,7 @@ namespace gentzen {
 					return true;
 				} else if (0 < quantifier_code) {
 					const auto rescan = offset + lhs.size() - 1;
-					auto relay = std::unique_ptr<var>(new var((quantifier)quantifier_code, std::shared_ptr<const formal::lex_node>(lhs.back()->release_post_anchor<formal::lex_node>()), have_domain));
+					auto relay = std::unique_ptr<const var>(new var((quantifier)quantifier_code, std::shared_ptr<const formal::lex_node>(lhs.back()->release_post_anchor<formal::lex_node>()), have_domain));
 					auto relay2 = std::make_unique<formal::lex_node>(relay.release(), formal::RequestNormalization);
 					decltype(auto) dest = (*tokens.first)[rescan];
 					delete dest;

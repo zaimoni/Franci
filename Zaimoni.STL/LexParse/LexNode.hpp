@@ -52,6 +52,10 @@ namespace formal {
 		lex_node(parsed*& src, unsigned long long code = 0) noexcept : _anchor(zaimoni::COW<parsed>(src)), _code(code) {
 			src = nullptr;
 		}
+		lex_node(const parsed* src, unsigned long long code = 0) noexcept : _anchor(std::shared_ptr<const parsed>(src)), _code(code) {}
+		lex_node(const parsed*& src, unsigned long long code = 0) noexcept : _anchor(std::shared_ptr<const parsed>(src)), _code(code) {
+			src = nullptr;
+		}
 		lex_node(std::shared_ptr<const parsed> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code) {}
 
 		lex_node() noexcept : _code(0) {}
