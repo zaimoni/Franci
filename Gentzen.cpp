@@ -1900,11 +1900,14 @@ restart:
 
 			auto stage = std::unique_ptr<inference_rule>(new inference_rule(std::move(hypothesis_like), std::move(conclusion_like)));
 			while(stage->Gentzen_parse_args());
+
 			auto stage2 = std::make_unique<formal::lex_node>(stage.release());
+			decltype(auto) dest = (*tokens.first)[offset];
+			delete dest;
+			dest = stage2.release();
+			if (no_args) error_report(*dest, "no-argument &#9500;");
+
 			tokens.first->DeleteNSlotsAt(tokens.second.size() - 1, offset + 1);
-			delete (*tokens.first)[offset];
-			(*tokens.first)[offset] = stage2.release();
-			if (no_args) error_report(*(*tokens.first)[offset], "no-argument &#9500;");
 			return true;
 		}
 
