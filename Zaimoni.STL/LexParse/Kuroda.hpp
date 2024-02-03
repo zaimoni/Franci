@@ -45,11 +45,14 @@ namespace kuroda {
 		auto begin() const { return src->begin() + offset; }
 		auto end() const { return src->begin() + offset + extent; }
 
+		auto& front() const { return *begin(); }
+		auto& back() const { return *(src->begin() + (offset + extent - 1)); }
+
 		auto to_span() const {
 			return std::span<T::value_type, std::dynamic_extent>(src->begin() + offset, extent);
 		}
 
-		T& operator[](ptrdiff_t n) const { return (*src)[offset + n]; }
+		auto& operator[](ptrdiff_t n) const { return (*src)[offset + n]; }
 	};
 #endif
 

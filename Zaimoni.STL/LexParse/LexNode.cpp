@@ -263,24 +263,29 @@ restart:
 		if (indexes.empty()) return ret;
 
 		size_t origin = 0;
+#if USING_EDIT_VIEW
 		for (const auto i : indexes) {
-			if (origin < i) {
-				const auto local_delta = i - origin;
-				ret.emplace_back(&src, std::span<lex_node*, std::dynamic_extent>(src.begin() + origin, local_delta));
-			} else {
-				ret.emplace_back(&src, std::span<lex_node*, std::dynamic_extent>(src.begin() + origin, 0));
-			}
+			const auto local_delta = origin < i ? i - origin : 0;
+			ret.emplace_back(&src, origin, local_delta);
+			origin = i + 1;
+		}
+
+		(decltype(indexes)()).swap(indexes);
+
+		const auto local_delta = origin < src.size() ? src.size() - origin : 0;
+		ret.emplace_back(&src, origin, local_delta);
+#else
+		for (const auto i : indexes) {
+			const auto local_delta = origin < i ? i - origin : 0;
+			ret.emplace_back(&src, std::span<lex_node*, std::dynamic_extent>(src.begin() + origin, local_delta));
 			origin = i+1;
 		}
 
 		(decltype(indexes)()).swap(indexes);
 
-		if (origin < src.size()) {
-			const auto local_delta = src.size() - origin;
-			ret.emplace_back(&src, std::span<lex_node*, std::dynamic_extent>(src.begin() + origin, local_delta));
-		} else {
-			ret.emplace_back(&src, std::span<lex_node*, std::dynamic_extent>(src.begin() + origin, 0));
-		}
+		const auto local_delta = origin < src.size() ? src.size() - origin : 0;
+		ret.emplace_back(&src, std::span<lex_node*, std::dynamic_extent>(src.begin() + origin, local_delta));
+#endif
 		return ret;
 	}
 
@@ -293,7 +298,8 @@ restart:
 #if USING_EDIT_VIEW
 		size_t n = 0;
 		while (src.size() > n) {
-			if (ok(src[n++])) indexes.push_back(n - 1);
+			decltype(auto) test = src[n++];
+			if (ok(*src[n++])) indexes.push_back(n - 1);
 		}
 		if (indexes.empty()) return ret;
 
@@ -339,7 +345,7 @@ restart:
 		for (decltype(auto) x : src) {
 			if (x.empty()) continue;
 			ret.emplace_back(x.size());
-			std::copy_n(*x.begin(), x.size(), ret.back().begin());
+			std::copy_n(x.begin(), x.size(), ret.back().begin());
 			std::fill_n(&(*x.begin()), x.size(), nullptr);
 		}
 #else
