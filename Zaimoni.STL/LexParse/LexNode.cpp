@@ -298,23 +298,15 @@ restart:
 
 		size_t origin = 0;
 		for (const auto i : indexes) {
-			if (origin < i) {
-				const auto local_delta = i - origin;
-				ret.emplace_back(src.first, std::span<lex_node*, std::dynamic_extent>(src.first->begin() + delta + origin, local_delta));
-			} else {
-				ret.emplace_back(src.first, std::span<lex_node*, std::dynamic_extent>(src.first->begin() + delta + origin, 0));
-			}
+			const auto local_delta = (origin < i) ? i - origin : 0;
+			ret.emplace_back(src.first, std::span<lex_node*, std::dynamic_extent>(src.first->begin() + delta + origin, local_delta));
 			origin = i + 1;
 		}
 
 		(decltype(indexes)()).swap(indexes);
 
-		if (origin < src.second.size()) {
-			const auto local_delta = src.second.size() - origin;
-			ret.emplace_back(src.first, std::span<lex_node*, std::dynamic_extent>(src.first->begin() + delta + origin, local_delta));
-		} else {
-			ret.emplace_back(src.first, std::span<lex_node*, std::dynamic_extent>(src.first->begin() + delta + origin, 0));
-		}
+		const auto local_delta = (origin < src.second.size()) ? src.second.size() - origin : 0;
+		ret.emplace_back(src.first, std::span<lex_node*, std::dynamic_extent>(src.first->begin() + delta + origin, local_delta));
 		return ret;
 	}
 
