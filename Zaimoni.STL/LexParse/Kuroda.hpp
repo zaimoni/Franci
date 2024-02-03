@@ -24,6 +24,35 @@ where A, B, C and D are nonterminal symbols and a is a terminal symbol. Some sou
 // left/right sequence edge rules may be more important
 
 namespace kuroda {
+	// edit_span typedef is questionable (doesn't re-anchor cleanly
+// #define USING_EDIT_VIEW 1
+
+#if USING_EDIT_VIEW
+	template<class T>
+	struct edit_view
+	{
+		T* src;
+		ptrdiff_t offset;
+		size_t extent;
+
+		edit_view(T& src) : src(&src), offset(0), extent(src.size()) {}
+		edit_view(T* src) : src(src), offset(0), extent(src->size()) {}
+		edit_view(T* src, ptrdiff_t offset, size_t extent) : src(src), offset(offset), extent(extent) {}
+
+		bool empty() const { return 0 >= extent; }
+		size_t size() const { return extent; }
+
+		auto begin() const { return src->begin() + offset; }
+		auto end() const { return src->begin() + offset + extent; }
+
+		auto to_span() const {
+			return std::span<T::value_type, std::dynamic_extent>(src->begin() + offset, extent);
+		}
+
+		T& operator[](ptrdiff_t n) const { return (*src)[offset + n]; }
+	};
+#endif
+
 	template<class T>
 	class parser {
 	public:
@@ -32,7 +61,11 @@ namespace kuroda {
 		using symbols = zaimoni::autovalarray_ptr_throws<T*>;
 //		using symbols = std::vector<std::unique_ptr<T> >;
 		using rewriter = std::function<std::vector<size_t>(sequence&, size_t)>;
+#if USING_EDIT_VIEW
+		using edit_span = edit_view<sequence>;
+#else
 		using edit_span = std::pair<sequence*, std::span<T*, std::dynamic_extent> >;
+#endif
 		using global_rewriter = std::function<bool(const edit_span&)>;
 		// hinting (using a return value of rewriter) looked interesting but in practice it doesn't work (many parse rules work from
 		// the same rightmost token trigger for efficiency reasons)
@@ -74,9 +107,15 @@ namespace kuroda {
 		void register_global_build(const global_rewriter& x) { global_build.push_back(x); }
 		void register_global_build(global_rewriter&& x) { global_build.push_back(std::move(x)); }
 
+#if USING_EDIT_VIEW
+		static auto to_editspan(kuroda::parser<T>::sequence& stage) {
+			return edit_span(&stage, 0, stage.size());
+		}
+#else
 		static auto to_editspan(kuroda::parser<T>::sequence& stage) {
 			return edit_span(&stage, std::span(stage.begin(), stage.size()));
 		}
+#endif
 
 		void append_to_parse(sequence& dest, T* src) {
 			if (!src) return;

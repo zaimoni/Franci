@@ -224,7 +224,11 @@ namespace formal {
 		static std::vector<edit_span> split(kuroda::parser<lex_node>::sequence& src, std::function<bool(const lex_node&)> ok);
 		static std::vector<edit_span> split(const edit_span& src, std::function<bool(const lex_node&)> ok);
 
+#if USING_EDIT_VIEW
+		static auto where_is(const edit_span& view) { return view.offset; }
+#else
 		static auto where_is(const edit_span& view) { return &(*view.second.begin()) - &(*view.first->begin()); }
+#endif
 
 		static std::vector<kuroda::parser<lex_node>::symbols> move_per_spec(const std::vector<edit_span>& src);
 
