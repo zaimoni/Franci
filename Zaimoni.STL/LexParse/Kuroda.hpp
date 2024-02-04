@@ -103,12 +103,21 @@ namespace kuroda {
 		void register_global_build(const global_rewriter& x) { global_build.push_back(x); }
 		void register_global_build(global_rewriter&& x) { global_build.push_back(std::move(x)); }
 
-		static auto to_editspan(kuroda::parser<T>::sequence* stage) {
-			return edit_span(stage, 0, stage->size());
-		}
+		static auto to_editspan(kuroda::parser<T>::sequence* stage) { return edit_span(stage, 0, stage->size()); }
+		static auto to_editspan(kuroda::parser<T>::sequence& stage) { return edit_span(&stage, 0, stage.size()); }
 
-		static auto to_editspan(kuroda::parser<T>::sequence& stage) {
-			return edit_span(&stage, 0, stage.size());
+		static void DeleteNSlotsAt(edit_span& x, size_t n, size_t Idx)
+		{
+			enum { test_preconditions = 0 };
+
+			if constexpr (test_preconditions) {
+				if (!x.src) std::cerr << "kuroda::parser<...>::DeleteNSlotsAt: null x.src\n";
+				else if (x.size() <= Idx) std::cerr << "kuroda::parser<...>::DeleteNSlotsAt: x.size() <= Idx\n";
+				else if (x.size() - Idx < n) std::cerr << "kuroda::parser<...>::DeleteNSlotsAt: x.size() - Idx < n\n";
+			}
+
+			x.src->DeleteNSlotsAt(n, x.offset+Idx);
+			x.extent -= n;
 		}
 
 		void append_to_parse(sequence& dest, T* src) {

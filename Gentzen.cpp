@@ -1469,8 +1469,7 @@ namespace gentzen {
 					decltype(auto) dest = (*tokens.src)[rescan];
 					delete dest;
 					dest = relay2.release();
-					tokens.extent -= 2;
-					tokens.src->DeleteNSlotsAt(2, rescan + 1);
+					kuroda::parser<formal::lex_node>::DeleteNSlotsAt(tokens, 2, rescan + 1);
 					if constexpr (trace_parse) {
 						std::cout << "var::global_parse: term variable ok\n";
 					}
@@ -1482,8 +1481,7 @@ namespace gentzen {
 					decltype(auto) dest = (*tokens.src)[rescan];
 					delete dest;
 					dest = relay2.release();
-					tokens.extent -= 2;
-					tokens.src->DeleteNSlotsAt(2, rescan + 1);
+					kuroda::parser<formal::lex_node>::DeleteNSlotsAt(tokens, 2, rescan + 1);
 					return true;
 				}
 			}
@@ -1933,8 +1931,7 @@ restart_conclusion:
 				std::cout << "inference_rule::global_parse: exiting: " << tokens.extent << " " << dest->to_s() << "\n";
 			}
 
-			tokens.src->DeleteNSlotsAt(tokens.size() - 1, offset + 1);
-			tokens.extent = 1;
+			kuroda::parser<formal::lex_node>::DeleteNSlotsAt(tokens, tokens.size() - 1, 1);
 			if constexpr (trace_parse) {
 				std::cout << "inference_rule::global_parse: exiting\n";
 			}
