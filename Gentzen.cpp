@@ -1403,7 +1403,7 @@ namespace gentzen {
 			return ret;
 		}
 
-		static bool global_parse(const kuroda::parser<formal::lex_node>::edit_span& tokens) {
+		static bool global_parse(kuroda::parser<formal::lex_node>::edit_span& tokens) {
 			enum { trace_parse = 0 };
 
 			const auto starting_errors = Errors.count();
@@ -1469,6 +1469,7 @@ namespace gentzen {
 					decltype(auto) dest = (*tokens.src)[rescan];
 					delete dest;
 					dest = relay2.release();
+					tokens.extent -= 2;
 					tokens.src->DeleteNSlotsAt(2, rescan + 1);
 					if constexpr (trace_parse) {
 						std::cout << "var::global_parse: term variable ok\n";
@@ -1481,6 +1482,7 @@ namespace gentzen {
 					decltype(auto) dest = (*tokens.src)[rescan];
 					delete dest;
 					dest = relay2.release();
+					tokens.extent -= 2;
 					tokens.src->DeleteNSlotsAt(2, rescan + 1);
 					return true;
 				}
@@ -1807,7 +1809,7 @@ redo_outer_parens:
 			return false;
 		}
 
-		static bool global_parse(const kuroda::parser<formal::lex_node>::edit_span& tokens) {
+		static bool global_parse(kuroda::parser<formal::lex_node>::edit_span& tokens) {
 			enum { trace_parse = 0 };
 
 			const auto starting_errors = Errors.count();
@@ -1872,9 +1874,15 @@ restart:
 			}
 
 			for (decltype(auto) view : weak_hypothesis_like) {
+				const auto old_size = view.size();
+restart_hypothesis:
 				if (interpret_substatement(view)) {
+					if constexpr (trace_parse) {
+						std::cout << "inference_rule::global_parse: hypothesis substatement:" << view.size() << " " << old_size << "\n";
+					}
+					if (view.size() == old_size) goto restart_hypothesis;
 					if (is_full_parse) {
-						const_cast<kuroda::parser<formal::lex_node>::edit_span&>(tokens) = kuroda::parser<formal::lex_node>::to_editspan(*tokens.src);
+						const_cast<kuroda::parser<formal::lex_node>::edit_span&>(tokens) = kuroda::parser<formal::lex_node>::to_editspan(tokens.src);
 						if constexpr (trace_parse) {
 							std::cout << "inference_rule::global_parse: restarting (hypothesis)\n";
 						}
@@ -1884,9 +1892,15 @@ restart:
 				}
 			}
 			for (decltype(auto) view : weak_conclusion_like) {
+				const auto old_size = view.size();
+restart_conclusion:
 				if (interpret_substatement(view)) {
+					if constexpr (trace_parse) {
+						std::cout << "inference_rule::global_parse: conclusion substatement:" << view.size() << " " << old_size << "\n";
+					}
+					if (view.size() == old_size) goto restart_conclusion;
 					if (is_full_parse) {
-						const_cast<kuroda::parser<formal::lex_node>::edit_span&>(tokens) = kuroda::parser<formal::lex_node>::to_editspan(*tokens.src);
+						const_cast<kuroda::parser<formal::lex_node>::edit_span&>(tokens) = kuroda::parser<formal::lex_node>::to_editspan(tokens.src);
 						if constexpr (trace_parse) {
 							std::cout << "inference_rule::global_parse: restarting (conclusion)\n";
 						}
@@ -1903,6 +1917,9 @@ restart:
 			decltype(_lexical_conclusions) conclusion_like = formal::lex_node::move_per_spec(weak_conclusion_like);
 
 			const bool no_args = hypothesis_like.empty() && conclusion_like.empty();
+			if constexpr (trace_parse) {
+				std::cout << "inference_rule::global_parse: no_args: " << no_args << "\n";
+			}
 
 			auto stage = std::unique_ptr<inference_rule>(new inference_rule(std::move(hypothesis_like), std::move(conclusion_like)));
 			while (stage->Gentzen_parse_args());
@@ -1912,8 +1929,15 @@ restart:
 			delete dest;
 			dest = stage2.release();
 			if (no_args) error_report(*dest, "no-argument &#9500;");
+			if constexpr (trace_parse) {
+				std::cout << "inference_rule::global_parse: exiting: " << tokens.extent << " " << dest->to_s() << "\n";
+			}
 
 			tokens.src->DeleteNSlotsAt(tokens.size() - 1, offset + 1);
+			tokens.extent = 1;
+			if constexpr (trace_parse) {
+				std::cout << "inference_rule::global_parse: exiting\n";
+			}
 			return true;
 		}
 

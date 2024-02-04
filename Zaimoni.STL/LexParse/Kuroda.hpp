@@ -62,7 +62,7 @@ namespace kuroda {
 //		using symbols = std::vector<std::unique_ptr<T> >;
 		using rewriter = std::function<std::vector<size_t>(sequence&, size_t)>;
 		using edit_span = edit_view<sequence>;
-		using global_rewriter = std::function<bool(const edit_span&)>;
+		using global_rewriter = std::function<bool(edit_span&)>;
 		// hinting (using a return value of rewriter) looked interesting but in practice it doesn't work (many parse rules work from
 		// the same rightmost token trigger for efficiency reasons)
 
@@ -102,6 +102,10 @@ namespace kuroda {
 
 		void register_global_build(const global_rewriter& x) { global_build.push_back(x); }
 		void register_global_build(global_rewriter&& x) { global_build.push_back(std::move(x)); }
+
+		static auto to_editspan(kuroda::parser<T>::sequence* stage) {
+			return edit_span(stage, 0, stage->size());
+		}
 
 		static auto to_editspan(kuroda::parser<T>::sequence& stage) {
 			return edit_span(&stage, 0, stage.size());
@@ -176,11 +180,11 @@ restart:
 			return changed;
 		}
 
-		bool finite_parse(const edit_span& dest) {
+		bool finite_parse(edit_span& dest) {
 			enum { trace_parse = 0 };
 
 			if constexpr (trace_parse) {
-				std::cout << "kuroda::finite_parse(const edit_span&): dest.size(): " << dest.size() << " " << global_build.size() << "\n";
+				std::cout << "kuroda::finite_parse(edit_span&): dest.size(): " << dest.size() << " " << global_build.size() << "\n";
 			}
 
 			for (decltype(auto) rule : global_build) {
@@ -194,10 +198,15 @@ restart:
 					return true;
 				}
 				if constexpr (trace_parse) {
-					std::cout << "kuroda::finite_parse(const edit_span&): failing rule ok\n";
+					std::cout << "kuroda::finite_parse(edit_span&): failing rule ok\n";
 				}
 			}
 			return false;
+		}
+
+		bool finite_parse(const edit_span& dest) {
+			auto relay = dest;
+			return finite_parse(relay);
 		}
 
 	private:
