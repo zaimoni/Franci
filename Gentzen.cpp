@@ -1808,15 +1808,10 @@ redo_outer_parens:
 		}
 
 		static bool global_parse(kuroda::parser<formal::lex_node>::edit_span& tokens) {
-			enum { trace_parse = 0 };
+			enum { trace_parse = 0, test_conditions = 0 };
 
 			const auto starting_errors = Errors.count();
-			const bool is_full_parse = 0 == tokens.offset && tokens.src->size() == tokens.size();
-			if constexpr (trace_parse) {
-				std::cout << "inference_rule::global_parse: is_full_parse: " << is_full_parse << "\n";
-			}
 
-restart:
 			auto args = formal::lex_node::split(tokens, [](const formal::lex_node& x) {
 				return is_parsed_HTML_entity(x, 9500UL);
 				});
@@ -1871,40 +1866,57 @@ restart:
 				std::cout << "inference_rule::global_parse: " << weak_hypothesis_like.size() << " " << weak_conclusion_like.size() << "\n";
 			}
 
+			ptrdiff_t cumulative_delta = 0;
 			for (decltype(auto) view : weak_hypothesis_like) {
+				view.offset += cumulative_delta;
+full_restart_hypothesis:
 				const auto old_size = view.size();
 restart_hypothesis:
 				if (interpret_substatement(view)) {
+					const ptrdiff_t delta = view.size() - old_size;
+					tokens.extent += delta;
+					cumulative_delta += delta;
+					if constexpr (test_conditions) {
+						if (auto err = view.bad_syntax()) {
+							std::cerr << std::string("kuroda::parser<...>::finite_parse: post-interpret_substatement view: ") + std::move(*err) << "\n";
+							throw std::logic_error(to_string(std::stacktrace::current()));
+						}
+						if (auto err = tokens.bad_syntax()) {
+							std::cerr << std::string("kuroda::parser<...>::finite_parse: post-interpret_substatement tokens: ") + std::move(*err) << "\n";
+							throw std::logic_error(to_string(std::stacktrace::current()));
+						}
+					}
 					if constexpr (trace_parse) {
 						std::cout << "inference_rule::global_parse: hypothesis substatement:" << view.size() << " " << old_size << "\n";
 					}
-					if (view.size() == old_size) goto restart_hypothesis;
-					if (is_full_parse) {
-						const_cast<kuroda::parser<formal::lex_node>::edit_span&>(tokens) = kuroda::parser<formal::lex_node>::to_editspan(tokens.src);
-						if constexpr (trace_parse) {
-							std::cout << "inference_rule::global_parse: restarting (hypothesis)\n";
-						}
-						goto restart;
-					}
-					return true;
+					if (0 == delta) goto restart_hypothesis;
+					goto full_restart_hypothesis;
 				}
 			}
 			for (decltype(auto) view : weak_conclusion_like) {
+				view.offset += cumulative_delta;
+full_restart_conclusion:
 				const auto old_size = view.size();
 restart_conclusion:
 				if (interpret_substatement(view)) {
+					const ptrdiff_t delta = view.size() - old_size;
+					tokens.extent += delta;
+					cumulative_delta += delta;
+					if constexpr (test_conditions) {
+						if (auto err = view.bad_syntax()) {
+							std::cerr << std::string("kuroda::parser<...>::finite_parse: post-interpret_substatement view: ") + std::move(*err) << "\n";
+							throw std::logic_error(to_string(std::stacktrace::current()));
+						}
+						if (auto err = tokens.bad_syntax()) {
+							std::cerr << std::string("kuroda::parser<...>::finite_parse: post-interpret_substatement tokens: ") + std::move(*err) << "\n";
+							throw std::logic_error(to_string(std::stacktrace::current()));
+						}
+					}
 					if constexpr (trace_parse) {
 						std::cout << "inference_rule::global_parse: conclusion substatement:" << view.size() << " " << old_size << "\n";
 					}
-					if (view.size() == old_size) goto restart_conclusion;
-					if (is_full_parse) {
-						const_cast<kuroda::parser<formal::lex_node>::edit_span&>(tokens) = kuroda::parser<formal::lex_node>::to_editspan(tokens.src);
-						if constexpr (trace_parse) {
-							std::cout << "inference_rule::global_parse: restarting (conclusion)\n";
-						}
-						goto restart;
-					}
-					return true;
+					if (0 == delta) goto restart_conclusion;
+					goto full_restart_conclusion;
 				}
 			}
 			if constexpr (trace_parse) {
