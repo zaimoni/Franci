@@ -7,6 +7,8 @@
 #include <functional>
 #include <span>
 #include <iostream>
+#include <string>
+#include <stacktrace>
 
 /*
 https://en.wikipedia.org/wiki/Kuroda_normal_form:
@@ -51,6 +53,13 @@ namespace kuroda {
 		}
 
 		auto& operator[](ptrdiff_t n) const { return (*src)[offset + n]; }
+
+		std::optional<std::string> bad_syntax() const {
+			if (!src) return "edit_view<...>::bad_syntax: !src\n";
+			if (src->size() <= offset) return "edit_view<...>::bad_syntax: src.size() <= offset: "+ std::to_string(src->size()) + " "+ std::to_string(offset) +"\n";
+			if (src->size() - offset < extent) return "edit_view<...>::bad_syntax: src.size() <= offset: " + std::to_string(src->size() - offset) + " " + std::to_string(extent) + "\n";
+			return std::nullopt;
+		}
 	};
 
 	template<class T>
@@ -190,10 +199,16 @@ restart:
 		}
 
 		bool finite_parse(edit_span& dest) {
-			enum { trace_parse = 0 };
+			enum { trace_parse = 0, test_conditions = 0 };
 
 			if constexpr (trace_parse) {
 				std::cout << "kuroda::finite_parse(edit_span&): dest.size(): " << dest.size() << " " << global_build.size() << "\n";
+			}
+			if constexpr (test_conditions) {
+				if (auto err = dest.bad_syntax()) {
+					std::cerr << std::string("kuroda::parser<...>::finite_parse: initial dest: ") + std::move(*err) << "\n";
+					throw std::logic_error(to_string(std::stacktrace::current()));
+				}
 			}
 
 			for (decltype(auto) rule : global_build) {
@@ -203,6 +218,12 @@ restart:
 				if (rule(dest)) {
 					if constexpr (trace_parse) {
 						std::cout << "rule succeeded\n";
+					}
+					if constexpr (test_conditions) {
+						if (auto err = dest.bad_syntax()) {
+							std::cerr << std::string("kuroda::parser<...>::finite_parse: post-rule dest: ") + std::move(*err) << "\n";
+							throw std::logic_error(to_string(std::stacktrace::current()));
+						}
 					}
 					return true;
 				}
