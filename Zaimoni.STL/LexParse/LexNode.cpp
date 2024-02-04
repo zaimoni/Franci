@@ -263,7 +263,6 @@ restart:
 		if (indexes.empty()) return ret;
 
 		size_t origin = 0;
-#if USING_EDIT_VIEW
 		for (const auto i : indexes) {
 			const auto local_delta = origin < i ? i - origin : 0;
 			ret.emplace_back(&src, origin, local_delta);
@@ -274,33 +273,29 @@ restart:
 
 		const auto local_delta = origin < src.size() ? src.size() - origin : 0;
 		ret.emplace_back(&src, origin, local_delta);
-#else
-		for (const auto i : indexes) {
-			const auto local_delta = origin < i ? i - origin : 0;
-			ret.emplace_back(&src, std::span<lex_node*, std::dynamic_extent>(src.begin() + origin, local_delta));
-			origin = i+1;
-		}
-
-		(decltype(indexes)()).swap(indexes);
-
-		const auto local_delta = origin < src.size() ? src.size() - origin : 0;
-		ret.emplace_back(&src, std::span<lex_node*, std::dynamic_extent>(src.begin() + origin, local_delta));
-#endif
 		return ret;
 	}
 
 	std::vector<lex_node::edit_span> lex_node::split(const edit_span& src, std::function<bool(const lex_node&)> ok)
 	{
+		enum { trace_parse = 0 };
+
 		std::vector<lex_node::edit_span> ret;
 		std::vector<size_t> indexes;
 		const auto delta = where_is(src);
 
-#if USING_EDIT_VIEW
+		if constexpr (trace_parse) {
+			std::cout << "lex_node::split: src.size(): " << src.size() << " " << src.extent << "\n";
+		}
+
 		size_t n = 0;
 		while (src.size() > n) {
-			decltype(auto) test = src[n++];
 			if (ok(*src[n++])) indexes.push_back(n - 1);
 		}
+		if constexpr (trace_parse) {
+			std::cout << "lex_node::split: indexes.size(): " << indexes.size() << "\n";
+		}
+
 		if (indexes.empty()) return ret;
 
 		size_t origin = 0;
@@ -314,25 +309,6 @@ restart:
 
 		const auto local_delta = (origin < src.size()) ? src.size() - origin : 0;
 		ret.emplace_back(src.src, delta + origin, local_delta);
-#else
-		size_t n = 0;
-		while (src.second.size() > n) {
-			if (ok(*(src.second[n++]))) indexes.push_back(n - 1);
-		}
-		if (indexes.empty()) return ret;
-
-		size_t origin = 0;
-		for (const auto i : indexes) {
-			const auto local_delta = (origin < i) ? i - origin : 0;
-			ret.emplace_back(src.first, std::span<lex_node*, std::dynamic_extent>(src.first->begin() + delta + origin, local_delta));
-			origin = i + 1;
-		}
-
-		(decltype(indexes)()).swap(indexes);
-
-		const auto local_delta = (origin < src.second.size()) ? src.second.size() - origin : 0;
-		ret.emplace_back(src.first, std::span<lex_node*, std::dynamic_extent>(src.first->begin() + delta + origin, local_delta));
-#endif
 		return ret;
 	}
 
@@ -341,21 +317,12 @@ restart:
 		std::vector<kuroda::parser<lex_node>::symbols> ret;
 		ret.reserve(src.size());
 
-#if USING_EDIT_VIEW
 		for (decltype(auto) x : src) {
 			if (x.empty()) continue;
 			ret.emplace_back(x.size());
 			std::copy_n(x.begin(), x.size(), ret.back().begin());
 			std::fill_n(&(*x.begin()), x.size(), nullptr);
 		}
-#else
-		for (decltype(auto) x : src) {
-			if (x.second.empty()) continue;
-			ret.emplace_back(x.second.size());
-			std::copy_n(x.second.begin(), x.second.size(), ret.back().begin());
-			std::fill_n(&(*x.second.begin()), x.second.size(), nullptr);
-		}
-#endif
 
 		return ret;
 	}

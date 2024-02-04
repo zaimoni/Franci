@@ -6,6 +6,7 @@
 #include <memory>
 #include <functional>
 #include <span>
+#include <iostream>
 
 /*
 https://en.wikipedia.org/wiki/Kuroda_normal_form:
@@ -25,9 +26,6 @@ where A, B, C and D are nonterminal symbols and a is a terminal symbol. Some sou
 
 namespace kuroda {
 	// edit_span typedef is questionable (doesn't re-anchor cleanly
-// #define USING_EDIT_VIEW 1
-
-#if USING_EDIT_VIEW
 	template<class T>
 	struct edit_view
 	{
@@ -54,7 +52,6 @@ namespace kuroda {
 
 		auto& operator[](ptrdiff_t n) const { return (*src)[offset + n]; }
 	};
-#endif
 
 	template<class T>
 	class parser {
@@ -64,11 +61,7 @@ namespace kuroda {
 		using symbols = zaimoni::autovalarray_ptr_throws<T*>;
 //		using symbols = std::vector<std::unique_ptr<T> >;
 		using rewriter = std::function<std::vector<size_t>(sequence&, size_t)>;
-#if USING_EDIT_VIEW
 		using edit_span = edit_view<sequence>;
-#else
-		using edit_span = std::pair<sequence*, std::span<T*, std::dynamic_extent> >;
-#endif
 		using global_rewriter = std::function<bool(const edit_span&)>;
 		// hinting (using a return value of rewriter) looked interesting but in practice it doesn't work (many parse rules work from
 		// the same rightmost token trigger for efficiency reasons)
@@ -110,15 +103,9 @@ namespace kuroda {
 		void register_global_build(const global_rewriter& x) { global_build.push_back(x); }
 		void register_global_build(global_rewriter&& x) { global_build.push_back(std::move(x)); }
 
-#if USING_EDIT_VIEW
 		static auto to_editspan(kuroda::parser<T>::sequence& stage) {
 			return edit_span(&stage, 0, stage.size());
 		}
-#else
-		static auto to_editspan(kuroda::parser<T>::sequence& stage) {
-			return edit_span(&stage, std::span(stage.begin(), stage.size()));
-		}
-#endif
 
 		void append_to_parse(sequence& dest, T* src) {
 			if (!src) return;
@@ -190,8 +177,25 @@ restart:
 		}
 
 		bool finite_parse(const edit_span& dest) {
+			enum { trace_parse = 0 };
+
+			if constexpr (trace_parse) {
+				std::cout << "kuroda::finite_parse(const edit_span&): dest.size(): " << dest.size() << " " << global_build.size() << "\n";
+			}
+
 			for (decltype(auto) rule : global_build) {
-				if (rule(dest)) return true;
+				if constexpr (trace_parse) {
+					std::cout << "attemptng rule\n";
+				}
+				if (rule(dest)) {
+					if constexpr (trace_parse) {
+						std::cout << "rule succeeded\n";
+					}
+					return true;
+				}
+				if constexpr (trace_parse) {
+					std::cout << "kuroda::finite_parse(const edit_span&): failing rule ok\n";
+				}
 			}
 			return false;
 		}

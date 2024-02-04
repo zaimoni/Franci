@@ -1413,7 +1413,6 @@ namespace gentzen {
 				});
 			if (args.empty()) return false;
 
-#if USING_EDIT_VIEW
 			decltype(auto) origin = *args.front().src; // backward compatibility
 			const auto offset = formal::lex_node::where_is(tokens);
 
@@ -1486,80 +1485,6 @@ namespace gentzen {
 					return true;
 				}
 			}
-#else
-			decltype(auto) origin = *args.front().first; // backward compatibility
-			const auto offset = formal::lex_node::where_is(tokens);
-
-			if (2 < args.size()) {
-				for (decltype(auto) fail : args) {
-					if (auto loc = formal::lex_node::where_is(fail)) {
-						formal::lex_node& err = *origin[loc - 1];
-						if (!(err.code() & formal::Error)) error_report(err, "non-associative ambiguous parse: &isin;");
-					}
-				}
-				return false;
-			}
-
-			decltype(auto) anchor = args[0].second.empty() ? origin : (&(args[0].second.back()) + 1);
-			std::shared_ptr<const domain> have_domain;
-			bool have_var = false;
-			bool have_quantifier = false;
-			unsigned int quantifier_code = 0;
-
-			auto& lhs = args[0].second;
-			if (lhs.empty()) {
-				if (!((*anchor)->code() & formal::Error)) error_report(**anchor, "&isin; cannot match to its left");
-			} else {
-				have_quantifier = (lhs.back()->code() & var::LexQuantifier);
-				if (have_quantifier) {
-					quantifier_code = legal_quantifier(*lhs.back()->c_anchor<formal::word>());
-				} else {
-					have_var = legal_varname(*lhs.back());
-				}
-			};
-			auto& rhs = args[1].second;
-			if (rhs.empty()) {
-				if (!((*anchor)->code() & formal::Error)) error_report(**anchor, "&isin; cannot match to its right");
-			} else {
-				// \todo would like to "see through" grouping parentheses, but not ordered tuples
-				have_domain = rhs.front()->shared_anchor<domain>();
-			}
-
-			if constexpr (trace_parse) {
-				std::cout << "var::global_parse: " << have_var << " " << have_quantifier << " " << quantifier_code << " " << (bool)have_domain << "\n";
-			}
-
-			if (starting_errors < Errors.count()) return false;
-
-			if (have_domain && 1 == rhs.size() && 1 == lhs.size()) {
-				if (have_var) {
-					const auto rescan = offset + lhs.size() - 1;
-					if constexpr (trace_parse) {
-						std::cout << "var::global_parse: " << rescan << " " << offset << " " << lhs.size() << " " << rhs.size() << " " << tokens.first->size() << "\n";
-					}
-					auto relay = std::unique_ptr<const var>(new var(quantifier::Term, std::shared_ptr<const formal::lex_node>(lhs.back()), have_domain));
-					lhs.back() = nullptr;
-					auto relay2 = std::make_unique<formal::lex_node>(relay.release(), formal::RequestNormalization);
-					decltype(auto) dest = (*tokens.first)[rescan];
-					delete dest;
-					dest = relay2.release();
-					tokens.first->DeleteNSlotsAt(2, rescan+1);
-					if constexpr (trace_parse) {
-						std::cout << "var::global_parse: term variable ok\n";
-					}
-					return true;
-				} else if (0 < quantifier_code) {
-					const auto rescan = offset + lhs.size() - 1;
-					auto relay = std::unique_ptr<const var>(new var((quantifier)quantifier_code, std::shared_ptr<const formal::lex_node>(lhs.back()->release_post_anchor<formal::lex_node>()), have_domain));
-					auto relay2 = std::make_unique<formal::lex_node>(relay.release(), formal::RequestNormalization);
-					decltype(auto) dest = (*tokens.first)[rescan];
-					delete dest;
-					dest = relay2.release();
-					tokens.first->DeleteNSlotsAt(2, rescan + 1);
-					return true;
-				}
-			}
-#endif
 
 			return false;
 		}
@@ -1837,7 +1762,6 @@ retry:
 		{
 			enum { trace_parse = 0 };
 
-#if USING_EDIT_VIEW
 			if constexpr (trace_parse) {
 				std::cout << "inference_rule::interpret_substatement: " << view.size() << "\n";
 			}
@@ -1846,63 +1770,20 @@ retry:
 			case 0: return false;
 			case 1: {
 				decltype(auto) dest = view.front();
-			redo_outer_parens:
-				if (dest->has_outer_parentheses()) {
-					decltype(auto) parsing = &static_cast<kuroda::parser<formal::lex_node>::sequence&>(const_cast<kuroda::parser<formal::lex_node>::symbols&>(dest->infix()));
-					switch (parsing->size()) {
-					case 0: return false;
-					case 1: {
-						formal::lex_node* test = parsing->front();
-						parsing->front() = nullptr;
-						delete dest; // invalidates variable parsing
-						dest = test;
-						goto redo_outer_parens;
-					}
-					default: { // in this context, an ordered tuple would be a syntax error
-						auto stage = kuroda::parser<formal::lex_node>::to_editspan(*parsing);
-						if (GentzenGrammar().finite_parse(stage)) return true;
-					}
-					}
-				}
-			}
-				  break;
-			default:
-				if constexpr (trace_parse) {
-					std::cout << "inference_rule::interpret_substatement: attemptng GentzenGrammar().finite_parse(view)\n";
-				}
-				if (GentzenGrammar().finite_parse(view)) {
-					if constexpr (trace_parse) {
-						std::cout << "inference_rule::interpret_substatement: GentzenGrammar().finite_parse(view) successful\n";
-					}
-					return true;
-				}
-				if constexpr (trace_parse) {
-					std::cout << "inference_rule::interpret_substatement: GentzenGrammar().finite_parse(view) ok\n";
-				}
-			}
-#else
-			if constexpr (trace_parse) {
-				std::cout << "inference_rule::interpret_substatement: " << view.second.size() << "\n";
-			}
-
-			switch (view.second.size()) {
-			case 0: return false;
-			case 1: {
-				decltype(auto) dest = view.second.front();
 redo_outer_parens:
 				if (dest->has_outer_parentheses()) {
-					decltype(auto) parsing = &static_cast<kuroda::parser<formal::lex_node>::sequence&>(const_cast<kuroda::parser<formal::lex_node>::symbols&>(dest->infix()));
-					switch (parsing->size()) {
+					decltype(auto) parsing = static_cast<kuroda::parser<formal::lex_node>::sequence&>(const_cast<kuroda::parser<formal::lex_node>::symbols&>(dest->infix()));
+					switch (parsing.size()) {
 					case 0: return false;
 					case 1: {
-						formal::lex_node* test = parsing->front();
-						parsing->front() = nullptr;
+						formal::lex_node* test = parsing.front();
+						parsing.front() = nullptr;
 						delete dest; // invalidates variable parsing
 						dest = test;
 						goto redo_outer_parens;
 					}
 					default: { // in this context, an ordered tuple would be a syntax error
-						formal::lex_node::edit_span stage(parsing, std::span<formal::lex_node*, std::dynamic_extent>(parsing->begin(), parsing->size()));
+						auto stage = kuroda::parser<formal::lex_node>::to_editspan(parsing);
 						if (GentzenGrammar().finite_parse(stage)) return true;
 					}
 					}
@@ -1923,7 +1804,6 @@ redo_outer_parens:
 					std::cout << "inference_rule::interpret_substatement: GentzenGrammar().finite_parse(view) ok\n";
 				}
 			}
-#endif
 			return false;
 		}
 
@@ -1931,13 +1811,19 @@ redo_outer_parens:
 			enum { trace_parse = 0 };
 
 			const auto starting_errors = Errors.count();
-#if USING_EDIT_VIEW
 			const bool is_full_parse = 0 == tokens.offset && tokens.src->size() == tokens.size();
+			if constexpr (trace_parse) {
+				std::cout << "inference_rule::global_parse: is_full_parse: " << is_full_parse << "\n";
+			}
 
 restart:
 			auto args = formal::lex_node::split(tokens, [](const formal::lex_node& x) {
 				return is_parsed_HTML_entity(x, 9500UL);
 				});
+			if constexpr (trace_parse) {
+				std::cout << "inference_rule::global_parse: args.size(): " << args.size() << "\n";
+			}
+
 			if (args.empty()) return false;
 
 			decltype(auto) origin = *tokens.src; // backward compatibility
@@ -2028,105 +1914,6 @@ restart:
 			if (no_args) error_report(*dest, "no-argument &#9500;");
 
 			tokens.src->DeleteNSlotsAt(tokens.size() - 1, offset + 1);
-#else
-			const bool is_full_parse = tokens.first->begin() == &(*tokens.second.begin())
-				                    && tokens.first->size()  ==    tokens.second.size();
-
-restart:
-			auto args = formal::lex_node::split(tokens, [](const formal::lex_node& x) {
-				return is_parsed_HTML_entity(x, 9500UL);
-			});
-			if (args.empty()) return false;
-
-			decltype(auto) origin = *args.front().first; // backward compatibility
-			const auto offset = formal::lex_node::where_is(tokens);
-
-			if (2 < args.size()) {
-				for (decltype(auto) fail : args) {
-					if (const auto loc = formal::lex_node::where_is(fail)) {
-						formal::lex_node& err = *origin[loc - 1];
-						if (!(err.code() & formal::Error)) error_report(err, "non-associative ambiguous parse: &#9500;");
-					}
-				}
-				return false;
-			}
-
-			auto weak_hypothesis_like = formal::lex_node::split(args[0], detect_comma);
-			if (weak_hypothesis_like.empty()) weak_hypothesis_like.push_back(args[0]);
-			else {
-				for (decltype(auto) x : weak_hypothesis_like) {
-					if (x.second.empty()) {
-						if (origin != &(*x.second.begin())) {
-							formal::lex_node& err = **(&(*x.second.begin()) - 1);
-							if (!(err.code() & formal::Error)) error_report(err, ", delimits missing argument for &#9500;");
-						}
-					}
-				}
-			}
-
-			auto weak_conclusion_like = formal::lex_node::split(args[1], detect_comma);
-			if (weak_conclusion_like.empty()) weak_conclusion_like.push_back(args[1]);
-			else {
-				for (decltype(auto) x : weak_conclusion_like) {
-					if (x.second.empty()) {
-						if (origin != &(*x.second.begin())) {
-							formal::lex_node& err = **(&(*x.second.begin()) - 1);
-							if (!(err.code() & formal::Error)) error_report(err, ", delimits missing argument for &#9500;");
-						}
-					}
-				}
-			}
-
-			if (starting_errors < Errors.count()) return false;
-
-			if constexpr (trace_parse) {
-				std::cout << "inference_rule::global_parse: " << weak_hypothesis_like.size() << " " << weak_conclusion_like.size() << "\n";
-			}
-
-			for (decltype(auto) view : weak_hypothesis_like) {
-				if (interpret_substatement(view)) {
-					if (is_full_parse) {
-						const_cast<kuroda::parser<formal::lex_node>::edit_span&>(tokens) = kuroda::parser<formal::lex_node>::to_editspan(*tokens.first);
-						if constexpr (trace_parse) {
-							std::cout << "inference_rule::global_parse: restarting (hypothesis)\n";
-						}
-						goto restart;
-					}
-					return true;
-				}
-			}
-			for (decltype(auto) view : weak_conclusion_like) {
-				if (interpret_substatement(view)) {
-					if (is_full_parse) {
-						const_cast<kuroda::parser<formal::lex_node>::edit_span&>(tokens) = kuroda::parser<formal::lex_node>::to_editspan(*tokens.first);
-						if constexpr (trace_parse) {
-							std::cout << "inference_rule::global_parse: restarting (conclusion)\n";
-						}
-						goto restart;
-					}
-					return true;
-				}
-			}
-			if constexpr (trace_parse) {
-				std::cout << "inference_rule::global_parse: interpret_substatement ok\n";
-			}
-
-			decltype(_lexical_hypotheses) hypothesis_like = formal::lex_node::move_per_spec(weak_hypothesis_like);
-			decltype(_lexical_conclusions) conclusion_like = formal::lex_node::move_per_spec(weak_conclusion_like);
-
-			const bool no_args = hypothesis_like.empty() && conclusion_like.empty();
-
-			auto stage = std::unique_ptr<inference_rule>(new inference_rule(std::move(hypothesis_like), std::move(conclusion_like)));
-			while(stage->Gentzen_parse_args());
-
-			auto stage2 = std::make_unique<formal::lex_node>(stage.release());
-			decltype(auto) dest = (*tokens.first)[offset];
-			delete dest;
-			dest = stage2.release();
-			if (no_args) error_report(*dest, "no-argument &#9500;");
-
-			tokens.first->DeleteNSlotsAt(tokens.second.size() - 1, offset + 1);
-#endif
 			return true;
 		}
 
