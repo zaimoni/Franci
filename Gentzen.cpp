@@ -1679,6 +1679,10 @@ private:
 			: _lexical_hypotheses(std::move(hypotheses)), _lexical_conclusions(std::move(conclusions)) {
 		}
 
+		inference_rule(decltype(_hypotheses)&& hypotheses, decltype(_conclusions)&& conclusions, decltype(_vars)&& vars)
+			: _vars(std::move(vars)), _hypotheses(std::move(hypotheses)), _conclusions(std::move(conclusions)) {
+		}
+
 	public:
 		inference_rule() = delete; // empty inference rule doesn't make much sense
 		inference_rule(const inference_rule& src) = default;
@@ -1977,6 +1981,42 @@ restart_conclusion:
 					if (0 == delta) goto restart_conclusion;
 					goto full_restart_conclusion;
 				}
+			}
+
+			decltype(_hypotheses) gentzen_hypotheses;
+			decltype(_conclusions) gentzen_conclusions;
+
+			while (!weak_hypothesis_like.empty()) {
+				if (1 != weak_hypothesis_like.front().size()) break;
+				decltype(auto) gentzen_test = dynamic_cast<const Gentzen*>(weak_hypothesis_like.front().front()->c_anchor<formal::parsed>());
+				if (!gentzen_test) break;
+				gentzen_hypotheses.push_back(weak_hypothesis_like.front().front()->shared_anchor<Gentzen>());
+				weak_hypothesis_like.erase(weak_hypothesis_like.begin());
+			}
+
+			while (!weak_conclusion_like.empty()) {
+				if (1 != weak_conclusion_like.front().size()) break;
+				decltype(auto) gentzen_test = dynamic_cast<const Gentzen*>(weak_conclusion_like.front().front()->c_anchor<formal::parsed>());
+				if (!gentzen_test) break;
+				gentzen_conclusions.push_back(weak_conclusion_like.front().front()->shared_anchor<Gentzen>());
+				weak_conclusion_like.erase(weak_conclusion_like.begin());
+			}
+
+			if (weak_hypothesis_like.empty() && weak_conclusion_like.empty()) {
+				const bool no_args = gentzen_hypotheses.empty() && gentzen_conclusions.empty();
+				auto stage = std::unique_ptr<const inference_rule>(new inference_rule(std::move(gentzen_hypotheses), std::move(gentzen_conclusions), std::move(local_vars)));
+
+				auto stage2 = std::make_unique<formal::lex_node>(stage.release());
+				decltype(auto) dest = tokens.front();
+				delete dest;
+				dest = stage2.release();
+				if (no_args) error_report(*dest, "no-argument &#9500;");
+				if constexpr (trace_parse) {
+					std::cout << "inference_rule::global_parse: Gentzen exiting: " << tokens.extent << " " << dest->to_s() << "\n";
+				}
+
+				kuroda::parser<formal::lex_node>::DeleteNSlotsAt(tokens, tokens.size() - 1, 1);
+				return true;
 			}
 
 			decltype(_lexical_hypotheses) hypothesis_like = formal::lex_node::move_per_spec(weak_hypothesis_like);
