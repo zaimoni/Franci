@@ -152,6 +152,65 @@ namespace formal {
 		return false;
 	}
 
+	bool lex_node::recursive_rewrite(std::function<bool(const lex_node&)> test, std::function<void(lex_node&)> op)
+	{
+		bool ret = false;
+
+		if (!_prefix.empty()) {
+			for (decltype(auto) x : _prefix) {
+				if (test(*x)) {
+					op(*x);
+					ret = true;
+				}
+			}
+		}
+		if (!_infix.empty()) {
+			for (decltype(auto) x : _infix) {
+				if (test(*x)) {
+					op(*x);
+					ret = true;
+				}
+			}
+		}
+		if (!_postfix.empty()) {
+			for (decltype(auto) x : _postfix) {
+				if (test(*x)) {
+					op(*x);
+					ret = true;
+				}
+			}
+		}
+		if (!_fragments.empty()) {
+			for (decltype(auto) scan : _fragments) {
+				for (decltype(auto) x : scan) {
+					if (test(*x)) {
+						op(*x);
+						ret = true;
+					}
+				}
+			}
+		} else { // only check anchor if no fragments
+			if (decltype(auto) x = c_anchor<formal::lex_node>()) {
+				if (test(*x)) {
+					op(*anchor<formal::lex_node>());
+					ret = true;
+				}
+			}
+		}
+		if (decltype(auto) x = c_post_anchor<formal::lex_node>()) {
+			if (test(*x)) {
+				op(*post_anchor<formal::lex_node>());
+				ret = true;
+			}
+		}
+		if (test(*this)) {
+			op(*this);
+			ret = true;
+		}
+		return ret;
+	}
+
+
 	std::string lex_node::to_s() const
 	{
 		std::ostringstream stage;

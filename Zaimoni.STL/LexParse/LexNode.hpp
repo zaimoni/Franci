@@ -209,6 +209,7 @@ namespace formal {
 
 		static bool rewrite(lex_node** target, std::function<lex_node* (lex_node* target)> op);
 		static bool rewrite(lex_node*& target, std::function<lex_node*(lex_node* target)> op);
+		bool recursive_rewrite(std::function<bool(const lex_node&)> test, std::function<void(lex_node&)> op);
 
 		std::string to_s() const;
 		void to_s(std::ostream& dest) const;
