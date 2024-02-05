@@ -1592,6 +1592,40 @@ private:
 			return false;
 		}
 
+		static bool make(std::shared_ptr<const var>& src, formal::lex_node* x) {
+			enum { trace_parse = 0 };
+
+			if (auto test = x->c_anchor<formal::parsed>()) {
+				if (dynamic_cast<const var*>(test)) return false;
+				if (dynamic_cast<const var_ref*>(test)) return false;
+			}
+
+			auto rewrite_ok = [my_name=src->name()](const formal::lex_node& target) {
+				if (auto test = target.c_anchor<formal::parsed>()) {
+					if (dynamic_cast<const var*>(test)) return false;
+					if (dynamic_cast<const var_ref*>(test)) return false;
+				}
+				if (!var::legal_varname(target)) return false;
+				if constexpr (trace_parse) {
+					std::cout << "checking for var_ref\n";
+					std::cout << my_name << "\n";
+					std::cout << target.to_s() << "\n";
+				}
+				return my_name == target.to_s();
+			};
+
+			auto exec_rewrite = [&src](formal::lex_node& target) {
+				auto stage = std::unique_ptr<var_ref>(new var_ref(src, target.origin()));
+				target = std::shared_ptr<const formal::parsed>(stage.release());
+
+				if constexpr (trace_parse) {
+					std::cout << "var_ref created\n";
+				}
+			};
+
+			return x->recursive_rewrite(rewrite_ok, exec_rewrite);
+		}
+
 		static std::unique_ptr<var_ref> improvise(formal::lex_node*& name, std::shared_ptr<const domain> domain, const var::live_caches_t& catalog) {
 			const auto origin = name->origin();
 			if (decltype(auto) test = var::lookup(*name, catalog)) {
@@ -1866,6 +1900,7 @@ redo_outer_parens:
 				std::cout << "inference_rule::global_parse: " << weak_hypothesis_like.size() << " " << weak_conclusion_like.size() << "\n";
 			}
 
+			var::cache_t local_vars;
 			ptrdiff_t cumulative_delta = 0;
 			for (decltype(auto) view : weak_hypothesis_like) {
 				view.offset += cumulative_delta;
@@ -1889,6 +1924,21 @@ restart_hypothesis:
 					if constexpr (trace_parse) {
 						std::cout << "inference_rule::global_parse: hypothesis substatement:" << view.size() << " " << old_size << "\n";
 					}
+
+					if (1 == view.size()) {
+						if (auto test = var::WantsToMakeVarRefs(view[0])) {
+							local_vars.push_back(test);
+							for (decltype(auto) x : *tokens.src) {
+								var_ref::make(test, x);
+							}
+							view[0]->forget(formal::RequestNormalization);
+						}
+					}
+
+					if constexpr (trace_parse) {
+						std::cout << "inference_rule::global_parse: interpret_substatement ok; local_vars.size(): " << local_vars.size() << "\n";
+					}
+
 					if (0 == delta) goto restart_hypothesis;
 					goto full_restart_hypothesis;
 				}
@@ -1915,12 +1965,18 @@ restart_conclusion:
 					if constexpr (trace_parse) {
 						std::cout << "inference_rule::global_parse: conclusion substatement:" << view.size() << " " << old_size << "\n";
 					}
+
+					if (1 == view.size()) {
+						if (auto test = var::WantsToMakeVarRefs(view[0])) local_vars.push_back(test);
+					}
+
+					if constexpr (trace_parse) {
+						std::cout << "inference_rule::global_parse: interpret_substatement ok; local_vars.size(): " << local_vars.size() << "\n";
+					}
+
 					if (0 == delta) goto restart_conclusion;
 					goto full_restart_conclusion;
 				}
-			}
-			if constexpr (trace_parse) {
-				std::cout << "inference_rule::global_parse: interpret_substatement ok\n";
 			}
 
 			decltype(_lexical_hypotheses) hypothesis_like = formal::lex_node::move_per_spec(weak_hypothesis_like);

@@ -76,6 +76,7 @@ namespace formal {
 		auto code() const { return _code; }
 		void interpret(unsigned long long src) { _code = src; }
 		void learn(unsigned long long src) { _code |= src; }
+		void forget(unsigned long long src) { _code &= ~src; }
 
 		template<class Val>
 		Val* anchor() requires requires { std::get_if<zaimoni::COW<Val> >(&_anchor); }
