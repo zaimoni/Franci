@@ -35,9 +35,9 @@ constexpr const char* const AlphaNoEffectFunctionCall = "ALPHA ERROR: function c
 constexpr const char* const AlphaRetValAssumption = "ALPHA ERROR: function return value assumptions violated.  I QUIT!";
 constexpr const char* const RAMFailure = "FATAL ERROR: irrecoverable RAM failure in computation.  I QUIT!";
 
-void UnconditionalDataIntegrityFailure(void) NO_RETURN;
-void UnconditionalRAMFailure(void) NO_RETURN;
-void UnconditionalCallAssumptionFailure(void) NO_RETURN;
+NO_RETURN void UnconditionalDataIntegrityFailure();
+NO_RETURN void UnconditionalRAMFailure();
+NO_RETURN void UnconditionalCallAssumptionFailure();
 
 void ReportTime(clock_t Clock0, clock_t Clock1);
 

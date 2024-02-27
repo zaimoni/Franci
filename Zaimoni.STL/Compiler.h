@@ -132,7 +132,6 @@
    PURE_C_FUNC: no effects except return value, return value depends only on parameters and global variables
    PTR_RESTRICT: C99 restrict semantics (pointer may be assumed not to be aliased) */
 #define NO_RETURN
-#define MS_NO_RETURN
 #define CONST_C_FUNC
 #define PURE_C_FUNC
 #define ALL_PTR_NONNULL
@@ -155,10 +154,6 @@
 #define PTR_RESTRICT __restrict__
 #endif
 
-#ifdef __cpp_attributes
-#undef MS_NO_RETURN
-#define MS_NO_RETURN [[noreturn]]
-#else
 #ifdef __GNUC__
 #undef NO_RETURN
 #define NO_RETURN __attribute__((noreturn))
@@ -167,6 +162,10 @@
 #undef MS_NO_RETURN
 #define MS_NO_RETURN __declspec(noreturn)
 #endif
+
+#ifdef __cplusplus
+#	undef NO_RETURN
+#	define NO_RETURN [[noreturn]]
 #endif
 
 /* other compiler blocks */
