@@ -1,0 +1,30 @@
+BEG_G {
+    graph_t dest = graph("image", "DS");
+//  request breadth-first search; as long as we're acyclic the filter on edge processing should be ok
+    $tvtype = TV_bfs;
+    node_t stage = isNode($, ARGV[0]);
+
+    if (stage) {
+        clone(dest, stage);
+        $tvroot = stage;
+    }
+}
+// ensure that the nodes we need are recorded "fast"
+N {
+    node_t want_dest = isNode(dest,$.name);
+    if (want_dest) {
+        edge_t st = fstin($);
+        while(st) {
+            clone(dest, st);
+            st = nxtin(st);
+        }
+    }
+}
+E {
+    if (isNode(dest,$.head.name)) {
+        clone(dest, $);
+    }
+}
+END_G {
+    write(dest);
+}
