@@ -47,6 +47,11 @@ target_link_libraries(Gentzen z_kuroda z_log_adapter z_stdio_log z_memory)
 target_link_options(Gentzen PRIVATE /FORCE:MULTIPLE)
 target_compile_definitions(Gentzen PUBLIC GENTZEN_DRIVER)
 
+add_executable(GentzenW GentzenW.cpp HTMLtag.cpp)
+target_link_libraries(GentzenW z_kuroda z_log_adapter z_stdio_log z_memory)
+target_link_options(GentzenW PRIVATE /FORCE:MULTIPLE)
+target_compile_definitions(GentzenW PUBLIC GENTZEN_DRIVER)
+
 add_custom_command(TARGET Franci POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         $<TARGET_FILE:z_memory>

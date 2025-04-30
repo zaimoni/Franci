@@ -141,7 +141,7 @@ void _copy_expendable_buffer(T* dest, T* src, size_t Idx) noexcept(std::is_nothr
 template<typename T>
 void _vector_assign(T* dest, typename zaimoni::param<T>::type src, size_t Idx)
 {
-	if (std::is_trivially_copy_assignable_v(T) && 1 == sizeof(T)) {
+	if constexpr (std::is_trivially_copy_assignable_v<T> && 1 == sizeof(T)) {
 		memset(dest, src, Idx);
 	} else {
 		do	dest[--Idx] = src;
