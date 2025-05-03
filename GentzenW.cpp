@@ -1,6 +1,9 @@
 #include "Zaimoni.STL/LexParse/LexNode.hpp"
 
 #ifdef GENTZEN_DRIVER
+// https://github.com/fktn-k/fkYAML; MIT license
+#include "fkYAML/node.hpp"
+
 #include "HTMLtag.hpp"
 #include "Zaimoni.STL/LexParse/string_view.hpp"
 #include "Zaimoni.STL/stack.hpp"
@@ -868,6 +871,22 @@ static auto to_lines(std::istream& in, formal::src_location& origin)
 	return ret;
 }
 
+//template<bool C_Shell_Line_Continue = true>
+static auto to_lines(std::vector<std::string>& in, formal::src_location& origin)
+{
+	kuroda::parser<formal::word>::symbols ret;
+	for (const auto& x : in) {
+		if (!x.empty()) {
+			std::unique_ptr<const std::string> next(new std::string(std::move(x)));
+			LineGrammar().append_to_parse(ret, new formal::word(std::shared_ptr<const std::string>(next.release()), origin));
+		}
+
+		origin.line_pos.first++;
+		origin.line_pos.second = 0;
+	}
+	return ret;
+}
+
 enum TG_modes {
 	TG_HTML_tag = 59,
 	TG_MAX
@@ -1247,7 +1266,6 @@ static auto apply_grammar(kuroda::parser<formal::lex_node>& grammar, std::unique
 	return stage;
 }
 
-
 template<class T>
 static auto apply_grammar(kuroda::parser<formal::lex_node>& grammar, typename kuroda::parser<T>::symbols& lines)
 {
@@ -1259,6 +1277,156 @@ static auto apply_grammar(kuroda::parser<formal::lex_node>& grammar, typename ku
 	};
 	return stage;
 }
+
+class undefined_SVO {
+private:
+	std::vector<formal::lex_node> _postfix;
+
+	static std::unique_ptr<undefined_SVO>& _get()
+	{
+		static std::unique_ptr<undefined_SVO> oaoo;
+		if (!oaoo) {
+			oaoo = decltype(oaoo)(new decltype(oaoo)::element_type());
+			oaoo->load();
+		}
+		return oaoo;
+	}
+public:
+	static constexpr const unsigned long long postfix = (1ULL << 2); // reserve this flag for both word and lex_node
+
+	static_assert(!(formal::Comment & postfix));
+	static_assert(!(formal::Error & postfix));
+	static_assert(!(formal::Inert_Token & postfix));
+	static_assert(!(formal::Tokenized & postfix));
+	static_assert(!(HTMLtag::Entity & postfix));
+
+	undefined_SVO() = default;
+
+	static undefined_SVO& get() { return *_get(); }
+
+private:
+	void load() {
+		std::ifstream ifs("cfg/core.yaml");
+
+		fkyaml::node root = fkyaml::node::deserialize(ifs);
+		std::vector<std::string> dest;
+
+		if (root.contains("SVO_postfix_undefined")) {
+			fkyaml::from_node(root["SVO_postfix_undefined"], dest);
+
+			formal::src_location src(std::pair(1, 0), std::shared_ptr<const std::filesystem::path>(new std::filesystem::path("cfg/core.yaml:SVO_postfix_undefined")));
+			auto lines = to_lines(dest, src);
+			while (!lines.empty()) {
+				try {
+					const auto prior_errors = Errors.count();
+					auto stage = apply_grammar(TokenGrammar(), formal::lex_node::pop_front(lines));
+					src.line_pos.first++;
+					src.line_pos.second = 0;
+					if (prior_errors < Errors.count()) continue;
+					if (1 == stage[0]->is_pure_anchor()) {
+						formal::lex_node tmp(*stage[0]);
+						stage.DeleteIdx(0);
+						if (!stage.empty()) {
+							bool ok = true;
+							for (decltype(auto) x : stage) {
+								if (1 != x->is_pure_anchor()) {
+									error_report(*x, "need more sophisticated parser");
+									ok = false;
+									break;
+								}
+							}
+							tmp.set_postfix(std::move(stage));
+						}
+						_postfix.push_back(std::move(tmp));
+					}
+					else {
+						error_report(*stage[0], "not a lexical word");
+					}
+				}
+				catch (std::exception& e) {
+					std::cout << "line iteration body: " << e.what() << "\n";
+					return;
+				}
+			}
+		}
+
+		(decltype(dest)()).swap(dest);
+
+		// test driver
+		if (root.contains("test_lines")) {
+			fkyaml::from_node(root["test_lines"], dest);
+
+			formal::src_location src(std::pair(1, 0), std::shared_ptr<const std::filesystem::path>(new std::filesystem::path("cfg/core.yaml:test_lines")));
+			auto lines = to_lines(dest, src);
+			std::cout << "lines = to_lines(dest, src); ok\n";
+			while (!lines.empty()) {
+				try {
+					const auto prior_errors = Errors.count();
+					auto stage = apply_grammar(TokenGrammar(), formal::lex_node::pop_front(lines));
+					src.line_pos.first++;
+					src.line_pos.second = 0;
+					if (prior_errors < Errors.count()) continue;
+
+					kuroda::parser<formal::lex_node>::edit_span scan(stage);
+
+					global_parse(scan);
+					formal::lex_node::to_s(std::cout, stage);
+					std::cout << "\n";
+				}
+				catch (std::exception& e) {
+					std::cout << "line iteration body: " << e.what() << "\n";
+					return;
+				}
+			}
+		}
+	}
+
+public:
+	static bool global_parse(kuroda::parser<formal::lex_node>::edit_span& tokens) {
+		enum { trace_parse = 0 };
+
+		const auto starting_errors = Errors.count();
+		const auto& x = get();
+
+		ptrdiff_t n = -1;
+		for (const auto& phrase : x._postfix) {
+			++n;
+			const auto reverse_offset = 1 + phrase.postfix().size();
+			if (tokens.size() <= reverse_offset) continue;	// won't match
+
+			const auto phrase_origin = tokens.size() - reverse_offset;
+			kuroda::parser<formal::lex_node>::edit_span stage(tokens, phrase_origin, reverse_offset);
+
+			if (0 != phrase.token_compare(stage)) continue;	// doesn't match
+			// did match: attempt parse
+			kuroda::parser<formal::lex_node>::symbols stage_prefix(phrase_origin);
+			kuroda::parser<formal::lex_node>::symbols stage_suffix(reverse_offset-1);
+			std::unique_ptr<formal::lex_node> dest(tokens[phrase_origin]);
+			tokens[phrase_origin] = nullptr;
+			if (0 < phrase_origin) {
+				const auto prefix_origin = tokens.begin();
+				std::copy_n(prefix_origin, phrase_origin, stage_prefix.begin());
+				std::fill_n(prefix_origin, phrase_origin, nullptr);
+				dest.get()->set_prefix(std::move(stage_prefix));
+			}
+			if (const auto ub = stage_suffix.size()) {
+				const auto suffix_origin = tokens.begin() + phrase_origin + 1;
+				std::copy_n(suffix_origin, ub, stage_suffix.begin());
+				std::fill_n(suffix_origin, ub, nullptr);
+				dest.get()->set_postfix(std::move(stage_suffix));
+			}
+			dest.get()->interpret(postfix, n);
+
+			// \todo: syntax error if a symbol uses more than one token
+
+			tokens[0] = dest.release();
+			kuroda::parser<formal::lex_node>::DeleteNSlotsAt(tokens, tokens.size()-1, 1);
+		}
+
+		return false;
+	}
+};
+
 
 int main(int argc, char* argv[], char* envp[])
 {
@@ -1272,6 +1440,8 @@ int main(int argc, char* argv[], char* envp[])
 //	std::wcout << std::filesystem::canonical(who_am_i.native()) << "\n";
 
 #ifndef MOCK_TEST
+	undefined_SVO::get();
+
 	if (2 > argc) help();
 #endif
 

@@ -38,6 +38,7 @@ namespace kuroda {
 		edit_view(T& src) : src(&src), offset(0), extent(src.size()) {}
 		edit_view(T* src) : src(src), offset(0), extent(src->size()) {}
 		edit_view(T* src, ptrdiff_t offset, size_t extent) : src(src), offset(offset), extent(extent) {}
+		edit_view(edit_view& src, ptrdiff_t offset, size_t extent) : src(src.src), offset(src.offset+offset), extent(extent) {}
 
 		bool empty() const { return 0 >= extent; }
 		size_t size() const { return extent; }
@@ -53,6 +54,17 @@ namespace kuroda {
 		}
 
 		auto& operator[](ptrdiff_t n) const { return (*src)[offset + n]; }
+
+		void pop_front() {
+			if (empty()) return;
+			++offset;
+			--extent;
+		}
+
+		void pop_back() {
+			if (empty()) return;
+			--extent;
+		}
 
 		std::optional<std::string> bad_syntax() const {
 			if (!src) return "edit_view<...>::bad_syntax: !src\n";

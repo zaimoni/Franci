@@ -34,10 +34,11 @@ namespace formal {
 			std::shared_ptr<const parsed> > _anchor;
 		decltype(_anchor) _post_anchor;
 		unsigned long long _code; // usually used as a bitmap
+		unsigned long long _offset; // used as a linear offset
 
 		lex_node(kuroda::parser<lex_node>::sequence& dest, size_t lb, size_t ub, unsigned long long code);	// slicing constructor
 		// thin-wrapping constructors
-		lex_node(word*& src, unsigned long long code = 0) noexcept : _anchor(std::unique_ptr<word>(src)), _code(code) {
+		lex_node(word*& src, unsigned long long code = 0) noexcept : _anchor(std::unique_ptr<word>(src)), _code(code), _offset(0) {
 			if (src->code() & Comment) _code |= Comment;
 			src = nullptr;
 		}
@@ -45,20 +46,20 @@ namespace formal {
 	public:
 		using edit_span = kuroda::parser<lex_node>::edit_span;
 
-		lex_node(std::unique_ptr<word> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code) {
+		lex_node(std::unique_ptr<word> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code), _offset(0) {
 			if (std::get<zaimoni::COW<word> >(_anchor)->code() & Comment) _code |= Comment;
 		}
-		lex_node(parsed* src, unsigned long long code = 0) noexcept : _anchor(zaimoni::COW<parsed>(src)), _code(code) {}
-		lex_node(parsed*& src, unsigned long long code = 0) noexcept : _anchor(zaimoni::COW<parsed>(src)), _code(code) {
+		lex_node(parsed* src, unsigned long long code = 0) noexcept : _anchor(zaimoni::COW<parsed>(src)), _code(code), _offset(0) {}
+		lex_node(parsed*& src, unsigned long long code = 0) noexcept : _anchor(zaimoni::COW<parsed>(src)), _code(code), _offset(0) {
 			src = nullptr;
 		}
-		lex_node(const parsed* src, unsigned long long code = 0) noexcept : _anchor(std::shared_ptr<const parsed>(src)), _code(code) {}
-		lex_node(const parsed*& src, unsigned long long code = 0) noexcept : _anchor(std::shared_ptr<const parsed>(src)), _code(code) {
+		lex_node(const parsed* src, unsigned long long code = 0) noexcept : _anchor(std::shared_ptr<const parsed>(src)), _code(code), _offset(0) {}
+		lex_node(const parsed*& src, unsigned long long code = 0) noexcept : _anchor(std::shared_ptr<const parsed>(src)), _code(code), _offset(0) {
 			src = nullptr;
 		}
-		lex_node(std::shared_ptr<const parsed> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code) {}
+		lex_node(std::shared_ptr<const parsed> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code), _offset(0) {}
 
-		lex_node() noexcept : _code(0) {}
+		lex_node() noexcept : _code(0), _offset(0) {}
 		// \todo anchor constructor
 		lex_node(const lex_node& src) = default;
 		lex_node(lex_node&& src) = default;
@@ -69,12 +70,18 @@ namespace formal {
 		// factory function: slices a lex_node out of dest, then puts the lex_node at index lb
 		static void slice(kuroda::parser<lex_node>::sequence& dest, size_t lb, size_t ub, unsigned long long code = 0);
 
+		void set_fragment(kuroda::parser<lex_node>::symbols&& src) { _fragments.push_back(std::move(src)); }
 		void set_fragments(decltype(_fragments) && src) { _fragments = std::move(src); }
+
+		void set_prefix(kuroda::parser<lex_node>::symbols&& src) { _prefix = std::move(src); }
+		void set_postfix(kuroda::parser<lex_node>::symbols&& src) { _postfix = std::move(src); }
 
 		src_location origin() const { return origin(this); }
 
 		auto code() const { return _code; }
+		auto offset() const { return _offset; }
 		void interpret(unsigned long long src) { _code = src; }
+		void interpret(unsigned long long src, unsigned long long offset) { _code = src; _offset = offset; }
 		void learn(unsigned long long src) { _code |= src; }
 		void forget(unsigned long long src) { _code &= ~src; }
 
@@ -169,6 +176,9 @@ namespace formal {
 
 		bool syntax_ok() const;
 		int is_pure_anchor() const; // C error code convention
+		std::optional<int> token_compare(const formal::lex_node& rhs) const;
+		std::optional<int> token_compare(const formal::word& rhs) const;
+		std::optional<int> token_compare(kuroda::parser<formal::lex_node>::edit_span tokens) const;
 
 #if OBSOLETE
 #define LEX_NODE_DEREF_BODY(SRC) \

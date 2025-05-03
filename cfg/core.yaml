@@ -1,0 +1,6 @@
+SVO_postfix_undefined:
+# this section is convenient to be order-sensitive
+  - "is a unary prefix symbol"
+  - "is a unary postfix symbol"
+  - "is a binary infix symbol"
+  - "is a constant symbol"

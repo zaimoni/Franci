@@ -4,7 +4,7 @@ namespace formal {
 
 	// we only handle closed intervals
 	lex_node::lex_node(kuroda::parser<lex_node>::sequence& dest, size_t lb, size_t ub, unsigned long long code)
-		: _code(code)
+		: _code(code), _offset(0)
 	{
 		assert(lb < ub);
 		assert(dest.size() > ub);
@@ -100,6 +100,87 @@ namespace formal {
 		if (classify(_post_anchor)) return 0;
 		if (int code = classify(_anchor)) return code;
 		return -1;
+	}
+
+	std::optional<int> lex_node::token_compare(const formal::lex_node& rhs) const
+	{
+		if (1 == is_pure_anchor() && 1 == rhs.is_pure_anchor()) {
+			if (auto x = c_anchor<formal::word>()) {
+				if (auto y = rhs.c_anchor<formal::word>()) return x->value().compare(y->value());
+			}
+		};
+		return std::nullopt;
+	}
+
+	std::optional<int> lex_node::token_compare(const formal::word& rhs) const
+	{
+		if (1 == is_pure_anchor()) {
+			if (auto x = c_anchor<formal::word>()) return x->value().compare(rhs.value());
+		};
+		return std::nullopt;
+	}
+
+	std::optional<int> lex_node::token_compare(kuroda::parser<formal::lex_node>::edit_span tokens) const
+	{
+		// implement these later
+		if (!_prefix.empty()) {
+			if (tokens.empty()) return 1;
+			std::cout << "lex_node::token_compare wants prefix handling\n";
+			return std::nullopt;
+		}
+		if (classify(_anchor)) {
+			if (tokens.empty()) return 1;
+			bool ok = false;
+			if (auto x = c_anchor<formal::word>()) {
+				if (const auto code = tokens.front()->token_compare(*x)) {
+					if (*code) return -(*code);
+					ok = true;
+					tokens.pop_front();
+				}
+			}
+			if (!ok) {
+				std::cout << "lex_node::token_compare wants anchor handling\n";
+				return std::nullopt;
+			}
+		}
+		if (!_infix.empty()) {
+			if (tokens.empty()) return 1;
+			std::cout << "lex_node::token_compare wants infix handling\n";
+			return std::nullopt;
+		}
+		if (classify(_post_anchor)) {
+			if (tokens.empty()) return 1;
+			std::cout << "lex_node::token_compare wants post-anchor handling\n";
+			return std::nullopt;
+		}
+		if (!_postfix.empty()) {
+			bool ok = true;
+			for (auto test : _postfix) {
+				if (tokens.empty()) return 1;
+				if (1 != test->is_pure_anchor()) break;
+				if (auto x = test->c_anchor<formal::word>()) {
+					if (const auto code = tokens.front()->token_compare(*x)) {
+					    if (*code) return -(*code);
+						tokens.pop_front();
+					} else {
+						return std::nullopt;
+					}
+				} else {
+					ok = false;
+					break;
+				}
+			}
+			if (!ok) {
+				std::cout << "lex_node::token_compare wants postfix handling\n";
+				return std::nullopt;
+			}
+		}
+		if (!_fragments.empty()) {
+			if (tokens.empty()) return 1;
+			std::cout << "lex_node::token_compare wants fragments handling\n";
+			return std::nullopt;
+		}
+		return tokens.empty() ? 0 : -1;
 	}
 
 	std::unique_ptr<lex_node> lex_node::pop_front(kuroda::parser<formal::word>::sequence& src)

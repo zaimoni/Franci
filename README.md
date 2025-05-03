@@ -1,5 +1,7 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/zaimoni/franci/badge)](https://www.codefactor.io/repository/github/zaimoni/franci)
 
+2025-05-03: dependency on https://github.com/fktn-k/fkYAML introduced, for the GentzenW binary.
+
 Notes on coding idioms
 
 * This project started pre-C++98.  It needs enough test cases to identify and fix the current breakage from the "big leap" to C++17.  Last known good build was on TDM-MingW32 GCC 5.2; TDM-MingW32 GCC 5.3-5.5 verified to miscompile, badly.
