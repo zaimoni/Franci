@@ -708,6 +708,7 @@ namespace gentzen {
 			if (!is_tag) return std::nullopt;
 			if (1 != src->infix().size()) return std::nullopt;
 		} while (src = src->infix().front());
+		return std::nullopt;
 	}
 
 } // end namespace gentzen
