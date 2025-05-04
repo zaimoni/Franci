@@ -234,6 +234,12 @@ static std::optional<std::string_view> interpret_inert_word(const formal::lex_no
 	return std::nullopt;
 }
 
+static std::optional<std::string_view> interpret_word(const formal::lex_node& src)
+{
+	if (1 != src.is_pure_anchor()) return std::nullopt;
+	return src.c_anchor<formal::word>()->value();
+}
+
 static constexpr const std::string_view comma(",");
 
 // action coding: offset to parse at next
@@ -1358,7 +1364,6 @@ private:
 
 			formal::src_location src(std::pair(1, 0), std::shared_ptr<const std::filesystem::path>(new std::filesystem::path("cfg/core.yaml:test_lines")));
 			auto lines = to_lines(dest, src);
-			std::cout << "lines = to_lines(dest, src); ok\n";
 			while (!lines.empty()) {
 				try {
 					const auto prior_errors = Errors.count();
@@ -1385,6 +1390,7 @@ public:
 	static bool global_parse(kuroda::parser<formal::lex_node>::edit_span& tokens) {
 		enum { trace_parse = 0 };
 
+		static constexpr const std::string_view symbol("symbol");
 		const auto starting_errors = Errors.count();
 		const auto& x = get();
 
@@ -1398,6 +1404,9 @@ public:
 			kuroda::parser<formal::lex_node>::edit_span stage(tokens, phrase_origin, reverse_offset);
 
 			if (0 != phrase.token_compare(stage)) continue;	// doesn't match
+			const auto last_word = interpret_word(*phrase.postfix().back());
+			const bool lhs_is_symbol = last_word ? last_word.value() == symbol : false;
+
 			// did match: attempt parse
 			kuroda::parser<formal::lex_node>::symbols stage_prefix(phrase_origin);
 			kuroda::parser<formal::lex_node>::symbols stage_suffix(reverse_offset-1);
@@ -1416,8 +1425,18 @@ public:
 				dest.get()->set_postfix(std::move(stage_suffix));
 			}
 			dest.get()->interpret(postfix, n);
+			if (lhs_is_symbol) {
+				if (1 != phrase_origin) {
+					error_report(*dest, "cannot declare a token-sequence as a symbol");
+				} else {
+					const auto is_word = interpret_word(*(dest->prefix().front()));
+					auto is_tag = dynamic_cast<const HTMLtag*>(dest->prefix().front()->c_anchor<formal::parsed>());
+					if (is_tag && !is_tag->attr("tokensequence")) is_tag = nullptr;
 
-			// \todo: syntax error if a symbol uses more than one token
+					// axioms can't accept token-sequences, but axiom schemata can
+					if (!is_tag && !is_word) error_report(*dest, "symbol must be a word");
+				}
+			}
 
 			tokens[0] = dest.release();
 			kuroda::parser<formal::lex_node>::DeleteNSlotsAt(tokens, tokens.size()-1, 1);

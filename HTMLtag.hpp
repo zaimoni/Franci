@@ -48,6 +48,14 @@ public:
 	auto tag_type() const { return (mode)(_bitmap & (Start | End)); }
 	const std::string& tag_name() const { return _tag_name; }
 
+	std::optional<std::string_view> attr(const std::string_view& lhs) const {
+		if (!kv_pairs) return std::nullopt;
+		for (const auto& kv : *kv_pairs) {
+			if (lhs == kv.first) return kv.second;
+		}
+		return std::nullopt;
+	}
+
 	formal::src_location origin() const override { return _origin; }
 
 	static const std::string* is_balanced_pair(const formal::lex_node& src);
