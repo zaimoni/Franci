@@ -698,6 +698,18 @@ namespace gentzen {
 		}
 	};
 
+	// could lose HTML formatting
+	std::optional<std::string_view> could_be_symbol(const formal::lex_node* src) {
+		do {
+			auto is_word = interpret_word(*src);
+			if (is_word) return is_word;
+			auto is_tag = dynamic_cast<const HTMLtag*>(src->c_anchor<formal::parsed>());
+			if (is_tag && !is_tag->attr("tokensequence")) is_tag = nullptr;
+			if (!is_tag) return std::nullopt;
+			if (1 != src->infix().size()) return std::nullopt;
+		} while (src = src->infix().front());
+	}
+
 } // end namespace gentzen
 
 // end prototype class
@@ -1428,13 +1440,8 @@ public:
 			if (lhs_is_symbol) {
 				if (1 != phrase_origin) {
 					error_report(*dest, "cannot declare a token-sequence as a symbol");
-				} else {
-					const auto is_word = interpret_word(*(dest->prefix().front()));
-					auto is_tag = dynamic_cast<const HTMLtag*>(dest->prefix().front()->c_anchor<formal::parsed>());
-					if (is_tag && !is_tag->attr("tokensequence")) is_tag = nullptr;
-
-					// axioms can't accept token-sequences, but axiom schemata can
-					if (!is_tag && !is_word) error_report(*dest, "symbol must be a word");
+				} else if (!gentzen::could_be_symbol(dest->prefix().front())) {
+					error_report(*dest, "symbol must be a word");
 				}
 			}
 
