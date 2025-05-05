@@ -51,13 +51,17 @@ void warning_report(const formal::src_location& loc, const std::string& warn) {
 	++Warnings;
 }
 
-const std::filesystem::path& self_path(const char* const _arg)
+const std::filesystem::path& self_path(const char* const _arg = nullptr)
 {
 	static std::filesystem::path ooao;
 	if (!_arg || !*_arg) return ooao;
 	if (!ooao.empty()) return ooao;	// XXX invariant failure \todo debug mode should hard-error
 	// should be argv[0], which exists as it is our name
 	ooao = _arg;
+
+	// work around test driver issue
+	if (!std::filesystem::exists(ooao)) ooao = std::string("../../") + _arg;
+
 	return ooao;
 }
 
@@ -266,6 +270,25 @@ size_t issymbol(const std::string_view& src)
 		if (src.starts_with(x.first)) return 0;
 	}
 	return 1;
+}
+
+static auto apply_grammar(kuroda::parser<formal::lex_node>& grammar, std::unique_ptr<formal::lex_node> wrapped)
+{
+	kuroda::parser<formal::lex_node>::symbols stage;
+	grammar.append_to_parse(stage, wrapped.release());
+	return stage;
+}
+
+template<class T>
+static auto apply_grammar(kuroda::parser<formal::lex_node>& grammar, typename kuroda::parser<T>::symbols& lines)
+{
+	kuroda::parser<formal::lex_node>::symbols stage;
+	auto wrapped = formal::lex_node::pop_front(lines);
+	while (wrapped) {
+		grammar.append_to_parse(stage, wrapped.release());
+		wrapped = formal::lex_node::pop_front(lines);
+	};
+	return stage;
 }
 
 // prototype class -- extract to own files when stable
@@ -704,8 +727,8 @@ namespace gentzen {
 			auto is_word = interpret_word(*src);
 			if (is_word) return is_word;
 			auto is_tag = dynamic_cast<const HTMLtag*>(src->c_anchor<formal::parsed>());
-			if (is_tag && !is_tag->attr("tokensequence")) is_tag = nullptr;
 			if (!is_tag) return std::nullopt;
+			if (!is_tag->attr("tokensequence")) return std::nullopt;
 			if (1 != src->infix().size()) return std::nullopt;
 		} while (src = src->infix().front());
 		return std::nullopt;
@@ -1267,36 +1290,6 @@ static auto& TokenGrammar() {
 	return *ooao;
 }
 
-// main language syntax
-static kuroda::parser<formal::lex_node>& GentzenGrammar() {
-	static std::unique_ptr<kuroda::parser<formal::lex_node> > ooao;
-	if (!ooao) {
-		ooao = decltype(ooao)(new decltype(ooao)::element_type());
-
-		// we do not register terminals for the Gentzen grammar.
-	};
-	return *ooao;
-}
-
-static auto apply_grammar(kuroda::parser<formal::lex_node>& grammar, std::unique_ptr<formal::lex_node> wrapped)
-{
-	kuroda::parser<formal::lex_node>::symbols stage;
-	grammar.append_to_parse(stage, wrapped.release());
-	return stage;
-}
-
-template<class T>
-static auto apply_grammar(kuroda::parser<formal::lex_node>& grammar, typename kuroda::parser<T>::symbols& lines)
-{
-	kuroda::parser<formal::lex_node>::symbols stage;
-	auto wrapped = formal::lex_node::pop_front(lines);
-	while (wrapped) {
-		grammar.append_to_parse(stage, wrapped.release());
-		wrapped = formal::lex_node::pop_front(lines);
-	};
-	return stage;
-}
-
 class undefined_SVO {
 private:
 	std::vector<formal::lex_node> _postfix;
@@ -1313,11 +1306,11 @@ private:
 public:
 	static constexpr const unsigned long long postfix = (1ULL << 2); // reserve this flag for both word and lex_node
 
-	static_assert(!(formal::Comment & postfix));
-	static_assert(!(formal::Error & postfix));
-	static_assert(!(formal::Inert_Token & postfix));
-	static_assert(!(formal::Tokenized & postfix));
-	static_assert(!(HTMLtag::Entity & postfix));
+	static_assert(!(formal::Comment& postfix));
+	static_assert(!(formal::Error& postfix));
+	static_assert(!(formal::Inert_Token& postfix));
+	static_assert(!(formal::Tokenized& postfix));
+	static_assert(!(HTMLtag::Entity& postfix));
 
 	undefined_SVO() = default;
 
@@ -1325,7 +1318,7 @@ public:
 
 private:
 	void load() {
-		std::ifstream ifs("cfg/core.yaml");
+		std::ifstream ifs(std::filesystem::path(self_path()).replace_filename("cfg/core.yaml"));
 
 		fkyaml::node root = fkyaml::node::deserialize(ifs);
 		std::vector<std::string> dest;
@@ -1422,7 +1415,7 @@ public:
 
 			// did match: attempt parse
 			kuroda::parser<formal::lex_node>::symbols stage_prefix(phrase_origin);
-			kuroda::parser<formal::lex_node>::symbols stage_suffix(reverse_offset-1);
+			kuroda::parser<formal::lex_node>::symbols stage_suffix(reverse_offset - 1);
 			std::unique_ptr<formal::lex_node> dest(tokens[phrase_origin]);
 			tokens[phrase_origin] = nullptr;
 			if (0 < phrase_origin) {
@@ -1447,13 +1440,26 @@ public:
 			}
 
 			tokens[0] = dest.release();
-			kuroda::parser<formal::lex_node>::DeleteNSlotsAt(tokens, tokens.size()-1, 1);
+			kuroda::parser<formal::lex_node>::DeleteNSlotsAt(tokens, tokens.size() - 1, 1);
+			return true;
 		}
 
 		return false;
 	}
 };
 
+// main language syntax
+static kuroda::parser<formal::lex_node>& GentzenGrammar() {
+	static std::unique_ptr<kuroda::parser<formal::lex_node> > ooao;
+	if (!ooao) {
+		ooao = decltype(ooao)(new decltype(ooao)::element_type());
+
+		// we do not register terminals for the Gentzen grammar.
+
+		ooao->register_global_build(undefined_SVO::global_parse);
+	};
+	return *ooao;
+}
 
 int main(int argc, char* argv[], char* envp[])
 {
@@ -1462,13 +1468,12 @@ int main(int argc, char* argv[], char* envp[])
 #else
 	const bool to_console = isatty(fileno(stdout));
 #endif
-	decltype(auto) who_am_i = self_path(argv[0]);
+	auto who_am_i = self_path(argv[0]);
+//	std::wcout << std::filesystem::exists(who_am_i) << "\n";
 //	std::wcout << who_am_i.native() << "\n";
 //	std::wcout << std::filesystem::canonical(who_am_i.native()) << "\n";
 
 #ifndef MOCK_TEST
-	undefined_SVO::get();
-
 	if (2 > argc) help();
 #endif
 

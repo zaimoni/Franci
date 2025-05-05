@@ -265,6 +265,6 @@ restart:
 			return ret;
 		}
 	};
-}
+} // namespace kuroda
 
 #endif
