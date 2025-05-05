@@ -1395,6 +1395,7 @@ private:
 public:
 	static bool global_parse(kuroda::parser<formal::lex_node>::edit_span& tokens) {
 		enum { trace_parse = 0 };
+		if constexpr (trace_parse) std::cerr << "undefined_SVO::global_parse: enter\n";
 
 		static constexpr const std::string_view symbol("symbol");
 		const auto starting_errors = Errors.count();
@@ -1493,6 +1494,7 @@ int main(int argc, char* argv[], char* envp[])
 
 		// intent is one line, one statement
 		while (!lines.empty()) {
+			const auto prior_errors = Errors.count();
 			try {
 			auto stage = apply_grammar(TokenGrammar(), formal::lex_node::pop_front(lines));
 			try {
@@ -1503,7 +1505,7 @@ int main(int argc, char* argv[], char* envp[])
 			}
 			std::cout << std::to_string(stage.size()) << "\n";
 			formal::lex_node::to_s(std::cout, stage) << "\n";
-			if (0 < Errors.count()) continue;
+			if (prior_errors < Errors.count()) continue;
 
 			try {
 				do {
