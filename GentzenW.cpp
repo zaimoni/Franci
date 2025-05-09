@@ -728,7 +728,6 @@ namespace gentzen {
 			if (is_word) return is_word;
 			auto is_tag = dynamic_cast<const HTMLtag*>(src->c_anchor<formal::parsed>());
 			if (!is_tag) return std::nullopt;
-			if (!is_tag->attr("tokensequence")) return std::nullopt;
 			if (1 != src->infix().size()) return std::nullopt;
 		} while (src = src->infix().front());
 		return std::nullopt;
