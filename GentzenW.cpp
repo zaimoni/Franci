@@ -722,15 +722,28 @@ namespace gentzen {
 	};
 
 	// could lose HTML formatting
-	std::optional<std::string_view> could_be_symbol(const formal::lex_node* src) {
+	std::optional<std::pair<const HTMLtag*, std::string_view> > could_be_symbol(const formal::lex_node* src) {
+		std::pair<const HTMLtag*, std::string_view> ret(nullptr, std::string_view());
 		do {
 			auto is_word = interpret_word(*src);
-			if (is_word) return is_word;
+			if (is_word) {
+				ret.second = *is_word;
+				return ret;
+			}
 			auto is_tag = dynamic_cast<const HTMLtag*>(src->c_anchor<formal::parsed>());
 			if (!is_tag) return std::nullopt;
 			if (1 != src->infix().size()) return std::nullopt;
+			if (!ret.first) ret.first = is_tag;
 		} while (src = src->infix().front());
 		return std::nullopt;
+	}
+
+	const HTMLtag* is_token_sequence_var(const formal::lex_node* src) {
+		auto ret = could_be_symbol(src);
+		if (ret && ret->first) {
+			if (auto test = ret->first->attr("tokensequence")) return ret->first;
+		}
+		return nullptr;
 	}
 
 } // end namespace gentzen
