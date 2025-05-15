@@ -101,6 +101,16 @@ static constexpr const auto force_consteval = V;
 
 // end from C:Z zero.h
 
+// for when it's not practical to use a converting constructor, or cast expression
+namespace zaimoni {
+	template<class dest, class src> dest from(const src& x) {
+		if constexpr (requires {*x; })
+			return from<dest>(*x);
+		else
+			static_assert(unconditional_v<bool, false>, "unimplemented");
+	}
+}
+
 // prototype lookup -- extract to own header when stable
 
 constexpr const std::pair<const char*, char32_t> HTML_entities[] = {
@@ -289,6 +299,67 @@ static auto apply_grammar(kuroda::parser<formal::lex_node>& grammar, typename ku
 		wrapped = formal::lex_node::pop_front(lines);
 	};
 	return stage;
+}
+
+// extract string processing namespace to own file when stable
+namespace perl {
+	class scalar {
+	private:
+		std::variant<std::string_view, std::string> _str;
+	public:
+		scalar() = default;
+		scalar(const scalar& src) = default;
+		scalar(scalar&& src) = default;
+		scalar& operator=(const scalar& src) = default;
+		scalar& operator=(scalar&& src) = default;
+		~scalar() = default;
+
+		scalar(const std::string_view& src) : _str(src) {}
+		scalar(std::string&& src) : _str(std::move(src)) {}
+		scalar(const std::string& src) : _str(src) {}
+		scalar(const char* src) : _str(std::string_view(src)) {}
+		scalar(std::nullptr_t) = delete;
+
+		scalar& operator=(const std::string_view& src) {
+			_str = src;
+			return *this;
+		}
+
+		scalar& operator=(std::string&& src) {
+			_str = std::move(src);
+			return *this;
+		}
+
+		scalar& operator=(const std::string& src) {
+			_str = src;
+			return *this;
+		}
+
+		std::string_view view() const {
+			if (auto x = std::get_if<std::string>(&_str)) return std::string_view(*x);
+			return std::get<std::string_view>(_str);
+		}
+	};
+
+	std::string join(const std::vector<scalar>& src, const std::string_view sep) {
+		std::string ret;
+		if (src.empty()) return ret;
+//		ret.reserve(src.size() * 2);	// unclear why Copilot wanted this
+		for (decltype(auto) x : src) {
+			if (!ret.empty()) ret += sep;
+			ret += x.view();
+		}
+		return ret;
+	}
+
+} // namespace perl
+
+namespace zaimoni {
+	template<>
+	perl::scalar from<perl::scalar, formal::lex_node>(const formal::lex_node& x) {
+		if (1 == x.is_pure_anchor()) return x.c_anchor<formal::word>()->value();
+		return x.to_s();
+	}
 }
 
 // prototype class -- extract to own files when stable
@@ -745,6 +816,23 @@ namespace gentzen {
 		}
 		return nullptr;
 	}
+
+	class symbol_catalog {
+	private:
+		std::vector<std::pair<std::shared_ptr<const formal::lex_node>, int > > _symbols;
+		std::vector<std::shared_ptr<const formal::lex_node> > _constant_symbols;
+	public:
+		symbol_catalog() = default;
+		symbol_catalog(const symbol_catalog&) = delete;
+		symbol_catalog(symbol_catalog&&) = delete;
+		symbol_catalog& operator=(const symbol_catalog&) = delete;
+		symbol_catalog& operator=(symbol_catalog&&) = delete;
+		~symbol_catalog() = default;
+		static symbol_catalog& get() {
+			static symbol_catalog ooao;
+			return ooao;
+		}
+	};
 
 } // end namespace gentzen
 
@@ -1324,6 +1412,62 @@ public:
 	static_assert(!(formal::Tokenized& postfix));
 	static_assert(!(HTMLtag::Entity& postfix));
 
+	class phrase_postfix final : public formal::parsed {
+		std::shared_ptr<const formal::lex_node> _subject;
+		size_t _code;
+	public:
+		phrase_postfix() = default;
+		phrase_postfix(const phrase_postfix&) = default;
+		phrase_postfix(phrase_postfix&&) = default;
+		phrase_postfix& operator=(const phrase_postfix&) = default;
+		phrase_postfix& operator=(phrase_postfix&&) = default;
+		~phrase_postfix() = default;
+
+		phrase_postfix(formal::lex_node*& sub, size_t code) : _subject(sub), _code(code) {
+			sub = nullptr;
+		}
+
+		const auto& subject() const { return _subject; }
+		auto& subject() { return _subject; }
+
+		std::unique_ptr<parsed> clone() const override { return std::unique_ptr<parsed>(new phrase_postfix(*this)); }
+		void CopyInto(formal::parsed*& dest) const override {
+			if (dest) {
+				if (auto x = dynamic_cast<phrase_postfix*>(dest)) {
+					*x = *this;
+					return;
+				}
+				delete dest;
+			}
+			dest = new phrase_postfix(*this);
+		}
+		void MoveInto(formal::parsed*& dest) override {
+			if (dest) {
+				if (auto x = dynamic_cast<phrase_postfix*>(dest)) {
+					*x = std::move(*this);
+					return;
+				}
+				delete dest;
+			}
+			dest = new phrase_postfix(*this);
+		}
+
+		formal::src_location origin() const override { return _subject->origin(); }
+
+		std::string to_s() const override {
+			std::vector<perl::scalar> stage;
+			stage.push_back(zaimoni::from<perl::scalar>(_subject));
+			const auto& test = get();
+			if (_code >= test._postfix.size()) {
+				stage.push_back("<error>");
+				return join(stage, " ");
+			}
+			stage.push_back(zaimoni::from<perl::scalar>(test._postfix[_code]));
+			return join(stage, " ");
+		}
+		unsigned int precedence() const override { return -1; } // \todo formal-fix this
+	};
+
 	undefined_SVO() = default;
 
 	static undefined_SVO& get() { return *_get(); }
@@ -1427,6 +1571,15 @@ public:
 			const bool lhs_is_symbol = last_word ? last_word.value() == symbol : false;
 
 			// did match: attempt parse
+			if (1 == phrase_origin) {
+				const bool symbol_is_word = lhs_is_symbol ? (bool)gentzen::could_be_symbol(tokens[0]) : true;
+				std::unique_ptr<formal::lex_node> dest(new formal::lex_node(new phrase_postfix(tokens[0], n)));
+				if (!symbol_is_word) error_report(*dest, "symbol must be a word");
+				tokens[0] = dest.release();
+				kuroda::parser<formal::lex_node>::DeleteNSlotsAt(tokens, tokens.size() - 1, 1);
+				return true;
+			}
+
 			kuroda::parser<formal::lex_node>::symbols stage_prefix(phrase_origin);
 			kuroda::parser<formal::lex_node>::symbols stage_suffix(reverse_offset - 1);
 			std::unique_ptr<formal::lex_node> dest(tokens[phrase_origin]);
