@@ -4,6 +4,7 @@
 #include "Kuroda.hpp"
 #include "FormalWord.hpp"
 #include "../COW.hpp"
+#include "../perl.hpp"
 #include <span>
 
 namespace formal {
@@ -66,6 +67,11 @@ namespace formal {
 		lex_node& operator=(const lex_node& src) = default;
 		lex_node& operator=(lex_node&& src) = default;
 		virtual ~lex_node() = default;
+
+		operator perl::scalar() const {
+			if (1 == is_pure_anchor()) return c_anchor<formal::word>()->value();
+			return to_s();
+		}
 
 		// factory function: slices a lex_node out of dest, then puts the lex_node at index lb
 		static void slice(kuroda::parser<lex_node>::sequence& dest, size_t lb, size_t ub, unsigned long long code = 0);
@@ -223,8 +229,6 @@ namespace formal {
 		bool recursive_rewrite(std::function<bool(const lex_node&)> test, std::function<void(lex_node&)> op);
 
 		std::string to_s() const;
-		void to_s(std::ostream& dest) const;
-		static std::ostream& to_s(std::ostream& dest, const kuroda::parser<lex_node>::sequence& src);
 
 		unsigned int precedence() const;
 
@@ -243,12 +247,14 @@ namespace formal {
 	private:
 		static src_location origin(const lex_node* src);
 		static src_location origin(const decltype(_anchor)& src);
-		static void to_s(std::ostream& dest, const lex_node* src);
-		static void to_s(std::ostream& dest, const decltype(_anchor)& src);
+
+		static perl::scalar to_scalar(const decltype(_anchor)& src);
 
 		static int classify(const decltype(_anchor)& src);
 		static void reset(decltype(_anchor)& dest, lex_node*& src);
 	};
+
+	std::string to_string(const kuroda::parser<formal::lex_node>::symbols& src);
 
 } // namespace formal
 

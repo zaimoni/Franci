@@ -7,6 +7,7 @@
 #include "HTMLtag.hpp"
 #include "Zaimoni.STL/LexParse/string_view.hpp"
 #include "Zaimoni.STL/stack.hpp"
+#include "Zaimoni.STL/perl.hpp"
 #include "test_driver.h"
 #include "Zaimoni.STL/Pure.C/comptest.h"
 #include <filesystem>
@@ -100,16 +101,6 @@ template <auto V>
 static constexpr const auto force_consteval = V;
 
 // end from C:Z zero.h
-
-// for when it's not practical to use a converting constructor, or cast expression
-namespace zaimoni {
-	template<class dest, class src> dest from(const src& x) {
-		if constexpr (requires {*x; })
-			return from<dest>(*x);
-		else
-			static_assert(unconditional_v<bool, false>, "unimplemented");
-	}
-}
 
 // prototype lookup -- extract to own header when stable
 
@@ -299,67 +290,6 @@ static auto apply_grammar(kuroda::parser<formal::lex_node>& grammar, typename ku
 		wrapped = formal::lex_node::pop_front(lines);
 	};
 	return stage;
-}
-
-// extract string processing namespace to own file when stable
-namespace perl {
-	class scalar {
-	private:
-		std::variant<std::string_view, std::string> _str;
-	public:
-		scalar() = default;
-		scalar(const scalar& src) = default;
-		scalar(scalar&& src) = default;
-		scalar& operator=(const scalar& src) = default;
-		scalar& operator=(scalar&& src) = default;
-		~scalar() = default;
-
-		scalar(const std::string_view& src) : _str(src) {}
-		scalar(std::string&& src) : _str(std::move(src)) {}
-		scalar(const std::string& src) : _str(src) {}
-		scalar(const char* src) : _str(std::string_view(src)) {}
-		scalar(std::nullptr_t) = delete;
-
-		scalar& operator=(const std::string_view& src) {
-			_str = src;
-			return *this;
-		}
-
-		scalar& operator=(std::string&& src) {
-			_str = std::move(src);
-			return *this;
-		}
-
-		scalar& operator=(const std::string& src) {
-			_str = src;
-			return *this;
-		}
-
-		std::string_view view() const {
-			if (auto x = std::get_if<std::string>(&_str)) return std::string_view(*x);
-			return std::get<std::string_view>(_str);
-		}
-	};
-
-	std::string join(const std::vector<scalar>& src, const std::string_view sep) {
-		std::string ret;
-		if (src.empty()) return ret;
-//		ret.reserve(src.size() * 2);	// unclear why Copilot wanted this
-		for (decltype(auto) x : src) {
-			if (!ret.empty()) ret += sep;
-			ret += x.view();
-		}
-		return ret;
-	}
-
-} // namespace perl
-
-namespace zaimoni {
-	template<>
-	perl::scalar from<perl::scalar, formal::lex_node>(const formal::lex_node& x) {
-		if (1 == x.is_pure_anchor()) return x.c_anchor<formal::word>()->value();
-		return x.to_s();
-	}
 }
 
 // prototype class -- extract to own files when stable
@@ -1456,13 +1386,13 @@ public:
 
 		std::string to_s() const override {
 			std::vector<perl::scalar> stage;
-			stage.push_back(zaimoni::from<perl::scalar>(_subject));
+			stage.push_back((perl::scalar)(*_subject));
 			const auto& test = get();
 			if (_code >= test._postfix.size()) {
 				stage.push_back("<error>");
 				return join(stage, " ");
 			}
-			stage.push_back(zaimoni::from<perl::scalar>(test._postfix[_code]));
+			stage.push_back((perl::scalar)test._postfix[_code]);
 			return join(stage, " ");
 		}
 		unsigned int precedence() const override { return -1; } // \todo formal-fix this
@@ -1537,8 +1467,7 @@ private:
 					kuroda::parser<formal::lex_node>::edit_span scan(stage);
 
 					global_parse(scan);
-					formal::lex_node::to_s(std::cout, stage);
-					std::cout << "\n";
+					std::cout << to_string(stage) << std::endl;
 				}
 				catch (std::exception& e) {
 					std::cout << "line iteration body: " << e.what() << "\n";
@@ -1669,7 +1598,8 @@ int main(int argc, char* argv[], char* envp[])
 				return 3;
 			}
 			std::cout << std::to_string(stage.size()) << "\n";
-			formal::lex_node::to_s(std::cout, stage) << "\n";
+			std::cout << to_string(stage) << std::endl;
+
 			if (prior_errors < Errors.count()) continue;
 
 			try {
@@ -1681,7 +1611,7 @@ int main(int argc, char* argv[], char* envp[])
 				return 3;
 			}
 			std::cout << std::to_string(stage.size()) << "\n";
-			formal::lex_node::to_s(std::cout, stage) << "\n";
+			std::cout << to_string(stage) << std::endl;
 			} catch (std::exception& e) {
 				std::cout << "line iteration body: " << e.what() << "\n";
 				return 3;

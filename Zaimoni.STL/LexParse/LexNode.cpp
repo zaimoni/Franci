@@ -291,64 +291,62 @@ namespace formal {
 		return ret;
 	}
 
+	static void push_back(std::vector<perl::scalar>& dest, const kuroda::parser<lex_node>::symbols& src)
+	{
+		for (const formal::lex_node* x : src) {
+			dest.push_back((perl::scalar)(*x));
+		}
+	}
 
 	std::string lex_node::to_s() const
 	{
-		std::ostringstream stage;
-		to_s(stage);
-		return stage.str();
-	}
+		std::vector<perl::scalar> stage;
+		if (!_fragments.empty()) {
+			const auto sep = to_scalar(_anchor);
 
-	void lex_node::to_s(std::ostream& dest) const { to_s(dest, this); }
-
-	std::ostream& lex_node::to_s(std::ostream& dest, const kuroda::parser<lex_node>::sequence& src)
-	{
-		for (decltype(auto) x : src) to_s(dest, x);
-		return dest;
-	};
-
-	void lex_node::to_s(std::ostream& dest, const lex_node* src)
-	{
-		if (!src->_fragments.empty()) {
 			bool is_first = true;
-			for (decltype(auto) x : src->_fragments) {
-				if (!is_first) to_s(dest, src->_anchor);
-				is_first = false;
-				to_s(dest, x);
+			for (decltype(auto) x : _fragments) {
+				std::vector<perl::scalar> stage2;
+				push_back(stage2, x);
+				stage.push_back(join(stage2, " "));
 			}
-			return;
+			return join(stage, sep.view());
 		}
 
-		if (!src->_prefix.empty()) to_s(dest, src->_prefix);
-		to_s(dest, src->_anchor);
-		if (!src->_infix.empty()) to_s(dest, src->_infix);
-		to_s(dest, src->_post_anchor);
-		if (!src->_postfix.empty()) to_s(dest, src->_postfix);
+		if (!_prefix.empty()) push_back(stage, _prefix);
+		stage.push_back(to_scalar(_anchor));
+		if (!_infix.empty()) push_back(stage, _infix);
+		if (classify(_post_anchor)) stage.push_back(to_scalar(_post_anchor));
+		if (!_postfix.empty()) push_back(stage, _postfix);
+		return join(stage, " ");
 	}
 
-	void lex_node::to_s(std::ostream& dest, const decltype(_anchor)& src)
+	std::string to_string(const kuroda::parser<formal::lex_node>::symbols& src)
+	{
+		std::vector<perl::scalar> stage;
+		for (const formal::lex_node* x : src) {
+			stage.push_back((perl::scalar)(*x));
+		}
+		return join(stage, " ");
+	}
+
+	perl::scalar lex_node::to_scalar(const decltype(_anchor)& src)
 	{
 		struct _to_s {
-			std::ostream& dest;
-
-			_to_s(std::ostream& dest) noexcept : dest(dest) {}
-
 			auto operator()(const zaimoni::COW<word>& w) {
-				const auto start = w->origin();
-				dest << w->value();
+				return perl::scalar(w->value());
 			}
 			auto operator()(const zaimoni::COW<lex_node>& x) {
-				if (auto lex = x.get()) return to_s(dest, lex);
+				return perl::scalar(x->to_s());
 			}
 			auto operator()(const zaimoni::COW<parsed>& x) {
-				auto stage = x->to_s();
-				if (!stage.empty()) dest << stage;
+				return perl::scalar(x->to_s());
 			}
 		};
 
-		std::visit(_to_s(dest), src);
-		dest << " ";
+		return std::visit(_to_s(), src);
 	}
+
 
 	unsigned int lex_node::precedence() const
 	{
