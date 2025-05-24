@@ -7,7 +7,6 @@
 #include "HTMLtag.hpp"
 #include "Zaimoni.STL/LexParse/string_view.hpp"
 #include "Zaimoni.STL/stack.hpp"
-#include "Zaimoni.STL/perl.hpp"
 #include "test_driver.h"
 #include "Zaimoni.STL/Pure.C/comptest.h"
 #include <filesystem>
@@ -764,6 +763,32 @@ namespace gentzen {
 		}
 	};
 
+	class facts {
+	private:
+		std::shared_ptr<facts> _parent;
+		std::vector<std::shared_ptr<const formal::parsed> > _axioms;
+	public:
+		facts() = default;
+		facts(const facts&) = delete;
+		facts(facts&&) = delete;
+		facts& operator=(const facts&) = delete;
+		facts& operator=(facts&&) = delete;
+		~facts() = default;
+
+		static std::shared_ptr<facts> get() {
+			static std::shared_ptr<facts> ooao;
+			if (!ooao) ooao = std::shared_ptr<facts>(new facts());
+			return ooao;
+		}
+
+		std::shared_ptr<facts> parent() const { return _parent; }
+
+		void add_axiom(std::shared_ptr<const formal::parsed> src) {
+			if (auto err = src->is_not_legal_axiom((bool)_parent)) return;
+			_axioms.push_back(src);
+		}
+	};
+
 } // end namespace gentzen
 
 // end prototype class
@@ -1345,6 +1370,25 @@ public:
 	class phrase_postfix final : public formal::parsed {
 		std::shared_ptr<const formal::lex_node> _subject;
 		size_t _code;
+
+/*
+  - "is a unary prefix symbol"
+  - "is a unary postfix symbol"
+  - "is a binary infix symbol"
+  - "is a constant symbol"
+*/
+		// this must agree with core.yaml:SVO_postfix_undefined
+		enum class hard_code {
+			prefix_symbol = 0,
+			postfix_symbol,
+			infix_symbol,
+			constant_symbol
+		};
+		enum {
+			PARSE_TREE_MAX = (int)hard_code::infix_symbol + 1,
+			SYMBOL_MAX = (int)hard_code::constant_symbol + 1,
+			HARD_CODE_MAX = (int)hard_code::constant_symbol + 1
+		};
 	public:
 		phrase_postfix() = default;
 		phrase_postfix(const phrase_postfix&) = default;
@@ -1383,6 +1427,17 @@ public:
 		}
 
 		formal::src_location origin() const override { return _subject->origin(); }
+
+		std::optional<perl::scalar> is_not_legal_axiom(bool unconditional) const override {
+			if (SYMBOL_MAX > _code) {
+				if (!gentzen::could_be_symbol(_subject.get())) return "not a syntactical symbol";
+				if ( gentzen::is_token_sequence_var(_subject.get())) return "is token-sequence variable";
+			}
+			if (!unconditional) {
+				if (PARSE_TREE_MAX > _code) return "cannot conditionally alter syntax";
+			}
+			return std::nullopt;
+		}
 
 		std::string to_s() const override {
 			std::vector<perl::scalar> stage;

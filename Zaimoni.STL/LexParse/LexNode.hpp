@@ -19,6 +19,8 @@ namespace formal {
 
 		virtual src_location origin() const = 0;
 
+		virtual std::optional<perl::scalar> is_not_legal_axiom(bool unconditional) const { return "does not evaluate to a truth value"; }
+
 		virtual std::string to_s() const = 0;
 		virtual unsigned int precedence() const = 0;
 	};
