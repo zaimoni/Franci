@@ -500,3 +500,10 @@ restart:
 		src = nullptr;
 	}
 }	// namespace formal
+
+void error_report(formal::lex_node& fail, const perl::scalar& err) {
+	error_report(fail.origin(), err);
+	fail.learn(formal::Error);
+}
+
+void error_report(formal::parsed& fail, const perl::scalar& err) { error_report(fail.origin(), err); }
