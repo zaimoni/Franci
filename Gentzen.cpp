@@ -2851,7 +2851,7 @@ int main(int argc, char* argv[], char* envp[])
 				return 3;
 			}
 			std::cout << std::to_string(stage.size()) << "\n";
-			formal::lex_node::to_s(std::cout, stage) << "\n";
+			std::cout << to_string(stage) << std::endl;
 			if (0 < Errors.count()) continue;
 
 			try {
@@ -2863,7 +2863,7 @@ int main(int argc, char* argv[], char* envp[])
 				return 3;
 			}
 			std::cout << std::to_string(stage.size()) << "\n";
-			formal::lex_node::to_s(std::cout, stage) << "\n";
+			std::cout << to_string(stage) << std::endl;
 			} catch (std::exception& e) {
 				std::cout << "line iteration body: " << e.what() << "\n";
 				return 3;

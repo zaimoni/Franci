@@ -1,13 +1,10 @@
 #ifndef ZAIMONI_STL_LEXPARSE_FORMAL_WORD_HPP
 #define ZAIMONI_STL_LEXPARSE_FORMAL_WORD_HPP 1
 
+#include "../perl.hpp"
+
 #include <filesystem>
-#include <memory>
-#include <string>
-#include <string_view>
 #include <utility>
-#include <variant>
-#include <vector>
 
 namespace formal {
 	static constexpr const unsigned long long Comment = 1ULL; // reserve this flag for both word and lex_node
@@ -47,7 +44,7 @@ namespace formal {
 	class word final {
 	private:
 		src_location _origin;
-		std::variant<std::string_view, std::shared_ptr<const std::string> > _token;
+		perl::scalar _token;
 		unsigned long long _code; // usually used as a bitmap
 
 	public:
@@ -74,8 +71,8 @@ namespace formal {
 			_token(src),
 			_code(code) {}
 
-		std::string_view value() const;
-		size_t size() const;
+		std::string_view value() const { return _token.view(); }
+		size_t size() const { return _token.view().size(); }
 
 		auto code() const { return _code; }
 		void interpret(unsigned long long src) { _code = src; }

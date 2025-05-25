@@ -30,20 +30,20 @@ namespace perl {
 		scalar& operator=(scalar&& src) = default;
 		~scalar() = default;
 
-		scalar(const std::string_view& src) : _str(src) {}
-		scalar(std::string&& src) : _str(std::move(src)) {}
+		scalar(const std::string_view& src) noexcept : _str(src) {}
+		scalar(std::string&& src) noexcept : _str(std::move(src)) {}
 		scalar(const std::string& src) : _str(src) {}
-		scalar(std::shared_ptr<const std::string>&& src) : _str(src) {}
-		scalar(const std::shared_ptr<const std::string>& src) : _str(src) {}
+		scalar(std::shared_ptr<const std::string>&& src) noexcept : _str(src) {}
+		scalar(const std::shared_ptr<const std::string>& src) noexcept : _str(src) {}
 		scalar(const char* src) : _str(std::string_view(src)) {}
 		scalar(std::nullptr_t) = delete;
 
-		scalar& operator=(const std::string_view& src) {
+		scalar& operator=(const std::string_view& src) noexcept {
 			_str = src;
 			return *this;
 		}
 
-		scalar& operator=(std::string&& src) {
+		scalar& operator=(std::string&& src) noexcept {
 			_str = std::move(src);
 			return *this;
 		}
@@ -53,12 +53,12 @@ namespace perl {
 			return *this;
 		}
 
-		scalar& operator=(std::shared_ptr<const std::string>&& src) {
+		scalar& operator=(std::shared_ptr<const std::string>&& src) noexcept {
 			_str = std::move(src);
 			return *this;
 		}
 
-		scalar& operator=(const std::shared_ptr<const std::string>& src) {
+		scalar& operator=(const std::shared_ptr<const std::string>& src) noexcept {
 			_str = src;
 			return *this;
 		}

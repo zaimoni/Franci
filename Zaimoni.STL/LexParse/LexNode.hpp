@@ -4,7 +4,6 @@
 #include "Kuroda.hpp"
 #include "FormalWord.hpp"
 #include "../COW.hpp"
-#include "../perl.hpp"
 #include <span>
 
 namespace formal {
