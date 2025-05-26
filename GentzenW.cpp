@@ -743,8 +743,17 @@ namespace gentzen {
 
 	class symbol_catalog {
 	private:
-		std::vector<std::pair<std::shared_ptr<const formal::lex_node>, int > > _symbols;
+		std::vector<std::pair<std::shared_ptr<const formal::lex_node>, unsigned int > > _symbols;
 		std::vector<std::shared_ptr<const formal::lex_node> > _constant_symbols;
+
+		enum {
+			// these are the kinds of symbols we can declare
+			Prefix = 1U << 0,	// prefix symbol
+			Infix = 1U << 1,	// infix symbol
+			Postfix = 1U << 2	// postfix symbol
+//			Constant = 1U << 3, // constant symbol	// Copilot recommended these, but we don't need them
+//			All = Prefix | Infix | Postfix | Constant
+		};
 	public:
 		symbol_catalog() = default;
 		symbol_catalog(const symbol_catalog&) = delete;
@@ -755,6 +764,80 @@ namespace gentzen {
 		static symbol_catalog& get() {
 			static symbol_catalog ooao;
 			return ooao;
+		}
+
+		// a constant symbol may not be any other kind of symbol
+		std::optional<perl::scalar> declare_prefix(const std::shared_ptr<const formal::lex_node>& x)
+		{
+			auto x_view = x->to_scalar().view();
+			for (decltype(auto) symbol : _constant_symbols) {
+				if (symbol->to_scalar().view() == x_view) return "already declared as constant symbol";
+			}
+			for (decltype(auto) symbol : _symbols) {
+				if (symbol.first->to_scalar().view() == x_view) {
+					if (symbol.second & Prefix) {
+						warning_report(*x, "already declared as prefix symbol");
+						return std::nullopt;
+					}
+					symbol.second |= Prefix;
+					return std::nullopt;
+				}
+			}
+			return std::nullopt;
+		}
+
+		std::optional<perl::scalar> declare_infix(const std::shared_ptr<const formal::lex_node>& x)
+		{
+			auto x_view = x->to_scalar().view();
+			for (decltype(auto) symbol : _constant_symbols) {
+				if (symbol->to_scalar().view() == x_view) return "already declared as constant symbol";
+			}
+			for (decltype(auto) symbol : _symbols) {
+				if (symbol.first->to_scalar().view() == x_view) {
+					if (symbol.second & Infix) {
+						warning_report(*x, "already declared as infix symbol");
+						return std::nullopt;
+					}
+					symbol.second |= Infix;
+					return std::nullopt;
+				}
+			}
+			return std::nullopt;
+		}
+
+		std::optional<perl::scalar> declare_postfix(const std::shared_ptr<const formal::lex_node>& x)
+		{
+			auto x_view = x->to_scalar().view();
+			for (decltype(auto) symbol : _constant_symbols) {
+				if (symbol->to_scalar().view() == x_view) return "already declared as constant symbol";
+			}
+			for (decltype(auto) symbol : _symbols) {
+				if (symbol.first->to_scalar().view() == x_view) {
+					if (symbol.second & Postfix) {
+						warning_report(*x, "already declared as postfix symbol");
+						return std::nullopt;
+					}
+					symbol.second |= Postfix;
+					return std::nullopt;
+				}
+			}
+			return std::nullopt;
+		}
+
+		std::optional<perl::scalar> declare_constant(const std::shared_ptr<const formal::lex_node>& x)
+		{
+			auto x_view = x->to_scalar().view();
+			for (decltype(auto) symbol : _symbols) {
+				if (symbol.first->to_scalar().view() == x_view) return "already declared as non-constant symbol";
+			}
+			for (decltype(auto) symbol : _constant_symbols) {
+				if (symbol->to_scalar().view() == x_view) {
+					warning_report(*x, "already declared as constant symbol");
+					return std::nullopt;
+				}
+			}
+			_constant_symbols.push_back(x);
+			return std::nullopt;
 		}
 	};
 
@@ -779,7 +862,14 @@ namespace gentzen {
 		std::shared_ptr<facts> parent() const { return _parent; }
 
 		void add_axiom(std::shared_ptr<const formal::parsed> src) {
-			if (auto err = src->is_not_legal_axiom((bool)_parent)) return;
+			if (auto err = src->is_not_legal_axiom((bool)_parent)) {
+				error_report(*src, *err);
+				return;
+			}
+			if (auto err = src->before_add_axiom_handler()) {
+				error_report(*src, *err);
+				return;
+			}
 			_axioms.push_back(src);
 		}
 	};
@@ -1430,6 +1520,18 @@ public:
 			}
 			if (!unconditional) {
 				if (PARSE_TREE_MAX > _code) return "cannot conditionally alter syntax";
+			}
+			return std::nullopt;
+		}
+
+		std::optional<perl::scalar> before_add_axiom_handler() const override {
+			decltype(auto) symbols = gentzen::symbol_catalog::get();
+
+			switch (_code) {
+			case (int)hard_code::prefix_symbol: return symbols.declare_prefix(_subject);
+			case (int)hard_code::postfix_symbol: return symbols.declare_postfix(_subject);
+			case (int)hard_code::infix_symbol: return symbols.declare_infix(_subject);
+			case (int)hard_code::constant_symbol: return symbols.declare_constant(_subject);
 			}
 			return std::nullopt;
 		}

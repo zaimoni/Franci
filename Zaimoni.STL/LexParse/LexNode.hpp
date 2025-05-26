@@ -18,10 +18,12 @@ namespace formal {
 
 		virtual src_location origin() const = 0;
 
-		virtual std::optional<perl::scalar> is_not_legal_axiom(bool unconditional) const { return "does not evaluate to a truth value"; }
-
 		virtual std::string to_s() const = 0;
 		virtual unsigned int precedence() const = 0;
+
+		// unclear if following belong in a sub-interface
+		virtual std::optional<perl::scalar> is_not_legal_axiom(bool unconditional) const { return "does not evaluate to a truth value"; }
+		virtual std::optional<perl::scalar> before_add_axiom_handler() const { return "does not evaluate to a truth value"; }
 	};
 
 	class lex_node final
@@ -37,6 +39,7 @@ namespace formal {
 		decltype(_anchor) _post_anchor;
 		unsigned long long _code; // usually used as a bitmap
 		unsigned long long _offset; // used as a linear offset
+		mutable std::optional<perl::scalar> _cached_scalar;
 
 		lex_node(kuroda::parser<lex_node>::sequence& dest, size_t lb, size_t ub, unsigned long long code);	// slicing constructor
 		// thin-wrapping constructors
@@ -72,6 +75,10 @@ namespace formal {
 		operator perl::scalar() const {
 			if (1 == is_pure_anchor()) return c_anchor<formal::word>()->value();
 			return to_s();
+		}
+		const perl::scalar& to_scalar() const {
+			if (!_cached_scalar) _cached_scalar = perl::scalar();
+			return *_cached_scalar;
 		}
 
 		// factory function: slices a lex_node out of dest, then puts the lex_node at index lb
@@ -265,6 +272,9 @@ void warning_report(const formal::src_location& loc, const perl::scalar& warn);
 
 // standard thin wrappers
 void error_report(formal::lex_node& fail, const perl::scalar& err);
-void error_report(formal::parsed& fail, const perl::scalar& err);
+void error_report(const formal::parsed& fail, const perl::scalar& err);
+
+void warning_report(const formal::lex_node& fail, const perl::scalar& err);
+void warning_report(const formal::parsed& fail, const perl::scalar& err);
 
 #endif

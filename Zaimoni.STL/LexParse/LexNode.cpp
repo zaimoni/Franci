@@ -506,4 +506,7 @@ void error_report(formal::lex_node& fail, const perl::scalar& err) {
 	fail.learn(formal::Error);
 }
 
-void error_report(formal::parsed& fail, const perl::scalar& err) { error_report(fail.origin(), err); }
+void error_report(const formal::parsed& fail, const perl::scalar& err) { error_report(fail.origin(), err); }
+
+void warning_report(const formal::lex_node& fail, const perl::scalar& err) { warning_report(fail.origin(), err); }
+void warning_report(const formal::parsed& fail, const perl::scalar& err) { warning_report(fail.origin(), err); }
