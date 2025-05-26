@@ -84,6 +84,12 @@ public:
 		return nullptr;
 	}
 
+	std::shared_ptr<const T> get_shared() {
+		if (_read) return _read;
+		if (_write) return _read = std::shared_ptr<const T>(_write.release());
+		return nullptr;
+	}
+
 	const T* operator->() const { return get_c(); }
 	T* operator->() { return get(); }
 
@@ -108,10 +114,6 @@ public:
 		return std::nullopt;
 	}
 
-/*
-	operator const T* () const { return get_c(); }
-	operator T* () { return get(); }
-*/
 	// value equality of contents
 	friend bool operator==(const COW& lhs, const COW& rhs) {
 		if (&lhs == &rhs) return true;

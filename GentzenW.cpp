@@ -862,7 +862,7 @@ namespace gentzen {
 		std::shared_ptr<facts> parent() const { return _parent; }
 
 		void add_axiom(std::shared_ptr<const formal::parsed> src) {
-			if (auto err = src->is_not_legal_axiom((bool)_parent)) {
+			if (auto err = src->is_not_legal_axiom(!_parent)) {
 				error_report(*src, *err);
 				return;
 			}
@@ -1591,6 +1591,38 @@ private:
 					}
 					else {
 						error_report(*stage[0], "not a lexical word");
+					}
+				}
+				catch (std::exception& e) {
+					std::cout << "line iteration body: " << e.what() << "\n";
+					return;
+				}
+			}
+		}
+
+		(decltype(dest)()).swap(dest);
+
+		if (root.contains("axioms")) {
+			fkyaml::from_node(root["axioms"], dest);
+			auto& instinct = *gentzen::facts::get();
+
+			formal::src_location src(std::pair(1, 0), std::shared_ptr<const std::filesystem::path>(new std::filesystem::path("cfg/core.yaml:axioms")));
+			auto lines = to_lines(dest, src);
+			while (!lines.empty()) {
+				try {
+					const auto prior_errors = Errors.count();
+					auto stage = apply_grammar(TokenGrammar(), formal::lex_node::pop_front(lines));
+					src.line_pos.first++;
+					src.line_pos.second = 0;
+					if (prior_errors < Errors.count()) continue;
+
+					kuroda::parser<formal::lex_node>::edit_span scan(stage);
+
+					global_parse(scan);
+					if (1 == stage.size() && prior_errors == Errors.count()) {
+						if (auto relay = stage[0]->shared_anchor<formal::parsed>()) {
+							instinct.add_axiom(relay);
+						}
 					}
 				}
 				catch (std::exception& e) {

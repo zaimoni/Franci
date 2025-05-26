@@ -160,6 +160,14 @@ namespace formal {
 		template<class T>
 		std::shared_ptr<const T> shared_post_anchor() = delete;
 
+		template<>
+		std::shared_ptr<const parsed> shared_anchor<parsed>() {
+			if (auto x = std::get_if<std::shared_ptr<const parsed> >(&_anchor)) return *x;
+			if (auto x = std::get_if<zaimoni::COW<parsed> >(&_anchor)) return x->get_shared();
+			return nullptr;
+		}
+
+		// 2025-05-26: Gentzen.exe regresses badly if shared_anchor<parsed>() is called here
 		template<std::derived_from<formal::parsed> T>
 		std::shared_ptr<const T> shared_post_anchor() {
 			if (auto x = std::get_if<std::shared_ptr<const parsed> >(&_post_anchor)) {
