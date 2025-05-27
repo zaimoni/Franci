@@ -862,6 +862,8 @@ namespace gentzen {
 		std::shared_ptr<facts> parent() const { return _parent; }
 
 		void add_axiom(std::shared_ptr<const formal::parsed> src) {
+			enum { trace_parse = 0 };
+
 			if (auto err = src->is_not_legal_axiom(!_parent)) {
 				error_report(*src, *err);
 				return;
@@ -870,6 +872,7 @@ namespace gentzen {
 				error_report(*src, *err);
 				return;
 			}
+			if constexpr (trace_parse) std::cerr << (_parent ? "hypothesis: " : "axiom: ") << src->to_s() << "\n";
 			_axioms.push_back(src);
 		}
 	};
