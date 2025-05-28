@@ -147,6 +147,14 @@ namespace formal {
 		template<class T>
 		std::shared_ptr<const T> shared_anchor() = delete;
 
+		template<>
+		std::shared_ptr<const parsed> shared_anchor<parsed>() {
+			if (auto x = std::get_if<std::shared_ptr<const parsed> >(&_anchor)) return *x;
+			if (auto x = std::get_if<zaimoni::COW<parsed> >(&_anchor)) return x->get_shared();
+			return nullptr;
+		}
+
+		// 2025-05-26: Gentzen.exe regresses badly if shared_anchor<parsed>() is called here
 		template<std::derived_from<formal::parsed> T>
 		std::shared_ptr<const T> shared_anchor() {
 			if (auto x = std::get_if<std::shared_ptr<const parsed> >(&_anchor)) {
@@ -160,14 +168,6 @@ namespace formal {
 		template<class T>
 		std::shared_ptr<const T> shared_post_anchor() = delete;
 
-		template<>
-		std::shared_ptr<const parsed> shared_anchor<parsed>() {
-			if (auto x = std::get_if<std::shared_ptr<const parsed> >(&_anchor)) return *x;
-			if (auto x = std::get_if<zaimoni::COW<parsed> >(&_anchor)) return x->get_shared();
-			return nullptr;
-		}
-
-		// 2025-05-26: Gentzen.exe regresses badly if shared_anchor<parsed>() is called here
 		template<std::derived_from<formal::parsed> T>
 		std::shared_ptr<const T> shared_post_anchor() {
 			if (auto x = std::get_if<std::shared_ptr<const parsed> >(&_post_anchor)) {
@@ -195,6 +195,9 @@ namespace formal {
 			if (auto x = std::get_if<zaimoni::COW<formal::lex_node> >(&_post_anchor)) return x->release();
 			return nullptr;
 		}
+
+		auto anchor_code() const { return classify(_anchor); }
+		auto post_anchor_code() const { return classify(_post_anchor); }
 
 		bool syntax_ok() const;
 		int is_pure_anchor() const; // C error code convention

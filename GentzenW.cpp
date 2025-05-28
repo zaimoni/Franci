@@ -716,25 +716,46 @@ namespace gentzen {
 		}
 	};
 
+	// due to typical HTML layout, we don't want these as symbols
+	static constexpr const char* const HTML_binds_to_predecessor[] = {
+		"sub",
+		"sup"
+	};
+
 	// could lose HTML formatting
-	std::optional<std::pair<const HTMLtag*, std::string_view> > could_be_symbol(const formal::lex_node* src) {
+	std::optional<std::pair<const HTMLtag*, std::string_view> > anchor_is_symbol_like(const formal::lex_node* src) {
 		std::pair<const HTMLtag*, std::string_view> ret(nullptr, std::string_view());
 		do {
-			auto is_word = interpret_word(*src);
-			if (is_word) {
-				ret.second = *is_word;
+			if (1 == src->anchor_code()) {
+				if (!src->infix().empty()) return std::nullopt;
+				if (0 != src->post_anchor_code()) return std::nullopt;
+				ret.second = src->c_anchor<formal::word>()->value();
 				return ret;
 			}
 			auto is_tag = dynamic_cast<const HTMLtag*>(src->c_anchor<formal::parsed>());
 			if (!is_tag) return std::nullopt;
 			if (1 != src->infix().size()) return std::nullopt;
+			for (decltype(auto) x : HTML_binds_to_predecessor) {
+				if (is_tag->tag_name() == x) return std::nullopt;
+			}
+			// HTML has already been lexed, so we're actually a balanced tag
 			if (!ret.first) ret.first = is_tag;
-		} while (src = src->infix().front());
+		} while (src = src->infix().front()); // simulate tail recursion
+		return std::nullopt;
+	}
+
+	std::optional<std::pair<const HTMLtag*, std::string_view> > is_symbol_like(const formal::lex_node* src) {
+		if (auto ret = anchor_is_symbol_like(src)) {
+			if (!src->prefix().empty()) return std::nullopt;
+			if (!src->postfix().empty()) return std::nullopt;
+			if (!src->fragments().empty()) return std::nullopt;
+			return ret;
+		}
 		return std::nullopt;
 	}
 
 	const HTMLtag* is_token_sequence_var(const formal::lex_node* src) {
-		auto ret = could_be_symbol(src);
+		auto ret = is_symbol_like(src);
 		if (ret && ret->first) {
 			if (auto test = ret->first->attr("tokensequence")) return ret->first;
 		}
@@ -1323,11 +1344,6 @@ auto balanced_html_tag(kuroda::parser<formal::lex_node>::sequence& src, size_t v
 }
 
 auto HTML_bind_to_preceding(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
-	static constexpr const char* binds_to_predecessor[] = {
-		"sub",
-		"sup"
-	};
-
 #if PROTOTYPE
 	static constexpr const char* visually_merges_with_predecessor[] = {
 		"b",
@@ -1342,7 +1358,7 @@ auto HTML_bind_to_preceding(kuroda::parser<formal::lex_node>::sequence& src, siz
 //	decltype(auto) balanced = src[viewpoint]; // lambda capture of reference from [], only works once
 	const auto tag = HTMLtag::is_balanced_pair(*src[viewpoint]);
 	if (!tag) return ret;
-	for (decltype(auto) x : binds_to_predecessor) {
+	for (decltype(auto) x : gentzen::HTML_binds_to_predecessor) {
 		if (*tag == x) {
 			static auto relink = [&](formal::lex_node* target) {
 				// don't mess with the balanced () {} parsing
@@ -1518,7 +1534,7 @@ public:
 
 		std::optional<perl::scalar> is_not_legal_axiom(bool unconditional) const override {
 			if (SYMBOL_MAX > _code) {
-				if (!gentzen::could_be_symbol(_subject.get())) return "not a syntactical symbol";
+				if (!gentzen::is_symbol_like(_subject.get())) return "not a syntactical symbol";
 				if ( gentzen::is_token_sequence_var(_subject.get())) return "is token-sequence variable";
 			}
 			if (!unconditional) {
@@ -1688,7 +1704,7 @@ public:
 
 			// did match: attempt parse
 			if (1 == phrase_origin) {
-				const bool symbol_is_word = lhs_is_symbol ? (bool)gentzen::could_be_symbol(tokens[0]) : true;
+				const bool symbol_is_word = lhs_is_symbol ? (bool)gentzen::is_symbol_like(tokens[0]) : true;
 				std::unique_ptr<formal::lex_node> dest(new formal::lex_node(new phrase_postfix(tokens[0], n)));
 				if (!symbol_is_word) error_report(*dest, "symbol must be a word");
 				tokens[0] = dest.release();
@@ -1716,7 +1732,7 @@ public:
 			if (lhs_is_symbol) {
 				if (1 != phrase_origin) {
 					error_report(*dest, "cannot declare a token-sequence as a symbol");
-				} else if (!gentzen::could_be_symbol(dest->prefix().front())) {
+				} else if (!gentzen::is_symbol_like(dest->prefix().front())) {
 					error_report(*dest, "symbol must be a word");
 				}
 			}
