@@ -3,6 +3,7 @@
 
 #include "Kuroda.hpp"
 #include "FormalWord.hpp"
+#include "../cache.hpp"
 #include "../COW.hpp"
 #include <span>
 
@@ -41,6 +42,8 @@ namespace formal {
 		unsigned long long _offset; // used as a linear offset
 		mutable std::optional<perl::scalar> _cached_scalar;
 
+		static std::vector<zaimoni::I_erase*> _caches;
+
 		lex_node(kuroda::parser<lex_node>::sequence& dest, size_t lb, size_t ub, unsigned long long code);	// slicing constructor
 		// thin-wrapping constructors
 		lex_node(word*& src, unsigned long long code = 0) noexcept : _anchor(std::unique_ptr<word>(src)), _code(code), _offset(0) {
@@ -70,7 +73,9 @@ namespace formal {
 		lex_node(lex_node&& src) = default;
 		lex_node& operator=(const lex_node& src) = default;
 		lex_node& operator=(lex_node&& src) = default;
-		virtual ~lex_node() = default;
+		virtual ~lex_node() {
+			for (decltype(auto) x : _caches) x->erase(this);
+		}
 
 		operator perl::scalar() const {
 			if (1 == is_pure_anchor()) return c_anchor<formal::word>()->value();

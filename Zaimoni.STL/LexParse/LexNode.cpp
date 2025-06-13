@@ -2,6 +2,8 @@
 
 namespace formal {
 
+	std::vector<zaimoni::I_erase*> lex_node::_caches;
+
 	// we only handle closed intervals
 	lex_node::lex_node(kuroda::parser<lex_node>::sequence& dest, size_t lb, size_t ub, unsigned long long code)
 		: _code(code), _offset(0)

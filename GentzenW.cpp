@@ -723,8 +723,8 @@ namespace gentzen {
 	};
 
 	// could lose HTML formatting
-	std::optional<std::pair<const HTMLtag*, std::string_view> > anchor_is_symbol_like(const formal::lex_node* src) {
-		std::pair<const HTMLtag*, std::string_view> ret(nullptr, std::string_view());
+	std::optional<std::pair<std::vector<const HTMLtag*>, std::string_view> > anchor_is_symbol_like(const formal::lex_node* src) {
+		std::pair<std::vector<const HTMLtag*>, std::string_view> ret;
 		do {
 			if (1 == src->anchor_code()) {
 				if (!src->infix().empty()) return std::nullopt;
@@ -739,12 +739,12 @@ namespace gentzen {
 				if (is_tag->tag_name() == x) return std::nullopt;
 			}
 			// HTML has already been lexed, so we're actually a balanced tag
-			if (!ret.first) ret.first = is_tag;
+			ret.first.push_back(is_tag);
 		} while (src = src->infix().front()); // simulate tail recursion
 		return std::nullopt;
 	}
 
-	std::optional<std::pair<const HTMLtag*, std::string_view> > is_symbol_like(const formal::lex_node* src) {
+	std::optional<std::pair<std::vector<const HTMLtag*>, std::string_view> > is_symbol_like(const formal::lex_node* src) {
 		if (auto ret = anchor_is_symbol_like(src)) {
 			if (!src->prefix().empty()) return std::nullopt;
 			if (!src->postfix().empty()) return std::nullopt;
@@ -756,8 +756,9 @@ namespace gentzen {
 
 	const HTMLtag* is_token_sequence_var(const formal::lex_node* src) {
 		auto ret = is_symbol_like(src);
-		if (ret && ret->first) {
-			if (auto test = ret->first->attr("tokensequence")) return ret->first;
+		if (ret && !ret->first.empty()) {
+			const auto tag = ret->first.front();
+			if (auto test = tag->attr("tokensequence")) return tag;
 		}
 		return nullptr;
 	}
@@ -860,6 +861,48 @@ namespace gentzen {
 			_constant_symbols.push_back(x);
 			return std::nullopt;
 		}
+
+#if 0
+		static bool global_parse(kuroda::parser<formal::lex_node>::edit_span& tokens)
+		{
+			enum { trace_parse = 0 };
+			if (tokens.empty()) return false;
+			const auto& catalog = get();
+			if (catalog._symbols.empty()) return false;
+			std::vector<std::optional<std::pair<std::vector<const HTMLtag*>, std::string_view> > > symbol_like_cache(tokens.size());
+			ptrdiff_t n = -1;
+			for (const formal::lex_node* x : tokens) {
+				symbol_like_cache[++n] = is_symbol_like(x);
+			}
+
+			n = -1;
+			while (++n < catalog._symbols.size()) {
+				decltype(auto) symbol = catalog._symbols[n].first;
+				auto test = *is_symbol_like(symbol.get());
+				auto test_size = test.first.size();
+				const unsigned int role = catalog._symbols[n].second & (Prefix | Infix | Postfix);
+				std::vector<ptrdiff_t> indexes;
+				ptrdiff_t i = -1;
+				while (++i < tokens.size()) {
+					if (!symbol_like_cache[i]) continue;
+					if (symbol_like_cache[i]->first.size() != test_size) continue;
+					if (test.second != symbol_like_cache[i]->second) continue;
+					bool matched = true;
+					while (0 < test_size) {
+						--test_size;
+						if (test.first[test_size]->tag_name() != symbol_like_cache[i]->first[test_size]->tag_name()) {
+							matched = false;
+							break;
+						}
+					}
+					if (!matched) continue;
+					indexes.push_back(i);
+				}
+				if (indexes.empty()) continue;
+			}
+			return false;
+		}
+#endif
 	};
 
 	class facts {
@@ -1464,12 +1507,29 @@ private:
 	}
 public:
 	static constexpr const unsigned long long postfix = (1ULL << 2); // reserve this flag for both word and lex_node
+	static constexpr const unsigned long long infix = (1ULL << 3); // reserve this flag for both word and lex_node
+	static constexpr const unsigned long long prefix = (1ULL << 4); // reserve this flag for both word and lex_node
 
-	static_assert(!(formal::Comment& postfix));
-	static_assert(!(formal::Error& postfix));
-	static_assert(!(formal::Inert_Token& postfix));
-	static_assert(!(formal::Tokenized& postfix));
-	static_assert(!(HTMLtag::Entity& postfix));
+	static_assert(!(postfix & formal::Comment));
+	static_assert(!(postfix & formal::Error));
+	static_assert(!(postfix & formal::Inert_Token));
+	static_assert(!(postfix & formal::Tokenized));
+	static_assert(!(postfix & HTMLtag::Entity));
+
+	static_assert(!(infix & formal::Comment));
+	static_assert(!(infix & formal::Error));
+	static_assert(!(infix & formal::Inert_Token));
+	static_assert(!(infix & formal::Tokenized));
+	static_assert(!(infix & HTMLtag::Entity));
+	static_assert(!(infix & postfix));
+
+	static_assert(!(prefix & formal::Comment));
+	static_assert(!(prefix & formal::Error));
+	static_assert(!(prefix & formal::Inert_Token));
+	static_assert(!(prefix & formal::Tokenized));
+	static_assert(!(prefix & HTMLtag::Entity));
+	static_assert(!(prefix & postfix));
+	static_assert(!(prefix & infix));
 
 	class phrase_postfix final : public formal::parsed {
 		std::shared_ptr<const formal::lex_node> _subject;
