@@ -31,6 +31,7 @@ namespace zaimoni {
 		}
 
 		void update(const void* src, T val) { _cache.insert_or_assign(reinterpret_cast<uintptr_t>(src), std::move(val)); }
+		void update(const void* src, T&& val) { _cache.insert_or_assign(reinterpret_cast<uintptr_t>(src), std::move(val)); }
 		void erase(const void* src) override { _cache.erase(reinterpret_cast<uintptr_t>(src)); }
 	};
 

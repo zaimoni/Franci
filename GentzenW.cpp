@@ -777,6 +777,21 @@ namespace gentzen {
 //			All = Prefix | Infix | Postfix | Constant
 		};
 	public:
+		static constexpr const unsigned long long anchor_is_symbol = (1ULL << 5); // reserve this flag for lex_node
+		static constexpr const unsigned long long anchor_is_const_symbol = (1ULL << 6); // reserve this flag for lex_node
+
+		static_assert(!(anchor_is_symbol & formal::Comment));
+		static_assert(!(anchor_is_symbol & formal::Error));
+		static_assert(!(anchor_is_symbol & formal::Inert_Token));
+		static_assert(!(anchor_is_symbol & formal::Tokenized));
+		static_assert(!(anchor_is_symbol & formal::RequestNormalization));
+		static_assert(!(anchor_is_const_symbol & formal::Comment));
+		static_assert(!(anchor_is_const_symbol & formal::Error));
+		static_assert(!(anchor_is_const_symbol & formal::Inert_Token));
+		static_assert(!(anchor_is_const_symbol & formal::Tokenized));
+		static_assert(!(anchor_is_const_symbol & formal::RequestNormalization));
+		static_assert(!(anchor_is_const_symbol & anchor_is_symbol));
+
 		symbol_catalog() = default;
 		symbol_catalog(const symbol_catalog&) = delete;
 		symbol_catalog(symbol_catalog&&) = delete;
@@ -798,13 +813,14 @@ namespace gentzen {
 			for (decltype(auto) symbol : _symbols) {
 				if (symbol.first->to_scalar().view() == x_view) {
 					if (symbol.second & Prefix) {
-						warning_report(*x, "already declared as prefix symbol");
+						warning_report(*x, x->to_s() + ":" + symbol.first->to_s() + " already declared as prefix symbol");
 						return std::nullopt;
 					}
 					symbol.second |= Prefix;
 					return std::nullopt;
 				}
 			}
+			_symbols.push_back(std::make_pair(x, Prefix));
 			return std::nullopt;
 		}
 
@@ -817,13 +833,14 @@ namespace gentzen {
 			for (decltype(auto) symbol : _symbols) {
 				if (symbol.first->to_scalar().view() == x_view) {
 					if (symbol.second & Infix) {
-						warning_report(*x, "already declared as infix symbol");
+						warning_report(*x, std::string(x_view) + ":" + std::string(symbol.first->to_scalar().view()) + " already declared as infix symbol");
 						return std::nullopt;
 					}
 					symbol.second |= Infix;
 					return std::nullopt;
 				}
 			}
+			_symbols.push_back(std::make_pair(x, Infix));
 			return std::nullopt;
 		}
 
@@ -836,13 +853,14 @@ namespace gentzen {
 			for (decltype(auto) symbol : _symbols) {
 				if (symbol.first->to_scalar().view() == x_view) {
 					if (symbol.second & Postfix) {
-						warning_report(*x, "already declared as postfix symbol");
+						warning_report(*x, x->to_s() + ":" + symbol.first->to_s() + " already declared as postfix symbol");
 						return std::nullopt;
 					}
 					symbol.second |= Postfix;
 					return std::nullopt;
 				}
 			}
+			_symbols.push_back(std::make_pair(x, Postfix));
 			return std::nullopt;
 		}
 
@@ -862,7 +880,62 @@ namespace gentzen {
 			return std::nullopt;
 		}
 
-#if 0
+		static bool anchor_symbol_parse(formal::lex_node& src) {
+			enum { trace_parse = 0 };
+			if (src.code() & (anchor_is_symbol | anchor_is_const_symbol)) return true; // \todo predicate target: any encoding using a linear index is already parsed
+			if (src.code() & formal::Error) return false;
+			const auto& catalog = get();
+			if (catalog._symbols.empty() && catalog._constant_symbols.empty()) {
+				if constexpr (trace_parse) std::cerr << "catalog._symbols.empty() && catalog._constant_symbols.empty()\n";
+				return false;
+			}
+			if constexpr (trace_parse) std::cerr << "entering anchor_symbol_parse\n";
+			if (auto test = anchor_is_symbol_like(&src)) {
+				if constexpr (trace_parse) std::cerr << src.to_s()+": anchor_is_symbol_like(&src)\n";
+				ptrdiff_t n = -1;
+				while (++n < catalog._symbols.size()) {
+					decltype(auto) symbol = catalog._symbols[n].first;
+					auto test2 = *is_symbol_like(symbol.get());
+					auto test_size = test->first.size();
+					if (test2.first.size() != test_size) continue;
+					if (test->second != test2.second) continue;
+					bool matched = true;
+					while (0 < test_size) {
+						--test_size;
+						if (test->first[test_size]->tag_name() != test2.first[test_size]->tag_name()) {
+							matched = false;
+							break;
+						}
+					}
+					if (!matched) continue;
+					src.learn(anchor_is_symbol, n);
+					if constexpr (trace_parse) std::cerr << "matched symbol: " << src.to_s() << "\n";
+					return true;
+				}
+				n = -1;
+				while (++n < catalog._constant_symbols.size()) {
+					decltype(auto) symbol = catalog._constant_symbols[n];
+					auto test2 = *is_symbol_like(symbol.get());
+					auto test_size = test->first.size();
+					if (test2.first.size() != test_size) continue;
+					if (test->second != test2.second) continue;
+					bool matched = true;
+					while (0 < test_size) {
+						--test_size;
+						if (test->first[test_size]->tag_name() != test2.first[test_size]->tag_name()) {
+							matched = false;
+							break;
+						}
+					}
+					if (!matched) continue;
+					src.learn(anchor_is_const_symbol, n);
+					return true;
+				}
+			}
+			return false;
+		}
+
+#if 2
 		static bool global_parse(kuroda::parser<formal::lex_node>::edit_span& tokens)
 		{
 			enum { trace_parse = 0 };
@@ -1244,6 +1317,7 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 		*w = formal::word(std::shared_ptr<const std::string>(new std::string(*html_entity)), w->origin(), w->code());
 		w->learn(HTMLtag::Entity);
 		x->learn(HTMLtag::Entity | formal::Inert_Token);
+		gentzen::symbol_catalog::anchor_symbol_parse(*x); // register this as a symbol, if it is one
 		return ret;
 	}
 
@@ -1272,6 +1346,7 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 			return ret;
 		}
 		x->learn(formal::Tokenized);
+		gentzen::symbol_catalog::anchor_symbol_parse(*x); // register this as a symbol, if it is one
 		return ret;
 	}
 
@@ -1290,9 +1365,11 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 			text.remove_suffix(text.size() - test->first.size());
 			*w = formal::word(std::shared_ptr<const std::string>(new std::string(text)), w->origin());
 			x->learn(formal::Tokenized);
+			gentzen::symbol_catalog::anchor_symbol_parse(*x); // register this as a symbol, if it is one
 			return ret;
 		}
 		x->learn(formal::Tokenized);
+		gentzen::symbol_catalog::anchor_symbol_parse(*x); // register this as a symbol, if it is one
 		return ret;
 	}
 
@@ -1374,7 +1451,7 @@ auto balanced_html_tag(kuroda::parser<formal::lex_node>::sequence& src, size_t v
 			}
 			// typically want to do this
 			formal::lex_node::slice(src, ub, viewpoint);
-//			gentzen::preaxiomatic::parse_lex(src[ub]);
+			gentzen::symbol_catalog::anchor_symbol_parse(*src[ub]); // register this as a symbol, if it is one
 			ret.push_back(ub);
 			return ret;
 		}
@@ -1494,6 +1571,7 @@ static auto& TokenGrammar() {
 
 class undefined_SVO {
 private:
+	// we have seven theoretical kinds of undefined sentences, based on where the infix/postfix/prefix text is.
 	std::vector<formal::lex_node> _postfix;
 
 	static std::unique_ptr<undefined_SVO>& _get()
@@ -1508,7 +1586,7 @@ private:
 public:
 	static constexpr const unsigned long long postfix = (1ULL << 2); // reserve this flag for both word and lex_node
 	static constexpr const unsigned long long infix = (1ULL << 3); // reserve this flag for both word and lex_node
-	static constexpr const unsigned long long prefix = (1ULL << 4); // reserve this flag for both word and lex_node
+	static constexpr const unsigned long long prefix = (1ULL << 4); // reserve this flag for both word and lex_nodel
 
 	static_assert(!(postfix & formal::Comment));
 	static_assert(!(postfix & formal::Error));
@@ -1604,6 +1682,9 @@ public:
 		}
 
 		std::optional<perl::scalar> before_add_axiom_handler() const override {
+			enum { trace_param = 0 };
+			if constexpr (trace_param) std::cerr << "entering before_add_axiom_handler\n";
+
 			decltype(auto) symbols = gentzen::symbol_catalog::get();
 
 			switch (_code) {
@@ -1612,6 +1693,7 @@ public:
 			case (int)hard_code::infix_symbol: return symbols.declare_infix(_subject);
 			case (int)hard_code::constant_symbol: return symbols.declare_constant(_subject);
 			}
+			if constexpr (trace_param) std::cerr << "before_add_axiom_handler: no action\n";
 			return std::nullopt;
 		}
 
@@ -1635,6 +1717,8 @@ public:
 
 private:
 	void load() {
+		enum { trace_load = 0 };
+
 		std::ifstream ifs(std::filesystem::path(self_path()).replace_filename("cfg/core.yaml"));
 
 		fkyaml::node root = fkyaml::node::deserialize(ifs);
@@ -1699,12 +1783,16 @@ private:
 
 					global_parse(scan);
 					if (1 == stage.size() && prior_errors == Errors.count()) {
-						if (auto relay = stage[0]->shared_anchor<formal::parsed>()) {
+						if constexpr (trace_load) std::cerr << "considering axiom\n";
+						if (auto relay = stage[0]->shared_anchor_is_parsed()) {
+							if constexpr (trace_load) std::cerr << "adding axiom " << relay->to_s() << "\n";
 							instinct.add_axiom(relay);
+						} else if constexpr(trace_load) {
+							warning_report(*stage[0], stage[0]->to_s() + ": axiom is not a parsed object");
+							std::cerr << stage[0]->anchor_code() << "\n";
 						}
 					}
-				}
-				catch (std::exception& e) {
+				} catch (std::exception& e) {
 					std::cout << "line iteration body: " << e.what() << "\n";
 					return;
 				}

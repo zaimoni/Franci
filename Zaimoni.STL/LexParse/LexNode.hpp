@@ -82,7 +82,7 @@ namespace formal {
 			return to_s();
 		}
 		const perl::scalar& to_scalar() const {
-			if (!_cached_scalar) _cached_scalar = perl::scalar();
+			if (!_cached_scalar) _cached_scalar = (perl::scalar)(*this);
 			return *_cached_scalar;
 		}
 
@@ -102,6 +102,7 @@ namespace formal {
 		void interpret(unsigned long long src) { _code = src; }
 		void interpret(unsigned long long src, unsigned long long offset) { _code = src; _offset = offset; }
 		void learn(unsigned long long src) { _code |= src; }
+		void learn(unsigned long long src, unsigned long long offset) { _code |= src; _offset = offset; }
 		void forget(unsigned long long src) { _code &= ~src; }
 
 		template<class Val>
@@ -152,8 +153,8 @@ namespace formal {
 		template<class T>
 		std::shared_ptr<const T> shared_anchor() = delete;
 
-		template<>
-		std::shared_ptr<const parsed> shared_anchor<parsed>() {
+		// 2025-06-19: fully specializing template doesn't work; the concept gets called instead
+		std::shared_ptr<const parsed> shared_anchor_is_parsed() {
 			if (auto x = std::get_if<std::shared_ptr<const parsed> >(&_anchor)) return *x;
 			if (auto x = std::get_if<zaimoni::COW<parsed> >(&_anchor)) return x->get_shared();
 			return nullptr;
