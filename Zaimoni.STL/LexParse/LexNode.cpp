@@ -467,6 +467,14 @@ restart:
 		return ret;
 	}
 
+	void lex_node::force_empty_prefix_postfix_fragments(lex_node*& dest)
+	{
+		if (dest->_prefix.empty() && dest->_postfix.empty() && dest->_fragments.empty()) return;
+		std::unique_ptr<lex_node> relay(new lex_node(dest));
+		dest = relay.release();
+	}
+
+
 	int lex_node::classify(const decltype(_anchor)& src)
 	{
 		struct _encode_anchor {

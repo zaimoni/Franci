@@ -72,6 +72,7 @@ namespace kuroda {
 			if (src->size() - offset < extent) return "edit_view<...>::bad_syntax: src.size() <= offset: " + std::to_string(src->size() - offset) + " " + std::to_string(extent) + "\n";
 			return std::nullopt;
 		}
+
 	};
 
 	template<class T>

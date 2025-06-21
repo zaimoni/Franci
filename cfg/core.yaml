@@ -8,5 +8,5 @@ axioms:
   - ":= is a binary infix symbol"
   - "&#9500; is a binary infix symbol"
   - "&#9500; is a unary prefix symbol"
-  - "& is a binary infix symbol"
   - ", is a binary infix symbol"
+  - "& is a binary infix symbol"

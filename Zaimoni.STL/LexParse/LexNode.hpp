@@ -39,17 +39,22 @@ namespace formal {
 			std::shared_ptr<const parsed> > _anchor;
 		decltype(_anchor) _post_anchor;
 		unsigned long long _code; // usually used as a bitmap
-		unsigned long long _offset; // used as a linear offset
+		size_t _offset; // used as a linear offset
 		mutable std::optional<perl::scalar> _cached_scalar;
 
 		static std::vector<zaimoni::I_erase*> _caches;
 
 		lex_node(kuroda::parser<lex_node>::sequence& dest, size_t lb, size_t ub, unsigned long long code);	// slicing constructor
+		// "sinking" constructor
+		lex_node(lex_node*& src) noexcept : _anchor(std::unique_ptr<lex_node>(src)), _code(src->_code), _offset(src->_offset) {
+			src = nullptr;
+		}
 		// thin-wrapping constructors
 		lex_node(word*& src, unsigned long long code = 0) noexcept : _anchor(std::unique_ptr<word>(src)), _code(code), _offset(0) {
 			if (src->code() & Comment) _code |= Comment;
 			src = nullptr;
 		}
+
 
 	public:
 		using edit_span = kuroda::parser<lex_node>::edit_span;
@@ -268,6 +273,8 @@ namespace formal {
 		static auto where_is(const edit_span& view) { return view.offset; }
 
 		static std::vector<kuroda::parser<lex_node>::symbols> move_per_spec(const std::vector<edit_span>& src);
+
+		static void force_empty_prefix_postfix_fragments(lex_node*& dest);
 
 	private:
 		static src_location origin(const lex_node* src);
