@@ -84,7 +84,7 @@ namespace kuroda {
 //		using symbols = std::vector<std::unique_ptr<T> >;
 		using rewriter = std::function<std::vector<size_t>(sequence&, size_t)>;
 		using edit_span = edit_view<sequence>;
-		using global_rewriter = std::function<bool(edit_span&)>;
+		using global_rewriter = std::function<bool(edit_span&, parser&)>;
 		// hinting (using a return value of rewriter) looked interesting but in practice it doesn't work (many parse rules work from
 		// the same rightmost token trigger for efficiency reasons)
 
@@ -246,7 +246,7 @@ restart:
 				if constexpr (trace_parse) {
 					std::cout << "attemptng rule\n";
 				}
-				if (rule(dest)) {
+				if (rule(dest, *this)) {
 					if constexpr (trace_parse) {
 						std::cout << "rule succeeded\n";
 					}

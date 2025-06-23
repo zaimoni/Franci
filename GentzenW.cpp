@@ -956,7 +956,7 @@ namespace gentzen {
 			return false;
 		}
 
-		static bool global_parse(kuroda::parser<formal::lex_node>::edit_span& tokens)
+		static bool global_parse(kuroda::parser<formal::lex_node>::edit_span& tokens, kuroda::parser<formal::lex_node>& grammar)
 		{
 			if (1 >= tokens.size()) return false; // no parse target
 
@@ -1875,7 +1875,7 @@ private:
 
 					kuroda::parser<formal::lex_node>::edit_span scan(stage);
 
-					global_parse(scan);
+					global_parse(scan, GentzenGrammar());
 					if (1 == stage.size() && prior_errors == Errors.count()) {
 						if constexpr (trace_load) std::cerr << "considering axiom\n";
 						if (auto relay = stage[0]->shared_anchor_is_parsed()) {
@@ -1911,7 +1911,7 @@ private:
 
 					kuroda::parser<formal::lex_node>::edit_span scan(stage);
 
-					global_parse(scan);
+					global_parse(scan, GentzenGrammar());
 					std::cout << to_string(stage) << std::endl;
 				}
 				catch (std::exception& e) {
@@ -1923,7 +1923,7 @@ private:
 	}
 
 public:
-	static bool global_parse(kuroda::parser<formal::lex_node>::edit_span& tokens) {
+	static bool global_parse(kuroda::parser<formal::lex_node>::edit_span& tokens, kuroda::parser<formal::lex_node>& grammar) {
 		enum { trace_parse = 0 };
 		if constexpr (trace_parse) std::cerr << "undefined_SVO::global_parse: enter\n";
 

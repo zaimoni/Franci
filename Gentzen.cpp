@@ -1398,7 +1398,7 @@ namespace gentzen {
 			return ret;
 		}
 
-		static bool global_parse(kuroda::parser<formal::lex_node>::edit_span& tokens) {
+		static bool global_parse(kuroda::parser<formal::lex_node>::edit_span& tokens, kuroda::parser<formal::lex_node>& grammar) {
 			enum { trace_parse = 0 };
 
 			const auto starting_errors = Errors.count();
@@ -1840,7 +1840,7 @@ redo_outer_parens:
 			return false;
 		}
 
-		static bool global_parse(kuroda::parser<formal::lex_node>::edit_span& tokens) {
+		static bool global_parse(kuroda::parser<formal::lex_node>::edit_span& tokens, kuroda::parser<formal::lex_node>& grammar) {
 			enum { trace_parse = 0, test_conditions = 0 };
 
 			const auto starting_errors = Errors.count();
