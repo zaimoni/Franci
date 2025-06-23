@@ -267,13 +267,6 @@ size_t issymbol(const std::string_view& src)
 	return 1;
 }
 
-static auto apply_grammar(kuroda::parser<formal::lex_node>& grammar, std::unique_ptr<formal::lex_node> wrapped)
-{
-	kuroda::parser<formal::lex_node>::symbols stage;
-	grammar.append_to_parse(stage, wrapped.release());
-	return stage;
-}
-
 template<class T>
 static auto apply_grammar(kuroda::parser<formal::lex_node>& grammar, typename kuroda::parser<T>::symbols& lines)
 {
@@ -982,7 +975,6 @@ namespace gentzen {
 			if (auto target = find_global_parse_target(tokens)) {
 				// for now, assume left-associativity in the parse tree
 				formal::lex_node::force_empty_prefix_postfix_fragments(tokens[target->first]);
-				bool updating = false;
 				std::unique_ptr<formal::lex_node> dest(tokens[target->first]);
 				tokens[target->first] = nullptr;
 
@@ -1836,7 +1828,7 @@ private:
 			while (!lines.empty()) {
 				try {
 					const auto prior_errors = Errors.count();
-					auto stage = apply_grammar(TokenGrammar(), formal::lex_node::pop_front(lines));
+					auto stage = TokenGrammar().apply(formal::lex_node::pop_front(lines));
 					src.line_pos.first++;
 					src.line_pos.second = 0;
 					if (prior_errors < Errors.count()) continue;
@@ -1878,7 +1870,7 @@ private:
 			while (!lines.empty()) {
 				try {
 					const auto prior_errors = Errors.count();
-					auto stage = apply_grammar(TokenGrammar(), formal::lex_node::pop_front(lines));
+					auto stage = TokenGrammar().apply(formal::lex_node::pop_front(lines));
 					src.line_pos.first++;
 					src.line_pos.second = 0;
 					if (prior_errors < Errors.count()) continue;
@@ -1914,7 +1906,7 @@ private:
 			while (!lines.empty()) {
 				try {
 					const auto prior_errors = Errors.count();
-					auto stage = apply_grammar(TokenGrammar(), formal::lex_node::pop_front(lines));
+					auto stage = TokenGrammar().apply(formal::lex_node::pop_front(lines));
 					src.line_pos.first++;
 					src.line_pos.second = 0;
 					if (prior_errors < Errors.count()) continue;
@@ -2047,7 +2039,7 @@ int main(int argc, char* argv[], char* envp[])
 		while (!lines.empty()) {
 			const auto prior_errors = Errors.count();
 			try {
-			auto stage = apply_grammar(TokenGrammar(), formal::lex_node::pop_front(lines));
+			auto stage = TokenGrammar().apply(formal::lex_node::pop_front(lines));
 			try {
 				if (0 >= Errors.count()) TokenGrammar().finite_parse(stage);
 			} catch (std::exception& e) {

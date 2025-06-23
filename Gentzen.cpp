@@ -2786,14 +2786,6 @@ static kuroda::parser<formal::lex_node>& GentzenGrammar() {
 	return *ooao;
 }
 
-static auto apply_grammar(kuroda::parser<formal::lex_node>& grammar, std::unique_ptr<formal::lex_node> wrapped)
-{
-	kuroda::parser<formal::lex_node>::symbols stage;
-	grammar.append_to_parse(stage, wrapped.release());
-	return stage;
-}
-
-
 template<class T>
 static auto apply_grammar(kuroda::parser<formal::lex_node>& grammar, typename kuroda::parser<T>::symbols& lines)
 {
@@ -2838,7 +2830,7 @@ int main(int argc, char* argv[], char* envp[])
 		// intent is one line, one statement
 		while (!lines.empty()) {
 			try {
-			auto stage = apply_grammar(TokenGrammar(), formal::lex_node::pop_front(lines));
+			auto stage = TokenGrammar().apply(formal::lex_node::pop_front(lines));
 			try {
 				if (0 >= Errors.count()) TokenGrammar().finite_parse(stage);
 			} catch (std::exception& e) {

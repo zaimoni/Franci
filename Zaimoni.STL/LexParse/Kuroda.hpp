@@ -158,6 +158,13 @@ namespace kuroda {
 			} while (dest.size() > ++viewpoint);
 		}
 
+		auto apply(std::unique_ptr<T>&& wrapped)
+		{
+			kuroda::parser<T>::symbols stage;
+			append_to_parse(stage, wrapped.release());
+			return stage;
+		}
+
 		std::vector<size_t> left_edge_at(sequence& dest, size_t viewpoint) {
 			std::vector<size_t> ret;
 			for (decltype(auto) test : left_edge_build_nonterminal) {
