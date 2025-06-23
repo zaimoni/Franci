@@ -252,6 +252,23 @@ restart:
 			return finite_parse(relay);
 		}
 
+		void complete_parse(sequence& stage) {
+			enum { trace_parse = 1 };
+
+			try {
+				do {
+					finite_parse(stage);
+				} while (finite_parse(to_editspan(stage)));
+			} catch (std::exception& e) {
+				std::cerr << "kuroda<T>::complete_parse: " << e.what() << "\n";
+				exit(3);
+			}
+			if constexpr (trace_parse) {
+				std::cerr << std::to_string(stage.size()) << "\n";
+				std::cerr << to_string(stage) << "\n";
+			}
+		}
+
 	private:
 		void notice_terminal(T*& src) {
 			for (decltype(auto) test : label_terminal) if (test(*src)) return;

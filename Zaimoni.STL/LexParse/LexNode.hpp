@@ -286,7 +286,7 @@ namespace formal {
 		static void reset(decltype(_anchor)& dest, lex_node*& src);
 	};
 
-	std::string to_string(const kuroda::parser<formal::lex_node>::symbols& src);
+	std::string to_string(const kuroda::parser<formal::lex_node>::sequence& src);
 
 } // namespace formal
 

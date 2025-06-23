@@ -980,17 +980,33 @@ namespace gentzen {
 			if (1 >= tokens.size()) return false; // no parse target
 
 			if (auto target = find_global_parse_target(tokens)) {
-				bool have_prefix_tokens = 0 < target->first;
-				bool have_postfix_tokens = tokens.size() - 1 > target->first;
-
 				// for now, assume left-associativity in the parse tree
 				formal::lex_node::force_empty_prefix_postfix_fragments(tokens[target->first]);
 				bool updating = false;
-				formal::lex_node& dest = *tokens[target->first];
+				std::unique_ptr<formal::lex_node> dest(tokens[target->first]);
+				tokens[target->first] = nullptr;
+
 				if (0 < target->first) {
+					kuroda::parser<formal::lex_node>::symbols stage_prefix(target->first);
+					const auto prefix_origin = tokens.begin();
+					std::copy_n(prefix_origin, target->first, stage_prefix.begin());
+					std::fill_n(prefix_origin, target->first, nullptr);
+					dest.get()->set_prefix(std::move(stage_prefix));
 				}
 				if (tokens.size()-1 > target->first) {
+					const auto ub = tokens.size() - 1 - target->first;
+					kuroda::parser<formal::lex_node>::symbols stage_suffix(ub);
+					const auto suffix_origin = tokens.begin() + target->first + 1;
+					std::copy_n(suffix_origin, ub, stage_suffix.begin());
+					std::fill_n(suffix_origin, ub, nullptr);
+					dest.get()->set_postfix(std::move(stage_suffix));
 				}
+
+				tokens[0] = dest.release();
+				kuroda::parser<formal::lex_node>::DeleteNSlotsAt(tokens, tokens.size() - 1, 1);
+				// \todo recurse the grammar on both prefix and postfix
+
+				return true;
 			}
 
 			return false;
@@ -2049,16 +2065,7 @@ int main(int argc, char* argv[], char* envp[])
 
 			if (prior_errors < Errors.count()) continue;
 
-			try {
-				do {
-					GentzenGrammar().finite_parse(stage);
-				} while (GentzenGrammar().finite_parse(kuroda::parser<formal::lex_node>::to_editspan(stage)));
-			} catch (std::exception& e) {
-				std::cout << "Gentzen finite parse: " << e.what() << "\n";
-				return 3;
-			}
-			std::cout << std::to_string(stage.size()) << "\n";
-			std::cout << to_string(stage) << std::endl;
+			GentzenGrammar().complete_parse(stage);
 			} catch (std::exception& e) {
 				std::cout << "line iteration body: " << e.what() << "\n";
 				return 3;

@@ -2849,16 +2849,7 @@ int main(int argc, char* argv[], char* envp[])
 			std::cout << to_string(stage) << std::endl;
 			if (0 < Errors.count()) continue;
 
-			try {
-				do {
-					GentzenGrammar().finite_parse(stage);
-				} while (GentzenGrammar().finite_parse(kuroda::parser<formal::lex_node>::to_editspan(stage)));
-			} catch (std::exception& e) {
-				std::cout << "Gentzen finite parse: " << e.what() << "\n";
-				return 3;
-			}
-			std::cout << std::to_string(stage.size()) << "\n";
-			std::cout << to_string(stage) << std::endl;
+			GentzenGrammar().complete_parse(stage);
 			} catch (std::exception& e) {
 				std::cout << "line iteration body: " << e.what() << "\n";
 				return 3;

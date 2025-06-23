@@ -323,7 +323,7 @@ namespace formal {
 		return join(stage, " ");
 	}
 
-	std::string to_string(const kuroda::parser<formal::lex_node>::symbols& src)
+	std::string to_string(const kuroda::parser<formal::lex_node>::sequence& src)
 	{
 		std::vector<perl::scalar> stage;
 		for (const formal::lex_node* x : src) {
