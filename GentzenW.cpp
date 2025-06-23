@@ -267,18 +267,6 @@ size_t issymbol(const std::string_view& src)
 	return 1;
 }
 
-template<class T>
-static auto apply_grammar(kuroda::parser<formal::lex_node>& grammar, typename kuroda::parser<T>::symbols& lines)
-{
-	kuroda::parser<formal::lex_node>::symbols stage;
-	auto wrapped = formal::lex_node::pop_front(lines);
-	while (wrapped) {
-		grammar.append_to_parse(stage, wrapped.release());
-		wrapped = formal::lex_node::pop_front(lines);
-	};
-	return stage;
-}
-
 static std::string to_string(const kuroda::parser<formal::lex_node>::edit_span& src)
 {
 	std::vector<perl::scalar> stage;
@@ -2045,10 +2033,7 @@ int main(int argc, char* argv[], char* envp[])
 			TokenGrammar().complete_parse(stage);
 			if (prior_errors < Errors.count()) continue;
 
-			stage = apply_grammar<formal::lex_node>(GentzenGrammar(), stage);
-			std::cout << std::to_string(stage.size()) << "\n";
-			std::cout << to_string(stage) << std::endl;
-
+			stage = GentzenGrammar().apply(stage);
 			if (prior_errors < Errors.count()) continue;
 
 			GentzenGrammar().complete_parse(stage);

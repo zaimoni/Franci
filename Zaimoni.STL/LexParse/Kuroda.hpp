@@ -158,10 +158,21 @@ namespace kuroda {
 			} while (dest.size() > ++viewpoint);
 		}
 
-		auto apply(std::unique_ptr<T>&& wrapped)
+		symbols apply(std::unique_ptr<T>&& wrapped)
 		{
-			kuroda::parser<T>::symbols stage;
+			symbols stage;
 			append_to_parse(stage, wrapped.release());
+			return stage;
+		}
+
+		symbols apply(symbols& lines)
+		{
+			symbols stage;
+			auto wrapped = T::pop_front(lines);
+			while (wrapped) {
+				append_to_parse(stage, wrapped.release());
+				wrapped = T::pop_front(lines);
+			};
 			return stage;
 		}
 
