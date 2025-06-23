@@ -962,28 +962,34 @@ namespace gentzen {
 
 			if (auto target = find_global_parse_target(tokens)) {
 				// for now, assume left-associativity in the parse tree
+				// need this to handle format-bound subscripts, etc.
 				formal::lex_node::force_empty_prefix_postfix_fragments(tokens[target->first]);
+
+				const auto postfix_ub = tokens.size() - 1 - target->first;
+
+				kuroda::parser<formal::lex_node>::symbols stage_prefix(target->first);
+				kuroda::parser<formal::lex_node>::symbols stage_suffix(postfix_ub);
+
 				std::unique_ptr<formal::lex_node> dest(tokens[target->first]);
 				tokens[target->first] = nullptr;
 
-				if (0 < target->first) {
-					kuroda::parser<formal::lex_node>::symbols stage_prefix(target->first);
+				if (tokens.size() - 1 > target->first && (target->second & (Infix | Prefix))) {
+					const auto suffix_origin = tokens.begin() + target->first + 1;
+					std::copy_n(suffix_origin, postfix_ub, stage_suffix.begin());
+					std::fill_n(suffix_origin, postfix_ub, nullptr);
+					dest.get()->set_postfix(std::move(stage_suffix));
+					kuroda::parser<formal::lex_node>::DeleteNSlotsAt(tokens, postfix_ub, target->first + 1);
+				}
+				if (0 < target->first && (target->second & (Infix | Postfix))) {
 					const auto prefix_origin = tokens.begin();
 					std::copy_n(prefix_origin, target->first, stage_prefix.begin());
 					std::fill_n(prefix_origin, target->first, nullptr);
 					dest.get()->set_prefix(std::move(stage_prefix));
-				}
-				if (tokens.size()-1 > target->first) {
-					const auto ub = tokens.size() - 1 - target->first;
-					kuroda::parser<formal::lex_node>::symbols stage_suffix(ub);
-					const auto suffix_origin = tokens.begin() + target->first + 1;
-					std::copy_n(suffix_origin, ub, stage_suffix.begin());
-					std::fill_n(suffix_origin, ub, nullptr);
-					dest.get()->set_postfix(std::move(stage_suffix));
+					kuroda::parser<formal::lex_node>::DeleteNSlotsAt(tokens, target->first, 0);
+					target->first = 0;
 				}
 
-				tokens[0] = dest.release();
-				kuroda::parser<formal::lex_node>::DeleteNSlotsAt(tokens, tokens.size() - 1, 1);
+				tokens[target->first] = dest.release();
 				// \todo recurse the grammar on both prefix and postfix
 
 				return true;
@@ -1001,6 +1007,10 @@ private:
 			ptrdiff_t n = -1;
 			for (formal::lex_node* x : tokens) {
 				++n;
+				// \todo ideally we would let superscripts and subscripts through
+				if (!x->prefix().empty()) continue;
+				if (!x->postfix().empty()) continue;
+				if (!x->fragments().empty()) continue;
 				if (x->code() & anchor_is_symbol) {
 					symbol_indexes.push_back(std::pair(n, x->offset()));
 					if (lowest_priority_symbol > symbol_indexes.back().second) lowest_priority_symbol = symbol_indexes.back().second;
