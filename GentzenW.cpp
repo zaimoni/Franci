@@ -2040,15 +2040,9 @@ int main(int argc, char* argv[], char* envp[])
 			const auto prior_errors = Errors.count();
 			try {
 			auto stage = TokenGrammar().apply(formal::lex_node::pop_front(lines));
-			try {
-				if (0 >= Errors.count()) TokenGrammar().finite_parse(stage);
-			} catch (std::exception& e) {
-				std::cout << "Token finite parse: " << e.what() << "\n";
-				return 3;
-			}
-			std::cout << std::to_string(stage.size()) << "\n";
-			std::cout << to_string(stage) << std::endl;
+			if (prior_errors < Errors.count()) continue;
 
+			TokenGrammar().complete_parse(stage);
 			if (prior_errors < Errors.count()) continue;
 
 			stage = apply_grammar<formal::lex_node>(GentzenGrammar(), stage);

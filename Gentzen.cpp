@@ -2786,18 +2786,6 @@ static kuroda::parser<formal::lex_node>& GentzenGrammar() {
 	return *ooao;
 }
 
-template<class T>
-static auto apply_grammar(kuroda::parser<formal::lex_node>& grammar, typename kuroda::parser<T>::symbols& lines)
-{
-	kuroda::parser<formal::lex_node>::symbols stage;
-	auto wrapped = formal::lex_node::pop_front(lines);
-	while (wrapped) {
-		grammar.append_to_parse(stage, wrapped.release());
-		wrapped = formal::lex_node::pop_front(lines);
-	};
-	return stage;
-}
-
 int main(int argc, char* argv[], char* envp[])
 {
 #ifdef ZAIMONI_HAS_MICROSOFT_IO_H
@@ -2831,14 +2819,9 @@ int main(int argc, char* argv[], char* envp[])
 		while (!lines.empty()) {
 			try {
 			auto stage = TokenGrammar().apply(formal::lex_node::pop_front(lines));
-			try {
-				if (0 >= Errors.count()) TokenGrammar().finite_parse(stage);
-			} catch (std::exception& e) {
-				std::cout << "Token finite parse: " << e.what() << "\n";
-				return 3;
-			}
-			std::cout << std::to_string(stage.size()) << "\n";
-			std::cout << to_string(stage) << std::endl;
+			if (0 < Errors.count()) continue;
+
+			TokenGrammar().complete_parse(stage);
 			if (0 < Errors.count()) continue;
 
 			GentzenGrammar().complete_parse(stage);
