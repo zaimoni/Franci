@@ -1694,12 +1694,18 @@ public:
 	static_assert(!(postfix & formal::Inert_Token));
 	static_assert(!(postfix & formal::Tokenized));
 	static_assert(!(postfix & HTMLtag::Entity));
+	static_assert(!(postfix & gentzen::symbol_catalog::anchor_is_symbol));
+	static_assert(!(postfix & gentzen::symbol_catalog::anchor_is_const_symbol));
+	static_assert(!(postfix & gentzen::symbol_catalog::anchor_is_not_symbol));
 
 	static_assert(!(infix & formal::Comment));
 	static_assert(!(infix & formal::Error));
 	static_assert(!(infix & formal::Inert_Token));
 	static_assert(!(infix & formal::Tokenized));
 	static_assert(!(infix & HTMLtag::Entity));
+	static_assert(!(infix & gentzen::symbol_catalog::anchor_is_symbol));
+	static_assert(!(infix & gentzen::symbol_catalog::anchor_is_const_symbol));
+	static_assert(!(infix & gentzen::symbol_catalog::anchor_is_not_symbol));
 	static_assert(!(infix & postfix));
 
 	static_assert(!(prefix & formal::Comment));
@@ -1707,6 +1713,9 @@ public:
 	static_assert(!(prefix & formal::Inert_Token));
 	static_assert(!(prefix & formal::Tokenized));
 	static_assert(!(prefix & HTMLtag::Entity));
+	static_assert(!(prefix & gentzen::symbol_catalog::anchor_is_symbol));
+	static_assert(!(prefix & gentzen::symbol_catalog::anchor_is_const_symbol));
+	static_assert(!(prefix & gentzen::symbol_catalog::anchor_is_not_symbol));
 	static_assert(!(prefix & postfix));
 	static_assert(!(prefix & infix));
 
