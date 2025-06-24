@@ -270,9 +270,8 @@ restart:
 			return finite_parse(relay);
 		}
 
+		template<bool trace_parse = false>
 		void complete_parse(sequence& stage) {
-			enum { trace_parse = 1 };
-
 			try {
 				do {
 					finite_parse(stage);

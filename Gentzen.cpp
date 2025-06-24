@@ -2821,10 +2821,10 @@ int main(int argc, char* argv[], char* envp[])
 			auto stage = TokenGrammar().apply(formal::lex_node::pop_front(lines));
 			if (0 < Errors.count()) continue;
 
-			TokenGrammar().complete_parse(stage);
+			TokenGrammar().complete_parse<true>(stage);
 			if (0 < Errors.count()) continue;
 
-			GentzenGrammar().complete_parse(stage);
+			GentzenGrammar().complete_parse<true>(stage);
 			} catch (std::exception& e) {
 				std::cout << "line iteration body: " << e.what() << "\n";
 				return 3;

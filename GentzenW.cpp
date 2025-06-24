@@ -1873,9 +1873,16 @@ private:
 					src.line_pos.second = 0;
 					if (prior_errors < Errors.count()) continue;
 
-					kuroda::parser<formal::lex_node>::edit_span scan(stage);
+					TokenGrammar().complete_parse(stage);
+					if (prior_errors < Errors.count()) continue;
 
-					global_parse(scan, GentzenGrammar());
+					stage = GentzenGrammar().apply(stage);
+					if (prior_errors < Errors.count()) continue;
+
+					GentzenGrammar().complete_parse(stage);
+//					kuroda::parser<formal::lex_node>::edit_span scan(stage);
+
+//					global_parse(scan, GentzenGrammar());
 					if (1 == stage.size() && prior_errors == Errors.count()) {
 						if constexpr (trace_load) std::cerr << "considering axiom\n";
 						if (auto relay = stage[0]->shared_anchor_is_parsed()) {
@@ -2040,13 +2047,13 @@ int main(int argc, char* argv[], char* envp[])
 			auto stage = TokenGrammar().apply(formal::lex_node::pop_front(lines));
 			if (prior_errors < Errors.count()) continue;
 
-			TokenGrammar().complete_parse(stage);
+			TokenGrammar().complete_parse<true>(stage);
 			if (prior_errors < Errors.count()) continue;
 
 			stage = GentzenGrammar().apply(stage);
 			if (prior_errors < Errors.count()) continue;
 
-			GentzenGrammar().complete_parse(stage);
+			GentzenGrammar().complete_parse<true>(stage);
 			} catch (std::exception& e) {
 				std::cout << "line iteration body: " << e.what() << "\n";
 				return 3;
