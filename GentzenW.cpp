@@ -990,7 +990,14 @@ namespace gentzen {
 				}
 
 				tokens[target->first] = dest.release();
-				// \todo recurse the grammar on both prefix and postfix
+
+				// recurse the grammar on both prefix and postfix
+				if (!tokens[target->first]->prefix().empty()) {
+					grammar.complete_parse(tokens[target->first]->prefix());
+				}
+				if (!tokens[target->first]->postfix().empty()) {
+					grammar.complete_parse(tokens[target->first]->postfix());
+				}
 
 				return true;
 			}
@@ -1073,7 +1080,7 @@ private:
 				}
 			}
 
-			return std::pair(n, syntax_code);
+			return std::pair(stage.front(), syntax_code);
 		}
 	};
 

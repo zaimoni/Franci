@@ -248,6 +248,11 @@ namespace formal {
 		auto& postfix() const { return _postfix; }
 		auto& fragments() const { return _fragments; }
 
+		auto& prefix() { return _prefix; }
+		auto& infix() { return _infix; }
+		auto& postfix() { return _postfix; }
+		auto& fragments() { return _fragments; }
+
 		static std::unique_ptr<lex_node> pop_front(kuroda::parser<formal::word>::sequence& src);
 		static std::unique_ptr<lex_node> pop_front(kuroda::parser<formal::lex_node>::sequence& src);
 
