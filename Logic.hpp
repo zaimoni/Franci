@@ -1383,6 +1383,7 @@ public:
 		case logics::belnap:
 		case logics::franci:	return std::ranges::subrange(ref_fourval);
 		}
+		throw std::invalid_argument("TruthTable::set_theoretic_range: unhandled logic");
 	}
 
 private:
@@ -1777,7 +1778,7 @@ private:
 				for (decltype(auto) t : to_append) ret.push_back((unsigned short)t);
 			} else {
 				for (decltype(auto) already : prior) {
-					for (decltype(auto) t : to_append) ret.push_back(already << 2 | (unsigned short)t);
+					for (decltype(auto) t : to_append) ret.push_back((already << 2) | (unsigned short)t);
 				}
 			}
 		}
@@ -1788,7 +1789,7 @@ private:
 		std::vector<std::vector<TruthValue> > ret(src.size());
 		size_t n = 0;
 		for (decltype(auto) x : src) {
-			if (auto stage = x->possible_values()) ret[n] = std::move(*stage);
+			if (auto stage = x->possible_values()) ret[n] = *stage;
 			else return std::nullopt;
 			n++;
 		}
