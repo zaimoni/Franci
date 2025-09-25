@@ -84,7 +84,7 @@ public:
 		return nullptr;
 	}
 
-	std::shared_ptr<const T> get_shared() {
+	std::shared_ptr<const T> get_shared() noexcept {
 		if (_read) return _read;
 		if (_write) return _read = std::shared_ptr<const T>(_write.release());
 		return nullptr;

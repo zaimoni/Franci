@@ -84,6 +84,7 @@ namespace kuroda {
 //		using symbols = std::vector<std::unique_ptr<T> >;
 		using symbol_gc = std::shared_ptr<const T>;
 		using symbols_gc = std::vector<std::shared_ptr<const T> >;
+		using symbols_unique = std::vector<std::unique_ptr<T> >;
 		using rewriter = std::function<std::vector<size_t>(sequence&, size_t)>;
 		using edit_span = edit_view<sequence>;
 		using global_rewriter = std::function<bool(edit_span&, parser&)>;
