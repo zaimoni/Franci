@@ -1,7 +1,6 @@
 #ifndef ZAIMONI_STL_LEXPARSE_KURODA_HPP
 #define ZAIMONI_STL_LEXPARSE_KURODA_HPP 1
 
-#include "../AutoPtr.hpp"
 #include <vector>
 #include <memory>
 #include <functional>
@@ -9,6 +8,9 @@
 #include <iostream>
 #include <string>
 #include <stacktrace>
+#include <optional>
+
+#include "../AutoPtr.hpp"
 
 /*
 https://en.wikipedia.org/wiki/Kuroda_normal_form:

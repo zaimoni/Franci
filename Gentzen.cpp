@@ -1,11 +1,6 @@
 #include "Zaimoni.STL/LexParse/LexNode.hpp"
 
 #ifdef GENTZEN_DRIVER
-#include "HTMLtag.hpp"
-#include "Zaimoni.STL/LexParse/string_view.hpp"
-#include "Zaimoni.STL/stack.hpp"
-#include "test_driver.h"
-#include "Zaimoni.STL/Pure.C/comptest.h"
 #include <filesystem>
 #include <memory>
 #include <fstream>
@@ -15,7 +10,11 @@
 #include <any>
 #include <tuple>
 
-#include <algorithm>
+#include "HTMLtag.hpp"
+#include "Zaimoni.STL/LexParse/string_view.hpp"
+#include "Zaimoni.STL/stack.hpp"
+#include "test_driver.h"
+#include "Zaimoni.STL/Pure.C/comptest.h"
 
 #include "errcount.hpp"
 

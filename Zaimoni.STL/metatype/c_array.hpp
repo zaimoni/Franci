@@ -9,11 +9,13 @@
 #ifndef ZAIMONI_STL_METATYPE_C_ARRAY_HPP
 #define ZAIMONI_STL_METATYPE_C_ARRAY_HPP 1
 
+#include <algorithm>
+#include <iterator>
+
 #include "../Logging.h"
 #include "../MetaRAM.hpp"
 #include "../logic_lt.hpp"
 #include "operator.hpp"
-#include "../Augment.STL/algorithm"
 
 // this macro goes in the class body
 // turns out the STL type definition glue doesn't inherit properly (in GCC)

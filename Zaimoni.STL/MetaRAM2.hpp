@@ -11,7 +11,6 @@
 #include "z_memory.h"
 #endif
 #include "Logging.h"
-#include "Augment.STL/algorithm"
 
 #ifdef ZAIMONI_FORCE_ISO
 #define ZAIMONI_NONISO_ISO_PARAM(A, B) , B
