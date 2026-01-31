@@ -4,6 +4,11 @@ SVO_postfix_undefined:
   - "is a unary postfix symbol"
   - "is a binary infix symbol"
   - "is a constant symbol"
+  - "is a prefix undefined notation"
+  - "is a postfix undefined notation"
+  - "is an infix undefined notation"
+  - "is a placeholder-syntax symbol"
+  - "is a symbol-placeholder-syntax symbol"
 axioms:
   - ":= is a binary infix symbol"
   - "&#9500; is a binary infix symbol"
