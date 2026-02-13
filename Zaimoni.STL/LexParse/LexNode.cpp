@@ -68,6 +68,15 @@ namespace formal {
 				if (x) return x->origin();
 				return src_location();
 			}
+			auto operator()(const std::shared_ptr<const parsed>& x) {
+				if (x) return x->origin();
+				return src_location();
+			}
+			auto operator()(const std::shared_ptr<const lex_node>& x) { return origin(x.get()); }
+			auto operator()(const std::shared_ptr<const word>& x) {
+				if (x) return x->origin();
+				return src_location();
+			}
 		};
 
 		static _origin ooao;
@@ -100,7 +109,11 @@ namespace formal {
 		if (!_postfix.empty()) return 0;
 		if (!_fragments.empty()) return 0;
 		if (classify(_post_anchor)) return 0;
-		if (int code = classify(_anchor)) return code;
+		if (int code = classify(_anchor)) {
+			if (code == 5) return 2;  // shared_ptr<const lex_node> -> node anchor
+			if (code == 6) return 1;  // shared_ptr<const word> -> word anchor
+			return code;
+		}
 		return -1;
 	}
 
@@ -275,15 +288,19 @@ namespace formal {
 		} else { // only check anchor if no fragments
 			if (decltype(auto) x = c_anchor<formal::lex_node>()) {
 				if (test(*x)) {
-					op(*anchor<formal::lex_node>());
-					ret = true;
+					if (auto mut = anchor<formal::lex_node>()) {
+						op(*mut);
+						ret = true;
+					}
 				}
 			}
 		}
 		if (decltype(auto) x = c_post_anchor<formal::lex_node>()) {
 			if (test(*x)) {
-				op(*post_anchor<formal::lex_node>());
-				ret = true;
+				if (auto mut = post_anchor<formal::lex_node>()) {
+					op(*mut);
+					ret = true;
+				}
 			}
 		}
 		if (test(*this)) {
@@ -343,6 +360,15 @@ namespace formal {
 			}
 			auto operator()(const zaimoni::COW<parsed>& x) {
 				return perl::scalar(x->to_s());
+			}
+			auto operator()(const std::shared_ptr<const parsed>& x) {
+				return perl::scalar(x->to_s());
+			}
+			auto operator()(const std::shared_ptr<const lex_node>& x) {
+				return perl::scalar(x->to_s());
+			}
+			auto operator()(const std::shared_ptr<const word>& x) {
+				return perl::scalar(x->value());
 			}
 		};
 
@@ -482,6 +508,8 @@ restart:
 			int operator()(const zaimoni::COW<lex_node>& x) { return x ? 2 : 0; }
 			int operator()(const zaimoni::COW<parsed>& x) { return x ? 3 : 0; }
 			int operator()(const std::shared_ptr<const parsed>& x) { return x ? 4 : 0; }
+			int operator()(const std::shared_ptr<const lex_node>& x) { return x ? 5 : 0; }
+			int operator()(const std::shared_ptr<const word>& x) { return x ? 6 : 0; }
 		};
 
 		static _encode_anchor ooao;
@@ -491,20 +519,19 @@ restart:
 	void lex_node::reset(decltype(_anchor)& dest, lex_node*& src)
 	{
 		assert(src);
-		switch (src->is_pure_anchor()) {
-		case 1:
-			dest = std::move(std::get<zaimoni::COW<word> >(src->_anchor));
-			break;
-		case 2:
-			dest = std::move(std::get<zaimoni::COW<lex_node> >(src->_anchor));
-			break;
-		case 3:
-			dest = std::move(std::get<zaimoni::COW<parsed> >(src->_anchor));
-			break;
-		default: // has internal structure; just capture it as-is
-			dest = std::unique_ptr<lex_node>(src);
+		const int purity = src->is_pure_anchor();
+		if (purity <= 0) {
+			dest = zaimoni::COW<lex_node>(src);
 			src = nullptr;
 			return;
+		}
+		switch (classify(src->_anchor)) {
+		case 1: dest = std::move(std::get<zaimoni::COW<word> >(src->_anchor)); break;
+		case 2: dest = std::move(std::get<zaimoni::COW<lex_node> >(src->_anchor)); break;
+		case 3: dest = std::move(std::get<zaimoni::COW<parsed> >(src->_anchor)); break;
+		case 4: dest = std::move(std::get<std::shared_ptr<const parsed> >(src->_anchor)); break;
+		case 5: dest = std::move(std::get<std::shared_ptr<const lex_node> >(src->_anchor)); break;
+		case 6: dest = std::move(std::get<std::shared_ptr<const word> >(src->_anchor)); break;
 		}
 		delete src;
 		src = nullptr;

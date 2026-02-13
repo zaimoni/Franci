@@ -36,7 +36,9 @@ namespace formal {
 		std::variant<zaimoni::COW<lex_node>,
 			zaimoni::COW<word>,
 			zaimoni::COW<parsed>,
-			std::shared_ptr<const parsed> > _anchor;
+			std::shared_ptr<const parsed>,
+			std::shared_ptr<const lex_node>,
+			std::shared_ptr<const word> > _anchor;
 		decltype(_anchor) _post_anchor;
 		unsigned long long _code; // usually used as a bitmap
 		size_t _offset; // used as a linear offset
@@ -46,11 +48,11 @@ namespace formal {
 
 		lex_node(kuroda::parser<lex_node>::sequence& dest, size_t lb, size_t ub, unsigned long long code);	// slicing constructor
 		// "sinking" constructor
-		lex_node(lex_node*& src) noexcept : _anchor(std::unique_ptr<lex_node>(src)), _code(src->_code), _offset(src->_offset) {
+		lex_node(lex_node*& src) noexcept : _anchor(zaimoni::COW<lex_node>(src)), _code(src->_code), _offset(src->_offset) {
 			src = nullptr;
 		}
 		// thin-wrapping constructors
-		lex_node(word*& src, unsigned long long code = 0) noexcept : _anchor(std::unique_ptr<word>(src)), _code(code), _offset(0) {
+		lex_node(word*& src, unsigned long long code = 0) noexcept : _anchor(zaimoni::COW<word>(src)), _code(code), _offset(0) {
 			if (src->code() & Comment) _code |= Comment;
 			src = nullptr;
 		}
@@ -59,9 +61,6 @@ namespace formal {
 	public:
 		using edit_span = kuroda::parser<lex_node>::edit_span;
 
-		lex_node(std::unique_ptr<word> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code), _offset(0) {
-			if (std::get<zaimoni::COW<word> >(_anchor)->code() & Comment) _code |= Comment;
-		}
 		lex_node(parsed* src, unsigned long long code = 0) noexcept : _anchor(zaimoni::COW<parsed>(src)), _code(code), _offset(0) {}
 		lex_node(parsed*& src, unsigned long long code = 0) noexcept : _anchor(zaimoni::COW<parsed>(src)), _code(code), _offset(0) {
 			src = nullptr;
@@ -71,6 +70,8 @@ namespace formal {
 			src = nullptr;
 		}
 		lex_node(std::shared_ptr<const parsed> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code), _offset(0) {}
+		lex_node(std::shared_ptr<const lex_node> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code), _offset(0) {}
+		lex_node(std::shared_ptr<const word> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code), _offset(0) {}
 
 		lex_node() noexcept : _code(0), _offset(0) {}
 		// \todo anchor constructor
@@ -78,7 +79,7 @@ namespace formal {
 		lex_node(lex_node&& src) = default;
 		lex_node& operator=(const lex_node& src) = default;
 		lex_node& operator=(lex_node&& src) = default;
-		virtual ~lex_node() {
+		~lex_node() {
 			for (decltype(auto) x : _caches) x->erase(this);
 		}
 
@@ -132,6 +133,21 @@ namespace formal {
 			return nullptr;
 		}
 
+		template<>
+		const word* c_anchor<word>() const
+		{
+			if (auto x = std::get_if<zaimoni::COW<word> >(&_anchor)) return x->get_c();
+			if (auto x = std::get_if<std::shared_ptr<const word> >(&_anchor)) return x->get();
+			return nullptr;
+		}
+
+		template<>
+		const lex_node* c_anchor<lex_node>() const
+		{
+			if (auto x = std::get_if<zaimoni::COW<lex_node> >(&_anchor)) return x->get_c();
+			if (auto x = std::get_if<std::shared_ptr<const lex_node> >(&_anchor)) return x->get();
+			return nullptr;
+		}
 
 		template<class Val>
 		Val* post_anchor() requires requires { std::get_if<zaimoni::COW<Val> >(&_post_anchor); }
@@ -155,6 +171,22 @@ namespace formal {
 			return nullptr;
 		}
 
+		template<>
+		const word* c_post_anchor<word>() const
+		{
+			if (auto x = std::get_if<zaimoni::COW<word> >(&_post_anchor)) return x->get_c();
+			if (auto x = std::get_if<std::shared_ptr<const word> >(&_post_anchor)) return x->get();
+			return nullptr;
+		}
+
+		template<>
+		const lex_node* c_post_anchor<lex_node>() const
+		{
+			if (auto x = std::get_if<zaimoni::COW<lex_node> >(&_post_anchor)) return x->get_c();
+			if (auto x = std::get_if<std::shared_ptr<const lex_node> >(&_post_anchor)) return x->get();
+			return nullptr;
+		}
+
 		template<class T>
 		std::shared_ptr<const T> shared_anchor() = delete;
 
@@ -162,6 +194,18 @@ namespace formal {
 		std::shared_ptr<const parsed> shared_anchor_is_parsed() {
 			if (auto x = std::get_if<std::shared_ptr<const parsed> >(&_anchor)) return *x;
 			if (auto x = std::get_if<zaimoni::COW<parsed> >(&_anchor)) return x->get_shared();
+			return nullptr;
+		}
+
+		std::shared_ptr<const lex_node> shared_anchor_is_lex_node() {
+			if (auto x = std::get_if<std::shared_ptr<const lex_node> >(&_anchor)) return *x;
+			if (auto x = std::get_if<zaimoni::COW<lex_node> >(&_anchor)) return x->get_shared();
+			return nullptr;
+		}
+
+		std::shared_ptr<const word> shared_anchor_is_word() {
+			if (auto x = std::get_if<std::shared_ptr<const word> >(&_anchor)) return *x;
+			if (auto x = std::get_if<zaimoni::COW<word> >(&_anchor)) return x->get_shared();
 			return nullptr;
 		}
 
@@ -189,11 +233,23 @@ namespace formal {
 			return nullptr;
 		}
 
+		std::shared_ptr<const lex_node> shared_post_anchor_is_lex_node() {
+			if (auto x = std::get_if<std::shared_ptr<const lex_node> >(&_post_anchor)) return *x;
+			if (auto x = std::get_if<zaimoni::COW<lex_node> >(&_post_anchor)) return x->get_shared();
+			return nullptr;
+		}
+
+		std::shared_ptr<const word> shared_post_anchor_is_word() {
+			if (auto x = std::get_if<std::shared_ptr<const word> >(&_post_anchor)) return *x;
+			if (auto x = std::get_if<zaimoni::COW<word> >(&_post_anchor)) return x->get_shared();
+			return nullptr;
+		}
+
 		bool set_null_post_anchor(lex_node*& src) {
 			if (c_post_anchor<word>()) return false;
 			if (c_post_anchor<lex_node>()) return false;
 			if (c_post_anchor<parsed>()) return false;
-			_post_anchor = std::unique_ptr<lex_node>(src);
+			_post_anchor = zaimoni::COW<lex_node>(src);
 			src = nullptr;
 			return true;
 		}

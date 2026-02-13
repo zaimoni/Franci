@@ -716,7 +716,7 @@ namespace gentzen {
 	std::optional<std::pair<std::vector<const HTMLtag*>, std::string_view> > anchor_is_symbol_like(const formal::lex_node* src) {
 		std::pair<std::vector<const HTMLtag*>, std::string_view> ret;
 		do {
-			if (1 == src->anchor_code()) {
+			if (auto word_code = src->anchor_code(); 1 == word_code || 6 == word_code) {
 				if (!src->infix().empty()) return std::nullopt;
 				if (0 != src->post_anchor_code()) return std::nullopt;
 				ret.second = src->c_anchor<formal::word>()->value();
