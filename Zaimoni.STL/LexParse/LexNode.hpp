@@ -119,33 +119,10 @@ namespace formal {
 		}
 
 		template<class Val>
-		const Val* c_anchor() const requires requires { std::get_if<zaimoni::COW<Val> >(&_anchor); }
+		const Val* c_anchor() const requires requires { std::get_if<zaimoni::COW<Val> >(&_anchor); std::get_if<std::shared_ptr<const Val> >(&_anchor); }
 		{
-			if (auto x = std::get_if<zaimoni::COW<Val> >(&_anchor)) return x->get();
-			return nullptr;
-		}
-
-		template<>
-		const parsed* c_anchor<parsed>() const
-		{
-			if (auto x = std::get_if<zaimoni::COW<parsed> >(&_anchor)) return x->get_c();
-			if (auto x = std::get_if<std::shared_ptr<const parsed> >(&_anchor)) return x->get();
-			return nullptr;
-		}
-
-		template<>
-		const word* c_anchor<word>() const
-		{
-			if (auto x = std::get_if<zaimoni::COW<word> >(&_anchor)) return x->get_c();
-			if (auto x = std::get_if<std::shared_ptr<const word> >(&_anchor)) return x->get();
-			return nullptr;
-		}
-
-		template<>
-		const lex_node* c_anchor<lex_node>() const
-		{
-			if (auto x = std::get_if<zaimoni::COW<lex_node> >(&_anchor)) return x->get_c();
-			if (auto x = std::get_if<std::shared_ptr<const lex_node> >(&_anchor)) return x->get();
+			if (auto x = std::get_if<zaimoni::COW<Val> >(&_anchor)) return x->get_c();
+			if (auto x = std::get_if<std::shared_ptr<const Val> >(&_anchor)) return x->get();
 			return nullptr;
 		}
 
@@ -157,33 +134,10 @@ namespace formal {
 		}
 
 		template<class Val>
-		const Val* c_post_anchor() const requires requires { std::get_if<zaimoni::COW<Val> >(&_post_anchor); }
+		const Val* c_post_anchor() const requires requires { std::get_if<zaimoni::COW<Val> >(&_post_anchor); std::get_if<std::shared_ptr<const Val> >(&_anchor); }
 		{
-			if (auto x = std::get_if<zaimoni::COW<Val> >(&_post_anchor)) return x->get();
-			return nullptr;
-		}
-
-		template<>
-		const parsed* c_post_anchor<parsed>() const
-		{
-			if (auto x = std::get_if<zaimoni::COW<parsed> >(&_post_anchor)) return x->get_c();
-			if (auto x = std::get_if<std::shared_ptr<const parsed> >(&_post_anchor)) return x->get();
-			return nullptr;
-		}
-
-		template<>
-		const word* c_post_anchor<word>() const
-		{
-			if (auto x = std::get_if<zaimoni::COW<word> >(&_post_anchor)) return x->get_c();
-			if (auto x = std::get_if<std::shared_ptr<const word> >(&_post_anchor)) return x->get();
-			return nullptr;
-		}
-
-		template<>
-		const lex_node* c_post_anchor<lex_node>() const
-		{
-			if (auto x = std::get_if<zaimoni::COW<lex_node> >(&_post_anchor)) return x->get_c();
-			if (auto x = std::get_if<std::shared_ptr<const lex_node> >(&_post_anchor)) return x->get();
+			if (auto x = std::get_if<zaimoni::COW<Val> >(&_post_anchor)) return x->get_c();
+			if (auto x = std::get_if<std::shared_ptr<const Val> >(&_post_anchor)) return x->get();
 			return nullptr;
 		}
 
@@ -271,33 +225,6 @@ namespace formal {
 		std::optional<int> token_compare(const formal::lex_node& rhs) const;
 		std::optional<int> token_compare(const formal::word& rhs) const;
 		std::optional<int> token_compare(kuroda::parser<formal::lex_node>::edit_span tokens) const;
-
-#if OBSOLETE
-#define LEX_NODE_DEREF_BODY(SRC) \
-	if (SRC.empty()) return nullptr; \
-	const size_t strict_ub = SRC.size(); \
-	if (strict_ub > n) return SRC[n]; \
-	if (0 <= n) return nullptr; \
-	n = strict_ub + n; \
-	if (strict_ub > n) return SRC[n]; \
-	if (0 > n) n = strict_ub - n; \
-	if (strict_ub > n) return SRC[n]; \
-	return nullptr
-
-		const lex_node* prefix(ptrdiff_t n) const {
-			LEX_NODE_DEREF_BODY(_prefix);
-		}
-
-		const lex_node* infix(ptrdiff_t n) const {
-			LEX_NODE_DEREF_BODY(_infix);
-		}
-
-		const lex_node* postfix(ptrdiff_t n) const {
-			LEX_NODE_DEREF_BODY(_postfix);
-		}
-
-#undef LEX_NODE_DEREF_BODY
-#endif
 
 		auto& prefix() const { return _prefix; }
 		auto& infix() const { return _infix; }
