@@ -23,21 +23,21 @@ if ($CACHE{ZSTL_HAVE_MS_IO_H})
 add_custom_command(OUTPUT comptest.h
 	COMMAND exists_MS_io_h >> comptest.h
 	DEPENDS exists_MS_io_h
-	VERBATIM APPEND)
+	APPEND)
 endif()
 
 if ($CACHE{ZSTL_HAVE_TIMESPEC})
 add_custom_command(OUTPUT comptest.h
 	COMMAND exists_timespec >> comptest.h
 	DEPENDS exists_timespec
-	VERBATIM APPEND)
+	APPEND)
 endif()
 
 if ($CACHE{ZSTL_HAVE_NANOSLEEP})
 add_custom_command(OUTPUT comptest.h
 	COMMAND exists_nanosleep >> comptest.h
 	DEPENDS exists_nanosleep
-	VERBATIM APPEND)
+	APPEND)
 endif()
 
 add_custom_target(AutoDetect ALL
