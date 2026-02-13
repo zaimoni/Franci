@@ -49,5 +49,5 @@ add_library(z_format_util STATIC format_util.c)
 add_library(z_logging STATIC logging.c)
 add_library(z_stdio_c STATIC stdio_c.c)
 
-target_include_directories(z_stdio_c PRIVATE ${CMAKE_BINARY_DIR})
+target_include_directories(z_stdio_c PRIVATE ${CMAKE_BINARY_DIR}/Zaimoni.STL/Pure.C)
 add_dependencies(z_stdio_c AutoDetect)

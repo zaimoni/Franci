@@ -57,7 +57,7 @@ downheap(T** const TargetArray,size_t v,size_t N)
 		{
 		if (w+1<N && *TargetArray[w]<*TargetArray[w+1]) w++;	// force maximum label
 		if (!(*TargetArray[v]<*TargetArray[w])) return;	// v has heap property
-		swap(TargetArray[v],TargetArray[w]);
+		std::swap(TargetArray[v],TargetArray[w]);
 		v = w;
 		w = 2*v+1;
 		}

@@ -29,12 +29,16 @@ include_directories(${CMAKE_BINARY_DIR})
 add_executable(Franci WIN32 LenName.cxx Related.cxx MetaCon2.cxx __GCF.cxx __IntegerNumeral.cxx Integer1.cxx GCF.cxx SymConst.cxx TVal.cxx Class.cxx SeriesOp.cxx Combin1.cxx StdAdd.cxx AddMult.cxx AddEqual.cxx StdMult.cxx EqualMult.cxx Equal.cxx ConEqual.cxx MetaCon3.cxx QState.cxx Quantify.cxx Variable.cxx AntiIdem.cxx MetaCon4.cxx LowRel.cxx MetaCon1.cxx AddInter.cxx Interval.cxx Digraph.cxx SrchTree.cxx main.cxx OS.cxx VConsole.cxx InParse.cxx CmdShell.cxx LexParse.cxx FlatFile.cxx PhraseN.cxx Phrase1.cxx LangCon_.cxx Unparsed.cxx ParseNode.cxx NoReturn.cxx)
 target_link_libraries(Franci z_console z_csvtable z_langconf z_logging z_log_adapter z_format_util z_stdio_c z_memory)
 target_link_options(Franci PRIVATE /FORCE:MULTIPLE)
+# working around IntegerNumeral
+target_include_directories(Franci PRIVATE ${CMAKE_BINARY_DIR}/Zaimoni.STL/Pure.C)
 # add_dependencies(... AutoDetect)
 
 add_executable(Franci_console LenName.cxx Related.cxx MetaCon2.cxx __GCF.cxx __IntegerNumeral.cxx Integer1.cxx GCF.cxx SymConst.cxx TVal.cxx Class.cxx SeriesOp.cxx Combin1.cxx StdAdd.cxx AddMult.cxx AddEqual.cxx StdMult.cxx EqualMult.cxx Equal.cxx ConEqual.cxx MetaCon3.cxx QState.cxx Quantify.cxx Variable.cxx AntiIdem.cxx MetaCon4.cxx LowRel.cxx MetaCon1.cxx AddInter.cxx Interval.cxx Digraph.cxx SrchTree.cxx main.cxx OS.cxx VConsole.cxx InParse.cxx CmdShell.cxx LexParse.cxx FlatFile.cxx PhraseN.cxx Phrase1.cxx LangCon_.cxx Unparsed.cxx ParseNode.cxx NoReturn.cxx)
 target_link_libraries(Franci_console z_cstdio_console z_csvtable z_langconf z_logging z_log_adapter z_format_util z_stdio_c z_memory)
 target_link_options(Franci_console PRIVATE /FORCE:MULTIPLE)
 target_compile_definitions(Franci_console PUBLIC FRANCI_CLI)
+# working around IntegerNumeral
+target_include_directories(Franci_console PRIVATE ${CMAKE_BINARY_DIR}/Zaimoni.STL/Pure.C)
 # add_dependencies(... AutoDetect)
 
 add_executable(LogicC Logic.cpp)

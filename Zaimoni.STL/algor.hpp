@@ -327,7 +327,7 @@ heapsort(T** const TargetArray, size_t N)
 	// finish the heapsort
 	while(1<N)
 		{
-		swap(TargetArray[0],TargetArray[--N]);
+		std::swap(TargetArray[0],TargetArray[--N]);
 		zaimoni::detail::downheap(TargetArray,0,N);
 		}
 }

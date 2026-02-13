@@ -325,7 +325,8 @@ _resize(T*& _ptr ZAIMONI_ISO_PARAM(size_t& _ptr_size), size_t n)
 	if (__resize2(ZAIMONI_NONISO_ISO_SRC(_ptr, _ptr_size), n)) return true;
 
 	if (T* Tmp = _new_buffer<T>(n)) {
-		_copy_expendable_buffer(Tmp, _ptr, min(ZAIMONI_NONISO_ISO_SRC(ArraySize(_ptr), _ptr_size), n));
+		auto N = ZAIMONI_NONISO_ISO_SRC(ArraySize(_ptr), _ptr_size);
+		_copy_expendable_buffer(Tmp, _ptr, N <= n ? N : n);
 		_flush(_ptr);
 		_ptr = Tmp;
 #ifdef ZAIMONI_FORCE_ISO
