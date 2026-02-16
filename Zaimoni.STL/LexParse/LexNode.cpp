@@ -307,6 +307,7 @@ namespace formal {
 			op(*this);
 			ret = true;
 		}
+		if (ret) _invalidate_scalar();
 		return ret;
 	}
 

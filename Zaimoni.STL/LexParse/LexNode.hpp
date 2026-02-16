@@ -95,11 +95,11 @@ namespace formal {
 		// factory function: slices a lex_node out of dest, then puts the lex_node at index lb
 		static void slice(kuroda::parser<lex_node>::sequence& dest, size_t lb, size_t ub, unsigned long long code = 0);
 
-		void set_fragment(kuroda::parser<lex_node>::symbols&& src) { _fragments.push_back(std::move(src)); }
-		void set_fragments(decltype(_fragments) && src) { _fragments = std::move(src); }
+		void set_fragment(kuroda::parser<lex_node>::symbols&& src) { _fragments.push_back(std::move(src)); _invalidate_scalar(); }
+		void set_fragments(decltype(_fragments) && src) { _fragments = std::move(src); _invalidate_scalar(); }
 
-		void set_prefix(kuroda::parser<lex_node>::symbols&& src) { _prefix = std::move(src); }
-		void set_postfix(kuroda::parser<lex_node>::symbols&& src) { _postfix = std::move(src); }
+		void set_prefix(kuroda::parser<lex_node>::symbols&& src) { _prefix = std::move(src); _invalidate_scalar(); }
+		void set_postfix(kuroda::parser<lex_node>::symbols&& src) { _postfix = std::move(src); _invalidate_scalar(); }
 
 		src_location origin() const { return origin(this); }
 
@@ -114,7 +114,10 @@ namespace formal {
 		template<class Val>
 		Val* anchor() requires requires { std::get_if<zaimoni::COW<Val> >(&_anchor); }
 		{
-			if (auto x = std::get_if<zaimoni::COW<Val> >(&_anchor)) return x->get();
+			if (auto x = std::get_if<zaimoni::COW<Val> >(&_anchor)) {
+				_invalidate_scalar();
+				return x->get();
+			}
 			return nullptr;
 		}
 
@@ -129,7 +132,10 @@ namespace formal {
 		template<class Val>
 		Val* post_anchor() requires requires { std::get_if<zaimoni::COW<Val> >(&_post_anchor); }
 		{
-			if (auto x = std::get_if<zaimoni::COW<Val> >(&_post_anchor)) return x->get();
+			if (auto x = std::get_if<zaimoni::COW<Val> >(&_post_anchor)) {
+				_invalidate_scalar();
+				return x->get();
+			}
 			return nullptr;
 		}
 
@@ -205,6 +211,7 @@ namespace formal {
 			if (c_post_anchor<parsed>()) return false;
 			_post_anchor = zaimoni::COW<lex_node>(src);
 			src = nullptr;
+			_invalidate_scalar();
 			return true;
 		}
 
@@ -231,10 +238,10 @@ namespace formal {
 		auto& postfix() const { return _postfix; }
 		auto& fragments() const { return _fragments; }
 
-		auto& prefix() { return _prefix; }
-		auto& infix() { return _infix; }
-		auto& postfix() { return _postfix; }
-		auto& fragments() { return _fragments; }
+		auto& prefix() { _invalidate_scalar(); return _prefix; }
+		auto& infix() { _invalidate_scalar(); return _infix; }
+		auto& postfix() { _invalidate_scalar(); return _postfix; }
+		auto& fragments() { _invalidate_scalar(); return _fragments; }
 
 		static std::unique_ptr<lex_node> pop_front(kuroda::parser<formal::word>::sequence& src);
 		static std::unique_ptr<lex_node> pop_front(kuroda::parser<formal::lex_node>::sequence& src);
@@ -265,6 +272,8 @@ namespace formal {
 		static void force_empty_prefix_postfix_fragments(lex_node*& dest);
 
 	private:
+		void _invalidate_scalar() { _cached_scalar = std::nullopt; }
+
 		static src_location origin(const lex_node* src);
 		static src_location origin(const decltype(_anchor)& src);
 
