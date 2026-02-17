@@ -744,15 +744,6 @@ namespace gentzen {
 		return std::nullopt;
 	}
 
-	const HTMLtag* is_token_sequence_var(const formal::lex_node* src) {
-		auto ret = is_symbol_like(src);
-		if (ret && !ret->first.empty()) {
-			const auto tag = ret->first.front();
-			if (auto test = tag->attr("tokensequence")) return tag;
-		}
-		return nullptr;
-	}
-
 	class symbol_catalog {
 	private:
 		std::vector<std::pair<std::shared_ptr<const formal::lex_node>, unsigned int > > _symbols;
@@ -1830,7 +1821,6 @@ public:
 		std::optional<perl::scalar> is_not_legal_axiom(bool unconditional) const override {
 			if (SYMBOL_MAX > _code) {
 				if (!gentzen::is_symbol_like(_subject.get())) return "not a syntactical symbol";
-				if ( gentzen::is_token_sequence_var(_subject.get())) return "is token-sequence variable";
 			}
 			if (!unconditional) {
 				if (PARSE_TREE_MAX > _code) return "cannot conditionally alter syntax";
