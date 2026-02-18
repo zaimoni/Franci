@@ -148,28 +148,14 @@ namespace formal {
 		}
 
 		template<class T>
-		std::shared_ptr<const T> shared_anchor() = delete;
-
-		// 2025-06-19: fully specializing template doesn't work; the concept gets called instead
-		std::shared_ptr<const parsed> shared_anchor_is_parsed() {
+		std::shared_ptr<const T> shared_anchor() {
 			if (auto x = std::get_if<std::shared_ptr<const parsed> >(&_anchor)) return *x;
 			if (auto x = std::get_if<zaimoni::COW<parsed> >(&_anchor)) return x->get_shared();
 			return nullptr;
 		}
 
-		std::shared_ptr<const lex_node> shared_anchor_is_lex_node() {
-			if (auto x = std::get_if<std::shared_ptr<const lex_node> >(&_anchor)) return *x;
-			if (auto x = std::get_if<zaimoni::COW<lex_node> >(&_anchor)) return x->get_shared();
-			return nullptr;
-		}
-
-		std::shared_ptr<const word> shared_anchor_is_word() {
-			if (auto x = std::get_if<std::shared_ptr<const word> >(&_anchor)) return *x;
-			if (auto x = std::get_if<zaimoni::COW<word> >(&_anchor)) return x->get_shared();
-			return nullptr;
-		}
-
-		// 2025-05-26: Gentzen.exe regresses badly if shared_anchor<parsed>() is called here
+#if 0
+		// need a free adapter, rather than this
 		template<std::derived_from<formal::parsed> T>
 		std::shared_ptr<const T> shared_anchor() {
 			if (auto x = std::get_if<std::shared_ptr<const parsed> >(&_anchor)) {
@@ -179,10 +165,17 @@ namespace formal {
 			}
 			return nullptr;
 		}
+#endif
 
 		template<class T>
-		std::shared_ptr<const T> shared_post_anchor() = delete;
+		std::shared_ptr<const T> shared_post_anchor() {
+			if (auto x = std::get_if<std::shared_ptr<const T> >(&_post_anchor)) return *x;
+			if (auto x = std::get_if<zaimoni::COW<T> >(&_post_anchor)) return x->get_shared();
+			return nullptr;
+		}
 
+#if 0
+		// need a free adapter, rather than this
 		template<std::derived_from<formal::parsed> T>
 		std::shared_ptr<const T> shared_post_anchor() {
 			if (auto x = std::get_if<std::shared_ptr<const parsed> >(&_post_anchor)) {
@@ -192,18 +185,7 @@ namespace formal {
 			}
 			return nullptr;
 		}
-
-		std::shared_ptr<const lex_node> shared_post_anchor_is_lex_node() {
-			if (auto x = std::get_if<std::shared_ptr<const lex_node> >(&_post_anchor)) return *x;
-			if (auto x = std::get_if<zaimoni::COW<lex_node> >(&_post_anchor)) return x->get_shared();
-			return nullptr;
-		}
-
-		std::shared_ptr<const word> shared_post_anchor_is_word() {
-			if (auto x = std::get_if<std::shared_ptr<const word> >(&_post_anchor)) return *x;
-			if (auto x = std::get_if<zaimoni::COW<word> >(&_post_anchor)) return x->get_shared();
-			return nullptr;
-		}
+#endif
 
 		bool set_null_post_anchor(lex_node*& src) {
 			if (c_post_anchor<word>()) return false;

@@ -1122,6 +1122,7 @@ private:
 		}
 	};
 
+	// this is not architected reasonably
 	class facts {
 	private:
 		std::shared_ptr<facts> _parent;
@@ -1938,7 +1939,7 @@ private:
 //					global_parse(scan, GentzenGrammar());
 					if (1 == stage.size() && prior_errors == Errors.count()) {
 						if constexpr (trace_load) std::cerr << "considering axiom\n";
-						if (auto relay = stage[0]->shared_anchor_is_parsed()) {
+						if (auto relay = stage[0]->shared_anchor<formal::parsed>()) {
 							if constexpr (trace_load) std::cerr << "adding axiom " << relay->to_s() << "\n";
 							instinct.add_axiom(relay);
 						} else if constexpr(trace_load) {
