@@ -256,6 +256,17 @@ bool detect_comma(const formal::lex_node& src) {
 	return false;
 }
 
+bool is_reserved_atomic(const formal::lex_node& src)
+{
+	if (const auto word = src.c_anchor<formal::word>()) {
+		const auto text = word->value();
+		for (decltype(auto) x : reserved_atomic) {
+			if (text.starts_with(x.first)) return true;
+		}
+	}
+	return false;
+}
+
 size_t issymbol(const std::string_view& src)
 {
 	if (isalnum(static_cast<unsigned char>(src[0]))) return 0;
@@ -744,7 +755,69 @@ namespace gentzen {
 		return std::nullopt;
 	}
 
-	// \todo predicates for placeholder-syntax and symbol-placeholder-syntax symbols
+	bool is_placeholder_syntax_symbol(const formal::lex_node* x) {
+		if (!x) return false;
+	restart:
+		if (!x->prefix().empty()) return false;
+		if (!x->infix().empty()) return false;
+		if (!x->fragments().empty()) return false;
+		if (auto node = x->c_anchor<formal::lex_node>()) {
+			if (!x->postfix().empty()) return false;
+			if (0 != x->post_anchor_code()) return false;
+			x = node;	// simulate tail recursion
+			goto restart;
+		}
+		auto word = x->c_anchor<formal::word>();
+		if (!word) return false;
+		const auto text = word->value();
+		if (1 != text.size()) return false;
+		// assuming ASCII-friendly encoding
+		auto c = text.front();
+		if ('A' > c || 'Z' < c) return false;
+
+		if (auto html_ish = x->c_post_anchor<formal::lex_node>()) {
+			if (!x->prefix().empty()) return false;
+			if (!x->postfix().empty()) return false;
+			if (!x->fragments().empty()) return false;
+			if (x->infix().empty()) return false;
+			// the axiom is vague on what counts as a subscripted placeholder substitution
+			const auto tag = HTMLtag::is_balanced_pair(*html_ish);
+			if (!tag) return false;
+			return std::string_view(*tag) == std::string_view("sub");
+		}
+		return 0 == x->post_anchor_code();
+	}
+
+	bool is_symbol_placeholder_syntax_symbol(const formal::lex_node* x) {
+		if (!x) return false;
+	restart:
+		if (!x->prefix().empty()) return false;
+		if (!x->infix().empty()) return false;
+		if (!x->fragments().empty()) return false;
+		if (auto node = x->c_anchor<formal::lex_node>()) {
+			if (!x->postfix().empty()) return false;
+			if (0 != x->post_anchor_code()) return false;
+			x = node;	// simulate tail recursion
+			goto restart;
+		}
+		auto word = x->c_anchor<formal::word>();
+		if (!word) return false;
+		const auto text = word->value();
+		if (1 != text.size()) return false;
+		if ('_' != text.front()) return false;
+
+		if (auto html_ish = x->c_post_anchor<formal::lex_node>()) {
+			if (!x->prefix().empty()) return false;
+			if (!x->postfix().empty()) return false;
+			if (!x->fragments().empty()) return false;
+			if (x->infix().empty()) return false;
+			// the axiom is vague on what counts as a subscripted placeholder substitution
+			const auto tag = HTMLtag::is_balanced_pair(*html_ish);
+			if (!tag) return false;
+			return std::string_view(*tag) == std::string_view("sub");
+		}
+		return 0 == x->post_anchor_code();
+	}
 
 	class symbol_catalog {
 	private:
@@ -829,6 +902,19 @@ namespace gentzen {
 
 			if constexpr (trace_parse) std::cerr << "declare_prefix: " << x->to_s() << "\n";
 
+			if (is_placeholder_syntax_symbol(x.get())) {
+				warning_report(*x, x->to_s() + ": is placeholder-syntax symbol");
+				return std::nullopt;
+			}
+			if (is_symbol_placeholder_syntax_symbol(x.get())) {
+				warning_report(*x, x->to_s() + ": is symbol-placeholder-syntax symbol");
+				return std::nullopt;
+			}
+			if (is_reserved_atomic(*x)) {
+				warning_report(*x, x->to_s() + ": is a reserved atomic symbol");
+				return std::nullopt;
+			}
+
 			auto x_view = x->to_scalar().view();
 			for (decltype(auto) symbol : _constant_symbols) {
 				if (symbol->to_scalar().view() == x_view) return "already declared as constant symbol";
@@ -855,6 +941,19 @@ namespace gentzen {
 
 			if constexpr (trace_parse) std::cerr << "declare_infix: " << x->to_s() << "\n";
 
+			if (is_placeholder_syntax_symbol(x.get())) {
+				warning_report(*x, x->to_s() + ": is placeholder-syntax symbol");
+				return std::nullopt;
+			}
+			if (is_symbol_placeholder_syntax_symbol(x.get())) {
+				warning_report(*x, x->to_s() + ": is symbol-placeholder-syntax symbol");
+				return std::nullopt;
+			}
+			if (is_reserved_atomic(*x)) {
+				warning_report(*x, x->to_s() + ": is a reserved atomic symbol");
+				return std::nullopt;
+			}
+
 			auto x_view = x->to_scalar().view();
 			for (decltype(auto) symbol : _constant_symbols) {
 				if (symbol->to_scalar().view() == x_view) return "already declared as constant symbol";
@@ -880,6 +979,19 @@ namespace gentzen {
 			enum { trace_parse = 0 };
 
 			if constexpr (trace_parse) std::cerr << "declare_postfix: " << x->to_s() << "\n";
+
+			if (is_placeholder_syntax_symbol(x.get())) {
+				warning_report(*x, x->to_s() + ": is placeholder-syntax symbol");
+				return std::nullopt;
+			}
+			if (is_symbol_placeholder_syntax_symbol(x.get())) {
+				warning_report(*x, x->to_s() + ": is symbol-placeholder-syntax symbol");
+				return std::nullopt;
+			}
+			if (is_reserved_atomic(*x)) {
+				warning_report(*x, x->to_s() + ": is a reserved atomic symbol");
+				return std::nullopt;
+			}
 
 			auto x_view = x->to_scalar().view();
 			for (decltype(auto) symbol : _constant_symbols) {
@@ -1707,70 +1819,6 @@ static auto& TokenGrammar() {
 	return *ooao;
 }
 
-bool is_placeholder_syntax_symbol(const formal::lex_node* x) {
-	if (!x) return false;
-restart:
-	if (!x->prefix().empty()) return false;
-	if (!x->infix().empty()) return false;
-	if (!x->fragments().empty()) return false;
-	if (auto node = x->c_anchor<formal::lex_node>()) {
-		if (!x->postfix().empty()) return false;
-		if (0 != x->post_anchor_code()) return false;
-		x = node;	// simulate tail recursion
-		goto restart;
-	}
-	auto word = x->c_anchor<formal::word>();
-	if (!word) return false;
-	const auto text = word->value();
-	if (1 != text.size()) return false;
-	// assuming ASCII-friendly encoding
-	auto c = text.front();
-	if ('A' > c || 'Z' < c) return false;
-
-	if (auto html_ish = x->c_post_anchor<formal::lex_node>()) {
-		if (!x->prefix().empty()) return false;
-		if (!x->postfix().empty()) return false;
-		if (!x->fragments().empty()) return false;
-		if (x->infix().empty()) return false;
-		// the axiom is vague on what counts as a subscripted placeholder substitution
-		const auto tag = HTMLtag::is_balanced_pair(*html_ish);
-		if (!tag) return false;
-		return std::string_view(*tag) == std::string_view("sub");
-	}
-	return 0 == x->post_anchor_code();
-}
-
-bool is_symbol_placeholder_syntax_symbol(const formal::lex_node* x) {
-	if (!x) return false;
-restart:
-	if (!x->prefix().empty()) return false;
-	if (!x->infix().empty()) return false;
-	if (!x->fragments().empty()) return false;
-	if (auto node = x->c_anchor<formal::lex_node>()) {
-		if (!x->postfix().empty()) return false;
-		if (0 != x->post_anchor_code()) return false;
-		x = node;	// simulate tail recursion
-		goto restart;
-	}
-	auto word = x->c_anchor<formal::word>();
-	if (!word) return false;
-	const auto text = word->value();
-	if (1 != text.size()) return false;
-	if ('_' != text.front()) return false;
-
-	if (auto html_ish = x->c_post_anchor<formal::lex_node>()) {
-		if (!x->prefix().empty()) return false;
-		if (!x->postfix().empty()) return false;
-		if (!x->fragments().empty()) return false;
-		if (x->infix().empty()) return false;
-		// the axiom is vague on what counts as a subscripted placeholder substitution
-		const auto tag = HTMLtag::is_balanced_pair(*html_ish);
-		if (!tag) return false;
-		return std::string_view(*tag) == std::string_view("sub");
-	}
-	return 0 == x->post_anchor_code();
-}
-
 class undefined_SVO {
 private:
 	// we have seven theoretical kinds of undefined sentences, based on where the infix/postfix/prefix text is.
@@ -1835,12 +1883,18 @@ public:
 			prefix_symbol = 0,
 			postfix_symbol,
 			infix_symbol,
-			constant_symbol
+			constant_symbol,
+			prefix_undefined,
+			postfix_undefined,
+			infix_undefined,
+			placeholder_syntax,
+			symbol_placeholder_syntax,
+			balanced_symbol_pair
 		};
 		enum {
 			PARSE_TREE_MAX = (int)hard_code::infix_symbol + 1,
 			SYMBOL_MAX = (int)hard_code::constant_symbol + 1,
-			HARD_CODE_MAX = (int)hard_code::constant_symbol + 1
+			HARD_CODE_MAX = (int)hard_code::balanced_symbol_pair + 1
 		};
 	public:
 		phrase_postfix() = default;
