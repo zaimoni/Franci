@@ -744,6 +744,8 @@ namespace gentzen {
 		return std::nullopt;
 	}
 
+	// \todo predicates for placeholder-syntax and symbol-placeholder-syntax symbols
+
 	class symbol_catalog {
 	private:
 		std::vector<std::pair<std::shared_ptr<const formal::lex_node>, unsigned int > > _symbols;
@@ -1705,6 +1707,70 @@ static auto& TokenGrammar() {
 	return *ooao;
 }
 
+bool is_placeholder_syntax_symbol(const formal::lex_node* x) {
+	if (!x) return false;
+restart:
+	if (!x->prefix().empty()) return false;
+	if (!x->infix().empty()) return false;
+	if (!x->fragments().empty()) return false;
+	if (auto node = x->c_anchor<formal::lex_node>()) {
+		if (!x->postfix().empty()) return false;
+		if (0 != x->post_anchor_code()) return false;
+		x = node;	// simulate tail recursion
+		goto restart;
+	}
+	auto word = x->c_anchor<formal::word>();
+	if (!word) return false;
+	const auto text = word->value();
+	if (1 != text.size()) return false;
+	// assuming ASCII-friendly encoding
+	auto c = text.front();
+	if ('A' > c || 'Z' < c) return false;
+
+	if (auto html_ish = x->c_post_anchor<formal::lex_node>()) {
+		if (!x->prefix().empty()) return false;
+		if (!x->postfix().empty()) return false;
+		if (!x->fragments().empty()) return false;
+		if (x->infix().empty()) return false;
+		// the axiom is vague on what counts as a subscripted placeholder substitution
+		const auto tag = HTMLtag::is_balanced_pair(*html_ish);
+		if (!tag) return false;
+		return std::string_view(*tag) == std::string_view("sub");
+	}
+	return 0 == x->post_anchor_code();
+}
+
+bool is_symbol_placeholder_syntax_symbol(const formal::lex_node* x) {
+	if (!x) return false;
+restart:
+	if (!x->prefix().empty()) return false;
+	if (!x->infix().empty()) return false;
+	if (!x->fragments().empty()) return false;
+	if (auto node = x->c_anchor<formal::lex_node>()) {
+		if (!x->postfix().empty()) return false;
+		if (0 != x->post_anchor_code()) return false;
+		x = node;	// simulate tail recursion
+		goto restart;
+	}
+	auto word = x->c_anchor<formal::word>();
+	if (!word) return false;
+	const auto text = word->value();
+	if (1 != text.size()) return false;
+	if ('_' != text.front()) return false;
+
+	if (auto html_ish = x->c_post_anchor<formal::lex_node>()) {
+		if (!x->prefix().empty()) return false;
+		if (!x->postfix().empty()) return false;
+		if (!x->fragments().empty()) return false;
+		if (x->infix().empty()) return false;
+		// the axiom is vague on what counts as a subscripted placeholder substitution
+		const auto tag = HTMLtag::is_balanced_pair(*html_ish);
+		if (!tag) return false;
+		return std::string_view(*tag) == std::string_view("sub");
+	}
+	return 0 == x->post_anchor_code();
+}
+
 class undefined_SVO {
 private:
 	// we have seven theoretical kinds of undefined sentences, based on where the infix/postfix/prefix text is.
@@ -1908,6 +1974,8 @@ private:
 		}
 
 		(decltype(dest)()).swap(dest);
+
+		// \todo ok to preload axioms after all undefined notations are loaded
 
 		if (root.contains("axioms")) {
 			fkyaml::from_node(root["axioms"], dest);

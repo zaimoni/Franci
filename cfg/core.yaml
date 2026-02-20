@@ -9,6 +9,7 @@ SVO_postfix_undefined:
   - "is an infix undefined notation"
   - "is a placeholder-syntax symbol"
   - "is a symbol-placeholder-syntax symbol"
+  - "is a balanced symbol pair"
 axioms:
   - ":= is a binary infix symbol"
   - "&#9500; is a binary infix symbol"

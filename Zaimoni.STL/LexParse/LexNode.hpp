@@ -149,8 +149,8 @@ namespace formal {
 
 		template<class T>
 		std::shared_ptr<const T> shared_anchor() {
-			if (auto x = std::get_if<std::shared_ptr<const parsed> >(&_anchor)) return *x;
-			if (auto x = std::get_if<zaimoni::COW<parsed> >(&_anchor)) return x->get_shared();
+			if (auto x = std::get_if<std::shared_ptr<const T> >(&_anchor)) return *x;
+			if (auto x = std::get_if<zaimoni::COW<T> >(&_anchor)) return x->get_shared();
 			return nullptr;
 		}
 
