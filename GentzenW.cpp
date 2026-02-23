@@ -1548,8 +1548,8 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 			remainder.remove_prefix(scan.first.size());
 			ltrim(remainder);
 			if (!remainder.empty()) {
-				std::unique_ptr<formal::word> stage(new formal::word(std::shared_ptr<const std::string>(new std::string(remainder)), w->origin() + (text.size() - remainder.size())));
-				std::unique_ptr<formal::lex_node> node(new formal::lex_node(std::move(stage)));
+				auto* raw_word = new formal::word(std::shared_ptr<const std::string>(new std::string(remainder)), w->origin() + (text.size() - remainder.size()));
+				std::unique_ptr<formal::lex_node> node(new formal::lex_node(raw_word));
 				src.insertNSlotsAt(1, viewpoint + 1);
 				src[viewpoint + 1] = node.release();
 			};
@@ -1565,8 +1565,8 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 		remainder.remove_prefix(html_entity->size());
 		ltrim(remainder);
 		if (!remainder.empty()) {
-			std::unique_ptr<formal::word> stage(new formal::word(std::shared_ptr<const std::string>(new std::string(remainder)), w->origin() + (text.size() - remainder.size())));
-			std::unique_ptr<formal::lex_node> node(new formal::lex_node(std::move(stage)));
+			auto* raw_word = new formal::word(std::shared_ptr<const std::string>(new std::string(remainder)), w->origin() + (text.size() - remainder.size()));
+			std::unique_ptr<formal::lex_node> node(new formal::lex_node(raw_word));
 			src.insertNSlotsAt(1, viewpoint + 1);
 			src[viewpoint + 1] = node.release();
 		};
@@ -1591,8 +1591,8 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 			remainder.remove_prefix(test->first.size());
 			ltrim(remainder);
 			if (!remainder.empty()) {
-				std::unique_ptr<formal::word> stage(new formal::word(std::shared_ptr<const std::string>(new std::string(remainder)), w->origin() + (text.size() - remainder.size())));
-				std::unique_ptr<formal::lex_node> node(new formal::lex_node(std::move(stage)));
+				auto* raw_word = new formal::word(std::shared_ptr<const std::string>(new std::string(remainder)), w->origin() + (text.size() - remainder.size()));
+				std::unique_ptr<formal::lex_node> node(new formal::lex_node(raw_word));
 				src.insertNSlotsAt(1, viewpoint + 1);
 				src[viewpoint + 1] = node.release();
 			};
@@ -1612,8 +1612,8 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 			remainder.remove_prefix(test->first.size());
 			ltrim(remainder);
 			if (!remainder.empty()) {
-				std::unique_ptr<formal::word> stage(new formal::word(std::shared_ptr<const std::string>(new std::string(remainder)), w->origin() + (text.size() - remainder.size())));
-				std::unique_ptr<formal::lex_node> node(new formal::lex_node(std::move(stage)));
+				auto* raw_word = new formal::word(std::shared_ptr<const std::string>(new std::string(remainder)), w->origin() + (text.size() - remainder.size()));
+				std::unique_ptr<formal::lex_node> node(new formal::lex_node(raw_word));
 				src.insertNSlotsAt(1, viewpoint + 1);
 				src[viewpoint + 1] = node.release();
 			};
