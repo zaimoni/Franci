@@ -2049,7 +2049,11 @@ private:
 		// preload symbol-placeholder-syntax symbol axioms
 		instinct.add_axiom(undefined_SVO::declare_placeholder("_", true));
 
-		// \todo preload balanced symbol pair axioms
+		// preload balanced symbol pair axioms
+		instinct.add_axiom(undefined_SVO::declare_balanced_pair(reserved_atomic[0].first, reserved_atomic[1].first));
+		instinct.add_axiom(undefined_SVO::declare_balanced_pair(reserved_atomic[2].first, reserved_atomic[3].first));
+		instinct.add_axiom(undefined_SVO::declare_balanced_pair(reserved_atomic[4].first, reserved_atomic[5].first));
+
 
 		if (root.contains("axioms")) {
 			fkyaml::from_node(root["axioms"], dest);
@@ -2122,11 +2126,22 @@ private:
 	}
 
 public:
+	// these two are called during axiom loading, when the RAM pressure should be very low.  If these new operator 
+	// calls were to throw, there would be no viable recovery strategy.
 	static std::shared_ptr<const formal::parsed> declare_placeholder(std::string src, bool symbol = false) {
 		formal::word* token = new formal::word(std::move(src), formal::src_location(), formal::Tokenized);
 		formal::lex_node* subject = new formal::lex_node(token, formal::Tokenized);
 
 		return std::shared_ptr<const formal::parsed>(new undefined_SVO::phrase_postfix(subject, symbol ? undefined_SVO::phrase_postfix::hard_code::symbol_placeholder_syntax : undefined_SVO::phrase_postfix::hard_code::placeholder_syntax));
+	}
+
+	static std::shared_ptr<const formal::parsed> declare_balanced_pair(const std::string_view& lhs, const std::string_view& rhs) {
+		formal::word* token_lhs = new formal::word(lhs, formal::src_location(), formal::Inert_Token);
+		formal::word* token_rhs = new formal::word(rhs, formal::src_location(), formal::Inert_Token);
+		formal::lex_node* subject = new formal::lex_node(token_lhs, formal::Tokenized);
+		subject->set_null_post_anchor(token_rhs);
+
+		return std::shared_ptr<const formal::parsed>(new undefined_SVO::phrase_postfix(subject, undefined_SVO::phrase_postfix::hard_code::balanced_symbol_pair));
 	}
 
 	static bool global_parse(kuroda::parser<formal::lex_node>::edit_span& tokens, kuroda::parser<formal::lex_node>& grammar) {

@@ -200,6 +200,16 @@ namespace formal {
 			return true;
 		}
 
+		bool set_null_post_anchor(word*& src) {
+			if (c_post_anchor<word>()) return false;
+			if (c_post_anchor<lex_node>()) return false;
+			if (c_post_anchor<parsed>()) return false;
+			_post_anchor = zaimoni::COW<word>(src);
+			src = nullptr;
+			_invalidate_scalar();
+			return true;
+		}
+
 		template<class T>
 		T* release_post_anchor() = delete;
 
