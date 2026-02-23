@@ -51,6 +51,7 @@ namespace formal {
 		lex_node(lex_node*& src) noexcept : _anchor(zaimoni::COW<lex_node>(src)), _code(src->_code), _offset(src->_offset) {
 			src = nullptr;
 		}
+	public:
 		// thin-wrapping constructors
 		lex_node(word*& src, unsigned long long code = 0) noexcept : _anchor(zaimoni::COW<word>(src)), _code(code), _offset(0) {
 			if (src->code() & Comment) _code |= Comment;
@@ -58,7 +59,6 @@ namespace formal {
 		}
 
 
-	public:
 		using edit_span = kuroda::parser<lex_node>::edit_span;
 
 		lex_node(parsed* src, unsigned long long code = 0) noexcept : _anchor(zaimoni::COW<parsed>(src)), _code(code), _offset(0) {}

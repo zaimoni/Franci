@@ -1879,6 +1879,7 @@ public:
   - "is a constant symbol"
 */
 		// this must agree with core.yaml:SVO_postfix_undefined
+	public:
 		enum class hard_code {
 			prefix_symbol = 0,
 			postfix_symbol,
@@ -1891,6 +1892,7 @@ public:
 			symbol_placeholder_syntax,
 			balanced_symbol_pair
 		};
+	private:
 		enum {
 			PARSE_TREE_MAX = (int)hard_code::infix_symbol + 1,
 			SYMBOL_MAX = (int)hard_code::constant_symbol + 1,
@@ -1905,6 +1907,9 @@ public:
 		~phrase_postfix() = default;
 
 		phrase_postfix(formal::lex_node*& sub, size_t code) : _subject(sub), _code(code) {
+			sub = nullptr;
+		}
+		phrase_postfix(formal::lex_node*& sub, hard_code code) : _subject(sub), _code((size_t)code) {
 			sub = nullptr;
 		}
 
@@ -2033,7 +2038,9 @@ private:
 		{
 		auto& instinct = *gentzen::facts::get();
 		// \todo preload placeholder-syntax symbol axioms
-		// \todo preload symbol-placeholder-syntax symbol axioms
+		// preload symbol-placeholder-syntax symbol axioms
+		instinct.add_axiom(undefined_SVO::declare_placeholder("_", true));
+
 		// \todo preload balanced symbol pair axioms
 
 		if (root.contains("axioms")) {
@@ -2107,6 +2114,13 @@ private:
 	}
 
 public:
+	static std::shared_ptr<const formal::parsed> declare_placeholder(const std::string_view& src, bool symbol = false) {
+		formal::word* token = new formal::word(src, formal::src_location(), formal::Tokenized);
+		formal::lex_node* subject = new formal::lex_node(token, formal::Tokenized);
+
+		return std::shared_ptr<const formal::parsed>(new undefined_SVO::phrase_postfix(subject, symbol ? undefined_SVO::phrase_postfix::hard_code::symbol_placeholder_syntax : undefined_SVO::phrase_postfix::hard_code::placeholder_syntax));
+	}
+
 	static bool global_parse(kuroda::parser<formal::lex_node>::edit_span& tokens, kuroda::parser<formal::lex_node>& grammar) {
 		enum { trace_parse = 0 };
 		if constexpr (trace_parse) std::cerr << "undefined_SVO::global_parse: enter\n";
