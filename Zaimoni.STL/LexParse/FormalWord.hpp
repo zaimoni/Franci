@@ -66,6 +66,12 @@ namespace formal {
 			_token(src),
 			_code(code) {}
 
+		word(std::string&& src, src_location origin, unsigned long long code = 0) noexcept
+			: _origin(origin),
+			_token(std::move(src)),
+			_code(code) {
+		}
+
 		word(std::shared_ptr<const std::string> src, src_location origin, unsigned long long code = 0) noexcept
 			: _origin(origin),
 			_token(src),

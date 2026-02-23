@@ -2114,8 +2114,8 @@ private:
 	}
 
 public:
-	static std::shared_ptr<const formal::parsed> declare_placeholder(const std::string_view& src, bool symbol = false) {
-		formal::word* token = new formal::word(src, formal::src_location(), formal::Tokenized);
+	static std::shared_ptr<const formal::parsed> declare_placeholder(std::string src, bool symbol = false) {
+		formal::word* token = new formal::word(std::move(src), formal::src_location(), formal::Tokenized);
 		formal::lex_node* subject = new formal::lex_node(token, formal::Tokenized);
 
 		return std::shared_ptr<const formal::parsed>(new undefined_SVO::phrase_postfix(subject, symbol ? undefined_SVO::phrase_postfix::hard_code::symbol_placeholder_syntax : undefined_SVO::phrase_postfix::hard_code::placeholder_syntax));
