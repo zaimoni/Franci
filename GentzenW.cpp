@@ -949,7 +949,7 @@ namespace gentzen {
 				warning_report(*x, x->to_s() + ": is symbol-placeholder-syntax symbol");
 				return std::nullopt;
 			}
-			if (is_reserved_atomic(*x)) {
+			if (is_reserved_atomic(*x) && !detect_comma(*x)) {
 				warning_report(*x, x->to_s() + ": is a reserved atomic symbol");
 				return std::nullopt;
 			}
