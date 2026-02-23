@@ -69,9 +69,12 @@ namespace formal {
 		lex_node(const parsed*& src, unsigned long long code = 0) noexcept : _anchor(std::shared_ptr<const parsed>(src)), _code(code), _offset(0) {
 			src = nullptr;
 		}
-		lex_node(std::shared_ptr<const parsed> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code), _offset(0) {}
-		lex_node(std::shared_ptr<const lex_node> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code), _offset(0) {}
-		lex_node(std::shared_ptr<const word> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code), _offset(0) {}
+
+		// There is an implicit conversion from std::unique_ptr to std::shared_ptr.
+		// We don't want that here: hard crash during YAML configuration loading
+		explicit lex_node(std::shared_ptr<const parsed> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code), _offset(0) {}
+		explicit lex_node(std::shared_ptr<const lex_node> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code), _offset(0) {}
+		explicit lex_node(std::shared_ptr<const word> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code), _offset(0) {}
 
 		lex_node() noexcept : _code(0), _offset(0) {}
 		// \todo anchor constructor
