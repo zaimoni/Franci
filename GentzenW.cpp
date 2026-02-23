@@ -1253,6 +1253,8 @@ private:
 			return ooao;
 		}
 
+		auto size() const noexcept { return _axioms.size(); }
+
 		void add_axiom(std::shared_ptr<const formal::parsed> src) {
 			enum { trace_parse = 0 };
 
@@ -1988,6 +1990,7 @@ private:
 	void load() {
 		enum { trace_load = 0 };
 
+		auto open_this = std::filesystem::path(self_path()).replace_filename("cfg/core.yaml");
 		std::ifstream ifs(std::filesystem::path(self_path()).replace_filename("cfg/core.yaml"));
 
 		fkyaml::node root = fkyaml::node::deserialize(ifs);
@@ -2037,7 +2040,12 @@ private:
 		// ok to preload axioms after all undefined notations are loaded
 		{
 		auto& instinct = *gentzen::facts::get();
-		// \todo preload placeholder-syntax symbol axioms
+		// preload placeholder-syntax symbol axioms
+		char tok[2] = "A";
+		do {
+			instinct.add_axiom(undefined_SVO::declare_placeholder(tok));
+		} while ('Z' >= ++tok[0]);
+
 		// preload symbol-placeholder-syntax symbol axioms
 		instinct.add_axiom(undefined_SVO::declare_placeholder("_", true));
 
