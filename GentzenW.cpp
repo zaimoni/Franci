@@ -2029,11 +2029,15 @@ private:
 
 		(decltype(dest)()).swap(dest);
 
-		// \todo ok to preload axioms after all undefined notations are loaded
+		// ok to preload axioms after all undefined notations are loaded
+		{
+		auto& instinct = *gentzen::facts::get();
+		// \todo preload placeholder-syntax symbol axioms
+		// \todo preload symbol-placeholder-syntax symbol axioms
+		// \todo preload balanced symbol pair axioms
 
 		if (root.contains("axioms")) {
 			fkyaml::from_node(root["axioms"], dest);
-			auto& instinct = *gentzen::facts::get();
 
 			formal::src_location src(std::pair(1, 0), std::shared_ptr<const std::filesystem::path>(new std::filesystem::path("cfg/core.yaml:axioms")));
 			auto lines = to_lines(dest, src);
@@ -2070,6 +2074,7 @@ private:
 					return;
 				}
 			}
+		}
 		}
 
 		(decltype(dest)()).swap(dest);
