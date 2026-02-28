@@ -1685,12 +1685,12 @@ auto parse_inside_balanced(const std::string_view& l_token, const std::string_vi
 		const auto in_size = src.infix().size();
 		if (1 == in_size) return false;
 
-		if (auto word_code = src.anchor_code(); 1 == word_code || 6 == word_code) {
-			if (l_token != src.c_anchor<formal::word>()->value()) return false;
+		if (auto anchor = src.c_anchor<formal::word>()) {
+			if (l_token != anchor->value()) return false;
 		} else return false;
 
-		if (auto word_code = src.post_anchor_code(); 1 == word_code || 6 == word_code) {
-			if (r_token != src.c_post_anchor<formal::word>()->value()) return false;
+		if (auto post_anchor = src.c_post_anchor<formal::word>()) {
+			if (r_token != post_anchor->value()) return false;
 		} else return false;
 
 		const auto prior_errors = Errors.count();
