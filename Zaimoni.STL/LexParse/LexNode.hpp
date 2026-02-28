@@ -219,6 +219,9 @@ namespace formal {
 			return nullptr;
 		}
 
+		void diagnose(std::vector<std::string>& dest);
+		std::vector<std::string> diagnose();
+
 		auto anchor_code() const { return classify(_anchor); }
 		auto post_anchor_code() const { return classify(_post_anchor); }
 
@@ -276,9 +279,13 @@ namespace formal {
 
 		static int classify(const decltype(_anchor)& src);
 		static void reset(decltype(_anchor)& dest, lex_node*& src);
+
+		static void diagnose(const decltype(_anchor)& src, std::vector<std::string>& dest, const std::string& pre);
+		static void diagnose(const decltype(_prefix)& src, std::vector<std::string>& dest, const std::string& pre);
 	};
 
 	std::string to_string(const kuroda::parser<formal::lex_node>::sequence& src);
+	std::vector<std::string> diagnose(const kuroda::parser<formal::lex_node>::sequence& src);
 
 } // namespace formal
 

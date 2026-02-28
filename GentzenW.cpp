@@ -1677,6 +1677,31 @@ auto balanced_atomic_handler(const std::string_view& l_token, const std::string_
 	};
 }
 
+// works for GentzenGrammar.apply, not TokenGrammar.apply
+auto parse_inside_balanced(const std::string_view& l_token, const std::string_view& r_token)
+{
+	return [=](formal::lex_node& src) {
+		if (src.infix().empty()) return false;
+		const auto in_size = src.infix().size();
+		if (1 == in_size) return false;
+
+		if (auto word_code = src.anchor_code(); 1 == word_code || 6 == word_code) {
+			if (l_token != src.c_anchor<formal::word>()->value()) return false;
+		} else return false;
+
+		if (auto word_code = src.post_anchor_code(); 1 == word_code || 6 == word_code) {
+			if (r_token != src.c_post_anchor<formal::word>()->value()) return false;
+		} else return false;
+
+		const auto prior_errors = Errors.count();
+
+		src.infix() = GentzenGrammar().apply(src.infix());
+		if (prior_errors == Errors.count()) GentzenGrammar().complete_parse(src.infix());
+
+		return in_size != src.infix().size();	// not really
+	};
+}
+
 auto balanced_html_tag(kuroda::parser<formal::lex_node>::sequence& src, size_t viewpoint) {
 	static constexpr const char* empty_visual_no_op[] = {
 		"span",
@@ -2084,9 +2109,7 @@ private:
 					if (prior_errors < Errors.count()) continue;
 
 					GentzenGrammar().complete_parse(stage);
-//					kuroda::parser<formal::lex_node>::edit_span scan(stage);
 
-//					global_parse(scan, GentzenGrammar());
 					if (1 == stage.size() && prior_errors == Errors.count()) {
 						if constexpr (trace_load) std::cerr << "considering axiom\n";
 						if (auto relay = stage[0]->shared_anchor<formal::parsed>()) {
@@ -2119,12 +2142,19 @@ private:
 					auto stage = TokenGrammar().apply(formal::lex_node::pop_front(lines));
 					src.line_pos.first++;
 					src.line_pos.second = 0;
+ 					if (prior_errors < Errors.count()) continue;
+
+					TokenGrammar().complete_parse(stage);
 					if (prior_errors < Errors.count()) continue;
 
-					kuroda::parser<formal::lex_node>::edit_span scan(stage);
+					stage = GentzenGrammar().apply(stage);
+					if (prior_errors < Errors.count()) continue;
 
-					global_parse(scan, GentzenGrammar());
-					std::cout << to_string(stage) << std::endl;
+					GentzenGrammar().complete_parse(stage);
+
+					for (decltype(auto) str : diagnose(stage)) {
+						std::cout << str << std::endl;
+					}
 				}
 				catch (std::exception& e) {
 					std::cout << "line iteration body: " << e.what() << "\n";
@@ -2225,6 +2255,9 @@ static kuroda::parser<formal::lex_node>& GentzenGrammar() {
 		ooao = decltype(ooao)(new decltype(ooao)::element_type());
 
 		ooao->register_terminal(gentzen::symbol_catalog::anchor_symbol_parse);
+		ooao->register_terminal(parse_inside_balanced(reserved_atomic[0].first, reserved_atomic[1].first));
+		ooao->register_terminal(parse_inside_balanced(reserved_atomic[2].first, reserved_atomic[3].first));
+		ooao->register_terminal(parse_inside_balanced(reserved_atomic[4].first, reserved_atomic[5].first));
 
 		ooao->register_global_build(undefined_SVO::global_parse);
 		ooao->register_global_build(gentzen::symbol_catalog::global_parse);

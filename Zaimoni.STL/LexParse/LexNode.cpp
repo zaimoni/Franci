@@ -350,6 +350,93 @@ namespace formal {
 		return join(stage, " ");
 	}
 
+	void lex_node::diagnose(std::vector<std::string>& dest)
+	{
+		static const std::string a_msg("anchor: ");
+		static const std::string pa_msg("post anchor: ");
+		static const std::string pre_msg("prefix: ");
+		static const std::string in_msg("infix: ");
+		static const std::string post_msg("postfix: ");
+		static const std::string frag_msg("fragments: ");
+
+		dest.push_back(to_s());
+
+		diagnose(_prefix, dest, pre_msg);
+		diagnose(_anchor, dest, a_msg);
+		diagnose(_infix, dest, in_msg);
+		diagnose(_post_anchor, dest, pa_msg);
+		diagnose(_postfix, dest, post_msg);
+
+		auto frag_s = _fragments.size();
+		if (0 < frag_s) dest.push_back(frag_msg + std::to_string(frag_s));
+	}
+
+	void lex_node::diagnose(const decltype(_anchor)& src, std::vector<std::string>& dest, const std::string& pre)
+	{
+		auto code = classify(src);
+		if (0 == code) return;
+
+		struct _diagnose {
+			std::vector<std::string>& _x;
+			const std::string& _pre;
+
+			_diagnose(std::vector<std::string>& src, const std::string& msg) : _x(src), _pre(msg) {}
+
+			void operator()(const zaimoni::COW<word>& w) {
+				_x.push_back(_pre + std::string(w->value()));
+			}
+			void operator()(const zaimoni::COW<lex_node>& x) {
+				_x.push_back(_pre + x->to_s());
+			}
+			void operator()(const zaimoni::COW<parsed>& x) {
+				_x.push_back(_pre + x->to_s());
+			}
+			void operator()(const std::shared_ptr<const parsed>& x) {
+				_x.push_back(_pre + x->to_s());
+			}
+			void operator()(const std::shared_ptr<const lex_node>& x) {
+				_x.push_back(_pre + x->to_s());
+			}
+			void operator()(const std::shared_ptr<const word>& w) {
+				_x.push_back(_pre + std::string(w->value()));
+			}
+		};
+
+		return std::visit(_diagnose(dest, pre), src);
+	}
+
+	void lex_node::diagnose(const decltype(_prefix)& src, std::vector<std::string>& dest, const std::string& pre) {
+		if (src.empty()) return;
+
+		auto ub = src.size();
+		if (1 == ub && 1 == src.front()->is_pure_anchor()) {
+			dest.push_back(pre + src.front()->to_s());
+			return;
+		}
+
+		dest.push_back(pre + std::to_string(src.size()));
+		for (decltype(auto) x : src) x->diagnose(dest);
+	}
+
+	std::vector<std::string> diagnose(const kuroda::parser<formal::lex_node>::sequence& src) {
+		std::vector<std::string> ret;
+
+		auto ub = src.size();
+		while (0 < ub) {
+			src[--ub]->diagnose(ret);
+		}
+
+		return ret;
+	}
+
+	std::vector<std::string> lex_node::diagnose()
+	{
+		std::vector<std::string> ret;
+
+		diagnose(ret);
+		return ret;
+	}
+
 	perl::scalar lex_node::to_scalar(const decltype(_anchor)& src)
 	{
 		struct _to_s {
