@@ -1239,6 +1239,9 @@ private:
 	class facts {
 	private:
 		std::vector<std::shared_ptr<const formal::parsed> > _axioms;
+
+		static const constexpr std::string_view str_axiom = std::string_view("axiom");
+		static const constexpr std::string_view str_schema = std::string_view("axiom schema");
 	public:
 		facts() = default;
 		facts(const facts&) = delete;
@@ -1254,6 +1257,12 @@ private:
 		}
 
 		auto size() const noexcept { return _axioms.size(); }
+
+		std::pair<std::shared_ptr<const formal::parsed>, perl::scalar> known(size_t n) {
+			if (size() <= n) throw std::logic_error("gentzen::facts::known: size() <= n");
+			// \todo once we have an axiom schema loading, report the rationale for axiom schemas as axiom schema
+			return std::pair(_axioms[n], str_axiom);
+		}
 
 		void add_axiom(std::shared_ptr<const formal::parsed> src) {
 			enum { trace_parse = 0 };
