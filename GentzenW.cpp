@@ -2015,7 +2015,6 @@ public:
 			stage.push_back((perl::scalar)test._postfix[_code]);
 			return join(stage, " ");
 		}
-		unsigned int precedence() const override { return -1; } // \todo formal-fix this
 	};
 
 	undefined_SVO() = default;
