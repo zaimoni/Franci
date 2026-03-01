@@ -463,12 +463,6 @@ namespace formal {
 		return std::visit(_to_s(), src);
 	}
 
-
-	unsigned int lex_node::precedence() const
-	{
-		return 0;
-	}
-
 	bool lex_node::is_balanced_pair(const std::string_view& l_token, const std::string_view& r_token) const {
 		auto leading_tag = c_anchor<formal::word>();
 		if (!leading_tag || leading_tag->value() != l_token) return false;

@@ -252,8 +252,6 @@ namespace formal {
 
 		std::string to_s() const;
 
-		unsigned int precedence() const;
-
 		bool is_balanced_pair(const std::string_view& l_token, const std::string_view& r_token) const;
 		static lex_node** find_binding_predecessor(lex_node** src);
 

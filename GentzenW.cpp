@@ -1258,7 +1258,7 @@ private:
 
 		auto size() const noexcept { return _axioms.size(); }
 
-		std::pair<std::pair<std::shared_ptr<const formal::parsed>, std::shared_ptr<const formal::lex_node> >, perl::scalar> known(size_t n) {
+		std::pair<std::pair<std::shared_ptr<const formal::parsed>, std::shared_ptr<const formal::lex_node> >, perl::scalar> known(size_t n) const {
 			if (size() <= n) throw std::logic_error("gentzen::facts::known: size() <= n");
 			// \todo once we have an axiom schema loading, report the rationale for axiom schemas as axiom schema
 			return std::pair(_axioms[n], str_axiom);
@@ -1282,6 +1282,60 @@ private:
 		// \todo void add_axiom(std::shared_ptr<const formal::lex_node> src) {}
 	};
 
+	class syntactical_entailment_2ary final : public formal::parsed {
+	private:
+		std::shared_ptr<formal::lex_node> hypothesis_1;
+		std::shared_ptr<formal::lex_node> hypothesis_2;
+		std::shared_ptr<formal::lex_node> conclusion;
+	public:
+		syntactical_entailment_2ary() = default;
+		syntactical_entailment_2ary(const syntactical_entailment_2ary&) = default;
+		syntactical_entailment_2ary(syntactical_entailment_2ary&&) = default;
+		syntactical_entailment_2ary& operator=(const syntactical_entailment_2ary&) = default;
+		syntactical_entailment_2ary& operator=(syntactical_entailment_2ary&&) = default;
+		~syntactical_entailment_2ary() = default;
+
+		std::unique_ptr<parsed> clone() const override { return std::unique_ptr<formal::parsed>(new syntactical_entailment_2ary(*this)); }
+		void CopyInto(formal::parsed*& dest) const override {
+			if (dest) {
+				if (auto x = dynamic_cast<syntactical_entailment_2ary*>(dest)) {
+					*x = *this;
+					return;
+				}
+				delete dest;
+			}
+			dest = new syntactical_entailment_2ary(*this);
+		}
+		void MoveInto(formal::parsed*& dest) override {
+			if (dest) {
+				if (auto x = dynamic_cast<syntactical_entailment_2ary*>(dest)) {
+					*x = std::move(*this);
+					return;
+				}
+				delete dest;
+			}
+			dest = new syntactical_entailment_2ary(*this);
+		}
+
+		formal::src_location origin() const override { return hypothesis_1->origin(); }
+
+		std::string to_s() const override {
+			std::vector<perl::scalar> ret(5);
+			ret[0] = hypothesis_1->to_s();
+			ret[1] = comma;
+			ret[2] = hypothesis_2->to_s();
+			ret[3] = std::string_view("&#9500;");
+			ret[4] = conclusion->to_s();
+
+			// \todo use grouping parentheses on the hypotheses, and conclusion, if needed
+
+			return join(ret, std::string_view(" "));
+		}
+
+		// unclear if following belong in a sub-interface
+		std::optional<perl::scalar> is_not_legal_axiom(bool unconditional) const override { return std::nullopt; }
+		std::optional<perl::scalar> before_add_axiom_handler() const override { return std::nullopt; }
+	};
 } // end namespace gentzen
 
 // end prototype class
@@ -2025,7 +2079,6 @@ private:
 	void load() {
 		enum { trace_load = 0 };
 
-		auto open_this = std::filesystem::path(self_path()).replace_filename("cfg/core.yaml");
 		std::ifstream ifs(std::filesystem::path(self_path()).replace_filename("cfg/core.yaml"));
 
 		fkyaml::node root = fkyaml::node::deserialize(ifs);
