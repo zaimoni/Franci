@@ -1238,7 +1238,7 @@ private:
 
 	class facts {
 	private:
-		std::vector<std::shared_ptr<const formal::parsed> > _axioms;
+		std::vector<std::pair<std::shared_ptr<const formal::parsed>, std::shared_ptr<const formal::lex_node> > >  _axioms;
 
 		static const constexpr std::string_view str_axiom = std::string_view("axiom");
 		static const constexpr std::string_view str_schema = std::string_view("axiom schema");
@@ -1258,7 +1258,7 @@ private:
 
 		auto size() const noexcept { return _axioms.size(); }
 
-		std::pair<std::shared_ptr<const formal::parsed>, perl::scalar> known(size_t n) {
+		std::pair<std::pair<std::shared_ptr<const formal::parsed>, std::shared_ptr<const formal::lex_node> >, perl::scalar> known(size_t n) {
 			if (size() <= n) throw std::logic_error("gentzen::facts::known: size() <= n");
 			// \todo once we have an axiom schema loading, report the rationale for axiom schemas as axiom schema
 			return std::pair(_axioms[n], str_axiom);
@@ -1276,8 +1276,10 @@ private:
 				return;
 			}
 			if constexpr (trace_parse) std::cerr << "axiom: " << src->to_s() << "\n";
-			_axioms.push_back(src);
+			_axioms.push_back(std::pair(src, nullptr));
 		}
+
+		// \todo void add_axiom(std::shared_ptr<const formal::lex_node> src) {}
 	};
 
 } // end namespace gentzen
