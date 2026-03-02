@@ -1208,43 +1208,44 @@ private:
 		return (node.code() & symbol_catalog::anchor_is_symbol) && 1 >= node.offset();
 	}
 
-	using axiom_type = std::variant<std::shared_ptr<const formal::parsed>, std::shared_ptr<const formal::lex_node>>;
+	using statement_t = std::variant<std::shared_ptr<const formal::parsed>, std::shared_ptr<const formal::lex_node>>;
 
 	struct fact_database {
 		virtual ~fact_database() = default;
-		virtual std::pair<axiom_type, perl::scalar> known(size_t n) const = 0;
+		virtual size_t size() const noexcept = 0;
+		virtual std::pair<statement_t, perl::scalar> known(size_t n) const = 0;
 	};
 
-	class facts : public fact_database {
+	class axioms : public fact_database {
 	private:
-		std::vector<axiom_type> _axioms;
-		std::vector<std::shared_ptr<zaimoni::observer<axiom_type>>> _watchers;
+		std::vector<statement_t> _axioms;
+		std::vector<std::shared_ptr<zaimoni::observer<statement_t>>> _watchers;
 
 		static const constexpr std::string_view str_axiom = std::string_view("axiom");
 		static const constexpr std::string_view str_schema = std::string_view("axiom schema");
 	public:
-		facts() = default;
-		facts(const facts&) = delete;
-		facts(facts&&) = delete;
-		facts& operator=(const facts&) = delete;
-		facts& operator=(facts&&) = delete;
-		~facts() = default;
+		axioms() = default;
+		axioms(const axioms&) = delete;
+		axioms(axioms&&) = delete;
+		axioms& operator=(const axioms&) = delete;
+		axioms& operator=(axioms&&) = delete;
+		~axioms() = default;
 
-		static std::shared_ptr<facts> get() {
-			static std::shared_ptr<facts> ooao;
-			if (!ooao) ooao = std::shared_ptr<facts>(new facts());
-			return ooao;
+		static std::shared_ptr<axioms> get() {
+			static std::shared_ptr<axioms> oaoo;
+			if (!oaoo) oaoo = std::shared_ptr<axioms>(new axioms());
+			return oaoo;
 		}
 
-		auto size() const noexcept { return _axioms.size(); }
+		size_t size() const noexcept override { return _axioms.size(); }
 
-		std::pair<axiom_type, perl::scalar> known(size_t n) const override {
-			if (size() <= n) throw std::logic_error("gentzen::facts::known: size() <= n");
+		std::pair<statement_t, perl::scalar> known(size_t n) const override {
+			if (size() <= n) throw std::logic_error("gentzen::axioms::known: size() <= n");
 			// \todo once we have an axiom schema loading, report the rationale for axiom schemas as axiom schema
 			return std::pair(_axioms[n], str_axiom);
 		}
 
-		void watched_by(const std::shared_ptr<zaimoni::observer<axiom_type>>& src) {
+		void watched_by(const std::shared_ptr<zaimoni::observer<statement_t>>& src) {
 			ptrdiff_t ub = _watchers.size();
 			while (0 <= --ub) {
 				if (_watchers[ub]) {
@@ -1272,7 +1273,7 @@ private:
 				return;
 			}
 			if constexpr (trace_parse) std::cerr << "axiom: " << src->to_s() << "\n";
-			_axioms.push_back(axiom_type(src));
+			_axioms.push_back(src);
 
 			// notify observers
 			ptrdiff_t ub = _watchers.size();
@@ -2189,7 +2190,7 @@ private:
 
 		// ok to preload axioms after all undefined notations are loaded
 		{
-		auto& instinct = *gentzen::facts::get();
+		auto& instinct = *gentzen::axioms::get();
 		// preload placeholder-syntax symbol axioms
 		char tok[2] = "A";
 		do {
