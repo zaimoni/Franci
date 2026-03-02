@@ -856,34 +856,6 @@ namespace gentzen {
 		static_assert(!(anchor_is_not_symbol & anchor_is_symbol));
 		static_assert(!(anchor_is_not_symbol & anchor_is_const_symbol));
 
-		class phrase {
-			kuroda::parser<formal::lex_node>::symbols _prefix;
-			kuroda::parser<formal::lex_node>::symbols _postfix;
-			std::shared_ptr<const formal::lex_node> _symbol;
-			size_t _offset; // used as a linear offset
-
-			phrase(decltype(_prefix) && pre, decltype(_postfix) && post, std::shared_ptr<const formal::lex_node> sym, size_t n) noexcept
-				: _prefix(std::move(pre)), _postfix(std::move(post)), _symbol(sym), _offset(n)
-			{
-			}
-
-		public:
-			static phrase* construct(formal::lex_node*& src) {
-				if (!(src->code() && symbol_catalog::anchor_is_symbol)) return nullptr;
-				if (src->code() && formal::Error) return nullptr;
-				if (!src->infix().empty()) return nullptr;
-				if (!src->fragments().empty()) return nullptr; // \todo rethink this when introducing generalized associativity
-				if (0 != src->post_anchor_code()) return nullptr;
-				if (auto data = symbol_catalog::get().is_nonconstant_symbol_offset(src->offset())) {
-					std::unique_ptr<phrase> ret(new phrase(std::move(src->prefix()), std::move(src->postfix()), data->first, src->offset()));
-					delete src;
-					src = nullptr;
-					return ret.release();
-				}
-				return nullptr;
-			}
-		};
-
 		symbol_catalog() = default;
 		symbol_catalog(const symbol_catalog&) = delete;
 		symbol_catalog(symbol_catalog&&) = delete;
@@ -1140,20 +1112,6 @@ namespace gentzen {
 				return true;
 			}
 
-			return false;
-		}
-
-		static bool is_lexical_definition(const formal::lex_node* src)
-		{
-			if (src->code() && symbol_catalog::anchor_is_symbol) {
-				if (0 != src->offset()) return false;
-				if (src->prefix().empty()) return false;
-				if (!src->infix().empty()) return false;
-				if (src->postfix().empty()) return false;
-				if (!src->fragments().empty()) return false;
-				if (0 != src->post_anchor_code()) return false;
-				return true;
-			}
 			return false;
 		}
 
