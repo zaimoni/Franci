@@ -256,6 +256,15 @@ bool detect_comma(const formal::lex_node& src) {
 	return false;
 }
 
+bool is_strict_binary_node(const formal::lex_node& src) {
+	if (1 != src.postfix().size()) return false;
+	if (1 != src.prefix().size()) return false;
+	if (!src.infix().empty()) return false;
+	if (!src.fragments().empty()) return false;
+	if (0 != src.post_anchor_code()) return false;
+	return true;
+}
+
 bool is_reserved_atomic(const formal::lex_node& src)
 {
 	if (const auto word = src.c_anchor<formal::word>()) {
@@ -1194,6 +1203,10 @@ private:
 		}
 	};
 
+	bool needs_grouping_parens(const formal::lex_node& node) {
+		return (node.code() & symbol_catalog::anchor_is_symbol) && 1 >= node.offset();
+	}
+
 	class facts {
 	private:
 		std::vector<std::pair<std::shared_ptr<const formal::parsed>, std::shared_ptr<const formal::lex_node> > >  _axioms;
@@ -1295,9 +1308,9 @@ private:
 
 			// use grouping parentheses on the hypotheses, and conclusion, if needed
 			unsigned int code = 0;
-			if ((hypothesis_1->code() & symbol_catalog::anchor_is_symbol) && 1 >= hypothesis_1->offset()) code &= 1U;
-			if ((hypothesis_2->code() & symbol_catalog::anchor_is_symbol) && 1 >= hypothesis_2->offset()) code &= 2U;
-			if ((conclusion->code() & symbol_catalog::anchor_is_symbol) && 1 >= conclusion->offset()) code &= 4U;
+			if (needs_grouping_parens(*hypothesis_1)) code |= 1U;
+			if (needs_grouping_parens(*hypothesis_2)) code |= 2U;
+			if (needs_grouping_parens(*conclusion)) code |= 4U;
 			if (0 < code) {
 				std::string l_paren("(");
 				std::string r_paren(")");
@@ -1318,22 +1331,14 @@ private:
 
 			if (!(src.code() & symbol_catalog::anchor_is_symbol)) return false;
 			if (1 != src.offset()) return false;	// need &#9500; ; only higher priority symbol is :=
-			if (1 != src.postfix().size()) return false;
-			if (1 != src.prefix().size()) return false;
-			if (!src.infix().empty()) return false;
-			if (!src.fragments().empty()) return false;
-			if (0 != src.post_anchor_code()) return false;	// accept no substitutes -- we're implementing a Wittgenstein given, not Malinkowski entailment options
+			if (!is_strict_binary_node(src)) return false;
 
 			if (detect_comma(*src.postfix().front())) return false;
 
 			decltype(auto) lhs = *src.prefix().front();
 
 			if (!detect_comma(lhs)) return false;
-			if (1 != lhs.postfix().size()) return false;
-			if (1 != lhs.prefix().size()) return false;
-			if (!lhs.infix().empty()) return false;
-			if (!lhs.fragments().empty()) return false;
-			if (0 != lhs.post_anchor_code()) return false;	// accept no substitutes -- we're implementing a Wittgenstein given, not Malinkowski entailment options
+			if (!is_strict_binary_node(lhs)) return false;
 
 			if (detect_comma(*lhs.prefix().front())) return false;
 			if (detect_comma(*lhs.postfix().front())) return false;
