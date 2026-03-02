@@ -16,6 +16,7 @@
 #include "HTMLtag.hpp"
 #include "Zaimoni.STL/LexParse/string_view.hpp"
 #include "Zaimoni.STL/stack.hpp"
+#include "Zaimoni.STL/observer.hpp"
 #include "test_driver.h"
 #include "Zaimoni.STL/Pure.C/comptest.h"
 
@@ -1207,9 +1208,17 @@ private:
 		return (node.code() & symbol_catalog::anchor_is_symbol) && 1 >= node.offset();
 	}
 
-	class facts {
+	using axiom_type = std::variant<std::shared_ptr<const formal::parsed>, std::shared_ptr<const formal::lex_node>>;
+
+	struct fact_database {
+		virtual ~fact_database() = default;
+		virtual std::pair<axiom_type, perl::scalar> known(size_t n) const = 0;
+	};
+
+	class facts : public fact_database {
 	private:
-		std::vector<std::pair<std::shared_ptr<const formal::parsed>, std::shared_ptr<const formal::lex_node> > >  _axioms;
+		std::vector<axiom_type> _axioms;
+		std::vector<std::shared_ptr<zaimoni::observer<axiom_type>>> _watchers;
 
 		static const constexpr std::string_view str_axiom = std::string_view("axiom");
 		static const constexpr std::string_view str_schema = std::string_view("axiom schema");
@@ -1229,10 +1238,26 @@ private:
 
 		auto size() const noexcept { return _axioms.size(); }
 
-		std::pair<std::pair<std::shared_ptr<const formal::parsed>, std::shared_ptr<const formal::lex_node> >, perl::scalar> known(size_t n) const {
+		std::pair<axiom_type, perl::scalar> known(size_t n) const override {
 			if (size() <= n) throw std::logic_error("gentzen::facts::known: size() <= n");
 			// \todo once we have an axiom schema loading, report the rationale for axiom schemas as axiom schema
 			return std::pair(_axioms[n], str_axiom);
+		}
+
+		void watched_by(const std::shared_ptr<zaimoni::observer<axiom_type>>& src) {
+			ptrdiff_t ub = _watchers.size();
+			while (0 <= --ub) {
+				if (_watchers[ub]) {
+					if (_watchers[ub] == src) return;	// already installed
+				} else if (1 == _watchers.size()) {
+					decltype(_watchers)().swap(_watchers);
+					return;
+				} else {
+					_watchers[ub].swap(_watchers.back());
+					_watchers.pop_back();
+				}
+			}
+			_watchers.push_back(src);
 		}
 
 		void add_axiom(std::shared_ptr<const formal::parsed> src) {
@@ -1247,7 +1272,27 @@ private:
 				return;
 			}
 			if constexpr (trace_parse) std::cerr << "axiom: " << src->to_s() << "\n";
-			_axioms.push_back(std::pair(src, nullptr));
+			_axioms.push_back(axiom_type(src));
+
+			// notify observers
+			ptrdiff_t ub = _watchers.size();
+			while (0 <= --ub) {
+				if (_watchers[ub]) {
+					if (!_watchers[ub]->onNext(_axioms.back())) {
+						if (1 == _watchers.size()) {
+							decltype(_watchers)().swap(_watchers);
+						} else {
+							_watchers[ub].swap(_watchers.back());
+							_watchers.pop_back();
+						}
+					}
+				} else if (1 == _watchers.size()) {
+					decltype(_watchers)().swap(_watchers);
+				} else {
+					_watchers[ub].swap(_watchers.back());
+					_watchers.pop_back();
+				}
+			}
 		}
 
 		// \todo void add_axiom(std::shared_ptr<const formal::lex_node> src) {}
