@@ -1245,6 +1245,14 @@ private:
 		std::shared_ptr<formal::lex_node> hypothesis_1;
 		std::shared_ptr<formal::lex_node> hypothesis_2;
 		std::shared_ptr<formal::lex_node> conclusion;
+
+		syntactical_entailment_2ary(formal::lex_node*& hyp_1, formal::lex_node*& hyp_2, formal::lex_node*& con)
+			: hypothesis_1(hyp_1), hypothesis_2(hyp_2), conclusion(con)
+		{
+			hyp_1 = nullptr;
+			hyp_2 = nullptr;
+			con = nullptr;
+		}
 	public:
 		syntactical_entailment_2ary() = default;
 		syntactical_entailment_2ary(const syntactical_entailment_2ary&) = default;
@@ -1305,7 +1313,7 @@ private:
 		std::optional<perl::scalar> is_not_legal_axiom(bool unconditional) const override { return std::nullopt; }
 		std::optional<perl::scalar> before_add_axiom_handler() const override { return std::nullopt; }
 
-		bool can_construct(const formal::lex_node& src) {
+		static bool can_construct(const formal::lex_node& src) {
 			// we are checking for A, B &#9500; C
 
 			if (!(src.code() & symbol_catalog::anchor_is_symbol)) return false;
@@ -1331,6 +1339,13 @@ private:
 			if (detect_comma(*lhs.postfix().front())) return false;
 
 			return true;
+		}
+
+		static syntactical_entailment_2ary* construct(formal::lex_node& src) {
+			if (!can_construct(src)) return nullptr;
+
+			decltype(auto) lhs = *src.prefix().front();
+			return new syntactical_entailment_2ary(lhs.prefix().front(), lhs.postfix().front(), src.postfix().front());
 		}
 	};
 } // end namespace gentzen
