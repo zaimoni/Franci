@@ -1327,7 +1327,18 @@ private:
 			ret[3] = std::string_view("&#9500;");
 			ret[4] = conclusion->to_s();
 
-			// \todo use grouping parentheses on the hypotheses, and conclusion, if needed
+			// use grouping parentheses on the hypotheses, and conclusion, if needed
+			unsigned int code = 0;
+			if ((hypothesis_1->code() & symbol_catalog::anchor_is_symbol) && 1 >= hypothesis_1->offset()) code &= 1U;
+			if ((hypothesis_2->code() & symbol_catalog::anchor_is_symbol) && 1 >= hypothesis_2->offset()) code &= 2U;
+			if ((conclusion->code() & symbol_catalog::anchor_is_symbol) && 1 >= conclusion->offset()) code &= 4U;
+			if (0 < code) {
+				std::string l_paren("(");
+				std::string r_paren(")");
+				if (1 & code) ret[0] = l_paren + std::string(ret[0].view()) + r_paren;
+				if (2 & code) ret[2] = l_paren + std::string(ret[2].view()) + r_paren;
+				if (4 & code) ret[4] = l_paren + std::string(ret[4].view()) + r_paren;
+			}
 
 			return join(ret, std::string_view(" "));
 		}
@@ -1335,6 +1346,34 @@ private:
 		// unclear if following belong in a sub-interface
 		std::optional<perl::scalar> is_not_legal_axiom(bool unconditional) const override { return std::nullopt; }
 		std::optional<perl::scalar> before_add_axiom_handler() const override { return std::nullopt; }
+
+		bool can_construct(const formal::lex_node& src) {
+			// we are checking for A, B &#9500; C
+
+			if (!(src.code() & symbol_catalog::anchor_is_symbol)) return false;
+			if (1 != src.offset()) return false;	// need &#9500; ; only higher priority symbol is :=
+			if (1 != src.postfix().size()) return false;
+			if (1 != src.prefix().size()) return false;
+			if (!src.infix().empty()) return false;
+			if (!src.fragments().empty()) return false;
+			if (0 != src.post_anchor_code()) return false;	// accept no substitutes -- we're implementing a Wittgenstein given, not Malinkowski entailment options
+
+			if (detect_comma(*src.postfix().front())) return false;
+
+			decltype(auto) lhs = *src.prefix().front();
+
+			if (!detect_comma(lhs)) return false;
+			if (1 != lhs.postfix().size()) return false;
+			if (1 != lhs.prefix().size()) return false;
+			if (!lhs.infix().empty()) return false;
+			if (!lhs.fragments().empty()) return false;
+			if (0 != lhs.post_anchor_code()) return false;	// accept no substitutes -- we're implementing a Wittgenstein given, not Malinkowski entailment options
+
+			if (detect_comma(*lhs.prefix().front())) return false;
+			if (detect_comma(*lhs.postfix().front())) return false;
+
+			return true;
+		}
 	};
 } // end namespace gentzen
 

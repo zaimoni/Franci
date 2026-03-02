@@ -350,6 +350,13 @@ namespace formal {
 		return join(stage, " ");
 	}
 
+	static std::string wrap_to_chars(unsigned long long src, int base) {
+		char buf[sizeof(unsigned long long) * CHAR_BIT + 1];
+		memset(buf, 0, sizeof(buf));
+		auto stage = std::to_chars(buf, buf + sizeof(buf) - 1, src, base);
+		return buf;
+	}
+
 	void lex_node::diagnose(std::vector<std::string>& dest)
 	{
 		static const std::string a_msg("anchor: ");
@@ -359,7 +366,7 @@ namespace formal {
 		static const std::string post_msg("postfix: ");
 		static const std::string frag_msg("fragments: ");
 
-		dest.push_back(to_s());
+		dest.push_back(to_s()+"; code/offset "+ wrap_to_chars(_code, 16)+"/"+std::to_string(_offset));
 
 		diagnose(_prefix, dest, pre_msg);
 		diagnose(_anchor, dest, a_msg);
