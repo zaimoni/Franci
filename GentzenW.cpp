@@ -1400,27 +1400,27 @@ private:
 		}
 	};
 
-	class syntactical_entailment_introduction final : public fact_database {
+	class syntactical_entailment_introduction_start final : public fact_database {
 	private:
 		std::shared_ptr<fact_database> prior;
 		std::vector<statement_t> hypotheses;
 
 		static const constexpr std::string_view str_hypothesis = std::string_view("hypothesis");
 
-		syntactical_entailment_introduction(std::shared_ptr<fact_database> assume, std::vector<statement_t>&& extra)
+		syntactical_entailment_introduction_start(std::shared_ptr<fact_database> assume, std::vector<statement_t>&& extra)
 			: prior(assume), hypotheses(std::move(extra)) {}
 	public:
-		syntactical_entailment_introduction() = default;
-		syntactical_entailment_introduction(const syntactical_entailment_introduction&) = default;
-		syntactical_entailment_introduction(syntactical_entailment_introduction&&) = default;
-		syntactical_entailment_introduction& operator=(const syntactical_entailment_introduction&) = default;
-		syntactical_entailment_introduction& operator=(syntactical_entailment_introduction&&) = default;
-		~syntactical_entailment_introduction() = default;
+		syntactical_entailment_introduction_start() = default;
+		syntactical_entailment_introduction_start(const syntactical_entailment_introduction_start&) = default;
+		syntactical_entailment_introduction_start(syntactical_entailment_introduction_start&&) = default;
+		syntactical_entailment_introduction_start& operator=(const syntactical_entailment_introduction_start&) = default;
+		syntactical_entailment_introduction_start& operator=(syntactical_entailment_introduction_start&&) = default;
+		~syntactical_entailment_introduction_start() = default;
 
 		// fact_database interface
 		size_t size() const noexcept override { return prior->size()+hypotheses.size(); }
 		std::pair<statement_t, perl::scalar> known(size_t n) const override { 
-			if (size() <= n) throw std::logic_error("gentzen::syntactical_entailment_introduction::known: size() <= n");
+			if (size() <= n) throw std::logic_error("gentzen::syntactical_entailment_introduction_start::known: size() <= n");
 			auto prior_s = prior->size();
 			if (prior_s > n) return prior->known(n);
 			return std::pair(hypotheses[n-prior_s], str_hypothesis);
@@ -1431,7 +1431,7 @@ private:
 			return true;
 		}
 
-		static syntactical_entailment_introduction* construct(std::shared_ptr<const formal::lex_node> src, std::shared_ptr<fact_database> assume = nullptr) {
+		static syntactical_entailment_introduction_start* construct(std::shared_ptr<const formal::lex_node> src, std::shared_ptr<fact_database> assume = nullptr) {
 			if (!src) return nullptr;
 			if (!can_construct(*src)) return nullptr;
 			if (!assume) assume = axioms::get();
@@ -1439,17 +1439,65 @@ private:
 			std::vector<statement_t> stage;
 			stage.push_back(src);
 
-			return new syntactical_entailment_introduction(assume, std::move(stage));
+			return new syntactical_entailment_introduction_start(assume, std::move(stage));
 		}
 
-		static syntactical_entailment_introduction* construct(std::shared_ptr<const formal::parsed> src, std::shared_ptr<fact_database> assume = nullptr) {
+		static syntactical_entailment_introduction_start* construct(std::shared_ptr<const formal::parsed> src, std::shared_ptr<fact_database> assume = nullptr) {
 			if (!src) return nullptr;
 			if (!assume) assume = axioms::get();
 
 			std::vector<statement_t> stage;
 			stage.push_back(src);
 
-			return new syntactical_entailment_introduction(assume, std::move(stage));
+			return new syntactical_entailment_introduction_start(assume, std::move(stage));
+		}
+
+		static syntactical_entailment_introduction_start* construct(std::shared_ptr<const formal::lex_node> src, std::shared_ptr<const formal::lex_node> src2, std::shared_ptr<fact_database> assume = nullptr) {
+			if (!src) return nullptr;
+			if (!can_construct(*src)) return nullptr;
+			if (!can_construct(*src2)) return nullptr;
+			if (!assume) assume = axioms::get();
+
+			std::vector<statement_t> stage;
+			stage.push_back(src);
+			stage.push_back(src2);
+
+			return new syntactical_entailment_introduction_start(assume, std::move(stage));
+		}
+
+		static syntactical_entailment_introduction_start* construct(std::shared_ptr<const formal::parsed> src, std::shared_ptr<const formal::lex_node> src2, std::shared_ptr<fact_database> assume = nullptr) {
+			if (!src) return nullptr;
+			if (!can_construct(*src2)) return nullptr;
+			if (!assume) assume = axioms::get();
+
+			std::vector<statement_t> stage;
+			stage.push_back(src);
+			stage.push_back(src2);
+
+			return new syntactical_entailment_introduction_start(assume, std::move(stage));
+		}
+
+		static syntactical_entailment_introduction_start* construct(std::shared_ptr<const formal::lex_node> src, std::shared_ptr<const formal::parsed> src2, std::shared_ptr<fact_database> assume = nullptr) {
+			if (!src) return nullptr;
+			if (!can_construct(*src)) return nullptr;
+			if (!assume) assume = axioms::get();
+
+			std::vector<statement_t> stage;
+			stage.push_back(src);
+			stage.push_back(src2);
+
+			return new syntactical_entailment_introduction_start(assume, std::move(stage));
+		}
+
+		static syntactical_entailment_introduction_start* construct(std::shared_ptr<const formal::parsed> src, std::shared_ptr<const formal::parsed> src2, std::shared_ptr<fact_database> assume = nullptr) {
+			if (!src) return nullptr;
+			if (!assume) assume = axioms::get();
+
+			std::vector<statement_t> stage;
+			stage.push_back(src);
+			stage.push_back(src2);
+
+			return new syntactical_entailment_introduction_start(assume, std::move(stage));
 		}
 	};
 } // end namespace gentzen
