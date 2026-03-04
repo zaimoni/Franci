@@ -1441,22 +1441,46 @@ private:
 		}
 		std::shared_ptr<fact_database> parent() const { return prior; }
 
-#if 0
-		formal::lex_node* hypothesis_node() {
+		formal::lex_node* hypothesis_node() const {
 			std::vector<std::unique_ptr<formal::lex_node> > stage;
 			for (decltype(auto) x : hypotheses) stage.push_back(std::unique_ptr<formal::lex_node>(node_from(x)));
 
-			auto stage_s = stage.size();
+			const auto stage_s = stage.size();
 			if (1 == stage_s) return stage.front().release();
 
 			std::unique_ptr<formal::word> w(new formal::word(comma, formal::src_location(), formal::Inert_Token));
 			std::unique_ptr<formal::lex_node> ret(new formal::lex_node(w, formal::Inert_Token));
 
-			// ...
+			if (2 == stage_s) {
+				ret->prefix().push_back(nullptr);
+				ret->postfix().push_back(nullptr);
+				ret->prefix().front() = stage.front().release();
+				ret->postfix().front() = stage.back().release();
+				return ret.release();
+			}
 
-			return nullptr;
+			// this requires generalized rearrangement of logical and
+			ptrdiff_t i = -1;
+			ret->fragments().reserve(stage_s);
+			for (decltype(auto) x : stage) {
+				decltype(auto) dest = ret->fragments()[++i];
+				dest.push_back(nullptr);
+				dest.front() = x.release();
+			}
+
+			return ret.release();
 		}
-#endif
+
+		std::vector<std::pair<size_t, size_t> > hypothesis_ids() const {
+			// \todo want synthetic ids as right
+			const size_t n = prior->size();
+			ptrdiff_t i = hypotheses.size();
+
+			std::vector<std::pair<size_t, size_t> > ret(hypotheses.size());
+			while (0 <= --i) ret[i] = std::pair(n + i, 0);
+
+			return ret;
+		}
 
 		static bool can_construct(const formal::lex_node& src) {
 			if (detect_comma(src)) return false;
@@ -1536,11 +1560,14 @@ private:
 	class syntactical_entailment_introduction final : public fact_database {
 	private:
 		std::shared_ptr<fact_database> prior;
-		std::vector<size_t> hypotheses;
-		statement_t conclusion;
+		const syntactical_entailment_introduction_start* const hypotheses;
 		statement_t inferred;
 
 		static const constexpr std::string_view str_introduction = std::string_view("&#9500;-introduction,");
+
+		syntactical_entailment_introduction(std::unique_ptr<formal::lex_node>& infer, const syntactical_entailment_introduction_start* hyp, const std::shared_ptr<fact_database>& assume)
+			: prior(assume), hypotheses(hyp), inferred(std::shared_ptr<const formal::lex_node>(infer.release()))
+			{}
 	public:
 		syntactical_entailment_introduction() = default;
 		syntactical_entailment_introduction(const syntactical_entailment_introduction&) = default;
@@ -1560,13 +1587,15 @@ private:
 			stage2[0] = std::string_view("label(");
 			stage2[2] = std::string_view(")");
 
-			std::vector<perl::scalar> stage(hypotheses.size() + 1);
+			auto ids = hypotheses->hypothesis_ids();
+
+			std::vector<perl::scalar> stage(ids.size() + 1);
 
 
 			stage[0] = str_introduction;
-			ptrdiff_t i = hypotheses.size();
+			ptrdiff_t i = ids.size();
 			while (0 <= --i) {
-				stage2[1] = std::to_string(hypotheses[i]);
+				stage2[1] = std::to_string(ids[i].first);	// \todo change to .second when bringing synthetic ids up
 				stage[i] = join(stage2, "");
 			}
 
@@ -1574,10 +1603,10 @@ private:
 		}
 		std::shared_ptr<fact_database> parent() const { return prior; }
 
-#if 0
+#if 2
 		static syntactical_entailment_introduction* construct(std::shared_ptr<fact_database> src) {
 			if (!src) return nullptr;
-			if (dynamic_cast<syntactical_entailment_introduction_start*>(src.get())) return false;
+			if (dynamic_cast<syntactical_entailment_introduction_start*>(src.get())) return nullptr;
 
 			auto conclusion = src->known(src->size() - 1);
 
@@ -1586,7 +1615,23 @@ private:
 				hypotheses = dynamic_cast<syntactical_entailment_introduction_start*>(src.get());
 				if (hypotheses) break;
 			}
+			if (!hypotheses) return nullptr;
 
+			// \todo construct a syntactical_entailment_2ary object if we assumed 2 hypotheses
+
+			// general case
+			std::unique_ptr<formal::lex_node> lhs(hypotheses->hypothesis_node());
+			std::unique_ptr<formal::lex_node> rhs(node_from(conclusion.first));
+
+			// base case
+			std::unique_ptr<formal::word> w(new formal::word(std::string_view("&#9500;"), formal::src_location(), formal::Tokenized));
+			std::unique_ptr<formal::lex_node> ret(new formal::lex_node(w, formal::Tokenized));
+			ret->prefix().push_back(nullptr);
+			ret->postfix().push_back(nullptr);
+			ret->prefix().front() = lhs.release();
+			ret->postfix().front() = rhs.release();
+
+//			return new syntactical_entailment_introduction(ret, hypotheses, src); // \todo enable after full prototyping
 			return nullptr;
 		}
 #endif
