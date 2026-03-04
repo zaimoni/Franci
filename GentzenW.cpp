@@ -1500,6 +1500,58 @@ private:
 			return new syntactical_entailment_introduction_start(assume, std::move(stage));
 		}
 	};
+
+	class syntactical_entailment_introduction final : public fact_database {
+	private:
+		std::shared_ptr<fact_database> prior;
+		std::vector<size_t> hypotheses;
+		statement_t conclusion;
+		statement_t inferred;
+
+		static const constexpr std::string_view str_introduction = std::string_view("&#9500;-introduction,");
+	public:
+		syntactical_entailment_introduction() = default;
+		syntactical_entailment_introduction(const syntactical_entailment_introduction&) = default;
+		syntactical_entailment_introduction(syntactical_entailment_introduction&&) = default;
+		syntactical_entailment_introduction& operator=(const syntactical_entailment_introduction&) = default;
+		syntactical_entailment_introduction& operator=(syntactical_entailment_introduction&&) = default;
+		~syntactical_entailment_introduction() = default;
+
+		// fact_database interface
+		size_t size() const noexcept override { return prior->size() + 1; }
+		std::pair<statement_t, perl::scalar> known(size_t n) const override {
+			if (size() <= n) throw std::logic_error("gentzen::syntactical_entailment_introduction_start::known: size() <= n");
+			auto prior_s = prior->size();
+			if (prior_s > n) return prior->known(n);
+
+			std::vector<perl::scalar> stage2(3);
+			stage2[0] = std::string_view("label(");
+			stage2[2] = std::string_view(")");
+
+			std::vector<perl::scalar> stage(hypotheses.size() + 1);
+
+
+			stage[0] = str_introduction;
+			ptrdiff_t i = hypotheses.size();
+			while (0 <= --i) {
+				stage2[1] = std::to_string(hypotheses[i]);
+				stage[i] = join(stage2, "");
+			}
+
+			return std::pair(inferred, join(stage," "));
+		}
+
+#if 0
+		static syntactical_entailment_introduction* construct(std::shared_ptr<fact_database> src) {
+			if (!src) return nullptr;
+			if (dynamic_cast<syntactical_entailment_introduction_start*>(src.get())) return false;
+
+			auto last = src->known(src->size() - 1);
+
+			return nullptr;
+		}
+#endif
+	};
 } // end namespace gentzen
 
 // end prototype class
