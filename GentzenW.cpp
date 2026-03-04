@@ -1208,6 +1208,17 @@ private:
 		return (node.code() & symbol_catalog::anchor_is_symbol) && 1 >= node.offset();
 	}
 
+	// builds: lhs op rhs as a lex_node tree
+	formal::lex_node* make_binary_node(std::string_view op, unsigned long long code, std::unique_ptr<formal::lex_node>&& lhs, std::unique_ptr<formal::lex_node>&& rhs) {
+		formal::word* w = new formal::word(op, formal::src_location(), code);
+		std::unique_ptr<formal::lex_node> ret(new formal::lex_node(w, code));
+		ret->prefix().push_back(nullptr);
+		ret->postfix().push_back(nullptr);
+		ret->prefix().front() = lhs.release();
+		ret->postfix().front() = rhs.release();
+		return ret.release();
+	}
+
 	using statement_t = std::variant<std::shared_ptr<const formal::parsed>, std::shared_ptr<const formal::lex_node>>;
 
 	formal::lex_node* node_from(const statement_t& src) {
@@ -1448,18 +1459,12 @@ private:
 			const auto stage_s = stage.size();
 			if (1 == stage_s) return stage.front().release();
 
+			if (2 == stage_s) return make_binary_node(comma, formal::Inert_Token, std::move(stage.front()), std::move(stage.back()));
+
+			// this requires generalized rearrangement of logical and
 			formal::word* w = new formal::word(comma, formal::src_location(), formal::Inert_Token);
 			std::unique_ptr<formal::lex_node> ret(new formal::lex_node(w, formal::Inert_Token));
 
-			if (2 == stage_s) {
-				ret->prefix().push_back(nullptr);
-				ret->postfix().push_back(nullptr);
-				ret->prefix().front() = stage.front().release();
-				ret->postfix().front() = stage.back().release();
-				return ret.release();
-			}
-
-			// this requires generalized rearrangement of logical and
 			ptrdiff_t i = -1;
 			ret->fragments().reserve(stage_s);
 			for (decltype(auto) x : stage) {
@@ -1624,12 +1629,7 @@ private:
 			std::unique_ptr<formal::lex_node> rhs(node_from(conclusion.first));
 
 			// base case
-			formal::word* w = new formal::word(std::string_view("&#9500;"), formal::src_location(), formal::Tokenized);
-			std::unique_ptr<formal::lex_node> ret(new formal::lex_node(w, formal::Tokenized));
-			ret->prefix().push_back(nullptr);
-			ret->postfix().push_back(nullptr);
-			ret->prefix().front() = lhs.release();
-			ret->postfix().front() = rhs.release();
+			std::unique_ptr<formal::lex_node> ret(make_binary_node(std::string_view("&#9500;"), formal::Tokenized, std::move(lhs), std::move(rhs)));
 
 //			return new syntactical_entailment_introduction(ret, hypotheses, src); // \todo enable after full prototyping
 			return nullptr;
