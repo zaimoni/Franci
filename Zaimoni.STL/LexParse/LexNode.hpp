@@ -52,9 +52,6 @@ namespace formal {
 		}
 	public:
 		// thin-wrapping constructors
-		lex_node(std::unique_ptr<word>& src, unsigned long long code = 0) noexcept : _anchor(zaimoni::COW<word>(src.release())), _code(code), _offset(0) {
-			if (src->code() & Comment) _code |= Comment;
-		}
 		lex_node(word*& src, unsigned long long code = 0) noexcept : _anchor(zaimoni::COW<word>(src)), _code(code), _offset(0) {
 			if (src->code() & Comment) _code |= Comment;
 			src = nullptr;

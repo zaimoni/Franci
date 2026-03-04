@@ -112,7 +112,7 @@ std::unique_ptr<HTMLtag> HTMLtag::parse(kuroda::parser<formal::lex_node>::sequen
 		remainder.remove_prefix(remainder.size() - working.size());
 		ltrim(remainder);
 		if (!remainder.empty()) {
-			std::unique_ptr<formal::word> raw_word(new formal::word(std::shared_ptr<const std::string>(new std::string(remainder)), r_origin + (r_size - remainder.size())));
+			formal::word* raw_word = new formal::word(std::shared_ptr<const std::string>(new std::string(remainder)), r_origin + (r_size - remainder.size()));
 			std::unique_ptr<formal::lex_node> node(new formal::lex_node(raw_word));
 			if (viewpoint < scan) {
 				delete src[scan];

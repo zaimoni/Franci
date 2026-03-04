@@ -1448,7 +1448,7 @@ private:
 			const auto stage_s = stage.size();
 			if (1 == stage_s) return stage.front().release();
 
-			std::unique_ptr<formal::word> w(new formal::word(comma, formal::src_location(), formal::Inert_Token));
+			formal::word* w = new formal::word(comma, formal::src_location(), formal::Inert_Token);
 			std::unique_ptr<formal::lex_node> ret(new formal::lex_node(w, formal::Inert_Token));
 
 			if (2 == stage_s) {
@@ -1624,7 +1624,7 @@ private:
 			std::unique_ptr<formal::lex_node> rhs(node_from(conclusion.first));
 
 			// base case
-			std::unique_ptr<formal::word> w(new formal::word(std::string_view("&#9500;"), formal::src_location(), formal::Tokenized));
+			formal::word* w = new formal::word(std::string_view("&#9500;"), formal::src_location(), formal::Tokenized);
 			std::unique_ptr<formal::lex_node> ret(new formal::lex_node(w, formal::Tokenized));
 			ret->prefix().push_back(nullptr);
 			ret->postfix().push_back(nullptr);
@@ -1913,7 +1913,7 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 			remainder.remove_prefix(scan.first.size());
 			ltrim(remainder);
 			if (!remainder.empty()) {
-				std::unique_ptr<formal::word> raw_word(new formal::word(std::shared_ptr<const std::string>(new std::string(remainder)), w->origin() + (text.size() - remainder.size())));
+				formal::word* raw_word = new formal::word(std::shared_ptr<const std::string>(new std::string(remainder)), w->origin() + (text.size() - remainder.size()));
 				std::unique_ptr<formal::lex_node> node(new formal::lex_node(raw_word));
 				src.insertNSlotsAt(1, viewpoint + 1);
 				src[viewpoint + 1] = node.release();
@@ -1930,7 +1930,7 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 		remainder.remove_prefix(html_entity->size());
 		ltrim(remainder);
 		if (!remainder.empty()) {
-			std::unique_ptr<formal::word> raw_word(new formal::word(std::shared_ptr<const std::string>(new std::string(remainder)), w->origin() + (text.size() - remainder.size())));
+			formal::word* raw_word = new formal::word(std::shared_ptr<const std::string>(new std::string(remainder)), w->origin() + (text.size() - remainder.size()));
 			std::unique_ptr<formal::lex_node> node(new formal::lex_node(raw_word));
 			src.insertNSlotsAt(1, viewpoint + 1);
 			src[viewpoint + 1] = node.release();
@@ -1956,7 +1956,7 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 			remainder.remove_prefix(test->first.size());
 			ltrim(remainder);
 			if (!remainder.empty()) {
-				std::unique_ptr<formal::word> raw_word(new formal::word(std::shared_ptr<const std::string>(new std::string(remainder)), w->origin() + (text.size() - remainder.size())));
+				formal::word* raw_word = new formal::word(std::shared_ptr<const std::string>(new std::string(remainder)), w->origin() + (text.size() - remainder.size()));
 				std::unique_ptr<formal::lex_node> node(new formal::lex_node(raw_word));
 				src.insertNSlotsAt(1, viewpoint + 1);
 				src[viewpoint + 1] = node.release();
@@ -1977,7 +1977,7 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 			remainder.remove_prefix(test->first.size());
 			ltrim(remainder);
 			if (!remainder.empty()) {
-				std::unique_ptr<formal::word> raw_word(new formal::word(std::shared_ptr<const std::string>(new std::string(remainder)), w->origin() + (text.size() - remainder.size())));
+				formal::word* raw_word = new formal::word(std::shared_ptr<const std::string>(new std::string(remainder)), w->origin() + (text.size() - remainder.size()));
 				std::unique_ptr<formal::lex_node> node(new formal::lex_node(raw_word));
 				src.insertNSlotsAt(1, viewpoint + 1);
 				src[viewpoint + 1] = node.release();
@@ -2522,14 +2522,14 @@ public:
 	// these two are called during axiom loading, when the RAM pressure should be very low.  If these new operator 
 	// calls were to throw, there would be no viable recovery strategy.
 	static std::shared_ptr<const formal::parsed> declare_placeholder(std::string src, bool symbol = false) {
-		std::unique_ptr<formal::word> token(new formal::word(std::move(src), formal::src_location(), formal::Tokenized));
+		formal::word* token = new formal::word(std::move(src), formal::src_location(), formal::Tokenized);
 		formal::lex_node* subject = new formal::lex_node(token, formal::Tokenized);
 
 		return std::shared_ptr<const formal::parsed>(new undefined_SVO::phrase_postfix(subject, symbol ? undefined_SVO::phrase_postfix::hard_code::symbol_placeholder_syntax : undefined_SVO::phrase_postfix::hard_code::placeholder_syntax));
 	}
 
 	static std::shared_ptr<const formal::parsed> declare_balanced_pair(const std::string_view& lhs, const std::string_view& rhs) {
-		std::unique_ptr<formal::word> token_lhs(new formal::word(lhs, formal::src_location(), formal::Inert_Token));
+		formal::word* token_lhs = new formal::word(lhs, formal::src_location(), formal::Inert_Token);
 		formal::word* token_rhs = new formal::word(rhs, formal::src_location(), formal::Inert_Token);
 		formal::lex_node* subject = new formal::lex_node(token_lhs, formal::Tokenized);
 		subject->set_null_post_anchor(token_rhs);
