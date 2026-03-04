@@ -1496,78 +1496,40 @@ private:
 			return ret;
 		}
 
-		static bool can_construct(const formal::lex_node& src) {
-			if (detect_comma(src)) return false;
-			return true;
+		static bool can_construct(const statement_t& src) {
+			struct visitor {
+				bool operator()(const std::shared_ptr<const formal::parsed>& x) { return (bool)x; }
+				bool operator()(const std::shared_ptr<const formal::lex_node>& x) { return x && !detect_comma(*x); }
+			};
+			static visitor v;
+			return std::visit(v, src);
 		}
 
-		static syntactical_entailment_introduction_start* construct(std::shared_ptr<const formal::lex_node> src, std::shared_ptr<fact_database> assume = nullptr) {
-			if (!src) return nullptr;
-			if (!can_construct(*src)) return nullptr;
+	private:
+		static syntactical_entailment_introduction_start* finish_construct(std::vector<statement_t>&& stage, std::shared_ptr<fact_database> assume) {
 			if (!assume) assume = axioms::get();
-
-			std::vector<statement_t> stage;
-			stage.push_back(src);
-
 			return new syntactical_entailment_introduction_start(assume, std::move(stage));
 		}
 
-		static syntactical_entailment_introduction_start* construct(std::shared_ptr<const formal::parsed> src, std::shared_ptr<fact_database> assume = nullptr) {
-			if (!src) return nullptr;
-			if (!assume) assume = axioms::get();
+	public:
+		static syntactical_entailment_introduction_start* construct(statement_t src, std::shared_ptr<fact_database> assume = nullptr) {
+			if (!can_construct(src)) return nullptr;
 
 			std::vector<statement_t> stage;
-			stage.push_back(src);
+			stage.push_back(std::move(src));
 
-			return new syntactical_entailment_introduction_start(assume, std::move(stage));
+			return finish_construct(std::move(stage), assume);
 		}
 
-		static syntactical_entailment_introduction_start* construct(std::shared_ptr<const formal::lex_node> src, std::shared_ptr<const formal::lex_node> src2, std::shared_ptr<fact_database> assume = nullptr) {
-			if (!src) return nullptr;
-			if (!can_construct(*src)) return nullptr;
-			if (!can_construct(*src2)) return nullptr;
-			if (!assume) assume = axioms::get();
+		static syntactical_entailment_introduction_start* construct(statement_t src, statement_t src2, std::shared_ptr<fact_database> assume = nullptr) {
+			if (!can_construct(src)) return nullptr;
+			if (!can_construct(src2)) return nullptr;
 
 			std::vector<statement_t> stage;
-			stage.push_back(src);
-			stage.push_back(src2);
+			stage.push_back(std::move(src));
+			stage.push_back(std::move(src2));
 
-			return new syntactical_entailment_introduction_start(assume, std::move(stage));
-		}
-
-		static syntactical_entailment_introduction_start* construct(std::shared_ptr<const formal::parsed> src, std::shared_ptr<const formal::lex_node> src2, std::shared_ptr<fact_database> assume = nullptr) {
-			if (!src) return nullptr;
-			if (!can_construct(*src2)) return nullptr;
-			if (!assume) assume = axioms::get();
-
-			std::vector<statement_t> stage;
-			stage.push_back(src);
-			stage.push_back(src2);
-
-			return new syntactical_entailment_introduction_start(assume, std::move(stage));
-		}
-
-		static syntactical_entailment_introduction_start* construct(std::shared_ptr<const formal::lex_node> src, std::shared_ptr<const formal::parsed> src2, std::shared_ptr<fact_database> assume = nullptr) {
-			if (!src) return nullptr;
-			if (!can_construct(*src)) return nullptr;
-			if (!assume) assume = axioms::get();
-
-			std::vector<statement_t> stage;
-			stage.push_back(src);
-			stage.push_back(src2);
-
-			return new syntactical_entailment_introduction_start(assume, std::move(stage));
-		}
-
-		static syntactical_entailment_introduction_start* construct(std::shared_ptr<const formal::parsed> src, std::shared_ptr<const formal::parsed> src2, std::shared_ptr<fact_database> assume = nullptr) {
-			if (!src) return nullptr;
-			if (!assume) assume = axioms::get();
-
-			std::vector<statement_t> stage;
-			stage.push_back(src);
-			stage.push_back(src2);
-
-			return new syntactical_entailment_introduction_start(assume, std::move(stage));
+			return finish_construct(std::move(stage), assume);
 		}
 	};
 
