@@ -8,6 +8,7 @@
 #include <span>
 #include <initializer_list>
 #include <any>
+#include <concepts>
 #include <tuple>
 
 // https://github.com/fktn-k/fkYAML; MIT license
@@ -1239,6 +1240,14 @@ private:
 		virtual std::shared_ptr<fact_database> parent() const = 0;
 	};
 
+	template<class T> requires (std::derived_from<T, fact_database> && !std::same_as<T, fact_database>)
+	T* find_ancestor(std::shared_ptr<fact_database>& db) {
+		while (db = db->parent()) {
+			if (auto p = dynamic_cast<T*>(db.get())) return p;
+		}
+		return nullptr;
+	}
+
 	class axioms : public fact_database {
 	private:
 		std::vector<statement_t> _axioms;
@@ -1615,11 +1624,7 @@ private:
 
 			auto conclusion = src->known(src->size() - 1);
 
-			syntactical_entailment_introduction_start* hypotheses = nullptr;
-			while (src = src->parent()) {
-				hypotheses = dynamic_cast<syntactical_entailment_introduction_start*>(src.get());
-				if (hypotheses) break;
-			}
+			auto hypotheses = find_ancestor<syntactical_entailment_introduction_start>(src);
 			if (!hypotheses) return nullptr;
 
 			// \todo construct a syntactical_entailment_2ary object if we assumed 2 hypotheses
