@@ -1434,6 +1434,50 @@ private:
 		}
 	};
 
+	// forward direction.  Modus tollens has too many logic dependencies to handle this cleanly.
+	class syntactical_entailment_2ary_infer final : public fact_database {
+	private:
+		std::shared_ptr<fact_database> prior;
+		std::shared_ptr<syntactical_entailment_2ary> rule;
+		std::vector<std::pair<size_t, size_t> > hypothesis_ids;
+		statement_t inferred;
+	public:
+		syntactical_entailment_2ary_infer() = default;
+		syntactical_entailment_2ary_infer(const syntactical_entailment_2ary_infer&) = default;
+		syntactical_entailment_2ary_infer(syntactical_entailment_2ary_infer&&) = default;
+		syntactical_entailment_2ary_infer& operator=(const syntactical_entailment_2ary_infer&) = default;
+		syntactical_entailment_2ary_infer& operator=(syntactical_entailment_2ary_infer&&) = default;
+		~syntactical_entailment_2ary_infer() = default;
+
+		// fact_database interface
+		size_t size() const noexcept override { return prior->size() + 1; }
+		std::pair<statement_t, perl::scalar> known(size_t n) const override {
+			if (size() <= n) throw std::logic_error("gentzen::syntactical_entailment_2ary_infer::known: size() <= n");
+			auto prior_s = prior->size();
+			if (prior_s > n) return prior->known(n);
+
+			std::vector<perl::scalar> stage2(3);
+			stage2[0] = std::string_view("label(");
+			stage2[2] = std::string_view(")");
+
+			std::vector<perl::scalar> stage(hypothesis_ids.size() + 1);
+
+			stage[0] = rule->to_s();
+			ptrdiff_t i = hypothesis_ids.size();
+			while (0 <= --i) {
+				stage2[1] = std::to_string(hypothesis_ids[i].first);	// \todo change to .second when bringing synthetic ids up
+				stage[i] = join(stage2, "");
+			}
+
+			return std::pair(inferred, join(stage, " "));
+		}
+		std::shared_ptr<fact_database> parent() const { return prior; }
+
+#if 0
+		static syntactical_entailment_2ary_infer* construct(std::shared_ptr<syntactical_entailment_2ary> r, statement_t infer /* ... */)
+#endif
+	};
+
 	class syntactical_entailment_introduction_start final : public fact_database {
 	private:
 		std::shared_ptr<fact_database> prior;
