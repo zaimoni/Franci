@@ -1221,6 +1221,15 @@ private:
 	}
 
 	using statement_t = std::variant<std::shared_ptr<const formal::parsed>, std::shared_ptr<const formal::lex_node>>;
+	using weak_statement_t = std::variant<std::weak_ptr<const formal::parsed>, std::weak_ptr<const formal::lex_node>>;
+
+	static weak_statement_t weaken(const statement_t& src) {
+		struct visitor {
+			weak_statement_t operator()(const std::shared_ptr<const formal::parsed>& x) { return std::weak_ptr(x); }
+			weak_statement_t operator()(const std::shared_ptr<const formal::lex_node>& x) { return std::weak_ptr(x); }
+		};
+		return std::visit(visitor{}, src);
+	}
 
 	formal::lex_node* node_from(const statement_t& src) {
 		struct _node_from {
@@ -1233,11 +1242,34 @@ private:
 		return std::visit(ooao, src);
 	}
 
+	class notation_ids {
+	private:
+		size_t _next;
+		std::vector<std::pair<size_t, weak_statement_t> > _registry;
+
+		notation_ids() : _next(std::numeric_limits<size_t>::max()) {}
+	public:
+		notation_ids(const notation_ids&) = delete;
+		notation_ids& operator=(const notation_ids&) = delete;
+
+		static notation_ids& get() {
+			static notation_ids ooao;
+			return ooao;
+		}
+
+		size_t allocate(const statement_t& src) {
+			size_t id = _next--;
+			_registry.push_back(std::pair(id, weaken(src)));
+			return id;
+		}
+	};
+
 	struct fact_database {
 		virtual ~fact_database() = default;
 		virtual size_t size() const noexcept = 0;
 		virtual std::pair<statement_t, perl::scalar> known(size_t n) const = 0;
 		virtual std::shared_ptr<fact_database> parent() const = 0;
+		virtual size_t synthetic_id(size_t n) const = 0;
 	};
 
 	template<class T> requires (std::derived_from<T, fact_database> && !std::same_as<T, fact_database>)
@@ -1278,6 +1310,7 @@ private:
 		}
 
 		std::shared_ptr<fact_database> parent() const noexcept { return nullptr; }
+		size_t synthetic_id(size_t n) const override { return 0; }
 
 		void watched_by(const std::shared_ptr<zaimoni::observer<statement_t>>& src) {
 			ptrdiff_t ub = _watchers.size();
@@ -1441,6 +1474,16 @@ private:
 		std::shared_ptr<syntactical_entailment_2ary> rule;
 		std::vector<std::pair<size_t, size_t> > hypothesis_ids;
 		statement_t inferred;
+		size_t _synthetic_id;
+
+		syntactical_entailment_2ary_infer(
+			std::shared_ptr<fact_database> p,
+			std::shared_ptr<syntactical_entailment_2ary> r,
+			std::vector<std::pair<size_t, size_t> > hids,
+			statement_t inf)
+			: prior(std::move(p)), rule(std::move(r)),
+			  hypothesis_ids(std::move(hids)), inferred(std::move(inf)),
+			  _synthetic_id(notation_ids::get().allocate(inferred)) {}
 	public:
 		syntactical_entailment_2ary_infer() = default;
 		syntactical_entailment_2ary_infer(const syntactical_entailment_2ary_infer&) = default;
@@ -1465,16 +1508,27 @@ private:
 			stage[0] = rule->to_s();
 			ptrdiff_t i = hypothesis_ids.size();
 			while (0 <= --i) {
-				stage2[1] = std::to_string(hypothesis_ids[i].first);	// \todo change to .second when bringing synthetic ids up
-				stage[i] = join(stage2, "");
+				stage2[1] = std::to_string(hypothesis_ids[i].second);
+				stage[i + 1] = join(stage2, "");
 			}
 
 			return std::pair(inferred, join(stage, " "));
 		}
 		std::shared_ptr<fact_database> parent() const { return prior; }
+		size_t synthetic_id(size_t n) const override {
+			if (size() <= n) throw std::logic_error("gentzen::syntactical_entailment_2ary_infer::synthetic_id: size() <= n");
+			auto prior_s = prior->size();
+			if (prior_s > n) return prior->synthetic_id(n);
+			return _synthetic_id;
+		}
 
 #if 0
-		static syntactical_entailment_2ary_infer* construct(std::shared_ptr<syntactical_entailment_2ary> r, statement_t infer /* ... */)
+		static syntactical_entailment_2ary_infer* construct(std::shared_ptr<syntactical_entailment_2ary> r, statement_t infer,
+			std::vector<std::pair<size_t, size_t> > hyp_ids, std::shared_ptr<fact_database> prior)
+		{
+			if (!r || !prior) return nullptr;
+			return new syntactical_entailment_2ary_infer(std::move(prior), std::move(r), std::move(hyp_ids), std::move(infer));
+		}
 #endif
 	};
 
@@ -1482,11 +1536,16 @@ private:
 	private:
 		std::shared_ptr<fact_database> prior;
 		std::vector<statement_t> hypotheses;
+		std::vector<size_t> _synthetic_ids;
 
 		static const constexpr std::string_view str_hypothesis = std::string_view("hypothesis");
 
 		syntactical_entailment_introduction_start(std::shared_ptr<fact_database> assume, std::vector<statement_t>&& extra)
-			: prior(assume), hypotheses(std::move(extra)) {}
+			: prior(assume), hypotheses(std::move(extra)) {
+			auto& reg = notation_ids::get();
+			_synthetic_ids.reserve(hypotheses.size());
+			for (const auto& h : hypotheses) _synthetic_ids.push_back(reg.allocate(h));
+		}
 	public:
 		syntactical_entailment_introduction_start() = default;
 		syntactical_entailment_introduction_start(const syntactical_entailment_introduction_start&) = default;
@@ -1504,6 +1563,12 @@ private:
 			return std::pair(hypotheses[n-prior_s], str_hypothesis);
 		}
 		std::shared_ptr<fact_database> parent() const { return prior; }
+		size_t synthetic_id(size_t n) const override {
+			if (size() <= n) throw std::logic_error("gentzen::syntactical_entailment_introduction_start::synthetic_id: size() <= n");
+			auto prior_s = prior->size();
+			if (prior_s > n) return prior->synthetic_id(n);
+			return _synthetic_ids[n - prior_s];
+		}
 
 		formal::lex_node* hypothesis_node() const {
 			std::vector<std::unique_ptr<formal::lex_node> > stage;
@@ -1530,12 +1595,11 @@ private:
 		}
 
 		std::vector<std::pair<size_t, size_t> > hypothesis_ids() const {
-			// \todo want synthetic ids as right
 			const size_t n = prior->size();
 			ptrdiff_t i = hypotheses.size();
 
 			std::vector<std::pair<size_t, size_t> > ret(hypotheses.size());
-			while (0 <= --i) ret[i] = std::pair(n + i, 0);
+			while (0 <= --i) ret[i] = std::pair(n + i, _synthetic_ids[i]);
 
 			return ret;
 		}
@@ -1582,11 +1646,13 @@ private:
 		std::shared_ptr<fact_database> prior;
 		const syntactical_entailment_introduction_start* const hypotheses;
 		statement_t inferred;
+		size_t _synthetic_id;
 
 		static const constexpr std::string_view str_introduction = std::string_view("&#9500;-introduction,");
 
 		syntactical_entailment_introduction(std::unique_ptr<formal::lex_node>& infer, const syntactical_entailment_introduction_start* hyp, const std::shared_ptr<fact_database>& assume)
-			: prior(assume), hypotheses(hyp), inferred(std::shared_ptr<const formal::lex_node>(infer.release()))
+			: prior(assume), hypotheses(hyp), inferred(std::shared_ptr<const formal::lex_node>(infer.release())),
+			  _synthetic_id(notation_ids::get().allocate(inferred))
 			{}
 	public:
 		syntactical_entailment_introduction() = default;
@@ -1615,13 +1681,19 @@ private:
 			stage[0] = str_introduction;
 			ptrdiff_t i = ids.size();
 			while (0 <= --i) {
-				stage2[1] = std::to_string(ids[i].first);	// \todo change to .second when bringing synthetic ids up
-				stage[i] = join(stage2, "");
+				stage2[1] = std::to_string(ids[i].second);
+				stage[i + 1] = join(stage2, "");
 			}
 
 			return std::pair(inferred, join(stage," "));
 		}
 		std::shared_ptr<fact_database> parent() const { return prior; }
+		size_t synthetic_id(size_t n) const override {
+			if (size() <= n) throw std::logic_error("gentzen::syntactical_entailment_introduction::synthetic_id: size() <= n");
+			auto prior_s = prior->size();
+			if (prior_s > n) return prior->synthetic_id(n);
+			return _synthetic_id;
+		}
 
 #if 2
 		static syntactical_entailment_introduction* construct(std::shared_ptr<fact_database> src) {
@@ -1642,8 +1714,8 @@ private:
 			// base case
 			std::unique_ptr<formal::lex_node> ret(make_binary_node(std::string_view("&#9500;"), formal::Tokenized, std::move(lhs), std::move(rhs)));
 
-//			return new syntactical_entailment_introduction(ret, hypotheses, src); // \todo enable after full prototyping
-			return nullptr;
+			return new syntactical_entailment_introduction(ret, hypotheses, src);
+//			return nullptr; // \todo was disabled before synthetic ids
 		}
 #endif
 	};
