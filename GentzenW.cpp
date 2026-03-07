@@ -1242,6 +1242,15 @@ private:
 		return std::visit(ooao, src);
 	}
 
+	bool valid_placeholder_symbol_content(const statement_t& src) {
+		struct visitor {
+			bool operator()(const std::shared_ptr<const formal::parsed>& x) { return (bool)x; }
+			bool operator()(const std::shared_ptr<const formal::lex_node>& x) { return x && !detect_comma(*x); }
+		};
+		static visitor v;
+		return std::visit(v, src);
+	}
+
 	struct fact_database {
 		virtual ~fact_database() = default;
 		virtual size_t size() const noexcept = 0;
@@ -1472,17 +1481,8 @@ private:
 		std::optional<perl::scalar> is_not_legal_axiom(bool unconditional) const override { return std::nullopt; }
 		std::optional<perl::scalar> before_add_axiom_handler() const override { return std::nullopt; }
 
-		static bool can_construct(const formal::lex_node& src) {
-			// we are checking for A, B &#9500; C
-
-			if (!(src.code() & symbol_catalog::anchor_is_symbol)) return false;
-			if (1 != src.offset()) return false;	// need &#9500; ; only higher priority symbol is :=
-			if (!is_strict_binary_node(src)) return false;
-
-			if (detect_comma(*src.postfix().front())) return false;
-
-			decltype(auto) lhs = *src.prefix().front();
-
+		static bool can_construct_hypothesis(const formal::lex_node& lhs) {
+			// we are checking for A, B
 			if (!detect_comma(lhs)) return false;
 			if (!is_strict_binary_node(lhs)) return false;
 
@@ -1492,11 +1492,31 @@ private:
 			return true;
 		}
 
+		static bool can_construct(const formal::lex_node& src) {
+			// we are checking for A, B &#9500; C
+
+			if (!(src.code() & symbol_catalog::anchor_is_symbol)) return false;
+			if (1 != src.offset()) return false;	// need &#9500; ; only higher priority symbol is :=
+			if (!is_strict_binary_node(src)) return false;
+
+			if (detect_comma(*src.postfix().front())) return false;
+
+			return can_construct_hypothesis(*src.prefix().front());
+		}
+
 		static syntactical_entailment_2ary* construct(formal::lex_node& src) {
 			if (!can_construct(src)) return nullptr;
 
 			decltype(auto) lhs = *src.prefix().front();
 			return new syntactical_entailment_2ary(lhs.prefix().front(), lhs.postfix().front(), src.postfix().front());
+		}
+
+		static syntactical_entailment_2ary* construct(formal::lex_node& lhs, const statement_t& conclusion) {
+			if (!can_construct_hypothesis(lhs)) return nullptr;
+			if (!valid_placeholder_symbol_content(conclusion)) return nullptr;
+			decltype(auto) rhs = node_from(conclusion);
+
+			return new syntactical_entailment_2ary(lhs.prefix().front(), lhs.postfix().front(), rhs);
 		}
 	};
 
@@ -1618,14 +1638,7 @@ private:
 			return ret;
 		}
 
-		static bool can_construct(const statement_t& src) {
-			struct visitor {
-				bool operator()(const std::shared_ptr<const formal::parsed>& x) { return (bool)x; }
-				bool operator()(const std::shared_ptr<const formal::lex_node>& x) { return x && !detect_comma(*x); }
-			};
-			static visitor v;
-			return std::visit(v, src);
-		}
+		static bool can_construct(const statement_t& src) { return valid_placeholder_symbol_content(src); }
 
 	private:
 		static syntactical_entailment_introduction_start* finish_construct(decltype(hypotheses)&& stage, std::shared_ptr<fact_database> assume) {
@@ -1702,29 +1715,26 @@ private:
 		}
 		std::shared_ptr<fact_database> parent() const { return prior; }
 
-#if 2
-		static syntactical_entailment_introduction* construct(std::shared_ptr<fact_database> src) {
-			if (!src) return nullptr;
-			if (dynamic_cast<syntactical_entailment_introduction_start*>(src.get())) return nullptr;
-
-			auto conclusion = src->known(src->size() - 1);
+		static std::optional<std::variant<syntactical_entailment_introduction*, syntactical_entailment_2ary*> > construct(std::shared_ptr<fact_database> src) {
+			if (!src) return std::nullopt;
+			if (dynamic_cast<syntactical_entailment_introduction_start*>(src.get())) return std::nullopt;
 
 			auto hypotheses = find_ancestor<syntactical_entailment_introduction_start>(src);
-			if (!hypotheses) return nullptr;
-
-			// \todo construct a syntactical_entailment_2ary object if we assumed 2 hypotheses
+			if (!hypotheses) return std::nullopt;
 
 			// general case
 			std::unique_ptr<formal::lex_node> lhs(hypotheses->hypothesis_node());
-			std::unique_ptr<formal::lex_node> rhs(node_from(conclusion.first));
+			auto conclusion = src->known(src->size() - 1);
+
+			// construct a syntactical_entailment_2ary object, if we assumed 2 hypotheses
+			if (auto ary2 = syntactical_entailment_2ary::construct(*lhs, conclusion.first)) return ary2;
 
 			// base case
+			std::unique_ptr<formal::lex_node> rhs(node_from(conclusion.first));
 			std::unique_ptr<formal::lex_node> ret(make_binary_node(std::string_view("&#9500;"), formal::Tokenized, std::move(lhs), std::move(rhs)));
 
 			return new syntactical_entailment_introduction(ret, hypotheses, src);
-//			return nullptr; // \todo was disabled before synthetic ids
 		}
-#endif
 	};
 } // end namespace gentzen
 
