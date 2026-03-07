@@ -1361,13 +1361,13 @@ private:
 			return ooao;
 		}
 
-		size_t allocate(const statement_t& src) {
+		std::pair<statement_t, size_t> allocate(const statement_t& src) {
 			// \todo notational deduplication check
 			// \todo axioms are special cases
 
 			size_t id = _next--;
 			_registry.push_back(std::pair(id, weaken(src)));
-			return id;
+			return std::pair(src ,id);
 		}
 
 		std::optional<statement_t> lookup(size_t src) {
@@ -1560,17 +1560,12 @@ private:
 	class syntactical_entailment_introduction_start final : public fact_database {
 	private:
 		std::shared_ptr<fact_database> prior;
-		std::vector<statement_t> hypotheses;
-		std::vector<size_t> _synthetic_ids;
+		std::vector<std::pair<statement_t, size_t> > hypotheses;
 
 		static const constexpr std::string_view str_hypothesis = std::string_view("hypothesis");
 
-		syntactical_entailment_introduction_start(std::shared_ptr<fact_database> assume, std::vector<statement_t>&& extra)
-			: prior(assume), hypotheses(std::move(extra)) {
-			auto& reg = notation_ids::get();
-			_synthetic_ids.reserve(hypotheses.size());
-			for (const auto& h : hypotheses) _synthetic_ids.push_back(reg.allocate(h));
-		}
+		syntactical_entailment_introduction_start(std::shared_ptr<fact_database> assume, decltype(hypotheses)&& extra)
+			: prior(assume), hypotheses(std::move(extra)) {}
 	public:
 		syntactical_entailment_introduction_start() = default;
 		syntactical_entailment_introduction_start(const syntactical_entailment_introduction_start&) = default;
@@ -1585,13 +1580,13 @@ private:
 			if (size() <= n) throw std::logic_error("gentzen::syntactical_entailment_introduction_start::known: size() <= n");
 			auto prior_s = prior->size();
 			if (prior_s > n) return prior->known(n);
-			return std::pair(hypotheses[n-prior_s], str_hypothesis);
+			return std::pair(hypotheses[n-prior_s].first, str_hypothesis);
 		}
 		std::shared_ptr<fact_database> parent() const { return prior; }
 
 		formal::lex_node* hypothesis_node() const {
 			std::vector<std::unique_ptr<formal::lex_node> > stage;
-			for (decltype(auto) x : hypotheses) stage.push_back(std::unique_ptr<formal::lex_node>(node_from(x)));
+			for (decltype(auto) x : hypotheses) stage.push_back(std::unique_ptr<formal::lex_node>(node_from(x.first)));
 
 			const auto stage_s = stage.size();
 			if (1 == stage_s) return stage.front().release();
@@ -1618,7 +1613,7 @@ private:
 			ptrdiff_t i = hypotheses.size();
 
 			std::vector<std::pair<size_t, size_t> > ret(hypotheses.size());
-			while (0 <= --i) ret[i] = std::pair(n + i, _synthetic_ids[i]);
+			while (0 <= --i) ret[i] = std::pair(n + i, hypotheses[i].second);
 
 			return ret;
 		}
@@ -1633,7 +1628,7 @@ private:
 		}
 
 	private:
-		static syntactical_entailment_introduction_start* finish_construct(std::vector<statement_t>&& stage, std::shared_ptr<fact_database> assume) {
+		static syntactical_entailment_introduction_start* finish_construct(decltype(hypotheses)&& stage, std::shared_ptr<fact_database> assume) {
 			if (!assume) assume = axioms::get();
 			return new syntactical_entailment_introduction_start(assume, std::move(stage));
 		}
@@ -1642,8 +1637,8 @@ private:
 		static syntactical_entailment_introduction_start* construct(statement_t src, std::shared_ptr<fact_database> assume = nullptr) {
 			if (!can_construct(src)) return nullptr;
 
-			std::vector<statement_t> stage;
-			stage.push_back(std::move(src));
+			decltype(hypotheses) stage;
+			stage.push_back(notation_ids::get().allocate(src));
 
 			return finish_construct(std::move(stage), assume);
 		}
@@ -1652,9 +1647,10 @@ private:
 			if (!can_construct(src)) return nullptr;
 			if (!can_construct(src2)) return nullptr;
 
-			std::vector<statement_t> stage;
-			stage.push_back(std::move(src));
-			stage.push_back(std::move(src2));
+			decltype(auto) reg = notation_ids::get();
+			decltype(hypotheses) stage;
+			stage.push_back(reg.allocate(src));
+			stage.push_back(reg.allocate(src2));
 
 			return finish_construct(std::move(stage), assume);
 		}
@@ -1664,14 +1660,12 @@ private:
 	private:
 		std::shared_ptr<fact_database> prior;
 		const syntactical_entailment_introduction_start* const hypotheses;
-		statement_t inferred;
-		size_t _synthetic_id;
+		std::pair<statement_t, size_t> inferred;
 
 		static const constexpr std::string_view str_introduction = std::string_view("&#9500;-introduction,");
 
 		syntactical_entailment_introduction(std::unique_ptr<formal::lex_node>& infer, const syntactical_entailment_introduction_start* hyp, const std::shared_ptr<fact_database>& assume)
-			: prior(assume), hypotheses(hyp), inferred(std::shared_ptr<const formal::lex_node>(infer.release())),
-			  _synthetic_id(notation_ids::get().allocate(inferred))
+			: prior(assume), hypotheses(hyp), inferred(notation_ids::get().allocate(std::shared_ptr<const formal::lex_node>(infer.release())))
 			{}
 	public:
 		syntactical_entailment_introduction() = default;
@@ -1704,7 +1698,7 @@ private:
 				stage[i + 1] = join(stage2, "");
 			}
 
-			return std::pair(inferred, join(stage," "));
+			return std::pair(inferred.first, join(stage," "));
 		}
 		std::shared_ptr<fact_database> parent() const { return prior; }
 
