@@ -1505,13 +1505,13 @@ private:
 	private:
 		std::shared_ptr<fact_database> prior;
 		std::shared_ptr<syntactical_entailment_2ary> rule;
-		std::vector<std::pair<size_t, size_t> > hypothesis_ids;
+		std::vector<size_t> hypothesis_ids;
 		statement_t inferred;
 
 		syntactical_entailment_2ary_infer(
 			std::shared_ptr<fact_database> p,
 			std::shared_ptr<syntactical_entailment_2ary> r,
-			std::vector<std::pair<size_t, size_t> > hids,
+			decltype(hypothesis_ids)&& hids,
 			statement_t inf)
 			: prior(std::move(p)), rule(std::move(r)),
 			  hypothesis_ids(std::move(hids)), inferred(std::move(inf)) {}
@@ -1539,7 +1539,7 @@ private:
 			stage[0] = rule->to_s();
 			ptrdiff_t i = hypothesis_ids.size();
 			while (0 <= --i) {
-				stage2[1] = std::to_string(hypothesis_ids[i].second);
+				stage2[1] = std::to_string(hypothesis_ids[i]);
 				stage[i + 1] = join(stage2, "");
 			}
 
@@ -1549,7 +1549,7 @@ private:
 
 #if 0
 		static syntactical_entailment_2ary_infer* construct(std::shared_ptr<syntactical_entailment_2ary> r, statement_t infer,
-			std::vector<std::pair<size_t, size_t> > hyp_ids, std::shared_ptr<fact_database> prior)
+			decltype(hypothesis_ids) hyp_ids, std::shared_ptr<fact_database> prior)
 		{
 			if (!r || !prior) return nullptr;
 			return new syntactical_entailment_2ary_infer(std::move(prior), std::move(r), std::move(hyp_ids), std::move(infer));
@@ -1608,12 +1608,12 @@ private:
 			return ret.release();
 		}
 
-		std::vector<std::pair<size_t, size_t> > hypothesis_ids() const {
+		std::vector<size_t> hypothesis_ids() const {
 			const size_t n = prior->size();
 			ptrdiff_t i = hypotheses.size();
 
-			std::vector<std::pair<size_t, size_t> > ret(hypotheses.size());
-			while (0 <= --i) ret[i] = std::pair(n + i, hypotheses[i].second);
+			std::vector<size_t> ret(hypotheses.size());
+			while (0 <= --i) ret[i] = hypotheses[i].second;
 
 			return ret;
 		}
@@ -1694,7 +1694,7 @@ private:
 			stage[0] = str_introduction;
 			ptrdiff_t i = ids.size();
 			while (0 <= --i) {
-				stage2[1] = std::to_string(ids[i].second);
+				stage2[1] = std::to_string(ids[i]);
 				stage[i + 1] = join(stage2, "");
 			}
 
