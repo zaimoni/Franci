@@ -68,15 +68,15 @@ public:
 		return *this = src._read;
 	}
 
-	explicit operator bool() const { return _read || _write; }
+	explicit operator bool() const noexcept { return _read || _write; }
 
-	const T* get_c() const {
+	const T* get_c() const noexcept {
 		if (_read) return _read.get();
 		if (_write) return _write.get();
 		return nullptr;
 	}
 
-	const T* get() const { return get_c(); }
+	const T* get() const noexcept { return get_c(); }
 
 	T* get() { // multi-threaded: race condition against operoator=(COW& src)
 		if (_read) _rw_clone();
@@ -84,13 +84,13 @@ public:
 		return nullptr;
 	}
 
-	std::shared_ptr<const T> get_shared() noexcept {
+	std::shared_ptr<const T> get_shared() {
 		if (_read) return _read;
 		if (_write) return _read = std::shared_ptr<const T>(_write.release());
 		return nullptr;
 	}
 
-	const T* operator->() const { return get_c(); }
+	const T* operator->() const noexcept { return get_c(); }
 	T* operator->() { return get(); }
 
 	T* release() {
