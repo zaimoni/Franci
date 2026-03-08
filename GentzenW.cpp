@@ -1232,14 +1232,11 @@ private:
 	}
 
 	formal::lex_node* node_from(const statement_t& src) {
-		struct _node_from {
+		struct visitor {
 			auto operator()(const std::shared_ptr<const formal::parsed>& x) { return new formal::lex_node(x); }
 			auto operator()(const std::shared_ptr<const formal::lex_node>& x) { return new formal::lex_node(x); }
 		};
-
-		static _node_from ooao;
-
-		return std::visit(ooao, src);
+		return std::visit(visitor(), src);
 	}
 
 	bool valid_placeholder_symbol_content(const statement_t& src) {
@@ -1247,8 +1244,7 @@ private:
 			bool operator()(const std::shared_ptr<const formal::parsed>& x) { return (bool)x; }
 			bool operator()(const std::shared_ptr<const formal::lex_node>& x) { return x && !detect_comma(*x); }
 		};
-		static visitor v;
-		return std::visit(v, src);
+		return std::visit(visitor(), src);
 	}
 
 	struct fact_database {
