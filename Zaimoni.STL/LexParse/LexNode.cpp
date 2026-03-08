@@ -84,7 +84,7 @@ namespace formal {
 		return std::visit(ooao, src);
 	}
 
-	bool lex_node::syntax_ok() const
+	bool lex_node::syntax_ok() const noexcept
 	{
 		// shallow test -- deep one is CPU-expensive
 		if (!classify(_anchor)) return false; // we always have a syntactic anchor
@@ -102,7 +102,7 @@ namespace formal {
 	}
 
 	/// <returns>1 if word anchor; 2 if node anchor; 0 for other data fields; -1 for no data at all (invalid)</returns>
-	int lex_node::is_pure_anchor() const
+	int lex_node::is_pure_anchor() const noexcept
 	{
 		if (!_prefix.empty()) return 0;
 		if (!_infix.empty()) return 0;
@@ -590,7 +590,7 @@ restart:
 	}
 
 
-	int lex_node::classify(const decltype(_anchor)& src)
+	int lex_node::classify(const decltype(_anchor)& src) noexcept
 	{
 		struct _encode_anchor {
 			int operator()(const zaimoni::COW<word>& x) { return x ? 1 : 0; }

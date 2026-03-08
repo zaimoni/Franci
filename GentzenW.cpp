@@ -1228,7 +1228,7 @@ private:
 			weak_statement_t operator()(const std::shared_ptr<const formal::parsed>& x) { return std::weak_ptr(x); }
 			weak_statement_t operator()(const std::shared_ptr<const formal::lex_node>& x) { return std::weak_ptr(x); }
 		};
-		return std::visit(visitor{}, src);
+		return std::visit(visitor(), src);
 	}
 
 	formal::lex_node* node_from(const statement_t& src) {

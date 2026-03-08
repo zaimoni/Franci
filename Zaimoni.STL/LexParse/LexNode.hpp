@@ -221,11 +221,11 @@ namespace formal {
 		void diagnose(std::vector<std::string>& dest);
 		std::vector<std::string> diagnose();
 
-		auto anchor_code() const { return classify(_anchor); }
-		auto post_anchor_code() const { return classify(_post_anchor); }
+		auto anchor_code() const noexcept { return classify(_anchor); }
+		auto post_anchor_code() const noexcept { return classify(_post_anchor); }
 
-		bool syntax_ok() const;
-		int is_pure_anchor() const; // C error code convention
+		bool syntax_ok() const noexcept;
+		int is_pure_anchor() const noexcept; // C error code convention
 		std::optional<int> token_compare(const formal::lex_node& rhs) const;
 		std::optional<int> token_compare(const formal::word& rhs) const;
 		std::optional<int> token_compare(kuroda::parser<formal::lex_node>::edit_span tokens) const;
@@ -274,7 +274,7 @@ namespace formal {
 
 		static perl::scalar to_scalar(const decltype(_anchor)& src);
 
-		static int classify(const decltype(_anchor)& src);
+		static int classify(const decltype(_anchor)& src) noexcept;
 		static void reset(decltype(_anchor)& dest, lex_node*& src);
 
 		static void diagnose(const decltype(_anchor)& src, std::vector<std::string>& dest, const std::string& pre);

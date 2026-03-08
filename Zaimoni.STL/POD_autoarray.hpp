@@ -36,14 +36,14 @@ public:
 	void insertNSlotsAt(size_t n, size_t i) { if (!_insert_n_slots_at(_ptr ZAIMONI_ISO_PARAM(_size), n, i)) throw std::bad_alloc(); }
 	void Overwrite(T*& src ZAIMONI_ISO_PARAM(size_t n)) { _ptr = src; src = 0; ZAIMONI_ISO_SRC(_size = n;) }
 
-	void swap(POD_autoarray_ptr<T>& rhs) { std::swap(_ptr, rhs._ptr); ZAIMONI_ISO_SRC(std::swap(_size, rhs._size);) }
+	void swap(POD_autoarray_ptr<T>& rhs) noexcept { std::swap(_ptr, rhs._ptr); ZAIMONI_ISO_SRC(std::swap(_size, rhs._size);) }
 
 	// STL support	
-	size_t size() const { return ZAIMONI_NONISO_ISO_SRC(zaimoni::SafeArraySize(_ptr), _size); }
+	size_t size() const noexcept { return ZAIMONI_NONISO_ISO_SRC(zaimoni::SafeArraySize(_ptr), _size); }
 	T* release() { T* tmp = _ptr; _ptr = nullptr; ZAIMONI_ISO_SRC(_size = 0;) return tmp; }
 	T* c_array() {return _ptr;}
 	const T* data() const {return _ptr;}
-	bool empty() const { return !_ptr; }
+	bool empty() const noexcept { return !_ptr; }
 	static size_t max_size() { return size_t(-1)/sizeof(T); }	// XXX casting -1 to an unsigned type gets the maximum of that type
 
 	void push_back(const T& src) {

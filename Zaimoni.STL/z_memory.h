@@ -63,7 +63,7 @@ ArraySize(T* memblock)
 }
 
 template <class T> inline size_t
-SafeArraySize(T* memblock)
+SafeArraySize(T* memblock) noexcept
 {	/* FORMALLY CORRECT: Kenneth Boyd, 11/2/2005 */
 	return (memblock) ? _msize(memblock)/sizeof(T) : 0;
 }
@@ -75,7 +75,7 @@ ArraySize(const T* memblock)
 }
 
 template <class T> inline size_t
-SafeArraySize(const T* memblock)
+SafeArraySize(const T* memblock) noexcept
 {	/* FORMALLY CORRECT: Kenneth Boyd, 11/2/2005 */
 	return (memblock) ? _msize(const_cast<T*>(memblock))/sizeof(T) : 0;
 }
