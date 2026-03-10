@@ -1220,8 +1220,44 @@ private:
 		return ret.release();
 	}
 
-	using statement_t = std::variant<std::shared_ptr<const formal::parsed>, std::shared_ptr<const formal::lex_node>>;
+	struct statement_t : public std::variant<std::shared_ptr<const formal::parsed>, std::shared_ptr<const formal::lex_node>> {
+		using base = std::variant<std::shared_ptr<const formal::parsed>, std::shared_ptr<const formal::lex_node>>;
+		using base::base;
+		using base::operator=;
+
+		explicit statement_t(formal::lex_node*& src) : base(_from_node(src)) {}
+
+		std::string to_s() const {
+			return std::visit([](const auto& x) { return x->to_s(); }, *this);
+		}
+
+		formal::src_location origin() const {
+			return std::visit([](const auto& x) { return x->origin(); }, *this);
+		}
+
+	private:
+		static base _from_node(formal::lex_node*& src) {
+			if (!src) throw std::logic_error("!src");
+			if (auto stage = src->shared_anchor<formal::parsed>()) {
+				delete src;
+				src = nullptr;
+				return stage;
+			}
+			std::shared_ptr<const formal::lex_node> ret(src);
+			src = nullptr;
+			return ret;
+		}
+	};
+
 	using weak_statement_t = std::variant<std::weak_ptr<const formal::parsed>, std::weak_ptr<const formal::lex_node>>;
+
+	bool needs_grouping_parens(const statement_t& stmt) {
+		struct visitor {
+			bool operator()(const std::shared_ptr<const formal::parsed>&) { return false; }
+			bool operator()(const std::shared_ptr<const formal::lex_node>& x) { return needs_grouping_parens(*x); }
+		};
+		return std::visit(visitor(), stmt);
+	}
 
 	static weak_statement_t weaken(const statement_t& src) {
 		struct visitor {
@@ -1406,17 +1442,15 @@ private:
 
 	class syntactical_entailment_2ary final : public formal::parsed {
 	private:
-		std::shared_ptr<formal::lex_node> hypothesis_1;
-		std::shared_ptr<formal::lex_node> hypothesis_2;
-		std::shared_ptr<formal::lex_node> conclusion;
+		statement_t hypothesis_1;
+		statement_t hypothesis_2;
+		statement_t conclusion;
 
 		syntactical_entailment_2ary(formal::lex_node*& hyp_1, formal::lex_node*& hyp_2, formal::lex_node*& con)
-			: hypothesis_1(hyp_1), hypothesis_2(hyp_2), conclusion(con)
-		{
-			hyp_1 = nullptr;
-			hyp_2 = nullptr;
-			con = nullptr;
-		}
+			: hypothesis_1(hyp_1), hypothesis_2(hyp_2), conclusion(con) {}
+
+		syntactical_entailment_2ary(formal::lex_node*& hyp_1, formal::lex_node*& hyp_2, const statement_t& con)
+			: hypothesis_1(hyp_1), hypothesis_2(hyp_2), conclusion(con) {}
 	public:
 		syntactical_entailment_2ary() = default;
 		syntactical_entailment_2ary(const syntactical_entailment_2ary&) = default;
@@ -1447,21 +1481,21 @@ private:
 			dest = new syntactical_entailment_2ary(*this);
 		}
 
-		formal::src_location origin() const override { return hypothesis_1->origin(); }
+		formal::src_location origin() const override { return hypothesis_1.origin(); }
 
 		std::string to_s() const override {
 			std::vector<perl::scalar> ret(5);
-			ret[0] = hypothesis_1->to_s();
+			ret[0] = hypothesis_1.to_s();
 			ret[1] = comma;
-			ret[2] = hypothesis_2->to_s();
+			ret[2] = hypothesis_2.to_s();
 			ret[3] = std::string_view("&#9500;");
-			ret[4] = conclusion->to_s();
+			ret[4] = conclusion.to_s();
 
 			// use grouping parentheses on the hypotheses, and conclusion, if needed
 			unsigned int code = 0;
-			if (needs_grouping_parens(*hypothesis_1)) code |= 1U;
-			if (needs_grouping_parens(*hypothesis_2)) code |= 2U;
-			if (needs_grouping_parens(*conclusion)) code |= 4U;
+			if (needs_grouping_parens(hypothesis_1)) code |= 1U;
+			if (needs_grouping_parens(hypothesis_2)) code |= 2U;
+			if (needs_grouping_parens(conclusion)) code |= 4U;
 			if (0 < code) {
 				std::string l_paren("(");
 				std::string r_paren(")");
@@ -1504,15 +1538,17 @@ private:
 			if (!can_construct(src)) return nullptr;
 
 			decltype(auto) lhs = *src.prefix().front();
+
+			// \todo tag placeholder-syntax symbols now
+
 			return new syntactical_entailment_2ary(lhs.prefix().front(), lhs.postfix().front(), src.postfix().front());
 		}
 
 		static syntactical_entailment_2ary* construct(formal::lex_node& lhs, const statement_t& conclusion) {
 			if (!can_construct_hypothesis(lhs)) return nullptr;
 			if (!valid_placeholder_symbol_content(conclusion)) return nullptr;
-			decltype(auto) rhs = node_from(conclusion);
 
-			return new syntactical_entailment_2ary(lhs.prefix().front(), lhs.postfix().front(), rhs);
+			return new syntactical_entailment_2ary(lhs.prefix().front(), lhs.postfix().front(), conclusion);
 		}
 	};
 
