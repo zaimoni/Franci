@@ -1301,7 +1301,7 @@ private:
 	class axioms : public fact_database, public zaimoni::observed<statement_t> {
 	private:
 		std::vector<statement_t> _axioms;
-		std::vector<std::shared_ptr<zaimoni::observer<statement_t>>> _watchers;
+		std::vector<std::weak_ptr<zaimoni::observer<statement_t>>> _watchers;
 
 		static const constexpr std::string_view str_axiom = std::string_view("axiom");
 		static const constexpr std::string_view str_schema = std::string_view("axiom schema");
@@ -1339,8 +1339,9 @@ private:
 
 			ptrdiff_t ub = _watchers.size();
 			while (0 <= --ub) {
-				if (_watchers[ub]) {
-					if (_watchers[ub] == src) return;	// already installed
+				auto whom = _watchers[ub].lock();
+				if (whom) {
+					if (whom == src) return;	// already installed
 				} else if (1 == _watchers.size()) {
 					decltype(_watchers)().swap(_watchers);
 					return;
@@ -1355,12 +1356,12 @@ private:
 		void notify(const statement_t& value) override {
 			ptrdiff_t ub = _watchers.size();
 			while (0 <= --ub) {
-				if (_watchers[ub]) {
-					if (!_watchers[ub]->onNext(value)) {
+				auto whom = _watchers[ub].lock();
+				if (whom) {
+					if (!whom->onNext(value)) {
 						if (1 == _watchers.size()) {
 							decltype(_watchers)().swap(_watchers);
-						}
-						else {
+						} else {
 							_watchers[ub].swap(_watchers.back());
 							_watchers.pop_back();
 						}
@@ -1400,7 +1401,7 @@ private:
 		std::shared_ptr<fact_database> prior;
 		std::vector<statement_t> _lemmas;	// \todo track how these were derived as well
 
-		std::vector<std::shared_ptr<zaimoni::observer<statement_t>>> _watchers;
+		std::vector<std::weak_ptr<zaimoni::observer<statement_t>>> _watchers;
 	public:
 		lemmas() = default;
 		lemmas(const lemmas&) = delete;
@@ -1430,8 +1431,9 @@ private:
 
 			ptrdiff_t ub = _watchers.size();
 			while (0 <= --ub) {
-				if (_watchers[ub]) {
-					if (_watchers[ub] == src) return;	// already installed
+				auto whom = _watchers[ub].lock();
+				if (whom) {
+					if (whom == src) return;	// already installed
 				} else if (1 == _watchers.size()) {
 					decltype(_watchers)().swap(_watchers);
 					return;
@@ -1446,12 +1448,12 @@ private:
 		void notify(const statement_t& value) override {
 			ptrdiff_t ub = _watchers.size();
 			while (0 <= --ub) {
-				if (_watchers[ub]) {
-					if (!_watchers[ub]->onNext(value)) {
+				auto whom = _watchers[ub].lock();
+				if (whom) {
+					if (!whom->onNext(value)) {
 						if (1 == _watchers.size()) {
 							decltype(_watchers)().swap(_watchers);
-						}
-						else {
+						} else {
 							_watchers[ub].swap(_watchers.back());
 							_watchers.pop_back();
 						}
