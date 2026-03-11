@@ -17,6 +17,14 @@ namespace zaimoni {
 	};
 
 	template<class SRC>
+	struct observed {
+		virtual ~observed() = default;
+
+		virtual void watched_by(const std::shared_ptr<zaimoni::observer<SRC>>& src) = 0;
+		virtual void notify(const SRC& value) = 0;
+	};
+
+	template<class SRC>
 	class lambda_observer : public observer<SRC>
 	{
 		std::function<bool(const SRC&)> _op;

@@ -1298,7 +1298,7 @@ private:
 		return nullptr;
 	}
 
-	class axioms : public fact_database {
+	class axioms : public fact_database, public zaimoni::observed<statement_t> {
 	private:
 		std::vector<statement_t> _axioms;
 		std::vector<std::shared_ptr<zaimoni::observer<statement_t>>> _watchers;
@@ -1319,6 +1319,7 @@ private:
 			return oaoo;
 		}
 
+		// fact_database interface
 		size_t size() const noexcept override { return _axioms.size(); }
 
 		std::pair<statement_t, perl::scalar> known(size_t n) const override {
@@ -1329,7 +1330,13 @@ private:
 
 		std::shared_ptr<fact_database> parent() const noexcept { return nullptr; }
 
+		// observed interface
 		void watched_by(const std::shared_ptr<zaimoni::observer<statement_t>>& src) {
+			// this is inappropriate in many contexts, but ok for our use case
+			for (decltype(auto) axiom : _axioms) {
+				if (!src->onNext(axiom)) return;
+			}
+
 			ptrdiff_t ub = _watchers.size();
 			while (0 <= --ub) {
 				if (_watchers[ub]) {
@@ -1345,6 +1352,29 @@ private:
 			_watchers.push_back(src);
 		}
 
+		void notify(const statement_t& value) override {
+			ptrdiff_t ub = _watchers.size();
+			while (0 <= --ub) {
+				if (_watchers[ub]) {
+					if (!_watchers[ub]->onNext(value)) {
+						if (1 == _watchers.size()) {
+							decltype(_watchers)().swap(_watchers);
+						}
+						else {
+							_watchers[ub].swap(_watchers.back());
+							_watchers.pop_back();
+						}
+					}
+				} else if (1 == _watchers.size()) {
+					decltype(_watchers)().swap(_watchers);
+				} else {
+					_watchers[ub].swap(_watchers.back());
+					_watchers.pop_back();
+				}
+			}
+		}
+		// end observed interface
+
 		void add_axiom(std::shared_ptr<const formal::parsed> src) {
 			enum { trace_parse = 0 };
 
@@ -1359,14 +1389,69 @@ private:
 			if constexpr (trace_parse) std::cerr << "axiom: " << src->to_s() << "\n";
 			_axioms.push_back(src);
 
-			// notify observers
+			notify(_axioms.back());
+		}
+
+		// \todo void add_axiom(std::shared_ptr<const formal::lex_node> src) {}
+	};
+
+	class lemmas : public fact_database, public zaimoni::observed<statement_t> {
+	private:
+		std::shared_ptr<fact_database> prior;
+		std::vector<statement_t> _lemmas;	// \todo track how these were derived as well
+
+		std::vector<std::shared_ptr<zaimoni::observer<statement_t>>> _watchers;
+	public:
+		lemmas() = default;
+		lemmas(const lemmas&) = delete;
+		lemmas(lemmas&&) = delete;
+		lemmas& operator=(const lemmas&) = delete;
+		lemmas& operator=(lemmas&&) = delete;
+		~lemmas() = default;
+
+		// fact_database interface
+		size_t size() const noexcept override { return prior->size() + _lemmas.size(); }
+		std::pair<statement_t, perl::scalar> known(size_t n) const override {
+			if (size() <= n) throw std::logic_error("gentzen::syntactical_entailment_2ary_infer::known: size() <= n");
+			auto prior_s = prior->size();
+			if (prior_s > n) return prior->known(n);
+
+			// \todo pass-through rationale
+			return std::pair(_lemmas[n - prior_s], std::string_view("prototyping lemma"));
+		}
+		std::shared_ptr<fact_database> parent() const override { return prior; }
+
+		// observed interface
+		void watched_by(const std::shared_ptr<zaimoni::observer<statement_t>>& src) {
+			// this is inappropriate in many contexts, but ok for our use case
+			for (decltype(auto) lemma : _lemmas) {
+				if (!src->onNext(lemma)) return;
+			}
+
 			ptrdiff_t ub = _watchers.size();
 			while (0 <= --ub) {
 				if (_watchers[ub]) {
-					if (!_watchers[ub]->onNext(_axioms.back())) {
+					if (_watchers[ub] == src) return;	// already installed
+				} else if (1 == _watchers.size()) {
+					decltype(_watchers)().swap(_watchers);
+					return;
+				} else {
+					_watchers[ub].swap(_watchers.back());
+					_watchers.pop_back();
+				}
+			}
+			_watchers.push_back(src);
+		}
+
+		void notify(const statement_t& value) override {
+			ptrdiff_t ub = _watchers.size();
+			while (0 <= --ub) {
+				if (_watchers[ub]) {
+					if (!_watchers[ub]->onNext(value)) {
 						if (1 == _watchers.size()) {
 							decltype(_watchers)().swap(_watchers);
-						} else {
+						}
+						else {
 							_watchers[ub].swap(_watchers.back());
 							_watchers.pop_back();
 						}
@@ -1379,8 +1464,8 @@ private:
 				}
 			}
 		}
+		// end observed interface
 
-		// \todo void add_axiom(std::shared_ptr<const formal::lex_node> src) {}
 	};
 
 	// these synthetic ids are supposed to be in bijection with statement notations actually used,
