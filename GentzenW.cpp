@@ -1301,7 +1301,6 @@ private:
 	class axioms : public fact_database, public zaimoni::observed<statement_t> {
 	private:
 		std::vector<statement_t> _axioms;
-		std::vector<std::weak_ptr<zaimoni::observer<statement_t>>> _watchers;
 
 		static const constexpr std::string_view str_axiom = std::string_view("axiom");
 		static const constexpr std::string_view str_schema = std::string_view("axiom schema");
@@ -1331,48 +1330,13 @@ private:
 		std::shared_ptr<fact_database> parent() const noexcept { return nullptr; }
 
 		// observed interface
-		void watched_by(const std::shared_ptr<zaimoni::observer<statement_t>>& src) {
+		void watched_by(const std::shared_ptr<zaimoni::observer<statement_t>>& src) override {
 			// this is inappropriate in many contexts, but ok for our use case
 			for (decltype(auto) axiom : _axioms) {
 				if (!src->onNext(axiom)) return;
 			}
 
-			ptrdiff_t ub = _watchers.size();
-			while (0 <= --ub) {
-				auto whom = _watchers[ub].lock();
-				if (whom) {
-					if (whom == src) return;	// already installed
-				} else if (1 == _watchers.size()) {
-					decltype(_watchers)().swap(_watchers);
-					return;
-				} else {
-					_watchers[ub].swap(_watchers.back());
-					_watchers.pop_back();
-				}
-			}
-			_watchers.push_back(src);
-		}
-
-		void notify(const statement_t& value) override {
-			ptrdiff_t ub = _watchers.size();
-			while (0 <= --ub) {
-				auto whom = _watchers[ub].lock();
-				if (whom) {
-					if (!whom->onNext(value)) {
-						if (1 == _watchers.size()) {
-							decltype(_watchers)().swap(_watchers);
-						} else {
-							_watchers[ub].swap(_watchers.back());
-							_watchers.pop_back();
-						}
-					}
-				} else if (1 == _watchers.size()) {
-					decltype(_watchers)().swap(_watchers);
-				} else {
-					_watchers[ub].swap(_watchers.back());
-					_watchers.pop_back();
-				}
-			}
+			seen_by(src);
 		}
 		// end observed interface
 
@@ -1400,8 +1364,6 @@ private:
 	private:
 		std::shared_ptr<fact_database> prior;
 		std::vector<statement_t> _lemmas;	// \todo track how these were derived as well
-
-		std::vector<std::weak_ptr<zaimoni::observer<statement_t>>> _watchers;
 	public:
 		lemmas() = default;
 		lemmas(const lemmas&) = delete;
@@ -1423,48 +1385,13 @@ private:
 		std::shared_ptr<fact_database> parent() const override { return prior; }
 
 		// observed interface
-		void watched_by(const std::shared_ptr<zaimoni::observer<statement_t>>& src) {
+		void watched_by(const std::shared_ptr<zaimoni::observer<statement_t>>& src) override {
 			// this is inappropriate in many contexts, but ok for our use case
 			for (decltype(auto) lemma : _lemmas) {
 				if (!src->onNext(lemma)) return;
 			}
 
-			ptrdiff_t ub = _watchers.size();
-			while (0 <= --ub) {
-				auto whom = _watchers[ub].lock();
-				if (whom) {
-					if (whom == src) return;	// already installed
-				} else if (1 == _watchers.size()) {
-					decltype(_watchers)().swap(_watchers);
-					return;
-				} else {
-					_watchers[ub].swap(_watchers.back());
-					_watchers.pop_back();
-				}
-			}
-			_watchers.push_back(src);
-		}
-
-		void notify(const statement_t& value) override {
-			ptrdiff_t ub = _watchers.size();
-			while (0 <= --ub) {
-				auto whom = _watchers[ub].lock();
-				if (whom) {
-					if (!whom->onNext(value)) {
-						if (1 == _watchers.size()) {
-							decltype(_watchers)().swap(_watchers);
-						} else {
-							_watchers[ub].swap(_watchers.back());
-							_watchers.pop_back();
-						}
-					}
-				} else if (1 == _watchers.size()) {
-					decltype(_watchers)().swap(_watchers);
-				} else {
-					_watchers[ub].swap(_watchers.back());
-					_watchers.pop_back();
-				}
-			}
+			seen_by(src);
 		}
 		// end observed interface
 
