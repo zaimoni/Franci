@@ -1447,6 +1447,41 @@ private:
 		}
 	};
 
+	static constexpr const unsigned long long used_as_placeholder = (1ULL << 8); // reserve this flag for lex_node
+
+	static_assert(!(used_as_placeholder & formal::Comment));
+	static_assert(!(used_as_placeholder & formal::Error));
+	static_assert(!(used_as_placeholder & formal::Inert_Token));
+	static_assert(!(used_as_placeholder & formal::Tokenized));
+	static_assert(!(used_as_placeholder & formal::RequestNormalization));
+	static_assert(!(used_as_placeholder & symbol_catalog::anchor_is_symbol));
+	static_assert(!(used_as_placeholder & symbol_catalog::anchor_is_const_symbol));
+	static_assert(!(used_as_placeholder & symbol_catalog::anchor_is_not_symbol));
+
+	struct tag_placeholder_syntax {
+		void operator()(formal::lex_node* x) {
+			if (is_placeholder_syntax_symbol(x)) {
+				x->learn(used_as_placeholder);
+				return;
+			}
+			if (is_symbol_placeholder_syntax_symbol(x)) {
+				x->learn(used_as_placeholder);
+				return;
+			}
+
+			(*this)(x->prefix());
+			(*this)(x->infix());
+			(*this)(x->postfix());
+			(*this)(x->fragments());
+		}
+		void operator()(kuroda::parser<formal::lex_node>::symbols& x) {
+			if (!x.empty()) for (decltype(auto) arg : x) (*this)(arg);
+		}
+		void operator()(std::vector<kuroda::parser<formal::lex_node>::symbols>& x) {
+			if (!x.empty()) for (decltype(auto) arg : x) (*this)(arg);
+		}
+	};
+
 	class syntactical_entailment_2ary final : public formal::parsed {
 	private:
 		statement_t hypothesis_1;
@@ -1546,7 +1581,11 @@ private:
 
 			decltype(auto) lhs = *src.prefix().front();
 
-			// \todo tag placeholder-syntax symbols now
+			// tag placeholder-syntax symbols now
+			tag_placeholder_syntax tag_this;
+			tag_this(lhs.prefix().front());
+			tag_this(lhs.postfix().front());
+			tag_this(src.postfix().front());
 
 			return new syntactical_entailment_2ary(lhs.prefix().front(), lhs.postfix().front(), src.postfix().front());
 		}
@@ -2691,6 +2730,14 @@ private:
 					if (prior_errors < Errors.count()) continue;
 
 					GentzenGrammar().complete_parse(stage);
+
+#if PROTOTYPE
+					if (1 == stage.size() && prior_errors == Errors.count()) {
+						if constexpr (trace_load) std::cerr << "considering test line as axiom\n";
+
+						// ....
+					}
+#endif
 
 					for (decltype(auto) str : diagnose(stage)) {
 						std::cout << str << std::endl;
