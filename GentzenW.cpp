@@ -1360,43 +1360,6 @@ private:
 		// \todo void add_axiom(std::shared_ptr<const formal::lex_node> src) {}
 	};
 
-	class lemmas : public fact_database, public zaimoni::observed<statement_t> {
-	private:
-		std::shared_ptr<fact_database> prior;
-		std::vector<statement_t> _lemmas;	// \todo track how these were derived as well
-	public:
-		lemmas() = default;
-		lemmas(const lemmas&) = delete;
-		lemmas(lemmas&&) = delete;
-		lemmas& operator=(const lemmas&) = delete;
-		lemmas& operator=(lemmas&&) = delete;
-		~lemmas() = default;
-
-		// fact_database interface
-		size_t size() const noexcept override { return prior->size() + _lemmas.size(); }
-		std::pair<statement_t, perl::scalar> known(size_t n) const override {
-			if (size() <= n) throw std::logic_error("gentzen::syntactical_entailment_2ary_infer::known: size() <= n");
-			auto prior_s = prior->size();
-			if (prior_s > n) return prior->known(n);
-
-			// \todo pass-through rationale
-			return std::pair(_lemmas[n - prior_s], std::string_view("prototyping lemma"));
-		}
-		std::shared_ptr<fact_database> parent() const override { return prior; }
-
-		// observed interface
-		void watched_by(const std::shared_ptr<zaimoni::observer<statement_t>>& src) override {
-			// this is inappropriate in many contexts, but ok for our use case
-			for (decltype(auto) lemma : _lemmas) {
-				if (!src->onNext(lemma)) return;
-			}
-
-			seen_by(src);
-		}
-		// end observed interface
-
-	};
-
 	// these synthetic ids are supposed to be in bijection with statement notations actually used,
 	// rather than the fact_database class.
 	class notation_ids final {
@@ -1781,6 +1744,53 @@ private:
 
 			return new syntactical_entailment_introduction(ret, hypotheses, src);
 		}
+	};
+
+	class lemmas : public fact_database, public zaimoni::observed<statement_t> {
+	private:
+		std::shared_ptr<fact_database> prior;
+		std::vector<statement_t> _lemmas;	// \todo track how these were derived as well
+
+		std::vector<std::shared_ptr<syntactical_entailment_introduction_start> > conditional_reasoning;
+
+		lemmas(decltype(prior) assumed) : prior(assumed) {}
+	public:
+		lemmas() = default;
+		lemmas(const lemmas&) = delete;
+		lemmas(lemmas&&) = delete;
+		lemmas& operator=(const lemmas&) = delete;
+		lemmas& operator=(lemmas&&) = delete;
+		~lemmas() = default;
+
+		static std::shared_ptr<lemmas> get() {
+			static std::shared_ptr<lemmas> oaoo;
+			if (!oaoo) oaoo = std::shared_ptr<lemmas>(new lemmas(axioms::get()));
+			return oaoo;
+		}
+
+		// fact_database interface
+		size_t size() const noexcept override { return prior->size() + _lemmas.size(); }
+		std::pair<statement_t, perl::scalar> known(size_t n) const override {
+			if (size() <= n) throw std::logic_error("gentzen::syntactical_entailment_2ary_infer::known: size() <= n");
+			auto prior_s = prior->size();
+			if (prior_s > n) return prior->known(n);
+
+			// \todo pass-through rationale
+			return std::pair(_lemmas[n - prior_s], std::string_view("prototyping lemma"));
+		}
+		std::shared_ptr<fact_database> parent() const override { return prior; }
+
+		// observed interface
+		void watched_by(const std::shared_ptr<zaimoni::observer<statement_t>>& src) override {
+			// this is inappropriate in many contexts, but ok for our use case
+			for (decltype(auto) lemma : _lemmas) {
+				if (!src->onNext(lemma)) return;
+			}
+
+			seen_by(src);
+		}
+		// end observed interface
+
 	};
 } // end namespace gentzen
 
