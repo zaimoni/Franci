@@ -1267,6 +1267,14 @@ private:
 		return std::visit(visitor(), src);
 	}
 
+	static statement_t lock(const weak_statement_t& src) {
+		struct visitor {
+			statement_t operator()(const std::weak_ptr<const formal::parsed>& x) { return x.lock(); }
+			statement_t operator()(const std::weak_ptr<const formal::lex_node>& x) { return x.lock(); }
+		};
+		return std::visit(visitor(), src);
+	}
+
 	formal::lex_node* node_from(const statement_t& src) {
 		struct visitor {
 			auto operator()(const std::shared_ptr<const formal::parsed>& x) { return new formal::lex_node(x); }
@@ -1358,6 +1366,18 @@ private:
 		}
 
 		// \todo void add_axiom(std::shared_ptr<const formal::lex_node> src) {}
+
+		std::optional<std::pair<statement_t, size_t> > disambiguate(const std::string& notation) {
+			// notational deduplication check
+
+			// \todo use lex_node::to_scalar when relevant
+			ptrdiff_t ub = _axioms.size();
+			while (0 <= --ub) {
+				if (notation == _axioms[ub].to_s()) return std::pair(_axioms[ub], ub+1);
+			}
+
+			return std::nullopt;
+		}
 	};
 
 	// these synthetic ids are supposed to be in bijection with statement notations actually used,
@@ -1380,8 +1400,18 @@ private:
 		}
 
 		std::pair<statement_t, size_t> allocate(const statement_t& src) {
-			// \todo notational deduplication check
-			// \todo axioms are special cases
+			// notational deduplication check
+			auto notation = src.to_s();
+
+			// \todo use lex_node::to_scalar when relevant
+			ptrdiff_t ub = _registry.size();
+			while (0 <= --ub) {
+				auto s = lock(_registry[ub].second);
+				if (notation == s.to_s()) return std::pair(s, _registry[ub].first);
+			}
+
+			// axioms are special cases
+			if (auto ret = axioms::get()->disambiguate(notation)) return *ret;
 
 			size_t id = _next--;
 			_registry.push_back(std::pair(id, weaken(src)));
