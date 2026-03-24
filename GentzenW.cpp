@@ -1623,7 +1623,7 @@ private:
 		std::shared_ptr<fact_database> prior;
 		std::shared_ptr<syntactical_entailment_2ary> rule;
 		std::vector<size_t> hypothesis_ids;
-		statement_t inferred;
+		std::pair<statement_t, size_t> inferred;
 
 		syntactical_entailment_2ary_infer(
 			std::shared_ptr<fact_database> p,
@@ -1631,7 +1631,7 @@ private:
 			decltype(hypothesis_ids)&& hids,
 			statement_t inf)
 			: prior(std::move(p)), rule(std::move(r)),
-			  hypothesis_ids(std::move(hids)), inferred(std::move(inf)) {}
+			  hypothesis_ids(std::move(hids)), inferred(notation_ids::get().allocate(inf)) {}
 	public:
 		syntactical_entailment_2ary_infer() = default;
 		syntactical_entailment_2ary_infer(const syntactical_entailment_2ary_infer&) = default;
@@ -1660,17 +1660,14 @@ private:
 				stage[i + 1] = join(stage2, "");
 			}
 
-			return { {inferred, join(stage, " ")}, {this, 0} };
+			return { {inferred.first, join(stage, " ")}, {this, 0} };
 		}
 		std::shared_ptr<fact_database> parent() const { return prior; }
 		std::optional<size_t> offset(size_t notation_id) const override {
 			if (0 >= notation_id) return std::nullopt;
 			if (axioms::get()->size() >= notation_id) return std::nullopt;
 
-			// \todo implement
-#if 0
 			if (inferred.second == notation_id) return 0;
-#endif
 			return std::nullopt;
 		}
 
@@ -1866,7 +1863,7 @@ private:
 	class lemmas : public fact_database, public zaimoni::observed<statement_t> {
 	private:
 		std::shared_ptr<fact_database> prior;
-		std::vector<statement_t> _lemmas;	// \todo track how these were derived as well
+		std::vector<std::pair<statement_t, size_t> > _lemmas;	// \todo track how these were derived as well
 
 		// each syntactical_entailment_introduction_start has its own successor lemmas instance
 		std::map<const syntactical_entailment_introduction_start*, std::shared_ptr<lemmas> > conditional_reasoning;
@@ -1901,21 +1898,18 @@ private:
 
 			auto local = n - prior_s;
 			// \todo pass-through rationale
-			return { {_lemmas[local], std::string_view("prototyping lemma")}, {this, local} };
+			return { {_lemmas[local].first, std::string_view("prototyping lemma")}, {this, local} };
 		}
 		std::shared_ptr<fact_database> parent() const override { return prior; }
 		std::optional<size_t> offset(size_t notation_id) const override {
 			if (0 >= notation_id) return std::nullopt;
 			if (axioms::get()->size() >= notation_id) return std::nullopt;
 
-			// \todo implement
-#if 0
 			ptrdiff_t i = -1;
-			for (decltype(auto) x : hypotheses) {
+			for (decltype(auto) x : _lemmas) {
 				++i;
 				if (x.second == notation_id) return i;
 			}
-#endif
 			return std::nullopt;
 		}
 
@@ -1924,7 +1918,7 @@ private:
 		void watched_by(const std::shared_ptr<zaimoni::observer<statement_t>>& src) override {
 			// this is inappropriate in many contexts, but ok for our use case
 			for (decltype(auto) lemma : _lemmas) {
-				if (!src->onNext(lemma)) return;
+				if (!src->onNext(lemma.first)) return;
 			}
 
 			seen_by(src);
