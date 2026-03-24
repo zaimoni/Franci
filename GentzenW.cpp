@@ -1300,6 +1300,7 @@ private:
 		virtual size_t size() const noexcept = 0;
 		virtual known_result_t known(size_t n) const = 0;
 		virtual std::shared_ptr<fact_database> parent() const = 0;
+		virtual std::optional<size_t> offset(size_t notation_id) const = 0;
 	};
 
 	template<class T> requires (std::derived_from<T, fact_database> && !std::same_as<T, fact_database>)
@@ -1308,6 +1309,14 @@ private:
 			if (auto p = dynamic_cast<T*>(db.get())) return p;
 		}
 		return nullptr;
+	}
+
+	std::optional<std::pair<std::shared_ptr<fact_database>, size_t> > offset(std::shared_ptr<fact_database> tip, const size_t notation_id) {
+		while (tip) {
+			if (auto test = tip->offset(notation_id)) return std::pair(tip, *test);
+			tip = tip->parent();
+		}
+		return std::nullopt;
 	}
 
 	class axioms : public fact_database, public zaimoni::observed<statement_t> {
@@ -1340,6 +1349,12 @@ private:
 		}
 
 		std::shared_ptr<fact_database> parent() const noexcept { return nullptr; }
+
+		std::optional<size_t> offset(size_t notation_id) const override {
+			if (0 >= notation_id) return std::nullopt;
+			if (_axioms.size() < notation_id) return std::nullopt;
+			return notation_id - 1;
+		}
 
 		// observed interface
 		void watched_by(const std::shared_ptr<zaimoni::observer<statement_t>>& src) override {
@@ -1648,6 +1663,16 @@ private:
 			return { {inferred, join(stage, " ")}, {this, 0} };
 		}
 		std::shared_ptr<fact_database> parent() const { return prior; }
+		std::optional<size_t> offset(size_t notation_id) const override {
+			if (0 >= notation_id) return std::nullopt;
+			if (axioms::get()->size() >= notation_id) return std::nullopt;
+
+			// \todo implement
+#if 0
+			if (inferred.second == notation_id) return 0;
+#endif
+			return std::nullopt;
+		}
 
 #if 0
 		static syntactical_entailment_2ary_infer* construct(std::shared_ptr<syntactical_entailment_2ary> r, statement_t infer,
@@ -1686,6 +1711,17 @@ private:
 			return { {hypotheses[local].first, str_hypothesis}, {this, local} };
 		}
 		std::shared_ptr<fact_database> parent() const { return prior; }
+		std::optional<size_t> offset(size_t notation_id) const override {
+			if (0 >= notation_id) return std::nullopt;
+			if (axioms::get()->size() >= notation_id) return std::nullopt;
+
+			ptrdiff_t i = -1;
+			for (decltype(auto) x : hypotheses) {
+				++i;
+				if (x.second == notation_id) return i;
+			}
+			return std::nullopt;
+		}
 
 		formal::lex_node* hypothesis_node() const {
 			std::vector<std::unique_ptr<formal::lex_node> > stage;
@@ -1797,6 +1833,13 @@ private:
 			return { {inferred.first, join(stage," ")}, {this, 0} };
 		}
 		std::shared_ptr<fact_database> parent() const { return prior; }
+		std::optional<size_t> offset(size_t notation_id) const override {
+			if (0 >= notation_id) return std::nullopt;
+			if (axioms::get()->size() >= notation_id) return std::nullopt;
+
+			if (inferred.second == notation_id) return 0;
+			return std::nullopt;
+		}
 
 		static std::optional<std::variant<syntactical_entailment_introduction*, syntactical_entailment_2ary*> > construct(std::shared_ptr<fact_database> src) {
 			if (!src) return std::nullopt;
@@ -1861,6 +1904,21 @@ private:
 			return { {_lemmas[local], std::string_view("prototyping lemma")}, {this, local} };
 		}
 		std::shared_ptr<fact_database> parent() const override { return prior; }
+		std::optional<size_t> offset(size_t notation_id) const override {
+			if (0 >= notation_id) return std::nullopt;
+			if (axioms::get()->size() >= notation_id) return std::nullopt;
+
+			// \todo implement
+#if 0
+			ptrdiff_t i = -1;
+			for (decltype(auto) x : hypotheses) {
+				++i;
+				if (x.second == notation_id) return i;
+			}
+#endif
+			return std::nullopt;
+		}
+
 
 		// observed interface
 		void watched_by(const std::shared_ptr<zaimoni::observer<statement_t>>& src) override {
