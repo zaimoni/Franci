@@ -9,6 +9,7 @@
 #include <initializer_list>
 #include <any>
 #include <concepts>
+#include <map>
 #include <tuple>
 
 // https://github.com/fktn-k/fkYAML; MIT license
@@ -1292,9 +1293,12 @@ private:
 	}
 
 	struct fact_database {
+		// audit trail: first pair is (statement, rationale), second pair is (which database, local index within that database)
+		using known_result_t = std::pair<std::pair<statement_t, perl::scalar>, std::pair<const fact_database*, size_t>>;
+
 		virtual ~fact_database() = default;
 		virtual size_t size() const noexcept = 0;
-		virtual std::pair<statement_t, perl::scalar> known(size_t n) const = 0;
+		virtual known_result_t known(size_t n) const = 0;
 		virtual std::shared_ptr<fact_database> parent() const = 0;
 	};
 
@@ -1329,10 +1333,10 @@ private:
 		// fact_database interface
 		size_t size() const noexcept override { return _axioms.size(); }
 
-		std::pair<statement_t, perl::scalar> known(size_t n) const override {
+		known_result_t known(size_t n) const override {
 			if (size() <= n) throw std::logic_error("gentzen::axioms::known: size() <= n");
 			// \todo once we have an axiom schema loading, report the rationale for axiom schemas as axiom schema
-			return std::pair(_axioms[n], str_axiom);
+			return { {_axioms[n], str_axiom}, {this, n} };
 		}
 
 		std::shared_ptr<fact_database> parent() const noexcept { return nullptr; }
@@ -1438,7 +1442,7 @@ private:
 			if (_registry.size() <= n) {
 				// axioms are special cases
 				if (0 < src && axioms::get()->size() >= src) {
-					return axioms::get()->known(src - 1).first;
+					return axioms::get()->known(src - 1).first.first;
 				}
 				return std::nullopt;
 			}
@@ -1623,7 +1627,7 @@ private:
 
 		// fact_database interface
 		size_t size() const noexcept override { return prior->size() + 1; }
-		std::pair<statement_t, perl::scalar> known(size_t n) const override {
+		known_result_t known(size_t n) const override {
 			if (size() <= n) throw std::logic_error("gentzen::syntactical_entailment_2ary_infer::known: size() <= n");
 			auto prior_s = prior->size();
 			if (prior_s > n) return prior->known(n);
@@ -1641,7 +1645,7 @@ private:
 				stage[i + 1] = join(stage2, "");
 			}
 
-			return std::pair(inferred, join(stage, " "));
+			return { {inferred, join(stage, " ")}, {this, 0} };
 		}
 		std::shared_ptr<fact_database> parent() const { return prior; }
 
@@ -1674,11 +1678,12 @@ private:
 
 		// fact_database interface
 		size_t size() const noexcept override { return prior->size()+hypotheses.size(); }
-		std::pair<statement_t, perl::scalar> known(size_t n) const override { 
+		known_result_t known(size_t n) const override {
 			if (size() <= n) throw std::logic_error("gentzen::syntactical_entailment_introduction_start::known: size() <= n");
 			auto prior_s = prior->size();
 			if (prior_s > n) return prior->known(n);
-			return std::pair(hypotheses[n-prior_s].first, str_hypothesis);
+			auto local = n - prior_s;
+			return { {hypotheses[local].first, str_hypothesis}, {this, local} };
 		}
 		std::shared_ptr<fact_database> parent() const { return prior; }
 
@@ -1768,7 +1773,7 @@ private:
 
 		// fact_database interface
 		size_t size() const noexcept override { return prior->size() + 1; }
-		std::pair<statement_t, perl::scalar> known(size_t n) const override {
+		known_result_t known(size_t n) const override {
 			if (size() <= n) throw std::logic_error("gentzen::syntactical_entailment_introduction_start::known: size() <= n");
 			auto prior_s = prior->size();
 			if (prior_s > n) return prior->known(n);
@@ -1789,7 +1794,7 @@ private:
 				stage[i + 1] = join(stage2, "");
 			}
 
-			return std::pair(inferred.first, join(stage," "));
+			return { {inferred.first, join(stage," ")}, {this, 0} };
 		}
 		std::shared_ptr<fact_database> parent() const { return prior; }
 
@@ -1805,10 +1810,10 @@ private:
 			auto conclusion = src->known(src->size() - 1);
 
 			// construct a syntactical_entailment_2ary object, if we assumed 2 hypotheses
-			if (auto ary2 = syntactical_entailment_2ary::construct(*lhs, conclusion.first)) return ary2;
+			if (auto ary2 = syntactical_entailment_2ary::construct(*lhs, conclusion.first.first)) return ary2;
 
 			// base case
-			std::unique_ptr<formal::lex_node> rhs(node_from(conclusion.first));
+			std::unique_ptr<formal::lex_node> rhs(node_from(conclusion.first.first));
 			std::unique_ptr<formal::lex_node> ret(make_binary_node(std::string_view("&#9500;"), formal::Tokenized, std::move(lhs), std::move(rhs)));
 
 			return new syntactical_entailment_introduction(ret, hypotheses, src);
@@ -1820,7 +1825,8 @@ private:
 		std::shared_ptr<fact_database> prior;
 		std::vector<statement_t> _lemmas;	// \todo track how these were derived as well
 
-		std::vector<std::shared_ptr<syntactical_entailment_introduction_start> > conditional_reasoning;
+		// each syntactical_entailment_introduction_start has its own successor lemmas instance
+		std::map<const syntactical_entailment_introduction_start*, std::shared_ptr<lemmas> > conditional_reasoning;
 
 		lemmas(decltype(prior) assumed) : prior(assumed) {}
 	public:
@@ -1837,15 +1843,22 @@ private:
 			return oaoo;
 		}
 
+		std::shared_ptr<lemmas> get_for(const syntactical_entailment_introduction_start* key, std::shared_ptr<fact_database> assume) {
+			auto& slot = conditional_reasoning[key];
+			if (!slot) slot = std::shared_ptr<lemmas>(new lemmas(std::move(assume)));
+			return slot;
+		}
+
 		// fact_database interface
 		size_t size() const noexcept override { return prior->size() + _lemmas.size(); }
-		std::pair<statement_t, perl::scalar> known(size_t n) const override {
-			if (size() <= n) throw std::logic_error("gentzen::syntactical_entailment_2ary_infer::known: size() <= n");
+		known_result_t known(size_t n) const override {
+			if (size() <= n) throw std::logic_error("gentzen::lemmas::known: size() <= n");
 			auto prior_s = prior->size();
 			if (prior_s > n) return prior->known(n);
 
+			auto local = n - prior_s;
 			// \todo pass-through rationale
-			return std::pair(_lemmas[n - prior_s], std::string_view("prototyping lemma"));
+			return { {_lemmas[local], std::string_view("prototyping lemma")}, {this, local} };
 		}
 		std::shared_ptr<fact_database> parent() const override { return prior; }
 
@@ -1861,6 +1874,29 @@ private:
 		// end observed interface
 
 	};
+
+	// \todo adjust this further, we actually need per-id results
+
+	// Checks whether all notation ids in hypothesis_ids are known to some ancestor
+	// of the given fact_database. Intended to be called from code controlled by
+	// syntactical_entailment_2ary_infer::construct.
+	// Returns the ancestor that contains them all, or nullptr if not found.
+	const fact_database* hypothesis_ids_contained_by_ancestor(const std::shared_ptr<fact_database>& db, const std::vector<size_t>& hypothesis_ids) {
+		if (hypothesis_ids.empty()) return nullptr;
+
+		auto cursor = db;
+		while (cursor) {
+			auto s = cursor->size();
+			bool all_found = true;
+			for (auto id : hypothesis_ids) {
+				if (id >= s) { all_found = false; break; }
+			}
+			if (all_found) return cursor.get();
+			cursor = cursor->parent();
+		}
+		return nullptr;
+	}
+
 } // end namespace gentzen
 
 // end prototype class
