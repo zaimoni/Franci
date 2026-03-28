@@ -1310,6 +1310,16 @@ private:
 		return nullptr;
 	}
 
+	template<class T> requires (std::derived_from<T, fact_database> && !std::same_as<T, fact_database>)
+	std::vector<T*> find_ancestors(std::shared_ptr<fact_database> db) {
+		std::vector<T*> ret;
+
+		while (db = db->parent()) {
+			if (auto p = dynamic_cast<T*>(db.get())) ret.push_back(p);
+		}
+		return ret;
+	}
+
 	std::optional<std::pair<std::shared_ptr<fact_database>, size_t> > offset(std::shared_ptr<fact_database> tip, const size_t notation_id) {
 		while (tip) {
 			if (auto test = tip->offset(notation_id)) return std::pair(tip, *test);
@@ -1942,6 +1952,29 @@ private:
 			cursor = cursor->parent();
 		}
 		return nullptr;
+	}
+
+	std::partial_ordering reachable(std::shared_ptr<lemmas> lhs, std::shared_ptr<lemmas> rhs) {
+		if (!lhs) return std::partial_ordering::unordered;
+		if (!rhs) return std::partial_ordering::unordered;
+		if (lhs.get() == rhs.get()) return std::partial_ordering::equivalent;
+		decltype(auto) anchor = lemmas::get();
+		if (anchor.get() == lhs.get()) return std::partial_ordering::less;
+		if (anchor.get() == rhs.get()) return std::partial_ordering::greater;
+
+		auto ancestors = find_ancestors<lemmas>(lhs);
+		for(auto x : ancestors) if (x == rhs.get()) return std::partial_ordering::greater;
+		ancestors = find_ancestors<lemmas>(rhs);
+		for(auto x : ancestors) if (x == lhs.get()) return std::partial_ordering::less;
+
+		return std::partial_ordering::unordered;
+	}
+
+	std::shared_ptr<lemmas> infer_to(std::shared_ptr<lemmas> lhs, std::shared_ptr<lemmas> rhs) {
+		const auto test = reachable(lhs, rhs);
+		if (test == std::partial_ordering::unordered) return nullptr;
+		if (test == std::partial_ordering::greater) return rhs;
+		return lhs;
 	}
 
 	std::shared_ptr<lemmas> inference_destination(std::shared_ptr<fact_database> db) {
