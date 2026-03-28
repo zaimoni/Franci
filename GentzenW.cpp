@@ -1935,6 +1935,14 @@ private:
 		return nullptr;
 	}
 
+	lemmas* inference_destination(std::shared_ptr<fact_database> db) {
+		if (auto p = dynamic_cast<lemmas*>(db.get())) return p;
+		if (auto p = dynamic_cast<axioms*>(db.get())) return lemmas::get().get();
+//		if (auto p = dynamic_cast<syntactical_entailment_introduction_start*>(db.get())) return lemmas::get().get();
+
+		return nullptr;
+	}
+
 } // end namespace gentzen
 
 // end prototype class
