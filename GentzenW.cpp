@@ -1296,11 +1296,14 @@ private:
 		// audit trail: first pair is (statement, rationale), second pair is (which database, local index within that database)
 		using known_result_t = std::pair<std::pair<statement_t, perl::scalar>, std::pair<const fact_database*, size_t>>;
 
+		const char * const rationale_oob = "*::rationale(size_t) out of bounds";
+
 		virtual ~fact_database() = default;
 		virtual size_t size() const noexcept = 0;
 		virtual known_result_t known(size_t n) const = 0;
 		virtual std::shared_ptr<fact_database> parent() const = 0;
 		virtual std::optional<size_t> offset(size_t notation_id) const = 0;
+		virtual std::pair<std::pair<statement_t, perl::scalar>, size_t> rationale(size_t n) const = 0;
 	};
 
 	template<class T> requires (std::derived_from<T, fact_database> && !std::same_as<T, fact_database>)
@@ -1354,6 +1357,11 @@ private:
 			if (0 >= notation_id) return std::nullopt;
 			if (_axioms.size() < notation_id) return std::nullopt;
 			return notation_id - 1;
+		}
+
+		std::pair<std::pair<statement_t, perl::scalar>, size_t> rationale(size_t n) const override {
+			if (_axioms.size() <= n) throw std::logic_error(rationale_oob);
+			return std::pair(std::pair(_axioms[n], str_axiom), n);
 		}
 
 		// observed interface
@@ -1671,7 +1679,26 @@ private:
 			return std::nullopt;
 		}
 
-#if 0
+		std::pair<std::pair<statement_t, perl::scalar>, size_t> rationale(size_t n) const override {
+			if (1 <= n) throw std::logic_error(rationale_oob);
+
+			std::vector<perl::scalar> stage2(3);
+			stage2[0] = std::string_view("label(");
+			stage2[2] = std::string_view(")");
+
+			std::vector<perl::scalar> stage(hypothesis_ids.size() + 1);
+
+			stage[0] = rule->to_s();
+			ptrdiff_t i = hypothesis_ids.size();
+			while (0 <= --i) {
+				stage2[1] = std::to_string(hypothesis_ids[i]);
+				stage[i + 1] = join(stage2, "");
+			}
+
+			return std::pair(std::pair(inferred.first, join(stage, " ")), 0);
+		}
+
+#if 2
 		static syntactical_entailment_2ary_infer* construct(std::shared_ptr<syntactical_entailment_2ary> r, statement_t infer,
 			decltype(hypothesis_ids) hyp_ids, std::shared_ptr<fact_database> prior)
 		{
@@ -1718,6 +1745,11 @@ private:
 				if (x.second == notation_id) return i;
 			}
 			return std::nullopt;
+		}
+
+		std::pair<std::pair<statement_t, perl::scalar>, size_t> rationale(size_t n) const override {
+			if (hypotheses.size() <= n) throw std::logic_error(rationale_oob);
+			return std::pair(std::pair(hypotheses[n].first, str_hypothesis), hypotheses[n].second);
 		}
 
 		formal::lex_node* hypothesis_node() const {
@@ -1838,6 +1870,26 @@ private:
 			return std::nullopt;
 		}
 
+		std::pair<std::pair<statement_t, perl::scalar>, size_t> rationale(size_t n) const override {
+			if (1 <= n) throw std::logic_error(rationale_oob);
+
+			std::vector<perl::scalar> stage2(3);
+			stage2[0] = std::string_view("label(");
+			stage2[2] = std::string_view(")");
+
+			auto ids = hypotheses->hypothesis_ids();
+			std::vector<perl::scalar> stage(ids.size() + 1);
+
+			stage[0] = str_introduction;
+			ptrdiff_t i = ids.size();
+			while (0 <= --i) {
+				stage2[1] = std::to_string(ids[i]);
+				stage[i + 1] = join(stage2, "");
+			}
+
+			return std::pair(std::pair(inferred.first, join(stage, " ")), inferred.second);
+		}
+
 		static std::optional<std::variant<syntactical_entailment_introduction*, syntactical_entailment_2ary*> > construct(std::shared_ptr<fact_database> src) {
 			if (!src) return std::nullopt;
 			if (dynamic_cast<syntactical_entailment_introduction_start*>(src.get())) return std::nullopt;
@@ -1913,6 +1965,10 @@ private:
 			return std::nullopt;
 		}
 
+		std::pair<std::pair<statement_t, perl::scalar>, size_t> rationale(size_t n) const override {
+			if (_lemmas.size() <= n) throw std::logic_error(rationale_oob);
+			return std::pair(std::pair(_lemmas[n].first, std::string_view("prototyping lemma")), _lemmas[n].second);
+		}
 
 		// observed interface
 		void watched_by(const std::shared_ptr<zaimoni::observer<statement_t>>& src) override {
