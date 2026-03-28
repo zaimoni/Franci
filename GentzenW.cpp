@@ -1864,9 +1864,7 @@ private:
 	private:
 		std::shared_ptr<fact_database> prior;
 		std::vector<std::pair<statement_t, size_t> > _lemmas;	// \todo track how these were derived as well
-
-		// each syntactical_entailment_introduction_start has its own successor lemmas instance
-		std::map<const syntactical_entailment_introduction_start*, std::shared_ptr<lemmas> > conditional_reasoning;
+		std::vector<std::shared_ptr<syntactical_entailment_introduction_start> > conditional_reasoning;
 
 		lemmas(decltype(prior) assumed) : prior(assumed) {}
 	public:
@@ -1881,12 +1879,6 @@ private:
 			static std::shared_ptr<lemmas> oaoo;
 			if (!oaoo) oaoo = std::shared_ptr<lemmas>(new lemmas(axioms::get()));
 			return oaoo;
-		}
-
-		std::shared_ptr<lemmas> get_for(const syntactical_entailment_introduction_start* key, std::shared_ptr<fact_database> assume) {
-			auto& slot = conditional_reasoning[key];
-			if (!slot) slot = std::shared_ptr<lemmas>(new lemmas(std::move(assume)));
-			return slot;
 		}
 
 		// fact_database interface
