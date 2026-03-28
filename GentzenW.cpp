@@ -1952,11 +1952,12 @@ private:
 		return nullptr;
 	}
 
-	lemmas* inference_destination(std::shared_ptr<fact_database> db) {
-		if (auto p = dynamic_cast<lemmas*>(db.get())) return p;
-		if (auto p = dynamic_cast<axioms*>(db.get())) return lemmas::get().get();
-		if (auto p = dynamic_cast<syntactical_entailment_introduction_start*>(db.get())) return p->infer_dest().get();
+	std::shared_ptr<lemmas> inference_destination(std::shared_ptr<fact_database> db) {
+		if (auto p = dynamic_cast<lemmas*>(db.get())) return std::shared_ptr<lemmas>(db, p);
+		if (auto p = dynamic_cast<axioms*>(db.get())) return lemmas::get();
+		if (auto p = dynamic_cast<syntactical_entailment_introduction_start*>(db.get())) return p->infer_dest();
 
+		// arguably an invariant violation
 		return nullptr;
 	}
 
