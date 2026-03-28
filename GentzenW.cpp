@@ -1677,10 +1677,14 @@ private:
 #endif
 	};
 
+	class lemmas;
+	std::shared_ptr<lemmas> infer_dest_for(std::shared_ptr<fact_database> src);
+
 	class syntactical_entailment_introduction_start final : public fact_database {
 	private:
 		std::shared_ptr<fact_database> prior;
 		std::vector<std::pair<statement_t, size_t> > hypotheses;
+		std::shared_ptr<lemmas> inference_dest;
 
 		static const constexpr std::string_view str_hypothesis = std::string_view("hypothesis");
 
@@ -1713,6 +1717,9 @@ private:
 			if (hypotheses.size() <= n) throw std::logic_error(rationale_oob);
 			return std::pair(std::pair(hypotheses[n].first, str_hypothesis), hypotheses[n].second);
 		}
+		// end fact_database inferface
+
+		std::shared_ptr<lemmas> infer_dest() const { return inference_dest; }
 
 		formal::lex_node* hypothesis_node() const {
 			std::vector<std::unique_ptr<formal::lex_node> > stage;
@@ -1751,13 +1758,15 @@ private:
 		static bool can_construct(const statement_t& src) { return valid_placeholder_symbol_content(src); }
 
 	private:
-		static syntactical_entailment_introduction_start* finish_construct(decltype(hypotheses)&& stage, std::shared_ptr<fact_database> assume) {
+		static std::shared_ptr<syntactical_entailment_introduction_start> finish_construct(decltype(hypotheses) && stage, std::shared_ptr<fact_database> assume) {
 			if (!assume) assume = axioms::get();
-			return new syntactical_entailment_introduction_start(assume, std::move(stage));
+			auto ret = std::shared_ptr<syntactical_entailment_introduction_start>(new syntactical_entailment_introduction_start(assume, std::move(stage)));
+			ret->inference_dest = infer_dest_for(ret);
+			return ret;
 		}
 
 	public:
-		static syntactical_entailment_introduction_start* construct(statement_t src, std::shared_ptr<fact_database> assume = nullptr) {
+		static std::shared_ptr<syntactical_entailment_introduction_start> construct(statement_t src, std::shared_ptr<fact_database> assume = nullptr) {
 			if (!can_construct(src)) return nullptr;
 
 			decltype(hypotheses) stage;
@@ -1766,7 +1775,7 @@ private:
 			return finish_construct(std::move(stage), assume);
 		}
 
-		static syntactical_entailment_introduction_start* construct(statement_t src, statement_t src2, std::shared_ptr<fact_database> assume = nullptr) {
+		static std::shared_ptr<syntactical_entailment_introduction_start> construct(statement_t src, statement_t src2, std::shared_ptr<fact_database> assume = nullptr) {
 			if (!can_construct(src)) return nullptr;
 			if (!can_construct(src2)) return nullptr;
 
@@ -1911,7 +1920,15 @@ private:
 		}
 		// end observed interface
 
+		static std::shared_ptr<lemmas> infer_dest_for(std::shared_ptr<fact_database>& src) {
+			return std::shared_ptr<lemmas>(new lemmas(src));
+		}
+
 	};
+
+	std::shared_ptr<lemmas> infer_dest_for(std::shared_ptr<fact_database> src) {
+		return lemmas::infer_dest_for(src);
+	}
 
 	// \todo adjust this further, we actually need per-id results
 
@@ -1938,7 +1955,7 @@ private:
 	lemmas* inference_destination(std::shared_ptr<fact_database> db) {
 		if (auto p = dynamic_cast<lemmas*>(db.get())) return p;
 		if (auto p = dynamic_cast<axioms*>(db.get())) return lemmas::get().get();
-//		if (auto p = dynamic_cast<syntactical_entailment_introduction_start*>(db.get())) return lemmas::get().get();
+		if (auto p = dynamic_cast<syntactical_entailment_introduction_start*>(db.get())) return p->infer_dest().get();
 
 		return nullptr;
 	}
