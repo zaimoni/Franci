@@ -1293,14 +1293,10 @@ private:
 	}
 
 	struct fact_database {
-		// audit trail: first pair is (statement, rationale), second pair is (which database, local index within that database)
-		using known_result_t = std::pair<std::pair<statement_t, perl::scalar>, std::pair<const fact_database*, size_t>>;
-
 		const char * const rationale_oob = "*::rationale(size_t) out of bounds";
 
 		virtual ~fact_database() = default;
 		virtual size_t size() const noexcept = 0;
-		virtual known_result_t known(size_t n) const = 0;
 		virtual std::shared_ptr<fact_database> parent() const = 0;
 		virtual std::optional<size_t> offset(size_t notation_id) const = 0;
 		virtual std::pair<std::pair<statement_t, perl::scalar>, size_t> rationale(size_t n) const = 0;
@@ -1344,13 +1340,6 @@ private:
 
 		// fact_database interface
 		size_t size() const noexcept override { return _axioms.size(); }
-
-		known_result_t known(size_t n) const override {
-			if (size() <= n) throw std::logic_error("gentzen::axioms::known: size() <= n");
-			// \todo once we have an axiom schema loading, report the rationale for axiom schemas as axiom schema
-			return { {_axioms[n], str_axiom}, {this, n} };
-		}
-
 		std::shared_ptr<fact_database> parent() const noexcept { return nullptr; }
 
 		std::optional<size_t> offset(size_t notation_id) const override {
@@ -1445,7 +1434,7 @@ private:
 			return std::pair(src ,id);
 		}
 
-		std::optional<statement_t> lookup(size_t src) {
+		std::optional<statement_t> lookup(size_t notation_id) {
 			struct _lookup {
 				std::optional<statement_t> operator()(const std::weak_ptr<const formal::parsed>& x) {
 					auto ret = x.lock();
@@ -1461,11 +1450,11 @@ private:
 
 			static _lookup ooao;
 
-			size_t n = std::numeric_limits<size_t>::max() - src;
+			size_t n = std::numeric_limits<size_t>::max() - notation_id;
 			if (_registry.size() <= n) {
 				// axioms are special cases
-				if (0 < src && axioms::get()->size() >= src) {
-					return axioms::get()->known(src - 1).first.first;
+				if (0 < notation_id && axioms::get()->size() >= notation_id) {
+					return axioms::get()->rationale(notation_id - 1).first.first;
 				}
 				return std::nullopt;
 			}
@@ -1649,27 +1638,7 @@ private:
 		~syntactical_entailment_2ary_infer() = default;
 
 		// fact_database interface
-		size_t size() const noexcept override { return prior->size() + 1; }
-		known_result_t known(size_t n) const override {
-			if (size() <= n) throw std::logic_error("gentzen::syntactical_entailment_2ary_infer::known: size() <= n");
-			auto prior_s = prior->size();
-			if (prior_s > n) return prior->known(n);
-
-			std::vector<perl::scalar> stage2(3);
-			stage2[0] = std::string_view("label(");
-			stage2[2] = std::string_view(")");
-
-			std::vector<perl::scalar> stage(hypothesis_ids.size() + 1);
-
-			stage[0] = rule->to_s();
-			ptrdiff_t i = hypothesis_ids.size();
-			while (0 <= --i) {
-				stage2[1] = std::to_string(hypothesis_ids[i]);
-				stage[i + 1] = join(stage2, "");
-			}
-
-			return { {inferred.first, join(stage, " ")}, {this, 0} };
-		}
+		size_t size() const noexcept override { return 1; }
 		std::shared_ptr<fact_database> parent() const { return prior; }
 		std::optional<size_t> offset(size_t notation_id) const override {
 			if (0 >= notation_id) return std::nullopt;
@@ -1726,14 +1695,7 @@ private:
 		~syntactical_entailment_introduction_start() = default;
 
 		// fact_database interface
-		size_t size() const noexcept override { return prior->size()+hypotheses.size(); }
-		known_result_t known(size_t n) const override {
-			if (size() <= n) throw std::logic_error("gentzen::syntactical_entailment_introduction_start::known: size() <= n");
-			auto prior_s = prior->size();
-			if (prior_s > n) return prior->known(n);
-			auto local = n - prior_s;
-			return { {hypotheses[local].first, str_hypothesis}, {this, local} };
-		}
+		size_t size() const noexcept override { return hypotheses.size(); }
 		std::shared_ptr<fact_database> parent() const { return prior; }
 		std::optional<size_t> offset(size_t notation_id) const override {
 			if (0 >= notation_id) return std::nullopt;
@@ -1837,30 +1799,7 @@ private:
 		~syntactical_entailment_introduction() = default;
 
 		// fact_database interface
-		size_t size() const noexcept override { return prior->size() + 1; }
-		known_result_t known(size_t n) const override {
-			if (size() <= n) throw std::logic_error("gentzen::syntactical_entailment_introduction_start::known: size() <= n");
-			auto prior_s = prior->size();
-			if (prior_s > n) return prior->known(n);
-
-			std::vector<perl::scalar> stage2(3);
-			stage2[0] = std::string_view("label(");
-			stage2[2] = std::string_view(")");
-
-			auto ids = hypotheses->hypothesis_ids();
-
-			std::vector<perl::scalar> stage(ids.size() + 1);
-
-
-			stage[0] = str_introduction;
-			ptrdiff_t i = ids.size();
-			while (0 <= --i) {
-				stage2[1] = std::to_string(ids[i]);
-				stage[i + 1] = join(stage2, "");
-			}
-
-			return { {inferred.first, join(stage," ")}, {this, 0} };
-		}
+		size_t size() const noexcept override { return 1; }
 		std::shared_ptr<fact_database> parent() const { return prior; }
 		std::optional<size_t> offset(size_t notation_id) const override {
 			if (0 >= notation_id) return std::nullopt;
@@ -1899,7 +1838,7 @@ private:
 
 			// general case
 			std::unique_ptr<formal::lex_node> lhs(hypotheses->hypothesis_node());
-			auto conclusion = src->known(src->size() - 1);
+			auto conclusion = src->rationale(src->size() - 1);
 
 			// construct a syntactical_entailment_2ary object, if we assumed 2 hypotheses
 			if (auto ary2 = syntactical_entailment_2ary::construct(*lhs, conclusion.first.first)) return ary2;
@@ -1942,16 +1881,7 @@ private:
 		}
 
 		// fact_database interface
-		size_t size() const noexcept override { return prior->size() + _lemmas.size(); }
-		known_result_t known(size_t n) const override {
-			if (size() <= n) throw std::logic_error("gentzen::lemmas::known: size() <= n");
-			auto prior_s = prior->size();
-			if (prior_s > n) return prior->known(n);
-
-			auto local = n - prior_s;
-			// \todo pass-through rationale
-			return { {_lemmas[local].first, std::string_view("prototyping lemma")}, {this, local} };
-		}
+		size_t size() const noexcept override { return _lemmas.size(); }
 		std::shared_ptr<fact_database> parent() const override { return prior; }
 		std::optional<size_t> offset(size_t notation_id) const override {
 			if (0 >= notation_id) return std::nullopt;
