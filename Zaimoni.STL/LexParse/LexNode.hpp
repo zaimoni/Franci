@@ -218,8 +218,8 @@ namespace formal {
 			return nullptr;
 		}
 
-		void diagnose(std::vector<std::string>& dest);
-		std::vector<std::string> diagnose();
+		void diagnose(std::vector<std::string>& dest) const;
+		std::vector<std::string> diagnose() const;
 
 		auto anchor_code() const noexcept { return classify(_anchor); }
 		auto post_anchor_code() const noexcept { return classify(_post_anchor); }

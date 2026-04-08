@@ -357,7 +357,7 @@ namespace formal {
 		return buf;
 	}
 
-	void lex_node::diagnose(std::vector<std::string>& dest)
+	void lex_node::diagnose(std::vector<std::string>& dest) const
 	{
 		static const std::string a_msg("anchor: ");
 		static const std::string pa_msg("post anchor: ");
@@ -436,7 +436,7 @@ namespace formal {
 		return ret;
 	}
 
-	std::vector<std::string> lex_node::diagnose()
+	std::vector<std::string> lex_node::diagnose() const
 	{
 		std::vector<std::string> ret;
 
