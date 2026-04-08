@@ -254,6 +254,29 @@ static constexpr std::pair<std::string_view, int> reserved_atomic[] = {
 	{",", 1},
 };
 
+void remove_grouping_parentheses(formal::lex_node*& src)
+{
+	if (!src) return;
+restart:
+	auto anchor = src->c_anchor<formal::word>();
+	if (!anchor) return;
+	if (anchor->value() != reserved_atomic[0].first) return;
+	auto post_anchor = src->c_post_anchor<formal::word>();
+	if (!post_anchor) return;
+	if (post_anchor->value() != reserved_atomic[1].first) return;
+	if (!src->prefix().empty()) return;
+	if (!src->postfix().empty()) return;
+	if (!src->fragments().empty()) return;
+	if (1 != src->infix().size()) return;
+
+	// simulate tail recursion
+	auto relay = src->infix().front(); // this has to be a copy, not a reference
+	src->infix().front() = nullptr;
+	delete src;
+	src = relay;
+	goto restart;
+}
+
 bool detect_comma(const formal::lex_node& src) {
 	if (const auto x = src.c_anchor<formal::word>()) return comma == x->value();
 	return false;
@@ -1617,6 +1640,11 @@ private:
 
 			decltype(auto) lhs = *src.prefix().front();
 
+			// if grouping parantheses are actually needed, they'll be restored by to_s()
+			remove_grouping_parentheses(lhs.prefix().front());
+			remove_grouping_parentheses(lhs.postfix().front());
+			remove_grouping_parentheses(src.postfix().front());
+
 			// tag placeholder-syntax symbols now
 			tag_placeholder_syntax tag_this;
 			tag_this(lhs.prefix().front());
@@ -2874,12 +2902,16 @@ private:
 						std::unique_ptr<formal::parsed> test(gentzen::syntactical_entailment_2ary::construct(*stage.front()));
 						std::cout << (test ? "non-null" : "null") << std::endl;
 						if (test) {
+#if 0
 							for (decltype(auto) str : test->diagnose()) {
 								std::cout << str << std::endl;
 							}
-							continue;
+							std::cout << test->to_s() << std::endl;
+#endif
+							std::unique_ptr<formal::lex_node> relay(new formal::lex_node(std::shared_ptr<const formal::parsed>(test.release())));
+							delete stage.front();
+							stage.front() = relay.release();
 						}
-						// ....
 					}
 #endif
 

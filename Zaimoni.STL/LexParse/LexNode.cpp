@@ -394,15 +394,19 @@ namespace formal {
 			}
 			void operator()(const zaimoni::COW<lex_node>& x) {
 				_x.push_back(_pre + x->to_s());
+				x->diagnose(_x);
 			}
 			void operator()(const zaimoni::COW<parsed>& x) {
 				_x.push_back(_pre + x->to_s());
+				x->diagnose(_x);
 			}
 			void operator()(const std::shared_ptr<const parsed>& x) {
 				_x.push_back(_pre + x->to_s());
+				x->diagnose(_x);
 			}
 			void operator()(const std::shared_ptr<const lex_node>& x) {
 				_x.push_back(_pre + x->to_s());
+				x->diagnose(_x);
 			}
 			void operator()(const std::shared_ptr<const word>& w) {
 				_x.push_back(_pre + std::string(w->value()));
