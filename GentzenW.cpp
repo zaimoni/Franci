@@ -1236,6 +1236,10 @@ private:
 			return std::visit([](const auto& x) { return x->origin(); }, *this);
 		}
 
+		void diagnose(std::vector<std::string>& dest) const {
+			return std::visit([&](const auto& x) { return x->diagnose(dest); }, *this);
+		}
+
 	private:
 		static base _from_node(formal::lex_node*& src) {
 			if (!src) throw std::logic_error("!src");
@@ -1573,6 +1577,12 @@ private:
 			}
 
 			return join(ret, std::string_view(" "));
+		}
+
+		void diagnose(std::vector<std::string>& dest) const override {
+			hypothesis_1.diagnose(dest);
+			hypothesis_2.diagnose(dest);
+			conclusion.diagnose(dest);
 		}
 
 		// unclear if following belong in a sub-interface
@@ -2856,10 +2866,19 @@ private:
 
 					GentzenGrammar().complete_parse(stage);
 
-#if PROTOTYPE
+#if 2
 					if (1 == stage.size() && prior_errors == Errors.count()) {
 						if constexpr (trace_load) std::cerr << "considering test line as axiom\n";
 
+//						std::unique_ptr<gentzen::syntactical_entailment_2ary> test(gentzen::syntactical_entailment_2ary::construct(*stage.front()));
+						std::unique_ptr<formal::parsed> test(gentzen::syntactical_entailment_2ary::construct(*stage.front()));
+						std::cout << (test ? "non-null" : "null") << std::endl;
+						if (test) {
+							for (decltype(auto) str : test->diagnose()) {
+								std::cout << str << std::endl;
+							}
+							continue;
+						}
 						// ....
 					}
 #endif

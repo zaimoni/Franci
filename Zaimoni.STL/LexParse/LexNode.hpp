@@ -20,6 +20,13 @@ namespace formal {
 		virtual src_location origin() const = 0;
 
 		virtual std::string to_s() const = 0;
+//		virtual void diagnose(std::vector<std::string>& dest) const = 0;
+		virtual void diagnose(std::vector<std::string>& dest) const {}
+		std::vector<std::string> diagnose() const {
+			std::vector<std::string> ret;
+			diagnose(ret);
+			return ret;
+		}
 
 		// unclear if following belong in a sub-interface
 		virtual std::optional<perl::scalar> is_not_legal_axiom(bool unconditional) const { return "does not evaluate to a truth value"; }
