@@ -1660,6 +1660,31 @@ private:
 
 			return new syntactical_entailment_2ary(lhs.prefix().front(), lhs.postfix().front(), conclusion);
 		}
+
+		// requires gentzen::symbol_catalog::global_parse to have run first, which is a global_rewriter
+		// so doesn't process as a reformat_to_terminal
+		static bool recognize(formal::lex_node*& src) {
+			enum { trace_parse = 0 };
+
+			std::unique_ptr<formal::parsed> test(gentzen::syntactical_entailment_2ary::construct(*src));
+			if (test) {
+				if constexpr (trace_parse) std::cerr << "syntactical_entailment_2ary::recognize: processing\n";
+				std::unique_ptr<formal::lex_node> relay(new formal::lex_node(std::shared_ptr<const formal::parsed>(test.release())));
+				delete src;
+				src = relay.release();
+				return true;
+			}
+			return false;
+		}
+
+		static bool global_parse(kuroda::parser<formal::lex_node>::edit_span& tokens, kuroda::parser<formal::lex_node>& grammar) {
+			ptrdiff_t n = tokens.size();
+			bool ret = false;
+			while (0 <= --n) {
+				if (recognize(tokens[n])) ret = true;
+			}
+			return ret;
+		}
 	};
 
 	// forward direction.  Modus tollens has too many logic dependencies to handle this cleanly.
@@ -2894,26 +2919,7 @@ private:
 
 					GentzenGrammar().complete_parse(stage);
 
-#if 2
-					if (1 == stage.size() && prior_errors == Errors.count()) {
-						if constexpr (trace_load) std::cerr << "considering test line as axiom\n";
-
-//						std::unique_ptr<gentzen::syntactical_entailment_2ary> test(gentzen::syntactical_entailment_2ary::construct(*stage.front()));
-						std::unique_ptr<formal::parsed> test(gentzen::syntactical_entailment_2ary::construct(*stage.front()));
-						std::cout << (test ? "non-null" : "null") << std::endl;
-						if (test) {
-#if 0
-							for (decltype(auto) str : test->diagnose()) {
-								std::cout << str << std::endl;
-							}
-							std::cout << test->to_s() << std::endl;
-#endif
-							std::unique_ptr<formal::lex_node> relay(new formal::lex_node(std::shared_ptr<const formal::parsed>(test.release())));
-							delete stage.front();
-							stage.front() = relay.release();
-						}
-					}
-#endif
+					// tests of new parsing code go here
 
 					for (decltype(auto) str : diagnose(stage)) {
 						std::cout << str << std::endl;
@@ -3021,9 +3027,11 @@ static kuroda::parser<formal::lex_node>& GentzenGrammar() {
 		ooao->register_terminal(parse_inside_balanced(reserved_atomic[0].first, reserved_atomic[1].first));
 		ooao->register_terminal(parse_inside_balanced(reserved_atomic[2].first, reserved_atomic[3].first));
 		ooao->register_terminal(parse_inside_balanced(reserved_atomic[4].first, reserved_atomic[5].first));
+//		ooao->register_terminal(gentzen::syntactical_entailment_2ary::recognize);
 
 		ooao->register_global_build(undefined_SVO::global_parse);
 		ooao->register_global_build(gentzen::symbol_catalog::global_parse);
+		ooao->register_global_build(gentzen::syntactical_entailment_2ary::global_parse);
 	};
 	return *ooao;
 }
