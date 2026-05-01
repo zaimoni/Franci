@@ -9,6 +9,9 @@
 
 namespace formal {
 
+	class lex_node;
+	struct placeholder_match;	// defined after lex_node
+
 	// abstract interface.
 	struct parsed {
 		virtual ~parsed() = default;
@@ -27,6 +30,11 @@ namespace formal {
 			diagnose(ret);
 			return ret;
 		}
+
+		// returns std::nullopt when the parsed object has no recognizable placeholder structure.
+		// when non-null, the returned placeholder_match owns a freshly-allocated, non-aliased
+		// lex_node tree, and the handles in groups point into that tree.
+		virtual std::optional<placeholder_match> get_placeholder_variables() const;
 
 		// unclear if following belong in a sub-interface
 		virtual std::optional<perl::scalar> is_not_legal_axiom(bool unconditional) const { return "does not evaluate to a truth value"; }
@@ -290,6 +298,26 @@ namespace formal {
 
 	std::string to_string(const kuroda::parser<formal::lex_node>::sequence& src);
 	std::vector<std::string> diagnose(const kuroda::parser<formal::lex_node>::sequence& src);
+
+	// mutable handle into a parent's slot for a placeholder occurrence.
+	// preconditions: the parent slot outlives this handle, and the underlying
+	// subtree is freshly-allocated and not aliased elsewhere.  Lifetime should
+	// not extend past the substitution call that consumed it.
+	struct placeholder_handle : public std::variant<std::shared_ptr<const lex_node>*, lex_node**> {
+		using base = std::variant<std::shared_ptr<const lex_node>*, lex_node**>;
+		using base::base;
+		using base::operator=;
+
+		perl::scalar name() const;
+		void replace(lex_node* src);
+		void replace(std::shared_ptr<const lex_node> src);
+	};
+
+	// the freshly-allocated tree owns the storage that the handles reference.
+	struct placeholder_match {
+		std::unique_ptr<lex_node> tree;
+		std::vector<std::pair<perl::scalar, std::vector<placeholder_handle>>> groups;
+	};
 
 } // namespace formal
 

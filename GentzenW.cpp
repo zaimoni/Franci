@@ -1263,6 +1263,8 @@ private:
 			return std::visit([&](const auto& x) { return x->diagnose(dest); }, *this);
 		}
 
+		std::optional<formal::placeholder_match> get_placeholder_variables() const;
+
 	private:
 		static base _from_node(formal::lex_node*& src) {
 			if (!src) throw std::logic_error("!src");
@@ -1307,6 +1309,19 @@ private:
 		struct visitor {
 			auto operator()(const std::shared_ptr<const formal::parsed>& x) { return new formal::lex_node(x); }
 			auto operator()(const std::shared_ptr<const formal::lex_node>& x) { return new formal::lex_node(x); }
+		};
+		return std::visit(visitor(), src);
+	}
+
+	// freshly-allocated, non-aliased deep copy of the underlying lex_node tree.
+	// returns nullptr for the parsed arm (no general lex_node form available yet).
+	formal::lex_node* deep_clone_to_lex_node(const statement_t& src) {
+		struct visitor {
+			formal::lex_node* operator()(const std::shared_ptr<const formal::parsed>&) { return nullptr; }
+			formal::lex_node* operator()(const std::shared_ptr<const formal::lex_node>& x) {
+				if (!x) return nullptr;
+				return new formal::lex_node(*x);
+			}
 		};
 		return std::visit(visitor(), src);
 	}
@@ -1511,6 +1526,19 @@ private:
 	static_assert(!(used_as_placeholder & symbol_catalog::anchor_is_const_symbol));
 	static_assert(!(used_as_placeholder & symbol_catalog::anchor_is_not_symbol));
 
+	// covers all four substitution variants: uniform/non-uniform x simultaneous/non-simultaneous
+	static constexpr const unsigned long long parsed_substitution = (1ULL << 9); // reserve this flag for lex_node
+
+	static_assert(!(parsed_substitution & formal::Comment));
+	static_assert(!(parsed_substitution & formal::Error));
+	static_assert(!(parsed_substitution & formal::Inert_Token));
+	static_assert(!(parsed_substitution & formal::Tokenized));
+	static_assert(!(parsed_substitution & formal::RequestNormalization));
+	static_assert(!(parsed_substitution & symbol_catalog::anchor_is_symbol));
+	static_assert(!(parsed_substitution & symbol_catalog::anchor_is_const_symbol));
+	static_assert(!(parsed_substitution & symbol_catalog::anchor_is_not_symbol));
+	static_assert(!(parsed_substitution & used_as_placeholder));
+
 	struct tag_placeholder_syntax {
 		void operator()(formal::lex_node* x) {
 			if (is_placeholder_syntax_symbol(x)) {
@@ -1534,6 +1562,109 @@ private:
 			if (!x.empty()) for (decltype(auto) arg : x) (*this)(arg);
 		}
 	};
+
+	// preconditions: tree is freshly-allocated and not aliased.  Recursively walks the
+	// tree and produces lex_node** handles into the parent slot for every descendant
+	// tagged with used_as_placeholder.  Groups by string equality on to_scalar().
+	// The returned handles' lifetime ends with the next mutation of the tree.
+	struct collect_placeholder_handles {
+		std::vector<std::pair<perl::scalar, std::vector<formal::placeholder_handle>>> groups;
+
+		void note(formal::lex_node** slot) {
+			if (!slot || !*slot) return;
+			perl::scalar key = (*slot)->to_scalar();
+			const auto key_view = key.view();
+			for (decltype(auto) g : groups) {
+				if (g.first.view() == key_view) {
+					g.second.emplace_back(slot);
+					return;
+				}
+			}
+			std::vector<formal::placeholder_handle> initial;
+			initial.emplace_back(slot);
+			groups.emplace_back(std::move(key), std::move(initial));
+		}
+
+		void operator()(kuroda::parser<formal::lex_node>::symbols& x) {
+			if (x.empty()) return;
+			for (size_t i = 0; i < x.size(); ++i) {
+				formal::lex_node** slot = &(x[i]);
+				if (!*slot) continue;
+				if ((*slot)->code() & used_as_placeholder) {
+					note(slot);
+					continue;
+				}
+				(*this)(**slot);
+			}
+		}
+
+		void operator()(std::vector<kuroda::parser<formal::lex_node>::symbols>& x) {
+			if (x.empty()) return;
+			for (decltype(auto) arg : x) (*this)(arg);
+		}
+
+		void operator()(formal::lex_node& x) {
+			(*this)(x.prefix());
+			(*this)(x.infix());
+			(*this)(x.postfix());
+			(*this)(x.fragments());
+		}
+	};
+
+	// builds [ <comma-fold of destinations> \ <comma-fold of sources> ] as strictly
+	// binary lex_nodes.  Sets parsed_substitution on the root.  destinations and
+	// sources must be the same nonzero size; ownership of all input pointers is
+	// taken on success.
+	formal::lex_node* make_substitution_node(std::vector<formal::lex_node*> destinations,
+		std::vector<formal::lex_node*> sources)
+	{
+		if (destinations.size() != sources.size()) throw std::logic_error("make_substitution_node: arity mismatch");
+		if (destinations.empty()) throw std::logic_error("make_substitution_node: empty");
+
+		auto comma_fold = [](std::vector<formal::lex_node*>& v) -> std::unique_ptr<formal::lex_node> {
+			std::unique_ptr<formal::lex_node> acc(v.back());
+			v.back() = nullptr;
+			ptrdiff_t i = v.size() - 1;
+			while (0 <= --i) {
+				std::unique_ptr<formal::lex_node> lhs(v[i]);
+				v[i] = nullptr;
+				acc.reset(make_binary_node(comma, 0, std::move(lhs), std::move(acc)));
+			}
+			return acc;
+		};
+
+		std::unique_ptr<formal::lex_node> dest_tree = comma_fold(destinations);
+		std::unique_ptr<formal::lex_node> src_tree = comma_fold(sources);
+
+		std::unique_ptr<formal::lex_node> backslash(make_binary_node(std::string_view("\\"), 0,
+			std::move(dest_tree), std::move(src_tree)));
+
+		// wrap with [ ... ]
+		formal::word* l_bracket = new formal::word(std::string_view("["), formal::src_location(), 0);
+		formal::word* r_bracket = new formal::word(std::string_view("]"), formal::src_location(), 0);
+		std::unique_ptr<formal::lex_node> root(new formal::lex_node(l_bracket, 0));
+		root->infix().push_back(backslash.release());
+		root->set_null_post_anchor(r_bracket);
+		root->learn(parsed_substitution);
+		return root.release();
+	}
+
+	std::optional<formal::placeholder_match> statement_t::get_placeholder_variables() const {
+		struct visitor {
+			std::optional<formal::placeholder_match> operator()(const std::shared_ptr<const formal::parsed>& x) const {
+				return x->get_placeholder_variables();
+			}
+			std::optional<formal::placeholder_match> operator()(const std::shared_ptr<const formal::lex_node>& x) const {
+				if (!x) return std::nullopt;
+				std::unique_ptr<formal::lex_node> tree(new formal::lex_node(*x));
+				collect_placeholder_handles walker;
+				walker(*tree);
+				if (walker.groups.empty()) return std::nullopt;
+				return formal::placeholder_match{std::move(tree), std::move(walker.groups)};
+			}
+		};
+		return std::visit(visitor(), *this);
+	}
 
 	class syntactical_entailment_2ary final : public formal::parsed {
 	private:
@@ -1608,6 +1739,22 @@ private:
 			conclusion.diagnose(dest);
 		}
 
+		std::optional<formal::placeholder_match> get_placeholder_variables() const override {
+			std::unique_ptr<formal::lex_node> h1(deep_clone_to_lex_node(hypothesis_1));
+			std::unique_ptr<formal::lex_node> h2(deep_clone_to_lex_node(hypothesis_2));
+			std::unique_ptr<formal::lex_node> c(deep_clone_to_lex_node(conclusion));
+			if (!h1 || !h2 || !c) return std::nullopt;
+
+			std::unique_ptr<formal::lex_node> lhs(make_binary_node(comma, 0, std::move(h1), std::move(h2)));
+			std::unique_ptr<formal::lex_node> tree(make_binary_node(std::string_view("&#9500;"), 0,
+				std::move(lhs), std::move(c)));
+
+			collect_placeholder_handles walker;
+			walker(*tree);
+			if (walker.groups.empty()) return std::nullopt;
+			return formal::placeholder_match{std::move(tree), std::move(walker.groups)};
+		}
+
 		// unclear if following belong in a sub-interface
 		std::optional<perl::scalar> is_not_legal_axiom(bool unconditional) const override { return std::nullopt; }
 		std::optional<perl::scalar> before_add_axiom_handler() const override { return std::nullopt; }
@@ -1659,6 +1806,47 @@ private:
 			if (!valid_placeholder_symbol_content(conclusion)) return nullptr;
 
 			return new syntactical_entailment_2ary(lhs.prefix().front(), lhs.postfix().front(), conclusion);
+		}
+
+		// returns an empty unique_ptr when no match (wrong shape, parsed-arm hypothesis, or
+		// hypothesis_idx out of range).  On match, returns a freshly-allocated [d1, d2 \ s1, s2]
+		// lex_node tree tagged with parsed_substitution.  hypothesis_idx selects which hypothesis
+		// pattern to match against; hypotheses whose entire content is a single placeholder
+		// (e.g. hypothesis_2 = P in modus ponens) silently yield an empty result.
+		std::unique_ptr<formal::lex_node> get_uniform_simultaneous_substitution(const statement_t& candidate, size_t hypothesis_idx) const {
+			if (1 < hypothesis_idx) return nullptr;
+			const statement_t& hyp = (0 == hypothesis_idx) ? hypothesis_1 : hypothesis_2;
+
+			// 7.1: parsed-arm hypothesis is unsupported for now
+			auto hyp_node = std::get_if<std::shared_ptr<const formal::lex_node>>(&hyp);
+			if (!hyp_node || !*hyp_node) return nullptr;
+			const formal::lex_node& hyp_ref = **hyp_node;
+			if (!(hyp_ref.code() & symbol_catalog::anchor_is_symbol)) return nullptr;
+			if (1 != hyp_ref.offset()) return nullptr;
+			if (!is_strict_binary_node(hyp_ref)) return nullptr;
+
+			auto cand_node = std::get_if<std::shared_ptr<const formal::lex_node>>(&candidate);
+			if (!cand_node || !*cand_node) return nullptr;
+			const formal::lex_node& cand_ref = **cand_node;
+			if (!(cand_ref.code() & symbol_catalog::anchor_is_symbol)) return nullptr;
+			if (1 != cand_ref.offset()) return nullptr;
+			if (!is_strict_binary_node(cand_ref)) return nullptr;
+
+			std::unique_ptr<formal::lex_node> dest_pre(new formal::lex_node(*cand_ref.prefix().front()));
+			std::unique_ptr<formal::lex_node> dest_post(new formal::lex_node(*cand_ref.postfix().front()));
+			std::unique_ptr<formal::lex_node> src_pre(new formal::lex_node(*hyp_ref.prefix().front()));
+			std::unique_ptr<formal::lex_node> src_post(new formal::lex_node(*hyp_ref.postfix().front()));
+
+			std::vector<formal::lex_node*> destinations;
+			std::vector<formal::lex_node*> sources;
+			destinations.reserve(2);
+			sources.reserve(2);
+			destinations.push_back(dest_pre.release());
+			destinations.push_back(dest_post.release());
+			sources.push_back(src_pre.release());
+			sources.push_back(src_post.release());
+
+			return std::unique_ptr<formal::lex_node>(make_substitution_node(std::move(destinations), std::move(sources)));
 		}
 
 		// requires gentzen::symbol_catalog::global_parse to have run first, which is a global_rewriter
@@ -2920,6 +3108,35 @@ private:
 					GentzenGrammar().complete_parse(stage);
 
 					// tests of new parsing code go here
+					if (1 == stage.size() && prior_errors == Errors.count()) {
+						// dump placeholder grouping for any parsed object that exposes one
+						if (auto relay = stage.front()->shared_anchor<formal::parsed>()) {
+							if (auto match = relay->get_placeholder_variables()) {
+								std::cout << "placeholder_variables of " << relay->to_s() << ":\n";
+								for (const auto& g : match->groups) {
+									std::cout << "  " << g.first.view() << " x " << g.second.size() << "\n";
+								}
+							}
+						}
+						// probe: if the test line itself looks like a candidate (lex_node arm),
+						// try to match it against every loaded 2-ary entailment axiom and dump
+						// the resulting substitution.
+						if (auto raw = stage.front()->shared_anchor<formal::lex_node>()) {
+							gentzen::statement_t candidate(raw);
+							auto axiom_set = gentzen::axioms::get();
+							for (size_t i = 0; i < axiom_set->size(); ++i) {
+								const auto& axiom_stmt = axiom_set->rationale(i).first.first;
+								auto p = std::get_if<std::shared_ptr<const formal::parsed>>(&axiom_stmt);
+								if (!p || !*p) continue;
+								auto rule = std::dynamic_pointer_cast<const gentzen::syntactical_entailment_2ary>(*p);
+								if (!rule) continue;
+								if (auto subst = rule->get_uniform_simultaneous_substitution(candidate, 0)) {
+									std::cout << "substitution against axiom " << (i+1) << " hyp 0: "
+										<< subst->to_s() << "\n";
+								}
+							}
+						}
+					}
 
 					for (decltype(auto) str : diagnose(stage)) {
 						std::cout << str << std::endl;

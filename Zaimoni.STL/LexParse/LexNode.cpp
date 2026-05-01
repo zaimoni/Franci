@@ -629,6 +629,39 @@ restart:
 		delete src;
 		src = nullptr;
 	}
+
+	std::optional<placeholder_match> parsed::get_placeholder_variables() const { return std::nullopt; }
+
+	perl::scalar placeholder_handle::name() const {
+		struct visitor {
+			perl::scalar operator()(std::shared_ptr<const lex_node>* x) const {
+				if (!x || !*x) throw std::logic_error("placeholder_handle::name: null shared slot");
+				return (**x).to_scalar();
+			}
+			perl::scalar operator()(lex_node** x) const {
+				if (!x || !*x) throw std::logic_error("placeholder_handle::name: null raw slot");
+				return (**x).to_scalar();
+			}
+		};
+		return std::visit(visitor(), static_cast<const base&>(*this));
+	}
+
+	void placeholder_handle::replace(lex_node* src) {
+		if (auto x = std::get_if<lex_node**>(static_cast<base*>(this))) {
+			delete **x;
+			**x = src;
+			return;
+		}
+		throw std::logic_error("placeholder_handle::replace(lex_node*): variant tag mismatch");
+	}
+
+	void placeholder_handle::replace(std::shared_ptr<const lex_node> src) {
+		if (auto x = std::get_if<std::shared_ptr<const lex_node>*>(static_cast<base*>(this))) {
+			**x = std::move(src);
+			return;
+		}
+		throw std::logic_error("placeholder_handle::replace(shared_ptr): variant tag mismatch");
+	}
 }	// namespace formal
 
 void error_report(formal::lex_node& fail, const perl::scalar& err) {
