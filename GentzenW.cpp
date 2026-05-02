@@ -811,10 +811,10 @@ namespace gentzen {
 		if ('A' > c || 'Z' < c) return false;
 
 		if (auto html_ish = x->c_post_anchor<formal::lex_node>()) {
-			if (!x->prefix().empty()) return false;
-			if (!x->postfix().empty()) return false;
-			if (!x->fragments().empty()) return false;
-			if (x->infix().empty()) return false;
+			if (!html_ish->prefix().empty()) return false;
+			if (!html_ish->postfix().empty()) return false;
+			if (!html_ish->fragments().empty()) return false;
+			if ( html_ish->infix().empty()) return false;
 			// the axiom is vague on what counts as a subscripted placeholder substitution
 			const auto tag = HTMLtag::is_balanced_pair(*html_ish);
 			if (!tag) return false;
@@ -842,10 +842,10 @@ namespace gentzen {
 		if ('_' != text.front()) return false;
 
 		if (auto html_ish = x->c_post_anchor<formal::lex_node>()) {
-			if (!x->prefix().empty()) return false;
-			if (!x->postfix().empty()) return false;
-			if (!x->fragments().empty()) return false;
-			if (x->infix().empty()) return false;
+			if (!html_ish->prefix().empty()) return false;
+			if (!html_ish->postfix().empty()) return false;
+			if (!html_ish->fragments().empty()) return false;
+			if ( html_ish->infix().empty()) return false;
 			// the axiom is vague on what counts as a subscripted placeholder substitution
 			const auto tag = HTMLtag::is_balanced_pair(*html_ish);
 			if (!tag) return false;
@@ -3125,7 +3125,13 @@ private:
 						// probe: if the test line itself looks like a candidate (lex_node arm),
 						// try to match it against every loaded 2-ary entailment axiom and dump
 						// the resulting substitution.
-						if (auto raw = stage.front()->shared_anchor<formal::lex_node>()) {
+						// reject placeholder syntax symbols of both flavors
+						if (   !gentzen::is_placeholder_syntax_symbol(stage.front())
+							&& !gentzen::is_symbol_placeholder_syntax_symbol(stage.front())) {
+							// R &#9500; S parses as a binary node with anchor &9500; and placeholder syntax symbols R and S as prefix and postfix
+#if 0
+							auto raw = stage.front()->shared_anchor<formal::lex_node>());
+							std::cout << "raw: " << raw->to_s() << "\n";
 							gentzen::statement_t candidate(raw);
 							auto axiom_set = gentzen::axioms::get();
 							for (size_t i = 0; i < axiom_set->size(); ++i) {
@@ -3139,6 +3145,7 @@ private:
 										<< subst->to_s() << "\n";
 								}
 							}
+#endif
 						}
 					}
 
