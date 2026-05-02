@@ -1314,10 +1314,14 @@ private:
 	}
 
 	// freshly-allocated, non-aliased deep copy of the underlying lex_node tree.
-	// returns nullptr for the parsed arm (no general lex_node form available yet).
 	formal::lex_node* deep_clone_to_lex_node(const statement_t& src) {
 		struct visitor {
-			formal::lex_node* operator()(const std::shared_ptr<const formal::parsed>&) { return nullptr; }
+			formal::lex_node* operator()(const std::shared_ptr<const formal::parsed>& x) {
+				if (!x) return nullptr;
+				formal::parsed* stage = nullptr;
+				x->CopyInto(stage);
+				return new formal::lex_node(zaimoni::COW(stage));
+			}
 			formal::lex_node* operator()(const std::shared_ptr<const formal::lex_node>& x) {
 				if (!x) return nullptr;
 				return new formal::lex_node(*x);

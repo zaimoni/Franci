@@ -90,6 +90,12 @@ namespace formal {
 		explicit lex_node(std::shared_ptr<const lex_node> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code), _offset(0) {}
 		explicit lex_node(std::shared_ptr<const word> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code), _offset(0) {}
 
+		// other direct control of anchor constructors
+		explicit lex_node(zaimoni::COW<parsed> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code), _offset(0) {}
+		explicit lex_node(zaimoni::COW<lex_node> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code), _offset(0) {}
+		explicit lex_node(zaimoni::COW<word> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code), _offset(0) {}
+
+
 		lex_node() noexcept : _code(0), _offset(0) {}
 		// \todo anchor constructor
 		lex_node(const lex_node& src) = default;
@@ -315,7 +321,7 @@ namespace formal {
 
 	// the freshly-allocated tree owns the storage that the handles reference.
 	struct placeholder_match {
-		std::unique_ptr<lex_node> tree;
+		std::unique_ptr<lex_node> tree;	// usually needs re-parsing before use as lemma
 		std::vector<std::pair<perl::scalar, std::vector<placeholder_handle>>> groups;
 	};
 
