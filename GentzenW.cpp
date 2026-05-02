@@ -1640,7 +1640,7 @@ private:
 		std::unique_ptr<formal::lex_node> dest_tree = comma_fold(destinations);
 		std::unique_ptr<formal::lex_node> src_tree = comma_fold(sources);
 
-		std::unique_ptr<formal::lex_node> backslash(make_binary_node(std::string_view("\\"), 0,
+		std::unique_ptr<formal::lex_node> backslash(make_binary_node(std::string_view("/"), 0,
 			std::move(dest_tree), std::move(src_tree)));
 
 		// wrap with [ ... ]
