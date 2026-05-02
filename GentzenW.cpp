@@ -795,9 +795,9 @@ namespace gentzen {
 	restart:
 		if (!x->prefix().empty()) return false;
 		if (!x->infix().empty()) return false;
+		if (!x->postfix().empty()) return false;
 		if (!x->fragments().empty()) return false;
 		if (auto node = x->c_anchor<formal::lex_node>()) {
-			if (!x->postfix().empty()) return false;
 			if (0 != x->post_anchor_code()) return false;
 			x = node;	// simulate tail recursion
 			goto restart;
@@ -829,8 +829,8 @@ namespace gentzen {
 		if (!x->prefix().empty()) return false;
 		if (!x->infix().empty()) return false;
 		if (!x->fragments().empty()) return false;
+		if (!x->postfix().empty()) return false;
 		if (auto node = x->c_anchor<formal::lex_node>()) {
-			if (!x->postfix().empty()) return false;
 			if (0 != x->post_anchor_code()) return false;
 			x = node;	// simulate tail recursion
 			goto restart;
@@ -3130,7 +3130,7 @@ private:
 							&& !gentzen::is_symbol_placeholder_syntax_symbol(stage.front())) {
 							// R &#9500; S parses as a binary node with anchor &9500; and placeholder syntax symbols R and S as prefix and postfix
 #if 0
-							auto raw = stage.front()->shared_anchor<formal::lex_node>());
+							auto raw = stage.front()->shared_anchor<formal::lex_node>();
 							std::cout << "raw: " << raw->to_s() << "\n";
 							gentzen::statement_t candidate(raw);
 							auto axiom_set = gentzen::axioms::get();
