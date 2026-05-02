@@ -1645,7 +1645,9 @@ private:
 
 		// wrap with [ ... ]
 		formal::word* l_bracket = new formal::word(std::string_view("["), formal::src_location(), 0);
+		l_bracket->learn(formal::Inert_Token);
 		formal::word* r_bracket = new formal::word(std::string_view("]"), formal::src_location(), 0);
+		r_bracket->learn(formal::Inert_Token);
 		std::unique_ptr<formal::lex_node> root(new formal::lex_node(l_bracket, 0));
 		root->infix().push_back(backslash.release());
 		root->set_null_post_anchor(r_bracket);
@@ -1819,6 +1821,16 @@ private:
 		// (e.g. hypothesis_2 = P in modus ponens) silently yield an empty result.
 		std::unique_ptr<formal::lex_node> get_uniform_simultaneous_substitution(const statement_t& candidate, size_t hypothesis_idx) const {
 			if (1 < hypothesis_idx) return nullptr;
+
+			// we do not yet want to adjust solely for a placeholder variable
+			auto cand_node = std::get_if<std::shared_ptr<const formal::lex_node>>(&candidate);
+			if (!cand_node || !*cand_node) return nullptr;	// we don't handle parsed-arm yet
+			const formal::lex_node& cand_ref = **cand_node;
+			if (cand_ref.code() & used_as_placeholder) return nullptr;	// unhandled
+			// \todo do we want a parsing invariant test here
+			if (!(cand_ref.code() & symbol_catalog::anchor_is_symbol)) return nullptr;	// reject what the prototype isn't looking for
+			if (!is_strict_binary_node(cand_ref)) return nullptr;	// reject what the prototype isn't looking for
+
 			const statement_t& hyp = (0 == hypothesis_idx) ? hypothesis_1 : hypothesis_2;
 
 			// 7.1: parsed-arm hypothesis is unsupported for now
@@ -1826,15 +1838,16 @@ private:
 			if (!hyp_node || !*hyp_node) return nullptr;
 			const formal::lex_node& hyp_ref = **hyp_node;
 			if (!(hyp_ref.code() & symbol_catalog::anchor_is_symbol)) return nullptr;
-			if (1 != hyp_ref.offset()) return nullptr;
 			if (!is_strict_binary_node(hyp_ref)) return nullptr;
 
-			auto cand_node = std::get_if<std::shared_ptr<const formal::lex_node>>(&candidate);
-			if (!cand_node || !*cand_node) return nullptr;
-			const formal::lex_node& cand_ref = **cand_node;
-			if (!(cand_ref.code() & symbol_catalog::anchor_is_symbol)) return nullptr;
-			if (1 != cand_ref.offset()) return nullptr;
-			if (!is_strict_binary_node(cand_ref)) return nullptr;
+			// check for same kind of binary node
+			if (hyp_ref.offset() != cand_ref.offset()) return nullptr;
+			// placeholder variables match anything (the symbol-syntax ones ultimately won't work here)
+			if (!(hyp_ref.prefix().front()->code() & used_as_placeholder)) return nullptr;	// unhandled
+			if (!(hyp_ref.postfix().front()->code() & used_as_placeholder)) return nullptr;	// unhandled
+
+			// while we do not want to record the identity substitution, that does document that this is a relevant
+			// inference rule for the candidate.
 
 			std::unique_ptr<formal::lex_node> dest_pre(new formal::lex_node(*cand_ref.prefix().front()));
 			std::unique_ptr<formal::lex_node> dest_post(new formal::lex_node(*cand_ref.postfix().front()));
@@ -3128,11 +3141,13 @@ private:
 						// reject placeholder syntax symbols of both flavors
 						if (   !gentzen::is_placeholder_syntax_symbol(stage.front())
 							&& !gentzen::is_symbol_placeholder_syntax_symbol(stage.front())) {
-							// R &#9500; S parses as a binary node with anchor &9500; and placeholder syntax symbols R and S as prefix and postfix
-#if 0
+							// Q &#9500; R parses as a binary node with anchor &9500; and placeholder syntax symbols R and S as prefix and postfix
 							auto raw = stage.front()->shared_anchor<formal::lex_node>();
-							std::cout << "raw: " << raw->to_s() << "\n";
-							gentzen::statement_t candidate(raw);
+							std::cout << "stage.front(): " << stage.front()->to_s() << "\n";
+							// this disables diagnose later one
+							gentzen::statement_t candidate(std::shared_ptr<const formal::lex_node>(stage.front()));
+							stage.front() = nullptr;
+#if 2
 							auto axiom_set = gentzen::axioms::get();
 							for (size_t i = 0; i < axiom_set->size(); ++i) {
 								const auto& axiom_stmt = axiom_set->rationale(i).first.first;
@@ -3146,6 +3161,7 @@ private:
 								}
 							}
 #endif
+							continue;
 						}
 					}
 
