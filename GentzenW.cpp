@@ -1553,6 +1553,10 @@ private:
 				x->learn(used_as_placeholder);
 				return;
 			}
+			// when looking into parsed statements, the undefined terminology regarding placeholder syntax symobls, is problematic
+			// A is a placeholder syntax symbol: do not tag A (we bypass this when entering hard-coded axioms)
+			// _ is a placeholder syntax symbol: do tag _, which is a symbol placeholder syntax symbol.  Result cannot be an axiom.
+			// _ is a symbol placeholder syntax symbol: do not tag the axiom, but do tag when used as a hypothesis
 
 			(*this)(x->prefix());
 			(*this)(x->infix());
@@ -1612,6 +1616,15 @@ private:
 			(*this)(x.infix());
 			(*this)(x.postfix());
 			(*this)(x.fragments());
+		}
+
+		static std::optional<formal::placeholder_match> operator()(const formal::lex_node* x) {
+			if (!x) return std::nullopt;
+			std::unique_ptr<formal::lex_node> tree(new formal::lex_node(*x));
+			collect_placeholder_handles walker;
+			walker(*tree);
+			if (walker.groups.empty()) return std::nullopt;
+			return formal::placeholder_match{ std::move(tree), std::move(walker.groups) };
 		}
 	};
 
@@ -1853,6 +1866,10 @@ private:
 			std::unique_ptr<formal::lex_node> dest_post(new formal::lex_node(*cand_ref.postfix().front()));
 			std::unique_ptr<formal::lex_node> src_pre(new formal::lex_node(*hyp_ref.prefix().front()));
 			std::unique_ptr<formal::lex_node> src_post(new formal::lex_node(*hyp_ref.postfix().front()));
+
+			tag_placeholder_syntax tag_this;
+			tag_this(dest_pre.get());
+			tag_this(dest_post.get());
 
 			std::vector<formal::lex_node*> destinations;
 			std::vector<formal::lex_node*> sources;
@@ -3130,6 +3147,14 @@ private:
 						if (auto relay = stage.front()->shared_anchor<formal::parsed>()) {
 							if (auto match = relay->get_placeholder_variables()) {
 								std::cout << "placeholder_variables of " << relay->to_s() << ":\n";
+								for (const auto& g : match->groups) {
+									std::cout << "  " << g.first.view() << " x " << g.second.size() << "\n";
+								}
+							}
+						} else {
+							// this tests false against Q &#9500; R because the placeholder variable tagging hasn't been triggered
+							if (auto match = gentzen::collect_placeholder_handles()(stage.front())) {
+								std::cout << "placeholder_variables of " << stage.front()->to_s() << ":\n";
 								for (const auto& g : match->groups) {
 									std::cout << "  " << g.first.view() << " x " << g.second.size() << "\n";
 								}
