@@ -31,10 +31,15 @@ namespace formal {
 			return ret;
 		}
 
-		// returns std::nullopt when the parsed object has no recognizable placeholder structure.
+		// appends placeholder groups to dest.groups (merged by to_scalar() key).
+		// freshly-allocated sub-trees that the appended handles point into must be
+		// attached to dest.aux_trees so they outlive the appended handles.
+		virtual void get_placeholder_variables(placeholder_match& dest) const {}
+
+		// wrapper around the appending API; returns nullopt when no placeholders surfaced.
 		// when non-null, the returned placeholder_match owns a freshly-allocated, non-aliased
-		// lex_node tree, and the handles in groups point into that tree.
-		virtual std::optional<placeholder_match> get_placeholder_variables() const;
+		// lex_node tree (or sub-trees in aux_trees), and the handles in groups point into it.
+		std::optional<placeholder_match> get_placeholder_variables() const;
 
 		// unclear if following belong in a sub-interface
 		virtual std::optional<perl::scalar> is_not_legal_axiom(bool unconditional) const { return "does not evaluate to a truth value"; }
@@ -323,6 +328,9 @@ namespace formal {
 	struct placeholder_match {
 		std::unique_ptr<lex_node> tree;	// usually needs re-parsing before use as lemma
 		std::vector<std::pair<perl::scalar, std::vector<placeholder_handle>>> groups;
+		// sub-trees from parsed-arm descents; handles in `groups` may point into these.
+		// TODO: substitution against `tree` does not propagate into aux_trees.
+		std::vector<std::unique_ptr<lex_node>> aux_trees;
 	};
 
 } // namespace formal

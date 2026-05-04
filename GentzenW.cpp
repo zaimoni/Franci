@@ -1572,17 +1572,19 @@ private:
 	};
 
 	// preconditions: tree is freshly-allocated and not aliased.  Recursively walks the
-	// tree and produces lex_node** handles into the parent slot for every descendant
-	// tagged with used_as_placeholder.  Groups by string equality on to_scalar().
-	// The returned handles' lifetime ends with the next mutation of the tree.
+	// tree, producing lex_node** handles into the parent slot for each placeholder
+	// occurrence and appending them to dest.groups (merged by string equality on
+	// to_scalar()).  Untagged placeholder-syntax symbols are tagged on the fly.
+	// Parsed-arm anchors delegate to parsed::get_placeholder_variables(dest), which
+	// must attach any freshly-allocated sub-trees to dest.aux_trees.
 	struct collect_placeholder_handles {
-		std::vector<std::pair<perl::scalar, std::vector<formal::placeholder_handle>>> groups;
+		formal::placeholder_match* dest_ = nullptr;
 
 		void note(formal::lex_node** slot) {
-			if (!slot || !*slot) return;
+			if (!slot || !*slot || !dest_) return;
 			perl::scalar key = (*slot)->to_scalar();
 			const auto key_view = key.view();
-			for (decltype(auto) g : groups) {
+			for (decltype(auto) g : dest_->groups) {
 				if (g.first.view() == key_view) {
 					g.second.emplace_back(slot);
 					return;
@@ -1590,7 +1592,7 @@ private:
 			}
 			std::vector<formal::placeholder_handle> initial;
 			initial.emplace_back(slot);
-			groups.emplace_back(std::move(key), std::move(initial));
+			dest_->groups.emplace_back(std::move(key), std::move(initial));
 		}
 
 		void operator()(kuroda::parser<formal::lex_node>::symbols& x) {
@@ -1600,6 +1602,15 @@ private:
 				if (!*slot) continue;
 				if ((*slot)->code() & used_as_placeholder) {
 					note(slot);
+					continue;
+				}
+				if (is_placeholder_syntax_symbol(*slot) || is_symbol_placeholder_syntax_symbol(*slot)) {
+					(*slot)->learn(used_as_placeholder);
+					note(slot);
+					continue;
+				}
+				if (auto parsed_ptr = (*slot)->shared_anchor<formal::parsed>()) {
+					if (dest_) parsed_ptr->get_placeholder_variables(*dest_);
 					continue;
 				}
 				(*this)(**slot);
@@ -1618,13 +1629,30 @@ private:
 			(*this)(x.fragments());
 		}
 
+		// primary entry: walks dest.tree, appending into dest.
+		void operator()(formal::placeholder_match& dest) {
+			dest_ = &dest;
+			if (dest.tree) (*this)(*dest.tree);
+			dest_ = nullptr;
+		}
+
+		// helper for parsed-arm overrides: walks an externally-owned root, appending into dest.
+		// caller is responsible for keeping `root` alive (typically by attaching to dest.aux_trees).
+		void walk_into(formal::lex_node& root, formal::placeholder_match& dest) {
+			auto* saved = dest_;
+			dest_ = &dest;
+			(*this)(root);
+			dest_ = saved;
+		}
+
 		static std::optional<formal::placeholder_match> operator()(const formal::lex_node* x) {
 			if (!x) return std::nullopt;
-			std::unique_ptr<formal::lex_node> tree(new formal::lex_node(*x));
+			formal::placeholder_match match;
+			match.tree.reset(new formal::lex_node(*x));
 			collect_placeholder_handles walker;
-			walker(*tree);
-			if (walker.groups.empty()) return std::nullopt;
-			return formal::placeholder_match{ std::move(tree), std::move(walker.groups) };
+			walker(match);
+			if (match.groups.empty()) return std::nullopt;
+			return match;
 		}
 	};
 
@@ -1675,11 +1703,12 @@ private:
 			}
 			std::optional<formal::placeholder_match> operator()(const std::shared_ptr<const formal::lex_node>& x) const {
 				if (!x) return std::nullopt;
-				std::unique_ptr<formal::lex_node> tree(new formal::lex_node(*x));
+				formal::placeholder_match match;
+				match.tree.reset(new formal::lex_node(*x));
 				collect_placeholder_handles walker;
-				walker(*tree);
-				if (walker.groups.empty()) return std::nullopt;
-				return formal::placeholder_match{std::move(tree), std::move(walker.groups)};
+				walker(match);
+				if (match.groups.empty()) return std::nullopt;
+				return match;
 			}
 		};
 		return std::visit(visitor(), *this);
@@ -1758,20 +1787,19 @@ private:
 			conclusion.diagnose(dest);
 		}
 
-		std::optional<formal::placeholder_match> get_placeholder_variables() const override {
+		void get_placeholder_variables(formal::placeholder_match& dest) const override {
 			std::unique_ptr<formal::lex_node> h1(deep_clone_to_lex_node(hypothesis_1));
 			std::unique_ptr<formal::lex_node> h2(deep_clone_to_lex_node(hypothesis_2));
 			std::unique_ptr<formal::lex_node> c(deep_clone_to_lex_node(conclusion));
-			if (!h1 || !h2 || !c) return std::nullopt;
+			if (!h1 || !h2 || !c) return;
 
 			std::unique_ptr<formal::lex_node> lhs(make_binary_node(comma, 0, std::move(h1), std::move(h2)));
 			std::unique_ptr<formal::lex_node> tree(make_binary_node(std::string_view("&#9500;"), 0,
 				std::move(lhs), std::move(c)));
 
-			collect_placeholder_handles walker;
-			walker(*tree);
-			if (walker.groups.empty()) return std::nullopt;
-			return formal::placeholder_match{std::move(tree), std::move(walker.groups)};
+			formal::lex_node& root = *tree;
+			dest.aux_trees.push_back(std::move(tree));
+			collect_placeholder_handles().walk_into(root, dest);
 		}
 
 		// unclear if following belong in a sub-interface

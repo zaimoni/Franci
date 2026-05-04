@@ -630,7 +630,12 @@ restart:
 		src = nullptr;
 	}
 
-	std::optional<placeholder_match> parsed::get_placeholder_variables() const { return std::nullopt; }
+	std::optional<placeholder_match> parsed::get_placeholder_variables() const {
+		placeholder_match dest;
+		get_placeholder_variables(dest);
+		if (dest.groups.empty()) return std::nullopt;
+		return dest;
+	}
 
 	perl::scalar placeholder_handle::name() const {
 		struct visitor {
