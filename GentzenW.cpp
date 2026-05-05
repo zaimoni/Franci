@@ -854,6 +854,8 @@ namespace gentzen {
 		return 0 == x->post_anchor_code();
 	}
 
+	static constexpr const unsigned long long used_as_placeholder = (1ULL << 8); // reserve this flag for lex_node
+
 	class symbol_catalog {
 	private:
 		std::vector<std::pair<std::shared_ptr<const formal::lex_node>, unsigned int > > _symbols;
@@ -1143,7 +1145,19 @@ namespace gentzen {
 					grammar.complete_parse(tokens[target->first]->postfix());
 				}
 
-				// \todo? replace tokens[target->first] with a corresponding phrase/clause
+				// tag isolated placeholder variables here
+				if (1 == tokens[target->first]->prefix().size()) {
+					if (is_placeholder_syntax_symbol(tokens[target->first]->prefix().front()) || is_symbol_placeholder_syntax_symbol(tokens[target->first]->prefix().front())) {
+						tokens[target->first]->prefix().front()->learn(used_as_placeholder);
+					}
+				};
+				if (1 == tokens[target->first]->postfix().size()) {
+					if (is_placeholder_syntax_symbol(tokens[target->first]->postfix().front()) || is_symbol_placeholder_syntax_symbol(tokens[target->first]->postfix().front())) {
+						tokens[target->first]->postfix().front()->learn(used_as_placeholder);
+					}
+				};
+
+				// interpreting phrases/clauses is for other grammar rules.
 				return true;
 			}
 
@@ -1519,7 +1533,8 @@ private:
 		}
 	};
 
-	static constexpr const unsigned long long used_as_placeholder = (1ULL << 8); // reserve this flag for lex_node
+//	lifted above class symbol_catalog to allow symbol_catalog::global_parse to use it there
+//	static constexpr const unsigned long long used_as_placeholder = (1ULL << 8); // reserve this flag for lex_node
 
 	static_assert(!(used_as_placeholder & formal::Comment));
 	static_assert(!(used_as_placeholder & formal::Error));
@@ -1596,6 +1611,9 @@ private:
 		}
 
 		void operator()(kuroda::parser<formal::lex_node>::symbols& x) {
+			enum { trace_parse = 0,
+				   backstop_placeholder = 0};
+
 			if (x.empty()) return;
 			for (size_t i = 0; i < x.size(); ++i) {
 				formal::lex_node** slot = &(x[i]);
@@ -1604,10 +1622,14 @@ private:
 					note(slot);
 					continue;
 				}
-				if (is_placeholder_syntax_symbol(*slot) || is_symbol_placeholder_syntax_symbol(*slot)) {
-					(*slot)->learn(used_as_placeholder);
-					note(slot);
-					continue;
+				if constexpr (backstop_placeholder) {
+					if (is_placeholder_syntax_symbol(*slot) || is_symbol_placeholder_syntax_symbol(*slot)) {
+						// if this were to process, some other inference rule isn't doing its job
+						if constexpr (trace_parse) std::cerr << "collect_placeholder_handles: tagging " << (*slot)->to_s() << "\n";
+						(*slot)->learn(used_as_placeholder);
+						note(slot);
+						continue;
+					}
 				}
 				if (auto parsed_ptr = (*slot)->shared_anchor<formal::parsed>()) {
 					if (dest_) parsed_ptr->get_placeholder_variables(*dest_);
@@ -3197,6 +3219,9 @@ private:
 							// Q &#9500; R parses as a binary node with anchor &9500; and placeholder syntax symbols R and S as prefix and postfix
 							auto raw = stage.front()->shared_anchor<formal::lex_node>();
 							std::cout << "stage.front(): " << stage.front()->to_s() << "\n";
+							for (decltype(auto) str : diagnose(stage)) {
+								std::cout << str << std::endl;
+							}
 							// this disables diagnose later one
 							gentzen::statement_t candidate(std::shared_ptr<const formal::lex_node>(stage.front()));
 							stage.front() = nullptr;
