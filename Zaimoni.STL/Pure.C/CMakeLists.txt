@@ -45,9 +45,14 @@ add_custom_target(AutoDetect ALL
                   DEPENDS comptest.h
                   VERBATIM)
 
+# Link this to opt into the AutoDetect-generated headers (auto_int.h, comptest.h).
+# It propagates both the include dir and the build-order dependency.
+add_library(z_autodetect INTERFACE)
+target_include_directories(z_autodetect INTERFACE ${CMAKE_BINARY_DIR}/Zaimoni.STL/Pure.C)
+add_dependencies(z_autodetect AutoDetect)
+
 add_library(z_format_util STATIC format_util.c)
 add_library(z_logging STATIC logging.c)
 add_library(z_stdio_c STATIC stdio_c.c)
 
-target_include_directories(z_stdio_c PRIVATE ${CMAKE_BINARY_DIR}/Zaimoni.STL/Pure.C)
-add_dependencies(z_stdio_c AutoDetect)
+target_link_libraries(z_stdio_c PRIVATE z_autodetect)

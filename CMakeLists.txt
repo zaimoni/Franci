@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.21)
 project(Franci C CXX)
 set(CMAKE_CXX_STANDARD 23)
 
@@ -27,37 +27,30 @@ endif()
 include_directories(${CMAKE_BINARY_DIR})
 
 add_executable(Franci WIN32 LenName.cxx Related.cxx MetaCon2.cxx __GCF.cxx __IntegerNumeral.cxx Integer1.cxx GCF.cxx SymConst.cxx TVal.cxx Class.cxx SeriesOp.cxx Combin1.cxx StdAdd.cxx AddMult.cxx AddEqual.cxx StdMult.cxx EqualMult.cxx Equal.cxx ConEqual.cxx MetaCon3.cxx QState.cxx Quantify.cxx Variable.cxx AntiIdem.cxx MetaCon4.cxx LowRel.cxx MetaCon1.cxx AddInter.cxx Interval.cxx Digraph.cxx SrchTree.cxx main.cxx OS.cxx VConsole.cxx InParse.cxx CmdShell.cxx LexParse.cxx FlatFile.cxx PhraseN.cxx Phrase1.cxx LangCon_.cxx Unparsed.cxx ParseNode.cxx NoReturn.cxx)
-target_link_libraries(Franci z_console z_csvtable z_langconf z_logging z_log_adapter z_format_util z_stdio_c z_memory)
+target_link_libraries(Franci z_console z_csvtable z_langconf z_logging z_log_adapter z_format_util z_stdio_c z_memory z_autodetect)
 target_link_options(Franci PRIVATE /FORCE:MULTIPLE)
-# working around IntegerNumeral
-target_include_directories(Franci PRIVATE ${CMAKE_BINARY_DIR}/Zaimoni.STL/Pure.C)
-# add_dependencies(... AutoDetect)
 
 add_executable(Franci_console LenName.cxx Related.cxx MetaCon2.cxx __GCF.cxx __IntegerNumeral.cxx Integer1.cxx GCF.cxx SymConst.cxx TVal.cxx Class.cxx SeriesOp.cxx Combin1.cxx StdAdd.cxx AddMult.cxx AddEqual.cxx StdMult.cxx EqualMult.cxx Equal.cxx ConEqual.cxx MetaCon3.cxx QState.cxx Quantify.cxx Variable.cxx AntiIdem.cxx MetaCon4.cxx LowRel.cxx MetaCon1.cxx AddInter.cxx Interval.cxx Digraph.cxx SrchTree.cxx main.cxx OS.cxx VConsole.cxx InParse.cxx CmdShell.cxx LexParse.cxx FlatFile.cxx PhraseN.cxx Phrase1.cxx LangCon_.cxx Unparsed.cxx ParseNode.cxx NoReturn.cxx)
-target_link_libraries(Franci_console z_cstdio_console z_csvtable z_langconf z_logging z_log_adapter z_format_util z_stdio_c z_memory)
+target_link_libraries(Franci_console z_cstdio_console z_csvtable z_langconf z_logging z_log_adapter z_format_util z_stdio_c z_memory z_autodetect)
 target_link_options(Franci_console PRIVATE /FORCE:MULTIPLE)
 target_compile_definitions(Franci_console PUBLIC FRANCI_CLI)
-# working around IntegerNumeral
-target_include_directories(Franci_console PRIVATE ${CMAKE_BINARY_DIR}/Zaimoni.STL/Pure.C)
-# add_dependencies(... AutoDetect)
 
 add_executable(LogicC Logic.cpp)
-target_link_libraries(LogicC z_log_adapter z_stdio_log z_memory)
+target_link_libraries(LogicC z_log_adapter z_stdio_log z_memory z_autodetect)
 target_link_options(LogicC PRIVATE /FORCE:MULTIPLE)
 target_compile_definitions(LogicC PUBLIC LOGIC_DRIVER)
 
 add_executable(GentzenW GentzenW.cpp HTMLtag.cpp)
-target_link_libraries(GentzenW z_kuroda z_log_adapter z_stdio_log z_memory)
+target_link_libraries(GentzenW z_kuroda z_log_adapter z_stdio_log z_memory z_autodetect)
 target_link_options(GentzenW PRIVATE /FORCE:MULTIPLE)
 target_compile_definitions(GentzenW PUBLIC GENTZEN_DRIVER)
 
-add_custom_command(TARGET Franci POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        $<TARGET_FILE:z_memory>
-        $<TARGET_FILE_DIR:Franci>)
-add_custom_command(TARGET Franci_console POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        $<TARGET_FILE:z_memory>
-        $<TARGET_FILE_DIR:Franci_console>)
+# Stage every linked SHARED dependency (currently just z_memory) next to the .exe.
+foreach(tgt Franci Franci_console LogicC GentzenW)
+    add_custom_command(TARGET ${tgt} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_RUNTIME_DLLS:${tgt}> $<TARGET_FILE_DIR:${tgt}>
+        COMMAND_EXPAND_LISTS)
+endforeach()
 
 # EXCLUDE_FROM_ALL means "can't test"
