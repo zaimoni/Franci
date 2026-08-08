@@ -2029,7 +2029,7 @@ private:
 	private:
 		std::shared_ptr<fact_database> prior;
 		std::vector<std::pair<statement_t, size_t> > hypotheses;
-		std::shared_ptr<lemmas> inference_dest;
+		std::weak_ptr<lemmas> inference_dest;	// weak: the branch tip owns us via its prior chain, not vice versa
 
 		static const constexpr std::string_view str_hypothesis = std::string_view("hypothesis");
 
@@ -2064,7 +2064,15 @@ private:
 		}
 		// end fact_database inferface
 
-		std::shared_ptr<lemmas> infer_dest() const { return inference_dest; }
+		// self must be a shared_ptr managing *this; caller keeps the returned tip alive
+		std::shared_ptr<lemmas> infer_dest(const std::shared_ptr<fact_database>& self) {
+			auto ret = inference_dest.lock();
+			if (!ret) {
+				ret = infer_dest_for(self);
+				inference_dest = ret;
+			}
+			return ret;
+		}
 
 		formal::lex_node* hypothesis_node() const {
 			std::vector<std::unique_ptr<formal::lex_node> > stage;
@@ -2105,9 +2113,7 @@ private:
 	private:
 		static std::shared_ptr<syntactical_entailment_introduction_start> finish_construct(decltype(hypotheses) && stage, std::shared_ptr<fact_database> assume) {
 			if (!assume) assume = axioms::get();
-			auto ret = std::shared_ptr<syntactical_entailment_introduction_start>(new syntactical_entailment_introduction_start(assume, std::move(stage)));
-			ret->inference_dest = infer_dest_for(ret);
-			return ret;
+			return std::shared_ptr<syntactical_entailment_introduction_start>(new syntactical_entailment_introduction_start(assume, std::move(stage)));
 		}
 
 	public:
@@ -2209,7 +2215,7 @@ private:
 	private:
 		std::shared_ptr<fact_database> prior;
 		std::vector<std::pair<statement_t, size_t> > _lemmas;	// \todo track how these were derived as well
-		std::vector<std::shared_ptr<syntactical_entailment_introduction_start> > conditional_reasoning;
+		std::vector<std::weak_ptr<syntactical_entailment_introduction_start> > conditional_reasoning;	// weak registry: prune expired entries when traversing
 
 		lemmas(decltype(prior) assumed) : prior(assumed) {}
 	public:
@@ -2315,7 +2321,7 @@ private:
 	std::shared_ptr<lemmas> inference_destination(std::shared_ptr<fact_database> db) {
 		if (auto p = dynamic_cast<lemmas*>(db.get())) return std::shared_ptr<lemmas>(db, p);
 		if (auto p = dynamic_cast<axioms*>(db.get())) return lemmas::get();
-		if (auto p = dynamic_cast<syntactical_entailment_introduction_start*>(db.get())) return p->infer_dest();
+		if (auto p = dynamic_cast<syntactical_entailment_introduction_start*>(db.get())) return p->infer_dest(db);
 
 		// arguably an invariant violation
 		return nullptr;
