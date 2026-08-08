@@ -2029,7 +2029,6 @@ private:
 	private:
 		std::shared_ptr<fact_database> prior;
 		std::vector<std::pair<statement_t, size_t> > hypotheses;
-		std::weak_ptr<lemmas> inference_dest;	// weak: the branch tip owns us via its prior chain, not vice versa
 
 		static const constexpr std::string_view str_hypothesis = std::string_view("hypothesis");
 
@@ -2065,13 +2064,8 @@ private:
 		// end fact_database inferface
 
 		// self must be a shared_ptr managing *this; caller keeps the returned tip alive
-		std::shared_ptr<lemmas> infer_dest(const std::shared_ptr<fact_database>& self) {
-			auto ret = inference_dest.lock();
-			if (!ret) {
-				ret = infer_dest_for(self);
-				inference_dest = ret;
-			}
-			return ret;
+		std::shared_ptr<lemmas> infer_dest(const std::shared_ptr<fact_database>& self) const {
+			return infer_dest_for(self);
 		}
 
 		formal::lex_node* hypothesis_node() const {
@@ -2217,6 +2211,10 @@ private:
 		std::vector<std::pair<statement_t, size_t> > _lemmas;	// \todo track how these were derived as well
 		std::vector<std::weak_ptr<syntactical_entailment_introduction_start> > conditional_reasoning;	// weak registry: prune expired entries when traversing
 
+		// pure cache of the mint's live output: ownership stays with the reasoning tips.
+		// a live value pins its key via prior, so value expiry covers key expiry
+		static inline std::vector<std::pair<std::weak_ptr<fact_database>, std::weak_ptr<lemmas> > > _canonical;
+
 		lemmas(decltype(prior) assumed) : prior(assumed) {}
 	public:
 		lemmas() = default;
@@ -2227,8 +2225,8 @@ private:
 		~lemmas() = default;
 
 		static std::shared_ptr<lemmas> get() {
-			static std::shared_ptr<lemmas> oaoo;
-			if (!oaoo) oaoo = std::shared_ptr<lemmas>(new lemmas(axioms::get()));
+			static std::shared_ptr<lemmas> oaoo;	// interim strong owner of the axioms slot; migrates to the scheduler/session
+			if (!oaoo) oaoo = infer_dest_for(axioms::get());
 			return oaoo;
 		}
 
@@ -2263,8 +2261,20 @@ private:
 		}
 		// end observed interface
 
-		static std::shared_ptr<lemmas> infer_dest_for(std::shared_ptr<fact_database>& src) {
-			return std::shared_ptr<lemmas>(new lemmas(src));
+		static std::shared_ptr<lemmas> infer_dest_for(const std::shared_ptr<fact_database>& src) {
+			ptrdiff_t ub = _canonical.size();
+			while (0 <= --ub) {
+				auto& e = _canonical[ub];
+				if (auto have = e.second.lock()) {
+					if (!e.first.owner_before(src) && !src.owner_before(e.first)) return have;
+				} else {
+					e.swap(_canonical.back());
+					_canonical.pop_back();
+				}
+			}
+			auto ret = std::shared_ptr<lemmas>(new lemmas(src));
+			_canonical.push_back(std::pair(src, ret));
+			return ret;
 		}
 
 	};
