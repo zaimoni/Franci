@@ -3258,7 +3258,7 @@ private:
 						// dump placeholder grouping for any parsed object that exposes one
 						if (auto relay = stage.front()->shared_anchor<formal::parsed>()) {
 							if (auto match = relay->get_placeholder_variables()) {
-								std::cout << "placeholder_variables of " << relay->to_s() << ":\n";
+								std::cout << "placeholder_variables of parsed " << relay->to_s() << ":\n";
 								for (const auto& g : match->groups) {
 									std::cout << "  " << g.first.view() << " x " << g.second.size() << "\n";
 								}
@@ -3266,7 +3266,7 @@ private:
 						} else {
 							// this tests false against Q &#9500; R because the placeholder variable tagging hasn't been triggered
 							if (auto match = gentzen::collect_placeholder_handles()(stage.front())) {
-								std::cout << "placeholder_variables of " << stage.front()->to_s() << ":\n";
+								std::cout << "placeholder_variables of lex_node " << stage.front()->to_s() << ":\n";
 								for (const auto& g : match->groups) {
 									std::cout << "  " << g.first.view() << " x " << g.second.size() << "\n";
 								}
