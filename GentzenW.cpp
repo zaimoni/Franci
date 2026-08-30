@@ -323,8 +323,8 @@ restart:
 	goto restart;
 }
 
-// For typical formal languages, cdomma is both the lowest precedence binary infix symbol,
-// and generally has left-fold semantics when parsing.
+// For typical formal languages, comma is both the lowest precedence binary infix symbol,
+// and generally has right-fold semantics when parsing.
 bool detect_comma(const formal::lex_node& src) {
 	if (const auto x = src.c_anchor<formal::word>()) return comma == x->value();
 	return false;
@@ -339,7 +339,7 @@ bool is_strict_binary_node(const formal::lex_node& src) {
 	return true;
 }
 
-// while the semantics of left-fold, right-fold, and generalized-associtivity are different,
+// while the semantics of left-fold, right-fold, and generalized-associativity are different,
 // they conserve RAM for n-ary expressions comparably
 bool is_lfold_rfold_gassoc_node(const formal::lex_node& src) {
 	if (src.fragments().empty()) return false;
@@ -1804,11 +1804,10 @@ private:
 					for (decltype(auto) x : tree->fragments()) ret.push_back(x.front());
 					return ret;
 				}
-				// typical recursive left-fold semantics
-				if (is_strict_binary_node(*tree)) {
-					ret.push_back(tree->prefix().front());
-					tree = tree->postfix().front();
-				}
+				// typical recursive right-fold semantics
+				if (!is_strict_binary_node(*tree)) break;	// non-conforming comma node: take it whole
+				ret.push_back(tree->prefix().front());
+				tree = tree->postfix().front();
 			}
 			ret.push_back(tree);
 			return ret;
