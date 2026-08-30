@@ -323,6 +323,8 @@ restart:
 	goto restart;
 }
 
+// For typical formal languages, cdomma is both the lowest precedence binary infix symbol,
+// and generally has left-fold semantics when parsing.
 bool detect_comma(const formal::lex_node& src) {
 	if (const auto x = src.c_anchor<formal::word>()) return comma == x->value();
 	return false;
@@ -334,6 +336,23 @@ bool is_strict_binary_node(const formal::lex_node& src) {
 	if (!src.infix().empty()) return false;
 	if (!src.fragments().empty()) return false;
 	if (0 != src.post_anchor_code()) return false;
+	return true;
+}
+
+// while the semantics of left-fold, right-fold, and generalized-associtivity are different,
+// they conserve RAM for n-ary expressions comparably
+bool is_lfold_rfold_gassoc_node(const formal::lex_node& src) {
+	if (src.fragments().empty()) return false;
+	if (!src.postfix().empty()) return false;
+	if (!src.prefix().empty()) return false;
+	if (!src.infix().empty()) return false;
+	if (0 != src.post_anchor_code()) return false;
+	return true;
+}
+
+bool are_fragments_superficially_parsed(const formal::lex_node& src) {
+	if (src.fragments().empty()) return false;
+	for (decltype(auto) x : src.fragments()) if (1 != x.size() || !x.front()) return false;
 	return true;
 }
 
@@ -1779,9 +1798,17 @@ private:
 
 		auto comma_unfold = [](const formal::lex_node* tree) {
 			std::vector<const formal::lex_node*> ret;
-			while (tree && detect_comma(*tree) && is_strict_binary_node(*tree)) {
-				ret.push_back(tree->prefix().front());
-				tree = tree->postfix().front();
+			while (tree && detect_comma(*tree)) {
+				if (   is_lfold_rfold_gassoc_node(*tree)
+					&& are_fragments_superficially_parsed(*tree)) {
+					for (decltype(auto) x : tree->fragments()) ret.push_back(x.front());
+					return ret;
+				}
+				// typical recursive left-fold semantics
+				if (is_strict_binary_node(*tree)) {
+					ret.push_back(tree->prefix().front());
+					tree = tree->postfix().front();
+				}
 			}
 			ret.push_back(tree);
 			return ret;
