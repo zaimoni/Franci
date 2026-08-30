@@ -98,6 +98,52 @@ static constexpr const auto force_consteval = V;
 
 // end from C:Z zero.h
 
+// test-harness UI, parallel to Iskandria Form1.AskUserToPickOne (C# WinForms).
+// Blocking: the C++ standard library has no non-blocking console read.
+
+constexpr char selection_key(size_t i) { return (10 > i) ? char('0' + i) : char('A' + (i - 10)); }
+
+constexpr ptrdiff_t index_from_key(char k) {
+	if ('0' <= k && k <= '9') return k - '0';
+	if ('A' <= k && k <= 'Z') return 10 + (k - 'A');
+	if ('a' <= k && k <= 'z') return 10 + (k - 'a');
+	return -1;
+}
+
+// returns std::nullopt when cancelled (blank line stands in for the Escape key; likewise stdin close/failure)
+// without a verdict from on_pick; a std::nullopt return from on_pick keeps the menu up and keeps asking
+std::optional<bool> ask_user_to_pick_one(const std::string& title, const std::vector<std::string>& entries, const std::function<std::optional<bool>(size_t)>& on_pick)
+{
+	if (entries.empty())
+#ifndef NDEBUG
+		throw std::logic_error("tracing");
+#else
+		return false;
+#endif
+
+	const size_t max_direct = (36 >= entries.size()) ? entries.size() : 36;	// \todo paging past 36
+
+	auto render = [&]() {
+		std::cout << title << '\n';
+		for (size_t i = 0; i < max_direct; ++i) std::cout << selection_key(i) << ") " << entries[i] << '\n';
+	};
+	render();
+
+	std::optional<bool> outcome;
+	std::string buffer;
+	// std::cin is tied to std::cout, so the menu flushes before we block
+	while (std::getline(std::cin, buffer)) {
+		if (buffer.empty()) break;
+		const auto idx = index_from_key(buffer.front());
+		if (0 <= idx && size_t(idx) < max_direct) {
+			outcome = on_pick(idx);
+			if (outcome) break;
+			render();	// the popup stays visible in the source implementation
+		}
+	}
+	return outcome;
+}
+
 // prototype lookup -- extract to own header when stable
 
 constexpr const std::pair<const char*, char32_t> HTML_entities[] = {
