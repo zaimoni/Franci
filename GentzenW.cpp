@@ -1764,6 +1764,35 @@ private:
 		return root.release();
 	}
 
+	// inverse of make_substitution_node.  Faithful only when no destination or source is
+	// itself a comma-anchored strict binary node (holds for placeholder variables, the
+	// current use case).  Returned pointers are views into src.
+	std::optional<std::pair<std::vector<const formal::lex_node*>, std::vector<const formal::lex_node*> > >
+	decode_substitution_node(const formal::lex_node& src)
+	{
+		if (!(src.code() & parsed_substitution)) return std::nullopt;
+		if (1 != src.infix().size()) return std::nullopt;
+		const auto slash = src.infix().front();
+		if (!slash || !is_strict_binary_node(*slash)) return std::nullopt;
+		const auto op = slash->c_anchor<formal::word>();
+		if (!op || "/" != op->value()) return std::nullopt;
+
+		auto comma_unfold = [](const formal::lex_node* tree) {
+			std::vector<const formal::lex_node*> ret;
+			while (tree && detect_comma(*tree) && is_strict_binary_node(*tree)) {
+				ret.push_back(tree->prefix().front());
+				tree = tree->postfix().front();
+			}
+			ret.push_back(tree);
+			return ret;
+		};
+
+		auto dests = comma_unfold(slash->prefix().front());
+		auto srcs = comma_unfold(slash->postfix().front());
+		if (dests.size() != srcs.size()) return std::nullopt;
+		return std::pair(std::move(dests), std::move(srcs));
+	}
+
 	std::optional<formal::placeholder_match> statement_t::get_placeholder_variables() const {
 		struct visitor {
 			std::optional<formal::placeholder_match> operator()(const std::shared_ptr<const formal::parsed>& x) const {
@@ -1977,6 +2006,74 @@ private:
 			sources.push_back(src_post.release());
 
 			return std::unique_ptr<formal::lex_node>(make_substitution_node(std::move(destinations), std::move(sources)));
+		}
+
+		const statement_t& hypothesis(size_t n) const noexcept { return (0 == n) ? hypothesis_1 : hypothesis_2; }
+		const statement_t& consequent() const noexcept { return conclusion; }
+
+		// Uniform substitution of placeholder variables for placeholder variables, per a
+		// parsed_substitution node [d1, ... \ s1, ...]: each si replaced by di throughout
+		// the rule.  Formally an undefined operation (implemented in C++ this iteration).
+		// Returns null if the node does not decode, any si/di is not a placeholder
+		// variable, or a hypothesis/conclusion delegates to a parsed-arm sub-tree
+		// (substitution would not propagate there; see placeholder_match::aux_trees).
+		std::unique_ptr<syntactical_entailment_2ary> apply_uniform_substitution(const formal::lex_node& subst) const
+		{
+			const auto decoded = decode_substitution_node(subst);
+			if (!decoded) return nullptr;
+			decltype(auto) dests = decoded->first;
+			decltype(auto) srcs = decoded->second;
+
+			std::vector<std::pair<perl::scalar, const formal::lex_node*> > rename;
+
+			ptrdiff_t i = srcs.size();
+			while (0 <= --i) {
+				if (!srcs[i] || !(srcs[i]->code() & used_as_placeholder)) return nullptr;
+				if (!dests[i] || !(dests[i]->code() & used_as_placeholder)) return nullptr;
+				rename.push_back(std::pair(srcs[i]->to_scalar(), dests[i]));
+			}
+
+			auto instantiate = [&](const statement_t& src) -> formal::lex_node* {
+				std::unique_ptr<formal::lex_node> stage(deep_clone_to_lex_node(src));
+				if (!stage) return nullptr;
+
+				// a bare placeholder variable has no parent slot for a handle
+				if (stage->code() & used_as_placeholder) {
+					const auto key = stage->to_scalar();
+					for (decltype(auto) x : rename) {
+						if (x.first.view() == key.view()) return new formal::lex_node(*x.second);
+					}
+					return stage.release();
+				}
+
+				formal::placeholder_match match;
+				match.tree = std::move(stage);
+				collect_placeholder_handles()(match);
+				if (!match.aux_trees.empty()) return nullptr;	// parsed-arm descent: substitution would not propagate
+				for (decltype(auto) g : match.groups) {
+					const formal::lex_node* to = nullptr;
+					for (decltype(auto) x : rename) {
+						if (x.first.view() == g.first.view()) {
+							to = x.second;
+							break;
+						}
+					}
+					if (!to) continue;
+					for (decltype(auto) h : g.second) h.replace(new formal::lex_node(*to));
+				}
+				return match.tree.release();
+			};
+
+			formal::lex_node* h1 = instantiate(hypothesis_1);
+			formal::lex_node* h2 = instantiate(hypothesis_2);
+			formal::lex_node* c = instantiate(conclusion);
+			if (!h1 || !h2 || !c) {
+				delete h1;
+				delete h2;
+				delete c;
+				return nullptr;
+			}
+			return std::unique_ptr<syntactical_entailment_2ary>(new syntactical_entailment_2ary(h1, h2, c));
 		}
 
 		// requires gentzen::symbol_catalog::global_parse to have run first, which is a global_rewriter
@@ -2307,6 +2404,18 @@ private:
 		}
 		// end observed interface
 
+		// Records a derived statement, notifying watchers.  Returns the recorded
+		// (statement, notation id); a notation already present is returned without
+		// duplication, and an axiom's notation is returned unrecorded.
+		std::pair<statement_t, size_t> record(const statement_t& src) {
+			auto stage = notation_ids::get().allocate(src);
+			if (0 < stage.second && axioms::get()->size() >= stage.second) return stage;
+			if (auto have = offset(stage.second)) return _lemmas[*have];
+			_lemmas.push_back(stage);
+			notify(_lemmas.back().first);
+			return stage;
+		}
+
 		static std::shared_ptr<lemmas> infer_dest_for(const std::shared_ptr<fact_database>& src) {
 			ptrdiff_t ub = _canonical.size();
 			while (0 <= --ub) {
@@ -2381,6 +2490,75 @@ private:
 
 		// arguably an invariant violation
 		return nullptr;
+	}
+
+	// scaffold: exercises the substitution and record primitives against the core.yaml
+	// axioms.  Referenced from main() behind a compile-time switch.
+	void self_test_substitution()
+	{
+		std::cout << std::unitbuf;
+		decltype(auto) ax = axioms::get();
+
+		const syntactical_entailment_2ary* rule = nullptr;
+		statement_t rule_stmt;
+		size_t ub = ax->size();
+		while (0 < ub) {
+			auto stmt = ax->rationale(--ub).first.first;
+			if (auto p = std::get_if<std::shared_ptr<const formal::parsed> >(&stmt)) {
+				if (auto q = dynamic_cast<const syntactical_entailment_2ary*>(p->get())) {
+					rule = q;
+					rule_stmt = stmt;
+					break;
+				}
+			}
+		}
+		if (!rule) {
+			std::cout << "self-test: no syntactical_entailment_2ary axiom found\n";
+			return;
+		}
+		std::cout << "self-test rule: " << rule->to_s() << "\n";
+
+		// identity substitution: match the rule's own first hypothesis
+		auto subst = rule->get_uniform_simultaneous_substitution(rule->hypothesis(0), 0);
+		std::cout << "self-test identity subst: " << (subst ? subst->to_s() : "(null)") << "\n";
+		if (subst) {
+			auto identity = rule->apply_uniform_substitution(*subst);
+			std::cout << "self-test identity apply: " << (identity ? identity->to_s() : "(null)") << "\n";
+		}
+
+		// rename substitution: [Q, R \ P, Q]
+		auto leaf = [](const char* name) {
+			auto ret = new formal::lex_node(new formal::word(std::string_view(name), formal::src_location(), 0), 0);
+			ret->learn(used_as_placeholder);
+			return ret;
+		};
+		std::vector<formal::lex_node*> dests;
+		std::vector<formal::lex_node*> srcs;
+		dests.push_back(leaf("Q"));
+		dests.push_back(leaf("R"));
+		srcs.push_back(leaf("P"));
+		srcs.push_back(leaf("Q"));
+		std::unique_ptr<formal::lex_node> rename(make_substitution_node(std::move(dests), std::move(srcs)));
+		std::cout << "self-test rename: " << rename->to_s() << "\n";
+		auto minor = rule->apply_uniform_substitution(*rename);
+		std::cout << "self-test rename apply: " << (minor ? minor->to_s() : "(null)") << "\n";
+		if (!minor) return;
+
+		// record: watcher sees the new lemma; duplicates and axioms do not re-record
+		decltype(auto) L = lemmas::get();
+		auto print_new = std::shared_ptr<zaimoni::observer<statement_t> >(new zaimoni::lambda_observer<statement_t>(
+			[](const statement_t& x) {
+				std::cout << "self-test watcher: " << x.to_s() << "\n";
+				return true;
+			}));
+		L->watched_by(print_new);
+
+		statement_t minor_stmt(std::shared_ptr<const formal::parsed>(minor.release()));
+		const auto first = L->record(minor_stmt);
+		const auto again = L->record(minor_stmt);
+		std::cout << "self-test record: id " << first.second << (first.second == again.second ? ", stable" : ", UNSTABLE") << ", size " << L->size() << "\n";
+		const auto ax_rec = L->record(rule_stmt);
+		std::cout << "self-test record axiom: id " << ax_rec.second << ", size " << L->size() << "\n";
 	}
 
 } // end namespace gentzen
@@ -3432,6 +3610,16 @@ int main(int argc, char* argv[], char* envp[])
 //	std::wcout << who_am_i.native() << "\n";
 //	std::wcout << std::filesystem::canonical(who_am_i.native()) << "\n";
 	undefined_SVO::get();	// load the undefined SVOs, and the axioms
+
+	enum { run_substitution_self_test = 0 };
+	if constexpr (run_substitution_self_test) {
+		try {
+			gentzen::self_test_substitution();
+		} catch (const std::exception& e) {
+			std::cout << "self-test exception: " << e.what() << "\n" << std::flush;
+		}
+		std::cout << std::nounitbuf;
+	}
 
 #ifndef MOCK_TEST
 	if (2 > argc) help();
