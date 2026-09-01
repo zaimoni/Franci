@@ -2178,7 +2178,7 @@ private:
 				stage[i + 1] = join(stage2, "");
 			}
 
-			return std::pair(std::pair(inferred.first, join(stage, " ")), 0);
+			return std::pair(std::pair(inferred.first, join(stage, " ")), inferred.second);
 		}
 
 #if 2
