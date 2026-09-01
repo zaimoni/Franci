@@ -1485,7 +1485,7 @@ private:
 
 		std::pair<std::pair<statement_t, perl::scalar>, size_t> rationale(size_t n) const override {
 			if (_axioms.size() <= n) throw std::logic_error(rationale_oob);
-			return std::pair(std::pair(_axioms[n], str_axiom), n);
+			return std::pair(std::pair(_axioms[n], str_axiom), n+1);
 		}
 
 		// observed interface
