@@ -2518,26 +2518,109 @@ private:
 		return nullptr;
 	}
 
+	// applicability enumeration (work item #4 of the cut-rule plan)
+
+	struct visible_statement {
+		statement_t stmt;
+		std::string notation;
+		size_t notation_id;
+	};
+
+	// tip-first walk of every statement the spine can see, deduplicated by notation id
+	std::vector<visible_statement> visible_statements(std::shared_ptr<fact_database> tip)
+	{
+		std::vector<visible_statement> ret;
+		while (tip) {
+			const size_t s = tip->size();
+			for (size_t n = 0; n < s; ++n) {
+				auto stage = tip->rationale(n).first.first;
+				auto id = notation_ids::get().allocate(stage);	// idempotent: reads back the registered id
+				bool seen = false;
+				for (decltype(auto) x : ret) {
+					if (x.notation_id == id.second) {
+						seen = true;
+						break;
+					}
+				}
+				if (!seen) ret.push_back(visible_statement{id.first, id.first.to_s(), id.second});
+			}
+			tip = tip->parent();
+		}
+		return ret;
+	}
+
+	struct applicable_2ary {
+		std::shared_ptr<syntactical_entailment_2ary> rule;	// instantiated for this application
+		statement_t inferred;	// the instantiated consequent
+		std::vector<size_t> hypothesis_ids;	// notation ids matched, in hypothesis order
+	};
+
+	// Enumerates the 2-ary rule applications available at tip: for each visible 2ary
+	// rule, match hypothesis 0 against each visible statement (yielding the uniform
+	// substitution), then require the instantiated hypothesis 1 to be visible
+	// notationally.  A rule whose hypothesis 1 uses placeholders not bound by
+	// hypothesis 0 cannot match this iteration.  Applications whose consequent is
+	// already visible are suppressed.
+	std::vector<applicable_2ary> enumerate_applicable_2ary(const std::shared_ptr<fact_database>& tip)
+	{
+		std::vector<applicable_2ary> ret;
+		const auto visible = visible_statements(tip);
+
+		auto find_visible = [&visible](const std::string& notation) -> std::optional<size_t> {
+			for (decltype(auto) v : visible) {
+				if (notation == v.notation) return v.notation_id;
+			}
+			return std::nullopt;
+		};
+
+		for (decltype(auto) r : visible) {
+			auto arm = std::get_if<std::shared_ptr<const formal::parsed> >(&r.stmt);
+			if (!arm) continue;
+			auto rule = dynamic_cast<const syntactical_entailment_2ary*>(arm->get());
+			if (!rule) continue;
+
+			for (decltype(auto) c : visible) {
+				auto subst = rule->get_uniform_simultaneous_substitution(c.stmt, 0);
+				if (!subst) continue;
+				auto instantiated = rule->apply_uniform_substitution(*subst);
+				if (!instantiated) continue;
+
+				auto h2 = find_visible(instantiated->hypothesis(1).to_s());
+				if (!h2) continue;
+				if (find_visible(instantiated->consequent().to_s())) continue;	// already derived
+
+				std::shared_ptr<syntactical_entailment_2ary> stage(instantiated.release());
+				std::vector<size_t> ids;
+				ids.reserve(2);
+				ids.push_back(c.notation_id);
+				ids.push_back(*h2);
+				ret.push_back(applicable_2ary{stage, stage->consequent(), std::move(ids)});
+			}
+		}
+		return ret;
+	}
+
+	// scaffold support: locate a syntactical_entailment_2ary among the loaded axioms
+	std::pair<const syntactical_entailment_2ary*, statement_t> find_2ary_axiom()
+	{
+		decltype(auto) ax = axioms::get();
+		size_t ub = ax->size();
+		while (0 < ub) {
+			auto stmt = ax->rationale(--ub).first.first;
+			if (auto p = std::get_if<std::shared_ptr<const formal::parsed> >(&stmt)) {
+				if (auto q = dynamic_cast<const syntactical_entailment_2ary*>(p->get())) return std::pair(q, stmt);
+			}
+		}
+		return std::pair(nullptr, statement_t());
+	}
+
 	// scaffold: exercises the substitution and record primitives against the core.yaml
 	// axioms.  Referenced from main() behind a compile-time switch.
 	void self_test_substitution()
 	{
 		std::cout << std::unitbuf;
-		decltype(auto) ax = axioms::get();
 
-		const syntactical_entailment_2ary* rule = nullptr;
-		statement_t rule_stmt;
-		size_t ub = ax->size();
-		while (0 < ub) {
-			auto stmt = ax->rationale(--ub).first.first;
-			if (auto p = std::get_if<std::shared_ptr<const formal::parsed> >(&stmt)) {
-				if (auto q = dynamic_cast<const syntactical_entailment_2ary*>(p->get())) {
-					rule = q;
-					rule_stmt = stmt;
-					break;
-				}
-			}
-		}
+		const auto [rule, rule_stmt] = find_2ary_axiom();
 		if (!rule) {
 			std::cout << "self-test: no syntactical_entailment_2ary axiom found\n";
 			return;
@@ -2585,6 +2668,74 @@ private:
 		std::cout << "self-test record: id " << first.second << (first.second == again.second ? ", stable" : ", UNSTABLE") << ", size " << L->size() << "\n";
 		const auto ax_rec = L->record(rule_stmt);
 		std::cout << "self-test record axiom: id " << ax_rec.second << ", size " << L->size() << "\n";
+	}
+
+	// scaffold: drives rows 3-5 of the cut-rule proof (hypothesis P; infer Q; infer R)
+	// through enumerate_applicable_2ary, entirely from the core.yaml axioms.
+	// Referenced from main() behind a compile-time switch.
+	void self_test_enumeration()
+	{
+		std::cout << std::unitbuf;
+
+		const auto [rule, rule_stmt] = find_2ary_axiom();
+		if (!rule) {
+			std::cout << "enumeration self-test: no syntactical_entailment_2ary axiom found\n";
+			return;
+		}
+
+		// statement inventory for the cut rule, built from the axiom itself
+		auto leaf = [](const char* name) {
+			auto ret = new formal::lex_node(new formal::word(std::string_view(name), formal::src_location(), 0), 0);
+			ret->learn(used_as_placeholder);
+			return ret;
+		};
+		std::vector<formal::lex_node*> dests;
+		std::vector<formal::lex_node*> srcs;
+		dests.push_back(leaf("Q"));
+		dests.push_back(leaf("R"));
+		srcs.push_back(leaf("P"));
+		srcs.push_back(leaf("Q"));
+		std::unique_ptr<formal::lex_node> rename(make_substitution_node(std::move(dests), std::move(srcs)));
+		auto minor = rule->apply_uniform_substitution(*rename);
+		if (!minor) {
+			std::cout << "enumeration self-test: could not instantiate rule\n";
+			return;
+		}
+
+		statement_t given1 = rule->hypothesis(0);	// P &#9500; Q
+		statement_t given2 = minor->hypothesis(0);	// Q &#9500; R
+		statement_t hyp = rule->hypothesis(1);	// P
+
+		auto outer = syntactical_entailment_introduction_start::construct(given1, given2);
+		if (!outer) {
+			std::cout << "enumeration self-test: outer start construction failed\n";
+			return;
+		}
+		auto inner = syntactical_entailment_introduction_start::construct(hyp, outer);
+		if (!inner) {
+			std::cout << "enumeration self-test: inner start construction failed\n";
+			return;
+		}
+
+		std::shared_ptr<fact_database> tip = inner;
+
+		int round = 0;
+		while (++round <= 4) {
+			auto apps = enumerate_applicable_2ary(tip);
+			std::cout << "enumeration round " << round << ": " << apps.size() << " applicable\n";
+			for (decltype(auto) a : apps) {
+				std::cout << "  " << a.rule->to_s() << " => " << a.inferred.to_s() << "\n";
+			}
+			if (apps.empty()) break;
+			decltype(auto) a = apps.front();
+			auto next = syntactical_entailment_2ary_infer::construct(a.rule, a.inferred, a.hypothesis_ids, tip);
+			if (!next) {
+				std::cout << "enumeration self-test: 2ary_infer construction failed\n";
+				return;
+			}
+			tip = std::shared_ptr<fact_database>(next);
+			std::cout << "  applied: " << tip->rationale(0).first.second.view() << "\n";
+		}
 	}
 
 } // end namespace gentzen
@@ -3637,10 +3788,11 @@ int main(int argc, char* argv[], char* envp[])
 //	std::wcout << std::filesystem::canonical(who_am_i.native()) << "\n";
 	undefined_SVO::get();	// load the undefined SVOs, and the axioms
 
-	enum { run_substitution_self_test = 0 };
-	if constexpr (run_substitution_self_test) {
+	enum { run_prototype_self_tests = 0 };
+	if constexpr (run_prototype_self_tests) {
 		try {
 			gentzen::self_test_substitution();
+			gentzen::self_test_enumeration();
 		} catch (const std::exception& e) {
 			std::cout << "self-test exception: " << e.what() << "\n" << std::flush;
 		}
