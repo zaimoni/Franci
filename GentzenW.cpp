@@ -2558,9 +2558,21 @@ private:
 	// Enumerates the 2-ary rule applications available at tip: for each visible 2ary
 	// rule, match hypothesis 0 against each visible statement (yielding the uniform
 	// substitution), then require the instantiated hypothesis 1 to be visible
-	// notationally.  A rule whose hypothesis 1 uses placeholders not bound by
-	// hypothesis 0 cannot match this iteration.  Applications whose consequent is
-	// already visible are suppressed.
+	// notationally.  Applications whose consequent is already visible are suppressed.
+	//
+	// Hard-coded assumptions, correct for the cut-rule test case:
+	// * A statement never pattern-matches a bare placeholder variable (both directions
+	//   are rejected by get_uniform_simultaneous_substitution).  Deliberate: a bare
+	//   placeholder would match every visible statement, and binding placeholders to
+	//   arbitrary statements is combinatoric explosion, not inference guidance.  The
+	//   instantiated hypothesis 1 is therefore checked by literal notation only.
+	// * Matching hypothesis 0 binds every placeholder variable of the rule at once
+	//   (true for the modus ponens schema: {P, Q} covers hypothesis 1 and the
+	//   conclusion).  A rule whose hypothesis 1 or conclusion uses placeholders not
+	//   bound by hypothesis 0 cannot match this iteration.
+	// * get_uniform_simultaneous_substitution is only ever called with hypothesis_idx
+	//   0 here; 1 is implemented but unexercised, and matching against the conclusion
+	//   (a hypothetical index 2) is unimplemented.
 	std::vector<applicable_2ary> enumerate_applicable_2ary(const std::shared_ptr<fact_database>& tip)
 	{
 		std::vector<applicable_2ary> ret;
