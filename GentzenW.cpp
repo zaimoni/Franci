@@ -2592,15 +2592,30 @@ private:
 			if (!rule) continue;
 
 			for (decltype(auto) c : visible) {
+				// The legacy Franci interpreters would consider rule to "want both of its hypotheses"
 				auto subst = rule->get_uniform_simultaneous_substitution(c.stmt, 0);
 				if (!subst) continue;
 				auto instantiated = rule->apply_uniform_substitution(*subst);
 				if (!instantiated) continue;
+				// At this point, rule has been given its major hypothesis.
+				// The Rete algorithem would be tracking instantiated as a rule instance.
+
+				if (find_visible(instantiated->consequent().to_s())) continue;	// already derived
+				// The legacy Franci interpreters would track instantiated->consequent().to_s(), as "provided by instantiated"
+				// The Rete algorithm would consider the rule instance, to be "suppressed".
 
 				auto h2 = find_visible(instantiated->hypothesis(1).to_s());
+				// The Rete algorithm tracks partially activated rule instances (those that take the continue statement)
 				if (!h2) continue;
-				if (find_visible(instantiated->consequent().to_s())) continue;	// already derived
+				// The rule instance also has its minor hypothesis.
 
+				// The Franci legacy interpreters, have many hard-coded special cases of matching hypotheses that
+				// are not provided, with conclusions that provide the hypothesis.  These hard-codings are
+				// used to provent combinatoric explosion.  Inferences that are "not simplifying" are only executed
+				// if some other inference rule, wants the provided conclusion, as a hypothesis.  This assumes
+				// the cut rule for syntactical entailment.
+
+				// Proceed with forward inference.
 				std::shared_ptr<syntactical_entailment_2ary> stage(instantiated.release());
 				std::vector<size_t> ids;
 				ids.reserve(2);
