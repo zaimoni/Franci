@@ -2598,7 +2598,7 @@ private:
 				auto instantiated = rule->apply_uniform_substitution(*subst);
 				if (!instantiated) continue;
 				// At this point, rule has been given its major hypothesis.
-				// The Rete algorithem would be tracking instantiated as a rule instance.
+				// The Rete algorithm would be tracking instantiated as a rule instance.
 
 				if (find_visible(instantiated->consequent().to_s())) continue;	// already derived
 				// The legacy Franci interpreters would track instantiated->consequent().to_s(), as "provided by instantiated"
@@ -2611,7 +2611,7 @@ private:
 
 				// The Franci legacy interpreters, have many hard-coded special cases of matching hypotheses that
 				// are not provided, with conclusions that provide the hypothesis.  These hard-codings are
-				// used to provent combinatoric explosion.  Inferences that are "not simplifying" are only executed
+				// used to prevent combinatoric explosion.  Inferences that are "not simplifying" are only executed
 				// if some other inference rule, wants the provided conclusion, as a hypothesis.  This assumes
 				// the cut rule for syntactical entailment.
 
