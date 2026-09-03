@@ -1427,8 +1427,10 @@ private:
 		virtual std::pair<std::pair<statement_t, perl::scalar>, size_t> rationale(size_t n) const = 0;
 	};
 
+	// pass by value: the loop re-seats db (manual tail recursion, a stack micro-optimization),
+	// so a caller's shared_ptr must not be mutated and const reference cannot work
 	template<class T> requires (std::derived_from<T, fact_database> && !std::same_as<T, fact_database>)
-	T* find_ancestor(std::shared_ptr<fact_database>& db) {
+	T* find_ancestor(std::shared_ptr<fact_database> db) {
 		while (db = db->parent()) {
 			if (auto p = dynamic_cast<T*>(db.get())) return p;
 		}
@@ -3802,6 +3804,205 @@ static kuroda::parser<formal::lex_node>& GentzenGrammar() {
 	return *ooao;
 }
 
+// GentzenW proof session (work item #5 of the cut-rule plan).  A proof script is a
+// YAML file (extension .yaml/.yml) with keys:
+//   theorem: display name
+//   given: sequence of top-level hypothesis statements (one introduction_start)
+//   hypothesis: sequence of subordinate hypothesis statements (one introduction_start)
+// Inference stepping is menu-driven via ask_user_to_pick_one, so regression runs are
+// ordinary console sessions with redirected stdin.
+
+// parses statement lines through the same pipeline as the core.yaml axioms
+static std::optional<std::vector<gentzen::statement_t> > parse_statements(std::vector<std::string>& src_lines, formal::src_location& src)
+{
+	std::vector<gentzen::statement_t> ret;
+	auto lines = to_lines(src_lines, src);
+	while (!lines.empty()) {
+		const auto prior_errors = Errors.count();
+		auto stage = TokenGrammar().apply(formal::lex_node::pop_front(lines));
+		src.line_pos.first++;
+		src.line_pos.second = 0;
+		if (prior_errors < Errors.count()) return std::nullopt;
+
+		TokenGrammar().complete_parse(stage);
+		if (prior_errors < Errors.count()) return std::nullopt;
+
+		stage = GentzenGrammar().apply(stage);
+		if (prior_errors < Errors.count()) return std::nullopt;
+
+		GentzenGrammar().complete_parse(stage);
+		if (prior_errors < Errors.count()) return std::nullopt;
+
+		if (1 != stage.size()) {
+			error_report(src, "proof-script statement did not parse to a single statement");
+			return std::nullopt;
+		}
+		ret.push_back(gentzen::statement_t(stage[0]));
+	}
+	return ret;
+}
+
+// column classifier for the Gentzen/Fitch table: entailments render in the
+// "Inference rule" column, other statements in the "Proposition" column
+static bool is_entailment_statement(const gentzen::statement_t& src)
+{
+	if (auto p = std::get_if<std::shared_ptr<const formal::parsed> >(&src)) {
+		return nullptr != dynamic_cast<const gentzen::syntactical_entailment_2ary*>(p->get());
+	}
+	auto n = std::get_if<std::shared_ptr<const formal::lex_node> >(&src);
+	if (!n || !*n) return false;
+	const formal::lex_node& ref = **n;
+	if (!(ref.code() & gentzen::symbol_catalog::anchor_is_symbol)) return false;
+	if (1 != ref.offset()) return false;	// &#9500;: cf. syntactical_entailment_2ary::can_construct
+	return is_strict_binary_node(ref);
+}
+
+struct proof_row {
+	size_t notation_id;
+	bool entailment_column;
+	std::string notation;
+	std::string rationale;	// label(...) references carry raw notation ids; renumbering is the theorem writer's job
+};
+
+static void run_proof_script(const std::filesystem::path& path)
+{
+	using namespace gentzen;
+
+	std::ifstream in(path);
+	if (!in.is_open()) {
+		std::cerr << path << ": cannot open\n";
+		return;
+	}
+	formal::src_location src(std::pair(1, 0), std::shared_ptr<const std::filesystem::path>(new std::filesystem::path(path)));
+	fkyaml::node root;
+	try {
+		root = fkyaml::node::deserialize(in);
+	} catch (const std::exception& e) {
+		error_report(src, e.what());
+		return;
+	}
+
+	std::string theorem_name("(unnamed)");
+	if (root.contains("theorem")) fkyaml::from_node(root["theorem"], theorem_name);
+
+	std::vector<std::string> given_lines;
+	std::vector<std::string> hypothesis_lines;
+	if (root.contains("given")) fkyaml::from_node(root["given"], given_lines);
+	if (root.contains("hypothesis")) fkyaml::from_node(root["hypothesis"], hypothesis_lines);
+
+	auto given = parse_statements(given_lines, src);
+	if (!given) return;
+	auto hypotheses = parse_statements(hypothesis_lines, src);
+	if (!hypotheses) return;
+	if (given->empty() && hypotheses->empty()) {
+		error_report(src, "proof script has no given: or hypothesis: statements");
+		return;
+	}
+
+	std::vector<proof_row> rows;
+	std::vector<std::shared_ptr<fact_database> > steps;	// pins derivation records for the theorem writer
+
+	std::shared_ptr<fact_database> tip = lemmas::get();	// previously proven theorems stay visible
+
+	// this iteration handles what the introduction_start overloads do: 1 or 2 statements per level
+	auto open_level = [&](std::vector<statement_t>& stmts, const char* label) -> bool {
+		std::shared_ptr<syntactical_entailment_introduction_start> level;
+		if (1 == stmts.size()) level = syntactical_entailment_introduction_start::construct(stmts[0], tip);
+		else if (2 == stmts.size()) level = syntactical_entailment_introduction_start::construct(stmts[0], stmts[1], tip);
+		if (!level) {
+			error_report(src, "this iteration only supports 1 or 2 statements per given:/hypothesis: level");
+			return false;
+		}
+		const size_t s = level->size();
+		for (size_t n = 0; n < s; ++n) {
+			auto row = level->rationale(n);
+			rows.push_back(proof_row{row.second, is_entailment_statement(row.first.first), row.first.first.to_s(), label});
+		}
+		tip = level;
+		return true;
+	};
+
+	if (!given->empty() && !open_level(*given, "Given")) return;
+	if (!hypotheses->empty() && !open_level(*hypotheses, "Hypothesis")) return;
+
+	const std::string title("prove: " + theorem_name);
+	statement_t last_discharged;
+	bool complete = false;
+
+	while (!complete) {
+		auto apps = enumerate_applicable_2ary(tip);
+
+		std::vector<std::string> entries;
+		for (decltype(auto) a : apps) entries.push_back("infer " + a.inferred.to_s() + " via " + a.rule->to_s());
+		entries.push_back("discharge current hypothesis level");
+
+		size_t picked = std::numeric_limits<size_t>::max();
+		const auto choice = ask_user_to_pick_one(title, entries, [&picked](size_t i) {
+			picked = i;
+			return std::optional<bool>(true);
+		});
+		if (!choice) {
+			std::cout << "proof of " << theorem_name << " abandoned\n";
+			return;
+		}
+
+		if (picked < apps.size()) {	// forward inference
+			decltype(auto) a = apps[picked];
+			auto next = syntactical_entailment_2ary_infer::construct(a.rule, a.inferred, a.hypothesis_ids, tip);
+			if (!next) {
+				error_report(src, "syntactical_entailment_2ary_infer::construct failed");
+				return;
+			}
+			tip = std::shared_ptr<fact_database>(next);
+			auto row = tip->rationale(0);
+			rows.push_back(proof_row{row.second, is_entailment_statement(row.first.first), row.first.first.to_s(), std::string(row.first.second.view())});
+			std::cout << "inferred: " << row.first.first.to_s() << "\n";
+			continue;
+		}
+
+		// discharge the nearest enclosing hypothesis level
+		auto result = syntactical_entailment_introduction::construct(tip);
+		if (!result) {
+			std::cout << "nothing to discharge here\n";
+			continue;
+		}
+		auto closed = find_ancestor<syntactical_entailment_introduction_start>(tip);
+		// non-null: construct(tip) just succeeded on the same walk
+		auto dest = inference_destination(closed->parent());
+		if (!dest) {
+			error_report(src, "no inference destination for discharge");
+			return;
+		}
+
+		if (auto p = std::get_if<syntactical_entailment_introduction*>(&*result)) {
+			std::shared_ptr<fact_database> node(*p);
+			steps.push_back(node);	// pins the discharged branch as well, via its prior chain
+			auto row = node->rationale(0);
+			last_discharged = row.first.first;
+			rows.push_back(proof_row{row.second, is_entailment_statement(last_discharged), last_discharged.to_s(), std::string(row.first.second.view())});
+		} else {
+			auto q = std::get<syntactical_entailment_2ary*>(*result);
+			last_discharged = statement_t(std::shared_ptr<const formal::parsed>(q));
+		}
+
+		dest->record(last_discharged);
+		tip = dest;
+		std::cout << "discharged: " << last_discharged.to_s() << "\n";
+
+		complete = !find_ancestor<syntactical_entailment_introduction_start>(tip);
+	}
+
+	std::cout << "\nproven (" << theorem_name << "): " << last_discharged.to_s() << "\n";
+	std::cout << "proof table preview:\n";
+	size_t line_no = 0;
+	for (decltype(auto) r : rows) {
+		std::cout << ++line_no << ".\t";
+		if (r.entailment_column) std::cout << r.notation << "\t\t";
+		else std::cout << "\t" << r.notation << "\t";
+		std::cout << r.rationale << "\n";
+	}
+}
+
 int main(int argc, char* argv[], char* envp[])
 {
 #ifdef ZAIMONI_HAS_MICROSOFT_IO_H
@@ -3840,6 +4041,13 @@ int main(int argc, char* argv[], char* envp[])
 		formal::src_location src(std::pair(1, 0), std::shared_ptr<const std::filesystem::path>(new std::filesystem::path(argv[idx])));
 #endif
 		std::wcout << src.path->native() << "\n";
+		{
+			const auto ext = src.path->extension();
+			if (L".yaml" == ext || L".yml" == ext) {
+				run_proof_script(*src.path);
+				continue;
+			}
+		}
 		auto to_interpret = std::ifstream(*src.path);
 		if (!to_interpret.is_open()) continue;
 		auto lines = to_lines(to_interpret, src);

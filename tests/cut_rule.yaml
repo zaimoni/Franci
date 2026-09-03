@@ -1,0 +1,7 @@
+# GentzenW proof script: transitivity of syntactical entailment (the cut rule)
+theorem: "cut rule for &#9500;"
+given:
+  - "P &#9500; Q"
+  - "Q &#9500; R"
+hypothesis:
+  - "P"
