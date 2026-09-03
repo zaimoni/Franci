@@ -1386,8 +1386,9 @@ private:
 
 	formal::lex_node* node_from(const statement_t& src) {
 		struct visitor {
-			auto operator()(const std::shared_ptr<const formal::parsed>& x) { return new formal::lex_node(x); }
-			auto operator()(const std::shared_ptr<const formal::lex_node>& x) { return new formal::lex_node(x); }
+			auto operator()(const std::shared_ptr<const formal::parsed>& x) { return new formal::lex_node(x); }	// formal::parsed has no code() to punt to
+			// propagate code and offset so the wrapper reads like what it wraps (cf. the sinking constructor)
+			auto operator()(const std::shared_ptr<const formal::lex_node>& x) { return new formal::lex_node(x, x->code(), x->offset()); }
 		};
 		return std::visit(visitor(), src);
 	}

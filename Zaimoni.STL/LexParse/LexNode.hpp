@@ -91,14 +91,14 @@ namespace formal {
 
 		// There is an implicit conversion from std::unique_ptr to std::shared_ptr.
 		// We don't want that here: hard crash during YAML configuration loading
-		explicit lex_node(std::shared_ptr<const parsed> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code), _offset(0) {}
-		explicit lex_node(std::shared_ptr<const lex_node> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code), _offset(0) {}
-		explicit lex_node(std::shared_ptr<const word> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code), _offset(0) {}
+		explicit lex_node(std::shared_ptr<const parsed> src, unsigned long long code = 0, size_t offset = 0) noexcept : _anchor(std::move(src)), _code(code), _offset(offset) {}
+		explicit lex_node(std::shared_ptr<const lex_node> src, unsigned long long code = 0, size_t offset = 0) noexcept : _anchor(std::move(src)), _code(code), _offset(offset) {}
+		explicit lex_node(std::shared_ptr<const word> src, unsigned long long code = 0, size_t offset = 0) noexcept : _anchor(std::move(src)), _code(code), _offset(offset) {}
 
 		// other direct control of anchor constructors
-		explicit lex_node(zaimoni::COW<parsed> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code), _offset(0) {}
-		explicit lex_node(zaimoni::COW<lex_node> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code), _offset(0) {}
-		explicit lex_node(zaimoni::COW<word> src, unsigned long long code = 0) noexcept : _anchor(std::move(src)), _code(code), _offset(0) {}
+		explicit lex_node(zaimoni::COW<parsed> src, unsigned long long code = 0, size_t offset = 0) noexcept : _anchor(std::move(src)), _code(code), _offset(offset) {}
+		explicit lex_node(zaimoni::COW<lex_node> src, unsigned long long code = 0, size_t offset = 0) noexcept : _anchor(std::move(src)), _code(code), _offset(offset) {}
+		explicit lex_node(zaimoni::COW<word> src, unsigned long long code = 0, size_t offset = 0) noexcept : _anchor(std::move(src)), _code(code), _offset(offset) {}
 
 
 		lex_node() noexcept : _code(0), _offset(0) {}
