@@ -1,9 +1,17 @@
 # GentzenW defined notations ("modus ponens for _") — plan
 
-Status: **planned, not started** (plan agreed 2026-09-04).  This is the true form of the
-dropped work item #1 of the cut-rule plan: the name "modus ponens for &#9500;" is not
+Status: **in progress** (plan agreed 2026-09-04).  This is the true form of the dropped
+work item #1 of the cut-rule plan: the name "modus ponens for &#9500;" is not
 configuration metadata but a theorem of the notation system, obtained by instantiating a
 conditional definition.
+
+Progress log:
+* 2026-09-04: `is_unary_syntactical_entailment` (top-layer recognizer, contract-template
+  over the anchor_symbol_parse postcondition, exercised by the enumeration self-test)
+  and `is_definition_node` + `is_binary_node` (definition-layer recognizer; the relaxed
+  binary shape admits multi-token sides such as the definiendum phrase) checkpointed.
+* 2026-09-04: W0 premise revised — see W0 below; `_` must never be globally registered
+  as a symbol.
 
 Target axiom (cf. the schema tables in docs/SubatomicPhysicsOfMath_LogicV2.html; not yet
 in cfg/core.yaml):
@@ -36,10 +44,19 @@ place of the definiens notations.
 
 * **W0 — parse spike (first, cheap)**: put the axiom line into a local `test_lines` in
   core.yaml (the test-driver hook with placeholder-dump probes exists) and see what the
-  current grammar produces.  Known risks it exposes: whether `P _ Q` parses with a
-  symbol-placeholder in *operator* position, and how the multi-word phrase
-  "modus ponens for" tokenizes before any registration.  Design W1/W2 against the
-  spike's findings.
+  current grammar produces.  Remaining question for the spike: how the multi-word
+  phrase "modus ponens for" tokenizes before any registration.
+  **Settled by design, not by the spike**: `P _ Q` must NOT parse via global symbol
+  registration.  A symbol-placeholder-syntax symbol exists specifically for axiom
+  schemata *about other kinds of symbols*; declaring `_` as a binary infix (or unary
+  prefix/postfix, or constant) symbol would add `_` to the formal grammar being
+  described axiomatically.  Instead, **the hypothesis about `_` controls how the
+  conclusion is parsed**: the conditional axiom's hypothesis (`_ is a binary infix
+  symbol`) licenses a hypothesis-scoped parse of the conclusion span, in which `_`
+  parses as a binary infix operator.  W2's recognizer therefore cannot expect a fully
+  parsed conclusion from the global grammar; it parses the hypothesis first, extracts
+  the grammatical category the hypothesis asserts about `_`, and applies it as a scoped
+  extension when parsing the conclusion.
 * **W1 — definition recognition**: a new class in the syntactical_entailment_2ary style
   (can_construct / construct / recognize / global_parse) over `:=`-anchored binary
   nodes.  LHS analysis needs undefined_SVO-style phrase matching (token sequence with a
