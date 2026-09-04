@@ -1312,16 +1312,23 @@ private:
 		return (node.code() & symbol_catalog::anchor_is_symbol) && 1 >= node.offset();
 	}
 
+	// Consumes the intended postcondition of symbol_catalog::anchor_symbol_parse: exactly
+	// one of anchor_is_symbol / anchor_is_const_symbol / anchor_is_not_symbol set.
+	// require_contract=true throws on a node that never went through anchor_symbol_parse
+	// (e.g. a freshly constructed tree); the default treats it as a non-match.  The
+	// contract test runs first, so enforcement is uniform across all node shapes.
+	template<bool require_contract = false>
 	static bool is_unary_syntactical_entailment(const formal::lex_node& node) {
 		// we need syntactical entailment, not a Gentzen axiom (both use the same symbol)
-		if (!is_strict_binary_node(node)) return false;
 		if (node.code() & symbol_catalog::anchor_is_symbol) {
 			if (1 != node.offset()) return false;
-		} else  if (node.code() & (symbol_catalog::anchor_is_const_symbol | symbol_catalog::anchor_is_not_symbol)) return false;
+		} else if (node.code() & (symbol_catalog::anchor_is_const_symbol | symbol_catalog::anchor_is_not_symbol)) return false;
 		else {
 			// precondition failure
-			throw std::logic_error(std::string("symbol_catalog::anchor_symbol_parse not called on node ")+node.to_s());
+			if constexpr (require_contract) throw std::logic_error(std::string("symbol_catalog::anchor_symbol_parse not called on node ") + node.to_s());
+			else return false;
 		}
+		if (!is_strict_binary_node(node)) return false;
 		if (detect_comma(*node.prefix().front())) return false;	// n-ary hypothesis, not unary
 		if (detect_comma(*node.postfix().front())) return false;	// n-ary conclusion is not intuitionistic -- classical logical or, hard to work with
 		// we do want the arguments to be truth-valued statements, but the logic is a parameter
@@ -2768,6 +2775,12 @@ private:
 		statement_t given1 = rule->hypothesis(0);	// P &#9500; Q
 		statement_t given2 = minor->hypothesis(0);	// Q &#9500; R
 		statement_t hyp = rule->hypothesis(1);	// P
+
+		// exercise both contract modes of is_unary_syntactical_entailment on real data
+		if (auto h = std::get_if<std::shared_ptr<const formal::lex_node> >(&given1)) {
+			std::cout << "unary entailment (default): " << is_unary_syntactical_entailment(**h) << "\n";
+			std::cout << "unary entailment (contract): " << is_unary_syntactical_entailment<true>(**h) << "\n";
+		}
 
 		auto outer = syntactical_entailment_introduction_start::construct(given1, given2);
 		if (!outer) {
