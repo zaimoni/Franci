@@ -1,0 +1,747 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=windows-1252"/>
+	<title>Subatomic Physics of Math: Map for Formalizing Notation</title>
+	<style type="text/css">
+		@page { margin: 0.79in }
+		p { margin-bottom: 0.1in; line-height: 120% }
+		a:link { so-language: zxx }
+		* {
+            font-family: "Liberation Serif", serif
+        }
+	</style>
+<script type="text/javascript">
+(function (global) {
+    const _noop = function () { }
+    const local_alert = global.alert ? global.alert : _noop;
+
+    if (!global.document) {
+        local_alert("no document property: further JS won't work");
+        return;
+    }
+    if (!global.document.createElement) {
+        local_alert("no document.querySelectorAll property: further JS won't work");
+        return;
+    }
+    if (!global.document.querySelectorAll) {
+        local_alert("no document.querySelectorAll property: further JS won't work");
+        return;
+    }
+    if (!global.Array.isArray) {
+        local_alert("no Array.isArray function: further JS won't work");
+        return;
+    }
+
+    function is_string(x) {
+        "use strict";
+        var type_x = typeof (x);
+        if ("string" === type_x) return true;
+        if ("object" === type_x) {
+            return x instanceof global.String;
+        }
+        return false;
+    }
+
+    // want to know if countup loop is valid
+    function is_countloop_valid(x) {
+        "use strict";
+        if (global.Array.isArray(x)) return true;
+        if (x instanceof global.NodeList) return true;
+        return false;
+    }
+
+    function DOMappend(dest_zq, src) {
+        "use strict";
+        if (src instanceof global.Node) {
+            dest_zq.push(src);
+            return true;
+        }
+        if (is_countloop_valid(src)) {
+            const ub = src.length;
+            let i = 0;
+            while (i < ub) DOMappend(dest_zq, src[i++]);
+            return true;
+        }
+        return false;
+    }
+
+    // returns something array-ish
+    global.ZQuery = function (selector, context) {
+        if (!selector) return;
+        if (is_string(selector)) {
+            selector = selector.trim();
+
+            if ('<' === selector[0]) {
+                const staging = global.document.createElement('span');
+                staging.innerHTML = selector;
+                DOMappend(this, staging.childNodes);
+                return;
+            } else {
+                // selector-ish
+                if ("undefined" === typeof (context)) context = global.document;
+                if (context.querySelectorAll) {
+                    try {
+                        DOMappend(this, context.querySelectorAll(selector));
+                        return;
+                    } catch (e) {
+                        local_alert("illegal selector: " + selector);
+                        throw e; // unlike C++, this does not lose call chain information
+                    }
+                }
+            }
+        } else if (selector instanceof global.ZQuery) {
+            // value copy construction
+            const ub = selector.length;
+            let n = 0;
+            this.length = ub;
+            while (n < ub) {
+                this[n] = selector[n];
+                n++;
+            };
+            return;
+        } else if (DOMappend(this, selector)) return;
+        throw new Error("unhandled selector");
+    };
+
+    global.ZQuery.prototype = Object.create(global.Array.prototype);
+    global.ZQuery.prototype.constructor = global.ZQuery;
+    global.ZQuery.prototype.noop = _noop;
+
+    global.ZQuery.prototype.base_map = global.ZQuery.prototype.map; // just in case we need Array.map
+
+    // ideally Element fn(Element, index)
+    global.ZQuery.prototype.map = function(callback) {
+        "use strict";
+        const ub = this.length;
+        const staging = [];
+        let n = 0;
+        while (n < ub) {
+            const src = this[n++];
+            if (null === src) continue;
+            if ("undefined" === typeof(src)) continue;
+            DOMappend(staging, callback(src, n - 1));
+        }
+        return new ZQuery(staging);
+    }
+
+    function DOMparent(src) {
+        "use strict";
+        if (src.parentElement) return src.parentElement;
+        if (src.parentNode) return src.parentNode;
+        return null;
+    }
+
+    global.ZQuery.prototype.parent = function () {
+        "use strict";
+        return this.map(DOMparent);
+    }
+
+    function DOMancestor_match(src, selector) {
+        "use strict";
+        while (src) {
+            if (src.matches && src.matches(selector)) return src; // can throw, but want to fix the selector rather than cruise on
+            if (src.parentElement) src = src.parentElement;
+            else if (src.parentNode) src = src.parentNode;
+            else break;
+        }
+        return null;
+    }
+
+    global.ZQuery.prototype.closest = function (selector) {
+        "use strict";
+        return this.map(function (src) { return DOMancestor_match(src, selector); });
+    }
+
+    global.ZQuery.prototype.css = function (attr, value) {
+        const ub = this.length;
+        if (0 >= ub) return;
+        if ("undefined" === typeof (value) || null === value) {
+            const st = global.window.getComputedStyle(test);
+            if (attr in st) return st[attr];
+            // \todo interpose CSS -> JavaScript translation here
+            return;
+        }
+        let n = 0;
+        while (ub > n) {
+            const test = this[n++];
+            if (test.style) test.style[attr] = value;
+        }
+    }
+})(this);
+</script>
+</head>
+<body lang="en-US" dir="ltr">
+<div style="position:fixed; top:0.5em; left:0.5em; background:white"><a href="./">Home</a> &gt; <a href="./SubatomicPhysicsOfMath_FormalLogicNotation.html">Formal Notation</a></div>
+<h1 align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 16px">Subatomic Physics of Math: Map for Formalizing Notation</h1>
+<span style="border: 1px solid black; display:block; float:left; margin-right: 20px; padding: 5px">
+	<b>Mathematically modeling mathematical notation, e.g. proofs</b>
+	<ol type="I">
+		<li><a href="./SubatomicPhysicsOfMath_FormalLogicNotation.html">Formal Notation</a></li>
+		<li><a href="./SubatomicPhysicsOfMath_ProvabilityLogic.html">Provability Logic</a></li>
+		<li><b>Map for Formalizing Notation</b></li>
+	</ol>
+</span>
+<span style="border: 1px solid black; display:block; float:right">
+	<ol type="I">
+        <li><a href="#back-to-eden">Back to Eden</a></li>
+        <li><a href="#conjunction-elimination">Conjunction Elimination</a></li>
+        <li><a href="#conjunction-introduction">Conjunction Introduction</a></li>
+	</ol>
+</span>
+<p>Our first formalization of logic and set theory, generally follows the instructions for Von Neumann-Bernays-G&ouml;del set theory.  
+    That is, it is a mathematically platonist formalization.  What would a formalization that took non-formalized physical notation as given -- 
+    the Wittgenstein approach -- look like?</p>
+<p>We start by requiring that a successful formalization, have no testable difference between non-formalized physical notation, 
+    and mathematically modeled notation.  That is, the Wittgenstein given is philosophically heavy.  According to our first formalization,
+    we are simply assuming:</p>
+<ul>
+    <li>[W1] We may explicitly construct finite sequences, of finite sequences, of finite sequences of textual glyphs.</li>
+    <li>[W2] Verbatim copying of finite sequences of textual glyphs, is a reliable process.</li>
+    <li>[W3] Recognizing finite subsequences of textual glyphs, is a reliable process.</li>
+</ul>    
+<p>Our first formalization tells us that a finite sequence of textual glyphs is defined as a formal word, that each line 
+    of a Gentzen-format proof is a finite sequence of formal words, and the entire Gentzen-format proof is a finite sequence
+    lines.</p>
+<h2 id="back-to-eden" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Back to Eden</h2>
+<p>We start by declaring some English phrases about formal syntax, to be undefined notations.</p>
+<table align="center">
+    <tr><th>Undefined postfix notations</th></tr>
+    <tr><td align="left">is a unary prefix symbol</td></tr>
+    <tr><td align="left">is a unary postfix symbol</td></tr>
+    <tr><td align="left">is a binary infix symbol</td></tr>
+    <tr><td align="left">is a constant symbol</td></tr>
+    <tr><td align="left">is a prefix undefined notation</td></tr>
+    <tr><td align="left">is a postfix undefined notation</td></tr>
+    <tr><td align="left">is an infix undefined notation</td></tr>
+    <tr><td align="left">is a placeholder-syntax symbol</td></tr>
+    <tr><td align="left">is a symbol-placeholder-syntax symbol</td></tr>
+    <tr><td align="left">is a balanced symbol pair</td></tr>
+<!--
+    <tr><th>Undefined infix notations</th></tr>
+    <tr><td align="left">is a symbol-placeholder symbol for</td></tr>
+    <tr><td align="left">is a placeholder symbol for</td></tr>
+    <tr><td align="left">is not a symbol-placeholder symbol for</td></tr>
+    <tr><td align="left">is not a placeholder symbol for</td></tr>
+-->    
+</table>
+<p>The intended interpretation, is the usual formal English meaning of these phrases.  In terms of our first formalization, viewing notations 
+    as finite sequences of formal words:</p>
+<ul>
+    <li>An axiom does not contain either a symbol-placeholder symbol, or a placeholder symbol.  An axiom may contain symbols with these syntaxes.</li>
+    <li>An axiom schema does contain either at least one symbol-placeholder symbol, or at least one placeholder symbol.</li>
+    <li>We take any capital letter of the English alphabet, to be a placeholder-syntax symbol (formally, 26 axioms).</li>
+    <li>A placeholder symbol may be replaced, by a non-empty sequence of formal words.</li>
+    <li>A symbol-placeholder symbol may be replaced, by a single formal word.</li>
+</ul>
+<table align="center">
+    <tr><th colspan="2">Axioms for syntax</th></tr>
+    <tr><td align="center" colspan="2">_ is a symbol-placeholder-syntax symbol</td></tr>
+    <tr><td align="right">( )</td><td align="left">&nbsp;is a balanced symbol pair</td></tr>
+    <tr><td align="right">:=</td><td align="left">&nbsp;is a binary infix symbol</td></tr>
+    <tr><td align="right">&#9500;</td><td align="left">&nbsp;is a binary infix symbol</td></tr>
+    <tr><td align="right">&#9500;</td><td align="left">&nbsp;is a unary prefix symbol</td></tr>
+    <tr><td align="right">&</td><td align="left">&nbsp;is a binary infix symbol</td></tr>
+    <tr><td align="right">,</td><td align="left">&nbsp;is a binary infix symbol</td></tr>
+    <tr><th colspan="2">Axiom schemas for symbol syntax</th></tr>
+    <tr><td align="right">_ is a binary infix symbol &#9500;&nbsp;</td><td align="left">_<sub>A</sub> is a binary infix symbol</td><td></td></tr>
+    <tr><td align="right">_ is a postfix symbol &#9500;&nbsp;</td><td align="left">_<sub>A</sub> is a postfix symbol</td><td></td></tr>
+    <tr><td align="right">_ is a prefix symbol &#9500;&nbsp;</td><td align="left">_<sub>A</sub> is a prefix symbol</td><td></td></tr>
+    <tr><td align="right">_ is a symbol-placeholder-syntax symbol &#9500;&nbsp;</td><td align="left">_<sub>A</sub> is a symbol-placeholder-syntax symbol</td><td></td></tr>
+    <tr><td align="right">_ is a placeholder-syntax symbol &#9500;&nbsp;</td><td align="left">_<sub>A</sub> is a placeholder-syntax symbol</td><td></td></tr>
+    <tr><td align="right">_<sub>1</sub> _<sub>2</sub> is a balanced symbol pair &#9500;&nbsp;</td><td align="left">_<sub>1<sub>A</sub></sub> _<sub>2<sub>A</sub></sub> is a balanced symbol pair</td><td></td></tr>
+    <tr><th colspan="2">Axiom schemas with rationale W2</th></tr>
+    <tr><td align="right">(&#9500; Q) &#9500;&nbsp;</td><td align="left">Q</td><td></td></tr>
+    <tr><td align="right">A &#9500;&nbsp;</td><td align="left">A</td><td>identity axiom</td></tr>
+    <tr><td align="right">A, B &#9500; C :=&nbsp;</td><td align="left">A & B &#9500; C</td><td>definition of 2-ary &#9500;</td></tr>
+    <tr><td align="right">(P &#9500; Q), P &#9500;&nbsp;</td><td align="left">Q</td><td><i>modus ponens</i> for &#9500;</td></tr>
+    <tr><th colspan="2">Defining prefix notation</th></tr>
+    <tr><td align="right"> _ is a binary infix symbol &#9500;&nbsp;</td><td align="left">(modus ponens for _ := ((P _ Q), P &#9500; Q))</td><td></td></tr>
+</table>
+<table align="right">
+    <tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
+    <tr><td>(a)</td><td></td><td>P</td><td></td></tr>
+    <tr><td>(b)</td><td>P _ Q</td><td></td><td></td></tr>
+    <tr><td>(c)</td><td></td><td>Q</td><td><i>modus ponens</i> for _; (b) and (a)</td></tr>
+</table>
+<table align="left">
+    <tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
+    <tr><td>(a)</td><td>P _ Q</td><td></td><td></td></tr>
+    <tr><td>(b)</td><td></td><td>P</td><td></td></tr>
+    <tr><td>(c)</td><td></td><td>Q</td><td><i>modus ponens</i> for _; (a) and (b)</td></tr>
+</table>
+<p style="clear:both">We also introduce Gentzen format schemata, for using 2-ary &#9500; inference rules.  <i>modus ponens</i> is an important special case.</p>
+<table align="right">
+    <tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+    <tr><td>(a)</td><td>B</td><td></td></tr>
+    <tr><td>(b)</td><td>A</td><td></td><td></td></tr>
+    <tr><td>(c)</td><td>C</td><td>A, B &#9500; C; (b) and (a)</td></tr>
+</table>
+<table align="left">
+    <tr><th></th><th>Proposition</th><th>Rationale</th></tr>
+    <tr><td>(a)</td><td>A</td><td></td></tr>
+    <tr><td>(b)</td><td>B</td><td></td></tr>
+    <tr><td>(c)</td><td>C</td><td>A, B &#9500; C; (a) and (b)</td></tr>
+</table>
+<p style="clear:both">Finally, we introduce a Gentzen format schema, for syntactical entailment introduction:</p>
+<table align="center" cellspacing="0">
+    <tr><th colspan="2"></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
+    <tr><td style="border-left: 1px black solid; border-top: 1px black solid"></td><td>(a)</td><td></td><td>A</td><td>Hypothesis</td></tr>
+    <tr><td style="border-left: 1px black solid"></td><td colspan="4">...</td></tr>
+    <tr><td style="border-left: 1px black solid; border-bottom: 1px black solid"></td><td>(b)</td><td></td><td>B</td><td></td></tr>
+    <tr><td></td><td>(b+1)</td><td>A &#9500; B</td><td></td><td>&#9500; introduction, (a) and (b)</td></tr>
+</table>
+<h2 id="conjunction-elimination" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Conjunction elimination</h2>
+<h2 id="conjunction-introduction" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Conjunction Introduction</h2>
+<table align="right">
+    <tr><th></th><th>Inference Rule</th><th>Rationale</th></tr>
+    <tr><td>1.</td><td>A & B &#9500; A & B</td><td>(A &#9500; A)[A & B/A]</td></tr>
+    <tr><td>2.</td><td>A, B &#9500; A & B</td><td>definition of 2-ary &#9500; on (1)</td></tr>
+    <tr><th colspan="3">Conjunction introduction</th></tr>
+    <tr><th colspan="3">~discussive logics</th></tr>
+</table>
+<p>With Wittgenstein's given of physical notation, we would like conjunction introduction to be a theorem.  The given proof sketch
+   is not a proof, since it does not document how uniform substitution is to be interpreted in Gentzen-format physical notation.  Furthermore, any proof of conjunction introduction has to be 
+   invalid for discussive logics, suggesting such logics are inappropriate as a foundation for mathematics.</p>
+<p>We recall, that discussive logics model when two or more different persons disagree -- that is, each person is consistent in their beliefs but their
+    combined beliefs are inconsistent.  We do not consider what it would take to replicate <a href="https://en.wikipedia.org/wiki/Arrow%27s_impossibility_theorem">Arrow's Impossibility Theorem</a> here,
+    but we clearly need to exclude such issues from a foundation of mathematics.</p>
+<p>We thus need an additional assumption -- that a Gentzen-format proof is about notations of statements 
+    that are observer-independent.  This assumption is also needed for our first formalization.</pp>
+<table align="center">
+    <tr><th colspan="3">We need to choose one pair of these axioms,<br>then prove the other pair</th></tr>
+    <tr><th colspan="3">detachment for &#9500;</th></tr>
+    <tr><td align="right">A, B &#9500;&nbsp;</td><td align="left">A</td><td>left detachment for &#9500;</td></tr>
+    <tr><td align="right">A, B &#9500;&nbsp;</td><td align="left">B</td><td>right detachment for &#9500;</td></tr>
+    <tr><th colspan="3">conjunction elimination</th></tr>
+    <tr><td align="right">A & B &#9500;&nbsp;</td><td align="left">A</td><td>left conjunction elimination</td></tr>
+    <tr><td align="right">A & B &#9500;&nbsp;</td><td align="left">B</td><td>right conjunction elimination</td></tr>
+</table>
+<p>We now consider what we would need, to make the above provable.  We start by trying to interpret 
+    uniform substitutions.</p>
+<!--
+<table align="center">
+    <tr><th colspan="2">Undefined binary infix notations</th></tr>
+    <tr><td colspan="2" align="center">is a subexpression of</td></tr>
+    <tr><td colspan="2" align="center">is not a subexpression of</td></tr>
+    <tr><th colspan="3">Axiom schemas interpreting English</th></tr>
+    <tr><td align="right">_ is a unary prefix symbol&#9500;&nbsp;</td><td align="left">A is a subexpression of _ A</td></tr>
+    <tr><td align="right">_ is a unary postfix symbol&#9500;&nbsp;</td><td align="left">A is a subexpression of A _</td></tr>
+    <tr><td align="right">_ is a binary infix symbol&#9500;&nbsp;</td><td align="left">A is a subexpression of A _ B</td></tr>
+    <tr><td align="right">_ is a binary infix symbol&#9500;&nbsp;</td><td align="left">B is a subexpression of A _ B</td></tr>
+    <tr><td colspan="2" align="center">A is a subexpression of A</td></tr>
+</table>
+<p>The intended interpretation of the above undefined notations, is the usual one.  In terms of our first formalization, viewing notations 
+    as finite sequences of formal words:</p>
+<ul>
+    <li>A subexpression of B, when viewing both A and B as finite sequences of formal words, entails that A is a subsequence of B (possibly multiple times).</li>
+</ul> 
+-->
+<table align="center">
+    <tr><th colspan="2">Undefined postfix notations</th></tr>
+    <tr><td colspan="2" align="center">is a substitution</td></tr>
+    <tr><td colspan="2" align="center">is a valid substitution</td></tr>
+</table>
+<table align="center">
+    <tr><th colspan="3">Syntax axioms</th></tr>
+    <tr><td align="center" colspan="3">&#x21A6; is a binary infix symbol</td></tr>
+    <tr><td align="center" colspan="3">/ is a binary infix symbol</td></tr>
+    <tr><td align="center" colspan="3">[ ] is a balanced symbol pair</td></tr>
+    <tr><th colspan="3">Interpreting English</th></tr>
+    <tr><td align="right">[B/A] is a valid substitution&#9500;&nbsp;</td><td align="left">[B/A] is a substitution</td></tr>
+    <tr><td align="right">A is a placeholder-syntax symbol&#9500;&nbsp;</td><td align="left">[B/A] is a substitution</td><td>placeholder substitution declaration</td></tr>
+    <tr><th colspan="3">Introduciing valid substitutions</th></tr>
+    <tr><td align="right">A is a placeholder-syntax symbol, B is a placeholder-syntax symbol&#9500;&nbsp;</td><td align="left">[B/A] is a valid substitution</td><td>placeholder substitution introduction</td></tr>
+    <tr><td align="right">_ is a syntax-placeholder-syntax symbol, _<sub>1</sub> is a binary infix symbol&#9500;&nbsp;</td><td align="left">[_<sub>1</sub>/_] is a valid substitution</td><td></td></tr>
+    <tr><td align="right">_ is a syntax-placeholder-syntax symbol, _<sub>1</sub> is a unary prefix symbol&#9500;&nbsp;</td><td align="left">[_<sub>1</sub>/_] is a valid substitution</td><td></td></tr>
+    <tr><td align="right">_ is a syntax-placeholder-syntax symbol, _<sub>1</sub> is a unary postfix symbol&#9500;&nbsp;</td><td align="left">[_<sub>1</sub>/_] is a valid substitution</td><td></td></tr>
+    <tr><td align="right">A := B&#9500;&nbsp;</td><td align="left">[A/B] is a valid substitution</td><td>:= justifies substitution</td></tr>
+    <tr><td align="right">A := B&#9500;&nbsp;</td><td align="left">[B/A] is a valid substitution</td><td>:= justifies reverse substitution</td></tr>
+    <tr><td align="right">A &#x21A6; B&#9500;&nbsp;</td><td align="left">[A/B] is a valid substitution</td><td>&#x21A6; justifies substitution</td></tr>
+    <tr><td align="right">A &#x21A6; B&#9500;&nbsp;</td><td align="left">[B/A] is a valid substitution</td><td>&#x21A6; justifies reverse substitution</td></tr>
+    <tr><th colspan="3">Uniform substitution base cases</th></tr>
+    <tr><td align="right">[B/A] is a substitution&#9500;&nbsp;</td><td align="left">A[B/A] &#x21A6; B</td><td>copy substitution</td></tr>
+    <tr><th colspan="3">Uniform substitution recursion cases</th></tr>
+    <tr><td align="right">_ is a binary infix symbol &#9500;&nbsp;</td><td align="left">([B/A] is a substitution &#9500; (C _ D)[B/A] &#x21A6; C[B/A] _ D[B/A])</td><td rowspan="3">&#x21A6; for _</td></tr>
+    <tr><td align="right">_ is a postfix symbol &#9500;&nbsp;</td><td align="left">([B/A] is a substitution &#9500; (C _)[B/A] &#x21A6; C[B/A] _)</td></tr>
+    <tr><td align="right">_ is a prefix symbol &#9500;&nbsp;</td><td align="left">([B/A] is a substitution &#9500; (_ C)[B/A] &#x21A6; _  C[B/A])</td></tr>
+    <tr><td align="right">Z is an infix undefined notation &#9500;&nbsp;</td><td align="left">([B/A] is a substitution &#9500; (C Z D)[B/A] &#x21A6; C[B/A] Z D[B/A])</td><td rowspan="3">&#x21A6; for "Z"</td></tr>
+    <tr><td align="right">Z is a postfix undefined notation &#9500;&nbsp;</td><td align="left">([B/A] is a substitution &#9500; (C Z)[B/A] &#x21A6; C[B/A] Z)</td></tr>
+    <tr><td align="right">Z is a prefix undefined notation &#9500;&nbsp;</td><td align="left">([B/A] is a substitution &#9500; (Z C)[B/A] &#x21A6; Z C[B/A])</td></tr>
+</table>
+<p>We have several immediate practical difficulties.  We should have a no-op base case for uniform substitutions.  We also need to 
+    interpret partial evaluation, i.e. evaluation of a subexpression.  We likely also need to interpret what a well-formed expression is.</p>
+<p>In particular, the intended interpretation of uniform substitution, is that replacing a placeholder-syntax variable or symbol-placeholder-syntax variable can 
+    be done simply by a linear scan of the formal words of the notation; this should be equivalent to a full recursive parsing.</p>
+<table align="center">
+    <tr><th colspan="2">Undefined postfix notations</th></tr>
+    <tr><td colspan="2" align="center">is a wff</td></tr>
+    <tr><th colspan="2">Syntax axioms</th></tr>
+    <tr><td align="center" colspan="2">= is a binary infix symbol</td></tr>
+    <tr><td align="center" colspan="2">&ne; is a binary infix symbol</td></tr>
+    <tr><th colspan="2">Defining prefix notation for equivalence relations</th></tr>
+    <tr><td align="right"> _ is a binary infix symbol &#9500;&nbsp;</td><td align="left">(reflexivity of _ := (A _ A is a wff &#9500; A _ A))</td><td></td></tr>
+    <tr><td align="right"> _ is a binary infix symbol &#9500;&nbsp;</td><td align="left">(symmetry of _ := (A _ B &#9500; B _ A))</td><td></td></tr>
+    <tr><td align="right"> _ is a binary infix symbol &#9500;&nbsp;</td><td align="left">(transitivity of _ := (A _ B, B _ C &#9500; A _ C))</td><td></td></tr>
+    <tr><th colspan="2">Syntax axioms</th></tr>
+    <tr><td align="center" colspan="2">A =<sub><b>Notation</b></sub> B is a wff</b></sub></sub></td><td></td><td></td></tr>
+    <tr><td align="center" colspan="2">A &ne;<sub><b>Notation</b></sub> B is a wff</b></sub></sub></td><td></td><td></td></tr>
+    <tr><td align="center" colspan="2">reflexivity of =<sub><b>Notation</b></sub></td><td></td><td></td></tr>
+    <tr><td align="center" colspan="2">symmetry of =<sub><b>Notation</b></sub></td><td></td><td></td></tr>
+    <tr><td align="center" colspan="2">transitivity of =<sub><b>Notation</b></sub></td><td></td><td></td></tr>
+    <tr><td align="center" colspan="2">symmetry of &ne;<sub><b>Notation</b></sub></td><td></td><td></td></tr>
+    <tr><td align="center" colspan="2">transitivity of &ne;<sub><b>Notation</b></sub></td><td></td><td></td></tr>
+    <tr><th colspan="2">placeholder symbols and well-formed formulas</th></tr>
+    <tr><td align="right"> A is a placeholder-syntax symbol &#9500;&nbsp;</td><td align="left">A is a wff</td><td></td></tr>
+    <tr><td align="right"> _ is a binary infix symbol &#9500;&nbsp;</td><td align="left">(A is a placeholder-syntax symbol, B is a placeholder-syntax symbol &#9500; A _ B is a wff)</td><td></td></tr>
+    <tr><td align="right"> _ is a unary prefix symbol &#9500;&nbsp;</td><td align="left">(A is a placeholder-syntax symbol &#9500; _ A is a wff)</td><td></td></tr>
+    <tr><td align="right"> _ is a unary postfix symbol &#9500;&nbsp;</td><td align="left">(A is a placeholder-syntax symbol &#9500; A _ is a wff))</td><td></td></tr>
+</table>
+<p>We first interpret notational equality, and notational inequality.  We will re-visit this once 
+    the Wittgenstein approach has re-formalized logical negation, allowing &ne; to be defined in terms of =</p>
+<p>The intended interpretation of "is a wff", is the usual formal meaning of "is a well formed formula".</p>
+<p>We interpret Wittgenstein's given of physical notation, as axioms for each textual glyph stating that
+    each textual glyph is notationally equal =<sub><b>Notation</b></sub> to itself,
+    and that any district pair of textual glyphs are notationally unequal &ne;<sub><b>Notation</b></sub> .</p>
+<table align="center">
+    <tr><th colspan="3">Uniform substitution base case</th></tr>
+    <tr><td align="right">A is a placeholder-syntax symbol, C is a placeholder-syntax symbol &#9500;&nbsp;</td><td align="left">(A &ne;<sub><b>Notation</b></sub> C, [B/A] is a substitution &#9500; C[B/A] &#x21A6; C)</td><td>no-op substitution</td></tr>
+</table>
+<p>We now can state another base case for uniform substitution.  Since we do not have any axioms asserting that textual glyphs are notationally unequal to themselves, 
+    applying the substitution [C/A] to the above schema will result in a schema that, when used, infers a true but unusable inference rule.</p>
+
+<table align="center">
+    <tr><th colspan="3">Partial evaluation cases</th></tr>
+    <tr><td align="center" colspan="2">transitivity of &#x21A6;</td><td></td><td></td></tr>
+    <tr><td align="right">_ is a binary infix symbol &#9500;&nbsp;</td><td align="left">(A &#x21A6; C &#9500; A _ B &#x21A6; C _ B)</td><td rowspan="4">subexpression &#x21A6; for _</td></tr>
+    <tr><td align="right">_ is a binary infix symbol &#9500;&nbsp;</td><td align="left">(A &#x21A6; C &#9500; A _ B &#x21A6; A _ C)</td></tr>
+    <tr><td align="right">_ is a postfix symbol &#9500;&nbsp;</td><td align="left">(A &#x21A6; C &#9500; A _ &#x21A6; C _)</td></tr>
+    <tr><td align="right">_ is a prefix symbol &#9500;&nbsp;</td><td align="left">(A &#x21A6; C &#9500; _ A &#x21A6; _ C)</td></tr>
+    <tr><td align="right">Z is a undefined binary notation &#9500;&nbsp;</td><td align="left">(A &#x21A6; C &#9500; A Z B &#x21A6; C Z B)</td><td rowspan="4">subexpression &#x21A6; for "Z"</td></tr>
+    <tr><td align="right">Z is a undefined binary notation &#9500;&nbsp;</td><td align="left">(A &#x21A6; C &#9500; A Z B &#x21A6; A Z C)</td></tr>
+    <tr><td align="right">Z is a undefined postfix notation &#9500;&nbsp;</td><td align="left">(A &#x21A6; C &#9500; A Z &#x21A6; C Z)</td></tr>
+    <tr><td align="right">Z is a undefined prefix notation &#9500;&nbsp;</td><td align="left">(A &#x21A6; C &#9500; Z A &#x21A6; Z C)</td></tr>
+</table>
+<p>We next interpret evaluation of expressions.</p>
+<table align="center">
+    <tr><th colspan="3">Deriving from axioms</th></tr>
+    <tr><td align="right">A is a placeholder-syntax symbol, B is a wff &#9500;&nbsp;</td><td align="left"> [B/A] is a valid substitution</td><td>Intended interpretation of placeholder-syntax symbols</td></tr>
+    <tr><td align="right">Q, [R/S] is a valid substitution &#9500;&nbsp;</td><td align="left">(T is a wff, Q[R/S] &#x21A6; T &#9500; T)</td><td></td></tr>
+    <tr><td align="right">Q, [_<sub>1</sub>/_] is a valid substitution &#9500;&nbsp;</td><td align="left">(Q[_<sub>1</sub>/_] &#x21A6; T &#9500; T)</td><td></td></tr>
+</table>
+<p>These two inference rules are not justified from Wittgenstein's given of physical notation; rather, they describe typical practice of mathematicians.</pp>
+
+
+<table align="center">
+    <tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Axiom schema</th><th>Axiom</th><th>Rationale</th></tr>
+    <tr><td>AS1.</td><td></td><td></td><td>A, B &#9500; C := A & B &#9500; C</td><td></td><td>Definition of 2-ary &#9500;</td></tr>
+    <tr><td>AS2.</td><td></td><td></td><td>A &#9500; A</td><td></td><td>identity inference rule</td></tr>
+    <tr><td>AS3.</td><td></td><td></td><td>A := B &#9500; [A/B] is a valid substitution</td><td></td><td>:= justifies substitution</td></tr>
+    <tr><td>AS4.</td><td></td><td></td><td>_ is a binary infix symbol &#9500; (A is a placeholder-syntax symbol, B is a placeholder-syntax symbol &#9500; A _ B is a wff)</td><td></td><td></td></tr>
+    <tr><td>AS5.</td><td></td><td></td><td>A is a placeholder-syntax symbol, B is a wff &#9500; [B/A] is a valid substitution</td><td></td><td>Intended interpretation of placeholder-syntax symbols</td></tr>
+    <tr><td>AS6.</td><td></td><td></td><td>Q, [R/S] is a valid substitution &#9500; (T is a wff, Q[R/S] &#x21A6; T &#9500; T)</td><td></td><td></td></tr>
+    <tr><td>AS7.</td><td></td><td></td><td>_ is a binary infix symbol &#9500; ([B/A] is a substitution &#9500; (C _ D)[B/A] &#x21A6; C[B/A] _ D[B/A])</td><td></td><td></td></tr>
+    <tr><td>AS8.</td><td></td><td></td><td>Q, [_<sub>1</sub>/_] is a valid substitution &#9500; (Q[_<sub>1</sub>/_] &#x21A6; T &#9500; T)</td><td></td><td></td></tr>
+
+    <tr><td>A1a.</td><td></td><td></td><td></td><td>A is a placeholder-syntax symbol</td><td></td></tr>
+    <tr><td>A1b.</td><td></td><td></td><td></td><td>B is a placeholder-syntax symbol</td><td></td></tr>
+    <tr><td>A1c.</td><td></td><td></td><td></td><td>C is a placeholder-syntax symbol</td><td></td></tr>
+    <tr><td>A2a.</td><td></td><td></td><td></td><td>& is a binary infix symbol</td><td></td></tr>
+    <tr><td>A2b.</td><td></td><td></td><td></td><td>&#9500; is a binary infix symbol</td><td></td></tr>
+
+    <tr><td>1.</td><td>A is a placeholder-syntax symbol, B is a placeholder-syntax symbol &#9500; A & B is a wff</td><td></td><td></td><td></td><td><i>modus ponens</i> for &#9500;, (AS4) and (A2a)</td></tr>
+    <tr><td>2.</td><td></td><td>A & B is a wff</td><td></td><td></td><td>(5), (A1a) and (A1b)</td></tr>
+    <tr><th colspan="6">This step fails for discussive logics</th></tr>
+    <tr><td>3.</td><td></td><td>[A & B/A] is a valid substitution</td><td></td><td></td><td>(AS5), (A1a) and (2)</td></tr>
+    <tr><td>4.</td><td></td><td></td><td>T is a wff, (A &#9500; A)[A & B/A] &#x21A6; T &#9500; T</td><td></td><td>(AS6), (AS2) and (3)</td></tr>
+    <tr><td>5.</td><td></td><td>[&/_] is a valid substitution</td><td></td><td></td><td>(AS5), (A1a) and (A2a)</td></tr>
+</table>
+
+
+<p style="background:orange">We now consider what it would take to prove conjunction elimination, from detachment (for 2-ary &#9500;).  Informally, this should just be a consequence of 
+    substituting out the placeholder symbol C in the definition of 2-ary &#9500; for one of the placeholder symbols A and B, 
+    then using a substitution justified by the resulting specialized definition.</p>
+<p>Ultimately, we would want to be able to enumerate all placeholder symbols in the definition of 2-ary &#9500;, then apply a simultaneous
+    substitution of those placeholder symbols to get the definition instance that justifies the substitution that replaces the detachment rule 
+    with the conjunction elimination rule.  We defer this, instead going for just enough axiom schemas to proceed.</p>
+<table align="center">
+    <tr><th colspan="3">Uniform substitution base cases</th></tr>
+    <tr><td align="right">[B/A] is a substitution, A is not a subexpression of C&#9500;&nbsp;</td><td align="left">C[B/A] &#x21A6; C</td><td>no-op substitution</td></tr>
+    <tr><th colspan="3">Uniform substitution inferences</th></tr>
+    <tr><td align="right">[B/A] is a valid substitution, A is a subexpression of C&#9500;&nbsp;</td><td align="left">(C &#9500; C[B/A])</td><td>substitution &#9500; introduction</td></tr>
+    <tr><th colspan="3">This will fail to interpret correctly when truth values are formalized</th></tr>
+    <tr><td align="right">C[B/A] &#x21A6; D, C[B/A]&#9500;&nbsp;</td><td align="left">D</td><td>substitution evaluation</td></tr>
+</table>
+<p>Strictly speaking, we should be requiring a substitution result to be a well-formed formula before 
+    allowing syntactically entailing the substitution result.</p>
+<table align="center">
+    <tr><th colspan="3">Undefined postfix notation</th></tr>
+    <tr><td colspan="3" align="center">is a wff</td></tr>
+    <tr><th colspan="3">Base case</th></tr>
+    <tr><td align="right">A is a placeholder-syntax symbol&#9500;&nbsp;</td><td align="left">A is a wff</td></tr>
+    <tr><th colspan="3">Interpreting English</th></tr>
+    <tr><td align="right">A is a wff, B is a wff&#9500;&nbsp;</td><td align="left">[B/A] is a substitution</td></tr>
+    <tr><td align="right">A is a wff, B is a wff&#9500;&nbsp;</td><td align="left">[B/A] is a wff</td></tr>
+    <tr><td align="right">_ is a unary postfix symbol&#9500;&nbsp;</td><td align="left">(A is a placeholder-syntax symbol &#9500; A _ is a wff)</td><td rowspan="3">placeholder wff for _</td></tr>
+    <tr><td align="right">_ is a unary prefix symbol&#9500;&nbsp;</td><td align="left">(A is a placeholder-syntax symbol &#9500; _ A is a wff)</td></tr>
+    <tr><td align="right">_ is a binary infix symbol&#9500;&nbsp;</td><td align="left">(A is a placeholder-syntax symbol, B is a placeholder-syntax symbol &#9500; A _ B is a wff)</td></tr>
+    <tr><td align="right">(A := B), B is a wff&#9500;&nbsp;</td><td align="left">A is a wff</td></tr>
+    <tr><td align="center" colspan="2">(A is a subexpression of B) is a wff</td></tr>
+    <tr><th colspan="3">We would like this to be a theorem, not an axiom schema</th></tr>
+    <tr><td align="right">[B/A] is a valid substitution, A is a subexpression of C&#9500;&nbsp;</td><td align="left">(C is a wff &#9500; C[B/A] is a wff)</td><td>substitution &#9500; introduction does not remove well-formed formulas</td></tr>
+    <tr><th colspan="3">This will fail to interpret correctly when truth values are formalized</th></tr>
+    <tr><th colspan="3">Uniform substitution inferences</th></tr>
+    <tr><td align="right">(&#9500; Q), A is a subexpression of Q&#9500;&nbsp;</td><td align="left">([B/A] is a substitution, Q[B/A] is a wff &#9500; Q[B/A])</td><td>axiom schemas are self-proving</td></tr>
+</table>
+<p>The intended interpretation of "is a wff", is the usual "is a well-formed formula".  At this point, it matters that the intended interpretation of logical connectives,
+    includes that their arguments are truth values (which are yet to be re-formalized).  We proceed by specifically allowing logical and & as an argument for syntactical entailment &#9500; .</p>
+<table align="center">
+    <tr><th colspan="2">These will fail to interpret correctly when truth values are formalized</th></tr>
+    <tr><th colspan="2">A & B is a legal argument for &#9500;</th></tr>
+    <tr><td align="right">A & B is a wff, C is a placeholder-syntax symbol&#9500;&nbsp;</td><td align="left">(A & B &#9500; C) is a wff</td></tr>
+    <tr><td align="right">A is a placeholder-syntax symbol, B & C is a wff&#9500;&nbsp;</td><td align="left">(A &#9500; B & C) is a wff</td></tr>
+    <tr><td align="right">A & B is a wff, C & D is a wff&#9500;&nbsp;</td><td align="left">(A & B &#9500; C & D) is a wff</td></tr>
+</table>
+<table align="right">
+    <tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Axiom schema</th><th>Axiom</th><th>Rationale</th></tr>
+    <tr><td>1.</td><td></td><td></td><td>A, B &#9500; C := A & B &#9500; C</td><td></td><td>Definition of 2-ary &#9500;</td></tr>
+    <tr><td>2.</td><td></td><td></td><td>A is a subexpression of A</td><td></td><td></td></tr>
+    <tr><td>3.</td><td></td><td></td><td>A, B &#9500; A</td><td></td><td>left detachment</td></tr>
+    <tr><td>3a.</td><td></td><td></td><td></td><td>& is a binary infix symbol</td><td></td></tr>
+    <tr><td>3b.</td><td></td><td></td><td></td><td>&#9500; is a binary infix symbol</td><td></td></tr>
+    <tr><td>3c.</td><td></td><td></td><td></td><td>:= is a binary infix symbol</td><td></td></tr>
+    <tr><td>3d.</td><td></td><td></td><td></td><td>, is a binary infix symbol</td><td></td></tr>
+    <tr><td>4.</td><td></td><td></td><td></td><td>A is a placeholder-syntax symbol</td><td></td></tr>
+    <tr><td>4a.</td><td></td><td></td><td></td><td>B is a placeholder-syntax symbol</td><td></td></tr>
+    <tr><td>5.</td><td></td><td></td><td></td><td>C is a placeholder-syntax symbol</td><td></td></tr>
+    <tr><td>5a.</td><td></td><td></td><td></td><td>(is a subexpression of) is an infix undefined notation</td><td></td></tr>
+    <tr><td>5b.</td><td></td><td></td><td></td><td>(is a wff) is a postfix undefined notation</td><td></td></tr>
+    <tr><td>6.</td><td></td><td>[A/C] is a valid substitution</td><td></td><td></td><td>placeholder substitution introduction, (5) and (4)</td></tr>
+    <tr><td>6a.</td><td></td><td>[A/C] is a substitution</td><td></td><td></td><td><i>modus ponens</i> for &#9500;, placeholder substitution declaration and (5)</td></tr>
+    <tr><td>6b.</td><td></td><td>C[A/C] &#x21A6; A</td><td></td><td></td><td><i>modus ponens</i> for &#9500;, copy substitution and (6a)</td></tr>
+    <tr><td>7.</td><td></td><td></td><td></td><td>C is a subexpression of (A, B &#9500; C := A & B &#9500; C)</td><td>intended interpretation</td></tr>
+    <tr><td>8.</td><td>(A, B &#9500; C := A & B &#9500; C) &#9500;
+                       (A, B &#9500; C := A & B &#9500; C)[A/C]</td><td></td><td></td><td></td><td>substitution &#9500; introduction, (6) and (7)</td></tr>
+    <tr><td>9.</td><td></td><td>(A, B &#9500; C := A & B &#9500; C)[A/C]</td><td></td><td></td><td><i>modus ponens</i> for &#9500;, (8) and (1)</td></tr>
+
+    <tr><td>10.</td><td></td><td>(A, B &#9500; C := A & B &#9500; C)[A/C] &#x21A6;
+                                ((A, B &#9500; C)[A/C] := (A & B &#9500; C)[A/C])</td><td></td><td></td><td>substitution &#x21A6; for :-, (3c) and (6a)</td></tr>
+    <tr><td>10a.</td><td></td><td>(A, B &#9500; C)[A/C] &#x21A6;
+                                ((A, B)[A/C] &#9500; C[A/C])</td><td></td><td></td><td>substitution &#x21A6; for &#9500;, (3b) and (6a)</td></tr>
+    <tr><td>10b.</td><td></td><td>(A & B &#9500; C)[A/C] &#x21A6;
+                                ((A & B)[A/C] &#9500; C[A/C])</td><td></td><td></td><td>substitution &#x21A6; for &#9500;, (3b) and (6a)</td></tr>
+    <tr><td>10a.1</td><td></td><td>(A, B &#9500; C)[A/C] &#x21A6;
+                                ((A, B)[A/C] &#9500; A)</td><td></td><td></td><td>Wittgenstein: local evaluation of (10a) with (6b)</td></tr>
+    <tr><td>10b.1</td><td></td><td>(A & B &#9500; C)[A/C] &#x21A6;
+                                ((A & B)[A/C] &#9500; A)</td><td></td><td></td><td>Wittgenstein: local evaluation of (10b) with (6b)</td></tr>
+    <tr><td>11a.</td><td></td><td></td><td></td><td>C is not a subexpression of A, B</td><td>intended interpretation</td></tr>
+    <tr><td>11b.</td><td></td><td></td><td></td><td>C is not a subexpression of A & B</td><td>intended interpretation</td></tr>
+    <tr><td>12a.</td><td></td><td>(A, B)[A/C] &#x21A6; A, B</td><td></td><td></td><td>no-op substitution, (6a) and (11a)</td></tr>
+    <tr><td>12b.</td><td></td><td>(A & B)[A/C] &#x21A6; A & B</td><td></td><td></td><td>no-op substitution, (6a) and (11b)</td></tr>
+    <tr><td>13a.</td><td></td><td>(A, B &#9500; C)[A/C] &#x21A6;
+                                (A, B &#9500; A)</td><td></td><td></td><td>Wittgenstein: local evaluation of (10a.1) with (12a)</td></tr>
+    <tr><td>13b.</td><td></td><td>(A & B &#9500; C)[A/C] &#x21A6;
+                                (A & B &#9500; A)</td><td></td><td></td><td>Wittgenstein: local evaluation of (10b.1) with (12b)</td></tr>
+    <tr><td>14.</td><td></td><td>(A, B &#9500; C := A & B &#9500; C)[A/C] &#x21A6;
+                                (A, B &#9500; A := (A & B &#9500; C)[A/C])</td><td></td><td></td><td>Wittgenstein: local evaluation of (10) with (13a)</td></tr>
+    <tr><td>15.</td><td></td><td>(A, B &#9500; C := A & B &#9500; C)[A/C] &#x21A6;
+                                (A, B &#9500; A := A & B &#9500; A)</td><td></td><td></td><td>Wittgenstein: local evaluation of (14) with (13b)</td></tr>
+    <tr><td>16.</td><td></td><td>A, B &#9500; A := A & B &#9500; A</td><td></td><td></td><td>substitution evaluation, (15) and (9)</td></tr>
+    <tr><td>17.</td><td></td><td>[A & B &#9500; A/A, B &#9500; A] is a valid substitution</td><td></td><td></td><td>modus ponens</i> for &#9500;, := justifies reverse substitution, (16)</td></tr>
+
+    <tr><td>18.</td><td></td><td>[A, B &#9500; A/A] is a substitution</td><td></td><td></td><td>modus ponens</i> for &#9500;, placeholder substitution declaration and (4)</td></tr>
+    <tr><td>19.</td><td></td><td></td><td></td><td>A is a subexpression of (A is a subexpression of A)</td><td>intended interpretation</td></tr>
+    <tr><td>20.</td><td>[A, B &#9500; A/A] is a substitution, (A is a subexpression of A)[A, B &#9500; A/A] is a wff &#9500; (A is a subexpression of A)[A, B &#9500; A/A]</td><td></td><td></td><td></td><td>axiom schemas are self-proving, (2) and (19)</td></tr>
+    <tr><td>21.</td><td>A is a placeholder-syntax symbol, B is a placeholder-syntax symbol &#9500; A & B is a wff</td><td></td><td></td><td></td><td><i>modus ponens</i> for &#9500;, placeholder wff for & and (3a)</td></tr>
+    <tr><td>22.</td><td></td><td>A & B is a wff</td><td></td><td></td><td>(21), (4) and (4a)</td></tr>
+    <tr><td>23.</td><td></td><td></td><td>A & B is a wff, C is a placeholder-syntax symbol &#9500; (A & B &#9500; C) is a wff</td><td></td><td>A & B is a legal argument for &#9500; </td></tr>
+    <tr><td>24.</td><td></td><td></td><td></td><td>C is a subexpression of (A & B is a wff, C is a placeholder-syntax symbol &#9500; (A & B &#9500; C) is a wff)</td><td>intended interpretation</td></tr>
+    <tr><td>25.</td><td>(A & B is a wff, C is a placeholder-syntax symbol &#9500; (A & B &#9500; C) is a wff) &#9500;
+                        (A & B is a wff, C is a placeholder-syntax symbol &#9500; (A & B &#9500; C) is a wff)[A/C]</td><td></td><td></td><td></td><td>substitution &#9500; introduction, (6) and (24)</td></tr>
+    <tr><td>26.</td><td></td><td>(A & B is a wff, C is a placeholder-syntax symbol &#9500; (A & B &#9500; C) is a wff)[A/C]</td><td></td><td></td><td><i>modus ponens</i> for &#9500;, (25) and (23)</td></tr>
+    <tr><td>27.</td><td></td><td>(A & B is a wff, C is a placeholder-syntax symbol &#9500; (A & B &#9500; C) is a wff)[A/C] &#x21A6;
+                                ((A & B is a wff, C is a placeholder-syntax symbol)[A/C] &#9500; ((A & B &#9500; C) is a wff)[A/C])</td><td></td><td></td><td>substitution &#x21A6; for &#9500;, (3b) and (6a)</td></tr>
+
+    <tr><td>27a.</td><td></td><td>(A & B is a wff, C is a placeholder-syntax symbol)[A/C] &#x21A6;
+                                  (A & B is a wff)[A/C], (C is a placeholder-syntax symbol)[A/C]</td><td></td><td></td><td>substitution &#x21A6; for ,, (3b) and (6a)</td></tr>
+
+
+    <tr style="background:yellow"><td>27a.1</td><td></td><td>(A & B is a wff)[A/C] &#x21A6;
+                                  (A & B)[A/C] is a wff</td><td></td><td></td><td>substitution &#x21A6; for "is a wff", (5b) and (6a)</td></tr>
+
+
+    <tr><td>27a.2</td><td></td><td>(C is a placeholder-syntax symbol)[A/C] &#x21A6;
+                                  C[A/C] is a placeholder-syntax symbol</td><td></td><td></td><td>substitution &#x21A6; for "is a placeholder-syntax symbol", (5) and (6a)</td></tr>
+    <tr><td>27a.2a</td><td></td><td>(C is a placeholder-syntax symbol)[A/C] &#x21A6;
+                                  A is a placeholder-syntax symbol</td><td></td><td></td><td>Wittgenstein: local evaluation of (27a.2) with (6b)</td></tr>
+
+    <tr><td>27b.</td><td></td><td>((A & B &#9500; C) is a wff)[A/C] &#x21A6;
+                                (A & B &#9500; C)[A/C] is a wff</td><td></td><td></td><td>substitution &#x21A6; for "is a wff" on (A & B &#9500; C), (5b) and (6a)</td></tr>
+    <tr><td>27b.1</td><td></td><td>((A & B &#9500; C) is a wff)[A/C] &#x21A6;
+                                    (A & B &#9500; A) is a wff</td><td></td><td></td><td>Wittgenstein: local evaluation of (27b) with (13b) </td></tr>
+
+    <tr><td>18a.</td><td></td><td>(A is a subexpression of A)[A, B &#9500; A/A] &#x21A6; A[A, B &#9500; A/A] is a subexpression of A[A, B &#9500; A/A]</td><td></td><td></td><td>substitution &#x21A6; for "is a subexpression of", (5a) and (15)</td></tr>
+    <tr><td>19b.</td><td></td><td>(A is a subexpression of A)[A, B &#9500; A/A] &#x21A6; (A, B &#9500; A) is a subexpression of (A, B &#9500; A)</td><td></td><td></td><td>substitution evaluation, copy substitution on (18)</td></tr>
+    <tr style="background:orange"><td>17.</td><td>[A, B &#9500; A/A] is a substitution &#9500; (A is a subexpression of A)[A, B &#9500; A/A]</td><td></td><td></td><td></td><td>axiom schemas are self-proving, (2) and (16)</td></tr>
+    <tr><td>18.</td><td></td><td>(A is a subexpression of A)[A, B &#9500; A/A]</td><td></td><td></td><td>modus ponens</i> for &#9500;, (17) and (16)</td></tr>
+    <tr><td>19.</td><td></td><td>A[A, B &#9500; A/A] is a subexpression of A[A, B &#9500; A/A]</td><td></td><td></td><td>substitution evaluation, substitution &#x21A6; for "is a subexpression of" on (18)</td></tr>
+    <tr><td>20.</td><td></td><td>A, B &#9500; A is a subexpression of A, B &#9500; A</td><td></td><td></td><td>substitution evaluation, copy substitution on (19)</td></tr>
+    <tr><td>21.</td><td>(A, B &#9500; A) &#9500; (A, B &#9500; A)[A & B &#9500; A/A, B &#9500; A]</td><td></td><td></td><td></td><td>substitution &#9500; introduction, (14) and (20)</td></tr>
+    <tr><td>22.</td><td></td><td>(A, B &#9500; A)[A & B &#9500; A/A, B &#9500; A]</td><td></td><td></td><td>modus ponens</i> for &#9500;, (21) and (3)</td></tr>
+    <tr><td>23.</td><td>A & B &#9500; A</td><td></td><td></td><td></td><td>substitution evaluation, copy substitution on (22)</td></tr>
+</table>
+<p>We finally have enough axioms, and axiom schemas, to prove left conjunction elimination from left detacthment for &#9500; .  Proving right conjunction elimination 
+    from right detachment for &#9500;, and the reverse directions, are left as exercises.</p>
+
+<table>
+    <tr><th></th></tr>
+    <tr><th></th></tr>
+    <tr><td></td></tr>
+    <tr><td></td></tr>
+</table>
+<div style="background:orange">&nbsp;</div>
+<p>We review what we previously learned about formal notation, as an <i>ur-element</i> mathematical object.  It is a routine exercise that both the 
+	Zermelo and Von Neumann set-theoretic models of &#x2115; contain no <i>ur-elements</i>, i.e.</p>
+<p align="center">(&forall;n &isin; &#x2115;)(n &notin; <b>Ur</b>)</p>
+<p>That is, if we reject Max Tegmark's mathematical universe hypothesis, the notation by which we reason about mathematical objects that do not use ur-elements, cannot itself be any 
+	any of the mathematical objects formalized by that notation.  The circular reasoning problems with the formal description of notation, are thus restricted to the formal description of finite sequences.  We do not address the philosophical and formal issues with accepting 
+	the mathematical universe hypothesis, which requires textual glyphs to be mathematical objects.</p>
+<div align="center"><select id="philosophy">
+	<option value="mathematical-universe">Mathematical Universe Hypothesis</option>
+	<option value="mathematical-platonism" selected>Mathematical Platonism</option>
+	<option value="mathematical-irrealism">Mathematical Irrealism</option>
+</select></div>
+<script type="text/javascript">
+	(function(){
+		let x = new ZQuery('#philosophy')[0];
+		x.onchange = function(){
+			let target = this.value;
+			(new ZQuery('.mathematical-universe')).css('display',target==='mathematical-universe' ? 'block' : 'none');
+			(new ZQuery('.mathematical-platonism')).css('display',target==='mathematical-platonism' ? 'block' : 'none');
+			(new ZQuery('.mathematical-irrealism')).css('display',target==='mathematical-irrealism' ? 'block' : 'none');
+
+		};
+	})();
+</script>
+<div class="mathematical-universe" style="clear:both; display:none" align="center"><img src="NotationFormalizationTegmark.dot.svg"></div>
+<div class="mathematical-platonism" style="clear:both" align="center"><img src="NotationFormalizationPlatonism.dot.svg"></div>
+<div class="mathematical-irrealism" style="clear:both; display:none" align="center"><img src="NotationFormalizationWittgenstein.dot.svg"></div>
+<p>I provide diagrams for three philosophies; the select control chooses which philosophy to display diagrams for.</p>
+<p>We have not reviewed lambda calculus properly.  The two general strategies for formalization are to either define functions in terms of mathematical containers (set theory), or define mathematical containers in terms of functions (lambda calculus).  We have been following instructions for the formally easiest approach 
+	to mathematical containers (Von Neumann-Bernays-G&ouml;del set theory).  The diagram mentions lambda calculus, for completeness.</p>
+<p>We also observe, that anything that is part of the formalization of finite sequences would have two instances, when extending the graph.  E.g., we introduced the 
+	notation for finite sequences, when formalizing finite sequences.</p>
+<p>A mathematical irrealist such as Wittgenstein, to avoid circular reasoning from notation causing mathematics to exist, needs to distinguish between physical, non-formalized notation
+	and mathematically modeled notation.  (We started with non-formalized notation; it just "so happens" that there is no visual difference between non-formalized notation, and mathematically modeled notation.)</p>
+<p>We consider the identity inference rule.  To be used as non-formalized notation, substitution into</p>
+<p align="center">A &#9500; A</p>
+<p>needs to be done by physical copying, rather than subsequence extraction and sequence concatentation.</p>
+<h2 id="primitive-recursion" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Primitive recursive functions</h2>
+<p>Following prior art, we define <a href="https://en.wikipedia.org/wiki/Primitive_recursive_function">primitive recursive functions</a> with domain &#x2115;<sup>k</sup>, where 1&lt;k&isin;&#x2115;, as follows.  (We shall review some rationales for this definition, shortly.)</p>
+<p style="clear:both">Our intended basis cases, for a structural induction definition, are:</p>
+<ol>
+	<li>For n&isin;&#x2115;, the constant function n<sub>&#x2115;<sup>k</sup></sub> is a primitive recursive function.</li>
+	<li>The Peano successor function S, restricted to &#x2115;, is a primitive recursive function.</li>
+	<li>For 1&le;i&le;k, the projection function Projection<sub>i</sub> restricted to &#x2115;<sup>k</sup>, is a primitive recursive function.</li>
+</ol>
+<p>We note that in all cases, the range of the basis case functions is a subset of &#x2115;.</p>
+<p>The two inductive definition steps are defined as:</p>
+<ol start="4">
+	<li>For 1&le;m&isin;&#x2115; and 1&le;n&isin;&#x2115;, if h is an n-ary primitive recursive function and (g<sub>1</sub>, ..., g<sub>n</sub>) is an ordered n-tuple of primitive recursive functions of arity m, then 
+		h o (g<sub>1</sub>, ..., g<sub>n</sub>) is a primitive recursive function with domain &#x2115;<sup>m</sup>.</li>
+	<li>We define the primitive recursion function (of functions) as follows.  For 1&le;n, let g be an n-ary primitive recursive function and 
+		h be an (n+2)-ary primitive recursive function.  We define Primitive<sub>g,h</sub> to be an (n+1)-ary function:
+		<ol>
+			<li>Primitive<sub>g,h</sub>(0, x<sub>1</sub>, ..., x<sub>n</sub>) := g(x<sub>1</sub>, ..., x<sub>n</sub>)</li>
+			<li>Primitive<sub>g,h</sub>(S(y), x<sub>1</sub>, ..., x<sub>n</sub>) := h(y, f(y, x<sub>1</sub>, ..., x<sub>n</sub>), x<sub>1</sub>, ..., x<sub>n</sub>)</li>
+		</ol>
+		We say that Primitive<sub>g,h</sub>, is a primitive recursive function.</li>
+</ol>
+<p>Informally, we recognize the above definition can be interpreted into pseudocode for a C-like programming language:</p>
+<pre style="font-family:monospace">
+unsigned Primitive_g_h(unsigned y, unsigned x1, ..., unsigned xn) {
+	unsigned ret = g(x1, ..., xn);
+	for(int i=1; i<=y; i++) { // this loop iterates 0 times for y=0
+		ret = h(i, ret, x1, ..., xn);
+	}
+	return ret
+}
+</pre>
+<p>So the primitive recursive functions, should be an easily visualized kind of computable function.  The applied mathematical discipline for this, is 
+	computational complexity theory.  The mathematical collection of all primitive recursive functions, is often abbreviated as PR for computational complexity theory.</p>
+<p>For a C#-like language, the corresponding pseudocode would be</p>
+<pre style="font-family:monospace">
+	unsigned Primitive_g_h(unsigned y, unsigned x1, ..., unsigned xn) {
+		unsigned ret = g(x1, ..., xn);
+		foreach(var i in 1...y) { // this loop iterates 0 times for y=0
+			ret = h(i, ret, x1, ..., xn);
+		}
+		return ret
+	}
+</pre>
+<p>Note: if we were to replace the mathematical collection 1...y with the infinite mathematical collection &#x2115;, 
+	the loop would not terminate.  We would need to account for this, when formalizing computational complexity theory.</p>
+
+<h2 id="metaphysics-pr" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Metaphysics of primitive recursive functions</h2>
+<p>In general, structural inductive definitions use the <a href="https://www.logical-fallacy.com/articles/fallacy-of-composition/#ignoring-emergence">ignoring emergence variant fallacy of composition</a>,
+	as a formal definition.  We note, after a cursory inspection of the above definition of primitive recursive functions:</p>
+<ul>
+	<li>The first and third basis cases, rely on n-ary ordered tuples.  That is, their formalization relies on the definition of n-ary Cartesian product.</li>
+	<li>Likewise, both of the inductive definition steps rely on n-ary ordered tuples.</li>
+	<li>There should be a weak natural induction proof, that all primitive recursive functions have a mathematical range that is a subset of &#x2115;.</li>
+</ul>
+<p>We do not go into the details here, but the original G&ouml;del's Incompleteness theorems used only primitive recursive functions for their 
+	G&ouml;del encodings.  Primitive recursive arithmetic also is generally considered Intuitionistically valid, i.e. these functions are generally considered 
+	explicitly constructed.  This suggests that the standard Heyting rationale for Intuitionistic logic, doesn't formalize everything needed.</p>
+<p>We interpret a special case each, of the first and third basis cases, into Gentzen-format notation as</p>
+<table align="center">
+	<tr><td align="right">n&isin;&#x2115;&nbsp;</td><td align="left">&#9500; n<sub>&#x2115;</sub>&isin;Function(&#x2115;, {n})</td></tr>
+	<tr><td align="right">&nbsp;</td><td align="left">&#9500; id|<sub>&#x2115;</sub> &isin; Function(&#x2115;, &#x2115;) </td></tr>
+</table>
+<p>Recalling that the corresponding evaluation rules are <i>x &#x21A6; n</i> and <i>x &#x21A6; x</i>, it would be notationally convenient to explicitly use within a Gentzen-format notation.  However, evaluation rules do not specify their domain.</p>
+<p>Of the notations we have already formalized, the most relevant ones are for domain restriction.  We would like the following to be defined:</p>
+<table align="center" style="background:orange">
+	<tr><td align="right">n&isin;&#x2115;&nbsp;</td><td align="left">&#9500; (x &#x21A6; n)|<sub>&#x2115;</sub> &isin; Function(&#x2115;, {n})</td></tr>
+	<tr><td align="right">&nbsp;</td><td align="left">&#9500; (x &#x21A6; x)|<sub>&#x2115;</sub> &isin; Function(&#x2115;, &#x2115;) </td></tr>
+</table>
+<p>We did not do this earlier when verifying the usual definitions for cardinal size of sets, because our authorities did not.</p>
+<p>We say that the domain restriction of an evaluation rule R to a mathematical collection D, R|<sub>D</sub>, defines a partial function whose domain is contained in D.  If 
+	the evaluation rule is defined for all d&isin;D, then a function whose domain is D is defined.</p>
+<p>However, as a matter of intended interpretation both the constant evaluation rule <i>x &#x21A6; n</i>, and the identity evaluation rule <i>x &#x21A6; x</i>, make 
+	sense with non-formalizable domains of discourse.  They also fulfil the Kolmogorov rationale's "solutions to problems".</p>
+
+<h2 id="metaphysics-nonformalizable" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Metaphysics of collections, of non-formalizable domains of discourse</h2>
+<p>This leads us to consider extending the notation of set theory, to handle non-formalizable domains of discourse.  That is, we want to handle any situation where the Kolmogorov rationale for 
+	Intuitionistic logic makes sense.  We duplicate some definitions we introduced earlier.</p>
+<ul>
+	<li>We say that the notation d&isin;D is syntactically valid, when
+		<ul>
+			<li>D is a notation for a (philosophical) domain of discourse, and</li>
+			<li>d is either a term variable, or a well-formed formula <i>wff</i> for some formal grammar.</li>
+		</ul>
+		The intended interpretation is "d is in the domain of discourse D", or "d is a D".</li>
+	<li>Given a well-formed formula <i>wff</i> for some formal grammar, we say that <i>x &#x21A6; wff</i> notates an evaluation rule.  The intended intepretation is "x evaluates to wff".  We observe that 
+		x is a free variable, i.e. does not have an associated domain of discourse.</li>
+	<li>We say that <i>x &#x21A6; x</i> is the identity evaluation rule.  The intended intepretation is "x evaluates to x"</li>
+	<li>For d&isin;D, we say <i>x &#x21A6; d</i> is a constant evaluation rule.  The intended intepretation is "x evaluates to d".</li>
+	<li>For a domain of discourse D, and evaluation rule <i>x &#x21A6; wff</i>, (<i>x &#x21A6; wff</i>)|<sub>D</sub> has intended interpretation "x evaluates to wff on D", or "<i>x &#x21A6; wff</i> restricted to domain of discourse D".</li>
+</ul>
+<p>It is a mechanical exercise that when D is a mathematical collection for which partial functions have been defined, that (<i>x &#x21A6; wff</i>)|<sub>D</sub> is a partial function whose domain is all d&isin;D for which <i>wff</i> is syntactically valid.
+	For the identity and constant evaluation rules, the partial function so named is actually a (total) function.</p>
+<p>Furthermore, we see that the domain restriction of the identity evaluation rule is unconditionally syntactically valid, 
+	and that the domain restriction of a constant evaluation rule depends only on the syntactical validity of the constant being evaluated to.  In particular, we 
+	have:</p>
+<table align="center">
+	<tr><td align="right">d&isin;<b>Set</b>, E&isin;<b>Class</b></td><td align="left">&#9500; (x &#x21A6; d)|<sub>E</sub> &isin; Function(E, {d})</td></tr>
+	<tr><td align="right">E&isin;<b>Class</b></td><td align="left">&#9500; (x &#x21A6; x)|<sub>E</sub> &isin; Function(E, E) </td></tr>
+</table>	
+<p>We would like the following to be defined for all domains of discourse, both formalized and non-formalizable:</p>
+<table align="center" style="background:orange">
+	<tr><td align="right">d&isin;D, E is a domain of discourse</td><td align="left">&#9500; (x &#x21A6; d)|<sub>E</sub> &isin; Function(E, {d})</td></tr>
+	<tr><td align="right">E is a domain of discourse</td><td align="left">&#9500; (x &#x21A6; x)|<sub>E</sub> &isin; Function(E, E) </td></tr>
+</table>	
+<p>The notations to be defined, are {d} and Function(..., ...). {d} should notate a collection of things in the domain of discourse of D, containing only d.
+	Even though these notations are not defined, they are still described enough to be part of a ur-element mathematical structure of Gentzen-format proofs.
+	That is, we have a strategy for formalizing reasoning about non-formalizable domains of discourse.</p>
+</body>
+</html>
