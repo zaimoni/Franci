@@ -2367,7 +2367,7 @@ private:
 			return std::pair(std::pair(inferred.first, join(stage, " ")), inferred.second);
 		}
 
-		static std::optional<std::variant<syntactical_entailment_introduction*, syntactical_entailment_2ary*> > construct(std::shared_ptr<fact_database> src) {
+		static std::optional<std::variant<std::unique_ptr<syntactical_entailment_introduction>, std::unique_ptr<syntactical_entailment_2ary> > > construct(std::shared_ptr<fact_database> src) {
 			if (!src) return std::nullopt;
 			if (dynamic_cast<syntactical_entailment_introduction_start*>(src.get())) return std::nullopt;
 
@@ -2379,7 +2379,7 @@ private:
 			auto conclusion = src->rationale(src->size() - 1);
 
 			// construct a syntactical_entailment_2ary object, if we assumed 2 hypotheses
-			if (auto ary2 = syntactical_entailment_2ary::construct(*lhs, conclusion.first.first)) return ary2;
+			if (auto ary2 = syntactical_entailment_2ary::construct(*lhs, conclusion.first.first)) return std::unique_ptr<syntactical_entailment_2ary>(ary2);
 
 			// base case
 			std::unique_ptr<formal::lex_node> rhs(node_from(conclusion.first.first));
@@ -2389,7 +2389,7 @@ private:
 			// catalog for the real code and offset rather than hard-coding them
 			if (!symbol_catalog::anchor_symbol_parse(*ret)) return std::nullopt;
 
-			return new syntactical_entailment_introduction(ret, hypotheses, src);
+			return std::unique_ptr<syntactical_entailment_introduction>(new syntactical_entailment_introduction(ret, hypotheses, src));
 		}
 	};
 
@@ -3949,9 +3949,35 @@ static void run_proof_script(const std::filesystem::path& path)
 	while (!complete) {
 		auto apps = enumerate_applicable_2ary(tip);
 
+		// probe dischargeability up front (the unique_ptr variant makes an unpicked probe
+		// leak-free), and suppress re-assuming a statement that is already visible, e.g.
+		// discharging to the Given P &#9500; Q.  P &#9500; P stays offered: it is not a
+		// configured axiom.
+		auto discharge = syntactical_entailment_introduction::construct(tip);
+		bool offer_discharge = false;
+		if (discharge) {
+			struct notation_of {
+				std::string operator()(const std::unique_ptr<syntactical_entailment_introduction>& x) const { return x->rationale(0).first.first.to_s(); }
+				std::string operator()(const std::unique_ptr<syntactical_entailment_2ary>& x) const { return x->to_s(); }
+			};
+			const auto notation = std::visit(notation_of(), *discharge);
+			offer_discharge = true;
+			for (decltype(auto) v : visible_statements(tip)) {
+				if (v.notation == notation) {
+					offer_discharge = false;
+					break;
+				}
+			}
+		}
+
 		std::vector<std::string> entries;
 		for (decltype(auto) a : apps) entries.push_back("infer " + a.inferred.to_s() + " via " + a.rule->to_s());
-		entries.push_back("discharge current hypothesis level");
+		if (offer_discharge) entries.push_back("discharge current hypothesis level");
+
+		if (entries.empty()) {
+			std::cout << "no applicable inferences or discharges; proof of " << theorem_name << " abandoned\n";
+			return;
+		}
 
 		size_t picked = std::numeric_limits<size_t>::max();
 		const auto choice = ask_user_to_pick_one(title, entries, [&picked](size_t i) {
@@ -3977,29 +4003,24 @@ static void run_proof_script(const std::filesystem::path& path)
 			continue;
 		}
 
-		// discharge the nearest enclosing hypothesis level
-		auto result = syntactical_entailment_introduction::construct(tip);
-		if (!result) {
-			std::cout << "nothing to discharge here\n";
-			continue;
-		}
+		// discharge the nearest enclosing hypothesis level, probed above
 		auto closed = find_ancestor<syntactical_entailment_introduction_start>(tip);
-		// non-null: construct(tip) just succeeded on the same walk
+		// non-null: the discharge probe succeeded on the same walk
 		auto dest = inference_destination(closed->parent());
 		if (!dest) {
 			error_report(src, "no inference destination for discharge");
 			return;
 		}
 
-		if (auto p = std::get_if<syntactical_entailment_introduction*>(&*result)) {
-			std::shared_ptr<fact_database> node(*p);
+		if (auto p = std::get_if<std::unique_ptr<syntactical_entailment_introduction> >(&*discharge)) {
+			std::shared_ptr<fact_database> node(std::move(*p));
 			steps.push_back(node);	// pins the discharged branch as well, via its prior chain
 			auto row = node->rationale(0);
 			last_discharged = row.first.first;
 			rows.push_back(proof_row{row.second, is_entailment_statement(last_discharged), last_discharged.to_s(), std::string(row.first.second.view())});
 		} else {
-			auto q = std::get<syntactical_entailment_2ary*>(*result);
-			last_discharged = statement_t(std::shared_ptr<const formal::parsed>(q));
+			decltype(auto) q = std::get<std::unique_ptr<syntactical_entailment_2ary> >(*discharge);
+			last_discharged = statement_t(std::shared_ptr<const formal::parsed>(q.release()));
 		}
 
 		dest->record(last_discharged);
