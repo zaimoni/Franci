@@ -2172,14 +2172,18 @@ private:
 			stage2[0] = std::string_view("label(");
 			stage2[2] = std::string_view(")");
 
-			std::vector<perl::scalar> stage(hypothesis_ids.size() + 1);
-
-			stage[0] = rule->to_s();
+			std::vector<perl::scalar> labels(hypothesis_ids.size());
 			ptrdiff_t i = hypothesis_ids.size();
 			while (0 <= --i) {
 				stage2[1] = std::to_string(hypothesis_ids[i]);
-				stage[i + 1] = join(stage2, "");
+				labels[i] = join(stage2, "");
 			}
+
+			// design document format: <rule>; label(...) and label(...).  The row ledger
+			// is responsible for rewriting each label(id) expression to a row label.
+			std::vector<perl::scalar> stage(2);
+			stage[0] = rule->to_s() + ";";
+			stage[1] = join(labels, " and ");
 
 			return std::pair(std::pair(inferred.first, join(stage, " ")), inferred.second);
 		}
