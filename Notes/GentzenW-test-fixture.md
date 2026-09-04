@@ -56,6 +56,9 @@ runnable from Visual Studio with minimal ceremony.
 
 (Extend this list as decisions land; these are the anticipated ones.)
 
+* Defined notations (see GentzenW-defined-notations.md): rationale strings become
+  "modus ponens for &#9500;; (1) and (3)" etc., and the `axioms:` list gains the
+  conditional-definition axiom once it is used.
 * N-ary (>2 statements) `given:`/`hypothesis:` levels.
 * A "lemmas used" key alongside `axioms:` once previously proven theorems can be
   applied as rules.
