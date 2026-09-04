@@ -1308,8 +1308,24 @@ private:
 		}
 	};
 
-	bool needs_grouping_parens(const formal::lex_node& node) {
+	static bool needs_grouping_parens(const formal::lex_node& node) {
 		return (node.code() & symbol_catalog::anchor_is_symbol) && 1 >= node.offset();
+	}
+
+	static bool is_unary_syntactical_entailment(const formal::lex_node& node) {
+		// we need syntactical entailment, not a Gentzen axiom (both use the same symbol)
+		if (!is_strict_binary_node(node)) return false;
+		if (node.code() & symbol_catalog::anchor_is_symbol) {
+			if (1 != node.offset()) return false;
+		} else  if (node.code() & (symbol_catalog::anchor_is_const_symbol | symbol_catalog::anchor_is_not_symbol)) return false;
+		else {
+			// precondition failure
+			throw std::logic_error(std::string("symbol_catalog::anchor_symbol_parse not called on node ")+node.to_s());
+		}
+		if (detect_comma(*node.prefix().front())) return false;	// n-ary hypothesis, not unary
+		if (detect_comma(*node.postfix().front())) return false;	// n-ary conclusion is not intuitionistic -- classical logical or, hard to work with
+		// we do want the arguments to be truth-valued statements, but the logic is a parameter
+		return true;
 	}
 
 	// builds: lhs op rhs as a lex_node tree
