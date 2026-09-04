@@ -2572,6 +2572,7 @@ private:
 		std::shared_ptr<syntactical_entailment_2ary> rule;	// instantiated for this application
 		statement_t inferred;	// the instantiated consequent
 		std::vector<size_t> hypothesis_ids;	// notation ids matched, in hypothesis order
+		statement_t schema;	// the base rule statement this application instantiates
 	};
 
 	// Enumerates the 2-ary rule applications available at tip: for each visible 2ary
@@ -2640,7 +2641,7 @@ private:
 				ids.reserve(2);
 				ids.push_back(c.notation_id);
 				ids.push_back(*h2);
-				ret.push_back(applicable_2ary{stage, stage->consequent(), std::move(ids)});
+				ret.push_back(applicable_2ary{stage, stage->consequent(), std::move(ids), r.stmt});
 			}
 		}
 		return ret;
@@ -3881,6 +3882,60 @@ struct proof_row {
 	std::string rationale;	// label(...) references carry raw notation ids; renumbering is the theorem writer's job
 };
 
+// Rewrites each label(<notation id>) expression whose id has a ledger row, to the row
+// label (<row #>).  Notation ids need not be unique in general (first ledger row wins),
+// but are unique for Gentzen-format proofs structured like the cut rule.  An id with no
+// ledger row is left as its label(...) expression rather than silently mislabeled.
+static std::string rewrite_labels(const std::string& rationale, const std::vector<proof_row>& rows)
+{
+	static constexpr const char* tag = "label(";
+	static constexpr const size_t tag_len = 6;
+
+	std::string ret;
+	size_t pos = 0;
+	while (true) {
+		const auto hit = rationale.find(tag, pos);
+		if (std::string::npos == hit) break;
+		auto scan = hit + tag_len;
+		size_t id = 0;
+		bool have_digits = false;
+		while (scan < rationale.size() && '0' <= rationale[scan] && '9' >= rationale[scan]) {
+			id = id * 10 + size_t(rationale[scan] - '0');
+			have_digits = true;
+			++scan;
+		}
+		if (!have_digits || scan >= rationale.size() || ')' != rationale[scan]) {
+			ret += rationale.substr(pos, scan - pos);
+			pos = scan;
+			continue;
+		}
+
+		size_t row_no = 0;
+		{
+			size_t n = 0;
+			for (decltype(auto) r : rows) {
+				++n;
+				if (r.notation_id == id) {
+					row_no = n;
+					break;
+				}
+			}
+		}
+
+		ret += rationale.substr(pos, hit - pos);
+		if (0 < row_no) {
+			ret += '(';
+			ret += std::to_string(row_no);
+			ret += ')';
+		} else {
+			ret += rationale.substr(hit, scan + 1 - hit);
+		}
+		pos = scan + 1;
+	}
+	ret += rationale.substr(pos);
+	return ret;
+}
+
 static void run_proof_script(const std::filesystem::path& path)
 {
 	using namespace gentzen;
@@ -3918,6 +3973,7 @@ static void run_proof_script(const std::filesystem::path& path)
 
 	std::vector<proof_row> rows;
 	std::vector<std::shared_ptr<fact_database> > steps;	// pins derivation records for the theorem writer
+	std::vector<std::pair<std::string, size_t> > schemas_used;	// base rules applied: (notation, notation id)
 
 	std::shared_ptr<fact_database> tip = lemmas::get();	// previously proven theorems stay visible
 
@@ -3999,6 +4055,17 @@ static void run_proof_script(const std::filesystem::path& path)
 			tip = std::shared_ptr<fact_database>(next);
 			auto row = tip->rationale(0);
 			rows.push_back(proof_row{row.second, is_entailment_statement(row.first.first), row.first.first.to_s(), std::string(row.first.second.view())});
+
+			auto schema_id = notation_ids::get().allocate(a.schema);
+			bool known = false;
+			for (decltype(auto) s : schemas_used) {
+				if (s.second == schema_id.second) {
+					known = true;
+					break;
+				}
+			}
+			if (!known) schemas_used.push_back(std::pair(schema_id.first.to_s(), schema_id.second));
+
 			std::cout << "inferred: " << row.first.first.to_s() << "\n";
 			continue;
 		}
@@ -4031,13 +4098,54 @@ static void run_proof_script(const std::filesystem::path& path)
 	}
 
 	std::cout << "\nproven (" << theorem_name << "): " << last_discharged.to_s() << "\n";
+
+	// theorem writer (work item #6): axioms used, the result, and the proof table as an
+	// array of arrays [row label, inference-rule column, proposition column, rationale],
+	// reformattable to the docs folder's Gentzen/Fitch HTML tables
+	{
+		fkyaml::node::sequence_type ax;
+		for (decltype(auto) s : schemas_used) {
+			if (0 < s.second && gentzen::axioms::get()->size() >= s.second) ax.emplace_back(s.first);
+		}
+
+		fkyaml::node::sequence_type proof_table;
+		size_t line_no = 0;
+		for (decltype(auto) r : rows) {
+			fkyaml::node::sequence_type cells;
+			cells.emplace_back(std::to_string(++line_no) + ".");
+			cells.emplace_back(r.entailment_column ? r.notation : std::string());
+			cells.emplace_back(r.entailment_column ? std::string() : r.notation);
+			cells.emplace_back(rewrite_labels(r.rationale, rows));
+			proof_table.emplace_back(fkyaml::node::sequence(std::move(cells)));
+		}
+
+		fkyaml::node theorem = fkyaml::node::mapping();
+		theorem["name"] = theorem_name;
+		theorem["axioms"] = fkyaml::node::sequence(std::move(ax));
+		theorem["result"] = last_discharged.to_s();
+		theorem["proof"] = fkyaml::node::sequence(std::move(proof_table));
+
+		fkyaml::node root = fkyaml::node::mapping();
+		root["theorem"] = theorem;
+
+		auto out_path = path;
+		out_path.replace_extension(".theorem.yaml");
+		std::ofstream out(out_path);
+		if (out.is_open()) {
+			out << fkyaml::node::serialize(root);
+			std::wcout << L"theorem file: " << out_path.native() << L"\n";
+		} else {
+			error_report(src, "cannot write theorem file");
+		}
+	}
+
 	std::cout << "proof table preview:\n";
 	size_t line_no = 0;
 	for (decltype(auto) r : rows) {
 		std::cout << ++line_no << ".\t";
 		if (r.entailment_column) std::cout << r.notation << "\t\t";
 		else std::cout << "\t" << r.notation << "\t";
-		std::cout << r.rationale << "\n";
+		std::cout << rewrite_labels(r.rationale, rows) << "\n";
 	}
 }
 
