@@ -339,6 +339,15 @@ bool is_strict_binary_node(const formal::lex_node& src) {
 	return true;
 }
 
+bool is_binary_node(const formal::lex_node& src) {
+	if (src.postfix().empty()) return false;
+	if (src.prefix().empty()) return false;
+	if (!src.infix().empty()) return false;
+	if (!src.fragments().empty()) return false;
+	if (0 != src.post_anchor_code()) return false;
+	return true;
+}
+
 // while the semantics of left-fold, right-fold, and generalized-associativity are different,
 // they conserve RAM for n-ary expressions comparably
 bool is_lfold_rfold_gassoc_node(const formal::lex_node& src) {
@@ -1332,6 +1341,23 @@ private:
 		if (detect_comma(*node.prefix().front())) return false;	// n-ary hypothesis, not unary
 		if (detect_comma(*node.postfix().front())) return false;	// n-ary conclusion is not intuitionistic -- classical logical or, hard to work with
 		// we do want the arguments to be truth-valued statements, but the logic is a parameter
+		return true;
+	}
+
+	template<bool require_contract = false>
+	static bool is_definition_node(const formal::lex_node& node) {
+		// we need syntactical entailment, not a Gentzen axiom (both use the same symbol)
+		if (node.code() & symbol_catalog::anchor_is_symbol) {
+			if (0 != node.offset()) return false;
+		}
+		else if (node.code() & (symbol_catalog::anchor_is_const_symbol | symbol_catalog::anchor_is_not_symbol)) return false;
+		else {
+			// precondition failure
+			if constexpr (require_contract) throw std::logic_error(std::string("symbol_catalog::anchor_symbol_parse not called on node ") + node.to_s());
+			else return false;
+		}
+		if (!is_binary_node(node)) return false;
+		// this is credibly under-specified
 		return true;
 	}
 
