@@ -2313,8 +2313,16 @@ private:
 
 		static const constexpr std::string_view str_introduction = std::string_view("&#9500;-introduction,");
 
+		// C++-side precondition: construct() has normalized the inferred tree's root through
+		// symbol_catalog::anchor_symbol_parse.  Not NDEBUG-guarded by design: this is
+		// foundations-of-math code, so correctness outranks CPU and there is no safe default.
+		static std::shared_ptr<const formal::lex_node> verified(std::unique_ptr<formal::lex_node>& infer) {
+			if (!infer || !(infer->code() & symbol_catalog::anchor_is_symbol)) throw std::logic_error("syntactical_entailment_introduction: inferred statement not symbol-anchored");
+			return std::shared_ptr<const formal::lex_node>(infer.release());
+		}
+
 		syntactical_entailment_introduction(std::unique_ptr<formal::lex_node>& infer, const syntactical_entailment_introduction_start* hyp, const std::shared_ptr<fact_database>& assume)
-			: prior(assume), hypotheses(hyp), inferred(notation_ids::get().allocate(std::shared_ptr<const formal::lex_node>(infer.release())))
+			: prior(assume), hypotheses(hyp), inferred(notation_ids::get().allocate(verified(infer)))
 			{}
 	public:
 		syntactical_entailment_introduction() = default;
@@ -2372,6 +2380,10 @@ private:
 			// base case
 			std::unique_ptr<formal::lex_node> rhs(node_from(conclusion.first.first));
 			std::unique_ptr<formal::lex_node> ret(make_binary_node(std::string_view("&#9500;"), formal::Tokenized, std::move(lhs), std::move(rhs)));
+
+			// the minted &#9500; word never went through the grammar: consult the symbol
+			// catalog for the real code and offset rather than hard-coding them
+			if (!symbol_catalog::anchor_symbol_parse(*ret)) return std::nullopt;
 
 			return new syntactical_entailment_introduction(ret, hypotheses, src);
 		}
