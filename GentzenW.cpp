@@ -939,9 +939,11 @@ namespace gentzen {
 			// these are the kinds of symbols we can declare
 			Prefix = 1U << 0,	// prefix symbol
 			Infix = 1U << 1,	// infix symbol
-			Postfix = 1U << 2	// postfix symbol
-//			Constant = 1U << 3, // constant symbol	// Copilot recommended these, but we don't need them
-//			All = Prefix | Infix | Postfix | Constant
+			Postfix = 1U << 2,	// postfix symbol
+			// Infix operations can support recursive-definition syntax.  Cf. https://wiki.haskell.org/Fold
+//			Infix_LFold = 1U << 3,	// left-fold: A _ B _ C := (A _ B) _ C
+//			Infix_GAssoc = 1U << 4, // generalized associativity: A _ B _ C = A _ (B _ C) = (A _ B) _ C
+//			Infix_RFold = 1U << 5,	// right-fold: A _ B _ C := A _ (B _ C)
 		};
 	public:
 		static constexpr const unsigned long long anchor_is_symbol = (1ULL << 5); // reserve this flag for lex_node
