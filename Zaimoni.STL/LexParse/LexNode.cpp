@@ -667,14 +667,29 @@ restart:
 		}
 		throw std::logic_error("placeholder_handle::replace(shared_ptr): variant tag mismatch");
 	}
+	void lex_node::report_error() {
+		if (!_last_error) return;
+		::error_report(origin(), *_last_error);
+		learn(Error);
+		_last_error = std::nullopt;
+	}
+
+	void lex_node::report_warning() const {
+		if (!_last_warning) return;
+		::warning_report(origin(), *_last_warning);
+		_last_warning = std::nullopt;
+	}
 }	// namespace formal
 
 void error_report(formal::lex_node& fail, const perl::scalar& err) {
-	error_report(fail.origin(), err);
-	fail.learn(formal::Error);
+	fail.record_error(err);
+	fail.report_error();
 }
 
 void error_report(const formal::parsed& fail, const perl::scalar& err) { error_report(fail.origin(), err); }
 
-void warning_report(const formal::lex_node& fail, const perl::scalar& err) { warning_report(fail.origin(), err); }
+void warning_report(const formal::lex_node& fail, const perl::scalar& err) {
+	fail.record_warning(err);
+	fail.report_warning();
+}
 void warning_report(const formal::parsed& fail, const perl::scalar& err) { warning_report(fail.origin(), err); }

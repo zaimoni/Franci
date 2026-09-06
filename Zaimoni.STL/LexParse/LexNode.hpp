@@ -62,6 +62,9 @@ namespace formal {
 		unsigned long long _code; // usually used as a bitmap
 		size_t _offset; // used as a linear offset
 		mutable std::optional<perl::scalar> _cached_scalar;
+		// two-stage diagnostics: recorded now; reported or discarded later
+		mutable std::optional<perl::scalar> _last_error;
+		mutable std::optional<perl::scalar> _last_warning;
 
 		static std::vector<zaimoni::I_erase*> _caches;
 
@@ -132,6 +135,18 @@ namespace formal {
 		src_location origin() const { return origin(this); }
 
 		auto code() const { return _code; }
+
+		// Two-stage diagnostics (cf. C++ SFINAE): record now; report (print, and for an
+		// error learn formal::Error) or discard later.  error_report/warning_report on a
+		// lex_node are the hard-coded record-then-report-immediately composition.
+		void record_error(const perl::scalar& src) const { _last_error = src; }
+		void record_warning(const perl::scalar& src) const { _last_warning = src; }
+		const std::optional<perl::scalar>& last_error() const { return _last_error; }
+		const std::optional<perl::scalar>& last_warning() const { return _last_warning; }
+		void discard_error() const { _last_error = std::nullopt; }
+		void discard_warning() const { _last_warning = std::nullopt; }
+		void report_error();	// these no-op when nothing is recorded
+		void report_warning() const;
 		auto offset() const { return _offset; }
 		void interpret(unsigned long long src) { _code = src; }
 		void interpret(unsigned long long src, unsigned long long offset) { _code = src; _offset = offset; }
