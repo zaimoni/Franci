@@ -84,6 +84,54 @@ place of the definiens notations.
   order-sensitive); update expected rationales; this feature is on the reshaping list
   in GentzenW-test-fixture.md.
 
+## Enforcement scoping for the conditional axiom (sketch, 2026-09-05)
+
+The argument_enforcer error reports are unconditional and fire at **token stage**:
+reject_left_edge / reject_right_edge / reject_adjacent (and the boolean terminal
+forms), plus the is_wff path via check_for_gentzen_wellformed, are all registered in
+TokenGrammar — they run long before GentzenGrammar and therefore before any `:=` node
+exists.  Under the hypothesis-scoped parse, `_` at the right edge of the definiendum
+"modus ponens for _" would hard-error (binary infix, nothing to its right) even though
+the definiendum is technical English where `_` is a phrase slot, not an operator.
+
+**The discriminator is not "LHS of :=".**  The reversed classical-logic definition
+`A & B &#9500; C := A, B &#9500; C` wants full Gentzen parsing and enforcement on its
+LHS.  What separates the cases is token content: a span made entirely of grammatically
+known material (registered symbols, placeholder variables) is a Gentzen formula —
+parse and enforce; a span containing grammatically unknown (English) words is a
+definiendum introducing notation — phrase-parse, no argument enforcement on slots.
+This is the same test that classifies the axiom as notation-introducing, doing double
+duty.
+
+Three candidate change points:
+
+* **(a) Deferral mode on the enforcement path**: violations mark nodes "pending"
+  instead of error_report + formal::Error; the `:=` recognizer later clears
+  (definiendum) or promotes (formula).  Precedent: is_wff's wff_t warning-vs-error
+  bool.  Cost: touches the global enforcer; pending-state leaks into everything that
+  tests formal::Error.  Fallback option.
+* **(b) Scoping built into the W2 overlay**: `_`'s enforcement exists only where its
+  scoped registration does; the overlay applies to the definiens sub-span, not the
+  definiendum.  Requires push/pop (RAII) scoping of argument_enforcer's singleton
+  reservation state.
+* **(c) Keep the conclusion span out of the token-stage grammar — recommended.**  The
+  axiom text already parenthesizes the whole conclusion, and TokenGrammar registers
+  the balanced_atomic_handlers *before* the reject_* enforcers, so parenthesized
+  content is captured into a balanced node's infix before top-level edge rejection
+  sees it.  The conditional-definition recognizer then owns everything inside: it
+  sub-parses the definiens under the `_` overlay *with* enforcement and the
+  definiendum as a phrase *without*, using the unknown-token discriminator.  The
+  global enforcer stays untouched and unconditional — correct for ordinary Gentzen
+  text.  Deferred sub-span reparse has in-repo precedent (HTMLtag infix reparse;
+  note its "works for GentzenGrammar.apply, not TokenGrammar.apply" caveat, which is
+  the one constraint to design around).
+
+Added W0 spike obligations: confirm enforcement genuinely does not reach inside a
+balanced capture at token stage (registration order says no; parse_inside_balanced
+drives inner spans at GentzenGrammar stage and the interaction wants an empirical
+check), and observe how the unregistered phrase words tokenize inside the capture.
+If the shielding assumption is falsified, fall back to (a).
+
 ## Resolved decisions
 
 * **Phrase machinery**: parallel implementation first; evaluate what the shared base
