@@ -300,7 +300,7 @@ static constexpr std::pair<std::string_view, int> reserved_atomic[] = {
 	{",", 1},
 };
 
-void remove_grouping_parentheses(formal::lex_node*& src)
+void remove_grouping_parentheses(formal::lex_node*& src, std::function<bool(const formal::lex_node& contents)> ok = nullptr)
 {
 	if (!src) return;
 restart:
@@ -314,6 +314,16 @@ restart:
 	if (!src->postfix().empty()) return;
 	if (!src->fragments().empty()) return;
 	if (1 != src->infix().size()) return;
+	if (!src->infix().front())
+#ifndef NDEBUG
+		throw std::logic_error("tracing");
+#else
+		{
+		error_report(*src, "found nullptr inside ()");
+		return;
+		}
+#endif
+	if (ok && !ok(*src->infix().front())) return;
 
 	// simulate tail recursion
 	auto relay = src->infix().front(); // this has to be a copy, not a reference
