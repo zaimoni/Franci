@@ -3441,6 +3441,8 @@ private:
 		}
 		return oaoo;
 	}
+
+	undefined_SVO() = default;
 public:
 	static constexpr const unsigned long long postfix = (1ULL << 2); // reserve this flag for both word and lex_node
 	static constexpr const unsigned long long infix = (1ULL << 3); // reserve this flag for both word and lex_node
@@ -3586,8 +3588,6 @@ public:
 			return join(stage, " ");
 		}
 	};
-
-	undefined_SVO() = default;
 
 	static undefined_SVO& get() { return *_get(); }
 
