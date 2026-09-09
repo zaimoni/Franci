@@ -12,6 +12,13 @@ Progress log:
   binary shape admits multi-token sides such as the definiendum phrase) checkpointed.
 * 2026-09-04: W0 premise revised — see W0 below; `_` must never be globally registered
   as a symbol.
+* 2026-09-05: two-stage lex_node diagnostics landed (record_error/record_warning,
+  report_*/discard_*), giving the enforcement sketch's deferral option real
+  infrastructure; remove_grouping_parentheses gained the contents-inspecting callback.
+* 2026-09-08: **W0 spike executed and passed** (Kenneth, via local test_lines): the full
+  conditional axiom parses, `_` does not error, and the machinery returns a
+  simultaneous substitution for the line.  undefined_SVO made a compiler-enforced
+  singleton — defined_SVO should copy that construction from birth.
 
 Target axiom (cf. the schema tables in docs/SubatomicPhysicsOfMath_LogicV2.html; not yet
 in cfg/core.yaml):
@@ -132,8 +139,39 @@ drives inner spans at GentzenGrammar stage and the interaction wants an empirica
 check), and observe how the unregistered phrase words tokenize inside the capture.
 If the shielding assumption is falsified, fall back to (a).
 
+**Spike outcome (2026-09-08): passed.**  The full conditional axiom line parses via
+test_lines with no error from `_`, and a simultaneous substitution comes back for it.
+The shielding assumption held; option (c) remains the plan of record, with the
+two-stage diagnostics (record/report/discard) available if a corner case surfaces
+during W1/W2 buildout.
+
 ## Resolved decisions
 
+* **No hard-coded notation ids.**  The axiom to be defined as "modus ponens for
+  &#9500;" currently carries notation id 37 — a load-order artifact (hard-coded axioms
+  plus YAML sequence position).  The definition machinery resolves the definiens
+  *notationally* (the notation_ids::allocate / axioms::disambiguate precedent), never
+  by baked-in id.
+* **Registry class**: `defined_SVO`, paralleling undefined_SVO (name acknowledged as
+  approximate for what is stored); compiler-enforced singleton from birth, per the
+  2026-09-08 undefined_SVO fix.
+* **Definition granularity**: one "modus ponens for _" instance per binary infix
+  symbol, rather than a single parameterized "modus ponens for" taking a
+  binary-infix-symbol argument.  Less testing to build out; also the natural output
+  shape of the already-resolved config-time saturation, which materializes per-symbol
+  instances anyway.
+* **Definitions are bidirectional.**  `A := B` formally justifies both C[A/B] and
+  C[B/A]; this matters once the uniform substitutions the C++ implementation actually
+  performs are themselves axiomatized.  For "modus ponens for &#9500;" neither
+  direction is simplifying — rationale rewriting is a *policy* of favoring technical
+  English in rationales over Gentzen-format notation, not a simplification step.  The
+  defined_SVO registry API should expose both directions from the start even though
+  rationale rewriting only consumes the English-ward one.
+* **Post-saturation framing**: the instantiated "modus ponens for &#9500;" can be
+  viewed as a *constant* defined notation on the left-hand side whose right-hand side
+  is the fully-parsed "(P &#9500; Q), P &#9500; Q".  This collapses W4's lookup to a
+  notational pair in defined_SVO (constant-name <-> definiens notation), sidestepping
+  slot/parameter machinery in the rendering path entirely.
 * **Phrase machinery**: parallel implementation first; evaluate what the shared base
   with undefined_SVO/phrase_postfix should be by comparing the two implementations once
   the new one is stable.
