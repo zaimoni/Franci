@@ -139,6 +139,21 @@ drives inner spans at GentzenGrammar stage and the interaction wants an empirica
 check), and observe how the unregistered phrase words tokenize inside the capture.
 If the shielding assumption is falsified, fall back to (a).
 
+**Two-stage reporting flush contract (2026-09-17)**: the top-level parsing loops that
+early-terminate iterations when the error count changes must trigger the second stage
+of reporting (report_error/report_warning) before testing, so the counts they test are
+correct.  Lower-level short-circuit loop tests are not expected to flush.
+
+**remove_grouping_parentheses return encoding (2026-09-17)**: returns ptrdiff_t — the
+layer count c on normal termination, -(c+1) on termination by the ok predicate, so a
+negative value signals a predicate stop; the *caller* decides whether that is an error.
+Motivating use: stripping must not increase an entailment's hypothesis count —
+"(A) &#9500; B" strips to "A &#9500; B", "(A,B) &#9500; C" is an error at the
+entailment-slot call site, while the ordered pair (1,2) is fine elsewhere.  Callers
+needing more detail than the sign use a stateful function object; plain function
+pointers stay acceptable as predicates.  The null-inside-parens path keeps immediate
+error_report (release; debug throws).
+
 **Spike outcome (2026-09-08): passed.**  The full conditional axiom line parses via
 test_lines with no error from `_`, and a simultaneous substitution comes back for it.
 The shielding assumption held; option (c) remains the plan of record, with the

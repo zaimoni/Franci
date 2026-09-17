@@ -300,36 +300,44 @@ static constexpr std::pair<std::string_view, int> reserved_atomic[] = {
 	{",", 1},
 };
 
-void remove_grouping_parentheses(formal::lex_node*& src, std::function<bool(const formal::lex_node& contents)> ok = nullptr)
+// Returns the number of grouping layers stripped when the loop terminates normally.
+// When the ok predicate terminates the loop after c layers, returns -((ptrdiff_t)(c+1)),
+// so a negative value signals termination by predicate: the caller decides whether that
+// is an error condition (e.g. "(A,B) &#9500; C" must not gain a hypothesis, while the
+// ordered pair (1,2) is fine), and any further detail is the function object's to
+// remember.  std::bad_alloc fires long before the ptrdiff_t conversion could overflow.
+ptrdiff_t remove_grouping_parentheses(formal::lex_node*& src, std::function<bool(const formal::lex_node& contents)> ok = nullptr)
 {
-	if (!src) return;
+	size_t c = 0;
+	if (!src) return 0;
 restart:
 	auto anchor = src->c_anchor<formal::word>();
-	if (!anchor) return;
-	if (anchor->value() != reserved_atomic[0].first) return;
+	if (!anchor) return ptrdiff_t(c);
+	if (anchor->value() != reserved_atomic[0].first) return ptrdiff_t(c);
 	auto post_anchor = src->c_post_anchor<formal::word>();
-	if (!post_anchor) return;
-	if (post_anchor->value() != reserved_atomic[1].first) return;
-	if (!src->prefix().empty()) return;
-	if (!src->postfix().empty()) return;
-	if (!src->fragments().empty()) return;
-	if (1 != src->infix().size()) return;
+	if (!post_anchor) return ptrdiff_t(c);
+	if (post_anchor->value() != reserved_atomic[1].first) return ptrdiff_t(c);
+	if (!src->prefix().empty()) return ptrdiff_t(c);
+	if (!src->postfix().empty()) return ptrdiff_t(c);
+	if (!src->fragments().empty()) return ptrdiff_t(c);
+	if (1 != src->infix().size()) return ptrdiff_t(c);
 	if (!src->infix().front())
 #ifndef NDEBUG
 		throw std::logic_error("tracing");
 #else
 		{
 		error_report(*src, "found nullptr inside ()");
-		return;
+		return ptrdiff_t(c);
 		}
 #endif
-	if (ok && !ok(*src->infix().front())) return;
+	if (ok && !ok(*src->infix().front())) return -ptrdiff_t(c + 1);
 
 	// simulate tail recursion
 	auto relay = src->infix().front(); // this has to be a copy, not a reference
 	src->infix().front() = nullptr;
 	delete src;
 	src = relay;
+	++c;
 	goto restart;
 }
 
@@ -2818,6 +2826,24 @@ private:
 		if (auto h = std::get_if<std::shared_ptr<const formal::lex_node> >(&given1)) {
 			std::cout << "unary entailment (default): " << is_unary_syntactical_entailment(**h) << "\n";
 			std::cout << "unary entailment (contract): " << is_unary_syntactical_entailment<true>(**h) << "\n";
+		}
+
+		// exercise the remove_grouping_parentheses return encoding
+		{
+			auto wrap_parens = [](formal::lex_node* content) {
+				formal::word* l = new formal::word(std::string_view("("), formal::src_location(), formal::Inert_Token);
+				formal::word* r = new formal::word(std::string_view(")"), formal::src_location(), formal::Inert_Token);
+				auto ret = new formal::lex_node(l, formal::Inert_Token);
+				ret->infix().push_back(content);
+				ret->set_null_post_anchor(r);
+				return ret;
+			};
+			formal::lex_node* probe = wrap_parens(deep_clone_to_lex_node(given1));
+			std::cout << "strip, no predicate: " << remove_grouping_parentheses(probe) << "\n";
+			delete probe;
+			probe = wrap_parens(deep_clone_to_lex_node(given1));
+			std::cout << "strip, veto: " << remove_grouping_parentheses(probe, [](const formal::lex_node&) { return false; }) << "\n";
+			delete probe;
 		}
 
 		auto outer = syntactical_entailment_introduction_start::construct(given1, given2);
