@@ -3876,6 +3876,29 @@ public:
 	}
 };
 
+class defined_SVO {
+private:
+	// we have seven theoretical kinds of undefined sentences, based on where the infix/postfix/prefix text is.
+	static std::unique_ptr<defined_SVO>& _get()
+	{
+		static std::unique_ptr<defined_SVO> oaoo;
+		if (!oaoo) {
+			oaoo = decltype(oaoo)(new decltype(oaoo)::element_type());
+		}
+		return oaoo;
+	}
+
+	defined_SVO() = default;
+public:
+	static defined_SVO& get() { return *_get(); }
+
+	defined_SVO(const defined_SVO&) = delete;
+	defined_SVO(defined_SVO&&) = delete;
+	defined_SVO& operator=(const defined_SVO&) = delete;
+	defined_SVO& operator=(defined_SVO&&) = delete;
+	~defined_SVO() = default;
+};
+
 // main language syntax
 static kuroda::parser<formal::lex_node>& GentzenGrammar() {
 	static std::unique_ptr<kuroda::parser<formal::lex_node> > ooao;
