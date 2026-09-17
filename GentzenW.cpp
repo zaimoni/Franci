@@ -3478,6 +3478,12 @@ public:
 	static_assert(!(prefix & postfix));
 	static_assert(!(prefix & infix));
 
+	undefined_SVO(const undefined_SVO&) = delete;
+	undefined_SVO(undefined_SVO&&) = delete;
+	undefined_SVO& operator=(const undefined_SVO&) = delete;
+	undefined_SVO& operator=(undefined_SVO&&) = delete;
+	~undefined_SVO() = default;
+
 	class phrase_postfix final : public formal::parsed {
 		std::shared_ptr<const formal::lex_node> _subject;
 		size_t _code;
