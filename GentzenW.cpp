@@ -2358,6 +2358,15 @@ private:
 				err |= 2U;
 				error_report(*src.postfix().front(), "conclusion arity would be increased");
 			}
+			if (   detect_comma(*src.prefix().front())
+				&& normalize_word_strict_binary_node_to_lfold_r_fold_gassoc_node(*src.prefix().front())) {
+				for (decltype(auto) x : src.fragments()) {
+					if (0 > remove_grouping_parentheses(x.front(), not_detect_comma)) {
+						err |= 4U;
+						error_report(*x.front(), "hypothesis arity would be increased");
+					}
+				}
+			}
 			if (err) {
 				src.learn(formal::Error);
 				return false;
