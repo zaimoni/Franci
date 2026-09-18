@@ -3154,18 +3154,6 @@ static auto to_lines(std::vector<std::string>& in, formal::src_location& origin)
 	return ret;
 }
 
-enum TG_modes {
-	TG_HTML_tag = 59,
-	TG_MAX
-};
-
-static_assert(sizeof(unsigned long long)* CHAR_BIT >= TG_MAX);
-static_assert(!(formal::Comment & (1ULL << TG_HTML_tag)));
-static_assert(!(formal::Error & (1ULL << TG_HTML_tag)));
-static_assert(!(formal::Inert_Token & (1ULL << TG_HTML_tag)));
-static_assert(!(formal::Tokenized & (1ULL << TG_HTML_tag)));
-static_assert(!(formal::RequestNormalization & (1ULL << TG_HTML_tag)));
-
 std::optional<std::string_view> HTML_EntityLike(const std::string_view& src)
 {
 	if (3 > src.size() || '&' != src[0]) return std::nullopt;
@@ -3266,7 +3254,7 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 	}
 
 	if (auto tag = HTMLtag::parse(src, viewpoint)) {
-		std::unique_ptr<formal::lex_node> stage(new formal::lex_node(tag.release(), TG_HTML_tag | formal::Tokenized));
+		std::unique_ptr<formal::lex_node> stage(new formal::lex_node(tag.release(), HTMLtag::Tag | formal::Tokenized));
 		delete src[viewpoint];
 		src[viewpoint] = stage.release();
 		return ret;
