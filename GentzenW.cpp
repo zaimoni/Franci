@@ -394,6 +394,44 @@ bool are_fragments_superficially_parsed(const formal::lex_node& src) {
 	return true;
 }
 
+// Interior node of a same-word fold chain: same anchor word, strict binary, both
+// children present.  Shared by the sizing and commit traversals below so they cannot
+// disagree about the operand count.
+static bool _word_fold_interior(const formal::lex_node& node, const std::string_view& w)
+{
+	auto nw = node.c_anchor<formal::word>();
+	if (!nw || nw->value() != w) return false;
+	if (!is_strict_binary_node(node)) return false;
+	return node.prefix().front() && node.postfix().front();
+}
+
+static size_t _word_fold_operand_count(const formal::lex_node& node, const std::string_view& w)
+{
+	size_t ret = 0;
+	const formal::lex_node* const children[2] = { node.prefix().front(), node.postfix().front() };
+	for (decltype(auto) c : children) {
+		if (_word_fold_interior(*c, w)) ret += _word_fold_operand_count(*c, w);
+		else ++ret;
+	}
+	return ret;
+}
+
+// commit half: nothrow.  Harvests operands left-to-right into pre-populated
+// single-entry slots; interior chain nodes are deleted once their subtrees are moved.
+static void _word_fold_harvest(formal::lex_node& node, const std::string_view& w, std::vector<kuroda::parser<formal::lex_node>::symbols>& stage, size_t& i)
+{
+	formal::lex_node** const slots[2] = { &node.prefix().front(), &node.postfix().front() };
+	for (decltype(auto) s : slots) {
+		if (_word_fold_interior(**s, w)) {
+			_word_fold_harvest(**s, w, stage, i);
+			delete *s;
+		} else {
+			stage[i++].front() = *s;
+		}
+		*s = nullptr;
+	}
+}
+
 bool normalize_word_strict_binary_node_to_lfold_r_fold_gassoc_node(formal::lex_node& src) {
 	if (formal::Error & src.code()) return false;
 	auto w = src.c_anchor<formal::word>();
@@ -418,20 +456,26 @@ bool normalize_word_strict_binary_node_to_lfold_r_fold_gassoc_node(formal::lex_n
 		}
 #endif
 
-	auto l_w = src.prefix().front()->c_anchor<formal::word>();
-	if (l_w && l_w->value() != w->value()) l_w = nullptr;
-	auto r_w = src.postfix().front()->c_anchor<formal::word>();
-	if (r_w && r_w->value() != w->value()) r_w = nullptr;
-	if (!l_w && !r_w) return false;
+	const auto w_v = w->value();
+	// interior-ness, not mere anchor-word equality, is what makes a child flattenable
+	if (   !_word_fold_interior(*src.prefix().front(), w_v)
+		&& !_word_fold_interior(*src.postfix().front(), w_v)) return false;
 
-	std::remove_reference_t<decltype(src.fragments())> stage;
+	// ACID (Atomic Commit Insert Delete): all allocation happens against local staging
+	// before src is mutated, so a std::bad_alloc from sizing or pre-population leaves
+	// src unchanged; the second traversal and the container swaps are nothrow.
+	std::remove_reference_t<decltype(src.fragments())> stage(_word_fold_operand_count(src, w_v));
+	for (decltype(auto) frag : stage) frag.push_back(nullptr);
+	std::remove_reference_t<decltype(src.prefix())> empty_prefix;
+	std::remove_reference_t<decltype(src.postfix())> empty_postfix;
 
-	// \todo traverse left-to-right
-	// to be ACID, we need to allocate stage properly, then move-and-null all of the arguments
-
+	// commit: nothrow from here on
+	size_t i = 0;
+	_word_fold_harvest(src, w_v, stage, i);
 	stage.swap(src.fragments());
-	(std::remove_reference_t<decltype(src.prefix())>()).swap(src.prefix());
-	(std::remove_reference_t<decltype(src.postfix())>()).swap(src.postfix());
+	empty_prefix.swap(src.prefix());
+	empty_postfix.swap(src.postfix());
+	return true;
 }
 
 bool is_reserved_atomic(const formal::lex_node& src)
@@ -2989,6 +3033,25 @@ private:
 		{
 			formal::lex_node wrapper(std::shared_ptr<const formal::parsed>(rule->clone().release()));
 			std::cout << "entailment, parsed wrapper: " << is_syntactical_entailment<true>(wrapper) << "\n";
+		}
+
+		// exercise the ACID fold-chain normalization: (P , Q) , R flattens to arity 3;
+		// a leaf-only binary node refuses
+		{
+			std::unique_ptr<formal::lex_node> chain(make_binary_node(comma, 0,
+				std::unique_ptr<formal::lex_node>(make_binary_node(comma, 0,
+					std::unique_ptr<formal::lex_node>(leaf("P")),
+					std::unique_ptr<formal::lex_node>(leaf("Q")))),
+				std::unique_ptr<formal::lex_node>(leaf("R"))));
+			std::cout << "normalize fold chain: " << normalize_word_strict_binary_node_to_lfold_r_fold_gassoc_node(*chain)
+				<< ", gassoc " << is_lfold_rfold_gassoc_node(*chain)
+				<< ", superficially parsed " << are_fragments_superficially_parsed(*chain)
+				<< ", arity " << chain->fragments().size() << "\n";
+
+			std::unique_ptr<formal::lex_node> flat(make_binary_node(comma, 0,
+				std::unique_ptr<formal::lex_node>(leaf("P")),
+				std::unique_ptr<formal::lex_node>(leaf("Q"))));
+			std::cout << "normalize leaf-only binary: " << normalize_word_strict_binary_node_to_lfold_r_fold_gassoc_node(*flat) << "\n";
 		}
 
 		// exercise the remove_grouping_parentheses return encoding
