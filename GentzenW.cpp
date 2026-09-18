@@ -4005,6 +4005,13 @@ public:
 // hand, which is O(n^2) to maintain; this fold does the n^2 work in the compiler
 // while a human maintains the one list.  Every reserved word/lex_node code flag
 // belongs in the list (word-only line-phase LG_* bits excepted; see LG_modes).
+// \todo(__cpp_reflection) replace the hand-maintained list with a reflection-driven
+// sweep of the declaring classes/namespaces (P2996): the declaration becomes the only
+// mention, eliminating the forgotten-entry failure mode.  Prefer this over
+// std::ranges views::concat of per-site fragments, which merely coarsens the list.
+#ifdef __cpp_reflection
+#pragma message("all_distinct_bits: reflection available -- replace the hand-maintained flag list with a reflected sweep")
+#endif
 constexpr bool all_distinct_bits(std::initializer_list<unsigned long long> src)
 {
 	unsigned long long seen = 0;
