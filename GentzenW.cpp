@@ -3266,7 +3266,7 @@ std::vector<size_t> tokenize(kuroda::parser<formal::lex_node>::sequence& src, si
 	}
 
 	if (auto tag = HTMLtag::parse(src, viewpoint)) {
-		std::unique_ptr<formal::lex_node> stage(new formal::lex_node(tag.release(), TG_HTML_tag | formal::Tokenized));
+		std::unique_ptr<formal::lex_node> stage(new formal::lex_node(tag.release(), (1ULL << TG_HTML_tag) | formal::Tokenized));
 		delete src[viewpoint];
 		src[viewpoint] = stage.release();
 		return ret;
