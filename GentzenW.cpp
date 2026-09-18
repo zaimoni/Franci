@@ -2360,7 +2360,8 @@ private:
 			}
 			if (   detect_comma(*src.prefix().front())
 				&& normalize_word_strict_binary_node_to_lfold_r_fold_gassoc_node(*src.prefix().front())) {
-				for (decltype(auto) x : src.fragments()) {
+				// the normalization put the fragments on the hypothesis arm, not on src
+				for (decltype(auto) x : src.prefix().front()->fragments()) {
 					if (0 > remove_grouping_parentheses(x.front(), not_detect_comma)) {
 						err |= 4U;
 						error_report(*x.front(), "hypothesis arity would be increased");
@@ -3043,6 +3044,51 @@ private:
 				std::unique_ptr<formal::lex_node>(leaf("P")),
 				std::unique_ptr<formal::lex_node>(leaf("Q"))));
 			std::cout << "normalize leaf-only binary: " << normalize_word_strict_binary_node_to_lfold_r_fold_gassoc_node(*flat) << "\n";
+		}
+
+		// exercise the 3+ary normalization wired into tag_syntactical_entailment
+		// (unreachable from statement files until comma gains associativity config):
+		// A, B, C |- D normalizes cleanly; a tuple operand (A, B) must be rejected
+		{
+			auto wrap_parens = [](formal::lex_node* content) {
+				formal::word* l = new formal::word(std::string_view("("), formal::src_location(), formal::Inert_Token);
+				formal::word* r = new formal::word(std::string_view(")"), formal::src_location(), formal::Inert_Token);
+				auto ret = new formal::lex_node(l, formal::Inert_Token);
+				ret->infix().push_back(content);
+				ret->set_null_post_anchor(r);
+				return ret;
+			};
+			auto chain3 = [](formal::lex_node* a, formal::lex_node* b, formal::lex_node* c) {
+				return make_binary_node(comma, 0,
+					std::unique_ptr<formal::lex_node>(a),
+					std::unique_ptr<formal::lex_node>(make_binary_node(comma, 0,
+						std::unique_ptr<formal::lex_node>(b),
+						std::unique_ptr<formal::lex_node>(c))));
+			};
+
+			std::unique_ptr<formal::lex_node> good(make_binary_node(std::string_view("&#9500;"), 0,
+				std::unique_ptr<formal::lex_node>(chain3(leaf("A"), leaf("B"), leaf("C"))),
+				std::unique_ptr<formal::lex_node>(leaf("D"))));
+			symbol_catalog::anchor_symbol_parse(*good);
+			auto prior = Errors.count();
+			bool recognized = tag_syntactical_entailment::recognize(*good);
+			std::cout << "3ary entailment: recognized " << recognized
+				<< ", arm gassoc " << is_lfold_rfold_gassoc_node(*good->prefix().front())
+				<< ", arity " << good->prefix().front()->fragments().size()
+				<< ", errors +" << (Errors.count() - prior) << "\n";
+
+			std::unique_ptr<formal::lex_node> bad(make_binary_node(std::string_view("&#9500;"), 0,
+				std::unique_ptr<formal::lex_node>(chain3(
+					wrap_parens(make_binary_node(comma, 0,
+						std::unique_ptr<formal::lex_node>(leaf("A")),
+						std::unique_ptr<formal::lex_node>(leaf("B")))),
+					leaf("C"), leaf("D"))),
+				std::unique_ptr<formal::lex_node>(leaf("E"))));
+			symbol_catalog::anchor_symbol_parse(*bad);
+			prior = Errors.count();
+			recognized = tag_syntactical_entailment::recognize(*bad);
+			std::cout << "tuple-operand entailment: recognized " << recognized
+				<< ", errors +" << (Errors.count() - prior) << "\n";
 		}
 
 		// exercise the remove_grouping_parentheses return encoding
