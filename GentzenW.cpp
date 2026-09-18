@@ -321,15 +321,9 @@ restart:
 	if (!src->postfix().empty()) return ptrdiff_t(c);
 	if (!src->fragments().empty()) return ptrdiff_t(c);
 	if (1 != src->infix().size()) return ptrdiff_t(c);
-	if (!src->infix().front())
-#ifndef NDEBUG
-		throw std::logic_error("tracing");
-#else
-		{
-		error_report(*src, "found nullptr inside ()");
-		return ptrdiff_t(c);
-		}
-#endif
+	// C++-side invariant violation (the grammar cannot produce this): std::logic_error
+	// in all build modes.  Do not to_s() the node here -- the null is in its infix.
+	if (!src->infix().front()) throw std::logic_error(std::string("remove_grouping_parentheses: found nullptr inside () at ") + src->origin().to_s());
 	if (ok && !ok(*src->infix().front())) return -ptrdiff_t(c + 1);
 
 	// simulate tail recursion
@@ -4574,7 +4568,12 @@ int main(int argc, char* argv[], char* envp[])
 		{
 			const auto ext = src.path->extension();
 			if (L".yaml" == ext || L".yml" == ext) {
-				run_proof_script(*src.path);
+				try {
+					run_proof_script(*src.path);
+				} catch (std::exception& e) {
+					std::cout << "proof session: " << e.what() << "\n";
+					return 3;
+				}
 				continue;
 			}
 		}

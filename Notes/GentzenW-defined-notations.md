@@ -151,8 +151,9 @@ Motivating use: stripping must not increase an entailment's hypothesis count —
 "(A) &#9500; B" strips to "A &#9500; B", "(A,B) &#9500; C" is an error at the
 entailment-slot call site, while the ordered pair (1,2) is fine elsewhere.  Callers
 needing more detail than the sign use a stateful function object; plain function
-pointers stay acceptable as predicates.  The null-inside-parens path keeps immediate
-error_report (release; debug throws).
+pointers stay acceptable as predicates.  The null-inside-parens path throws
+std::logic_error in all build modes (normalized 2026-09-18 to the C++-side
+invariant-violation doctrine; it previously error_report-ed in release).
 
 **Spike outcome (2026-09-08): passed.**  The full conditional axiom line parses via
 test_lines with no error from `_`, and a simultaneous substitution comes back for it.
