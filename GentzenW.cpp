@@ -2249,7 +2249,7 @@ private:
 			if (!can_recognize(src)) return false;
 
 			unsigned int err = 0;
-			// if grouping parantheses are actually needed, they'll be restored by to_s()
+			// if grouping parentheses are actually needed, they'll be restored by to_s()
 			if (0 > remove_grouping_parentheses(src.prefix().front(), not_detect_comma)) {
 				err |= 1U;
 				error_report(*src.prefix().front(), "hypothesis arity would be increased");
@@ -2876,7 +2876,7 @@ private:
 
 		const auto [rule, rule_stmt] = find_2ary_axiom();
 		if (!rule) {
-			std::cout << "enumeration self-test: sno syntactical_entailment_2ary axiom found\n";
+			std::cout << "enumeration self-test: no syntactical_entailment_2ary axiom found\n";
 			return;
 		}
 
