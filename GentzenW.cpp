@@ -1381,6 +1381,30 @@ private:
 		return true;
 	}
 
+	// Detects a syntactical entailment expression still in lex_node form: A &#9500; B,
+	// or A, B &#9500; C etc. with a comma-fold hypothesis arm.  Deliberately false for
+	// a lex_node wrapping a formal::parsed instance (in particular an
+	// already-converted syntactical_entailment_2ary); that test precedes the contract
+	// trichotomy so converted wrappers, which never go through anchor_symbol_parse,
+	// cannot trip the throwing variant.
+	// \todo the 3+ arity normal form (anchor with non-empty fragments) is not set up
+	// yet; extend the shape tests when it is.
+	template<bool require_contract = false>
+	static bool is_syntactical_entailment(const formal::lex_node& node) {
+		if (node.c_anchor<formal::parsed>()) return false;
+		if (node.code() & symbol_catalog::anchor_is_symbol) {
+			if (1 != node.offset()) return false;
+		} else if (node.code() & (symbol_catalog::anchor_is_const_symbol | symbol_catalog::anchor_is_not_symbol)) return false;
+		else {
+			// precondition failure
+			if constexpr (require_contract) throw std::logic_error(std::string("symbol_catalog::anchor_symbol_parse not called on node ") + node.to_s());
+			else return false;
+		}
+		if (!is_strict_binary_node(node)) return false;
+		if (detect_comma(*node.postfix().front())) return false;	// reject non-Intuitionistic syntactical entailments
+		return true;
+	}
+
 	template<bool require_contract = false>
 	static bool is_definition_node(const formal::lex_node& node) {
 		// we need syntactical entailment, not a Gentzen axiom (both use the same symbol)
@@ -2917,6 +2941,14 @@ private:
 		if (auto h = std::get_if<std::shared_ptr<const formal::lex_node> >(&given1)) {
 			std::cout << "unary entailment (default): " << is_unary_syntactical_entailment(**h) << "\n";
 			std::cout << "unary entailment (contract): " << is_unary_syntactical_entailment<true>(**h) << "\n";
+			std::cout << "entailment, lex form: " << is_syntactical_entailment<true>(**h) << "\n";
+		}
+
+		// a lex_node wrapping a converted syntactical_entailment_2ary is not a
+		// lex_node-form entailment, even under the throwing contract
+		{
+			formal::lex_node wrapper(std::shared_ptr<const formal::parsed>(rule->clone().release()));
+			std::cout << "entailment, parsed wrapper: " << is_syntactical_entailment<true>(wrapper) << "\n";
 		}
 
 		// exercise the remove_grouping_parentheses return encoding
