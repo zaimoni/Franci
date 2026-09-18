@@ -350,9 +350,13 @@ bool detect_comma(const formal::lex_node& src) {
 
 // useful to prevent parentheses unwrapping when arity would be increased,
 // or when an ordered tuple is to be parsed.
-// \todo evaluate conversion to template function in Zaimoni.STL/flat_alg.h when migrating to a higher C++ standard
-// (C++23 rejected, standard syntax couldn't extract the parameter type of detect_comma for interpretation as
-// a stack-efficient compatible parameter)
+// \todo(__cpp_reflection) evaluate conversion to a template function in
+// Zaimoni.STL/flat_alg.h: C++23 standard syntax could not extract detect_comma's
+// parameter type for interpretation as a stack-efficient compatible parameter;
+// static reflection (P2996) can.
+#ifdef __cpp_reflection
+#pragma message("not_detect_comma: reflection available -- revisit the flat_alg.h template conversion")
+#endif
 bool not_detect_comma(const formal::lex_node& src) { return !detect_comma(src); }
 
 bool is_strict_binary_node(const formal::lex_node& src) {
