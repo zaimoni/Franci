@@ -437,24 +437,12 @@ bool normalize_word_strict_binary_node_to_lfold_r_fold_gassoc_node(formal::lex_n
 	auto w = src.c_anchor<formal::word>();
 	if (!w) return false;
 	if (!is_strict_binary_node(src)) return false;
-	if (!src.prefix().front())
-#ifndef NDEBUG
-		throw std::logic_error("tracing");
-#else
-		{
-		error_report(src, "found nullptr as prefix.front()");
-		return false;
-		}
-#endif
-	if (!src.postfix().front())
-#ifndef NDEBUG
-		throw std::logic_error("tracing");
-#else
-		{
-		error_report(src, "found nullptr as postfix.front()");
-		return false;
-		}
-#endif
+	// C++-side invariant violations (the grammar cannot produce these), so
+	// std::logic_error in all build modes: error-marking the line and continuing
+	// would presume the corruption is line-local, which an internal invariant
+	// breach specifically undermines
+	if (!src.prefix().front()) throw std::logic_error("normalize_word_strict_binary_node: null prefix.front() in " + src.to_s());
+	if (!src.postfix().front()) throw std::logic_error("normalize_word_strict_binary_node: null postfix.front() in " + src.to_s());
 
 	const auto w_v = w->value();
 	// interior-ness, not mere anchor-word equality, is what makes a child flattenable
