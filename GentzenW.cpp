@@ -984,17 +984,23 @@ namespace gentzen {
 		static_assert(!(anchor_is_symbol & formal::Inert_Token));
 		static_assert(!(anchor_is_symbol & formal::Tokenized));
 		static_assert(!(anchor_is_symbol & formal::RequestNormalization));
+		static_assert(!(anchor_is_symbol & HTMLtag::Entity));
+		static_assert(!(anchor_is_symbol & HTMLtag::Tag));
 		static_assert(!(anchor_is_const_symbol & formal::Comment));
 		static_assert(!(anchor_is_const_symbol & formal::Error));
 		static_assert(!(anchor_is_const_symbol & formal::Inert_Token));
 		static_assert(!(anchor_is_const_symbol & formal::Tokenized));
 		static_assert(!(anchor_is_const_symbol & formal::RequestNormalization));
+		static_assert(!(anchor_is_const_symbol & HTMLtag::Entity));
+		static_assert(!(anchor_is_const_symbol & HTMLtag::Tag));
 		static_assert(!(anchor_is_const_symbol & anchor_is_symbol));
 		static_assert(!(anchor_is_not_symbol & formal::Comment));
 		static_assert(!(anchor_is_not_symbol & formal::Error));
 		static_assert(!(anchor_is_not_symbol & formal::Inert_Token));
 		static_assert(!(anchor_is_not_symbol & formal::Tokenized));
 		static_assert(!(anchor_is_not_symbol & formal::RequestNormalization));
+		static_assert(!(anchor_is_not_symbol & HTMLtag::Entity));
+		static_assert(!(anchor_is_not_symbol & HTMLtag::Tag));
 		static_assert(!(anchor_is_not_symbol & anchor_is_symbol));
 		static_assert(!(anchor_is_not_symbol & anchor_is_const_symbol));
 
@@ -1689,6 +1695,8 @@ private:
 	static_assert(!(used_as_placeholder & formal::Inert_Token));
 	static_assert(!(used_as_placeholder & formal::Tokenized));
 	static_assert(!(used_as_placeholder & formal::RequestNormalization));
+	static_assert(!(used_as_placeholder & HTMLtag::Entity));
+	static_assert(!(used_as_placeholder & HTMLtag::Tag));
 	static_assert(!(used_as_placeholder & symbol_catalog::anchor_is_symbol));
 	static_assert(!(used_as_placeholder & symbol_catalog::anchor_is_const_symbol));
 	static_assert(!(used_as_placeholder & symbol_catalog::anchor_is_not_symbol));
@@ -1701,6 +1709,8 @@ private:
 	static_assert(!(parsed_substitution & formal::Inert_Token));
 	static_assert(!(parsed_substitution & formal::Tokenized));
 	static_assert(!(parsed_substitution & formal::RequestNormalization));
+	static_assert(!(parsed_substitution & HTMLtag::Entity));
+	static_assert(!(parsed_substitution & HTMLtag::Tag));
 	static_assert(!(parsed_substitution & symbol_catalog::anchor_is_symbol));
 	static_assert(!(parsed_substitution & symbol_catalog::anchor_is_const_symbol));
 	static_assert(!(parsed_substitution & symbol_catalog::anchor_is_not_symbol));
@@ -3547,31 +3557,43 @@ public:
 	static_assert(!(postfix & formal::Error));
 	static_assert(!(postfix & formal::Inert_Token));
 	static_assert(!(postfix & formal::Tokenized));
+	static_assert(!(postfix & formal::RequestNormalization));
 	static_assert(!(postfix & HTMLtag::Entity));
+	static_assert(!(postfix & HTMLtag::Tag));
 	static_assert(!(postfix & gentzen::symbol_catalog::anchor_is_symbol));
 	static_assert(!(postfix & gentzen::symbol_catalog::anchor_is_const_symbol));
 	static_assert(!(postfix & gentzen::symbol_catalog::anchor_is_not_symbol));
+	static_assert(!(postfix & gentzen::used_as_placeholder));
+	static_assert(!(postfix & gentzen::parsed_substitution));
 
 	static_assert(!(infix & formal::Comment));
 	static_assert(!(infix & formal::Error));
 	static_assert(!(infix & formal::Inert_Token));
 	static_assert(!(infix & formal::Tokenized));
+	static_assert(!(infix & formal::RequestNormalization));
 	static_assert(!(infix & HTMLtag::Entity));
+	static_assert(!(infix & HTMLtag::Tag));
 	static_assert(!(infix & gentzen::symbol_catalog::anchor_is_symbol));
 	static_assert(!(infix & gentzen::symbol_catalog::anchor_is_const_symbol));
 	static_assert(!(infix & gentzen::symbol_catalog::anchor_is_not_symbol));
 	static_assert(!(infix & postfix));
+	static_assert(!(infix & gentzen::used_as_placeholder));
+	static_assert(!(infix & gentzen::parsed_substitution));
 
 	static_assert(!(prefix & formal::Comment));
 	static_assert(!(prefix & formal::Error));
 	static_assert(!(prefix & formal::Inert_Token));
 	static_assert(!(prefix & formal::Tokenized));
+	static_assert(!(prefix & formal::RequestNormalization));
 	static_assert(!(prefix & HTMLtag::Entity));
+	static_assert(!(prefix & HTMLtag::Tag));
 	static_assert(!(prefix & gentzen::symbol_catalog::anchor_is_symbol));
 	static_assert(!(prefix & gentzen::symbol_catalog::anchor_is_const_symbol));
 	static_assert(!(prefix & gentzen::symbol_catalog::anchor_is_not_symbol));
 	static_assert(!(prefix & postfix));
 	static_assert(!(prefix & infix));
+	static_assert(!(prefix & gentzen::used_as_placeholder));
+	static_assert(!(prefix & gentzen::parsed_substitution));
 
 	undefined_SVO(const undefined_SVO&) = delete;
 	undefined_SVO(undefined_SVO&&) = delete;
