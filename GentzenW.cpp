@@ -394,6 +394,46 @@ bool are_fragments_superficially_parsed(const formal::lex_node& src) {
 	return true;
 }
 
+bool normalize_word_strict_binary_node_to_lfold_r_fold_gassoc_node(formal::lex_node& src) {
+	if (formal::Error & src.code()) return false;
+	auto w = src.c_anchor<formal::word>();
+	if (!w) return false;
+	if (!is_strict_binary_node(src)) return false;
+	if (!src.prefix().front())
+#ifndef NDEBUG
+		throw std::logic_error("tracing");
+#else
+		{
+		error_report(src, "found nullptr as prefix.front()");
+		return false;
+		}
+#endif
+	if (!src.postfix().front())
+#ifndef NDEBUG
+		throw std::logic_error("tracing");
+#else
+		{
+		error_report(src, "found nullptr as postfix.front()");
+		return false;
+		}
+#endif
+
+	auto l_w = src.prefix().front()->c_anchor<formal::word>();
+	if (l_w && l_w->value() != w->value()) l_w = nullptr;
+	auto r_w = src.postfix().front()->c_anchor<formal::word>();
+	if (r_w && r_w->value() != w->value()) r_w = nullptr;
+	if (!l_w && !r_w) return false;
+
+	std::remove_reference_t<decltype(src.fragments())> stage;
+
+	// \todo traverse left-to-right
+	// to be ACID, we need to allocate stage properly, then move-and-null all of the arguments
+
+	stage.swap(src.fragments());
+	(std::remove_reference_t<decltype(src.prefix())>()).swap(src.prefix());
+	(std::remove_reference_t<decltype(src.postfix())>()).swap(src.postfix());
+}
+
 bool is_reserved_atomic(const formal::lex_node& src)
 {
 	if (const auto word = src.c_anchor<formal::word>()) {
