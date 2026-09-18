@@ -348,7 +348,7 @@ bool detect_comma(const formal::lex_node& src) {
 	return false;
 }
 
-// useful to prevent parantheses unwrapping when arity would be increased,
+// useful to prevent parentheses unwrapping when arity would be increased,
 // or when an ordered tuple is to be parsed.
 // \todo evaluate conversion to template function in Zaimoni.STL/flat_alg.h when migrating to a higher C++ standard
 // (C++23 rejected, standard syntax couldn't extract the parameter type of detect_comma for interpretation as
@@ -2038,18 +2038,18 @@ private:
 			decltype(auto) lhs = *src.prefix().front();
 
 			unsigned int err = 0;
-			// if grouping parantheses are actually needed, they'll be restored by to_s()
+			// if grouping parentheses are actually needed, they'll be restored by to_s()
 			if (0 > remove_grouping_parentheses(lhs.prefix().front(), not_detect_comma)) {
 				err |= 1U;
 				error_report(*lhs.prefix().front(), "hypothesis arity would be increased");
 			}
 			if (0 > remove_grouping_parentheses(lhs.postfix().front(), not_detect_comma)) {
 				err |= 2U;
-				error_report(*lhs.prefix().front(), "hypothesis arity would be increased");
+				error_report(*lhs.postfix().front(), "hypothesis arity would be increased");
 			}
 			if (0 > remove_grouping_parentheses(src.postfix().front(), not_detect_comma)) {
 				err |= 4U;
-				error_report(*lhs.prefix().front(), "conclusion arity would be increased");
+				error_report(*src.postfix().front(), "conclusion arity would be increased");
 			}
 			if (err) {
 				src.learn(formal::Error);
