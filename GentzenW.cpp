@@ -2226,6 +2226,61 @@ private:
 		}
 	};
 
+	// functional analog to syntactical_entailment_2ary::global_parse
+	// schedule this global_parse after syntactical_entailment_2ary::global_parse
+	struct tag_syntactical_entailment {
+		static bool can_recognize(const formal::lex_node& src) {
+			// we are checking for A, B &#9500; C
+
+			if (!(src.code() & symbol_catalog::anchor_is_symbol)) return false;
+			if (1 != src.offset()) return false;	// need &#9500; ; only higher priority symbol is :=
+			if (!is_strict_binary_node(src)) return false;
+
+			if (detect_comma(*src.postfix().front())) return false;	// reject non-Intuitionistic syntactical entailments
+
+			// unlike syntactical_entailment_2ary::can_construct_hypothesis, we aren't finicky about commas in the hypothesis arm
+			return true;
+		}
+
+		// requires gentzen::symbol_catalog::global_parse to have run first, which is a global_rewriter
+		// so doesn't process as a reformat_to_terminal
+		static bool recognize(formal::lex_node& src) {
+			if (formal::Error & src.code()) return false;
+			if (!can_recognize(src)) return false;
+
+			unsigned int err = 0;
+			// if grouping parantheses are actually needed, they'll be restored by to_s()
+			if (0 > remove_grouping_parentheses(src.prefix().front(), not_detect_comma)) {
+				err |= 1U;
+				error_report(*src.prefix().front(), "hypothesis arity would be increased");
+			}
+			if (0 > remove_grouping_parentheses(src.postfix().front(), not_detect_comma)) {
+				err |= 2U;
+				error_report(*src.postfix().front(), "conclusion arity would be increased");
+			}
+			if (err) {
+				src.learn(formal::Error);
+				return false;
+			}
+
+			// tag placeholder-syntax symbols now
+			tag_placeholder_syntax tag_this;
+			tag_this(src.prefix().front());
+			tag_this(src.postfix().front());
+
+			return true;
+		}
+
+		static bool global_parse(kuroda::parser<formal::lex_node>::edit_span& tokens, kuroda::parser<formal::lex_node>& grammar) {
+			ptrdiff_t n = tokens.size();
+			bool ret = false;
+			while (0 <= --n) {
+				if (recognize(*tokens[n])) ret = true;
+			}
+			return ret;
+		}
+	};
+
 	// forward direction.  Modus tollens has too many logic dependencies to handle this cleanly.
 	class syntactical_entailment_2ary_infer final : public fact_database {
 	private:
@@ -2821,7 +2876,7 @@ private:
 
 		const auto [rule, rule_stmt] = find_2ary_axiom();
 		if (!rule) {
-			std::cout << "enumeration self-test: no syntactical_entailment_2ary axiom found\n";
+			std::cout << "enumeration self-test: sno syntactical_entailment_2ary axiom found\n";
 			return;
 		}
 
@@ -3961,11 +4016,11 @@ static kuroda::parser<formal::lex_node>& GentzenGrammar() {
 		ooao->register_terminal(parse_inside_balanced(reserved_atomic[0].first, reserved_atomic[1].first));
 		ooao->register_terminal(parse_inside_balanced(reserved_atomic[2].first, reserved_atomic[3].first));
 		ooao->register_terminal(parse_inside_balanced(reserved_atomic[4].first, reserved_atomic[5].first));
-//		ooao->register_terminal(gentzen::syntactical_entailment_2ary::recognize);
 
 		ooao->register_global_build(undefined_SVO::global_parse);
 		ooao->register_global_build(gentzen::symbol_catalog::global_parse);
 		ooao->register_global_build(gentzen::syntactical_entailment_2ary::global_parse);
+//		ooao->register_global_build(gentzen::tag_syntactical_entailment::global_parse);
 	};
 	return *ooao;
 }
