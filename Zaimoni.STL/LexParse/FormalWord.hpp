@@ -12,6 +12,7 @@ namespace formal {
 	static constexpr const unsigned long long Inert_Token = (1ULL << 62); // reserve this flag for both word and lex_node
 	static constexpr const unsigned long long Tokenized = (1ULL << 61); // reserve this flag for both word and lex_node
 	static constexpr const unsigned long long RequestNormalization = (1ULL << 60); // interpretation depends on context
+	static constexpr const unsigned long long Recognized = (1ULL << 58); // run-time testing needed for what this is; stops infinite looping during parsing
 
 	// this belongs elsewhere
 	struct src_location {

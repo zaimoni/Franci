@@ -2240,7 +2240,7 @@ private:
 	// schedule this global_parse after syntactical_entailment_2ary::global_parse
 	struct tag_syntactical_entailment {
 		static bool can_recognize(const formal::lex_node& src) {
-			// we are checking for A, B &#9500; C
+			// we are checking for A &#9500; B or A, B, C &#9500; D
 
 			if (!(src.code() & symbol_catalog::anchor_is_symbol)) return false;
 			if (1 != src.offset()) return false;	// need &#9500; ; only higher priority symbol is :=
@@ -2255,7 +2255,7 @@ private:
 		// requires gentzen::symbol_catalog::global_parse to have run first, which is a global_rewriter
 		// so doesn't process as a reformat_to_terminal
 		static bool recognize(formal::lex_node& src) {
-			if (formal::Error & src.code()) return false;
+			if ((formal::Error | formal::Recognized) & src.code()) return false;
 			if (!can_recognize(src)) return false;
 
 			unsigned int err = 0;
@@ -2277,7 +2277,7 @@ private:
 			tag_placeholder_syntax tag_this;
 			tag_this(src.prefix().front());
 			tag_this(src.postfix().front());
-
+			src.learn(formal::Recognized);
 			return true;
 		}
 
@@ -4033,6 +4033,7 @@ static_assert(all_distinct_bits({
 	gentzen::symbol_catalog::anchor_is_not_symbol,
 	gentzen::used_as_placeholder,
 	gentzen::parsed_substitution,
+	formal::Recognized,
 	HTMLtag::Tag,
 	formal::RequestNormalization,
 	formal::Tokenized,
@@ -4077,7 +4078,7 @@ static kuroda::parser<formal::lex_node>& GentzenGrammar() {
 		ooao->register_global_build(undefined_SVO::global_parse);
 		ooao->register_global_build(gentzen::symbol_catalog::global_parse);
 		ooao->register_global_build(gentzen::syntactical_entailment_2ary::global_parse);
-//		ooao->register_global_build(gentzen::tag_syntactical_entailment::global_parse);
+		ooao->register_global_build(gentzen::tag_syntactical_entailment::global_parse);
 	};
 	return *ooao;
 }
