@@ -29,6 +29,16 @@ public:
 	static_assert(!(formal::Tokenized & Entity));
 	static_assert(!(formal::RequestNormalization & Entity));
 
+	// marks a lex_node whose anchor wraps a parsed HTMLtag
+	static constexpr const unsigned long long Tag = (1ULL << 59); // reserve this flag for lex_node
+
+	static_assert(!(formal::Comment & Tag));
+	static_assert(!(formal::Error & Tag));
+	static_assert(!(formal::Inert_Token & Tag));
+	static_assert(!(formal::Tokenized & Tag));
+	static_assert(!(formal::RequestNormalization & Tag));
+	static_assert(!(Entity & Tag));
+
 	HTMLtag() = delete;
 	HTMLtag(const HTMLtag& src) = default;
 	HTMLtag(HTMLtag&& src) = default;
