@@ -2973,6 +2973,14 @@ private:
 
 // end prototype class
 
+// LG_* are word-level bit indices for the line-grammar phase only.  Their bit
+// positions deliberately overlap HTMLtag::Entity and undefined_SVO::postfix/infix
+// (bits 1-3): line-phase codes are assigned to whole-line words before tokenization,
+// the overlapping flags only to sub-line words and lex_nodes during or after it, and
+// the lex_node thin-wrap constructor propagates only Comment — so the two bit spaces
+// never meet on one object.  Only Comment and Error, which do cross phases, are
+// statically asserted distinct; LG_* is therefore excluded from the all_distinct_bits
+// master list below.
 enum LG_modes {
 	LG_PP_like = 1,	// #-format; could be interpreted later for C preprocessor directives if we were so inclined
 	LG_CPP_like, // //-format
@@ -3992,6 +4000,38 @@ public:
 		return false;
 	}
 };
+
+// The per-declaration static_assert batteries above check pairwise distinctness by
+// hand, which is O(n^2) to maintain; this fold does the n^2 work in the compiler
+// while a human maintains the one list.  Every reserved word/lex_node code flag
+// belongs in the list (word-only line-phase LG_* bits excepted; see LG_modes).
+constexpr bool all_distinct_bits(std::initializer_list<unsigned long long> src)
+{
+	unsigned long long seen = 0;
+	for (auto x : src) {
+		if (seen & x) return false;
+		seen |= x;
+	}
+	return true;
+}
+
+static_assert(all_distinct_bits({
+	formal::Comment,
+	HTMLtag::Entity,
+	undefined_SVO::postfix,
+	undefined_SVO::infix,
+	undefined_SVO::prefix,
+	gentzen::symbol_catalog::anchor_is_symbol,
+	gentzen::symbol_catalog::anchor_is_const_symbol,
+	gentzen::symbol_catalog::anchor_is_not_symbol,
+	gentzen::used_as_placeholder,
+	gentzen::parsed_substitution,
+	HTMLtag::Tag,
+	formal::RequestNormalization,
+	formal::Tokenized,
+	formal::Inert_Token,
+	formal::Error
+	}), "reserved word/lex_node code flags collide");
 
 class defined_SVO {
 private:
