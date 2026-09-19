@@ -2052,6 +2052,10 @@ private:
 		root.recursive_rewrite(has_pending_diagnostic, op);
 	}
 
+	void report_diagnostics(const kuroda::parser<formal::lex_node>::sequence& src) {
+		for (decltype(auto) x : src) report_diagnostics(*x);
+	}
+
 	// cancel every pending message in the subtree (e.g. the LHS of :=)
 	void discard_diagnostics(formal::lex_node& root) {
 		std::function<void(formal::lex_node&)> op = [&op](formal::lex_node& x) {
@@ -4085,6 +4089,7 @@ private:
 					auto stage = TokenGrammar().apply(formal::lex_node::pop_front(lines));
 					src.line_pos.first++;
 					src.line_pos.second = 0;
+					gentzen::report_diagnostics(stage);
 					if (prior_errors < Errors.count()) continue;
 					if (1 == stage[0]->is_pure_anchor()) {
 						formal::lex_node tmp(*stage[0]);
@@ -4154,6 +4159,7 @@ private:
 
 					GentzenGrammar().complete_parse(stage);
 
+					gentzen::report_diagnostics(stage);
 					if (1 == stage.size() && prior_errors == Errors.count()) {
 						if constexpr (trace_load) std::cerr << "considering axiom\n";
 						if (auto relay = stage[0]->shared_anchor<formal::parsed>()) {
@@ -4186,7 +4192,7 @@ private:
 					auto stage = TokenGrammar().apply(formal::lex_node::pop_front(lines));
 					src.line_pos.first++;
 					src.line_pos.second = 0;
- 					if (prior_errors < Errors.count()) continue;
+					if (prior_errors < Errors.count()) continue;
 
 					TokenGrammar().complete_parse(stage);
 					if (prior_errors < Errors.count()) continue;
@@ -4197,6 +4203,7 @@ private:
 					GentzenGrammar().complete_parse(stage);
 
 					// tests of new parsing code go here
+					gentzen::report_diagnostics(stage);
 					if (1 == stage.size() && prior_errors == Errors.count()) {
 						// dump placeholder grouping for any parsed object that exposes one
 						if (auto relay = stage.front()->shared_anchor<formal::parsed>()) {
@@ -4638,6 +4645,7 @@ static std::optional<std::vector<gentzen::statement_t> > parse_statements(std::v
 		if (prior_errors < Errors.count()) return std::nullopt;
 
 		GentzenGrammar().complete_parse(stage);
+		gentzen::report_diagnostics(stage);
 		if (prior_errors < Errors.count()) return std::nullopt;
 
 		if (1 != stage.size()) {
@@ -5009,6 +5017,7 @@ int main(int argc, char* argv[], char* envp[])
 			if (prior_errors < Errors.count()) continue;
 
 			GentzenGrammar().complete_parse<true>(stage);
+			gentzen::report_diagnostics(stage);
 			} catch (std::exception& e) {
 				std::cout << "line iteration body: " << e.what() << "\n";
 				return 3;
