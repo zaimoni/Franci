@@ -2002,6 +2002,23 @@ private:
 		return std::pair(std::move(dests), std::move(srcs));
 	}
 
+	// Post-substitution reparse (fork B): replacing an operator-position placeholder can
+	// leave a loose infix run (e.g. (P _ Q) -> a paren over [P, &#9500;, Q]) that must
+	// fold into a proper binary node.  Re-runs GentzenGrammar on each node's loose infix,
+	// deepest first, mirroring parse_inside_balanced; an already-folded (size 1) infix is
+	// a no-op there.
+	void reparse_loose_infix(formal::lex_node& node) {
+		for (decltype(auto) x : node.prefix()) if (x) reparse_loose_infix(*x);
+		for (decltype(auto) x : node.infix()) if (x) reparse_loose_infix(*x);
+		for (decltype(auto) x : node.postfix()) if (x) reparse_loose_infix(*x);
+		for (decltype(auto) frag : node.fragments()) for (decltype(auto) x : frag) if (x) reparse_loose_infix(*x);
+		if (1 < node.infix().size()) {
+			const auto prior_errors = Errors.count();
+			node.infix() = GentzenGrammar().apply(node.infix());
+			if (prior_errors == Errors.count()) GentzenGrammar().complete_parse(node.infix());
+		}
+	}
+
 	std::optional<formal::placeholder_match> statement_t::get_placeholder_variables() const {
 		struct visitor {
 			std::optional<formal::placeholder_match> operator()(const std::shared_ptr<const formal::parsed>& x) const {
@@ -2261,6 +2278,16 @@ private:
 				rename.push_back(std::pair(srcs[i]->to_scalar(), dests[i]));
 			}
 
+			return apply_uniform_substitution(rename);
+		}
+
+		// rename-vector core: the caller has already validated that each source is a
+		// placeholder-family variable and each destination non-null.  Shared with the
+		// deep parsed-arm applier so a nested definiens 2ary substitutes through the
+		// same path.  Reparses each arm (fork B), so an operator-position substitution
+		// such as (P _ Q) -> (P &#9500; Q) folds correctly.
+		std::unique_ptr<syntactical_entailment_2ary> apply_uniform_substitution(const std::vector<std::pair<perl::scalar, const formal::lex_node*> >& rename) const
+		{
 			auto instantiate = [&](const statement_t& src) -> formal::lex_node* {
 				std::unique_ptr<formal::lex_node> stage(deep_clone_to_lex_node(src));
 				if (!stage) return nullptr;
@@ -2277,7 +2304,7 @@ private:
 				formal::placeholder_match match;
 				match.tree = std::move(stage);
 				collect_placeholder_handles()(match);
-				if (!match.aux_trees.empty()) return nullptr;	// parsed-arm descent: substitution would not propagate
+				if (!match.aux_trees.empty()) return nullptr;	// nested parsed-arm descent still unhandled
 				for (decltype(auto) g : match.groups) {
 					const formal::lex_node* to = nullptr;
 					for (decltype(auto) x : rename) {
@@ -2289,6 +2316,7 @@ private:
 					if (!to) continue;
 					for (decltype(auto) h : g.second) h.replace(new formal::lex_node(*to));
 				}
+				reparse_loose_infix(*match.tree);
 				return match.tree.release();
 			};
 
@@ -3932,6 +3960,25 @@ public:
 			return std::unique_ptr<formal::lex_node>(gentzen::make_substitution_node(std::move(dests), std::move(srcs)));
 		}
 
+		// Step-3 support: a freshly-allocated clone with the subject uniformly
+		// substituted, when our subject is a placeholder-family variable named in
+		// rename; null otherwise.  The declaring axiom kinds are exempt (mention, not
+		// use), mirroring get_placeholder_variables.
+		phrase_postfix* apply_uniform_substitution(const std::vector<std::pair<perl::scalar, const formal::lex_node*> >& rename) const {
+			if (!_subject) return nullptr;
+			if ((size_t)hard_code::placeholder_syntax == _code || (size_t)hard_code::symbol_placeholder_syntax == _code) return nullptr;
+			if (   !gentzen::is_symbol_placeholder_syntax_symbol(_subject.get())
+				&& !gentzen::is_placeholder_syntax_symbol(_subject.get())) return nullptr;
+			const auto key = _subject->to_scalar();
+			for (decltype(auto) x : rename) {
+				if (x.first.view() == key.view()) {
+					formal::lex_node* stage = new formal::lex_node(*x.second);
+					return new phrase_postfix(stage, _code);
+				}
+			}
+			return nullptr;
+		}
+
 		std::optional<perl::scalar> is_not_legal_axiom(bool unconditional) const override {
 			if (SYMBOL_MAX > _code) {
 				if (!gentzen::is_symbol_like(_subject.get())) return "not a syntactical symbol";
@@ -4315,6 +4362,101 @@ public:
 	~defined_SVO() = default;
 };
 
+// step-3 support: substitutes through parsed-arm membranes the generic
+// placeholder-handle walk cannot mutate (cf. placeholder_match::aux_trees).  Two arm
+// kinds are dispatched (fork A(a); the A(b) unification into one virtual is deferred to
+// stage 6): phrase_postfix subjects, and syntactical_entailment_2ary definiens (via its
+// rename-vector apply, which reparses its arms).  The carrying node's code is preserved.
+static void substitute_parsed_anchors(formal::lex_node& node, const std::vector<std::pair<perl::scalar, const formal::lex_node*> >& rename);
+
+static void substitute_parsed_anchors(kuroda::parser<formal::lex_node>::symbols& x, const std::vector<std::pair<perl::scalar, const formal::lex_node*> >& rename)
+{
+	for (size_t i = 0; i < x.size(); ++i) {
+		formal::lex_node*& s = x[i];
+		if (!s) continue;
+		if (auto anchor = s->c_anchor<formal::parsed>()) {
+			if (auto pp = dynamic_cast<const undefined_SVO::phrase_postfix*>(anchor)) {
+				if (auto replaced = pp->apply_uniform_substitution(rename)) {
+					auto swap_in = new formal::lex_node(static_cast<formal::parsed*>(replaced), s->code());
+					delete s;
+					s = swap_in;
+					continue;
+				}
+			} else if (auto e2 = dynamic_cast<const gentzen::syntactical_entailment_2ary*>(anchor)) {
+				if (auto replaced = e2->apply_uniform_substitution(rename)) {
+					auto swap_in = new formal::lex_node(static_cast<formal::parsed*>(replaced.release()), s->code());
+					delete s;
+					s = swap_in;
+					continue;
+				}
+			}
+		}
+		substitute_parsed_anchors(*s, rename);
+	}
+}
+
+static void substitute_parsed_anchors(formal::lex_node& node, const std::vector<std::pair<perl::scalar, const formal::lex_node*> >& rename)
+{
+	substitute_parsed_anchors(node.prefix(), rename);
+	substitute_parsed_anchors(node.infix(), rename);
+	substitute_parsed_anchors(node.postfix(), rename);
+	for (decltype(auto) frag : node.fragments()) substitute_parsed_anchors(frag, rename);
+}
+
+// Step 3 of the instantiation mechanics (Notes/GentzenW-defined-notations.md): apply
+// [d \ s] uniformly to a freshly-cloned copy of src, covering lex-side placeholder
+// occurrences AND parsed-arm membranes (phrase_postfix subjects, nested
+// syntactical_entailment_2ary definiens).  Unlike
+// syntactical_entailment_2ary::apply_uniform_substitution, a non-empty aux_trees is
+// expected here (parsed-arm census descent); those handles point into discarded
+// clones, and the parsed-anchor pass performs the real parsed-side substitution.
+// Parallel implementation to the 2ary member; evaluate a shared base once stable
+// (fork A(b), stage 6).
+static formal::lex_node* apply_uniform_substitution_deep(const formal::lex_node& src, const formal::lex_node& subst)
+{
+	const auto decoded = gentzen::decode_substitution_node(subst);
+	if (!decoded) return nullptr;
+	decltype(auto) dests = decoded->first;
+	decltype(auto) srcs = decoded->second;
+
+	std::vector<std::pair<perl::scalar, const formal::lex_node*> > rename;
+	ptrdiff_t i = srcs.size();
+	while (0 <= --i) {
+		if (!srcs[i] || !(srcs[i]->code() & gentzen::used_as_placeholder)) return nullptr;
+		if (!dests[i]) return nullptr;
+		rename.push_back(std::pair(srcs[i]->to_scalar(), dests[i]));
+	}
+
+	std::unique_ptr<formal::lex_node> stage(new formal::lex_node(src));
+
+	// a bare placeholder variable has no parent slot for a handle
+	if (stage->code() & gentzen::used_as_placeholder) {
+		const auto key = stage->to_scalar();
+		for (decltype(auto) x : rename) {
+			if (x.first.view() == key.view()) return new formal::lex_node(*x.second);
+		}
+		return stage.release();
+	}
+
+	formal::placeholder_match match;
+	match.tree = std::move(stage);
+	gentzen::collect_placeholder_handles()(match);
+	for (decltype(auto) g : match.groups) {
+		const formal::lex_node* to = nullptr;
+		for (decltype(auto) x : rename) {
+			if (x.first.view() == g.first.view()) {
+				to = x.second;
+				break;
+			}
+		}
+		if (!to) continue;
+		for (decltype(auto) h : g.second) h.replace(new formal::lex_node(*to));
+	}
+
+	substitute_parsed_anchors(*match.tree, rename);
+	return match.tree.release();
+}
+
 // scaffold: exercises phrase_postfix::get_uniform_substitution against the configured
 // infix-symbol declaration axiom.  Referenced from main() behind the same
 // compile-time switch as the other prototype self-tests; placed here because
@@ -4352,6 +4494,29 @@ static void self_test_phrase_matcher()
 	formal::lex_node* subject2 = subject_leaf();
 	undefined_SVO::phrase_postfix wrong_kind(subject2, undefined_SVO::phrase_postfix::hard_code::prefix_symbol);
 	std::cout << "phrase matcher kind mismatch: " << (wrong_kind.get_uniform_substitution(*infix_decl) ? 1 : 0) << "\n";
+
+	// step 3: apply the matcher's own [&#9500; / _] to the parsed conditional axiom;
+	// all three _ occurrences (phrase subject, definiendum, definiens) must substitute
+	if (subst) {
+		std::vector<std::string> src_lines;
+		src_lines.push_back("_ is a binary infix symbol &#9500; (modus ponens for _ := (P _ Q), P &#9500; Q)");
+		formal::src_location loc(std::pair(1, 0), std::shared_ptr<const std::filesystem::path>(new std::filesystem::path("self-test:step-3")));
+		auto lines = to_lines(src_lines, loc);
+		if (!lines.empty()) {
+			auto stage = TokenGrammar().apply(formal::lex_node::pop_front(lines));
+			TokenGrammar().complete_parse(stage);
+			stage = GentzenGrammar().apply(stage);
+			GentzenGrammar().complete_parse(stage);
+			if (1 == stage.size() && stage[0]) {
+				std::unique_ptr<formal::lex_node> instantiated(apply_uniform_substitution_deep(*stage[0], *subst));
+				// all three _ occurrences substitute: hypothesis phrase subject,
+				// definiendum token, and the definiens 2ary arm (reparsed to fold P |- Q)
+				std::cout << "step-3 instantiation: " << (instantiated ? instantiated->to_s() : "(null)") << "\n";
+			} else {
+				std::cout << "step-3: conditional axiom did not parse to a single statement\n";
+			}
+		}
+	}
 }
 
 // main language syntax

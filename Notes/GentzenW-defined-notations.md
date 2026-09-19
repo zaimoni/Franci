@@ -15,6 +15,15 @@ Progress log:
 * 2026-09-05: two-stage lex_node diagnostics landed (record_error/record_warning,
   report_*/discard_*), giving the enforcement sketch's deferral option real
   infrastructure; remove_grouping_parentheses gained the contents-inspecting callback.
+* 2026-09-19: step 3 landed (apply_uniform_substitution_deep applies [&#9500; / _]
+  across all three occurrences: hypothesis phrase subject, definiendum token, and the
+  definiens -- which is itself a syntactical_entailment_2ary parsed object, reached via
+  fork A(a) parsed-arm dispatch in substitute_parsed_anchors calling the 2ary's
+  rename-vector apply).  Fork B reparse (reparse_loose_infix) folds the operator-position
+  result (P _ Q) -> (P &#9500; Q).  Verified end-to-end:
+  `&#9500; is a binary infix symbol &#9500; (modus ponens for &#9500; := (P &#9500; Q), P
+  &#9500; Q)`.  A(b) unification of the parsed-arm applier into one virtual is deferred
+  to stage 6 (before the defined_SVO::get() wire-in).
 * 2026-09-19: destination-kind relaxation landed (apply_uniform_substitution accepts
   placeholder, symbol, or statement destinations; sources stay placeholder-family;
   explosion guard at call sites) and phrase_postfix::get_uniform_substitution landed
