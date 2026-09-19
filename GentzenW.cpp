@@ -3152,10 +3152,15 @@ private:
 // Installed via std::function so the parser library stays ignorant of Gentzen types.
 static bool gentzen_interpolate_grouping_parens(const formal::lex_node& parent, const formal::lex_node& child)
 {
+	// currently, higher precedence corresponds to lower symbol index i.e. lower offset()
+	// \todo restrict to binary infix symbols (use symbol_catalog for lookup)
 	if (!(child.code() & gentzen::symbol_catalog::anchor_is_symbol)) return false;
-	if (0 != child.offset()) return false;
 	if (!(parent.code() & gentzen::symbol_catalog::anchor_is_symbol)) return false;
-	return 0 != parent.offset();
+	if (parent.offset() < child.offset()) return false;
+	if (parent.offset() > child.offset()) return true;
+	// \todo this should rely on lfold/rfold/generalized associativity.  With current configuration ordering:
+	// := (0) and &#9500; (1) are disqualified; & and , are qualified
+	return 1 >= parent.offset();
 }
 
 // LG_* are word-level bit indices for the line-grammar phase only.  Their bit
