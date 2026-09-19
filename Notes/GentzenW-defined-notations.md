@@ -238,10 +238,12 @@ subtree recursion; the op must know its own test hook, which has not been a prob
 before.  So recursive_rewrite is the intended vehicle for the report and cancel walks
 (currently unexercised code getting its first use).
 
-Open design choice: whether the pending-message stop is a new predicate
-(has_pending_error()) or folded into the existing formal::Error gates.  (The
-report/cancel walks are settled as self-recursing recursive_rewrite ops rather than
-new dedicated methods.)
+Design choices settled: the report/cancel walks are self-recursing recursive_rewrite
+ops (not new dedicated methods); the pending-message stop reuses the existing
+last_error() (a std::optional reference, truthy when a pending error is recorded) at
+the recognizer gates, rather than a new has_pending_error() predicate.  Step 4 is thus
+mechanical: a report-all op run before each error-count test, a discard-all op over
+the LHS-of-:= subtree, and last_error() folded into the formal::Error gates.
 
 **Stop-line for this push**: verify the chain through step 5's derivation.
 Automatically wiring the derived definition into defined_SVO::get() is a later commit,
