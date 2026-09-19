@@ -209,6 +209,36 @@ The chain, when `_ is a binary infix symbol &#9500; (modus ponens for _ := (P _ 
    pattern (P &#9500; Q) against the instantiated conditional axiom binds P to the
    (configured) hypothesis axiom and Q to the definition, and detaches.
 
+### Step 4 prerequisites (infrastructure, specified 2026-09-19)
+
+The cancelled reparse of "modus ponens for &#9500;" needs three lex_node-level
+capabilities on top of the two-stage diagnostics already landed (record_error /
+record_warning / last_error / last_warning / discard_error / discard_warning /
+report_error / report_warning, two fields _last_error / _last_warning):
+
+1. **Recursive error reporting**: call report_error() and report_warning() on every
+   lex_node in a subtree, immediately before the parse loop tests the error count for
+   an increase.  This is the second stage of the flush contract already recorded for
+   top-level error-count-tested loops; recorded pending messages must be flushed so
+   the count is correct when tested.
+2. **Recursive error cancellation**: clear the pending _last_error / _last_warning
+   fields (discard_error / discard_warning) on every lex_node controlled by the LHS of
+   :=, so an expected error on a definiendum such as "modus ponens for &#9500;" is
+   cancelled rather than reported.
+3. **Pending-message parse stop**: recognizers currently gate on `formal::Error &
+   code()`; they may also need to stop when an error message is *pending* (last_error()
+   non-empty) but formal::Error is not yet set -- the record-but-not-yet-reported state.
+
+Traversal shape: the recursion must cover _prefix, _postfix, _infix, _fragments, and
+the lex_node-based variants of _anchor and _post_anchor (the pattern of
+lex_node::recursive_rewrite, which is one level deep -- applies to immediate members,
+the lex anchor/post_anchor, and self; the report/cancel walks need genuine subtree
+recursion, either by self-recursing or by an op that recurses).
+
+Open design choices: dedicated recursive methods (report_subtree / discard_subtree)
+vs. driving recursive_rewrite with an op; and whether the pending-message stop is a
+new predicate (has_pending_error()) or folded into the existing formal::Error gates.
+
 **Stop-line for this push**: verify the chain through step 5's derivation.
 Automatically wiring the derived definition into defined_SVO::get() is a later commit,
 after the above checks out.
