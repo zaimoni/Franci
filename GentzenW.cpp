@@ -4589,10 +4589,10 @@ static formal::lex_node* apply_uniform_substitution_deep(const formal::lex_node&
 					if constexpr (test_preconditions) {
 						if (gentzen::symbol_catalog::anchor_is_not_symbol & swap_in->code()) throw std::logic_error("symbol tagged as non-symbol: " + swap_in->to_s());
 					}
-					// symbol_catalog::anchor_symbol_parse will short-cicruit and do nothing whatsoever, if we don't clear these flags.
+					// symbol_catalog::anchor_symbol_parse will short-circuit and do nothing whatsoever, if we don't clear these flags.
 					swap_in->forget(gentzen::symbol_catalog::anchor_is_symbol | gentzen::symbol_catalog::anchor_is_const_symbol | gentzen::symbol_catalog::anchor_is_not_symbol);
 				} else if constexpr(test_preconditions) {
-					if ((gentzen::symbol_catalog::anchor_is_symbol | gentzen::symbol_catalog::anchor_is_const_symbol) & swap_in->code()) throw std::logic_error("mon-symbol tagged as symbol: " + swap_in->to_s());
+					if ((gentzen::symbol_catalog::anchor_is_symbol | gentzen::symbol_catalog::anchor_is_const_symbol) & swap_in->code()) throw std::logic_error("non-symbol tagged as symbol: " + swap_in->to_s());
 				}
 				// why the flags can be stale: the destination's classification is a parse-state
 				// cache from its own context.  The subject of a symbol's *first* declaring axiom
