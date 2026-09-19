@@ -1223,19 +1223,16 @@ namespace gentzen {
 			return _symbols[n];
 		}
 
-		static bool anchor_symbol_parse(formal::lex_node& src) {
+		static std::optional<std::pair<ptrdiff_t, bool> > recognize(const formal::lex_node& src) {
 			enum { trace_parse = 0 };
-			if (src.code() & (anchor_is_symbol | anchor_is_const_symbol)) return true; // \todo predicate target: any encoding using a linear index is already parsed
-			if (src.code() & anchor_is_not_symbol) return false; // we already looked at this
-			if (src.code() & formal::Error) return false;
 			const auto& catalog = get();
 			if (catalog._symbols.empty() && catalog._constant_symbols.empty()) {
 				if constexpr (trace_parse) std::cerr << "catalog._symbols.empty() && catalog._constant_symbols.empty()\n";
-				return false;
+				return std::nullopt;
 			}
 			if constexpr (trace_parse) std::cerr << "entering anchor_symbol_parse\n";
 			if (auto test = anchor_is_symbol_like(&src)) {
-				if constexpr (trace_parse) std::cerr << src.to_s()+": anchor_is_symbol_like(&src)\n";
+				if constexpr (trace_parse) std::cerr << src.to_s() + ": anchor_is_symbol_like(&src)\n";
 				ptrdiff_t n = -1;
 				while (++n < catalog._symbols.size()) {
 					decltype(auto) symbol = catalog._symbols[n].first;
@@ -1252,9 +1249,7 @@ namespace gentzen {
 						}
 					}
 					if (!matched) continue;
-					src.learn(anchor_is_symbol, n);
-					if constexpr (trace_parse) std::cerr << "matched symbol: " << src.to_s() << "\n";
-					return true;
+					return std::pair(n, true);
 				}
 				n = -1;
 				while (++n < catalog._constant_symbols.size()) {
@@ -1272,9 +1267,19 @@ namespace gentzen {
 						}
 					}
 					if (!matched) continue;
-					src.learn(anchor_is_const_symbol, n);
-					return true;
+					return std::pair(n, false);
 				}
+			}
+			return std::nullopt;
+		}
+
+		static bool anchor_symbol_parse(formal::lex_node& src) {
+			if (src.code() & (anchor_is_symbol | anchor_is_const_symbol)) return true; // \todo predicate target: any encoding using a linear index is already parsed
+			if (src.code() & anchor_is_not_symbol) return false; // we already looked at this
+			if (src.code() & formal::Error) return false;
+			if (auto code = recognize(src)) {
+				src.learn(code->second ? anchor_is_symbol : anchor_is_const_symbol, code->first);
+				return true;
 			}
 			src.learn(anchor_is_not_symbol);
 			return false;
@@ -4564,14 +4569,25 @@ static formal::lex_node* apply_uniform_substitution_deep(const formal::lex_node&
 				break;
 			}
 		}
+
+		enum { incoming_integrity = 0 };
+
 		for (decltype(auto) h : g.second) {
 			auto swap_in = new formal::lex_node(*to);
 			if (track) {
+				if (auto is_symbol = gentzen::symbol_catalog::recognize(*swap_in)) {
+					if constexpr (incoming_integrity) {
+						if (gentzen::symbol_catalog::anchor_is_not_symbol & swap_in->code()) throw std::logic_error("symbol tagged as non-symbol: " + swap_in->to_s());
+					}
+					// symbol_catalog::anchor_symbol_parse will short-cicruit and do nothing whatsoever, if we don't clear these flags.
+					swap_in->forget(gentzen::symbol_catalog::anchor_is_symbol | gentzen::symbol_catalog::anchor_is_const_symbol | gentzen::symbol_catalog::anchor_is_not_symbol);
+				} else if constexpr(incoming_integrity) {
+					if ((gentzen::symbol_catalog::anchor_is_symbol | gentzen::symbol_catalog::anchor_is_const_symbol) & swap_in->code()) throw std::logic_error("mon-symbol tagged as symbol: " + swap_in->to_s());
+				}
 				// the destination's symbol classification is a parse-state cache from its own
 				// context (e.g. &#9500; in "&#9500; is a binary infix symbol" was classified
 				// before that axiom put it in the catalog, so it reads anchor_is_not_symbol);
 				// clear it so the container reparse classifies the clone afresh
-				swap_in->forget(gentzen::symbol_catalog::anchor_is_symbol | gentzen::symbol_catalog::anchor_is_const_symbol | gentzen::symbol_catalog::anchor_is_not_symbol);
 				replaced.push_back(swap_in);
 			}
 			h.replace(swap_in);
