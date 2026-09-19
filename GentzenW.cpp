@@ -2002,21 +2002,41 @@ private:
 		return std::pair(std::move(dests), std::move(srcs));
 	}
 
+	void reparse(kuroda::parser<formal::lex_node>::symbols& x) {
+		if (1 < x.size()) {
+			const auto prior_errors = Errors.count();
+			x = GentzenGrammar().apply(x);
+			if (prior_errors == Errors.count()) GentzenGrammar().complete_parse(x);
+		}
+	}
+
+	void reparse(std::vector<kuroda::parser<formal::lex_node>::symbols>& fragments) {
+		for (decltype(auto) frag : fragments) reparse(frag);
+	}
+
 	// Post-substitution reparse (fork B): replacing an operator-position placeholder can
 	// leave a loose infix run (e.g. (P _ Q) -> a paren over [P, &#9500;, Q]) that must
 	// fold into a proper binary node.  Re-runs GentzenGrammar on each node's loose infix,
 	// deepest first, mirroring parse_inside_balanced; an already-folded (size 1) infix is
 	// a no-op there.
 	void reparse_loose_infix(formal::lex_node& node) {
+#if 0
 		for (decltype(auto) x : node.prefix()) if (x) reparse_loose_infix(*x);
 		for (decltype(auto) x : node.infix()) if (x) reparse_loose_infix(*x);
 		for (decltype(auto) x : node.postfix()) if (x) reparse_loose_infix(*x);
 		for (decltype(auto) frag : node.fragments()) for (decltype(auto) x : frag) if (x) reparse_loose_infix(*x);
-		if (1 < node.infix().size()) {
-			const auto prior_errors = Errors.count();
-			node.infix() = GentzenGrammar().apply(node.infix());
-			if (prior_errors == Errors.count()) GentzenGrammar().complete_parse(node.infix());
+#elee
+		for (decltype(auto) x : node.prefix()) if (x) reparse_loose_infix(*x);
+		reparse(node.prefix());
+		for (decltype(auto) x : node.infix()) if (x) reparse_loose_infix(*x);
+		reparse(node.infix());
+		for (decltype(auto) x : node.postfix()) if (x) reparse_loose_infix(*x);
+		reparse(node.postfix());
+		for (decltype(auto) frag : node.fragments()) {
+			for (decltype(auto) x : frag) if (x) reparse_loose_infix(*x);
+			reparse(frag);
 		}
+#endif
 	}
 
 	// step-4 diagnostic walks (Notes/GentzenW-defined-notations.md): driven through
