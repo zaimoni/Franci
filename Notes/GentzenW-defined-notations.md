@@ -220,16 +220,32 @@ gates.  Self-test verifies the cycle: record -> pending; discard -> cancelled, n
 error-count change; report -> flushed, count +1, formal::Error set.  No corpus change
 (record+report are atomic during normal parse, so last_error() is empty at the gates).
 
-**Remaining for the end-to-end cancelled reparse (finding, 2026-09-19)**: the walks and
-gates are ready, but the definiendum error must first exist as a *pending* (recorded,
-not reported) diagnostic for discard_diagnostics to cancel.  Today the enforcement
-paths that would flag "modus ponens for &#9500;" (symbol_catalog / argument_enforcer)
-call error_report immediately (record + report atomically).  So the scoped definiendum
-reparse needs those paths in a *record-instead-of-report* deferral mode -- a fourth
-piece not in the original prerequisite list, and the actual connective tissue of step 4.
-This belongs with the := definition recognizer (W1): it owns the reparse, sets the
-deferral, and after classifying the LHS as a definiendum calls discard_diagnostics on it
-(or report_diagnostics + error-count test when the LHS is a genuine formula).
+**Remaining for the end-to-end cancelled reparse (findings, 2026-09-19)**: the walks and
+gates are ready, but two grammar-plumbing facts block the definiendum error from arising
+and being cancellable, both discovered by probing a whole-result reparse of the step-3
+instantiation (errors +0, structure unchanged):
+
+1. **The reparse must reach the definiendum.**  apply_uniform_substitution_deep does not
+   reparse the whole result -- only the definiens 2ary reparses its own arms (fork B,
+   internal to the 2ary apply).  The definiendum "modus ponens for &#9500;" lives in the
+   := node's prefix, outside that, so nothing reparses it today.  The := recognizer (W1)
+   that owns the whole-result reparse must cover it.
+2. **The reparse must route through the enforcement-bearing stage.**  reparse() uses
+   GentzenGrammar().apply, but the terminals that would flag &#9500; at a right edge
+   (argument_enforcer::reject_right_edge, is_wff via check_for_gentzen_wellformed) are
+   registered in TokenGrammar, not GentzenGrammar.  So a GentzenGrammar-only reparse of
+   the definiendum produces no error at all.  (Reparsing already-parsed lex_nodes through
+   TokenGrammar has its own caveat -- see the "works for GentzenGrammar.apply, not
+   TokenGrammar.apply" note near check_for_gentzen_wellformed.)
+3. **Then the deferral**: once the error can arise, it must arise as a *pending*
+   (recorded, not reported) diagnostic for discard_diagnostics to cancel.  Today those
+   enforcement paths call error_report immediately (record + report atomically), so they
+   need a *record-instead-of-report* mode.
+
+All three belong with the := definition recognizer (W1): it owns the whole-result
+reparse, routes it so enforcement runs in record mode, and after classifying the LHS as a
+definiendum calls discard_diagnostics on it (or report_diagnostics + error-count test
+when the LHS is a genuine formula such as A & B &#9500; C := ...).
 
 ### Step 4 prerequisites (infrastructure, specified 2026-09-19)
 
