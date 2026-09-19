@@ -15,6 +15,13 @@ Progress log:
 * 2026-09-05: two-stage lex_node diagnostics landed (record_error/record_warning,
   report_*/discard_*), giving the enforcement sketch's deferral option real
   infrastructure; remove_grouping_parentheses gained the contents-inspecting callback.
+* 2026-09-19: destination-kind relaxation landed (apply_uniform_substitution accepts
+  placeholder, symbol, or statement destinations; sources stay placeholder-family;
+  explosion guard at call sites) and phrase_postfix::get_uniform_substitution landed
+  (step-2 matcher; verified [&#9500; / _] against the configured infix declaration).
+  Also: phrase_postfix subjects now visible to placeholder collection (the census
+  reports _ x 3), and to_s regenerates precedence-mandated grouping parentheses via
+  the lex_node policy hook.
 * 2026-09-08: **W0 spike executed and passed** (Kenneth, via local test_lines): the full
   conditional axiom parses, `_` does not error, and the machinery returns a
   simultaneous substitution for the line.  undefined_SVO made a compiler-enforced

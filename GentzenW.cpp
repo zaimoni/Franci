@@ -2235,12 +2235,16 @@ private:
 		const statement_t& hypothesis(size_t n) const noexcept { return (0 == n) ? hypothesis_1 : hypothesis_2; }
 		const statement_t& consequent() const noexcept { return conclusion; }
 
-		// Uniform substitution of placeholder variables for placeholder variables, per a
-		// parsed_substitution node [d1, ... \ s1, ...]: each si replaced by di throughout
-		// the rule.  Formally an undefined operation (implemented in C++ this iteration).
-		// Returns null if the node does not decode, any si/di is not a placeholder
-		// variable, or a hypothesis/conclusion delegates to a parsed-arm sub-tree
-		// (substitution would not propagate there; see placeholder_match::aux_trees).
+		// Uniform substitution per a parsed_substitution node [d1, ... \ s1, ...]: each
+		// si (which must be a placeholder-family variable) is replaced by di throughout
+		// the rule.  Destinations may be placeholder variables, symbols, or statement
+		// subtrees; the combinatoric-explosion guard lives at the call sites (menu
+		// enumeration keeps its restrictions; directed instantiation uses this path).
+		// Formally an undefined operation (implemented in C++ this iteration).
+		// Returns null if the node does not decode, any si is not a placeholder-family
+		// variable, any di is null, or a hypothesis/conclusion delegates to a
+		// parsed-arm sub-tree (substitution would not propagate there; see
+		// placeholder_match::aux_trees).
 		std::unique_ptr<syntactical_entailment_2ary> apply_uniform_substitution(const formal::lex_node& subst) const
 		{
 			const auto decoded = decode_substitution_node(subst);
@@ -2253,7 +2257,7 @@ private:
 			ptrdiff_t i = srcs.size();
 			while (0 <= --i) {
 				if (!srcs[i] || !(srcs[i]->code() & used_as_placeholder)) return nullptr;
-				if (!dests[i] || !(dests[i]->code() & used_as_placeholder)) return nullptr;
+				if (!dests[i]) return nullptr;
 				rename.push_back(std::pair(srcs[i]->to_scalar(), dests[i]));
 			}
 
@@ -2975,6 +2979,17 @@ private:
 		std::cout << "self-test record: id " << first.second << (first.second == again.second ? ", stable" : ", UNSTABLE") << ", size " << L->size() << "\n";
 		const auto ax_rec = L->record(rule_stmt);
 		std::cout << "self-test record axiom: id " << ax_rec.second << ", size " << L->size() << "\n";
+
+		// destination-kind relaxation: a statement subtree as the destination
+		{
+			std::vector<formal::lex_node*> dests;
+			std::vector<formal::lex_node*> srcs;
+			dests.push_back(deep_clone_to_lex_node(rule->hypothesis(0)));	// P &#9500; Q
+			srcs.push_back(leaf("P"));
+			std::unique_ptr<formal::lex_node> statement_subst(make_substitution_node(std::move(dests), std::move(srcs)));
+			auto derived = rule->apply_uniform_substitution(*statement_subst);
+			std::cout << "statement-destination apply: " << (derived ? derived->to_s() : "(null)") << "\n";
+		}
 	}
 
 	// scaffold: drives rows 3-5 of the cut-rule proof (hypothesis P; infer Q; infer R)
@@ -3889,6 +3904,34 @@ public:
 			gentzen::collect_placeholder_handles().walk_into(root, dest);
 		}
 
+		// Unifies this phrase (a hypothesis pattern whose subject is a
+		// symbol-placeholder variable) with candidate (the same phrase kind, concrete
+		// symbol subject), authorizing the uniform substitution
+		// [candidate subject / our subject].  Step 2 of the instantiation mechanics in
+		// Notes/GentzenW-defined-notations.md: the hypothesis "_ is a binary infix
+		// symbol" against the axiom "&#9500; is a binary infix symbol" yields
+		// [&#9500; / _].  Returns null when the phrases do not unify.
+		std::unique_ptr<formal::lex_node> get_uniform_substitution(const phrase_postfix& candidate) const {
+			if (_code != candidate._code) return nullptr;
+			if (!_subject || !candidate._subject) return nullptr;
+			if (!gentzen::is_symbol_placeholder_syntax_symbol(_subject.get())) return nullptr;
+			// the candidate's subject must be a concrete symbol, not placeholder syntax
+			if (!gentzen::is_symbol_like(candidate._subject.get())) return nullptr;
+			if (gentzen::is_symbol_placeholder_syntax_symbol(candidate._subject.get())) return nullptr;
+			if (gentzen::is_placeholder_syntax_symbol(candidate._subject.get())) return nullptr;
+
+			std::unique_ptr<formal::lex_node> dest(new formal::lex_node(*candidate._subject));
+			std::unique_ptr<formal::lex_node> src(new formal::lex_node(*_subject));
+			gentzen::tag_placeholder_syntax tag_this;
+			tag_this(src.get());	// the source must read as a placeholder-family variable downstream
+
+			std::vector<formal::lex_node*> dests;
+			std::vector<formal::lex_node*> srcs;
+			dests.push_back(dest.release());
+			srcs.push_back(src.release());
+			return std::unique_ptr<formal::lex_node>(gentzen::make_substitution_node(std::move(dests), std::move(srcs)));
+		}
+
 		std::optional<perl::scalar> is_not_legal_axiom(bool unconditional) const override {
 			if (SYMBOL_MAX > _code) {
 				if (!gentzen::is_symbol_like(_subject.get())) return "not a syntactical symbol";
@@ -4272,6 +4315,45 @@ public:
 	~defined_SVO() = default;
 };
 
+// scaffold: exercises phrase_postfix::get_uniform_substitution against the configured
+// infix-symbol declaration axiom.  Referenced from main() behind the same
+// compile-time switch as the other prototype self-tests; placed here because
+// undefined_SVO must be complete.
+static void self_test_phrase_matcher()
+{
+	const undefined_SVO::phrase_postfix* infix_decl = nullptr;
+	decltype(auto) ax = gentzen::axioms::get();
+	size_t ub = ax->size();
+	while (0 < ub) {
+		auto stmt = ax->rationale(--ub).first.first;
+		if (auto p = std::get_if<std::shared_ptr<const formal::parsed> >(&stmt)) {
+			if (auto q = dynamic_cast<const undefined_SVO::phrase_postfix*>(p->get())) {
+				if ("&#9500; is a binary infix symbol" == q->to_s()) {
+					infix_decl = q;
+					break;
+				}
+			}
+		}
+	}
+	if (!infix_decl) {
+		std::cout << "phrase matcher: infix declaration axiom not found\n";
+		return;
+	}
+
+	auto subject_leaf = []() {
+		return new formal::lex_node(new formal::word(std::string_view("_"), formal::src_location(), 0), 0);
+	};
+
+	formal::lex_node* subject = subject_leaf();
+	undefined_SVO::phrase_postfix hyp(subject, undefined_SVO::phrase_postfix::hard_code::infix_symbol);
+	auto subst = hyp.get_uniform_substitution(*infix_decl);
+	std::cout << "phrase matcher [symbol / _]: " << (subst ? subst->to_s() : "(null)") << "\n";
+
+	formal::lex_node* subject2 = subject_leaf();
+	undefined_SVO::phrase_postfix wrong_kind(subject2, undefined_SVO::phrase_postfix::hard_code::prefix_symbol);
+	std::cout << "phrase matcher kind mismatch: " << (wrong_kind.get_uniform_substitution(*infix_decl) ? 1 : 0) << "\n";
+}
+
 // main language syntax
 static kuroda::parser<formal::lex_node>& GentzenGrammar() {
 	static std::unique_ptr<kuroda::parser<formal::lex_node> > ooao;
@@ -4637,6 +4719,7 @@ int main(int argc, char* argv[], char* envp[])
 		try {
 			gentzen::self_test_substitution();
 			gentzen::self_test_enumeration();
+			self_test_phrase_matcher();
 		} catch (const std::exception& e) {
 			std::cout << "self-test exception: " << e.what() << "\n" << std::flush;
 		}
