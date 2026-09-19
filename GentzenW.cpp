@@ -11,6 +11,7 @@
 #include <concepts>
 #include <map>
 #include <tuple>
+#include <stacktrace>
 
 // https://github.com/fktn-k/fkYAML; MIT license
 #include "fkYAML/node.hpp"
@@ -46,6 +47,15 @@ void warning_report(const formal::src_location& loc, const perl::scalar& warn) {
 	else std::cerr << "<unknown>";
 	std::cerr << loc.to_s() << ": warning : " << warn.view() << '\n';
 	++Warnings;
+}
+
+// for the most-general exception handlers.  std::stacktrace::current() here is the
+// *handler's* stack: unwinding has already discarded the throw point's frames, so this
+// identifies which handler caught and the call chain above it.  A throw-point trace has
+// to be captured where the exception is constructed (cf. kuroda::parser<T>::finite_parse).
+static void report_exception(const char* context, const std::exception& e)
+{
+	std::cout << context << ": " << e.what() << "\ncaught at:\n" << std::stacktrace::current() << "\n" << std::flush;
 }
 
 const std::filesystem::path& self_path(const char* const _arg = nullptr)
@@ -4143,7 +4153,7 @@ private:
 					}
 				}
 				catch (std::exception& e) {
-					std::cout << "line iteration body: " << e.what() << "\n";
+					report_exception("line iteration body", e);
 					return;
 				}
 			}
@@ -4202,7 +4212,7 @@ private:
 						}
 					}
 				} catch (std::exception& e) {
-					std::cout << "line iteration body: " << e.what() << "\n";
+					report_exception("line iteration body", e);
 					return;
 				}
 			}
@@ -4291,7 +4301,7 @@ private:
 					}
 				}
 				catch (std::exception& e) {
-					std::cout << "line iteration body: " << e.what() << "\n";
+					report_exception("line iteration body", e);
 					return;
 				}
 			}
@@ -4570,24 +4580,25 @@ static formal::lex_node* apply_uniform_substitution_deep(const formal::lex_node&
 			}
 		}
 
-		enum { incoming_integrity = 0 };
+		enum { test_preconditions = 0 };
 
 		for (decltype(auto) h : g.second) {
 			auto swap_in = new formal::lex_node(*to);
 			if (track) {
 				if (auto is_symbol = gentzen::symbol_catalog::recognize(*swap_in)) {
-					if constexpr (incoming_integrity) {
+					if constexpr (test_preconditions) {
 						if (gentzen::symbol_catalog::anchor_is_not_symbol & swap_in->code()) throw std::logic_error("symbol tagged as non-symbol: " + swap_in->to_s());
 					}
 					// symbol_catalog::anchor_symbol_parse will short-cicruit and do nothing whatsoever, if we don't clear these flags.
 					swap_in->forget(gentzen::symbol_catalog::anchor_is_symbol | gentzen::symbol_catalog::anchor_is_const_symbol | gentzen::symbol_catalog::anchor_is_not_symbol);
-				} else if constexpr(incoming_integrity) {
+				} else if constexpr(test_preconditions) {
 					if ((gentzen::symbol_catalog::anchor_is_symbol | gentzen::symbol_catalog::anchor_is_const_symbol) & swap_in->code()) throw std::logic_error("mon-symbol tagged as symbol: " + swap_in->to_s());
 				}
-				// the destination's symbol classification is a parse-state cache from its own
-				// context (e.g. &#9500; in "&#9500; is a binary infix symbol" was classified
-				// before that axiom put it in the catalog, so it reads anchor_is_not_symbol);
-				// clear it so the container reparse classifies the clone afresh
+				// why the flags can be stale: the destination's classification is a parse-state
+				// cache from its own context.  The subject of a symbol's *first* declaring axiom
+				// (&#9500; in "&#9500; is a binary infix symbol") is parsed before that
+				// declaration takes effect, so it caches anchor_is_not_symbol; cf.
+				// trace_subject_codes in self_test_phrase_matcher.
 				replaced.push_back(swap_in);
 			}
 			h.replace(swap_in);
@@ -4622,6 +4633,30 @@ static void self_test_phrase_matcher()
 	if (!infix_decl) {
 		std::cout << "phrase matcher: infix declaration axiom not found\n";
 		return;
+	}
+
+	// symbol-classification bits on each declaring axiom's subject.  Observed 2026-09-19: the
+	// *first* declaring axiom for a symbol (:=, &#9500; infix, /, &, ",") caches
+	// anchor_is_not_symbol on its subject, because it is parsed before its own declaration
+	// takes effect; a later one (&#9500; is a unary prefix symbol) caches anchor_is_symbol.
+	// This is the data-setup defect the test_preconditions checks in
+	// apply_uniform_substitution_deep are waiting on.
+	enum { trace_subject_codes = 0 };
+	if constexpr (trace_subject_codes) {
+		for (size_t i = 0; i < ax->size(); ++i) {
+			auto stmt = ax->rationale(i).first.first;
+			if (auto p = std::get_if<std::shared_ptr<const formal::parsed> >(&stmt)) {
+				if (auto q = dynamic_cast<const undefined_SVO::phrase_postfix*>(p->get())) {
+					if (!q->subject()) continue;
+					const auto code = q->subject()->code();
+					std::cout << "subject code " << i << ": " << q->to_s() << " -> " << std::hex << code << std::dec
+						<< (code & gentzen::symbol_catalog::anchor_is_symbol ? " symbol" : "")
+						<< (code & gentzen::symbol_catalog::anchor_is_const_symbol ? " const_symbol" : "")
+						<< (code & gentzen::symbol_catalog::anchor_is_not_symbol ? " NOT_symbol" : "")
+						<< ", catalog now says " << (gentzen::symbol_catalog::recognize(*q->subject()) ? "symbol" : "not a symbol") << "\n";
+				}
+			}
+		}
 	}
 
 	auto subject_leaf = []() {
@@ -5141,7 +5176,7 @@ int main(int argc, char* argv[], char* envp[])
 			self_test_diagnostic_walks();
 			self_test_reparse_routing();
 		} catch (const std::exception& e) {
-			std::cout << "self-test exception: " << e.what() << "\n" << std::flush;
+			report_exception("self-test exception", e);
 		}
 		std::cout << std::nounitbuf;
 	}
@@ -5166,7 +5201,7 @@ int main(int argc, char* argv[], char* envp[])
 				try {
 					run_proof_script(*src.path);
 				} catch (std::exception& e) {
-					std::cout << "proof session: " << e.what() << "\n";
+					report_exception("proof session", e);
 					return 3;
 				}
 				continue;
@@ -5192,7 +5227,7 @@ int main(int argc, char* argv[], char* envp[])
 			GentzenGrammar().complete_parse<true>(stage);
 			gentzen::report_diagnostics(stage);
 			} catch (std::exception& e) {
-				std::cout << "line iteration body: " << e.what() << "\n";
+				report_exception("line iteration body", e);
 				return 3;
 			}
 		}
