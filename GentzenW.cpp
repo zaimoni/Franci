@@ -2016,27 +2016,20 @@ private:
 
 	// Post-substitution reparse (fork B): replacing an operator-position placeholder can
 	// leave a loose infix run (e.g. (P _ Q) -> a paren over [P, &#9500;, Q]) that must
-	// fold into a proper binary node.  Re-runs GentzenGrammar on each node's loose infix,
-	// deepest first, mirroring parse_inside_balanced; an already-folded (size 1) infix is
-	// a no-op there.
-	void reparse_loose_infix(formal::lex_node& node) {
-#if 0
-		for (decltype(auto) x : node.prefix()) if (x) reparse_loose_infix(*x);
-		for (decltype(auto) x : node.infix()) if (x) reparse_loose_infix(*x);
-		for (decltype(auto) x : node.postfix()) if (x) reparse_loose_infix(*x);
-		for (decltype(auto) frag : node.fragments()) for (decltype(auto) x : frag) if (x) reparse_loose_infix(*x);
-#elee
-		for (decltype(auto) x : node.prefix()) if (x) reparse_loose_infix(*x);
+	// fold into a proper binary node.  Recurses deepest-first, then reparses every
+	// container (prefix/infix/postfix/fragments) via reparse(symbols&), mirroring
+	// parse_inside_balanced; an already-folded (size 1) container is a no-op there.
+	void reparse(formal::lex_node& node) {
+		for (decltype(auto) x : node.prefix()) if (x) reparse(*x);
 		reparse(node.prefix());
-		for (decltype(auto) x : node.infix()) if (x) reparse_loose_infix(*x);
+		for (decltype(auto) x : node.infix()) if (x) reparse(*x);
 		reparse(node.infix());
-		for (decltype(auto) x : node.postfix()) if (x) reparse_loose_infix(*x);
+		for (decltype(auto) x : node.postfix()) if (x) reparse(*x);
 		reparse(node.postfix());
 		for (decltype(auto) frag : node.fragments()) {
-			for (decltype(auto) x : frag) if (x) reparse_loose_infix(*x);
+			for (decltype(auto) x : frag) if (x) reparse(*x);
 			reparse(frag);
 		}
-#endif
 	}
 
 	// step-4 diagnostic walks (Notes/GentzenW-defined-notations.md): driven through
@@ -2367,7 +2360,7 @@ private:
 					if (!to) continue;
 					for (decltype(auto) h : g.second) h.replace(new formal::lex_node(*to));
 				}
-				reparse_loose_infix(*match.tree);
+				reparse(*match.tree);
 				return match.tree.release();
 			};
 
