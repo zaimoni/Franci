@@ -230,14 +230,18 @@ report_error / report_warning, two fields _last_error / _last_warning):
    non-empty) but formal::Error is not yet set -- the record-but-not-yet-reported state.
 
 Traversal shape: the recursion must cover _prefix, _postfix, _infix, _fragments, and
-the lex_node-based variants of _anchor and _post_anchor (the pattern of
-lex_node::recursive_rewrite, which is one level deep -- applies to immediate members,
-the lex anchor/post_anchor, and self; the report/cancel walks need genuine subtree
-recursion, either by self-recursing or by an op that recurses).
+the lex_node-based variants of _anchor and _post_anchor -- exactly what
+lex_node::recursive_rewrite(test, op) visits.  recursive_rewrite applies test/op one
+level (immediate members, the lex anchor/post_anchor, and self), but it is legal and
+prior practice for the op hook to call recursive_rewrite itself, driving genuine
+subtree recursion; the op must know its own test hook, which has not been a problem
+before.  So recursive_rewrite is the intended vehicle for the report and cancel walks
+(currently unexercised code getting its first use).
 
-Open design choices: dedicated recursive methods (report_subtree / discard_subtree)
-vs. driving recursive_rewrite with an op; and whether the pending-message stop is a
-new predicate (has_pending_error()) or folded into the existing formal::Error gates.
+Open design choice: whether the pending-message stop is a new predicate
+(has_pending_error()) or folded into the existing formal::Error gates.  (The
+report/cancel walks are settled as self-recursing recursive_rewrite ops rather than
+new dedicated methods.)
 
 **Stop-line for this push**: verify the chain through step 5's derivation.
 Automatically wiring the derived definition into defined_SVO::get() is a later commit,
