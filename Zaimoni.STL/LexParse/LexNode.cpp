@@ -311,10 +311,16 @@ namespace formal {
 		return ret;
 	}
 
-	static void push_back(std::vector<perl::scalar>& dest, const kuroda::parser<lex_node>::symbols& src)
+	std::function<bool(const lex_node&, const lex_node&)> lex_node::interpolate_grouping_parens;
+
+	static void push_back(const lex_node& parent, std::vector<perl::scalar>& dest, const kuroda::parser<lex_node>::symbols& src)
 	{
 		for (const formal::lex_node* x : src) {
-			dest.push_back((perl::scalar)(*x));
+			if (lex_node::interpolate_grouping_parens && lex_node::interpolate_grouping_parens(parent, *x)) {
+				dest.push_back("(" + std::string(((perl::scalar)(*x)).view()) + ")");
+			} else {
+				dest.push_back((perl::scalar)(*x));
+			}
 		}
 	}
 
@@ -327,17 +333,17 @@ namespace formal {
 			bool is_first = true;
 			for (decltype(auto) x : _fragments) {
 				std::vector<perl::scalar> stage2;
-				push_back(stage2, x);
+				push_back(*this, stage2, x);
 				stage.push_back(join(stage2, " "));
 			}
 			return join(stage, sep.view());
 		}
 
-		if (!_prefix.empty()) push_back(stage, _prefix);
+		if (!_prefix.empty()) push_back(*this, stage, _prefix);
 		stage.push_back(to_scalar(_anchor));
-		if (!_infix.empty()) push_back(stage, _infix);
+		if (!_infix.empty()) push_back(*this, stage, _infix);
 		if (classify(_post_anchor)) stage.push_back(to_scalar(_post_anchor));
-		if (!_postfix.empty()) push_back(stage, _postfix);
+		if (!_postfix.empty()) push_back(*this, stage, _postfix);
 		return join(stage, " ");
 	}
 

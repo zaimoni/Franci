@@ -23,7 +23,10 @@ Progress log:
 Target axiom (cf. the schema tables in docs/SubatomicPhysicsOfMath_LogicV2.html; not yet
 in cfg/core.yaml):
 
-    _ is a binary infix symbol &#9500; (modus ponens for _ := ((P _ Q), P &#9500; Q))
+    _ is a binary infix symbol &#9500; (modus ponens for _ := (P _ Q), P &#9500; Q)
+
+(Target revised 2026-09-19: := is higher precedence than &#9500;, so no grouping
+parentheses are needed to the right of := for a correct parse.)
 
 Intent: define the technical-English **unary prefix notation** "modus ponens for", valid
 only for binary infix symbols.  Instantiating _ := &#9500; discharges the hypothesis

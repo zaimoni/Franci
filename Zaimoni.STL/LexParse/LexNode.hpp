@@ -6,6 +6,7 @@
 #include "../cache.hpp"
 #include "../COW.hpp"
 #include <span>
+#include <functional>
 
 namespace formal {
 
@@ -135,6 +136,13 @@ namespace formal {
 		src_location origin() const { return origin(this); }
 
 		auto code() const { return _code; }
+
+		// String-representation policy hook: when set, a child rendered by to_s() as a
+		// direct argument of parent regenerates grouping parentheses if this returns
+		// true.  The library has no opinion of its own (default-empty std::function, so
+		// the parser library stays ignorant of application symbol types); parsers with
+		// precedence-sensitive notation install a policy.
+		static std::function<bool(const lex_node& parent, const lex_node& child)> interpolate_grouping_parens;
 
 		// Two-stage diagnostics (cf. C++ SFINAE): record now; report (print, and for an
 		// error learn formal::Error) or discard later.  error_report/warning_report on a

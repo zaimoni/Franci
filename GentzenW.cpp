@@ -3145,6 +3145,19 @@ private:
 
 // end prototype class
 
+// lex_node::to_s policy: a node anchored at := (binary infix priority index 0)
+// rendered as a direct argument of any other binary infix symbol must regenerate its
+// grouping parentheses -- otherwise reparsing lets :=, the highest-priority split,
+// seize the top level.  Applied to both argument sides; the mis-parse is symmetric.
+// Installed via std::function so the parser library stays ignorant of Gentzen types.
+static bool gentzen_interpolate_grouping_parens(const formal::lex_node& parent, const formal::lex_node& child)
+{
+	if (!(child.code() & gentzen::symbol_catalog::anchor_is_symbol)) return false;
+	if (0 != child.offset()) return false;
+	if (!(parent.code() & gentzen::symbol_catalog::anchor_is_symbol)) return false;
+	return 0 != parent.offset();
+}
+
 // LG_* are word-level bit indices for the line-grammar phase only.  Their bit
 // positions deliberately overlap HTMLtag::Entity and undefined_SVO::postfix/infix
 // (bits 1-3): line-phase codes are assigned to whole-line words before tokenization,
@@ -4593,6 +4606,7 @@ int main(int argc, char* argv[], char* envp[])
 //	std::wcout << std::filesystem::exists(who_am_i) << "\n";
 //	std::wcout << who_am_i.native() << "\n";
 //	std::wcout << std::filesystem::canonical(who_am_i.native()) << "\n";
+	formal::lex_node::interpolate_grouping_parens = gentzen_interpolate_grouping_parens;
 	undefined_SVO::get();	// load the undefined SVOs, and the axioms
 
 	enum { run_prototype_self_tests = 0 };
