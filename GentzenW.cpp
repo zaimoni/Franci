@@ -2019,6 +2019,36 @@ private:
 		}
 	}
 
+	// step-4 diagnostic walks (Notes/GentzenW-defined-notations.md): driven through
+	// lex_node::recursive_rewrite with a self-recursing op.  The pending-diagnostic test
+	// doubles as the termination guard -- op clears the node's message before recursing,
+	// so recursive_rewrite's re-visit of that node (it includes self) fails the test and
+	// stops.
+	bool has_pending_diagnostic(const formal::lex_node& x) {
+		return (bool)x.last_error() || (bool)x.last_warning();
+	}
+
+	// flush every pending message in the subtree; run immediately before an error-count
+	// test so the count reflects the deferred diagnostics
+	void report_diagnostics(formal::lex_node& root) {
+		std::function<void(formal::lex_node&)> op = [&op](formal::lex_node& x) {
+			x.report_error();
+			x.report_warning();
+			x.recursive_rewrite(has_pending_diagnostic, op);
+		};
+		root.recursive_rewrite(has_pending_diagnostic, op);
+	}
+
+	// cancel every pending message in the subtree (e.g. the LHS of :=)
+	void discard_diagnostics(formal::lex_node& root) {
+		std::function<void(formal::lex_node&)> op = [&op](formal::lex_node& x) {
+			x.discard_error();
+			x.discard_warning();
+			x.recursive_rewrite(has_pending_diagnostic, op);
+		};
+		root.recursive_rewrite(has_pending_diagnostic, op);
+	}
+
 	std::optional<formal::placeholder_match> statement_t::get_placeholder_variables() const {
 		struct visitor {
 			std::optional<formal::placeholder_match> operator()(const std::shared_ptr<const formal::parsed>& x) const {
@@ -2154,6 +2184,7 @@ private:
 
 		static syntactical_entailment_2ary* construct(formal::lex_node& src) {
 			if (formal::Error & src.code()) return nullptr;
+			if (src.last_error()) return nullptr;	// a pending (deferred) error also stops recognition
 			if (!can_construct(src)) return nullptr;
 
 			decltype(auto) lhs = *src.prefix().front();
@@ -2378,6 +2409,7 @@ private:
 		// so doesn't process as a reformat_to_terminal
 		static bool recognize(formal::lex_node& src) {
 			if ((formal::Error | formal::Recognized) & src.code()) return false;
+			if (src.last_error()) return false;	// a pending (deferred) error also stops recognition
 			if (!can_recognize(src)) return false;
 
 			unsigned int err = 0;
@@ -4519,6 +4551,34 @@ static void self_test_phrase_matcher()
 	}
 }
 
+// scaffold: exercises the step-4 diagnostic walks (record -> discard cancels,
+// record -> report flushes) on a hand-built subtree, independent of any reparse site.
+static void self_test_diagnostic_walks()
+{
+	auto leaf = [](const char* name) {
+		return new formal::lex_node(new formal::word(std::string_view(name), formal::src_location(), 0), 0);
+	};
+	std::unique_ptr<formal::lex_node> root(gentzen::make_binary_node(std::string_view("&#9500;"), 0,
+		std::unique_ptr<formal::lex_node>(leaf("A")),
+		std::unique_ptr<formal::lex_node>(leaf("B"))));
+	formal::lex_node* deep = root->prefix().front();	// the "A" leaf
+
+	deep->record_error(perl::scalar(std::string_view("deferred test error")));
+	std::cout << "diag: pending after record " << gentzen::has_pending_diagnostic(*deep) << "\n";
+
+	auto before = Errors.count();
+	gentzen::discard_diagnostics(*root);
+	std::cout << "diag: pending after discard " << gentzen::has_pending_diagnostic(*deep)
+		<< ", errors +" << (Errors.count() - before) << "\n";
+
+	deep->record_error(perl::scalar(std::string_view("deferred test error")));
+	before = Errors.count();
+	gentzen::report_diagnostics(*root);
+	std::cout << "diag: pending after report " << gentzen::has_pending_diagnostic(*deep)
+		<< ", errors +" << (Errors.count() - before)
+		<< ", Error flag " << ((deep->code() & formal::Error) ? 1 : 0) << "\n";
+}
+
 // main language syntax
 static kuroda::parser<formal::lex_node>& GentzenGrammar() {
 	static std::unique_ptr<kuroda::parser<formal::lex_node> > ooao;
@@ -4885,6 +4945,7 @@ int main(int argc, char* argv[], char* envp[])
 			gentzen::self_test_substitution();
 			gentzen::self_test_enumeration();
 			self_test_phrase_matcher();
+			self_test_diagnostic_walks();
 		} catch (const std::exception& e) {
 			std::cout << "self-test exception: " << e.what() << "\n" << std::flush;
 		}

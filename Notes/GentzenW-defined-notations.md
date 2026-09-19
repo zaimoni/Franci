@@ -209,6 +209,28 @@ The chain, when `_ is a binary infix symbol &#9500; (modus ponens for _ := (P _ 
    pattern (P &#9500; Q) against the instantiated conditional axiom binds P to the
    (configured) hypothesis axiom and Q to the definition, and detaches.
 
+### Step 4 infrastructure — LANDED 2026-09-19
+
+The three capabilities are in: gentzen::report_diagnostics and
+gentzen::discard_diagnostics (self-recursing recursive_rewrite ops, guarded by
+has_pending_diagnostic, which is also the termination condition -- op clears the node's
+message before the self-revisit so the test then fails), and last_error() folded into
+the syntactical_entailment_2ary::construct and tag_syntactical_entailment::recognize
+gates.  Self-test verifies the cycle: record -> pending; discard -> cancelled, no
+error-count change; report -> flushed, count +1, formal::Error set.  No corpus change
+(record+report are atomic during normal parse, so last_error() is empty at the gates).
+
+**Remaining for the end-to-end cancelled reparse (finding, 2026-09-19)**: the walks and
+gates are ready, but the definiendum error must first exist as a *pending* (recorded,
+not reported) diagnostic for discard_diagnostics to cancel.  Today the enforcement
+paths that would flag "modus ponens for &#9500;" (symbol_catalog / argument_enforcer)
+call error_report immediately (record + report atomically).  So the scoped definiendum
+reparse needs those paths in a *record-instead-of-report* deferral mode -- a fourth
+piece not in the original prerequisite list, and the actual connective tissue of step 4.
+This belongs with the := definition recognizer (W1): it owns the reparse, sets the
+deferral, and after classifying the LHS as a definiendum calls discard_diagnostics on it
+(or report_diagnostics + error-count test when the LHS is a genuine formula).
+
 ### Step 4 prerequisites (infrastructure, specified 2026-09-19)
 
 The cancelled reparse of "modus ponens for &#9500;" needs three lex_node-level
