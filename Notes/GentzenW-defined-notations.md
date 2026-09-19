@@ -225,17 +225,30 @@ gates are ready, but two grammar-plumbing facts block the definiendum error from
 and being cancellable, both discovered by probing a whole-result reparse of the step-3
 instantiation (errors +0, structure unchanged):
 
-1. **The reparse must reach the definiendum.**  apply_uniform_substitution_deep does not
-   reparse the whole result -- only the definiens 2ary reparses its own arms (fork B,
-   internal to the 2ary apply).  The definiendum "modus ponens for &#9500;" lives in the
-   := node's prefix, outside that, so nothing reparses it today.  The := recognizer (W1)
-   that owns the whole-result reparse must cover it.
+1. **The reparse must reach the definiendum -- interim LANDED 2026-09-19.**
+   apply_uniform_substitution_deep now tracks (by pointer) each lex-side replacement
+   whose *source* is_symbol_placeholder_variable (symbol-placeholder-syntax symbol with
+   used_as_placeholder; placeholder-to-placeholder replacements leave the parse unchanged
+   and are not tracked) and, after the parsed-anchor pass, reparses every container
+   holding one, bottom-up (reparse_substituted_containers), with the default reparse.
+   The := node's 4-entry prefix [modus ponens for _] therefore reparses as
+   [modus ponens for &#9500;] and self_test_phrase_matcher's step-3 line now reads
+   "errors +1" with "non-postfix symbol has no argument to right: &#9500;" -- the
+   broken intermediate stage, reported unconditionally until W1 cancels it.
+   Two details found on the way: (a) the replacement clone must `forget` the
+   destination's symbol-classification bits, because &#9500; in "&#9500; is a binary
+   infix symbol" was classified anchor_is_not_symbol *before* that axiom put it in the
+   catalog, and anchor_symbol_parse trusts the cached bit; (b) the error's reported
+   location is the clone's, i.e. the declaring axiom's (cfg/core.yaml:axioms(2,1)),
+   not the definiendum's -- W1 can decide whether the clone should take the source
+   occurrence's origin.
 2. **Routing (revised 2026-09-19, self_test_reparse_routing).**  The reparse family now
    takes `template<bool with_token_grammar = false>`, a pure routing switch that prefixes
    the TokenGrammar stage (apply + complete_parse, bail on new errors) before the
    GentzenGrammar stage.  The caller chooses it from what is being substituted *from*:
-   `reparse_wants_token_grammar(source)` = symbol-placeholder-syntax symbol with
-   used_as_placeholder set.  The earlier premise that the right-edge error lives only in
+   `is_symbol_placeholder_variable(source)` = symbol-placeholder-syntax symbol with
+   used_as_placeholder set (the same predicate that selects containers for reparse in
+   item 1; the interim item-1 walk uses the default routing unconditionally).  The earlier premise that the right-edge error lives only in
    TokenGrammar was wrong: reparsing the isolated run `[modus ponens for &#9500;]` yields
    "non-postfix symbol has no argument to right: &#9500;" (+1) under *both* routings,
    from GentzenGrammar's symbol_catalog.  The TokenGrammar stage is silent on it --
@@ -250,10 +263,10 @@ instantiation (errors +0, structure unchanged):
    enforcement paths call error_report immediately (record + report atomically), so they
    need a *record-instead-of-report* mode.
 
-Items 1 and 3 belong with the := definition recognizer (W1): it owns the whole-result
-reparse, isolates the definiendum run, routes it (per the substitution source) so
-enforcement runs in record mode, and after classifying the LHS as a
-definiendum calls discard_diagnostics on it (or report_diagnostics + error-count test
+Item 3 belongs with the := definition recognizer (W1), which is not yet ready to be
+attempted: it takes over the definiendum reparse from the interim item-1 walk, routes it
+(per the substitution source) so enforcement runs in record mode, and after classifying
+the LHS as a definiendum calls discard_diagnostics on it (or report_diagnostics + error-count test
 when the LHS is a genuine formula such as A & B &#9500; C := ...).
 
 ### Step 4 prerequisites (infrastructure, specified 2026-09-19)

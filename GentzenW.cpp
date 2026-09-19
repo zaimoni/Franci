@@ -2050,9 +2050,11 @@ private:
 		}
 	}
 
-	// the caller-side diagnosis for reparse<true>: the substitution source is a
-	// symbol-placeholder-syntax variable that has been used as a placeholder
-	bool reparse_wants_token_grammar(const formal::lex_node& source) {
+	// a symbol-placeholder-syntax variable that has been used as a placeholder.  Substituting
+	// *from* one of these changes the parse of the containers it sat in (a symbol arrives
+	// where a variable was), so those containers need reparsing; substituting placeholder
+	// to placeholder does not.  Also the caller-side diagnosis for reparse<true>.
+	bool is_symbol_placeholder_variable(const formal::lex_node& source) {
 		return (source.code() & used_as_placeholder) && is_symbol_placeholder_syntax_symbol(&source);
 	}
 
@@ -4479,6 +4481,32 @@ static void substitute_parsed_anchors(formal::lex_node& node, const std::vector<
 	for (decltype(auto) frag : node.fragments()) substitute_parsed_anchors(frag, rename);
 }
 
+// Step 4 (interim): after a uniform substitution, reparse each lex-side container that
+// received a replacement for a symbol-placeholder variable (the := prefix
+// [modus ponens for _] -> [modus ponens for &#9500;]); a placeholder-to-placeholder
+// replacement leaves the parse unchanged and is not tracked.  Bottom-up, so an inner
+// container settles before its parent's.  The default reparse is used unconditionally:
+// the Kuroda rule that flags &#9500; at a right edge is in GentzenGrammar, and the
+// resulting error is reported, not yet deferred -- cancelling it on a definiendum is
+// the := recognizer's job (W1).  Membership is by pointer identity against the
+// replacement nodes; nothing in `replaced` is dereferenced.
+static void reparse_substituted_containers(formal::lex_node& node, const std::vector<const formal::lex_node*>& replaced)
+{
+	auto pass = [&](kuroda::parser<formal::lex_node>::symbols& x) {
+		bool want = false;
+		for (decltype(auto) s : x) {
+			if (!s) continue;
+			reparse_substituted_containers(*s, replaced);
+			if (!want) for (decltype(auto) r : replaced) if (r == s) { want = true; break; }
+		}
+		if (want) gentzen::reparse(x);
+	};
+	pass(node.prefix());
+	pass(node.infix());
+	pass(node.postfix());
+	for (decltype(auto) frag : node.fragments()) pass(frag);
+}
+
 // Step 3 of the instantiation mechanics (Notes/GentzenW-defined-notations.md): apply
 // [d \ s] uniformly to a freshly-cloned copy of src, covering lex-side placeholder
 // occurrences AND parsed-arm membranes (phrase_postfix subjects, nested
@@ -4496,11 +4524,13 @@ static formal::lex_node* apply_uniform_substitution_deep(const formal::lex_node&
 	decltype(auto) srcs = decoded->second;
 
 	std::vector<std::pair<perl::scalar, const formal::lex_node*> > rename;
+	std::vector<perl::scalar> symbol_sources;	// sources whose replacement changes the parse
 	ptrdiff_t i = srcs.size();
 	while (0 <= --i) {
 		if (!srcs[i] || !(srcs[i]->code() & gentzen::used_as_placeholder)) return nullptr;
 		if (!dests[i]) return nullptr;
 		rename.push_back(std::pair(srcs[i]->to_scalar(), dests[i]));
+		if (gentzen::is_symbol_placeholder_variable(*srcs[i])) symbol_sources.push_back(srcs[i]->to_scalar());
 	}
 
 	std::unique_ptr<formal::lex_node> stage(new formal::lex_node(src));
@@ -4517,6 +4547,7 @@ static formal::lex_node* apply_uniform_substitution_deep(const formal::lex_node&
 	formal::placeholder_match match;
 	match.tree = std::move(stage);
 	gentzen::collect_placeholder_handles()(match);
+	std::vector<const formal::lex_node*> replaced;	// symbol-sourced replacements, for the container reparse
 	for (decltype(auto) g : match.groups) {
 		const formal::lex_node* to = nullptr;
 		for (decltype(auto) x : rename) {
@@ -4526,10 +4557,29 @@ static formal::lex_node* apply_uniform_substitution_deep(const formal::lex_node&
 			}
 		}
 		if (!to) continue;
-		for (decltype(auto) h : g.second) h.replace(new formal::lex_node(*to));
+		bool track = false;
+		for (decltype(auto) x : symbol_sources) {
+			if (x.view() == g.first.view()) {
+				track = true;
+				break;
+			}
+		}
+		for (decltype(auto) h : g.second) {
+			auto swap_in = new formal::lex_node(*to);
+			if (track) {
+				// the destination's symbol classification is a parse-state cache from its own
+				// context (e.g. &#9500; in "&#9500; is a binary infix symbol" was classified
+				// before that axiom put it in the catalog, so it reads anchor_is_not_symbol);
+				// clear it so the container reparse classifies the clone afresh
+				swap_in->forget(gentzen::symbol_catalog::anchor_is_symbol | gentzen::symbol_catalog::anchor_is_const_symbol | gentzen::symbol_catalog::anchor_is_not_symbol);
+				replaced.push_back(swap_in);
+			}
+			h.replace(swap_in);
+		}
 	}
 
 	substitute_parsed_anchors(*match.tree, rename);
+	if (!replaced.empty()) reparse_substituted_containers(*match.tree, replaced);
 	return match.tree.release();
 }
 
@@ -4584,10 +4634,33 @@ static void self_test_phrase_matcher()
 			stage = GentzenGrammar().apply(stage);
 			GentzenGrammar().complete_parse(stage);
 			if (1 == stage.size() && stage[0]) {
+				const auto before = Errors.count();
 				std::unique_ptr<formal::lex_node> instantiated(apply_uniform_substitution_deep(*stage[0], *subst));
 				// all three _ occurrences substitute: hypothesis phrase subject,
-				// definiendum token, and the definiens 2ary arm (reparsed to fold P |- Q)
-				std::cout << "step-3 instantiation: " << (instantiated ? instantiated->to_s() : "(null)") << "\n";
+				// definiendum token, and the definiens 2ary arm (reparsed to fold P |- Q).
+				// Step 4 interim: the := prefix reparses and reports the definiendum
+				// error (errors +1) unconditionally, until W1 cancels it.
+				std::cout << "step-3 instantiation: " << (instantiated ? instantiated->to_s() : "(null)")
+					<< ", errors +" << (Errors.count() - before) << "\n";
+				enum { trace_structure = 0 };	// per-node shape dump of source and result
+				if constexpr (trace_structure) {
+					auto shape = [](const formal::lex_node& n, unsigned depth, auto& self) -> void {
+						std::string pad(2 * depth, ' ');
+						std::cout << pad << "node anchor " << n.is_pure_anchor() << " code " << std::hex << n.code() << std::dec
+							<< " prefix " << n.prefix().size() << " infix " << n.infix().size() << " postfix " << n.postfix().size()
+							<< " fragments " << n.fragments().size() << ": " << n.to_s() << "\n";
+						for (decltype(auto) x : n.prefix()) if (x) self(*x, depth + 1, self);
+						for (decltype(auto) x : n.infix()) if (x) self(*x, depth + 1, self);
+						for (decltype(auto) x : n.postfix()) if (x) self(*x, depth + 1, self);
+						for (decltype(auto) f : n.fragments()) for (decltype(auto) x : f) if (x) self(*x, depth + 1, self);
+					};
+					std::cout << "step-3 source shape:\n";
+					shape(*stage[0], 1, shape);
+					if (instantiated) {
+						std::cout << "step-3 result shape:\n";
+						shape(*instantiated, 1, shape);
+					}
+				}
 			} else {
 				std::cout << "step-3: conditional axiom did not parse to a single statement\n";
 			}
@@ -4666,9 +4739,9 @@ static void self_test_reparse_routing()
 	};
 
 	auto placeholder = std::unique_ptr<formal::lex_node>(new formal::lex_node(new formal::word(std::string_view("_"), formal::src_location(), 0), 0));
-	std::cout << "reparse routing: wants TokenGrammar before tagging " << gentzen::reparse_wants_token_grammar(*placeholder);
+	std::cout << "reparse routing: is_symbol_placeholder_variable before tagging " << gentzen::is_symbol_placeholder_variable(*placeholder);
 	placeholder->learn(gentzen::used_as_placeholder);
-	std::cout << ", after tagging " << gentzen::reparse_wants_token_grammar(*placeholder) << "\n";
+	std::cout << ", after tagging " << gentzen::is_symbol_placeholder_variable(*placeholder) << "\n";
 
 	if (auto run = build_run("self-test:reparse<false>"); !run.empty()) {
 		const auto before = Errors.count();
