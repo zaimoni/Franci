@@ -161,6 +161,51 @@ The shielding assumption held; option (c) remains the plan of record, with the
 two-stage diagnostics (record/report/discard) available if a corner case surfaces
 during W1/W2 buildout.
 
+## Instantiation mechanics (specified 2026-09-19; verification target for the next push)
+
+The chain, when `_ is a binary infix symbol &#9500; (modus ponens for _ := (P _ Q), P
+&#9500; Q)` is declared as an axiom:
+
+1. The hypothesis parses through undefined_SVO::phrase_postfix with `_code ==
+   hard_code::infix_symbol`; its subject `_` tests true for
+   is_symbol_placeholder_syntax_symbol.
+2. An axiom that parses the same way -- `&#9500; is a binary infix symbol` --
+   authorizes the uniform substitution [&#9500; / _].  This requires a
+   **phrase_postfix-level matcher** (new): same hard_code, one subject a
+   symbol-placeholder binding to the other's concrete symbol.
+3. The substitution replaces **all three** occurrences of `_` (hypothesis,
+   definiendum "modus ponens for _", definiens "(P _ Q)"), yielding
+   `&#9500; is a binary infix symbol &#9500; (modus ponens for &#9500; := (P &#9500;
+   Q), P &#9500; Q)`.
+4. Reparsing "modus ponens for &#9500;" is *expected* to error (a binary infix symbol
+   in English-phrase position), and that error is **cancelled by being on the
+   left-hand side of :=**: the sub-reparse records the enforcement error (two-stage
+   diagnostics) and the := recognizer discards it on classifying the span as a
+   definiendum -- or reports it when the LHS is a genuine formula (`A & B &#9500; C :=
+   ...`).  This refines the enforcement sketch: balanced capture shields the
+   conclusion from token-stage enforcement (option c), and the recognizer's own
+   sub-reparse uses the deferral machinery (option a).
+5. The modus ponens axiom identifies the simultaneous substitution deriving
+   `modus ponens for &#9500; := (P &#9500; Q), P &#9500; Q`: matching hypothesis
+   pattern (P &#9500; Q) against the instantiated conditional axiom binds P to the
+   (configured) hypothesis axiom and Q to the definition, and detaches.
+
+**Stop-line for this push**: verify the chain through step 5's derivation.
+Automatically wiring the derived definition into defined_SVO::get() is a later commit,
+after the above checks out.
+
+Implementation observations against current code:
+
+* get_uniform_simultaneous_substitution already *produces* both substitution nodes --
+  it places no placeholder requirement on candidate children, so [&#9500; / _] and
+  [H, (def) \ P, Q] with symbol/statement destinations build today.  The single
+  blocker is apply_uniform_substitution's destination check.  Work item: relax
+  destination kinds (placeholder | symbol | statement; sources stay
+  placeholder-family), keeping the combinatoric-explosion guard at the *call sites*
+  (menu enumeration keeps the restriction; directed config-time saturation uses the
+  relaxed path), as the enumerate_applicable_2ary assumptions comment anticipated.
+* The phrase_postfix matcher of step 2 is the first parsed-arm unification consumer.
+
 ## Resolved decisions
 
 * **No hard-coded notation ids.**  The axiom to be defined as "modus ponens for
