@@ -3871,6 +3871,24 @@ public:
 
 		formal::src_location origin() const override { return _subject->origin(); }
 
+		void get_placeholder_variables(formal::placeholder_match& dest) const override {
+			if (!_subject) return;
+			// mention, not use: the placeholder-syntax declaring axioms do not treat
+			// their subject as a variable (cf. the tag_placeholder_syntax base-case notes)
+			if ((size_t)hard_code::placeholder_syntax == _code || (size_t)hard_code::symbol_placeholder_syntax == _code) return;
+			// the subject is typically a pure-anchor leaf, and placeholder handles attach
+			// only via parent slots (cf. apply_uniform_substitution's bare-placeholder
+			// case), so walk a carrier node around the tagged clone
+			std::unique_ptr<formal::lex_node> stage(new formal::lex_node(*_subject));
+			gentzen::tag_placeholder_syntax tag_this;
+			tag_this(stage.get());
+			std::unique_ptr<formal::lex_node> carrier(new formal::lex_node());
+			carrier->infix().push_back(stage.release());
+			formal::lex_node& root = *carrier;
+			dest.aux_trees.push_back(std::move(carrier));
+			gentzen::collect_placeholder_handles().walk_into(root, dest);
+		}
+
 		std::optional<perl::scalar> is_not_legal_axiom(bool unconditional) const override {
 			if (SYMBOL_MAX > _code) {
 				if (!gentzen::is_symbol_like(_subject.get())) return "not a syntactical symbol";
