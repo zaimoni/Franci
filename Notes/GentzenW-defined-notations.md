@@ -230,20 +230,29 @@ instantiation (errors +0, structure unchanged):
    internal to the 2ary apply).  The definiendum "modus ponens for &#9500;" lives in the
    := node's prefix, outside that, so nothing reparses it today.  The := recognizer (W1)
    that owns the whole-result reparse must cover it.
-2. **The reparse must route through the enforcement-bearing stage.**  reparse() uses
-   GentzenGrammar().apply, but the terminals that would flag &#9500; at a right edge
-   (argument_enforcer::reject_right_edge, is_wff via check_for_gentzen_wellformed) are
-   registered in TokenGrammar, not GentzenGrammar.  So a GentzenGrammar-only reparse of
-   the definiendum produces no error at all.  (Reparsing already-parsed lex_nodes through
-   TokenGrammar has its own caveat -- see the "works for GentzenGrammar.apply, not
-   TokenGrammar.apply" note near check_for_gentzen_wellformed.)
+2. **Routing (revised 2026-09-19, self_test_reparse_routing).**  The reparse family now
+   takes `template<bool with_token_grammar = false>`, a pure routing switch that prefixes
+   the TokenGrammar stage (apply + complete_parse, bail on new errors) before the
+   GentzenGrammar stage.  The caller chooses it from what is being substituted *from*:
+   `reparse_wants_token_grammar(source)` = symbol-placeholder-syntax symbol with
+   used_as_placeholder set.  The earlier premise that the right-edge error lives only in
+   TokenGrammar was wrong: reparsing the isolated run `[modus ponens for &#9500;]` yields
+   "non-postfix symbol has no argument to right: &#9500;" (+1) under *both* routings,
+   from GentzenGrammar's symbol_catalog.  The TokenGrammar stage is silent on it --
+   argument_enforcer's reserve_* tables and syntax_check's handlers are unpopulated (no
+   callers anywhere), so `<true>` is not distinguishable from `<false>` by this test yet.
+   What actually gates the error is *isolation*: in the whole step-3 result, &#9500; is
+   followed by `:=`, so no right-edge condition exists until W1 splits the definiendum
+   into its own run.  `<true>` stays scoped to loose leaf runs (the "works for
+   GentzenGrammar.apply, not TokenGrammar.apply" caveat near check_for_gentzen_wellformed).
 3. **Then the deferral**: once the error can arise, it must arise as a *pending*
    (recorded, not reported) diagnostic for discard_diagnostics to cancel.  Today those
    enforcement paths call error_report immediately (record + report atomically), so they
    need a *record-instead-of-report* mode.
 
-All three belong with the := definition recognizer (W1): it owns the whole-result
-reparse, routes it so enforcement runs in record mode, and after classifying the LHS as a
+Items 1 and 3 belong with the := definition recognizer (W1): it owns the whole-result
+reparse, isolates the definiendum run, routes it (per the substitution source) so
+enforcement runs in record mode, and after classifying the LHS as a
 definiendum calls discard_diagnostics on it (or report_diagnostics + error-count test
 when the LHS is a genuine formula such as A & B &#9500; C := ...).
 

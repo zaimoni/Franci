@@ -595,6 +595,7 @@ namespace formal {
 } // end namespace formal
 
 static kuroda::parser<formal::lex_node>& GentzenGrammar();
+static kuroda::parser<formal::lex_node>& TokenGrammar();
 
 namespace gentzen {
 
@@ -2002,16 +2003,32 @@ private:
 		return std::pair(std::move(dests), std::move(srcs));
 	}
 
+	// with_token_grammar is a pure routing switch: it prefixes the TokenGrammar stage,
+	// whose enforcement terminals (argument_enforcer, is_wff) GentzenGrammar lacks.  The
+	// caller selects it from what is being substituted *from*: a source that is a
+	// symbol-placeholder-syntax variable with used_as_placeholder set (e.g. _ -> &#9500;
+	// in "modus ponens for _") needs enforcement to re-run on the substituted run.
+	// Scope <true> to loose leaf runs (a symbols container such as the := prefix), not
+	// structured trees: TokenGrammar's captures are not idempotent on parsed input
+	// (cf. the parse_inside_balanced note).
+	template<bool with_token_grammar = false>
 	void reparse(kuroda::parser<formal::lex_node>::symbols& x) {
 		if (1 < x.size()) {
 			const auto prior_errors = Errors.count();
+			if constexpr (with_token_grammar) {
+				x = TokenGrammar().apply(x);
+				if (prior_errors < Errors.count()) return;
+				TokenGrammar().complete_parse(x);
+				if (prior_errors < Errors.count()) return;
+			}
 			x = GentzenGrammar().apply(x);
 			if (prior_errors == Errors.count()) GentzenGrammar().complete_parse(x);
 		}
 	}
 
+	template<bool with_token_grammar = false>
 	void reparse(std::vector<kuroda::parser<formal::lex_node>::symbols>& fragments) {
-		for (decltype(auto) frag : fragments) reparse(frag);
+		for (decltype(auto) frag : fragments) reparse<with_token_grammar>(frag);
 	}
 
 	// Post-substitution reparse (fork B): replacing an operator-position placeholder can
@@ -2019,17 +2036,24 @@ private:
 	// fold into a proper binary node.  Recurses deepest-first, then reparses every
 	// container (prefix/infix/postfix/fragments) via reparse(symbols&), mirroring
 	// parse_inside_balanced; an already-folded (size 1) container is a no-op there.
+	template<bool with_token_grammar = false>
 	void reparse(formal::lex_node& node) {
-		for (decltype(auto) x : node.prefix()) if (x) reparse(*x);
-		reparse(node.prefix());
-		for (decltype(auto) x : node.infix()) if (x) reparse(*x);
-		reparse(node.infix());
-		for (decltype(auto) x : node.postfix()) if (x) reparse(*x);
-		reparse(node.postfix());
+		for (decltype(auto) x : node.prefix()) if (x) reparse<with_token_grammar>(*x);
+		reparse<with_token_grammar>(node.prefix());
+		for (decltype(auto) x : node.infix()) if (x) reparse<with_token_grammar>(*x);
+		reparse<with_token_grammar>(node.infix());
+		for (decltype(auto) x : node.postfix()) if (x) reparse<with_token_grammar>(*x);
+		reparse<with_token_grammar>(node.postfix());
 		for (decltype(auto) frag : node.fragments()) {
-			for (decltype(auto) x : frag) if (x) reparse(*x);
-			reparse(frag);
+			for (decltype(auto) x : frag) if (x) reparse<with_token_grammar>(*x);
+			reparse<with_token_grammar>(frag);
 		}
+	}
+
+	// the caller-side diagnosis for reparse<true>: the substitution source is a
+	// symbol-placeholder-syntax variable that has been used as a placeholder
+	bool reparse_wants_token_grammar(const formal::lex_node& source) {
+		return (source.code() & used_as_placeholder) && is_symbol_placeholder_syntax_symbol(&source);
 	}
 
 	// step-4 diagnostic walks (Notes/GentzenW-defined-notations.md): driven through
@@ -3801,7 +3825,7 @@ auto check_for_gentzen_wellformed(kuroda::parser<formal::lex_node>::sequence& sr
 	return ret;
 }
 
-static auto& TokenGrammar() {
+static kuroda::parser<formal::lex_node>& TokenGrammar() {
 	static std::unique_ptr<kuroda::parser<formal::lex_node> > ooao;
 	if (!ooao) {
 		ooao = decltype(ooao)(new decltype(ooao)::element_type());
@@ -4599,6 +4623,65 @@ static void self_test_diagnostic_walks()
 		<< ", Error flag " << ((deep->code() & formal::Error) ? 1 : 0) << "\n";
 }
 
+// scaffold: step-4 reparse routing.  The same loose definiendum run
+// [modus ponens for &#9500;] goes through reparse<false> (GentzenGrammar only) and
+// reparse<true> (TokenGrammar first); the run is built as the instantiation builds it,
+// by tokenizing "modus ponens for _" and swapping the _ for a tokenizer-made &#9500;.
+// Observed 2026-09-19: both routings report "non-postfix symbol has no argument to
+// right: &#9500;" (errors +1) from GentzenGrammar's symbol_catalog; the TokenGrammar
+// stage is silent because argument_enforcer's reservation tables and syntax_check's
+// handlers are both unpopulated.  The isolated run is what triggers the error: in the
+// whole step-3 result &#9500; is followed by :=, so the definiendum must be split off
+// (W1) before it can be flagged.
+static void self_test_reparse_routing()
+{
+	auto build_run = [](const char* label) {
+		kuroda::parser<formal::lex_node>::symbols ret;
+		std::vector<std::string> src_lines;
+		src_lines.push_back("modus ponens for _");
+		src_lines.push_back("P &#9500; Q");
+		formal::src_location loc(std::pair(1, 0), std::shared_ptr<const std::filesystem::path>(new std::filesystem::path(label)));
+		auto lines = to_lines(src_lines, loc);
+		ret = TokenGrammar().apply(formal::lex_node::pop_front(lines));
+		TokenGrammar().complete_parse(ret);
+		auto donor = TokenGrammar().apply(formal::lex_node::pop_front(lines));
+		TokenGrammar().complete_parse(donor);
+		if (4 != ret.size() || 3 != donor.size()) {
+			std::cout << "reparse routing: unexpected tokenization " << ret.size() << ", " << donor.size() << "\n";
+			ret.clear();
+			return ret;
+		}
+		delete ret[3];
+		ret[3] = donor[1];
+		donor[1] = nullptr;
+		return ret;
+	};
+	auto show = [](const kuroda::parser<formal::lex_node>::symbols& run) {
+		std::string ret;
+		for (decltype(auto) x : run) {
+			if (!ret.empty()) ret += ' ';
+			ret += x ? x->to_s() : "(null)";
+		}
+		return ret;
+	};
+
+	auto placeholder = std::unique_ptr<formal::lex_node>(new formal::lex_node(new formal::word(std::string_view("_"), formal::src_location(), 0), 0));
+	std::cout << "reparse routing: wants TokenGrammar before tagging " << gentzen::reparse_wants_token_grammar(*placeholder);
+	placeholder->learn(gentzen::used_as_placeholder);
+	std::cout << ", after tagging " << gentzen::reparse_wants_token_grammar(*placeholder) << "\n";
+
+	if (auto run = build_run("self-test:reparse<false>"); !run.empty()) {
+		const auto before = Errors.count();
+		gentzen::reparse<false>(run);
+		std::cout << "reparse<false>: errors +" << (Errors.count() - before) << ", " << run.size() << " symbols: " << show(run) << "\n";
+	}
+	if (auto run = build_run("self-test:reparse<true>"); !run.empty()) {
+		const auto before = Errors.count();
+		gentzen::reparse<true>(run);
+		std::cout << "reparse<true>: errors +" << (Errors.count() - before) << ", " << run.size() << " symbols: " << show(run) << "\n";
+	}
+}
+
 // main language syntax
 static kuroda::parser<formal::lex_node>& GentzenGrammar() {
 	static std::unique_ptr<kuroda::parser<formal::lex_node> > ooao;
@@ -4967,6 +5050,7 @@ int main(int argc, char* argv[], char* envp[])
 			gentzen::self_test_enumeration();
 			self_test_phrase_matcher();
 			self_test_diagnostic_walks();
+			self_test_reparse_routing();
 		} catch (const std::exception& e) {
 			std::cout << "self-test exception: " << e.what() << "\n" << std::flush;
 		}
