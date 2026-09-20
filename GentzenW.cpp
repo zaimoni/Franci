@@ -55,9 +55,18 @@ void warning_report(const formal::src_location& loc, const perl::scalar& warn) {
 // to be captured where the exception is constructed (cf. kuroda::parser<T>::finite_parse).
 static void report_exception(const char* context, const std::exception& e)
 {
+	// \todo(_MSC_VER) compiler migration checklist: everything below is calibrated to MSVC
+	// (VS 18, x64, Debug).  On any new compiler, CRT, or optimization level, set
+	// implementation_test = 1, force an exception, and re-verify:
+	// * after_main -- how many entries follow main in the stacktrace; platform-specific
+	//   (here 6 = 4 CRT startup frames + 2 OS thread-start frames).
+	// * "!main+" -- the spelling of main within to_string(stacktrace_entry), which is
+	//   implementation-defined (here module!symbol+offset).
+	// * current(1) -- the skip count assumes report_exception is not inlined into its caller.
+#ifndef _MSC_VER
+#pragma message("report_exception: not MSVC -- work through the \\todo(_MSC_VER) compiler migration checklist")
+#endif
 	auto preview = std::stacktrace::current(1);
-	// it should be platform-specific how many entries after main are in the stacktrace.
-	// The name of main, definitely is platform-specific.
 	enum { after_main = 6, implementation_test = 0 };
 	auto actual = std::stacktrace::current(1, preview.size() - after_main);
 	if constexpr (implementation_test) {
