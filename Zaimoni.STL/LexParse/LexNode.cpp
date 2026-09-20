@@ -137,10 +137,12 @@ namespace formal {
 
 	std::optional<int> lex_node::token_compare(kuroda::parser<formal::lex_node>::edit_span tokens) const
 	{
+		enum { trace_parse = 0 };
+
 		// implement these later
 		if (!_prefix.empty()) {
 			if (tokens.empty()) return 1;
-			std::cout << "lex_node::token_compare wants prefix handling\n";
+			if constexpr(trace_parse) std::cout << "lex_node::token_compare wants prefix handling\n";
 			return std::nullopt;
 		}
 		if (classify(_anchor)) {
@@ -154,18 +156,18 @@ namespace formal {
 				}
 			}
 			if (!ok) {
-				std::cout << "lex_node::token_compare wants anchor handling\n";
+				if constexpr (trace_parse) std::cout << "lex_node::token_compare wants anchor handling\n";
 				return std::nullopt;
 			}
 		}
 		if (!_infix.empty()) {
 			if (tokens.empty()) return 1;
-			std::cout << "lex_node::token_compare wants infix handling\n";
+			if constexpr (trace_parse) std::cout << "lex_node::token_compare wants infix handling\n";
 			return std::nullopt;
 		}
 		if (classify(_post_anchor)) {
 			if (tokens.empty()) return 1;
-			std::cout << "lex_node::token_compare wants post-anchor handling\n";
+			if constexpr (trace_parse) std::cout << "lex_node::token_compare wants post-anchor handling\n";
 			return std::nullopt;
 		}
 		if (!_postfix.empty()) {
@@ -186,13 +188,13 @@ namespace formal {
 				}
 			}
 			if (!ok) {
-				std::cout << "lex_node::token_compare wants postfix handling\n";
+				if constexpr (trace_parse) std::cout << "lex_node::token_compare wants postfix handling\n";
 				return std::nullopt;
 			}
 		}
 		if (!_fragments.empty()) {
 			if (tokens.empty()) return 1;
-			std::cout << "lex_node::token_compare wants fragments handling\n";
+			if constexpr (trace_parse) std::cout << "lex_node::token_compare wants fragments handling\n";
 			return std::nullopt;
 		}
 		return tokens.empty() ? 0 : -1;
