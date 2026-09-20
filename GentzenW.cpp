@@ -1434,7 +1434,11 @@ private:
 						}
 					}
 					if (!already_error) {
+#if 1
 						error_report(*tokens[stage.front()], "infix symbol with no associativity or transitivity: " + tokens[stage.front()]->to_s());
+#else
+						tokens[stage.front()]->record_error("infix symbol with no associativity or transitivity: " + tokens[stage.front()]->to_s());
+#endif
 					}
 					for (const auto x : stage) {
 						tokens[x]->learn(formal::Error);
@@ -1445,7 +1449,11 @@ private:
 				if (!(syntax_code & Prefix)) {
 					if (tokens[stage.front()]->prefix().empty()) {
 						if (!(tokens[stage.front()]->code() & formal::Error)) {
+#if 1
 							error_report(*tokens[stage.front()], "non-prefix symbol has no argument to left: " + tokens[stage.front()]->to_s());
+#else
+							tokens[stage.front()]->record_error("non-prefix symbol has no argument to left: " + tokens[stage.front()]->to_s());
+#endif
 						}
 					}
 				}
@@ -1454,7 +1462,11 @@ private:
 				if (!(syntax_code & Postfix)) {
 					if (tokens[stage.back()]->postfix().empty()) {
 						if (!(tokens[stage.back()]->code() & formal::Error)) {
+#if 1
 							error_report(*tokens[stage.back()], "non-postfix symbol has no argument to right: " + tokens[stage.back()]->to_s());
+#else
+							tokens[stage.back()]->record_error("non-postfix symbol has no argument to right: " + tokens[stage.back()]->to_s());
+#endif
 						}
 					}
 				}
@@ -4725,6 +4737,7 @@ static void self_test_phrase_matcher()
 				// definiendum token, and the definiens 2ary arm (reparsed to fold P |- Q).
 				// Step 4 interim: the := prefix reparses and reports the definiendum
 				// error (errors +1) unconditionally, until W1 cancels it.
+				gentzen::report_diagnostics(stage);
 				std::cout << "step-3 instantiation: " << (instantiated ? instantiated->to_s() : "(null)")
 					<< ", errors +" << (Errors.count() - before) << "\n";
 				enum { trace_structure = 0 };	// per-node shape dump of source and result
