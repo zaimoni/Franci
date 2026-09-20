@@ -94,8 +94,9 @@ place of the definiens notations.
   the diagnostic walks (flush-before-construct), and for reparse -- and the definiens must
   stay substitutable.  So: is_definition_node (whose tolerance of multi-entry prefix() is
   *right* for a technical-English definiendum -- it is a token run until something
-  registers it) plus a plain nested registry record in defined_SVO (definiendum phrase,
-  slot shape, definiens statement_t, source axiom).  tag_syntactical_entailment is the
+  registers it) plus a plain nested registry record in defined_SVO (closed definiendum
+  phrase in undefined_SVO::_postfix-entry form, definiens statement_t, source axiom; no
+  slot shape -- see "Registry representation").  tag_syntactical_entailment is the
   in-tree precedent for "recognized lex_node, no class".
   The class that *would* pull its weight, as undefined_SVO::phrase_postfix does, is the
   **occurrence** of a defined phrase -- a nested defined_SVO::phrase (registry index + slot
@@ -225,6 +226,14 @@ The chain, when `_ is a binary infix symbol &#9500; (modus ponens for _ := (P _ 
    `modus ponens for &#9500; := (P &#9500; Q), P &#9500; Q`: matching hypothesis
    pattern (P &#9500; Q) against the instantiated conditional axiom binds P to the
    (configured) hypothesis axiom and Q to the definition, and detaches.
+   **Refined 2026-09-20**: the detachment itself works out to a *value-copy* in the
+   general case -- once the instantiated hypothesis is confirmed (notationally) to be an
+   established axiom, the conclusion subtree is copied out, grouping parentheses
+   stripped; no substitution machinery runs on it.  Afterwards the prefix() of := contains
+   **no placeholder variables at all**: `_` was the only one and step 3 replaced it, so
+   "modus ponens for &#9500;" is a closed phrase (P and Q survive only in the definiens).
+   That is checkable -- a collect_placeholder_handles census of the prefix must be empty
+   -- and is the precondition for registering the phrase as a constant.
 
 ### Step 4 infrastructure — LANDED 2026-09-19
 
@@ -363,6 +372,31 @@ the LHS-of-:= subtree, and last_error() folded into the formal::Error gates.
 Automatically wiring the derived definition into defined_SVO::get() is a later commit,
 after the above checks out.
 
+**After the stop-line (specified 2026-09-20).**  Once the conditional definition axiom is
+in core.yaml, its consequences land in **lemmas::get()** -- the root lemmas instance over
+axioms::get().  No conditional is introduced, so the derivation is just "immediate from
+non-explosive axioms"; that is also the rationale text (today lemmas::rationale says
+"prototyping lemma", and _lemmas carries a \todo to track derivations).  So there is a
+**"before add lemma" processing stage**, parallel to add_axiom's is_not_legal_axiom /
+before_add_axiom_handler pair, and *that* stage is what interacts with
+defined_SVO::get().  lemmas::record is the single choke point for it.
+Scope: lemmas::get() only.  Adding definitions to *conditional-reasoning* lemmas instances
+(infer_dest_for over an introduction_start / 2ary_infer / introduction) needs more design
+work first -- a definition made under a hypothesis is scoped to it, and what happens to
+the registry entry at discharge is unspecified -- so the stage must decline there.
+
+**Registry representation**: the defined notation "modus ponens for &#9500;" is stored
+like an undefined_SVO::_postfix entry -- a lex_node anchored at the phrase's first word
+with the remaining tokens in postfix() ("modus" + [ponens, for, &#9500;]) -- alongside its
+definiens statement_t.  Because the phrase is closed (step 5), the registry needs no slot
+or parameter machinery; the schema-level slot exists only in the conditional axiom.
+
+**Loader gap found 2026-09-20**: axioms::add_axiom accepts only formal::parsed
+(add_axiom(lex_node) is a \todo), and the conditional axiom parses to a &#9500;-anchored
+lex_node (parsed phrase_postfix prefix, := node postfix).  undefined_SVO::get()'s loader
+adds stage[0]->shared_anchor<formal::parsed>() and otherwise drops the statement,
+silently unless trace_load.  W5 is blocked on this.
+
 Implementation observations against current code:
 
 * get_uniform_simultaneous_substitution already *produces* both substitution nodes --
@@ -374,6 +408,57 @@ Implementation observations against current code:
   (menu enumeration keeps the restriction; directed config-time saturation uses the
   relaxed path), as the enumerate_applicable_2ary assumptions comment anticipated.
 * The phrase_postfix matcher of step 2 is the first parsed-arm unification consumer.
+
+## Remaining stages (as of 2026-09-20)
+
+Landed so far: instantiation steps 1-4 (matcher, [&#9500; / _] at all three occurrences,
+container reparse, record-instead-of-report deferral with its counter-changes, and
+SFINAE-style definiendum cancellation).  In dependency order:
+
+*Before the stop-line*
+
+* **R1 -- step 5, MP detachment.**  Confirm the instantiated hypothesis
+  ("&#9500; is a binary infix symbol") is notationally an established axiom; value-copy
+  the conclusion; strip grouping parentheses; assert the := prefix has an empty
+  placeholder census.  Self-test alongside step 3's.  Then the stop-line review.
+
+*After the stop-line*
+
+* **R2 -- axioms accept lex_node statements.**  Implement the add_axiom(lex_node) \todo
+  (_axioms storage and rationale() are already statement_t, so only the entry point and
+  the observer notification need widening), and have the loader stop dropping non-parsed
+  statements.  Legality for a lex_node axiom has no
+  virtual to dispatch on, so it is recognizer-driven (formal::Recognized from
+  tag_syntactical_entailment).  Blocks W5.  (The alternative -- a
+  syntactical_entailment_1ary class, open decision 3 -- would give virtual dispatch and,
+  unlike a definition-statement class, does trigger an inference schema; but it puts the
+  definition behind a membrane that steps 3-5 currently work without.)
+* **R3 -- config-time saturation driver.**  For a unary-entailment axiom whose hypothesis
+  is a phrase_postfix over a symbol-placeholder variable: match against the declaring
+  axioms (step 2), instantiate (steps 3-4), detach (R1), and lemmas::get()->record the
+  result.  Order-sensitive: runs once the hypothesis's declaring axioms are loaded.
+* **R4 -- "before add lemma" stage in lemmas::record**, root instance only; declines on
+  conditional-reasoning instances.  Recognizes is_definition_node with a closed prefix and
+  hands it to defined_SVO.  Also the place the rationale text stops being "prototyping
+  lemma".
+* **R5 -- defined_SVO registry content and API.**  Entries in _postfix-entry form plus
+  definiens statement_t and source axiom; both directions exposed (phrase -> definiens,
+  definiens notation -> phrase), resolved notationally, never by baked-in id.
+* **R6 -- W4 rationale rendering.**  Route 2ary_infer::rationale through
+  applicable_2ary::schema to the registry so cut-rule rows 4 and 5 both read
+  "modus ponens for &#9500;" (open decision 2: name on the node at construction).
+* **R7 -- W5 configuration and expectations.**  Axiom into core.yaml after the
+  "&#9500; is a binary infix symbol" line; cut-rule expected rationales; theorem-file
+  `axioms:` lists the conditional-definition axiom as used; fixture reshaping per
+  GentzenW-test-fixture.md.
+* **R8 -- W3 occurrence class** defined_SVO::phrase + defined_SVO::global_parse + tagging
+  (open decision 1).  Needed only once defined phrases are *used* inside statements; it is
+  also the proper fix for the kept definiendum run re-erroring under a whole-tree reparse.
+* **R9 -- fork A(b) unification** of substitute_parsed_anchors' dispatch arms (the old
+  "stage 6"); independent of R2-R8, and cheaper to do before R8 adds a third arm.
+
+*Deferred, needs design first*: definitions inside conditional-reasoning lemmas
+instances.  *Unrelated carry-over*: cut-rule plan step 7 (GentzenW-test-fixture.md).
 
 ## Resolved decisions
 
