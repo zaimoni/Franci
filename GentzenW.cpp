@@ -49,12 +49,7 @@ void warning_report(const formal::src_location& loc, const perl::scalar& warn) {
 	++Warnings;
 }
 
-// for the most-general exception handlers.  std::stacktrace::current() here is the
-// *handler's* stack: unwinding has already discarded the throw point's frames, so this
-// identifies which handler caught and the call chain above it.  A throw-point trace has
-// to be captured where the exception is constructed (cf. kuroda::parser<T>::finite_parse).
-static void report_exception(const char* context, const std::exception& e)
-{
+static auto relevant_stacktrace(size_t delta = 0) {
 	// \todo(_MSC_VER) compiler migration checklist: everything below is calibrated to MSVC
 	// (VS 18, x64, Debug).  On any new compiler, CRT, or optimization level, set
 	// implementation_test = 1, force an exception, and re-verify:
@@ -66,16 +61,26 @@ static void report_exception(const char* context, const std::exception& e)
 #ifndef _MSC_VER
 #pragma message("report_exception: not MSVC -- work through the \\todo(_MSC_VER) compiler migration checklist")
 #endif
-	auto preview = std::stacktrace::current(1);
+	auto preview = std::stacktrace::current(1 + delta);
 	enum { after_main = 6, implementation_test = 0 };
-	auto actual = std::stacktrace::current(1, preview.size() - after_main);
+	auto actual = std::stacktrace::current(1 + delta, preview.size() - after_main);
 	if constexpr (implementation_test) {
-		if (std::string::npos == to_string(*actual.rbegin()).find("!main+")) {
+		if (   actual.empty()
+			|| std::string::npos == to_string(*actual.rbegin()).find("!main+")) {
 			std::cout << "stacktrace does not appear to end on main (platform-dependent)\n";
 		}
 	}
 
-	std::cout << context << ": " << e.what() << "\ncaught at:\n" << actual << "\n" << std::flush;
+	return to_string(actual);
+}
+
+// for the most-general exception handlers.  std::stacktrace::current() here is the
+// *handler's* stack: unwinding has already discarded the throw point's frames, so this
+// identifies which handler caught and the call chain above it.  A throw-point trace has
+// to be captured where the exception is constructed (cf. kuroda::parser<T>::finite_parse).
+static void report_exception(const char* context, const std::exception& e)
+{
+	std::cout << context << ": " << e.what() << "\ncaught at:\n" << relevant_stacktrace(1) << "\n" << std::flush;
 }
 
 const std::filesystem::path& self_path(const char* const _arg = nullptr)
@@ -4607,12 +4612,18 @@ static formal::lex_node* apply_uniform_substitution_deep(const formal::lex_node&
 			if (track) {
 				if (auto is_symbol = gentzen::symbol_catalog::recognize(*swap_in)) {
 					if constexpr (test_preconditions) {
-						if (gentzen::symbol_catalog::anchor_is_not_symbol & swap_in->code()) throw std::logic_error("symbol tagged as non-symbol: " + swap_in->to_s());
+						if (gentzen::symbol_catalog::anchor_is_not_symbol & swap_in->code()) {
+							std::cerr << relevant_stacktrace() << "\n";
+							throw std::logic_error("symbol tagged as non-symbol: " + swap_in->to_s());
+						}
 					}
 					// symbol_catalog::anchor_symbol_parse will short-circuit and do nothing whatsoever, if we don't clear these flags.
 					swap_in->forget(gentzen::symbol_catalog::anchor_is_symbol | gentzen::symbol_catalog::anchor_is_const_symbol | gentzen::symbol_catalog::anchor_is_not_symbol);
 				} else if constexpr(test_preconditions) {
-					if ((gentzen::symbol_catalog::anchor_is_symbol | gentzen::symbol_catalog::anchor_is_const_symbol) & swap_in->code()) throw std::logic_error("non-symbol tagged as symbol: " + swap_in->to_s());
+					if ((gentzen::symbol_catalog::anchor_is_symbol | gentzen::symbol_catalog::anchor_is_const_symbol) & swap_in->code()) {
+						std::cerr << relevant_stacktrace() << "\n";
+						throw std::logic_error("non-symbol tagged as symbol: " + swap_in->to_s());
+					}
 				}
 				// why the flags can be stale: the destination's classification is a parse-state
 				// cache from its own context.  The subject of a symbol's *first* declaring axiom
