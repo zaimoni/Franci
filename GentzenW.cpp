@@ -55,7 +55,18 @@ void warning_report(const formal::src_location& loc, const perl::scalar& warn) {
 // to be captured where the exception is constructed (cf. kuroda::parser<T>::finite_parse).
 static void report_exception(const char* context, const std::exception& e)
 {
-	std::cout << context << ": " << e.what() << "\ncaught at:\n" << std::stacktrace::current() << "\n" << std::flush;
+	auto preview = std::stacktrace::current(1);
+	// it should be platform-specific how many entries after main are in the stacktrace.
+	// The name of main, definitely is platform-specific.
+	enum { after_main = 6, implementation_test = 0 };
+	auto actual = std::stacktrace::current(1, preview.size() - after_main);
+	if constexpr (implementation_test) {
+		if (std::string::npos == to_string(*actual.rbegin()).find("!main+")) {
+			std::cout << "stacktrace does not appear to end on main (platform-dependent)\n";
+		}
+	}
+
+	std::cout << context << ": " << e.what() << "\ncaught at:\n" << actual << "\n" << std::flush;
 }
 
 const std::filesystem::path& self_path(const char* const _arg = nullptr)
