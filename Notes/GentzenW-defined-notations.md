@@ -258,10 +258,33 @@ instantiation (errors +0, structure unchanged):
    followed by `:=`, so no right-edge condition exists until W1 splits the definiendum
    into its own run.  `<true>` stays scoped to loose leaf runs (the "works for
    GentzenGrammar.apply, not TokenGrammar.apply" caveat near check_for_gentzen_wellformed).
-3. **Then the deferral**: once the error can arise, it must arise as a *pending*
-   (recorded, not reported) diagnostic for discard_diagnostics to cancel.  Today those
-   enforcement paths call error_report immediately (record + report atomically), so they
-   need a *record-instead-of-report* mode.
+3. **Then the deferral -- LANDED 2026-09-19 for symbol_catalog.**  The three
+   find_global_parse_target enforcement errors (no associativity/transitivity, no argument
+   to left, no argument to right) now record_error instead of error_report, so they arise
+   *pending* and discard_diagnostics can cancel them.  (argument_enforcer's reject_* still
+   report atomically; its tables are unpopulated, so it is inert either way.)  Output is
+   byte-identical to immediate reporting on the HTML differential and on a six-line
+   malformed-statement probe (edge, nested-in-parens, inside :=, inside a 2ary arm).
+   The counter-changes that parity required:
+   * **The walks' test must be deep.**  recursive_rewrite is one level and applies op only
+     where the test passes, so the original shallow has_pending_diagnostic never descended
+     through a clean parent; the step-3 error sits at depth 2 (root -> := -> &#9500;).
+     has_pending_diagnostic is now "this node or any descendant", traversing exactly
+     recursive_rewrite's edges (the termination argument depends on that).
+   * **Flush what you are about to test, in the tree that holds it.**  The pending error
+     lives in the *instantiated* result, not the source statement.
+   * **Flush after GentzenGrammar().apply too**, not only after complete_parse: balanced
+     groups parse (and defer) during apply, and all four parse loops test the error count
+     there.  Without it the statement's size/echo trace printed before its own error.
+   * **Recognizer gates are deep** (has_pending_error): building a formal::parsed over a
+     subtree with a pending error puts the message behind a membrane the walks cannot
+     cross.  For the same reason syntactical_entailment_2ary's rename-apply flushes its
+     reparsed arms before constructing (an arm is never a definiendum).
+   * **Record-time location** (LexNode): origin() is the leftmost token, which moves once
+     the parse attaches a prefix, so a deferred report cited the left argument instead of
+     the offending symbol.  record_* now captures origin(); report_* cites it.
+   Standing hazard: any new code that wraps lex_nodes in a formal::parsed, or tests
+   Errors.count(), between a reparse and a flush inherits these obligations.
 
 Item 3 belongs with the := definition recognizer (W1), which is not yet ready to be
 attempted: it takes over the definiendum reparse from the interim item-1 walk, routes it

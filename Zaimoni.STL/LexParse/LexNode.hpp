@@ -66,6 +66,10 @@ namespace formal {
 		// two-stage diagnostics: recorded now; reported or discarded later
 		mutable std::optional<perl::scalar> _last_error;
 		mutable std::optional<perl::scalar> _last_warning;
+		// where the message was recorded.  origin() is the leftmost token, which moves once a
+		// parse attaches a prefix; a deferred report has to cite the recording-time location.
+		mutable std::optional<src_location> _last_error_origin;
+		mutable std::optional<src_location> _last_warning_origin;
 
 		static std::vector<zaimoni::I_erase*> _caches;
 
@@ -147,12 +151,12 @@ namespace formal {
 		// Two-stage diagnostics (cf. C++ SFINAE): record now; report (print, and for an
 		// error learn formal::Error) or discard later.  error_report/warning_report on a
 		// lex_node are the hard-coded record-then-report-immediately composition.
-		void record_error(const perl::scalar& src) const { _last_error = src; }
-		void record_warning(const perl::scalar& src) const { _last_warning = src; }
+		void record_error(const perl::scalar& src) const { _last_error = src; _last_error_origin = origin(); }
+		void record_warning(const perl::scalar& src) const { _last_warning = src; _last_warning_origin = origin(); }
 		const std::optional<perl::scalar>& last_error() const { return _last_error; }
 		const std::optional<perl::scalar>& last_warning() const { return _last_warning; }
-		void discard_error() const { _last_error = std::nullopt; }
-		void discard_warning() const { _last_warning = std::nullopt; }
+		void discard_error() const { _last_error = std::nullopt; _last_error_origin = std::nullopt; }
+		void discard_warning() const { _last_warning = std::nullopt; _last_warning_origin = std::nullopt; }
 		void report_error();	// these no-op when nothing is recorded
 		void report_warning() const;
 		auto offset() const { return _offset; }

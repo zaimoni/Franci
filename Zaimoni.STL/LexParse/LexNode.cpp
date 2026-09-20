@@ -677,15 +677,15 @@ restart:
 	}
 	void lex_node::report_error() {
 		if (!_last_error) return;
-		::error_report(origin(), *_last_error);
+		::error_report(_last_error_origin ? *_last_error_origin : origin(), *_last_error);
 		learn(Error);
-		_last_error = std::nullopt;
+		discard_error();
 	}
 
 	void lex_node::report_warning() const {
 		if (!_last_warning) return;
-		::warning_report(origin(), *_last_warning);
-		_last_warning = std::nullopt;
+		::warning_report(_last_warning_origin ? *_last_warning_origin : origin(), *_last_warning);
+		discard_warning();
 	}
 }	// namespace formal
 

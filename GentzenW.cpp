@@ -1434,7 +1434,7 @@ private:
 						}
 					}
 					if (!already_error) {
-#if 1
+#if 0
 						error_report(*tokens[stage.front()], "infix symbol with no associativity or transitivity: " + tokens[stage.front()]->to_s());
 #else
 						tokens[stage.front()]->record_error("infix symbol with no associativity or transitivity: " + tokens[stage.front()]->to_s());
@@ -1449,7 +1449,7 @@ private:
 				if (!(syntax_code & Prefix)) {
 					if (tokens[stage.front()]->prefix().empty()) {
 						if (!(tokens[stage.front()]->code() & formal::Error)) {
-#if 1
+#if 0
 							error_report(*tokens[stage.front()], "non-prefix symbol has no argument to left: " + tokens[stage.front()]->to_s());
 #else
 							tokens[stage.front()]->record_error("non-prefix symbol has no argument to left: " + tokens[stage.front()]->to_s());
@@ -1462,7 +1462,7 @@ private:
 				if (!(syntax_code & Postfix)) {
 					if (tokens[stage.back()]->postfix().empty()) {
 						if (!(tokens[stage.back()]->code() & formal::Error)) {
-#if 1
+#if 0
 							error_report(*tokens[stage.back()], "non-postfix symbol has no argument to right: " + tokens[stage.back()]->to_s());
 #else
 							tokens[stage.back()]->record_error("non-postfix symbol has no argument to right: " + tokens[stage.back()]->to_s());
@@ -2114,13 +2114,42 @@ private:
 	}
 
 	// step-4 diagnostic walks (Notes/GentzenW-defined-notations.md): driven through
-	// lex_node::recursive_rewrite with a self-recursing op.  The pending-diagnostic test
-	// doubles as the termination guard -- op clears the node's message before recursing,
-	// so recursive_rewrite's re-visit of that node (it includes self) fails the test and
-	// stops.
-	bool has_pending_diagnostic(const formal::lex_node& x) {
-		return (bool)x.last_error() || (bool)x.last_warning();
+	// lex_node::recursive_rewrite with a self-recursing op.  recursive_rewrite is one level
+	// and only applies op where the test passes, so the test has to be *deep* (this node or
+	// any descendant has a pending message): a shallow test never descends through a clean
+	// parent, and a deferred error two levels down is silently missed.  The deep test also
+	// remains the termination guard -- op clears the node's own message and recurses, which
+	// clears every descendant's, so recursive_rewrite's re-visit of that node (it includes
+	// self) fails the test and stops.  That argument requires these to traverse exactly the
+	// edges recursive_rewrite does (in particular: the lex anchor only when there are no
+	// fragments, and never a parsed anchor); an extra edge here would never be cleared.
+	template<bool errors_only>
+	static bool _has_pending(const formal::lex_node& x) {
+		if (x.last_error()) return true;
+		if constexpr (!errors_only) {
+			if (x.last_warning()) return true;
+		}
+		for (decltype(auto) y : x.prefix()) if (y && _has_pending<errors_only>(*y)) return true;
+		for (decltype(auto) y : x.infix()) if (y && _has_pending<errors_only>(*y)) return true;
+		for (decltype(auto) y : x.postfix()) if (y && _has_pending<errors_only>(*y)) return true;
+		if (!x.fragments().empty()) {
+			for (decltype(auto) frag : x.fragments()) {
+				for (decltype(auto) y : frag) if (y && _has_pending<errors_only>(*y)) return true;
+			}
+		} else if (auto y = x.c_anchor<formal::lex_node>()) {
+			if (_has_pending<errors_only>(*y)) return true;
+		}
+		if (auto y = x.c_post_anchor<formal::lex_node>()) {
+			if (_has_pending<errors_only>(*y)) return true;
+		}
+		return false;
 	}
+
+	bool has_pending_diagnostic(const formal::lex_node& x) { return _has_pending<false>(x); }
+
+	// for recognizer gates: a deferred error anywhere beneath src must stop recognition,
+	// since building a formal::parsed over it would put the message out of the walks' reach
+	bool has_pending_error(const formal::lex_node& x) { return _has_pending<true>(x); }
 
 	// flush every pending message in the subtree; run immediately before an error-count
 	// test so the count reflects the deferred diagnostics
@@ -2282,7 +2311,7 @@ private:
 
 		static syntactical_entailment_2ary* construct(formal::lex_node& src) {
 			if (formal::Error & src.code()) return nullptr;
-			if (src.last_error()) return nullptr;	// a pending (deferred) error also stops recognition
+			if (has_pending_error(src)) return nullptr;	// a pending (deferred) error, at any depth, also stops recognition
 			if (!can_construct(src)) return nullptr;
 
 			decltype(auto) lhs = *src.prefix().front();
@@ -2446,6 +2475,10 @@ private:
 					for (decltype(auto) h : g.second) h.replace(new formal::lex_node(*to));
 				}
 				reparse(*match.tree);
+				// the arms are about to go behind a formal::parsed membrane, out of the
+				// diagnostic walks' reach; an arm is never a definiendum, so nothing
+				// here is cancellable -- flush now
+				report_diagnostics(*match.tree);
 				return match.tree.release();
 			};
 
@@ -2507,7 +2540,7 @@ private:
 		// so doesn't process as a reformat_to_terminal
 		static bool recognize(formal::lex_node& src) {
 			if ((formal::Error | formal::Recognized) & src.code()) return false;
-			if (src.last_error()) return false;	// a pending (deferred) error also stops recognition
+			if (has_pending_error(src)) return false;	// a pending (deferred) error, at any depth, also stops recognition
 			if (!can_recognize(src)) return false;
 
 			unsigned int err = 0;
@@ -4236,6 +4269,7 @@ private:
 					if (prior_errors < Errors.count()) continue;
 
 					stage = GentzenGrammar().apply(stage);
+					gentzen::report_diagnostics(stage);	// balanced groups parse (and may defer errors) during apply
 					if (prior_errors < Errors.count()) continue;
 
 					GentzenGrammar().complete_parse(stage);
@@ -4279,6 +4313,7 @@ private:
 					if (prior_errors < Errors.count()) continue;
 
 					stage = GentzenGrammar().apply(stage);
+					gentzen::report_diagnostics(stage);	// balanced groups parse (and may defer errors) during apply
 					if (prior_errors < Errors.count()) continue;
 
 					GentzenGrammar().complete_parse(stage);
@@ -4737,7 +4772,7 @@ static void self_test_phrase_matcher()
 				// definiendum token, and the definiens 2ary arm (reparsed to fold P |- Q).
 				// Step 4 interim: the := prefix reparses and reports the definiendum
 				// error (errors +1) unconditionally, until W1 cancels it.
-				gentzen::report_diagnostics(stage);
+				if (instantiated) gentzen::report_diagnostics(*instantiated);	// the pending error is in the result, not the source
 				std::cout << "step-3 instantiation: " << (instantiated ? instantiated->to_s() : "(null)")
 					<< ", errors +" << (Errors.count() - before) << "\n";
 				enum { trace_structure = 0 };	// per-node shape dump of source and result
@@ -4792,6 +4827,27 @@ static void self_test_diagnostic_walks()
 	std::cout << "diag: pending after report " << gentzen::has_pending_diagnostic(*deep)
 		<< ", errors +" << (Errors.count() - before)
 		<< ", Error flag " << ((deep->code() & formal::Error) ? 1 : 0) << "\n";
+
+	// depth 2 under clean ancestors -- (A |- B) |- C with the message on A.  A shallow
+	// walk test never descends through the clean (A |- B) node; this is the shape of the
+	// step-3 definiendum error (root -> := -> &#9500;).
+	std::unique_ptr<formal::lex_node> outer(gentzen::make_binary_node(std::string_view("&#9500;"), 0,
+		std::move(root),
+		std::unique_ptr<formal::lex_node>(leaf("C"))));
+	deep->forget(formal::Error);
+	deep->record_error(perl::scalar(std::string_view("deferred test error, depth 2")));
+	std::cout << "diag depth 2: pending from root " << gentzen::has_pending_diagnostic(*outer)
+		<< ", pending error from root " << gentzen::has_pending_error(*outer) << "\n";
+	before = Errors.count();
+	gentzen::discard_diagnostics(*outer);
+	std::cout << "diag depth 2: pending after discard " << gentzen::has_pending_diagnostic(*outer)
+		<< ", errors +" << (Errors.count() - before) << "\n";
+	deep->record_error(perl::scalar(std::string_view("deferred test error, depth 2")));
+	before = Errors.count();
+	gentzen::report_diagnostics(*outer);
+	std::cout << "diag depth 2: pending after report " << gentzen::has_pending_diagnostic(*outer)
+		<< ", errors +" << (Errors.count() - before)
+		<< ", Error flag " << ((deep->code() & formal::Error) ? 1 : 0) << "\n";
 }
 
 // scaffold: step-4 reparse routing.  The same loose definiendum run
@@ -4844,11 +4900,13 @@ static void self_test_reparse_routing()
 	if (auto run = build_run("self-test:reparse<false>"); !run.empty()) {
 		const auto before = Errors.count();
 		gentzen::reparse<false>(run);
+		gentzen::report_diagnostics(run);	// flush contract: the enforcement error is deferred
 		std::cout << "reparse<false>: errors +" << (Errors.count() - before) << ", " << run.size() << " symbols: " << show(run) << "\n";
 	}
 	if (auto run = build_run("self-test:reparse<true>"); !run.empty()) {
 		const auto before = Errors.count();
 		gentzen::reparse<true>(run);
+		gentzen::report_diagnostics(run);
 		std::cout << "reparse<true>: errors +" << (Errors.count() - before) << ", " << run.size() << " symbols: " << show(run) << "\n";
 	}
 }
@@ -4896,6 +4954,7 @@ static std::optional<std::vector<gentzen::statement_t> > parse_statements(std::v
 		if (prior_errors < Errors.count()) return std::nullopt;
 
 		stage = GentzenGrammar().apply(stage);
+		gentzen::report_diagnostics(stage);	// balanced groups parse (and may defer errors) during apply
 		if (prior_errors < Errors.count()) return std::nullopt;
 
 		GentzenGrammar().complete_parse(stage);
@@ -5269,6 +5328,7 @@ int main(int argc, char* argv[], char* envp[])
 			if (prior_errors < Errors.count()) continue;
 
 			stage = GentzenGrammar().apply(stage);
+			gentzen::report_diagnostics(stage);	// balanced groups parse (and may defer errors) during apply
 			if (prior_errors < Errors.count()) continue;
 
 			GentzenGrammar().complete_parse<true>(stage);
