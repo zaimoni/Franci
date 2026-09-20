@@ -83,11 +83,28 @@ place of the definiens notations.
   parsed conclusion from the global grammar; it parses the hypothesis first, extracts
   the grammatical category the hypothesis asserts about `_`, and applies it as a scoped
   extension when parsing the conclusion.
-* **W1 — definition recognition**: a new class in the syntactical_entailment_2ary style
-  (can_construct / construct / recognize / global_parse) over `:=`-anchored binary
-  nodes.  LHS analysis needs undefined_SVO-style phrase matching (token sequence with a
-  distinguished slot).  Output: a definition record (definiendum phrase, slot shape,
-  definiens statement).
+* **W1 — definition recognition** (revised 2026-09-19: *no statement class*).  The
+  original proposal -- a class in the syntactical_entailment_2ary style -- does not pull
+  its weight.  A definition statement occurs once, so there is no flyweight; its definiens
+  is a full statement, not a table index; and the inference it licenses (expand/contract
+  the phrase, W4's rationale naming) is a registry lookup, not a property of the statement.
+  The one thing a class would buy is before_add_axiom_handler dispatch, and only because
+  axioms::add_axiom(lex_node) is still a \todo.  Against that, every formal::parsed is a
+  membrane for placeholder handles (aux_trees, another substitute_parsed_anchors arm), for
+  the diagnostic walks (flush-before-construct), and for reparse -- and the definiens must
+  stay substitutable.  So: is_definition_node (whose tolerance of multi-entry prefix() is
+  *right* for a technical-English definiendum -- it is a token run until something
+  registers it) plus a plain nested registry record in defined_SVO (definiendum phrase,
+  slot shape, definiens statement_t, source axiom).  tag_syntactical_entailment is the
+  in-tree precedent for "recognized lex_node, no class".
+  The class that *would* pull its weight, as undefined_SVO::phrase_postfix does, is the
+  **occurrence** of a defined phrase -- a nested defined_SVO::phrase (registry index + slot
+  arguments), deferred to W3 when uses exist: flyweight; identity comparison by index
+  (sidestepping the lex_node::token_compare(edit_span) gaps); expand() to the definiens
+  instance; to_s for W4; and a defined_SVO::global_parse that parses a used definiendum to
+  one node, so the slot's symbol never reaches symbol_catalog's infix rule.  LHS analysis
+  still needs undefined_SVO-style phrase matching (token sequence with a distinguished
+  slot).
 * **W2 — conditional form + symbol substitution**: (a) recognize `H &#9500; (definition)`;
   (b) a new substitution primitive, symbol-placeholder -> symbol (`_` -> `&#9500;`) —
   deliberately excluded from the placeholder->placeholder primitive shipped with the
@@ -286,11 +303,25 @@ instantiation (errors +0, structure unchanged):
    Standing hazard: any new code that wraps lex_nodes in a formal::parsed, or tests
    Errors.count(), between a reparse and a flush inherits these obligations.
 
-Item 3 belongs with the := definition recognizer (W1), which is not yet ready to be
-attempted: it takes over the definiendum reparse from the interim item-1 walk, routes it
-(per the substitution source) so enforcement runs in record mode, and after classifying
-the LHS as a definiendum calls discard_diagnostics on it (or report_diagnostics + error-count test
-when the LHS is a genuine formula such as A & B &#9500; C := ...).
+**Definiendum cancellation -- LANDED 2026-09-19, without a recognizer class.**
+reparse_substituted_containers treats the prefix() of an is_definition_node as the
+exception, SFINAE-style (the failed substitution is dropped, not merely its message): the
+reparse runs on a deep copy of the container; a pending error afterwards means the copy is
+discarded, messages and all, and the unparsed token run is kept (its replacement tokens
+re-classified via anchor_symbol_parse); a clean parse is adopted.  self_test_phrase_matcher:
+"modus ponens for &#9500; := ..." -> errors +0 with := prefix entries 4 (the phrase stays
+matchable); control "A &#9500; B := ..." -> errors +0 with := prefix entries 1 (adopted).
+Why this is sound *here* and would not be for freshly parsed text: the source statement
+parsed clean, so an error in that container was introduced by replacing a
+symbol-placeholder variable with a symbol -- a sharper criterion than "is the LHS of :=",
+which the enforcement-scoping section rejects as a discriminator.  A genuine-formula LHS
+reparses without error, so nothing is wrongly dropped.  Plain discard_diagnostics was
+rejected because it keeps the failed parse: the 4-entry prefix collapses into a single
+&#9500;-anchored node with no postfix and no Error flag, which every later consumer
+(registry, step 5) would have to special-case.  Limits: an error reported *immediately*
+during the trial cannot be retracted (the copy is then adopted so structure matches the
+report); and a later whole-tree reparse of the result would raise the definiendum error
+again -- nothing does that today.
 
 ### Step 4 prerequisites (infrastructure, specified 2026-09-19)
 
