@@ -57,9 +57,12 @@ static auto relevant_stacktrace(size_t delta = 0) {
 	//   (here 6 = 4 CRT startup frames + 2 OS thread-start frames).
 	// * "!main+" -- the spelling of main within to_string(stacktrace_entry), which is
 	//   implementation-defined (here module!symbol+offset).
-	// * current(1) -- the skip count assumes report_exception is not inlined into its caller.
+	// * current(1 + delta) -- the skip count assumes relevant_stacktrace is not inlined into
+	//   its caller, nor (delta = 1) report_exception into its own.
+	// Verified 2026-09-19 for both call paths: delta = 0 starts at the calling function
+	// (a throw site), delta = 1 at the catch funclet (main$catch$NN); both end on main.
 #ifndef _MSC_VER
-#pragma message("report_exception: not MSVC -- work through the \\todo(_MSC_VER) compiler migration checklist")
+#pragma message("relevant_stacktrace: not MSVC -- work through the \\todo(_MSC_VER) compiler migration checklist")
 #endif
 	auto preview = std::stacktrace::current(1 + delta);
 	enum { after_main = 6, implementation_test = 0 };
