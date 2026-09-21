@@ -4700,29 +4700,27 @@ static formal::lex_node* apply_uniform_substitution_deep(const formal::lex_node&
 
 		for (decltype(auto) h : g.second) {
 			auto swap_in = new formal::lex_node(*to);
-			if (track) {
-				if (auto is_symbol = gentzen::symbol_catalog::recognize(*swap_in)) {
-					if constexpr (test_preconditions) {
-						if (gentzen::symbol_catalog::anchor_is_not_symbol & swap_in->code()) {
-							std::cerr << relevant_stacktrace() << "\n";
-							throw std::logic_error("symbol tagged as non-symbol: " + swap_in->to_s());
-						}
-					}
-					// symbol_catalog::anchor_symbol_parse will short-circuit and do nothing whatsoever, if we don't clear these flags.
-					swap_in->forget(gentzen::symbol_catalog::anchor_is_symbol | gentzen::symbol_catalog::anchor_is_const_symbol | gentzen::symbol_catalog::anchor_is_not_symbol);
-				} else if constexpr(test_preconditions) {
-					if ((gentzen::symbol_catalog::anchor_is_symbol | gentzen::symbol_catalog::anchor_is_const_symbol) & swap_in->code()) {
+			if (auto is_symbol = gentzen::symbol_catalog::recognize(*swap_in)) {
+				if constexpr (test_preconditions) {
+					if (gentzen::symbol_catalog::anchor_is_not_symbol & swap_in->code()) {
 						std::cerr << relevant_stacktrace() << "\n";
-						throw std::logic_error("non-symbol tagged as symbol: " + swap_in->to_s());
+						throw std::logic_error("symbol tagged as non-symbol: " + swap_in->to_s());
 					}
 				}
-				// why the flags can be stale: the destination's classification is a parse-state
-				// cache from its own context.  The subject of a symbol's *first* declaring axiom
-				// (&#9500; in "&#9500; is a binary infix symbol") is parsed before that
-				// declaration takes effect, so it caches anchor_is_not_symbol; cf.
-				// trace_subject_codes in self_test_phrase_matcher.
-				replaced.push_back(swap_in);
+				// symbol_catalog::anchor_symbol_parse will short-circuit and do nothing whatsoever, if we don't clear these flags.
+				swap_in->forget(gentzen::symbol_catalog::anchor_is_symbol | gentzen::symbol_catalog::anchor_is_const_symbol | gentzen::symbol_catalog::anchor_is_not_symbol);
+			} else if constexpr (test_preconditions) {
+				if ((gentzen::symbol_catalog::anchor_is_symbol | gentzen::symbol_catalog::anchor_is_const_symbol) & swap_in->code()) {
+					std::cerr << relevant_stacktrace() << "\n";
+					throw std::logic_error("non-symbol tagged as symbol: " + swap_in->to_s());
+				}
 			}
+			// why the flags can be stale: the destination's classification is a parse-state
+			// cache from its own context.  The subject of a symbol's *first* declaring axiom
+			// (&#9500; in "&#9500; is a binary infix symbol") is parsed before that
+			// declaration takes effect, so it caches anchor_is_not_symbol; cf.
+			// trace_subject_codes in self_test_phrase_matcher.
+			if (track) replaced.push_back(swap_in);
 			h.replace(swap_in);
 		}
 	}
