@@ -1739,7 +1739,22 @@ private:
 			notify(_axioms.back());
 		}
 
-		// \todo void add_axiom(std::shared_ptr<const formal::lex_node> src) {}
+		void add_axiom(std::shared_ptr<const formal::lex_node> src) {
+			enum { trace_parse = 0 };
+
+			if (!(formal::Recognized & src->code())) {
+				error_report(src->origin(), "axiom not tagged as reocgnized");
+				return;
+			}
+			// other legality tests are specific to the Gentzen syntax.
+
+			// "before add axiom" tests go here (both validation, and side effects)
+
+			if constexpr (trace_parse) std::cerr << "axiom: " << src->to_s() << "\n";
+			_axioms.push_back(src);
+
+			notify(_axioms.back());
+		}
 
 		std::optional<std::pair<statement_t, size_t> > disambiguate(const std::string& notation) {
 			// notational deduplication check
