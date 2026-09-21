@@ -2101,6 +2101,75 @@ private:
 		return (source.code() & used_as_placeholder) && is_symbol_placeholder_syntax_symbol(&source);
 	}
 
+	// A decoded uniform substitution [d1, ..., dn \ s1, ..., sn] whose destinations have been
+	// prepared *once*, here, rather than at each place that copies one in.  Every consumer
+	// copies a destination with new lex_node(*view()[i].second) -- the handle loops, the
+	// bare-placeholder cases, phrase_postfix's subject -- and each copy needs its own bit
+	// flags, since they update independently once reparsed.  So the prototypes are owned
+	// here (one allocation per entry, not per occurrence) and the consumers' copies inherit
+	// the preparation without any of them having to remember it.
+	// The preparation: symbol_catalog::anchor_symbol_parse will short-circuit and do nothing
+	// whatsoever, if we don't clear these flags on a destination the catalog recognizes.
+	class prepared_rename final {
+	public:
+		using view_t = std::vector<std::pair<perl::scalar, const formal::lex_node*> >;
+	private:
+		std::vector<std::unique_ptr<formal::lex_node> > _owned;	// view()'s pointers target these
+		view_t _view;
+
+		prepared_rename() = default;
+	public:
+		prepared_rename(const prepared_rename&) = delete;	// _view would alias the source's prototypes
+		prepared_rename(prepared_rename&&) = default;
+		prepared_rename& operator=(const prepared_rename&) = delete;
+		prepared_rename& operator=(prepared_rename&&) = default;
+		~prepared_rename() = default;
+
+		const view_t& view() const { return _view; }
+
+		// nullopt when subst is not a substitution node, any source is not a placeholder-family
+		// variable, or any destination is null.  symbol_sources, when requested, receives the
+		// names of the sources that are symbol-placeholder variables: replacing one of those
+		// changes the parse of the container it sat in.
+		static std::optional<prepared_rename> decode(const formal::lex_node& subst, std::vector<perl::scalar>* symbol_sources = nullptr)
+		{
+			enum { test_preconditions = 0 };
+
+			const auto decoded = decode_substitution_node(subst);
+			if (!decoded) return std::nullopt;
+			decltype(auto) dests = decoded->first;
+			decltype(auto) srcs = decoded->second;
+
+			prepared_rename ret;
+			ptrdiff_t i = srcs.size();
+			while (0 <= --i) {
+				if (!srcs[i] || !(srcs[i]->code() & used_as_placeholder)) return std::nullopt;
+				if (!dests[i]) return std::nullopt;
+
+				std::unique_ptr<formal::lex_node> prototype(new formal::lex_node(*dests[i]));
+				if (symbol_catalog::recognize(*prototype)) {
+					if constexpr (test_preconditions) {
+						if (symbol_catalog::anchor_is_not_symbol & prototype->code()) {
+							std::cerr << relevant_stacktrace() << "\n";
+							throw std::logic_error("symbol tagged as non-symbol: " + prototype->to_s());
+						}
+					}
+					prototype->forget(symbol_catalog::anchor_is_symbol | symbol_catalog::anchor_is_const_symbol | symbol_catalog::anchor_is_not_symbol);
+				} else if constexpr (test_preconditions) {
+					if ((symbol_catalog::anchor_is_symbol | symbol_catalog::anchor_is_const_symbol) & prototype->code()) {
+						std::cerr << relevant_stacktrace() << "\n";
+						throw std::logic_error("non-symbol tagged as symbol: " + prototype->to_s());
+					}
+				}
+
+				ret._view.push_back(std::pair(srcs[i]->to_scalar(), prototype.get()));
+				ret._owned.push_back(std::move(prototype));
+				if (symbol_sources && is_symbol_placeholder_variable(*srcs[i])) symbol_sources->push_back(srcs[i]->to_scalar());
+			}
+			return ret;
+		}
+	};
+
 	// step-4 diagnostic walks (Notes/GentzenW-defined-notations.md): driven through
 	// lex_node::recursive_rewrite with a self-recursing op.  recursive_rewrite is one level
 	// and only applies op where the test passes, so the test has to be *deep* (this node or
@@ -2410,21 +2479,9 @@ private:
 		// placeholder_match::aux_trees).
 		std::unique_ptr<syntactical_entailment_2ary> apply_uniform_substitution(const formal::lex_node& subst) const
 		{
-			const auto decoded = decode_substitution_node(subst);
-			if (!decoded) return nullptr;
-			decltype(auto) dests = decoded->first;
-			decltype(auto) srcs = decoded->second;
-
-			std::vector<std::pair<perl::scalar, const formal::lex_node*> > rename;
-
-			ptrdiff_t i = srcs.size();
-			while (0 <= --i) {
-				if (!srcs[i] || !(srcs[i]->code() & used_as_placeholder)) return nullptr;
-				if (!dests[i]) return nullptr;
-				rename.push_back(std::pair(srcs[i]->to_scalar(), dests[i]));
-			}
-
-			return apply_uniform_substitution(rename);
+			const auto rename = prepared_rename::decode(subst);
+			if (!rename) return nullptr;
+			return apply_uniform_substitution(rename->view());
 		}
 
 		// rename-vector core: the caller has already validated that each source is a
@@ -2460,14 +2517,7 @@ private:
 						}
 					}
 					if (!to) continue;
-					for (decltype(auto) h : g.second) {
-						auto swap_in = new formal::lex_node(*to);
-						// cf. apply_uniform_substitution_deep: a symbol's cached classification can
-						// be stale (anchor_is_not_symbol from its first declaring axiom), and
-						// anchor_symbol_parse trusts the cache -- the arm would then never fold
-						if (symbol_catalog::recognize(*swap_in)) swap_in->forget(symbol_catalog::anchor_is_symbol | symbol_catalog::anchor_is_const_symbol | symbol_catalog::anchor_is_not_symbol);
-						h.replace(swap_in);
-					}
+					for (decltype(auto) h : g.second) h.replace(new formal::lex_node(*to));	// to is a prepared_rename prototype
 				}
 				reparse(*match.tree);
 				// the arms are about to go behind a formal::parsed membrane, out of the
@@ -4665,20 +4715,10 @@ static void reparse_substituted_containers(formal::lex_node& node, const std::ve
 // (fork A(b), stage 6).
 static formal::lex_node* apply_uniform_substitution_deep(const formal::lex_node& src, const formal::lex_node& subst)
 {
-	const auto decoded = gentzen::decode_substitution_node(subst);
-	if (!decoded) return nullptr;
-	decltype(auto) dests = decoded->first;
-	decltype(auto) srcs = decoded->second;
-
-	std::vector<std::pair<perl::scalar, const formal::lex_node*> > rename;
 	std::vector<perl::scalar> symbol_sources;	// sources whose replacement changes the parse
-	ptrdiff_t i = srcs.size();
-	while (0 <= --i) {
-		if (!srcs[i] || !(srcs[i]->code() & gentzen::used_as_placeholder)) return nullptr;
-		if (!dests[i]) return nullptr;
-		rename.push_back(std::pair(srcs[i]->to_scalar(), dests[i]));
-		if (gentzen::is_symbol_placeholder_variable(*srcs[i])) symbol_sources.push_back(srcs[i]->to_scalar());
-	}
+	const auto prepared = gentzen::prepared_rename::decode(subst, &symbol_sources);
+	if (!prepared) return nullptr;
+	decltype(auto) rename = prepared->view();	// destinations are prepared prototypes; copies need no further fixup
 
 	std::unique_ptr<formal::lex_node> stage(new formal::lex_node(src));
 
@@ -4711,31 +4751,8 @@ static formal::lex_node* apply_uniform_substitution_deep(const formal::lex_node&
 				break;
 			}
 		}
-
-		enum { test_preconditions = 0 };
-
 		for (decltype(auto) h : g.second) {
 			auto swap_in = new formal::lex_node(*to);
-			if (auto is_symbol = gentzen::symbol_catalog::recognize(*swap_in)) {
-				if constexpr (test_preconditions) {
-					if (gentzen::symbol_catalog::anchor_is_not_symbol & swap_in->code()) {
-						std::cerr << relevant_stacktrace() << "\n";
-						throw std::logic_error("symbol tagged as non-symbol: " + swap_in->to_s());
-					}
-				}
-				// symbol_catalog::anchor_symbol_parse will short-circuit and do nothing whatsoever, if we don't clear these flags.
-				swap_in->forget(gentzen::symbol_catalog::anchor_is_symbol | gentzen::symbol_catalog::anchor_is_const_symbol | gentzen::symbol_catalog::anchor_is_not_symbol);
-			} else if constexpr (test_preconditions) {
-				if ((gentzen::symbol_catalog::anchor_is_symbol | gentzen::symbol_catalog::anchor_is_const_symbol) & swap_in->code()) {
-					std::cerr << relevant_stacktrace() << "\n";
-					throw std::logic_error("non-symbol tagged as symbol: " + swap_in->to_s());
-				}
-			}
-			// why the flags can be stale: the destination's classification is a parse-state
-			// cache from its own context.  The subject of a symbol's *first* declaring axiom
-			// (&#9500; in "&#9500; is a binary infix symbol") is parsed before that
-			// declaration takes effect, so it caches anchor_is_not_symbol; cf.
-			// trace_subject_codes in self_test_phrase_matcher.
 			if (track) replaced.push_back(swap_in);
 			h.replace(swap_in);
 		}
@@ -4809,7 +4826,7 @@ static void self_test_phrase_matcher()
 	// takes effect; a later one (&#9500; is a unary prefix symbol) cached anchor_is_symbol.
 	// Fixed 2026-09-20 in phrase_postfix::before_add_axiom_handler, which re-classifies the
 	// subject once the declaration has taken effect: every declaring subject now reads
-	// "symbol", and the test_preconditions checks in apply_uniform_substitution_deep pass.
+	// "symbol", and the test_preconditions checks in prepared_rename::decode pass.
 	// Kept as the regression probe for that fix.
 	enum { trace_subject_codes = 0 };
 	if constexpr (trace_subject_codes) {
