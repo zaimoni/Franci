@@ -123,10 +123,12 @@ place of the definiens notations.
   `(Q &#9500; R), Q &#9500; R`), whose notation is NOT the definiens notation; the
   lookup must route through the schema (applicable_2ary::schema carries it; the node
   currently does not).
-* **W5 — configuration and expectations**: add the axiom to core.yaml *after* the
-  "&#9500; is a binary infix symbol" line it depends on (the axioms sequence is
-  order-sensitive); update expected rationales; this feature is on the reshaping list
-  in GentzenW-test-fixture.md.
+* **W5 — configuration and expectations**: add the axiom to core.yaml -- originally
+  "*after* the '&#9500; is a binary infix symbol' line it depends on (the axioms sequence
+  is order-sensitive)"; **superseded 2026-09-21**: appended as the next explicit axiom,
+  with saturation running in both directions so placement does not matter (see R3 and R7
+  under "Remaining stages"); update expected rationales; this feature is on the reshaping
+  list in GentzenW-test-fixture.md.
 
 ## Enforcement scoping for the conditional axiom (sketch, 2026-09-05)
 
@@ -445,19 +447,47 @@ SFINAE-style definiendum cancellation).  In dependency order:
 
 *After the stop-line*
 
-* **R2 -- axioms accept lex_node statements.**  Implement the add_axiom(lex_node) \todo
-  (_axioms storage and rationale() are already statement_t, so only the entry point and
-  the observer notification need widening), and have the loader stop dropping non-parsed
-  statements.  Legality for a lex_node axiom has no
-  virtual to dispatch on, so it is recognizer-driven (formal::Recognized from
-  tag_syntactical_entailment).  Blocks W5.  (The alternative -- a
-  syntactical_entailment_1ary class, open decision 3 -- would give virtual dispatch and,
-  unlike a definition-statement class, does trigger an inference schema; but it puts the
-  definition behind a membrane that steps 3-5 currently work without.)
-* **R3 -- config-time saturation driver.**  For a unary-entailment axiom whose hypothesis
-  is a phrase_postfix over a symbol-placeholder variable: match against the declaring
-  axioms (step 2), instantiate (steps 3-4), detach (R1), and lemmas::get()->record the
-  result.  Order-sensitive: runs once the hypothesis's declaring axioms are loaded.
+* **R2 -- axioms accept lex_node statements.  IN PROGRESS (checkpoint 06e6302,
+  2026-09-21).**  axioms::add_axiom(std::shared_ptr<const formal::lex_node>) exists: it
+  requires formal::Recognized, then stores and notifies.  _axioms, rationale(), notify and
+  disambiguate were already statement_t, so nothing else needed widening.  The conditional
+  axiom passes the gate -- its root carries Recognized from tag_syntactical_entailment.
+  Blocks W5.  Remaining:
+  - **Loader**: undefined_SVO::get()'s axioms loop still adds only
+    stage[0]->shared_anchor<formal::parsed>() and drops anything else (silently unless
+    trace_load).  It needs an else-branch that moves stage[0] out of the symbols container
+    into a shared_ptr<const lex_node>.
+  - **Legality slot** ("specific to the Gentzen syntax").  The existing rule "cannot
+    conditionally alter syntax" is phrase_postfix::is_not_legal_axiom(false); for a unary
+    entailment it applies to the *conclusion*, not the hypothesis.  "_ is a binary infix
+    symbol" is a legal hypothesis; H &#9500; (X is a binary infix symbol) is not a legal
+    axiom.
+  - **"Before add axiom" slot**: where R3 plugs in.
+  (The alternative -- a syntactical_entailment_1ary class, open decision 3 -- would give
+  virtual dispatch and, unlike a definition-statement class, does trigger an inference
+  schema; but it puts the definition behind a membrane that steps 3-5 work without.)
+* **R3 -- config-time saturation driver, in both directions (ruled 2026-09-21).**  For a
+  unary-entailment axiom whose hypothesis is a phrase_postfix over a symbol-placeholder
+  variable: match (step 2), instantiate (steps 3-4), detach (R1), and
+  lemmas::get()->record the result.  Both directions, so the outcome does not depend on
+  where a line sits in core.yaml:
+  - a newly added **schema** is saturated against all prior axioms;
+  - a newly added **declaring axiom** is saturated against all known schemas.
+  axioms is already zaimoni::observed<statement_t> and add_axiom already notifies, so an
+  observer is the natural vehicle; it has to remember the schemas it has seen.
+  Hazards to design for:
+  - **Instantiation can fail, and that must mean "no instance", not a config error**
+    (SFINAE once more).  Concretely, [, / _] turns the definiens arm (P _ Q) into the
+    tuple (P , Q), and syntactical_entailment_2ary's rename-apply then *reports* "arity
+    would be increased" immediately.  Inside saturation that report has to be deferred or
+    suppressed.
+  - **Instances whose definiens is not established** (open decision 4).  Only `_` is
+    replaced, so [/ / _] yields `modus ponens for / := (P / Q), P &#9500; Q`, whose
+    definiens is no axiom; of the five declared infix symbols only &#9500; yields one that
+    resolves (axiom #37).
+  - "Established" for the hypothesis check is axioms-only today; a lemma-derived
+    hypothesis needs a notational lookup without notation_ids::allocate's id-minting side
+    effect.
 * **R4 -- "before add lemma" stage in lemmas::record**, root instance only; declines on
   conditional-reasoning instances.  Recognizes is_definition_node with a closed prefix and
   hands it to defined_SVO.  Also the place the rationale text stops being "prototyping
@@ -468,10 +498,16 @@ SFINAE-style definiendum cancellation).  In dependency order:
 * **R6 -- W4 rationale rendering.**  Route 2ary_infer::rationale through
   applicable_2ary::schema to the registry so cut-rule rows 4 and 5 both read
   "modus ponens for &#9500;" (open decision 2: name on the node at construction).
-* **R7 -- W5 configuration and expectations.**  Axiom into core.yaml after the
-  "&#9500; is a binary infix symbol" line; cut-rule expected rationales; theorem-file
-  `axioms:` lists the conditional-definition axiom as used; fixture reshaping per
-  GentzenW-test-fixture.md.
+* **R7 -- W5 configuration and expectations.**  The conditional axiom is **appended as the
+  next explicit axiom** (ruled 2026-09-21), i.e. after `(P &#9500; Q), P &#9500; Q` -- not
+  inserted after the "&#9500; is a binary infix symbol" line as first planned.  By then all
+  five infix symbols (:=, &#9500;, /, &, ",") are declared, so in the shipped configuration
+  the schema-against-prior-axioms direction of R3 does all the work; the
+  declaring-axiom-against-known-schemas direction is exercised only by later configuration
+  or a self-test, and needs one so it does not rot.  Also: cut-rule expected rationales;
+  theorem-file `axioms:` lists the conditional-definition axiom as used; fixture reshaping
+  per GentzenW-test-fixture.md.  (Its notation id follows from load order and is never
+  relied on -- resolution is notational.)
 * **R8 -- W3 occurrence class** defined_SVO::phrase + defined_SVO::global_parse + tagging
   (open decision 1).  Needed only once defined phrases are *used* inside statements; it is
   also the proper fix for the kept definiendum run re-erroring under a whole-tree reparse.
@@ -528,3 +564,8 @@ instances.  *Unrelated carry-over*: cut-rule plan step 7 (GentzenW-test-fixture.
 3. Scope of the W2 recognizer: a general syntactical_entailment_1ary class now, or a
    narrower conditional-definition recognizer with generalization deferred.  Lean:
    narrow first.
+4. Saturation instances whose definiens is not an established statement (R3): register
+   every instance that instantiates cleanly -- a definition is only a notation, and W4's
+   lookup simply never fires for the unestablished ones -- or register only those whose
+   definiens resolves.  Lean: register all that instantiate cleanly; it is the simpler
+   rule and matches "one instance per binary infix symbol" under Resolved decisions.
