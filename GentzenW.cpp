@@ -2107,7 +2107,9 @@ private:
 	// bare-placeholder cases, phrase_postfix's subject -- and each copy needs its own bit
 	// flags, since they update independently once reparsed.  So the prototypes are owned
 	// here (one allocation per entry, not per occurrence) and the consumers' copies inherit
-	// the preparation without any of them having to remember it.
+	// the preparation without any of them having to remember it.  Consumers take
+	// const prepared_rename&, not the raw view, and decode is the only way to make one:
+	// an unprepared rename cannot be passed.
 	// The preparation: symbol_catalog::anchor_symbol_parse will short-circuit and do nothing
 	// whatsoever, if we don't clear these flags on a destination the catalog recognizes.
 	class prepared_rename final {
@@ -2481,15 +2483,15 @@ private:
 		{
 			const auto rename = prepared_rename::decode(subst);
 			if (!rename) return nullptr;
-			return apply_uniform_substitution(rename->view());
+			return apply_uniform_substitution(*rename);
 		}
 
-		// rename-vector core: the caller has already validated that each source is a
+		// rename core: prepared_rename::decode has already validated that each source is a
 		// placeholder-family variable and each destination non-null.  Shared with the
 		// deep parsed-arm applier so a nested definiens 2ary substitutes through the
 		// same path.  Reparses each arm (fork B), so an operator-position substitution
 		// such as (P _ Q) -> (P &#9500; Q) folds correctly.
-		std::unique_ptr<syntactical_entailment_2ary> apply_uniform_substitution(const std::vector<std::pair<perl::scalar, const formal::lex_node*> >& rename) const
+		std::unique_ptr<syntactical_entailment_2ary> apply_uniform_substitution(const prepared_rename& rename) const
 		{
 			auto instantiate = [&](const statement_t& src) -> formal::lex_node* {
 				std::unique_ptr<formal::lex_node> stage(deep_clone_to_lex_node(src));
@@ -2498,7 +2500,7 @@ private:
 				// a bare placeholder variable has no parent slot for a handle
 				if (stage->code() & used_as_placeholder) {
 					const auto key = stage->to_scalar();
-					for (decltype(auto) x : rename) {
+					for (decltype(auto) x : rename.view()) {
 						if (x.first.view() == key.view()) return new formal::lex_node(*x.second);
 					}
 					return stage.release();
@@ -2510,7 +2512,7 @@ private:
 				if (!match.aux_trees.empty()) return nullptr;	// nested parsed-arm descent still unhandled
 				for (decltype(auto) g : match.groups) {
 					const formal::lex_node* to = nullptr;
-					for (decltype(auto) x : rename) {
+					for (decltype(auto) x : rename.view()) {
 						if (x.first.view() == g.first.view()) {
 							to = x.second;
 							break;
@@ -4184,13 +4186,13 @@ public:
 		// substituted, when our subject is a placeholder-family variable named in
 		// rename; null otherwise.  The declaring axiom kinds are exempt (mention, not
 		// use), mirroring get_placeholder_variables.
-		phrase_postfix* apply_uniform_substitution(const std::vector<std::pair<perl::scalar, const formal::lex_node*> >& rename) const {
+		phrase_postfix* apply_uniform_substitution(const gentzen::prepared_rename& rename) const {
 			if (!_subject) return nullptr;
 			if ((size_t)hard_code::placeholder_syntax == _code || (size_t)hard_code::symbol_placeholder_syntax == _code) return nullptr;
 			if (   !gentzen::is_symbol_placeholder_syntax_symbol(_subject.get())
 				&& !gentzen::is_placeholder_syntax_symbol(_subject.get())) return nullptr;
 			const auto key = _subject->to_scalar();
-			for (decltype(auto) x : rename) {
+			for (decltype(auto) x : rename.view()) {
 				if (x.first.view() == key.view()) {
 					formal::lex_node* stage = new formal::lex_node(*x.second);
 					return new phrase_postfix(stage, _code);
@@ -4608,9 +4610,9 @@ public:
 // kinds are dispatched (fork A(a); the A(b) unification into one virtual is deferred to
 // stage 6): phrase_postfix subjects, and syntactical_entailment_2ary definiens (via its
 // rename-vector apply, which reparses its arms).  The carrying node's code is preserved.
-static void substitute_parsed_anchors(formal::lex_node& node, const std::vector<std::pair<perl::scalar, const formal::lex_node*> >& rename);
+static void substitute_parsed_anchors(formal::lex_node& node, const gentzen::prepared_rename& rename);
 
-static void substitute_parsed_anchors(kuroda::parser<formal::lex_node>::symbols& x, const std::vector<std::pair<perl::scalar, const formal::lex_node*> >& rename)
+static void substitute_parsed_anchors(kuroda::parser<formal::lex_node>::symbols& x, const gentzen::prepared_rename& rename)
 {
 	for (size_t i = 0; i < x.size(); ++i) {
 		formal::lex_node*& s = x[i];
@@ -4636,7 +4638,7 @@ static void substitute_parsed_anchors(kuroda::parser<formal::lex_node>::symbols&
 	}
 }
 
-static void substitute_parsed_anchors(formal::lex_node& node, const std::vector<std::pair<perl::scalar, const formal::lex_node*> >& rename)
+static void substitute_parsed_anchors(formal::lex_node& node, const gentzen::prepared_rename& rename)
 {
 	substitute_parsed_anchors(node.prefix(), rename);
 	substitute_parsed_anchors(node.infix(), rename);
@@ -4758,7 +4760,7 @@ static formal::lex_node* apply_uniform_substitution_deep(const formal::lex_node&
 		}
 	}
 
-	substitute_parsed_anchors(*match.tree, rename);
+	substitute_parsed_anchors(*match.tree, *prepared);
 	if (!replaced.empty()) reparse_substituted_containers(*match.tree, replaced);
 	return match.tree.release();
 }
