@@ -4165,13 +4165,29 @@ public:
 
 			decltype(auto) symbols = gentzen::symbol_catalog::get();
 
+			std::optional<perl::scalar> err;
 			switch (_code) {
-			case (int)hard_code::prefix_symbol: return symbols.declare_prefix(_subject);
-			case (int)hard_code::postfix_symbol: return symbols.declare_postfix(_subject);
-			case (int)hard_code::infix_symbol: return symbols.declare_infix(_subject);
-			case (int)hard_code::constant_symbol: return symbols.declare_constant(_subject);
+			case (int)hard_code::prefix_symbol: err = symbols.declare_prefix(_subject); break;
+			case (int)hard_code::postfix_symbol: err = symbols.declare_postfix(_subject); break;
+			case (int)hard_code::infix_symbol: err = symbols.declare_infix(_subject); break;
+			case (int)hard_code::constant_symbol: err = symbols.declare_constant(_subject); break;
+			default:
+				if constexpr (trace_param) std::cerr << "before_add_axiom_handler: no action\n";
+				return std::nullopt;
 			}
-			if constexpr (trace_param) std::cerr << "before_add_axiom_handler: no action\n";
+			if (err) return err;
+
+			// The subject was classified while this statement was being parsed, i.e. before the
+			// declaration above took effect: a symbol's *first* declaring axiom cached
+			// anchor_is_not_symbol on the very symbol it declares, and every later copy of that
+			// subject (uniform substitution destinations) inherited the stale cache, which
+			// symbol_catalog::anchor_symbol_parse trusts.  Re-classify now that the catalog is
+			// current.  The const_cast is deliberate and meant to look unusual: this is the one
+			// mutation of an otherwise const-correct class, it touches only the parse-state
+			// cache bits (never the notation), and the node was allocated non-const.
+			auto& subject = const_cast<formal::lex_node&>(*_subject);
+			subject.forget(gentzen::symbol_catalog::anchor_is_symbol | gentzen::symbol_catalog::anchor_is_const_symbol | gentzen::symbol_catalog::anchor_is_not_symbol);
+			gentzen::symbol_catalog::anchor_symbol_parse(subject);
 			return std::nullopt;
 		}
 
@@ -4788,11 +4804,13 @@ static void self_test_phrase_matcher()
 	}
 
 	// symbol-classification bits on each declaring axiom's subject.  Observed 2026-09-19: the
-	// *first* declaring axiom for a symbol (:=, &#9500; infix, /, &, ",") caches
+	// *first* declaring axiom for a symbol (:=, &#9500; infix, /, &, ",") cached
 	// anchor_is_not_symbol on its subject, because it is parsed before its own declaration
-	// takes effect; a later one (&#9500; is a unary prefix symbol) caches anchor_is_symbol.
-	// This is the data-setup defect the test_preconditions checks in
-	// apply_uniform_substitution_deep are waiting on.
+	// takes effect; a later one (&#9500; is a unary prefix symbol) cached anchor_is_symbol.
+	// Fixed 2026-09-20 in phrase_postfix::before_add_axiom_handler, which re-classifies the
+	// subject once the declaration has taken effect: every declaring subject now reads
+	// "symbol", and the test_preconditions checks in apply_uniform_substitution_deep pass.
+	// Kept as the regression probe for that fix.
 	enum { trace_subject_codes = 0 };
 	if constexpr (trace_subject_codes) {
 		for (size_t i = 0; i < ax->size(); ++i) {
