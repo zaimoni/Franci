@@ -417,10 +417,31 @@ SFINAE-style definiendum cancellation).  In dependency order:
 
 *Before the stop-line*
 
-* **R1 -- step 5, MP detachment.**  Confirm the instantiated hypothesis
-  ("&#9500; is a binary infix symbol") is notationally an established axiom; value-copy
-  the conclusion; strip grouping parentheses; assert the := prefix has an empty
-  placeholder census.  Self-test alongside step 3's.  Then the stop-line review.
+* **R1 -- step 5, MP detachment.  LANDED 2026-09-20; the stop-line review is next.**
+  detach_conclusion: from H |- C with H notationally a configured axiom
+  (axioms::disambiguate, a pure lookup), value-copy C and strip grouping parentheses;
+  refuses a non-entailment, a pending error, or an unestablished hypothesis.
+  definiendum_placeholder_census: distinct placeholder variables in a definition node's
+  prefix; zero = closed phrase.  self_test_phrase_matcher, per case:
+  - schema: detachment *refused* ("_ is a binary infix symbol" is no axiom); census 1.
+  - instance: `modus ponens for &#9500; := (P &#9500; Q) , P &#9500; Q`, census 0,
+    **definiens is axiom #37** -- resolved notationally, which is R5/R6's lookup premise.
+  - formula-LHS control: detaches, census 2 (A, B), so it would *not* register as a
+    constant.  That is R4's negative case.
+  "Established" is axioms-only for now: lemmas have no pure notational lookup
+  (notation_ids::allocate mints an id as a side effect).  R3 will want one.
+  **Defect found on the way**: the step-3 claim that the definiens arm "reparses to fold
+  P &#9500; Q" had only ever been checked by printback, and a grouping-paren node prints
+  the same whether or not its contents folded.  It had not folded:
+  syntactical_entailment_2ary's rename-apply cloned &#9500; with the same stale
+  anchor_is_not_symbol bit the deep applier already handled, so anchor_symbol_parse
+  skipped it.  Fixed with the catalog-based criterion (symbol_catalog::recognize => forget
+  the cached bits), plus construct's normalization after the reparse
+  (remove_grouping_parentheses with not_detect_comma, rejecting an arity increase):
+  an arm such as (P _ Q) is an unparseable group at schema time and keeps its
+  parentheses, which become redundant once the symbol arrives and otherwise change the
+  notation ("( P &#9500; Q )" vs "(P &#9500; Q)").  Lesson: verify structure with the
+  trace_structure dump or a notational lookup, not by reading to_s().
 
 *After the stop-line*
 

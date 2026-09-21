@@ -2460,14 +2460,33 @@ private:
 						}
 					}
 					if (!to) continue;
-					for (decltype(auto) h : g.second) h.replace(new formal::lex_node(*to));
+					for (decltype(auto) h : g.second) {
+						auto swap_in = new formal::lex_node(*to);
+						// cf. apply_uniform_substitution_deep: a symbol's cached classification can
+						// be stale (anchor_is_not_symbol from its first declaring axiom), and
+						// anchor_symbol_parse trusts the cache -- the arm would then never fold
+						if (symbol_catalog::recognize(*swap_in)) swap_in->forget(symbol_catalog::anchor_is_symbol | symbol_catalog::anchor_is_const_symbol | symbol_catalog::anchor_is_not_symbol);
+						h.replace(swap_in);
+					}
 				}
 				reparse(*match.tree);
 				// the arms are about to go behind a formal::parsed membrane, out of the
 				// diagnostic walks' reach; an arm is never a definiendum, so nothing
 				// here is cancellable -- flush now
 				report_diagnostics(*match.tree);
-				return match.tree.release();
+
+				// same normalization as construct: an arm that was an unparseable group at
+				// schema time -- (P _ Q) -- parses once the symbol arrives, and its grouping
+				// parentheses are then redundant.  Left in place they change the notation
+				// ("( P &#9500; Q )" vs "(P &#9500; Q)"), which breaks notational lookup
+				// against the configured axiom.  to_s() restores any that are needed.
+				formal::lex_node* ret = match.tree.release();
+				if (0 > remove_grouping_parentheses(ret, not_detect_comma)) {
+					error_report(*ret, "arity would be increased");
+					delete ret;
+					return nullptr;
+				}
+				return ret;
 			};
 
 			formal::lex_node* h1 = instantiate(hypothesis_1);
@@ -4713,6 +4732,38 @@ static formal::lex_node* apply_uniform_substitution_deep(const formal::lex_node&
 	return match.tree.release();
 }
 
+// Step 5 of the instantiation mechanics: modus ponens detachment.  From H |- C, where H is
+// (notationally) an established axiom, infer C.  In the general case this is a value-copy
+// of the conclusion, grouping parentheses stripped -- no substitution machinery runs.
+// Returns null when src is not a unary syntactical entailment, carries a pending error, or
+// its hypothesis is not established.  "Established" means a configured axiom for now:
+// config-time saturation needs no more, and lemmas have no pure notational lookup yet
+// (notation_ids::allocate mints an id as a side effect).
+static formal::lex_node* detach_conclusion(const formal::lex_node& src)
+{
+	if (!gentzen::is_unary_syntactical_entailment(src)) return nullptr;
+	if (gentzen::has_pending_error(src)) return nullptr;
+	if (!gentzen::axioms::get()->disambiguate(src.prefix().front()->to_s())) return nullptr;
+
+	formal::lex_node* ret = new formal::lex_node(*src.postfix().front());
+	remove_grouping_parentheses(ret);
+	return ret;
+}
+
+// How many distinct placeholder variables the left-hand side of a definition node mentions;
+// nullopt when src is not a definition node.  Zero means the definiendum is a closed phrase
+// -- the precondition for registering it as a constant defined notation.  (Non-const: the
+// census walker takes mutable handles, which are dropped here unused.)
+static std::optional<size_t> definiendum_placeholder_census(formal::lex_node& src)
+{
+	if (!gentzen::is_definition_node(src)) return std::nullopt;
+	formal::placeholder_match census;
+	gentzen::collect_placeholder_handles walker;
+	walker.dest_ = &census;
+	walker(src.prefix());
+	return census.groups.size();
+}
+
 // scaffold: exercises phrase_postfix::get_uniform_substitution against the configured
 // infix-symbol declaration axiom.  Referenced from main() behind the same
 // compile-time switch as the other prototype self-tests; placed here because
@@ -4801,6 +4852,24 @@ static void self_test_phrase_matcher()
 					<< ", errors +" << (Errors.count() - before);
 				if (instantiated && 1 == instantiated->postfix().size() && gentzen::is_definition_node(*instantiated->postfix().front())) {
 					std::cout << ", := prefix entries " << instantiated->postfix().front()->prefix().size();
+				}
+				std::cout << "\n";
+
+				// step 5: the conditional axiom itself does not detach (its hypothesis
+				// "_ is a binary infix symbol" is no axiom); the instantiation does, to a
+				// definition whose left-hand side mentions no placeholder variables
+				std::unique_ptr<formal::lex_node> undetachable(detach_conclusion(*stage[0]));
+				std::unique_ptr<formal::lex_node> detached(instantiated ? detach_conclusion(*instantiated) : nullptr);
+				std::cout << label << " detachment: schema " << (undetachable ? "DETACHED (wrong)" : "refused")
+					<< "; instance " << (detached ? detached->to_s() : "(null)");
+				if (detached) {
+					if (auto census = definiendum_placeholder_census(*detached)) std::cout << ", definiendum placeholders " << *census;
+					if (auto census = definiendum_placeholder_census(*stage[0]->postfix().front())) std::cout << " (schema's: " << *census << ")";
+					// the registry resolves the definiens notationally, never by baked-in id
+					if (gentzen::is_definition_node(*detached) && 1 == detached->postfix().size()) {
+						if (auto ax = gentzen::axioms::get()->disambiguate(detached->postfix().front()->to_s())) std::cout << ", definiens is axiom #" << ax->second;
+						else std::cout << ", definiens matches no axiom";
+					}
 				}
 				std::cout << "\n";
 				enum { trace_structure = 0 };	// per-node shape dump of source and result
