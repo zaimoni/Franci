@@ -1743,7 +1743,7 @@ private:
 			enum { trace_parse = 0 };
 
 			if (!(formal::Recognized & src->code())) {
-				error_report(src->origin(), "axiom not tagged as reocgnized");
+				error_report(src->origin(), "axiom not tagged as recognized");
 				return;
 			}
 			// other legality tests are specific to the Gentzen syntax.
