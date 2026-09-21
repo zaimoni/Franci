@@ -2137,8 +2137,8 @@ private:
 
 			const auto decoded = decode_substitution_node(subst);
 			if (!decoded) return std::nullopt;
-			decltype(auto) dests = decoded->first;
-			decltype(auto) srcs = decoded->second;
+			const auto& dests = decoded->first;
+			const auto& srcs = decoded->second;
 
 			prepared_rename ret;
 			ptrdiff_t i = srcs.size();
