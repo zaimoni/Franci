@@ -479,8 +479,29 @@ SFINAE-style definiendum cancellation).  In dependency order:
   - **Instantiation can fail, and that must mean "no instance", not a config error**
     (SFINAE once more).  Concretely, [, / _] turns the definiens arm (P _ Q) into the
     tuple (P , Q), and syntactical_entailment_2ary's rename-apply then *reports* "arity
-    would be increased" immediately.  Inside saturation that report has to be deferred or
-    suppressed.
+    would be increased" immediately.
+    **Mechanism LANDED 2026-09-30: try_instantiate.**  A diagnostic_capture (RAII,
+    file-static target, single-threaded by assumption, nests) makes the two reporting
+    hooks -- error_report / warning_report on a src_location, which every other overload
+    funnels through -- append to a buffer instead of printing and counting.
+    try_instantiate runs apply_uniform_substitution_deep under one, flushes the result's
+    deferred messages into it, and keeps the instance only if no error was captured; the
+    diagnostics come back as a value (saturation drops them, replay() re-issues them).
+    Chosen over switching error_report(lex_node&) from report to record and then walking
+    for pending messages, because a walk misses three things a capture does not: a
+    message on a node deleted right after (exactly the "arity" case -- `delete ret`), one
+    flushed just before a formal::parsed is built over it, and reports that carry only a
+    location.  Rejected alternatives: converting the remaining immediate sites to
+    record_error (does not cover the deleted-node or membrane cases without returning
+    messages as values); threading a sink parameter (Kuroda rules are std::functions with
+    fixed signatures -- a parser API change); exceptions (kuroda::complete_parse catches
+    and exit(3)s, and the path is not exception-safe).
+    Companion fix: substitute_parsed_anchors returns bool.  It used to treat a null from
+    the 2ary rename-apply as "nothing to replace" and fall through, leaving the
+    unsubstituted arm inside an otherwise substituted statement; the deep applier now
+    returns null instead.  (phrase_postfix's null still means "nothing to replace".)
+    Self-test, per declared infix symbol: :=, &#9500;, /, & kept; "," discarded with one
+    captured error and errors +0.
   - **Instances whose definiens is not established** (open decision 4).  Only `_` is
     replaced, so [/ / _] yields `modus ponens for / := (P / Q), P &#9500; Q`, whose
     definiens is no axiom; of the five declared infix symbols only &#9500; yields one that

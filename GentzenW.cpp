@@ -34,8 +34,48 @@
 static error_counter<size_t> Errors(100, "too many errors");
 static error_counter<size_t> Warnings(1000, "too many warnings");
 
+// Diagnostic capture: while a diagnostic_capture is alive, the two reporting hooks below
+// append to it instead of printing and counting.  Every report funnels through those hooks
+// -- the lex_node overloads (record, then report), the formal::parsed overloads, and plain
+// locations -- so a capture sees all of them, including a message on a node that is deleted
+// right after, and one flushed just before a formal::parsed is built over it; a walk for
+// pending messages sees neither.  This is the mechanism behind try_instantiate (SFINAE for
+// uniform substitution).
+// Single-threaded by assumption: the target is a file-static.  Captures nest; each restores
+// the one it displaced.  Errors.count() does not move while capturing, so code that tests
+// its delta for control flow does not see captured errors -- the same blind spot the
+// deferred (record_error) diagnostics already have.
+struct captured_diagnostics {
+	std::vector<std::pair<formal::src_location, perl::scalar> > errors;
+	std::vector<std::pair<formal::src_location, perl::scalar> > warnings;
+};
+
+class diagnostic_capture final {
+	captured_diagnostics _dest;
+	captured_diagnostics* _displaced;
+
+	static captured_diagnostics*& target() {
+		static captured_diagnostics* ooao = nullptr;
+		return ooao;
+	}
+public:
+	diagnostic_capture() : _displaced(target()) { target() = &_dest; }
+	~diagnostic_capture() { target() = _displaced; }
+	diagnostic_capture(const diagnostic_capture&) = delete;
+	diagnostic_capture(diagnostic_capture&&) = delete;
+	diagnostic_capture& operator=(const diagnostic_capture&) = delete;
+	diagnostic_capture& operator=(diagnostic_capture&&) = delete;
+
+	const captured_diagnostics& get() const { return _dest; }
+	static captured_diagnostics* active() { return target(); }
+};
+
 // stub for more sophisticated error reporting
 void error_report(const formal::src_location& loc, const perl::scalar& err) {
+	if (auto dest = diagnostic_capture::active()) {
+		dest->errors.push_back(std::pair(loc, err));
+		return;
+	}
 	if (loc.path) std::wcerr << loc.path->native();
 	else std::cerr << "<unknown>";
 	std::cerr << loc.to_s() << ": error : " << err.view() << '\n';
@@ -43,10 +83,21 @@ void error_report(const formal::src_location& loc, const perl::scalar& err) {
 }
 
 void warning_report(const formal::src_location& loc, const perl::scalar& warn) {
+	if (auto dest = diagnostic_capture::active()) {
+		dest->warnings.push_back(std::pair(loc, warn));
+		return;
+	}
 	if (loc.path) std::wcerr << loc.path->native();
 	else std::cerr << "<unknown>";
 	std::cerr << loc.to_s() << ": warning : " << warn.view() << '\n';
 	++Warnings;
+}
+
+// re-issues captured diagnostics through the hooks: printed and counted, or captured again
+// by an enclosing diagnostic_capture
+static void replay(const captured_diagnostics& src) {
+	for (decltype(auto) x : src.errors) error_report(x.first, x.second);
+	for (decltype(auto) x : src.warnings) warning_report(x.first, x.second);
 }
 
 static auto relevant_stacktrace(size_t delta = 0) {
@@ -4625,9 +4676,15 @@ public:
 // kinds are dispatched (fork A(a); the A(b) unification into one virtual is deferred to
 // stage 6): phrase_postfix subjects, and syntactical_entailment_2ary definiens (via its
 // rename-vector apply, which reparses its arms).  The carrying node's code is preserved.
-static void substitute_parsed_anchors(formal::lex_node& node, const gentzen::prepared_rename& rename);
+// Returns false when a substitution failed, leaving the tree partly substituted: the caller
+// must then discard the whole tree.  The two arm kinds differ in what a null result means.
+// phrase_postfix returns null when it has nothing to replace, which is not a failure.
+// syntactical_entailment_2ary always rebuilds all three arms, so its null *is* a failure
+// (an arm did not survive -- e.g. "arity would be increased"); falling through there would
+// keep the unsubstituted arm in an otherwise substituted statement.
+static bool substitute_parsed_anchors(formal::lex_node& node, const gentzen::prepared_rename& rename);
 
-static void substitute_parsed_anchors(kuroda::parser<formal::lex_node>::symbols& x, const gentzen::prepared_rename& rename)
+static bool substitute_parsed_anchors(kuroda::parser<formal::lex_node>::symbols& x, const gentzen::prepared_rename& rename)
 {
 	for (size_t i = 0; i < x.size(); ++i) {
 		formal::lex_node*& s = x[i];
@@ -4641,24 +4698,26 @@ static void substitute_parsed_anchors(kuroda::parser<formal::lex_node>::symbols&
 					continue;
 				}
 			} else if (auto e2 = dynamic_cast<const gentzen::syntactical_entailment_2ary*>(anchor)) {
-				if (auto replaced = e2->apply_uniform_substitution(rename)) {
-					auto swap_in = new formal::lex_node(static_cast<formal::parsed*>(replaced.release()), s->code());
-					delete s;
-					s = swap_in;
-					continue;
-				}
+				auto replaced = e2->apply_uniform_substitution(rename);
+				if (!replaced) return false;
+				auto swap_in = new formal::lex_node(static_cast<formal::parsed*>(replaced.release()), s->code());
+				delete s;
+				s = swap_in;
+				continue;
 			}
 		}
-		substitute_parsed_anchors(*s, rename);
+		if (!substitute_parsed_anchors(*s, rename)) return false;
 	}
+	return true;
 }
 
-static void substitute_parsed_anchors(formal::lex_node& node, const gentzen::prepared_rename& rename)
+static bool substitute_parsed_anchors(formal::lex_node& node, const gentzen::prepared_rename& rename)
 {
-	substitute_parsed_anchors(node.prefix(), rename);
-	substitute_parsed_anchors(node.infix(), rename);
-	substitute_parsed_anchors(node.postfix(), rename);
-	for (decltype(auto) frag : node.fragments()) substitute_parsed_anchors(frag, rename);
+	if (!substitute_parsed_anchors(node.prefix(), rename)) return false;
+	if (!substitute_parsed_anchors(node.infix(), rename)) return false;
+	if (!substitute_parsed_anchors(node.postfix(), rename)) return false;
+	for (decltype(auto) frag : node.fragments()) if (!substitute_parsed_anchors(frag, rename)) return false;
+	return true;
 }
 
 // Step 4: after a uniform substitution, reparse each lex-side container that received a
@@ -4775,9 +4834,34 @@ static formal::lex_node* apply_uniform_substitution_deep(const formal::lex_node&
 		}
 	}
 
-	substitute_parsed_anchors(*match.tree, *prepared);
+	if (!substitute_parsed_anchors(*match.tree, *prepared)) return nullptr;	// partly substituted: discard
 	if (!replaced.empty()) reparse_substituted_containers(*match.tree, replaced);
 	return match.tree.release();
+}
+
+// SFINAE for uniform substitution: an instantiation that fails is not an error, it is no
+// instance.  Runs apply_uniform_substitution_deep under a diagnostic_capture, flushes the
+// result's deferred messages into the same capture, and keeps the instance only if no error
+// was captured.  The diagnostics come back as a value either way: config-time saturation
+// drops a discarded instance's, while a caller acting on a user's request can replay() them;
+// for a kept instance they can only be warnings.  instance is null on failure, including a
+// failure that reported nothing (e.g. subst is not a substitution node).
+struct instantiation_result {
+	std::unique_ptr<formal::lex_node> instance;
+	captured_diagnostics diagnostics;
+};
+
+static instantiation_result try_instantiate(const formal::lex_node& src, const formal::lex_node& subst)
+{
+	instantiation_result ret;
+	{
+		diagnostic_capture capture;
+		ret.instance.reset(apply_uniform_substitution_deep(src, subst));
+		if (ret.instance) gentzen::report_diagnostics(*ret.instance);
+		ret.diagnostics = capture.get();
+	}
+	if (!ret.diagnostics.errors.empty()) ret.instance.reset();
+	return ret;
 }
 
 // Step 5 of the instantiation mechanics: modus ponens detachment.  From H |- C, where H is
@@ -4949,6 +5033,51 @@ static void self_test_phrase_matcher()
 	if (subst) {
 		instantiate("step-3", "_ is a binary infix symbol &#9500; (modus ponens for _ := (P _ Q), P &#9500; Q)");
 		instantiate("step-3 formula LHS", "_ is a binary infix symbol &#9500; (A _ B := (P _ Q), P &#9500; Q)");
+	}
+
+	// SFINAE, as R3's saturation will use it: try_instantiate the conditional axiom against
+	// every declaring axiom its hypothesis matches.  A failed instantiation is discarded with
+	// its diagnostics captured rather than reported, so errors +0 on every line.  The case
+	// that motivates it is [, / _]: the definiens arm (P _ Q) becomes the tuple (P , Q), which
+	// syntactical_entailment_2ary's rename-apply rejects ("arity would be increased").
+	{
+		std::vector<std::string> src_lines;
+		src_lines.push_back("_ is a binary infix symbol &#9500; (modus ponens for _ := (P _ Q), P &#9500; Q)");
+		formal::src_location loc(std::pair(1, 0), std::shared_ptr<const std::filesystem::path>(new std::filesystem::path("self-test:sfinae")));
+		auto lines = to_lines(src_lines, loc);
+		auto stage = TokenGrammar().apply(formal::lex_node::pop_front(lines));
+		TokenGrammar().complete_parse(stage);
+		stage = GentzenGrammar().apply(stage);
+		GentzenGrammar().complete_parse(stage);
+		if (1 == stage.size() && stage[0]) {
+			for (size_t i = 0; i < ax->size(); ++i) {
+				auto stmt = ax->rationale(i).first.first;
+				auto p = std::get_if<std::shared_ptr<const formal::parsed> >(&stmt);
+				if (!p) continue;
+				auto q = dynamic_cast<const undefined_SVO::phrase_postfix*>(p->get());
+				if (!q) continue;
+				auto with = hyp.get_uniform_substitution(*q);
+				if (!with) continue;	// not a declaration the hypothesis matches
+
+				const auto before = Errors.count();
+				auto result = try_instantiate(*stage[0], *with);
+				std::cout << "sfinae " << with->to_s() << ": ";
+				if (result.instance) {
+					std::unique_ptr<formal::lex_node> detached(detach_conclusion(*result.instance));
+					std::cout << "kept, " << (detached ? detached->to_s() : "(not detachable)");
+				} else std::cout << "discarded";
+				std::cout << ", captured errors " << result.diagnostics.errors.size();
+				if (!result.diagnostics.errors.empty()) std::cout << " (" << result.diagnostics.errors.front().second.view() << ")";
+
+				// captures nest, and replay() re-issues into whichever is active
+				if (!result.diagnostics.errors.empty()) {
+					diagnostic_capture outer;
+					replay(result.diagnostics);
+					std::cout << ", replayed into an enclosing capture " << outer.get().errors.size();
+				}
+				std::cout << ", errors +" << (Errors.count() - before) << "\n";
+			}
+		}
 	}
 }
 
