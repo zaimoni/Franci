@@ -2340,7 +2340,26 @@ private:
 		return std::visit(visitor(), *this);
 	}
 
-	class syntactical_entailment_2ary final : public formal::parsed {
+	// Fork A(b): the one virtual the parsed-arm substitution walk dispatches on, so the walk
+	// (substitute_parsed_anchors) names no statement kinds.  A formal::parsed that can carry
+	// placeholder variables behind its membrane implements it.  Three outcomes, because the
+	// two original arms meant different things by "null": phrase_postfix had nothing to
+	// replace, syntactical_entailment_2ary had failed (an arm did not survive) -- and a failure
+	// must abandon the whole substitution rather than leave an unsubstituted arm behind.
+	// Takes prepared_rename, so the compile-time "destinations are prepared" guarantee holds
+	// through the virtual; this is why it lives here and not on formal::parsed.
+	struct uniformly_substitutable {
+		enum class outcome { unchanged, replaced, failed };
+		struct result {
+			outcome status;
+			std::unique_ptr<formal::parsed> value;	// replaced only
+		};
+
+		virtual ~uniformly_substitutable() = default;
+		virtual result substitute(const prepared_rename& rename) const = 0;
+	};
+
+	class syntactical_entailment_2ary final : public formal::parsed, public uniformly_substitutable {
 	private:
 		statement_t hypothesis_1;
 		statement_t hypothesis_2;
@@ -2571,6 +2590,13 @@ private:
 			const auto rename = prepared_rename::decode(subst);
 			if (!rename) return nullptr;
 			return apply_uniform_substitution(*rename);
+		}
+
+		// uniformly_substitutable: all three arms are always rebuilt, so the only alternative to
+		// a replacement is failure
+		result substitute(const prepared_rename& rename) const override {
+			if (auto replaced = apply_uniform_substitution(rename)) return result{outcome::replaced, std::move(replaced)};
+			return result{outcome::failed, nullptr};
 		}
 
 		// rename core: prepared_rename::decode has already validated that each source is a
@@ -4195,7 +4221,7 @@ public:
 	undefined_SVO& operator=(undefined_SVO&&) = delete;
 	~undefined_SVO() = default;
 
-	class phrase_postfix final : public formal::parsed {
+	class phrase_postfix final : public formal::parsed, public gentzen::uniformly_substitutable {
 		std::shared_ptr<const formal::lex_node> _subject;
 		size_t _code;
 
@@ -4317,19 +4343,22 @@ public:
 		// substituted, when our subject is a placeholder-family variable named in
 		// rename; null otherwise.  The declaring axiom kinds are exempt (mention, not
 		// use), mirroring get_placeholder_variables.
-		phrase_postfix* apply_uniform_substitution(const gentzen::prepared_rename& rename) const {
-			if (!_subject) return nullptr;
-			if ((size_t)hard_code::placeholder_syntax == _code || (size_t)hard_code::symbol_placeholder_syntax == _code) return nullptr;
+		// uniformly_substitutable: the subject is the only slot, and a subject that is not a
+		// placeholder-family variable (or belongs to a placeholder-declaring phrase, which
+		// mentions rather than uses it) is left alone -- never a failure
+		result substitute(const gentzen::prepared_rename& rename) const override {
+			if (!_subject) return result{outcome::unchanged, nullptr};
+			if ((size_t)hard_code::placeholder_syntax == _code || (size_t)hard_code::symbol_placeholder_syntax == _code) return result{outcome::unchanged, nullptr};
 			if (   !gentzen::is_symbol_placeholder_syntax_symbol(_subject.get())
-				&& !gentzen::is_placeholder_syntax_symbol(_subject.get())) return nullptr;
+				&& !gentzen::is_placeholder_syntax_symbol(_subject.get())) return result{outcome::unchanged, nullptr};
 			const auto key = _subject->to_scalar();
 			for (decltype(auto) x : rename.view()) {
 				if (x.first.view() == key.view()) {
 					formal::lex_node* stage = new formal::lex_node(*x.second);
-					return new phrase_postfix(stage, _code);
+					return result{outcome::replaced, std::unique_ptr<formal::parsed>(new phrase_postfix(stage, _code))};
 				}
 			}
-			return nullptr;
+			return result{outcome::unchanged, nullptr};
 		}
 
 		std::optional<perl::scalar> is_not_legal_axiom(bool unconditional) const override {
@@ -4792,35 +4821,24 @@ public:
 };
 
 // step-3 support: substitutes through parsed-arm membranes the generic
-// placeholder-handle walk cannot mutate (cf. placeholder_match::aux_trees).  Two arm
-// kinds are dispatched (fork A(a); the A(b) unification into one virtual is deferred to
-// stage 6): phrase_postfix subjects, and syntactical_entailment_2ary definiens (via its
-// rename-vector apply, which reparses its arms).  The carrying node's code is preserved.
-// Returns false when a substitution failed, leaving the tree partly substituted: the caller
-// must then discard the whole tree.  The two arm kinds differ in what a null result means.
-// phrase_postfix returns null when it has nothing to replace, which is not a failure.
-// syntactical_entailment_2ary always rebuilds all three arms, so its null *is* a failure
-// (an arm did not survive -- e.g. "arity would be increased"); falling through there would
-// keep the unsubstituted arm in an otherwise substituted statement.
+// placeholder-handle walk cannot mutate (cf. placeholder_match::aux_trees), by the one
+// virtual gentzen::uniformly_substitutable::substitute (fork A(b), landed); the kinds that
+// implement it are phrase_postfix (its subject) and syntactical_entailment_2ary (its arms,
+// reparsed).  The carrying node's code is preserved.  Returns false when a substitution
+// failed, leaving the tree partly substituted: the caller must then discard the whole tree.
 static bool substitute_parsed_anchors(formal::lex_node& node, const gentzen::prepared_rename& rename);
 
 static bool substitute_parsed_anchors(kuroda::parser<formal::lex_node>::symbols& x, const gentzen::prepared_rename& rename)
 {
+	using outcome = gentzen::uniformly_substitutable::outcome;
 	for (size_t i = 0; i < x.size(); ++i) {
 		formal::lex_node*& s = x[i];
 		if (!s) continue;
-		if (auto anchor = s->c_anchor<formal::parsed>()) {
-			if (auto pp = dynamic_cast<const undefined_SVO::phrase_postfix*>(anchor)) {
-				if (auto replaced = pp->apply_uniform_substitution(rename)) {
-					auto swap_in = new formal::lex_node(static_cast<formal::parsed*>(replaced), s->code());
-					delete s;
-					s = swap_in;
-					continue;
-				}
-			} else if (auto e2 = dynamic_cast<const gentzen::syntactical_entailment_2ary*>(anchor)) {
-				auto replaced = e2->apply_uniform_substitution(rename);
-				if (!replaced) return false;
-				auto swap_in = new formal::lex_node(static_cast<formal::parsed*>(replaced.release()), s->code());
+		if (auto target = dynamic_cast<const gentzen::uniformly_substitutable*>(s->c_anchor<formal::parsed>())) {
+			auto r = target->substitute(rename);
+			if (outcome::failed == r.status) return false;
+			if (outcome::replaced == r.status) {
+				auto swap_in = new formal::lex_node(static_cast<formal::parsed*>(r.value.release()), s->code());
 				delete s;
 				s = swap_in;
 				continue;

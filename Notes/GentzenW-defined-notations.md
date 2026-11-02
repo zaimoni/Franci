@@ -558,8 +558,18 @@ SFINAE-style definiendum cancellation).  In dependency order:
 * **R8 -- W3 occurrence class** defined_SVO::phrase + defined_SVO::global_parse + tagging
   (open decision 1).  Needed only once defined phrases are *used* inside statements; it is
   also the proper fix for the kept definiendum run re-erroring under a whole-tree reparse.
-* **R9 -- fork A(b) unification** of substitute_parsed_anchors' dispatch arms (the old
-  "stage 6"); independent of R2-R8, and cheaper to do before R8 adds a third arm.
+* **R9 -- fork A(b) unification.  LANDED 2026-11-02.**  gentzen::uniformly_substitutable
+  (declared right before syntactical_entailment_2ary) is the one virtual: `result
+  substitute(const prepared_rename&) const`, with a three-way outcome -- unchanged
+  (nothing to replace: leave the node), replaced (swap in the value), failed (abandon the
+  whole substitution) -- because the two arms had meant different things by "null".
+  phrase_postfix and syntactical_entailment_2ary implement it (multiple inheritance beside
+  formal::parsed); substitute_parsed_anchors does one dynamic_cast to the interface and
+  names no kinds, so R8's occurrence class needs no walk change.  It lives in gentzen rather
+  than on formal::parsed so the compile-time "destinations are prepared" guarantee holds
+  through the virtual.  phrase_postfix's old raw-pointer apply_uniform_substitution is
+  folded into its override; the 2ary keeps its unique_ptr-returning one (other callers)
+  and adapts.  Self-test output unchanged on every path.
 
 *Deferred, needs design first*: definitions inside conditional-reasoning lemmas
 instances.  *Unrelated carry-over*: cut-rule plan step 7 (GentzenW-test-fixture.md).
@@ -593,7 +603,10 @@ instances.  *Unrelated carry-over*: cut-rule plan step 7 (GentzenW-test-fixture.
   slot/parameter machinery in the rendering path entirely.
 * **Phrase machinery**: parallel implementation first; evaluate what the shared base
   with undefined_SVO/phrase_postfix should be by comparing the two implementations once
-  the new one is stable.
+  the new one is stable.  **Outcome (R9, 2026-11-02)**: the shared base is an interface,
+  not a phrase class -- gentzen::uniformly_substitutable, implemented by both; the
+  per-kind substitution bodies stayed separate because they genuinely differ (one slot vs
+  three reparsed arms).
 * **Theorem file `axioms:` key**: list axioms **used at least once**.  Rendering the
   defined name counts as use of the conditional-definition axiom, so it appears; the
   placeholder-syntax symbol axioms remain unlisted for the same reason (not used yet).
