@@ -464,16 +464,23 @@ SFINAE-style definiendum cancellation).  In dependency order:
   (The alternative -- a syntactical_entailment_1ary class, open decision 3 -- would give
   virtual dispatch and, unlike a definition-statement class, does trigger an inference
   schema; but it puts the definition behind a membrane that steps 3-5 work without.)
-* **R3 -- config-time saturation driver, in both directions (ruled 2026-09-21).**  For a
-  unary-entailment axiom whose hypothesis is a phrase_postfix over a symbol-placeholder
-  variable: match (step 2), instantiate (steps 3-4), detach (R1), and
-  lemmas::get()->record the result.  Both directions, so the outcome does not depend on
-  where a line sits in core.yaml:
-  - a newly added **schema** is saturated against all prior axioms;
-  - a newly added **declaring axiom** is saturated against all known schemas.
-  axioms is already zaimoni::observed<statement_t> and add_axiom already notifies, so an
-  observer is the natural vehicle; it has to remember the schemas it has seen.
-  Hazards to design for:
+* **R3 -- config-time saturation driver, in both directions.  LANDED 2026-11-02.**
+  `saturation` (file scope, after detach_conclusion) is a zaimoni::observer<statement_t>
+  singleton that main registers on axioms::get() right after undefined_SVO::get();
+  watched_by replays the loaded axioms, so registering late equals registering early.  A
+  *schema* is a unary entailment whose hypothesis is a phrase_postfix over a
+  symbol-placeholder variable; a *declaration* is any phrase_postfix axiom (the step-2
+  matcher rejects the wrong kinds).  onNext remembers both and saturates each new one
+  against everything of the other kind seen so far; per pair: match, try_instantiate,
+  detach_conclusion, lemmas::get()->record.  self_test_lex_axiom_admission: admitting the
+  schema records 4 lemmas (:=, &#9500;, /, &; the "," pair is discarded silently), and a
+  declaration admitted *after* it (`@ is a binary infix symbol`) records 1 -- the reverse
+  direction the shipped configuration never exercises.
+  Found on the way, fixed: notation_ids::allocate dereferenced expired registry entries
+  (lock() of a dead weak statement is null, and to_s() on it faults).  Latent before R3 --
+  a discharged conditional-reasoning scope leaves such entries behind -- and surfaced by
+  the substitution self-test's temporary.  Expired entries are now pruned.
+  Hazards, as resolved:
   - **Instantiation can fail, and that must mean "no instance", not a config error**
     (SFINAE once more).  Concretely, [, / _] turns the definiens arm (P _ Q) into the
     tuple (P , Q), and syntactical_entailment_2ary's rename-apply then *reports* "arity
@@ -504,9 +511,9 @@ SFINAE-style definiendum cancellation).  In dependency order:
     replaced, so [/ / _] yields `modus ponens for / := (P / Q), P &#9500; Q`, whose
     definiens is no axiom; of the five declared infix symbols only &#9500; yields one that
     resolves (axiom #37).
-  - "Established" for the hypothesis check is axioms-only today; a lemma-derived
-    hypothesis needs a notational lookup without notation_ids::allocate's id-minting side
-    effect.
+  - "Established" for the hypothesis check now covers the root lemmas instance too:
+    lemmas::disambiguate is the pure notational lookup (cf. axioms::disambiguate), without
+    notation_ids::allocate's id-minting side effect.
 * **R4 -- "before add lemma" stage in lemmas::record**, root instance only; declines on
   conditional-reasoning instances.  Recognizes is_definition_node with a closed prefix and
   hands it to defined_SVO.  Also the place the rationale text stops being "prototyping
@@ -523,7 +530,7 @@ SFINAE-style definiendum cancellation).  In dependency order:
   five infix symbols (:=, &#9500;, /, &, ",") are declared, so in the shipped configuration
   the schema-against-prior-axioms direction of R3 does all the work; the
   declaring-axiom-against-known-schemas direction is exercised only by later configuration
-  or a self-test, and needs one so it does not rot.  Also: cut-rule expected rationales;
+  or a self-test -- self_test_lex_axiom_admission's `@` case (R3).  Also: cut-rule expected rationales;
   theorem-file `axioms:` lists the conditional-definition axiom as used; fixture reshaping
   per GentzenW-test-fixture.md.  (Its notation id follows from load order and is never
   relied on -- resolution is notational.)

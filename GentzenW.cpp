@@ -1858,6 +1858,15 @@ private:
 			// \todo use lex_node::to_scalar when relevant
 			ptrdiff_t ub = _registry.size();
 			while (0 <= --ub) {
+				// an expired entry -- its statement died with a discharged conditional-reasoning
+				// scope, or was a temporary -- cannot be deduplicated against, and lock() on it
+				// yields a null statement whose to_s() dereferences null.  Prune it instead
+				// (swap-with-back is safe here: the back was already visited).
+				if (std::visit([](const auto& w) { return w.expired(); }, _registry[ub].second)) {
+					_registry[ub].swap(_registry.back());
+					_registry.pop_back();
+					continue;
+				}
 				auto s = lock(_registry[ub].second);
 				if (notation == s.to_s()) return std::pair(s, _registry[ub].first);
 			}
@@ -3044,6 +3053,13 @@ private:
 		// Records a derived statement, notifying watchers.  Returns the recorded
 		// (statement, notation id); a notation already present is returned without
 		// duplication, and an axiom's notation is returned unrecorded.
+		// pure notational lookup of a lemma recorded here -- unlike record, which allocates a
+		// notation id as a side effect.  Cf. axioms::disambiguate.
+		std::optional<std::pair<statement_t, size_t> > disambiguate(const std::string& notation) const {
+			for (decltype(auto) x : _lemmas) if (notation == x.first.to_s()) return x;
+			return std::nullopt;
+		}
+
 		std::pair<statement_t, size_t> record(const statement_t& src) {
 			auto stage = notation_ids::get().allocate(src);
 			if (0 < stage.second && axioms::get()->size() >= stage.second) return stage;
@@ -4893,7 +4909,8 @@ static formal::lex_node* detach_conclusion(const formal::lex_node& src)
 {
 	if (!gentzen::is_unary_syntactical_entailment(src)) return nullptr;
 	if (gentzen::has_pending_error(src)) return nullptr;
-	if (!gentzen::axioms::get()->disambiguate(src.prefix().front()->to_s())) return nullptr;
+	const auto hypothesis = src.prefix().front()->to_s();
+	if (!gentzen::axioms::get()->disambiguate(hypothesis) && !gentzen::lemmas::get()->disambiguate(hypothesis)) return nullptr;
 
 	formal::lex_node* ret = new formal::lex_node(*src.postfix().front());
 	remove_grouping_parentheses(ret);
@@ -4913,6 +4930,82 @@ static std::optional<size_t> definiendum_placeholder_census(formal::lex_node& sr
 	walker(src.prefix());
 	return census.groups.size();
 }
+
+// R3: config-time saturation of conditional definition axioms, in both directions.  A
+// *schema* is a unary syntactical entailment whose hypothesis is a phrase_postfix over a
+// symbol-placeholder variable ("_ is a binary infix symbol &#9500; (...)"); a *declaration*
+// is any phrase_postfix axiom ("&#9500; is a binary infix symbol").  Each new schema is
+// saturated against every declaration seen so far, and each new declaration against every
+// schema, so the outcome does not depend on their order in core.yaml; axioms::watched_by
+// replays the axioms already loaded, so registering late equals registering early.
+// Per pair: match (step 2; the matcher rejects a declaration of the wrong kind),
+// try_instantiate (steps 3-4; SFINAE, so a failed instantiation is no instance, not an
+// error), detach (step 5), and record into the root lemmas instance.  Every instance that
+// instantiates cleanly is recorded, established definiens or not (resolved decision 4: the
+// unestablished ones signal that provability should be checked).  R4's before-add-lemma
+// stage, in lemmas::record, is what will hand a recorded definition to defined_SVO.
+class saturation final : public zaimoni::observer<gentzen::statement_t> {
+	std::vector<std::shared_ptr<const formal::lex_node> > _schemas;
+	std::vector<std::shared_ptr<const undefined_SVO::phrase_postfix> > _declarations;
+
+	saturation() = default;
+public:
+	saturation(const saturation&) = delete;
+	saturation(saturation&&) = delete;
+	saturation& operator=(const saturation&) = delete;
+	saturation& operator=(saturation&&) = delete;
+	~saturation() = default;
+
+	static std::shared_ptr<saturation> get() {
+		static std::shared_ptr<saturation> ooao(new saturation());
+		return ooao;
+	}
+
+	// the hypothesis that makes x a schema, or null
+	static const undefined_SVO::phrase_postfix* schema_hypothesis(const formal::lex_node& x) {
+		if (!gentzen::is_unary_syntactical_entailment(x)) return nullptr;
+		auto h = dynamic_cast<const undefined_SVO::phrase_postfix*>(x.prefix().front()->c_anchor<formal::parsed>());
+		if (!h || !gentzen::is_symbol_placeholder_syntax_symbol(h->subject().get())) return nullptr;
+		return h;
+	}
+
+	// one (schema, declaration) pair: the recorded lemma, if the pair yields one
+	static std::optional<std::pair<gentzen::statement_t, size_t> > saturate(const formal::lex_node& schema, const undefined_SVO::phrase_postfix& decl) {
+		enum { trace_saturation = 0 };
+		if constexpr (trace_saturation) std::cerr << "saturate: " << decl.to_s() << "\n";
+		auto hypothesis = schema_hypothesis(schema);
+		if (!hypothesis) return std::nullopt;
+		auto subst = hypothesis->get_uniform_substitution(decl);
+		if (!subst) return std::nullopt;
+		if constexpr (trace_saturation) std::cerr << "  subst: " << subst->to_s() << "\n";
+		auto instance = try_instantiate(schema, *subst);
+		if (!instance.instance) return std::nullopt;
+		if constexpr (trace_saturation) std::cerr << "  instance: " << instance.instance->to_s() << "\n";
+		std::shared_ptr<const formal::lex_node> conclusion(detach_conclusion(*instance.instance));
+		if (!conclusion) return std::nullopt;
+		if constexpr (trace_saturation) std::cerr << "  conclusion: " << conclusion->to_s() << "\n";
+		auto ret = gentzen::lemmas::get()->record(gentzen::statement_t(conclusion));
+		if constexpr (trace_saturation) std::cerr << "  recorded " << ret.second << "\n";
+		return ret;
+	}
+
+	bool onNext(const gentzen::statement_t& value) override {
+		enum { trace_saturation = 0 };
+		if constexpr (trace_saturation) std::cerr << "onNext: " << value.to_s() << "\n";
+		if (auto p = std::get_if<std::shared_ptr<const formal::parsed> >(&value)) {
+			auto decl = std::dynamic_pointer_cast<const undefined_SVO::phrase_postfix>(*p);
+			if (!decl) return true;
+			_declarations.push_back(decl);
+			for (decltype(auto) schema : _schemas) saturate(*schema, *decl);
+		} else if (auto n = std::get_if<std::shared_ptr<const formal::lex_node> >(&value)) {
+			if (!*n || !schema_hypothesis(**n)) return true;
+			if constexpr (trace_saturation) std::cerr << "  schema; declarations seen " << _declarations.size() << "\n";
+			_schemas.push_back(*n);
+			for (decltype(auto) decl : _declarations) saturate(**n, *decl);
+		}
+		return true;
+	}
+};
 
 // scaffold: exercises phrase_postfix::get_uniform_substitution against the configured
 // infix-symbol declaration axiom.  Referenced from main() behind the same
@@ -5154,7 +5247,7 @@ static void self_test_diagnostic_walks()
 // a successful admission grows the global axiom list.
 static void self_test_lex_axiom_admission()
 {
-	auto parse = [](const char* label, const char* text) -> std::shared_ptr<const formal::lex_node> {
+	auto parse = [](const char* label, const char* text) -> std::shared_ptr<formal::lex_node> {
 		std::vector<std::string> src_lines;
 		src_lines.push_back(text);
 		formal::src_location loc(std::pair(1, 0), std::shared_ptr<const std::filesystem::path>(new std::filesystem::path(std::string("self-test:") + label)));
@@ -5168,10 +5261,14 @@ static void self_test_lex_axiom_admission()
 		if (1 != stage.size() || !stage[0]) return nullptr;
 		formal::lex_node* raw = stage[0];	// ownership moves out of the symbols container, as in the loader
 		stage[0] = nullptr;
-		return std::shared_ptr<const formal::lex_node>(raw);
+		return std::shared_ptr<formal::lex_node>(raw);
 	};
 
 	decltype(auto) ax = gentzen::axioms::get();
+	decltype(auto) L = gentzen::lemmas::get();
+	// dispatches as the loader does: a parsed statement through add_axiom(parsed), anything
+	// else through add_axiom(lex_node).  R3: the saturation observer is live, so admitting a
+	// schema, or a declaration after one, records lemmas; they are listed.
 	auto admit = [&](const char* label, const char* text) {
 		auto stmt = parse(label, text);
 		if (!stmt) {
@@ -5180,14 +5277,23 @@ static void self_test_lex_axiom_admission()
 		}
 		const auto before = Errors.count();
 		const auto size = ax->size();
-		ax->add_axiom(stmt);
+		const auto lemmas = L->size();
+		if (auto relay = stmt->shared_anchor<formal::parsed>()) ax->add_axiom(relay);
+		else ax->add_axiom(stmt);
 		std::cout << label << ": " << stmt->to_s() << " -> axioms +" << (ax->size() - size) << ", errors +" << (Errors.count() - before);
 		if (auto found = ax->disambiguate(stmt->to_s())) std::cout << ", notation id " << found->second;
-		std::cout << "\n";
+		std::cout << ", lemmas +" << (L->size() - lemmas) << "\n";
+		for (size_t i = lemmas; i < L->size(); ++i) {
+			auto r = L->rationale(i);
+			std::cout << "  lemma " << r.second << ": " << r.first.first.to_s() << " (" << r.first.second.view() << ")\n";
+		}
 	};
 	admit("lex axiom, unrecognized", "A := B");
 	admit("lex axiom, alters syntax", "A &#9500; (X is a binary infix symbol)");
 	admit("lex axiom, conditional definition", "_ is a binary infix symbol &#9500; (modus ponens for _ := (P _ Q), P &#9500; Q)");
+	// reverse direction: a declaration arriving after the schema; a plain word, so the
+	// symbol catalog accepts it and nothing in the HTML fixture is affected
+	admit("declaration after schema", "@ is a binary infix symbol");
 }
 
 // scaffold: step-4 reparse routing.  The same loose definiendum run
@@ -5612,6 +5718,7 @@ int main(int argc, char* argv[], char* envp[])
 //	std::wcout << std::filesystem::canonical(who_am_i.native()) << "\n";
 	formal::lex_node::interpolate_grouping_parens = gentzen_interpolate_grouping_parens;
 	undefined_SVO::get();	// load the undefined SVOs, and the axioms
+	gentzen::axioms::get()->watched_by(saturation::get());	// replays the loaded axioms, then watches
 
 	enum { run_prototype_self_tests = 0 };
 	if constexpr (run_prototype_self_tests) {
