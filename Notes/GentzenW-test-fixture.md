@@ -72,7 +72,9 @@ alternative.)
   "modus ponens for &#9500;; (1) and (3)" etc., and the `axioms:` list gains the
   conditional-definition axiom once it is used.  **Landed 2026-11-02 (R6/R7).**
 * Fitch modification (see GentzenW-theorem-table.md): the theorem writer emits the
-  hypothesis nesting depth per row; max depth 1 for the cut rule.
+  hypothesis nesting depth per row; max depth 1 for the cut rule.  **Landed 2026-11-02**:
+  the fifth cell is in tests/cut_rule.theorem.yaml, and theorem_table_cut_rule also
+  checks the `--fitch` rendering against tests/cut_rule_fitch.html.
 * N-ary (>2 statements) `given:`/`hypothesis:` levels.
 * A "lemmas used" key alongside `axioms:` once previously proven theorems can be
   applied as rules.

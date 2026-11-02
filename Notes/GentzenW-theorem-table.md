@@ -1,8 +1,15 @@
 # TheoremTable: `*.theorem.yaml` -> HTML proof table (specification)
 
 Status: **v1 implemented 2026-11-02** (TheoremTable.cpp; CTest `theorem_table_cut_rule`
-against tests/cut_rule.theorem.yaml and tests/cut_rule.html).  The Fitch modification
-remains a later stage.
+against tests/cut_rule.theorem.yaml and tests/cut_rule.html), **and the Fitch modification
+with it, the same day**: the theorem writer emits the hypothesis nesting depth as a fifth
+cell per proof row (`hypothesis_depth`: enclosing introduction_start levels counting the
+row's own, less one, so the givens level is depth 0; a discharge row is measured at its
+destination), and `--fitch` draws one leading column per nesting level -- a cell with
+`border-left`, plus `border-top` / `border-bottom` on a scope's first / last row, the
+table given `cellspacing="0"` so the borders join, the header's blank `<th>` and the name
+and theorem rows widened by `colspan`.  A file without the fifth cell renders at depth 0.
+Expected output: tests/cut_rule_fitch.html (one scope column; rows 3-5 boxed).
 
 **fkYAML is pinned at the vendored 0.4.4** (ruled 2026-11-02): 0.5.0 exists, but migrating
 is high-risk and the only consumer that needed the round trip no longer uses it.
@@ -116,7 +123,7 @@ Exit codes: 0; 1 for a file that does not parse, lacks `theorem:`/`proof:`, or h
 row that is not exactly four cells (reported with file and row index, then the next
 file is still processed).  Null cells are empty strings.
 
-## Fitch modification -- a later stage, with the design settled
+## Fitch modification -- landed 2026-11-02 as designed below
 
 The docs' Fitch-style tables (LogicV2, "Gentzen format schema") draw hypothesis scopes
 with one extra leading column per nesting level, the cell carrying `border-left` (and

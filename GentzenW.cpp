@@ -5612,7 +5612,18 @@ struct proof_row {
 	bool entailment_column;
 	std::string notation;
 	std::string rationale;	// label(...) references carry raw notation ids; renumbering is the theorem writer's job
+	size_t depth;	// hypothesis nesting, for the Fitch rendering: the givens level is depth 0
 };
+
+// How many hypothesis levels enclose db, counting db itself, less one: the outermost level
+// (the givens) is depth 0, because its discharge is the theorem itself and is never drawn
+// as a scope.  A discharge row is measured at its destination, outside the closed scope.
+static size_t hypothesis_depth(std::shared_ptr<gentzen::fact_database> db)
+{
+	size_t levels = dynamic_cast<gentzen::syntactical_entailment_introduction_start*>(db.get()) ? 1 : 0;
+	levels += gentzen::find_ancestors<gentzen::syntactical_entailment_introduction_start>(db).size();
+	return levels ? levels - 1 : 0;
+}
 
 // Rewrites each label(<notation id>) expression whose id has a ledger row, to the row
 // label (<row #>).  Notation ids need not be unique in general (first ledger row wins),
@@ -5721,7 +5732,7 @@ static void run_proof_script(const std::filesystem::path& path)
 		const size_t s = level->size();
 		for (size_t n = 0; n < s; ++n) {
 			auto row = level->rationale(n);
-			rows.push_back(proof_row{row.second, is_entailment_statement(row.first.first), row.first.first.to_s(), label});
+			rows.push_back(proof_row{row.second, is_entailment_statement(row.first.first), row.first.first.to_s(), label, hypothesis_depth(level)});
 		}
 		tip = level;
 		return true;
@@ -5786,7 +5797,7 @@ static void run_proof_script(const std::filesystem::path& path)
 			}
 			tip = std::shared_ptr<fact_database>(next);
 			auto row = tip->rationale(0);
-			rows.push_back(proof_row{row.second, is_entailment_statement(row.first.first), row.first.first.to_s(), std::string(row.first.second.view())});
+			rows.push_back(proof_row{row.second, is_entailment_statement(row.first.first), row.first.first.to_s(), std::string(row.first.second.view()), hypothesis_depth(tip)});
 
 			auto schema_id = notation_ids::get().allocate(a.schema);
 			bool known = false;
@@ -5816,7 +5827,7 @@ static void run_proof_script(const std::filesystem::path& path)
 			steps.push_back(node);	// pins the discharged branch as well, via its prior chain
 			auto row = node->rationale(0);
 			last_discharged = row.first.first;
-			rows.push_back(proof_row{row.second, is_entailment_statement(last_discharged), last_discharged.to_s(), std::string(row.first.second.view())});
+			rows.push_back(proof_row{row.second, is_entailment_statement(last_discharged), last_discharged.to_s(), std::string(row.first.second.view()), hypothesis_depth(dest)});
 		} else {
 			decltype(auto) q = std::get<std::unique_ptr<syntactical_entailment_2ary> >(*discharge);
 			last_discharged = statement_t(std::shared_ptr<const formal::parsed>(q.release()));
@@ -5832,8 +5843,9 @@ static void run_proof_script(const std::filesystem::path& path)
 	std::cout << "\nproven (" << theorem_name << "): " << last_discharged.to_s() << "\n";
 
 	// theorem writer (work item #6): axioms used, the result, and the proof table as an
-	// array of arrays [row label, inference-rule column, proposition column, rationale],
-	// reformattable to the docs folder's Gentzen/Fitch HTML tables
+	// array of arrays [row label, inference-rule column, proposition column, rationale,
+	// hypothesis depth], reformattable to the docs folder's Gentzen/Fitch HTML tables
+	// (TheoremTable; see Notes/GentzenW-theorem-table.md)
 	{
 		fkyaml::node::sequence_type ax;
 		std::vector<std::string> listed;
@@ -5863,6 +5875,7 @@ static void run_proof_script(const std::filesystem::path& path)
 			cells.emplace_back(r.entailment_column ? r.notation : std::string());
 			cells.emplace_back(r.entailment_column ? std::string() : r.notation);
 			cells.emplace_back(rewrite_labels(r.rationale, rows));
+			cells.emplace_back(static_cast<std::int64_t>(r.depth));	// fifth cell: hypothesis nesting depth
 			proof_table.emplace_back(fkyaml::node::sequence(std::move(cells)));
 		}
 

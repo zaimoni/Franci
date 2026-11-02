@@ -20,3 +20,22 @@ if(NOT rc EQUAL 0)
     file(READ ${BIN}/cut_rule.html actual)
     message(FATAL_ERROR "HTML differs from tests/cut_rule.html; actual:\n${actual}")
 endif()
+
+# the Fitch rendering of the same file: one scope column, since the cut rule nests one deep
+execute_process(
+    COMMAND ${THEOREM_TABLE} --fitch -o ${BIN}/cut_rule_fitch.html ${SRC}/tests/cut_rule.theorem.yaml
+    RESULT_VARIABLE rc
+    OUTPUT_VARIABLE out
+    ERROR_VARIABLE err)
+if(NOT rc EQUAL 0)
+    message(FATAL_ERROR "TheoremTable --fitch exited ${rc}\n${out}\n${err}")
+endif()
+
+execute_process(
+    COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol
+        ${BIN}/cut_rule_fitch.html ${SRC}/tests/cut_rule_fitch.html
+    RESULT_VARIABLE rc)
+if(NOT rc EQUAL 0)
+    file(READ ${BIN}/cut_rule_fitch.html actual)
+    message(FATAL_ERROR "HTML differs from tests/cut_rule_fitch.html; actual:\n${actual}")
+endif()

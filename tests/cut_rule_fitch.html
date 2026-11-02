@@ -1,0 +1,16 @@
+<table align="center">
+	<tr><th>Axioms used</th></tr>
+	<tr><td align="left">(P &#9500; Q) , P &#9500; Q</td></tr>
+	<tr><td align="left">_ is a binary infix symbol &#9500; (modus ponens for _ := ( P _ Q ) , P &#9500; Q)</td></tr>
+</table>
+<table align="center" cellspacing="0">
+	<tr><th colspan="2"></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
+	<tr><td></td><td>1.</td><td>P &#9500; Q</td><td></td><td>Given</td></tr>
+	<tr><td></td><td>2.</td><td>Q &#9500; R</td><td></td><td>Given</td></tr>
+	<tr><td style="border-left: 1px black solid; border-top: 1px black solid"></td><td>3.</td><td></td><td>P</td><td>Hypothesis</td></tr>
+	<tr><td style="border-left: 1px black solid"></td><td>4.</td><td></td><td>Q</td><td>modus ponens for &#9500;; (1) and (3)</td></tr>
+	<tr><td style="border-left: 1px black solid; border-bottom: 1px black solid"></td><td>5.</td><td></td><td>R</td><td>modus ponens for &#9500;; (2) and (4)</td></tr>
+	<tr><td></td><td>6.</td><td>P &#9500; R</td><td></td><td>&#9500;-introduction, (3)</td></tr>
+	<tr><th align="center" colspan="5">cut rule for &#9500;</th></tr>
+	<tr><th align="center" colspan="5">(P &#9500; Q) , (Q &#9500; R) &#9500; (P &#9500; R)</th></tr>
+</table>

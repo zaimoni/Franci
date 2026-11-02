@@ -7,10 +7,12 @@
 // as "(P &#9500; Q) , P &#9500; Q" as a flow-sequence separator and asserts
 // (m_flow_context_depth > 0), so it cannot read back what its own serializer wrote.  The
 // writer's output is a small, fixed YAML subset, read here directly: a "theorem:" mapping
-// with keys axioms (block sequence of scalars), name, proof (block sequence of four-cell
-// block sequences) and result; scalars plain or double-quoted; empty cells as "- " with
-// nothing after.  Keys may come in any order.
+// with keys axioms (block sequence of scalars), name, proof (block sequence of four- or
+// five-cell block sequences: the fifth cell, when present, is the hypothesis nesting depth
+// the Fitch rendering draws) and result; scalars plain or double-quoted; empty cells as
+// "- " with nothing after.  Keys may come in any order.
 
+#include <algorithm>
 #include <array>
 #include <filesystem>
 #include <fstream>
@@ -28,13 +30,19 @@ struct options {
 	bool page = false;
 	bool axioms = true;
 	bool name = true;
+	bool fitch = false;
+};
+
+struct proof_row {
+	std::array<std::string, 4> cells;	// row label, inference-rule column, proposition column, rationale
+	size_t depth = 0;	// hypothesis nesting; 0 when the file predates the fifth cell
 };
 
 struct theorem {
 	std::string name;
 	std::string result;
 	std::vector<std::string> axioms;
-	std::vector<std::array<std::string, 4> > proof;	// row label, inference-rule column, proposition column, rationale
+	std::vector<proof_row> proof;
 };
 
 // one physical line of the theorem file, split into indent and content
@@ -175,7 +183,7 @@ bool load(const std::filesystem::path& path, theorem& dest, std::string& err)
 					return false;
 				}
 				++i;
-				std::array<std::string, 4> cells;
+				proof_row row;
 				size_t n = 0;
 				while (i < lines.size() && row_indent < lines[i].indent) {
 					auto x = item(lines[i]);
@@ -183,18 +191,26 @@ bool load(const std::filesystem::path& path, theorem& dest, std::string& err)
 						err = "line " + std::to_string(i) + ": expected a cell";
 						return false;
 					}
-					if (4 <= n) {
-						err = "proof row " + std::to_string(dest.proof.size()) + " has more than four cells";
+					if (4 > n) row.cells[n] = std::move(*x);
+					else if (4 == n) {
+						// the depth cell: a non-negative integer
+						if (x->empty() || std::string::npos != x->find_first_not_of("0123456789")) {
+							err = "proof row " + std::to_string(dest.proof.size()) + ": depth cell is not a non-negative integer";
+							return false;
+						}
+						row.depth = std::stoull(*x);
+					} else {
+						err = "proof row " + std::to_string(dest.proof.size()) + " has more than five cells";
 						return false;
 					}
-					cells[n++] = std::move(*x);
+					++n;
 					++i;
 				}
-				if (4 != n) {
-					err = "proof row " + std::to_string(dest.proof.size()) + " is not exactly four cells";
+				if (4 > n) {
+					err = "proof row " + std::to_string(dest.proof.size()) + " has fewer than four cells";
 					return false;
 				}
-				dest.proof.push_back(std::move(cells));
+				dest.proof.push_back(std::move(row));
 			}
 		} else {
 			// an unknown key: skip its block
@@ -227,9 +243,12 @@ void emit_head(std::ostream& out, const std::string& title)
 
 void emit(std::ostream& out, const theorem& src, const options& opt)
 {
-	// before the Fitch modification every row has four columns, so the table-spanning
-	// rows span four; each Fitch column will add one
-	constexpr const int columns = 4;
+	// the Fitch modification adds one leading column per hypothesis nesting level, each
+	// drawn as a cell with a left border (top / bottom borders on a scope's first / last
+	// row); the table-spanning rows widen to match
+	size_t scopes = 0;
+	if (opt.fitch) for (const auto& row : src.proof) scopes = std::max(scopes, row.depth);
+	const size_t columns = 4 + scopes;
 
 	if (opt.axioms && !src.axioms.empty()) {
 		out << "<table align=\"" << opt.align << "\">\n"
@@ -238,11 +257,27 @@ void emit(std::ostream& out, const theorem& src, const options& opt)
 		out << "</table>\n";
 	}
 
-	out << "<table align=\"" << opt.align << "\">\n"
-		<< "\t<tr><th></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>\n";
-	for (const auto& row : src.proof) {
+	// cellspacing="0" so the scope borders join, as the docs' Fitch tables have it
+	out << "<table align=\"" << opt.align << "\"" << (scopes ? " cellspacing=\"0\"" : "") << ">\n\t<tr>";
+	if (scopes) out << "<th colspan=\"" << (scopes + 1) << "\"></th>";
+	else out << "<th></th>";
+	out << "<th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>\n";
+	for (size_t i = 0; i < src.proof.size(); ++i) {
+		const auto& row = src.proof[i];
 		out << "\t<tr>";
-		for (const auto& c : row) out << "<td>" << escape(c) << "</td>";
+		for (size_t k = 1; k <= scopes; ++k) {
+			if (row.depth < k) {
+				out << "<td></td>";
+				continue;
+			}
+			const bool opens = 0 == i || src.proof[i - 1].depth < k;
+			const bool closes = i + 1 == src.proof.size() || src.proof[i + 1].depth < k;
+			out << "<td style=\"border-left: 1px black solid";
+			if (opens) out << "; border-top: 1px black solid";
+			if (closes) out << "; border-bottom: 1px black solid";
+			out << "\"></td>";
+		}
+		for (const auto& c : row.cells) out << "<td>" << escape(c) << "</td>";
 		out << "</tr>\n";
 	}
 	// the theorem name, then the theorem itself: the theorem is always the last row
@@ -260,7 +295,8 @@ int usage(std::ostream& out, int ret)
 		<< "  --page         wrap the tables in a complete page\n"
 		<< "  --align <a>    center (default) | left | right\n"
 		<< "  --no-axioms    omit the axioms-used table\n"
-		<< "  --no-name      omit the theorem-name row\n";
+		<< "  --no-name      omit the theorem-name row\n"
+		<< "  --fitch        draw hypothesis scopes (one leading column per nesting level)\n";
 	return ret;
 }
 
@@ -282,6 +318,7 @@ int main(int argc, char* argv[])
 			if ("center" != opt.align && "left" != opt.align && "right" != opt.align) return usage(std::cerr, 1);
 		} else if ("--no-axioms" == arg) opt.axioms = false;
 		else if ("--no-name" == arg) opt.name = false;
+		else if ("--fitch" == arg) opt.fitch = true;
 		else if ("--help" == arg || "-h" == arg) return usage(std::cout, 0);
 		else if (!arg.empty() && '-' == arg[0]) return usage(std::cerr, 1);
 		else inputs.emplace_back(argv[i]);

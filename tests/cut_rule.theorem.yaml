@@ -9,29 +9,35 @@ theorem:
       - P &#9500; Q
       - 
       - Given
+      - 0
     -
       - "2."
       - Q &#9500; R
       - 
       - Given
+      - 0
     -
       - "3."
       - 
       - P
       - Hypothesis
+      - 1
     -
       - "4."
       - 
       - Q
       - modus ponens for &#9500;; (1) and (3)
+      - 1
     -
       - "5."
       - 
       - R
       - modus ponens for &#9500;; (2) and (4)
+      - 1
     -
       - "6."
       - P &#9500; R
       - 
       - &#9500;-introduction, (3)
+      - 0
   result: (P &#9500; Q) , (Q &#9500; R) &#9500; (P &#9500; R)
