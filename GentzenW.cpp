@@ -2994,10 +2994,21 @@ private:
 		}
 	};
 
+	// R4: the "before add lemma" stage (validation and side effects), parallel to add_axiom's
+	// is_not_legal_axiom / before_add_axiom_handler pair.  Defined after defined_SVO, which it
+	// feeds; an error refuses the lemma.
+	std::optional<perl::scalar> before_add_lemma(const statement_t& src);
+
 	class lemmas : public fact_database, public zaimoni::observed<statement_t> {
 	private:
+		struct lemma {
+			statement_t stmt;
+			size_t id;
+			perl::scalar rationale;	// how it was derived, as the recorder states it
+		};
+
 		std::shared_ptr<fact_database> prior;
-		std::vector<std::pair<statement_t, size_t> > _lemmas;	// \todo track how these were derived as well
+		std::vector<lemma> _lemmas;
 		std::vector<std::weak_ptr<syntactical_entailment_introduction_start> > conditional_reasoning;	// weak registry: prune expired entries when traversing
 
 		// pure cache of the mint's live output: ownership stays with the reasoning tips.
@@ -3029,43 +3040,57 @@ private:
 			ptrdiff_t i = -1;
 			for (decltype(auto) x : _lemmas) {
 				++i;
-				if (x.second == notation_id) return i;
+				if (x.id == notation_id) return i;
 			}
 			return std::nullopt;
 		}
 
 		std::pair<std::pair<statement_t, perl::scalar>, size_t> rationale(size_t n) const override {
 			if (_lemmas.size() <= n) throw std::logic_error(rationale_oob);
-			return std::pair(std::pair(_lemmas[n].first, std::string_view("prototyping lemma")), _lemmas[n].second);
+			return std::pair(std::pair(_lemmas[n].stmt, _lemmas[n].rationale), _lemmas[n].id);
 		}
 
 		// observed interface
 		void watched_by(const std::shared_ptr<zaimoni::observer<statement_t>>& src) override {
 			// this is inappropriate in many contexts, but ok for our use case
 			for (decltype(auto) lemma : _lemmas) {
-				if (!src->onNext(lemma.first)) return;
+				if (!src->onNext(lemma.stmt)) return;
 			}
 
 			seen_by(src);
 		}
 		// end observed interface
 
-		// Records a derived statement, notifying watchers.  Returns the recorded
-		// (statement, notation id); a notation already present is returned without
-		// duplication, and an axiom's notation is returned unrecorded.
 		// pure notational lookup of a lemma recorded here -- unlike record, which allocates a
 		// notation id as a side effect.  Cf. axioms::disambiguate.
 		std::optional<std::pair<statement_t, size_t> > disambiguate(const std::string& notation) const {
-			for (decltype(auto) x : _lemmas) if (notation == x.first.to_s()) return x;
+			for (decltype(auto) x : _lemmas) if (notation == x.stmt.to_s()) return std::pair(x.stmt, x.id);
 			return std::nullopt;
 		}
 
-		std::pair<statement_t, size_t> record(const statement_t& src) {
+		// the root instance, over the axioms themselves: the only one whose lemmas are
+		// unconditional, hence the only one where a definition can be registered (one made
+		// under a hypothesis is scoped to it, and its fate at discharge is undesigned)
+		bool is_root() const { return nullptr != std::dynamic_pointer_cast<axioms>(prior); }
+
+		// Records a derived statement, notifying watchers.  Returns the recorded
+		// (statement, notation id); a notation already present is returned without
+		// duplication, and an axiom's notation is returned unrecorded.  The rationale is the
+		// recorder's statement of how it was derived.  Before recording, the root instance
+		// runs the before-add-lemma stage (R4); a refusal is reported and nothing is recorded
+		// (the notation id allocated for it is simply unused).
+		std::pair<statement_t, size_t> record(const statement_t& src, perl::scalar rationale = perl::scalar(std::string_view("prototyping lemma"))) {
 			auto stage = notation_ids::get().allocate(src);
 			if (0 < stage.second && axioms::get()->size() >= stage.second) return stage;
-			if (auto have = offset(stage.second)) return _lemmas[*have];
-			_lemmas.push_back(stage);
-			notify(_lemmas.back().first);
+			if (auto have = offset(stage.second)) return std::pair(_lemmas[*have].stmt, _lemmas[*have].id);
+			if (is_root()) {
+				if (auto err = before_add_lemma(stage.first)) {
+					error_report(stage.first.origin(), *err);
+					return stage;
+				}
+			}
+			_lemmas.push_back(lemma{stage.first, stage.second, std::move(rationale)});
+			notify(_lemmas.back().stmt);
 			return stage;
 		}
 
@@ -4696,6 +4721,20 @@ private:
 
 	defined_SVO() = default;
 public:
+	// R5: a defined notation.  The phrase is stored as an undefined_SVO::_postfix entry is --
+	// a lex_node anchored at its first word with the remaining tokens in postfix() -- and,
+	// since a registered definiendum is a closed phrase (step 5: no placeholder variables),
+	// there is no slot machinery.  Lookup is notational in both directions, never by id.
+	struct entry {
+		formal::lex_node phrase;
+		perl::scalar phrase_notation;
+		gentzen::statement_t definiens;
+		perl::scalar definiens_notation;
+		gentzen::statement_t definition;	// the := statement itself, as recorded
+	};
+private:
+	std::vector<entry> _entries;
+public:
 	static defined_SVO& get() { return *_get(); }
 
 	defined_SVO(const defined_SVO&) = delete;
@@ -4703,6 +4742,26 @@ public:
 	defined_SVO& operator=(const defined_SVO&) = delete;
 	defined_SVO& operator=(defined_SVO&&) = delete;
 	~defined_SVO() = default;
+
+	size_t size() const { return _entries.size(); }
+	const entry& operator[](size_t n) const { return _entries[n]; }
+
+	// phrase -> its definition (expansion)
+	const entry* by_phrase(std::string_view notation) const {
+		for (decltype(auto) x : _entries) if (notation == x.phrase_notation.view()) return &x;
+		return nullptr;
+	}
+
+	// definiens notation -> the phrase that names it (W4's rationale direction)
+	const entry* by_definiens(std::string_view notation) const {
+		for (decltype(auto) x : _entries) if (notation == x.definiens_notation.view()) return &x;
+		return nullptr;
+	}
+
+	// registers a definition whose left-hand side is a closed phrase; idempotent for the
+	// same definiens, an error for a different one.  Defined after
+	// definiendum_placeholder_census, which it relies on.
+	std::optional<perl::scalar> declare(const gentzen::statement_t& definition);
 };
 
 // step-3 support: substitutes through parsed-arm membranes the generic
@@ -4919,16 +4978,55 @@ static formal::lex_node* detach_conclusion(const formal::lex_node& src)
 
 // How many distinct placeholder variables the left-hand side of a definition node mentions;
 // nullopt when src is not a definition node.  Zero means the definiendum is a closed phrase
-// -- the precondition for registering it as a constant defined notation.  (Non-const: the
-// census walker takes mutable handles, which are dropped here unused.)
-static std::optional<size_t> definiendum_placeholder_census(formal::lex_node& src)
+// -- the precondition for registering it as a constant defined notation.
+static std::optional<size_t> definiendum_placeholder_census(const formal::lex_node& src)
 {
 	if (!gentzen::is_definition_node(src)) return std::nullopt;
+	// the census walker takes mutable handles (dropped here unused), so it runs on a copy
+	kuroda::parser<formal::lex_node>::symbols probe(src.prefix());	// deep copy
 	formal::placeholder_match census;
 	gentzen::collect_placeholder_handles walker;
 	walker.dest_ = &census;
-	walker(src.prefix());
+	walker(probe);
 	return census.groups.size();
+}
+
+std::optional<perl::scalar> defined_SVO::declare(const gentzen::statement_t& definition)
+{
+	auto n = std::get_if<std::shared_ptr<const formal::lex_node> >(&definition);
+	if (!n || !*n) return "definition is not a lex_node statement";
+	const formal::lex_node& node = **n;
+	auto census = definiendum_placeholder_census(node);
+	if (!census) return "not a definition";
+	if (0 < *census) return "definiendum is not a closed phrase";
+
+	// the phrase in _postfix-entry form: first token anchors, the rest go to postfix()
+	kuroda::parser<formal::lex_node>::symbols tokens(node.prefix());	// deep copy
+	formal::lex_node phrase(*tokens[0]);
+	tokens.DeleteIdx(0);
+	if (!tokens.empty()) phrase.set_postfix(std::move(tokens));
+	perl::scalar phrase_notation(phrase.to_s());
+
+	gentzen::statement_t definiens(std::shared_ptr<const formal::lex_node>(new formal::lex_node(*node.postfix().front())));
+	perl::scalar definiens_notation(definiens.to_s());
+
+	if (auto prior = by_phrase(phrase_notation.view())) {
+		if (prior->definiens_notation.view() == definiens_notation.view()) return std::nullopt;	// the same definition again
+		return std::string(phrase_notation.view()) + " is already defined as " + std::string(prior->definiens_notation.view());
+	}
+	_entries.push_back(entry{std::move(phrase), std::move(phrase_notation), std::move(definiens), std::move(definiens_notation), definition});
+	return std::nullopt;
+}
+
+// R4: what the root lemmas instance runs before recording.  A definition with a closed
+// definiendum is registered as a defined notation; anything else passes through untouched.
+std::optional<perl::scalar> gentzen::before_add_lemma(const gentzen::statement_t& src)
+{
+	auto n = std::get_if<std::shared_ptr<const formal::lex_node> >(&src);
+	if (!n || !*n) return std::nullopt;
+	auto census = definiendum_placeholder_census(**n);
+	if (!census || 0 < *census) return std::nullopt;
+	return defined_SVO::get().declare(src);
 }
 
 // R3: config-time saturation of conditional definition axioms, in both directions.  A
@@ -4984,7 +5082,8 @@ public:
 		std::shared_ptr<const formal::lex_node> conclusion(detach_conclusion(*instance.instance));
 		if (!conclusion) return std::nullopt;
 		if constexpr (trace_saturation) std::cerr << "  conclusion: " << conclusion->to_s() << "\n";
-		auto ret = gentzen::lemmas::get()->record(gentzen::statement_t(conclusion));
+		// no conditional is introduced on the way, so this is the rationale
+		auto ret = gentzen::lemmas::get()->record(gentzen::statement_t(conclusion), perl::scalar(std::string_view("immediate from non-explosive axioms")));
 		if constexpr (trace_saturation) std::cerr << "  recorded " << ret.second << "\n";
 		return ret;
 	}
@@ -5278,14 +5377,19 @@ static void self_test_lex_axiom_admission()
 		const auto before = Errors.count();
 		const auto size = ax->size();
 		const auto lemmas = L->size();
+		const auto defined = defined_SVO::get().size();
 		if (auto relay = stmt->shared_anchor<formal::parsed>()) ax->add_axiom(relay);
 		else ax->add_axiom(stmt);
 		std::cout << label << ": " << stmt->to_s() << " -> axioms +" << (ax->size() - size) << ", errors +" << (Errors.count() - before);
 		if (auto found = ax->disambiguate(stmt->to_s())) std::cout << ", notation id " << found->second;
-		std::cout << ", lemmas +" << (L->size() - lemmas) << "\n";
+		std::cout << ", lemmas +" << (L->size() - lemmas) << ", defined +" << (defined_SVO::get().size() - defined) << "\n";
 		for (size_t i = lemmas; i < L->size(); ++i) {
 			auto r = L->rationale(i);
 			std::cout << "  lemma " << r.second << ": " << r.first.first.to_s() << " (" << r.first.second.view() << ")\n";
+		}
+		for (size_t i = defined; i < defined_SVO::get().size(); ++i) {
+			decltype(auto) e = defined_SVO::get()[i];
+			std::cout << "  defined: " << e.phrase.to_s() << " [" << e.phrase.postfix().size() << " postfix] := " << e.definiens.to_s() << "\n";
 		}
 	};
 	admit("lex axiom, unrecognized", "A := B");
@@ -5294,6 +5398,22 @@ static void self_test_lex_axiom_admission()
 	// reverse direction: a declaration arriving after the schema; a plain word, so the
 	// symbol catalog accepts it and nothing in the HTML fixture is affected
 	admit("declaration after schema", "@ is a binary infix symbol");
+
+	// R4/R5: the registry answers in both directions, notationally; re-recording the same
+	// definition is idempotent (lemmas dedupe by notation before the stage even runs)
+	decltype(auto) D = defined_SVO::get();
+	if (auto e = D.by_phrase("modus ponens for &#9500;")) std::cout << "by phrase: " << e->phrase.to_s() << " := " << e->definiens.to_s() << "\n";
+	else std::cout << "by phrase: not found\n";
+	if (auto e = D.by_definiens("(P &#9500; Q) , P &#9500; Q")) std::cout << "by definiens: " << e->phrase.to_s() << " (definition: " << e->definition.to_s() << ")\n";
+	else std::cout << "by definiens: not found\n";
+	std::cout << "unknown phrase: " << (D.by_phrase("modus tollens for &#9500;") ? "found (wrong)" : "not found") << "\n";
+	if (auto e = D.by_phrase("modus ponens for &#9500;")) {
+		const auto before = Errors.count();
+		const auto lemmas = L->size();
+		const auto defined = D.size();
+		auto again = L->record(e->definition);
+		std::cout << "re-record: lemmas +" << (L->size() - lemmas) << ", defined +" << (D.size() - defined) << ", errors +" << (Errors.count() - before) << ", id " << again.second << "\n";
+	}
 }
 
 // scaffold: step-4 reparse routing.  The same loose definiendum run

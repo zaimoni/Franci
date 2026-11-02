@@ -514,13 +514,25 @@ SFINAE-style definiendum cancellation).  In dependency order:
   - "Established" for the hypothesis check now covers the root lemmas instance too:
     lemmas::disambiguate is the pure notational lookup (cf. axioms::disambiguate), without
     notation_ids::allocate's id-minting side effect.
-* **R4 -- "before add lemma" stage in lemmas::record**, root instance only; declines on
-  conditional-reasoning instances.  Recognizes is_definition_node with a closed prefix and
-  hands it to defined_SVO.  Also the place the rationale text stops being "prototyping
-  lemma".
-* **R5 -- defined_SVO registry content and API.**  Entries in _postfix-entry form plus
-  definiens statement_t and source axiom; both directions exposed (phrase -> definiens,
-  definiens notation -> phrase), resolved notationally, never by baked-in id.
+* **R4 -- "before add lemma" stage.  LANDED 2026-11-02.**  gentzen::before_add_lemma
+  (forward-declared before lemmas, defined after defined_SVO) runs in lemmas::record on
+  the root instance only (lemmas::is_root: prior is the axioms instance), after the
+  axiom/duplicate short-circuits and before the push; a refusal is reported at the
+  statement's origin and nothing is recorded.  It registers an is_definition_node whose
+  definiendum census is 0 via defined_SVO::declare and passes everything else through.
+  lemmas now stores {stmt, id, rationale} per lemma (the old \todo), and record takes the
+  rationale from the recorder (default "prototyping lemma"); saturation passes
+  "immediate from non-explosive axioms".  definiendum_placeholder_census takes const&
+  (the walker runs on a copy of the prefix).
+* **R5 -- defined_SVO registry.  LANDED 2026-11-02.**  entry {phrase (a lex_node anchored
+  at the first word, the rest in postfix() -- the _postfix-entry form), phrase_notation,
+  definiens (a deep-copied lex statement_t), definiens_notation, definition (the recorded
+  := statement)}.  by_phrase (expansion) and by_definiens (W4's direction) are linear
+  notational lookups; declare is idempotent for the same definiens and refuses a different
+  one ("... is already defined as ...").  Self-test: 5 definitions registered (:=,
+  &#9500;, /, &, @), each with 3 postfix tokens; both lookups resolve "modus ponens for
+  &#9500;" <-> "(P &#9500; Q) , P &#9500; Q"; an unknown phrase does not; re-recording the
+  &#9500; definition is +0 everywhere.  Nothing consumes the registry yet (R6).
 * **R6 -- W4 rationale rendering.**  Route 2ary_infer::rationale through
   applicable_2ary::schema to the registry so cut-rule rows 4 and 5 both read
   "modus ponens for &#9500;" (open decision 2: name on the node at construction).
