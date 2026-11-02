@@ -2733,20 +2733,32 @@ private:
 	};
 
 	// forward direction.  Modus tollens has too many logic dependencies to handle this cleanly.
+	// W4: the technical-English name a defined notation gives a schema, if one does; defined
+	// after defined_SVO.  Resolved notationally from the *schema* (the base rule), never from
+	// the instantiated rule, whose notation is not the definiens.
+	std::optional<perl::scalar> defined_name_for(const statement_t& schema);
+
 	class syntactical_entailment_2ary_infer final : public fact_database {
 	private:
 		std::shared_ptr<fact_database> prior;
 		std::shared_ptr<syntactical_entailment_2ary> rule;
 		std::vector<size_t> hypothesis_ids;
 		std::pair<statement_t, size_t> inferred;
+		perl::scalar display;	// how the rule is named in the rationale: its defined name, else its notation
 
 		syntactical_entailment_2ary_infer(
 			std::shared_ptr<fact_database> p,
 			std::shared_ptr<syntactical_entailment_2ary> r,
 			decltype(hypothesis_ids)&& hids,
-			statement_t inf)
+			statement_t inf,
+			const statement_t& schema)
 			: prior(std::move(p)), rule(std::move(r)),
-			  hypothesis_ids(std::move(hids)), inferred(notation_ids::get().allocate(inf)) {}
+			  hypothesis_ids(std::move(hids)), inferred(notation_ids::get().allocate(inf)) {
+			// resolved at construction (open decision 2): the node carries its display name,
+			// degrading to the rule notation when no definition names the schema
+			if (auto name = defined_name_for(schema)) display = std::move(*name);
+			else display = rule->to_s();
+		}
 	public:
 		syntactical_entailment_2ary_infer() = default;
 		syntactical_entailment_2ary_infer(const syntactical_entailment_2ary_infer&) = default;
@@ -2783,7 +2795,7 @@ private:
 			// design document format: <rule>; label(...) and label(...).  The row ledger
 			// is responsible for rewriting each label(id) expression to a row label.
 			std::vector<perl::scalar> stage(2);
-			stage[0] = rule->to_s() + ";";
+			stage[0] = std::string(display.view()) + ";";
 			stage[1] = join(labels, " and ");
 
 			return std::pair(std::pair(inferred.first, join(stage, " ")), inferred.second);
@@ -2791,10 +2803,10 @@ private:
 
 #if 2
 		static syntactical_entailment_2ary_infer* construct(std::shared_ptr<syntactical_entailment_2ary> r, statement_t infer,
-			decltype(hypothesis_ids) hyp_ids, std::shared_ptr<fact_database> prior)
+			decltype(hypothesis_ids) hyp_ids, std::shared_ptr<fact_database> prior, const statement_t& schema)
 		{
 			if (!r || !prior) return nullptr;
-			return new syntactical_entailment_2ary_infer(std::move(prior), std::move(r), std::move(hyp_ids), std::move(infer));
+			return new syntactical_entailment_2ary_infer(std::move(prior), std::move(r), std::move(hyp_ids), std::move(infer), schema);
 		}
 #endif
 	};
@@ -3515,7 +3527,7 @@ private:
 			}
 			if (apps.empty()) break;
 			decltype(auto) a = apps.front();
-			auto next = syntactical_entailment_2ary_infer::construct(a.rule, a.inferred, a.hypothesis_ids, tip);
+			auto next = syntactical_entailment_2ary_infer::construct(a.rule, a.inferred, a.hypothesis_ids, tip, a.schema);
 			if (!next) {
 				std::cout << "enumeration self-test: 2ary_infer construction failed\n";
 				return;
@@ -4731,6 +4743,7 @@ public:
 		gentzen::statement_t definiens;
 		perl::scalar definiens_notation;
 		gentzen::statement_t definition;	// the := statement itself, as recorded
+		std::optional<gentzen::statement_t> source;	// the axiom it was derived from, when the deriver says (saturation does)
 	};
 private:
 	std::vector<entry> _entries;
@@ -4762,6 +4775,20 @@ public:
 	// same definiens, an error for a different one.  Defined after
 	// definiendum_placeholder_census, which it relies on.
 	std::optional<perl::scalar> declare(const gentzen::statement_t& definition);
+
+	// records where a registered definition came from (the schema axiom, for saturation);
+	// rendering its name then counts as a use of that axiom.  Keyed by the definition's
+	// notation; false if no such definition is registered.
+	bool attribute(const gentzen::statement_t& definition, const gentzen::statement_t& source) {
+		const auto notation = definition.to_s();
+		for (decltype(auto) x : _entries) {
+			if (notation == x.definition.to_s()) {
+				x.source = source;
+				return true;
+			}
+		}
+		return false;
+	}
 };
 
 // step-3 support: substitutes through parsed-arm membranes the generic
@@ -5018,6 +5045,12 @@ std::optional<perl::scalar> defined_SVO::declare(const gentzen::statement_t& def
 	return std::nullopt;
 }
 
+std::optional<perl::scalar> gentzen::defined_name_for(const gentzen::statement_t& schema)
+{
+	if (auto e = defined_SVO::get().by_definiens(schema.to_s())) return e->phrase_notation;
+	return std::nullopt;
+}
+
 // R4: what the root lemmas instance runs before recording.  A definition with a closed
 // definiendum is registered as a defined notation; anything else passes through untouched.
 std::optional<perl::scalar> gentzen::before_add_lemma(const gentzen::statement_t& src)
@@ -5085,6 +5118,9 @@ public:
 		// no conditional is introduced on the way, so this is the rationale
 		auto ret = gentzen::lemmas::get()->record(gentzen::statement_t(conclusion), perl::scalar(std::string_view("immediate from non-explosive axioms")));
 		if constexpr (trace_saturation) std::cerr << "  recorded " << ret.second << "\n";
+		// the definition, if it registered, descends from the schema axiom: a theorem that
+		// renders its name has used that axiom
+		if (auto own = gentzen::axioms::get()->disambiguate(schema.to_s())) defined_SVO::get().attribute(ret.first, own->first);
 		return ret;
 	}
 
@@ -5394,7 +5430,9 @@ static void self_test_lex_axiom_admission()
 	};
 	admit("lex axiom, unrecognized", "A := B");
 	admit("lex axiom, alters syntax", "A &#9500; (X is a binary infix symbol)");
-	admit("lex axiom, conditional definition", "_ is a binary infix symbol &#9500; (modus ponens for _ := (P _ Q), P &#9500; Q)");
+	// since R7 this schema is configured, so this admission duplicates it: add_axiom does
+	// not deduplicate (axioms +1), but saturation's lemmas and definitions do (+0, +0)
+	admit("lex axiom, conditional definition (configured since R7)", "_ is a binary infix symbol &#9500; (modus ponens for _ := (P _ Q), P &#9500; Q)");
 	// reverse direction: a declaration arriving after the schema; a plain word, so the
 	// symbol catalog accepts it and nothing in the HTML fixture is affected
 	admit("declaration after schema", "@ is a binary infix symbol");
@@ -5723,7 +5761,7 @@ static void run_proof_script(const std::filesystem::path& path)
 
 		if (picked < apps.size()) {	// forward inference
 			decltype(auto) a = apps[picked];
-			auto next = syntactical_entailment_2ary_infer::construct(a.rule, a.inferred, a.hypothesis_ids, tip);
+			auto next = syntactical_entailment_2ary_infer::construct(a.rule, a.inferred, a.hypothesis_ids, tip, a.schema);
 			if (!next) {
 				error_report(src, "syntactical_entailment_2ary_infer::construct failed");
 				return;
@@ -5780,8 +5818,23 @@ static void run_proof_script(const std::filesystem::path& path)
 	// reformattable to the docs folder's Gentzen/Fitch HTML tables
 	{
 		fkyaml::node::sequence_type ax;
+		std::vector<std::string> listed;
 		for (decltype(auto) s : schemas_used) {
-			if (0 < s.second && gentzen::axioms::get()->size() >= s.second) ax.emplace_back(s.first);
+			if (0 < s.second && gentzen::axioms::get()->size() >= s.second) {
+				ax.emplace_back(s.first);
+				listed.push_back(s.first);
+			}
+			// a schema rendered under its defined name has also used the axiom that
+			// conditionally defines it (the definition's source), once per such axiom
+			if (auto e = defined_SVO::get().by_definiens(s.first)) {
+				if (e->source) {
+					const auto notation = e->source->to_s();
+					if (listed.end() == std::find(listed.begin(), listed.end(), notation)) {
+						ax.emplace_back(notation);
+						listed.push_back(notation);
+					}
+				}
+			}
 		}
 
 		fkyaml::node::sequence_type proof_table;

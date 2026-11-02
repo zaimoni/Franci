@@ -533,19 +533,28 @@ SFINAE-style definiendum cancellation).  In dependency order:
   &#9500;, /, &, @), each with 3 postfix tokens; both lookups resolve "modus ponens for
   &#9500;" <-> "(P &#9500; Q) , P &#9500; Q"; an unknown phrase does not; re-recording the
   &#9500; definition is +0 everywhere.  Nothing consumes the registry yet (R6).
-* **R6 -- W4 rationale rendering.**  Route 2ary_infer::rationale through
-  applicable_2ary::schema to the registry so cut-rule rows 4 and 5 both read
-  "modus ponens for &#9500;" (open decision 2: name on the node at construction).
-* **R7 -- W5 configuration and expectations.**  The conditional axiom is **appended as the
-  next explicit axiom** (ruled 2026-09-21), i.e. after `(P &#9500; Q), P &#9500; Q` -- not
-  inserted after the "&#9500; is a binary infix symbol" line as first planned.  By then all
-  five infix symbols (:=, &#9500;, /, &, ",") are declared, so in the shipped configuration
-  the schema-against-prior-axioms direction of R3 does all the work; the
-  declaring-axiom-against-known-schemas direction is exercised only by later configuration
-  or a self-test -- self_test_lex_axiom_admission's `@` case (R3).  Also: cut-rule expected rationales;
-  theorem-file `axioms:` lists the conditional-definition axiom as used; fixture reshaping
-  per GentzenW-test-fixture.md.  (Its notation id follows from load order and is never
-  relied on -- resolution is notational.)
+* **R6 -- W4 rationale rendering.  LANDED 2026-11-02.**  Open decision 2 taken as leaned:
+  syntactical_entailment_2ary_infer carries a `display` name resolved at construction --
+  construct now takes applicable_2ary::schema, and gentzen::defined_name_for (declared
+  before the class, defined after defined_SVO) answers by_definiens on the *schema's*
+  notation, degrading to the instantiated rule's notation when nothing names it.
+  rationale() renders `<display>; label(a) and label(b)`.  Cut-rule rows 4 and 5 both
+  read "modus ponens for &#9500;; ..." with renaming carried by the labels, exactly as W4
+  specified.  Theorem-file `axioms:`: defined_SVO::entry gained `source` (saturation
+  attributes the schema axiom after recording), and the writer lists a rendered
+  definition's source once, after the schemas used.
+* **R7 -- W5 configuration and expectations.  LANDED 2026-11-02** (except fixture
+  reshaping, which stays with GentzenW-test-fixture.md).  The conditional axiom is
+  appended to cfg/core.yaml as the next explicit axiom after `(P &#9500; Q), P &#9500; Q`
+  (ruled 2026-09-21); it loads through R2's else-branch as notation id 38 (load-order
+  artifact, never relied on), and R3 saturates it at startup into four root lemmas and
+  four defined notations.  Expectations: the cut-rule console table and theorem file now
+  differ from the pre-R7 baseline in exactly rows 4 and 5 (rendered name) and the added
+  `axioms:` entry; smoke, the HTML differential and the malformed-statement probe are
+  unchanged.  The reverse saturation direction is exercised only by
+  self_test_lex_axiom_admission's `@` case, and that test's admission of the schema is now
+  a duplicate of the configured one (axioms +1, lemmas +0, defined +0: add_axiom does not
+  deduplicate; saturation's products do).
 * **R8 -- W3 occurrence class** defined_SVO::phrase + defined_SVO::global_parse + tagging
   (open decision 1).  Needed only once defined phrases are *used* inside statements; it is
   also the proper fix for the kept definiendum run re-erroring under a whole-tree reparse.
