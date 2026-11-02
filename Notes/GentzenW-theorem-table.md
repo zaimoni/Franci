@@ -4,7 +4,10 @@ Status: **v1 implemented 2026-11-02** (TheoremTable.cpp; CTest `theorem_table_cu
 against tests/cut_rule.theorem.yaml and tests/cut_rule.html).  The Fitch modification
 remains a later stage.
 
-**Implementation deviation from this spec: no fkYAML.**  The vendored fkYAML's lexer
+**fkYAML is pinned at the vendored 0.4.4** (ruled 2026-11-02): 0.5.0 exists, but migrating
+is high-risk and the only consumer that needed the round trip no longer uses it.
+
+**Implementation deviation from this spec: no fkYAML.**  The vendored fkYAML 0.4.4's lexer
 treats the "," inside a plain scalar such as `(P &#9500; Q) , P &#9500; Q` as a
 flow-sequence separator and asserts (`m_flow_context_depth > 0`, node.hpp ~8111), so it
 cannot read back what its own serializer wrote (core.yaml avoids this only because its
