@@ -540,9 +540,10 @@ SFINAE-style definiendum cancellation).  In dependency order:
   notation, degrading to the instantiated rule's notation when nothing names it.
   rationale() renders `<display>; label(a) and label(b)`.  Cut-rule rows 4 and 5 both
   read "modus ponens for &#9500;; ..." with renaming carried by the labels, exactly as W4
-  specified.  Theorem-file `axioms:`: defined_SVO::entry gained `source` (saturation
-  attributes the schema axiom after recording), and the writer lists a rendered
-  definition's source once, after the schemas used.
+  specified.  Theorem-file `axioms:`: defined_SVO::entry gained `sources` (saturation
+  attributes the declaring axiom and then the schema axiom after recording -- a defined
+  name's use is a use of everything the definition descends from), and the writer lists
+  a rendered definition's sources once each, after the schemas used.
 * **R7 -- W5 configuration and expectations.  LANDED 2026-11-02** (except fixture
   reshaping, which stays with GentzenW-test-fixture.md).  The conditional axiom is
   appended to cfg/core.yaml as the next explicit axiom after `(P &#9500; Q), P &#9500; Q`

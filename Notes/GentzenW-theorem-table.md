@@ -97,7 +97,15 @@ preceded by the axioms used, as a single-column table in the docs' style:
   the result row is the addition.)  The last proof row is technically a syntactical
   entailment introduction against both givens at once -- the 2-ary entailment that the
   result states -- but that is adequately connoted and is not made explicit.
-* The axioms-used table goes **above** the main table.
+* The axioms-used table goes **above** the main table.  Since a defined name's use is a
+  use of everything the definition descends from, the list carries the declaring axiom
+  as well as the conditional-definition axiom (ruled 2026-11-02): for the cut rule,
+  `(P &#9500; Q) , P &#9500; Q`, `&#9500; is a binary infix symbol`, then the conditional
+  axiom -- in attribution order, declaration before schema.
+* `align="center"` is emitted as-is; `align="left"` and `align="right"` also get
+  `style="clear: left"` / `style="clear: right"` (ruled 2026-11-02): a floated table that
+  clears its own side is what convinces browsers to stack the axioms-used table above the
+  proof table rather than beside it.
 * Cells are emitted verbatim except `<` and `>` (escaped).  `&` is **not** escaped: the
   content is entity-encoded already, and the docs write a bare `&` for conjunction
   (`A & B &#9500; A & B`), which browsers tolerate.  Escaping it would break every

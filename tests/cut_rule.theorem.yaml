@@ -1,6 +1,7 @@
 theorem:
   axioms:
     - (P &#9500; Q) , P &#9500; Q
+    - &#9500; is a binary infix symbol
     - _ is a binary infix symbol &#9500; (modus ponens for _ := ( P _ Q ) , P &#9500; Q)
   name: cut rule for &#9500;
   proof:

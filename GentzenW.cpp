@@ -4772,7 +4772,7 @@ public:
 		gentzen::statement_t definiens;
 		perl::scalar definiens_notation;
 		gentzen::statement_t definition;	// the := statement itself, as recorded
-		std::optional<gentzen::statement_t> source;	// the axiom it was derived from, when the deriver says (saturation does)
+		std::vector<gentzen::statement_t> sources;	// the axioms it was derived from, when the deriver says (saturation does); in attribution order
 	};
 private:
 	std::vector<entry> _entries;
@@ -4805,14 +4805,17 @@ public:
 	// definiendum_placeholder_census, which it relies on.
 	std::optional<perl::scalar> declare(const gentzen::statement_t& definition);
 
-	// records where a registered definition came from (the schema axiom, for saturation);
-	// rendering its name then counts as a use of that axiom.  Keyed by the definition's
-	// notation; false if no such definition is registered.
+	// records an axiom a registered definition came from (for saturation: the declaring
+	// axiom and the schema axiom); rendering its name then counts as a use of each.  Keyed
+	// by the definition's notation; a source already recorded is not repeated; false if no
+	// such definition is registered.
 	bool attribute(const gentzen::statement_t& definition, const gentzen::statement_t& source) {
 		const auto notation = definition.to_s();
 		for (decltype(auto) x : _entries) {
 			if (notation == x.definition.to_s()) {
-				x.source = source;
+				const auto incoming = source.to_s();
+				for (decltype(auto) s : x.sources) if (incoming == s.to_s()) return true;
+				x.sources.push_back(source);
 				return true;
 			}
 		}
@@ -5136,8 +5139,10 @@ public:
 		// no conditional is introduced on the way, so this is the rationale
 		auto ret = gentzen::lemmas::get()->record(gentzen::statement_t(conclusion), perl::scalar(std::string_view("immediate from non-explosive axioms")));
 		if constexpr (trace_saturation) std::cerr << "  recorded " << ret.second << "\n";
-		// the definition, if it registered, descends from the schema axiom: a theorem that
-		// renders its name has used that axiom
+		// the definition, if it registered, descends from the declaring axiom (the
+		// instantiated hypothesis) and the schema axiom: a theorem that renders its name has
+		// used both
+		if (auto own = gentzen::axioms::get()->disambiguate(decl.to_s())) defined_SVO::get().attribute(ret.first, own->first);
 		if (auto own = gentzen::axioms::get()->disambiguate(schema.to_s())) defined_SVO::get().attribute(ret.first, own->first);
 		return ret;
 	}
@@ -5854,11 +5859,12 @@ static void run_proof_script(const std::filesystem::path& path)
 				ax.emplace_back(s.first);
 				listed.push_back(s.first);
 			}
-			// a schema rendered under its defined name has also used the axiom that
-			// conditionally defines it (the definition's source), once per such axiom
+			// a schema rendered under its defined name has also used the axioms the
+			// definition descends from (the declaring axiom and the conditional-definition
+			// axiom), once each
 			if (auto e = defined_SVO::get().by_definiens(s.first)) {
-				if (e->source) {
-					const auto notation = e->source->to_s();
+				for (decltype(auto) source : e->sources) {
+					const auto notation = source.to_s();
 					if (listed.end() == std::find(listed.begin(), listed.end(), notation)) {
 						ax.emplace_back(notation);
 						listed.push_back(notation);

@@ -250,15 +250,21 @@ void emit(std::ostream& out, const theorem& src, const options& opt)
 	if (opt.fitch) for (const auto& row : src.proof) scopes = std::max(scopes, row.depth);
 	const size_t columns = 4 + scopes;
 
+	// a floated table (align left/right) also clears its side, which is what makes browsers
+	// stack the axioms-used table above the proof table instead of beside it
+	const std::string table_open = "center" == opt.align
+		? "<table align=\"center\""
+		: "<table align=\"" + opt.align + "\" style=\"clear: " + opt.align + "\"";
+
 	if (opt.axioms && !src.axioms.empty()) {
-		out << "<table align=\"" << opt.align << "\">\n"
+		out << table_open << ">\n"
 			<< "\t<tr><th>Axioms used</th></tr>\n";
 		for (const auto& x : src.axioms) out << "\t<tr><td align=\"left\">" << escape(x) << "</td></tr>\n";
 		out << "</table>\n";
 	}
 
 	// cellspacing="0" so the scope borders join, as the docs' Fitch tables have it
-	out << "<table align=\"" << opt.align << "\"" << (scopes ? " cellspacing=\"0\"" : "") << ">\n\t<tr>";
+	out << table_open << (scopes ? " cellspacing=\"0\"" : "") << ">\n\t<tr>";
 	if (scopes) out << "<th colspan=\"" << (scopes + 1) << "\"></th>";
 	else out << "<th></th>";
 	out << "<th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>\n";
