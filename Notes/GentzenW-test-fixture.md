@@ -44,13 +44,14 @@ runnable from Visual Studio with minimal ceremony.
   **null, not ""** — a comparator must treat null cells as empty strings.  Byte
   comparison also needs newline normalization (the repo is CRLF on checkout).
 
-## Runner options (decision deferred)
+## Runner: CTest (ruled 2026-11-02)
 
-* Simplest: a `.cmd` script doing copy / run-with-redirection / compare, invocable from
-  a VS external tool or terminal.
-* Better integrated: CTest `add_test` in CMakeLists.txt driving the same steps (note
-  the existing "EXCLUDE_FROM_ALL means can't test" comment there), plus a tiny compare
-  helper since CTest has no YAML-aware diff.
+Visual Studio wants CTest, so: `add_test` in CMakeLists.txt driving copy /
+run-with-redirection / compare (note the existing "EXCLUDE_FROM_ALL means can't test"
+comment there), plus a tiny compare helper since CTest has no YAML-aware diff.  The
+TheoremTable tool (GentzenW-theorem-table.md) is the natural second stage of the same
+test: theorem file -> HTML, byte-compared.  (A `.cmd` script was the rejected
+alternative.)
 
 ## Known feature work expected to reshape the fixture
 
@@ -58,7 +59,9 @@ runnable from Visual Studio with minimal ceremony.
 
 * Defined notations (see GentzenW-defined-notations.md): rationale strings become
   "modus ponens for &#9500;; (1) and (3)" etc., and the `axioms:` list gains the
-  conditional-definition axiom once it is used.
+  conditional-definition axiom once it is used.  **Landed 2026-11-02 (R6/R7).**
+* Fitch modification (see GentzenW-theorem-table.md): the theorem writer emits the
+  hypothesis nesting depth per row; max depth 1 for the cut rule.
 * N-ary (>2 statements) `given:`/`hypothesis:` levels.
 * A "lemmas used" key alongside `axioms:` once previously proven theorems can be
   applied as rules.

@@ -52,12 +52,30 @@ The established format (SubatomicPhysicsOfMath_ArithmeticTables.html and others)
 	<tr><td>4.</td><td></td><td>Q</td><td>modus ponens for &#9500;; (1) and (3)</td></tr>
 	<tr><td>5.</td><td></td><td>R</td><td>modus ponens for &#9500;; (2) and (4)</td></tr>
 	<tr><td>6.</td><td>P &#9500; R</td><td></td><td>&#9500;-introduction, (3)</td></tr>
-	<tr><th colspan="4">cut rule for &#9500;</th></tr>
+	<tr><th align="center" colspan="4">cut rule for &#9500;</th></tr>
+	<tr><th align="center" colspan="4">(P &#9500; Q) , (Q &#9500; R) &#9500; (P &#9500; R)</th></tr>
 </table>
 ```
 
-* Header row as above; the theorem **name** is the closing `<th colspan="4">` row, which
-  is how the docs caption their tables.
+preceded by the axioms used, as a single-column table in the docs' style:
+
+```html
+<table align="center">
+	<tr><th>Axioms used</th></tr>
+	<tr><td align="left">(P &#9500; Q) , P &#9500; Q</td></tr>
+	<tr><td align="left">_ is a binary infix symbol &#9500; (modus ponens for _ := ( P _ Q ) , P &#9500; Q)</td></tr>
+</table>
+```
+
+* Header row as above.  **Two table-spanning, centered rows close the table (ruled
+  2026-11-02): the theorem name, then the theorem itself** (`result:`).  The theorem is
+  always the last row; the name is by default the row before it.  Both are
+  `<th align="center" colspan="N">` with N = 4 before the Fitch modification; each extra
+  Fitch column adds one to N.  (The docs' existing tables caption with the name alone;
+  the result row is the addition.)  The last proof row is technically a syntactical
+  entailment introduction against both givens at once -- the 2-ary entailment that the
+  result states -- but that is adequately connoted and is not made explicit.
+* The axioms-used table goes **above** the main table.
 * Cells are emitted verbatim except `<` and `>` (escaped).  `&` is **not** escaped: the
   content is entity-encoded already, and the docs write a bare `&` for conjunction
   (`A & B &#9500; A & B`), which browsers tolerate.  Escaping it would break every
@@ -72,34 +90,34 @@ TheoremTable [options] <file.theorem.yaml>...
   --page           wrap the table(s) in a complete page: the docs' <head> (charset,
                    the shared <style> block, <title> = theorem name), nothing else
   --align <a>      center (default) | left | right -- the docs float tables both ways
-  --axioms         precede the table with "<p>Axioms used:</p><ul>...</ul>"
-  --result         follow the table with "<p>Result: ...</p>"
+  --no-axioms      omit the axioms-used table (for pasting into a page that already
+                   states them)
+  --no-name        omit the theorem-name row (the theorem row is never omitted)
 ```
 
-Several inputs produce several tables in one output, in argument order.  `--axioms` and
-`--result` default off: the docs state axioms in their own tables and the result is the
-last row anyway; both exist for stand-alone pages.
+Several inputs produce several table pairs in one output, in argument order.
 
 Exit codes: 0; 1 for a file that does not parse, lacks `theorem:`/`proof:`, or has a
 row that is not exactly four cells (reported with file and row index, then the next
 file is still processed).  Null cells are empty strings.
 
-## Fitch scoping -- deferred, with a decision
+## Fitch modification -- a later stage, with the design settled
 
 The docs' Fitch-style tables (LogicV2, "Gentzen format schema") draw hypothesis scopes
-with a leading cell carrying `border-left` (and `border-top` / `border-bottom` on the
-first / last row of the scope), plus labels like `(a)`.  The theorem file carries **no
-scope information**, so the tool cannot draw them from the data.  Two ways to get there:
+with one extra leading column per nesting level, the cell carrying `border-left` (and
+`border-top` / `border-bottom` on the first / last row of the scope).  Each extra column
+adds one to the colspan of the name and theorem rows.  The theorem file carries **no
+scope information** today, so the tool cannot draw scopes from the data; the theorem
+writer must emit the nesting depth per row (a fifth cell, or a parallel `scopes:` key)
+-- a GentzenW change, so a later GentzenW commit.  Inferring depth from rationale text
+("Hypothesis" opens, "&#9500;-introduction, (n)" closes) was considered and rejected:
+it couples the tool to wording the defined-notations work has already changed once.
 
-1. Infer from rationale text: "Hypothesis" opens a scope, "&#9500;-introduction, (n)"
-   closes the one opened at row n.  Works for everything the session writes today, but
-   couples the tool to rationale wording that the defined-notations work has already
-   changed once.
-2. Have the theorem writer emit scope depth per row (a fifth cell, or a parallel
-   `scopes:` key).  Robust; a GentzenW change, so it belongs to a later GentzenW commit.
+For the revised cut_rule.theorem.yaml the maximum nesting depth is 1: row 6's
+syntactical entailment introduction for P &#9500; R takes the depth 1 -> 0, which forces
+0 -> 1 at row 3, the hypothesis P.  Rows 1-2 and 6 are at depth 0, rows 3-5 at depth 1.
 
-**Decision: v1 emits the flat Gentzen table only.**  Option 2 is the intended path to
-`--fitch`; the fixture note's "anticipated reshaping" list should gain it.
+**v1 emits the flat Gentzen table only** (colspan 4).
 
 ## Implementation notes
 
@@ -115,5 +133,6 @@ scope information**, so the tool cannot draw them from the data.  Two ways to ge
 * Test: `tests/cut_rule.theorem.yaml` (generate once from a known-good run -- all the
   features that were going to reshape it have now landed except N-ary levels and
   "lemmas used") and `tests/cut_rule.html` as expected output; byte comparison is fine
-  for HTML, with newline normalization.  This doubles as the first half of the deferred
-  regression fixture.
+  for HTML, with newline normalization.  Driven by **CTest** (ruled 2026-11-02: Visual
+  Studio wants CTest; see GentzenW-test-fixture.md), so it doubles as the first half of
+  the deferred regression fixture.
