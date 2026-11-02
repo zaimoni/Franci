@@ -558,6 +558,9 @@ SFINAE-style definiendum cancellation).  In dependency order:
 * **R8 -- W3 occurrence class** defined_SVO::phrase + defined_SVO::global_parse + tagging
   (open decision 1).  Needed only once defined phrases are *used* inside statements; it is
   also the proper fix for the kept definiendum run re-erroring under a whole-tree reparse.
+  **PARKED 2026-11-02**: the last open item of this subproject; left open deliberately
+  until a statement actually uses a defined phrase.  R9 already made the substitution
+  walk kind-agnostic, so R8 needs no walk change when it comes.
 * **R9 -- fork A(b) unification.  LANDED 2026-11-02.**  gentzen::uniformly_substitutable
   (declared right before syntactical_entailment_2ary) is the one virtual: `result
   substitute(const prepared_rename&) const`, with a three-way outcome -- unchanged
