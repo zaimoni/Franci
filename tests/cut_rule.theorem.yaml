@@ -1,0 +1,37 @@
+theorem:
+  axioms:
+    - (P &#9500; Q) , P &#9500; Q
+    - _ is a binary infix symbol &#9500; (modus ponens for _ := ( P _ Q ) , P &#9500; Q)
+  name: cut rule for &#9500;
+  proof:
+    -
+      - "1."
+      - P &#9500; Q
+      - 
+      - Given
+    -
+      - "2."
+      - Q &#9500; R
+      - 
+      - Given
+    -
+      - "3."
+      - 
+      - P
+      - Hypothesis
+    -
+      - "4."
+      - 
+      - Q
+      - modus ponens for &#9500;; (1) and (3)
+    -
+      - "5."
+      - 
+      - R
+      - modus ponens for &#9500;; (2) and (4)
+    -
+      - "6."
+      - P &#9500; R
+      - 
+      - &#9500;-introduction, (3)
+  result: (P &#9500; Q) , (Q &#9500; R) &#9500; (P &#9500; R)

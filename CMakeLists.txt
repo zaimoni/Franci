@@ -45,6 +45,10 @@ target_link_libraries(GentzenW z_kuroda z_log_adapter z_stdio_log z_memory z_aut
 target_link_options(GentzenW PRIVATE /FORCE:MULTIPLE)
 target_compile_definitions(GentzenW PUBLIC GENTZEN_DRIVER)
 
+# <script>.theorem.yaml -> HTML proof table; see Notes/GentzenW-theorem-table.md.
+# Header-only fkYAML, no Zaimoni.STL: the file format is its only contract with GentzenW.
+add_executable(TheoremTable TheoremTable.cpp)
+
 # Stage every linked SHARED dependency (currently just z_memory) next to the .exe.
 foreach(tgt Franci Franci_console LogicC GentzenW)
     add_custom_command(TARGET ${tgt} POST_BUILD
@@ -52,5 +56,17 @@ foreach(tgt Franci Franci_console LogicC GentzenW)
             $<TARGET_RUNTIME_DLLS:${tgt}> $<TARGET_FILE_DIR:${tgt}>
         COMMAND_EXPAND_LISTS)
 endforeach()
+
+# Regression tests (CTest; see Notes/GentzenW-test-fixture.md).  Each is a CMake script so
+# it can stage files, redirect stdin and compare outputs without a shell.
+enable_testing()
+add_test(NAME gentzenw_cut_rule
+    COMMAND ${CMAKE_COMMAND} -DGENTZENW=$<TARGET_FILE:GentzenW>
+        -DSRC=${CMAKE_SOURCE_DIR} -DBIN=${CMAKE_BINARY_DIR}/ctest
+        -P ${CMAKE_SOURCE_DIR}/tests/cut_rule.cmake)
+add_test(NAME theorem_table_cut_rule
+    COMMAND ${CMAKE_COMMAND} -DTHEOREM_TABLE=$<TARGET_FILE:TheoremTable>
+        -DSRC=${CMAKE_SOURCE_DIR} -DBIN=${CMAKE_BINARY_DIR}/ctest
+        -P ${CMAKE_SOURCE_DIR}/tests/theorem_table.cmake)
 
 # EXCLUDE_FROM_ALL means "can't test"

@@ -1,7 +1,19 @@
 # TheoremTable: `*.theorem.yaml` -> HTML proof table (specification)
 
-Status: **specified 2026-11-02, not implemented**.  Do not implement until Kenneth
-green-lights it.
+Status: **v1 implemented 2026-11-02** (TheoremTable.cpp; CTest `theorem_table_cut_rule`
+against tests/cut_rule.theorem.yaml and tests/cut_rule.html).  The Fitch modification
+remains a later stage.
+
+**Implementation deviation from this spec: no fkYAML.**  The vendored fkYAML's lexer
+treats the "," inside a plain scalar such as `(P &#9500; Q) , P &#9500; Q` as a
+flow-sequence separator and asserts (`m_flow_context_depth > 0`, node.hpp ~8111), so it
+cannot read back what its own serializer wrote (core.yaml avoids this only because its
+comma-bearing axioms are double-quoted).  TheoremTable therefore reads the writer's fixed
+subset directly: a `theorem:` mapping with keys in any order, block sequences, plain or
+double-quoted scalars, `- ` with nothing after for an empty cell.  About 80 lines, and
+the tool now has no dependencies at all.  Consequence for the fixture note: its
+"deserialize-and-compare" advice does not work with this fkYAML; byte comparison modulo
+line endings is what the tests do, which is exact because the serializer is deterministic.
 
 ## Purpose
 

@@ -1,8 +1,16 @@
 # GentzenW regression fixture (work item #7 of the cut-rule plan)
 
-Status: **deferred by design**.  Several planned features will radically change the
-fixture's appearance, so this note records the design well enough to implement after
-they land.  Do not implement until Kenneth green-lights it.
+Status: **implemented 2026-11-02** as CTest `gentzenw_cut_rule` (tests/cut_rule.cmake,
+driven by `cmake -P`): stages GentzenW.exe, its runtime DLLs, cfg/core.yaml and a copy of
+the script under `<build>/ctest/cut_rule/`, runs the session with
+`execute_process(INPUT_FILE tests/cut_rule_picks.txt)` (no shell, no BOM), and
+byte-compares the theorem file against tests/cut_rule.theorem.yaml modulo line endings.
+The second stage, `theorem_table_cut_rule`, renders that file to HTML and compares it
+with tests/cut_rule.html (see GentzenW-theorem-table.md).  Run with `ctest --test-dir
+<build> --output-on-failure`; Visual Studio's Test Explorer picks them up.  The
+remaining anticipated reshaping (N-ary levels, "lemmas used", Fitch depth) will change
+the expected files when it lands.  The design notes below are kept as the record of why
+it is built this way.
 
 ## Purpose
 
@@ -38,11 +46,14 @@ runnable from Visual Studio with minimal ceremony.
   fixture run cannot dirty `tests/`.
 * **Exit codes**: 0 on success (`Errors.count()` drives `EXIT_FAILURE`); the abandoned
   paths print explicit messages.
-* **YAML comparison**: prefer deserialize-and-compare over byte comparison.  fkYAML
+* **YAML comparison**: byte comparison modulo line endings (`cmake -E compare_files
+  --ignore-eol`), which is exact because fkYAML serializes deterministically: it
   alphabetizes mapping keys, serializes the proof rows in block form (not the flow form
-  sketched in planning), and writes empty cells as empty scalars, which round-trip as
-  **null, not ""** — a comparator must treat null cells as empty strings.  Byte
-  comparison also needs newline normalization (the repo is CRLF on checkout).
+  sketched in planning), and writes empty cells as empty scalars.  Deserialize-and-compare
+  was the original preference but **does not work**: the vendored fkYAML cannot
+  deserialize its own output when a plain scalar contains "," (see
+  GentzenW-theorem-table.md).  If the serializer ever changes, regenerate the expected
+  file rather than loosening the comparison.
 
 ## Runner: CTest (ruled 2026-11-02)
 
