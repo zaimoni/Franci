@@ -1797,7 +1797,19 @@ private:
 				error_report(src->origin(), "axiom not tagged as recognized");
 				return;
 			}
-			// other legality tests are specific to the Gentzen syntax.
+			// other legality tests are specific to the Gentzen syntax.  A conditional's
+			// conclusion may not alter syntax: the parsed statement kinds carry that rule as
+			// is_not_legal_axiom(false) (phrase_postfix: "cannot conditionally alter syntax").
+			// The hypothesis is an assumption, not an assertion, and is not tested --
+			// "_ is a binary infix symbol" is a legal hypothesis, not a legal axiom.
+			if (is_unary_syntactical_entailment(*src)) {
+				if (auto conclusion = src->postfix().front()->c_anchor<formal::parsed>()) {
+					if (auto err = conclusion->is_not_legal_axiom(false)) {
+						error_report(src->postfix().front()->origin(), *err);
+						return;
+					}
+				}
+			}
 
 			// "before add axiom" tests go here (both validation, and side effects)
 
@@ -4421,9 +4433,15 @@ private:
 						if (auto relay = stage[0]->shared_anchor<formal::parsed>()) {
 							if constexpr (trace_load) std::cerr << "adding axiom " << relay->to_s() << "\n";
 							instinct.add_axiom(relay);
-						} else if constexpr(trace_load) {
-							warning_report(*stage[0], stage[0]->to_s() + ": axiom is not a parsed object");
-							std::cerr << stage[0]->anchor_code() << "\n";
+						} else {
+							// a statement still in lex_node form (the conditional definition
+							// axiom is a &#9500;-anchored node): admit it as-is; add_axiom's
+							// gates report an unrecognized or illegal one.  Ownership moves
+							// out of the symbols container.
+							formal::lex_node* raw = stage[0];
+							stage[0] = nullptr;
+							if constexpr (trace_load) std::cerr << "adding lex_node axiom " << raw->to_s() << "\n";
+							instinct.add_axiom(std::shared_ptr<const formal::lex_node>(raw));
 						}
 					}
 				} catch (std::exception& e) {
@@ -5130,6 +5148,48 @@ static void self_test_diagnostic_walks()
 		<< ", Error flag " << ((deep->code() & formal::Error) ? 1 : 0) << "\n";
 }
 
+// R2: lex_node axioms.  Exercises axioms::add_axiom(shared_ptr<const lex_node>)'s gates
+// directly -- the loader's else-branch in undefined_SVO::get() is the same call, and is
+// exercised by the configuration once the conditional axiom is appended (R7).  Runs last:
+// a successful admission grows the global axiom list.
+static void self_test_lex_axiom_admission()
+{
+	auto parse = [](const char* label, const char* text) -> std::shared_ptr<const formal::lex_node> {
+		std::vector<std::string> src_lines;
+		src_lines.push_back(text);
+		formal::src_location loc(std::pair(1, 0), std::shared_ptr<const std::filesystem::path>(new std::filesystem::path(std::string("self-test:") + label)));
+		auto lines = to_lines(src_lines, loc);
+		if (lines.empty()) return nullptr;
+		auto stage = TokenGrammar().apply(formal::lex_node::pop_front(lines));
+		TokenGrammar().complete_parse(stage);
+		stage = GentzenGrammar().apply(stage);
+		GentzenGrammar().complete_parse(stage);
+		gentzen::report_diagnostics(stage);
+		if (1 != stage.size() || !stage[0]) return nullptr;
+		formal::lex_node* raw = stage[0];	// ownership moves out of the symbols container, as in the loader
+		stage[0] = nullptr;
+		return std::shared_ptr<const formal::lex_node>(raw);
+	};
+
+	decltype(auto) ax = gentzen::axioms::get();
+	auto admit = [&](const char* label, const char* text) {
+		auto stmt = parse(label, text);
+		if (!stmt) {
+			std::cout << label << ": did not parse to a single statement\n";
+			return;
+		}
+		const auto before = Errors.count();
+		const auto size = ax->size();
+		ax->add_axiom(stmt);
+		std::cout << label << ": " << stmt->to_s() << " -> axioms +" << (ax->size() - size) << ", errors +" << (Errors.count() - before);
+		if (auto found = ax->disambiguate(stmt->to_s())) std::cout << ", notation id " << found->second;
+		std::cout << "\n";
+	};
+	admit("lex axiom, unrecognized", "A := B");
+	admit("lex axiom, alters syntax", "A &#9500; (X is a binary infix symbol)");
+	admit("lex axiom, conditional definition", "_ is a binary infix symbol &#9500; (modus ponens for _ := (P _ Q), P &#9500; Q)");
+}
+
 // scaffold: step-4 reparse routing.  The same loose definiendum run
 // [modus ponens for &#9500;] goes through reparse<false> (GentzenGrammar only) and
 // reparse<true> (TokenGrammar first); the run is built as the instantiation builds it,
@@ -5561,6 +5621,7 @@ int main(int argc, char* argv[], char* envp[])
 			self_test_phrase_matcher();
 			self_test_diagnostic_walks();
 			self_test_reparse_routing();
+			self_test_lex_axiom_admission();
 		} catch (const std::exception& e) {
 			report_exception("self-test exception", e);
 		}

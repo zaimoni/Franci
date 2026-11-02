@@ -447,22 +447,20 @@ SFINAE-style definiendum cancellation).  In dependency order:
 
 *After the stop-line*
 
-* **R2 -- axioms accept lex_node statements.  IN PROGRESS (checkpoint 06e6302,
-  2026-09-21).**  axioms::add_axiom(std::shared_ptr<const formal::lex_node>) exists: it
-  requires formal::Recognized, then stores and notifies.  _axioms, rationale(), notify and
-  disambiguate were already statement_t, so nothing else needed widening.  The conditional
-  axiom passes the gate -- its root carries Recognized from tag_syntactical_entailment.
-  Blocks W5.  Remaining:
-  - **Loader**: undefined_SVO::get()'s axioms loop still adds only
-    stage[0]->shared_anchor<formal::parsed>() and drops anything else (silently unless
-    trace_load).  It needs an else-branch that moves stage[0] out of the symbols container
-    into a shared_ptr<const lex_node>.
-  - **Legality slot** ("specific to the Gentzen syntax").  The existing rule "cannot
-    conditionally alter syntax" is phrase_postfix::is_not_legal_axiom(false); for a unary
-    entailment it applies to the *conclusion*, not the hypothesis.  "_ is a binary infix
-    symbol" is a legal hypothesis; H &#9500; (X is a binary infix symbol) is not a legal
-    axiom.
-  - **"Before add axiom" slot**: where R3 plugs in.
+* **R2 -- axioms accept lex_node statements.  LANDED 2026-11-02** (on checkpoint
+  06e6302).  axioms::add_axiom(std::shared_ptr<const formal::lex_node>) requires
+  formal::Recognized, then, for a unary entailment, asks a parsed conclusion
+  is_not_legal_axiom(false) -- phrase_postfix's "cannot conditionally alter syntax" -- and
+  refuses on error; the hypothesis is an assumption, not an assertion, and is not tested.
+  Then stores and notifies.  The loader's else-branch in undefined_SVO::get() moves a
+  non-parsed stage[0] out of the symbols container into a shared_ptr<const lex_node> and
+  admits it through the same call (it used to drop such statements, silently unless
+  trace_load).  self_test_lex_axiom_admission: `A := B` refused (not recognized);
+  `A &#9500; (X is a binary infix symbol)` refused at the conclusion's location; the
+  conditional definition axiom admitted as notation id 38, errors +0.  The "before add
+  axiom" slot (validation and side effects) is a comment in add_axiom; R3 plugs in there.
+  Nothing else needed widening: _axioms, rationale(), notify and disambiguate were already
+  statement_t.
   (The alternative -- a syntactical_entailment_1ary class, open decision 3 -- would give
   virtual dispatch and, unlike a definition-statement class, does trigger an inference
   schema; but it puts the definition behind a membrane that steps 3-5 work without.)
@@ -585,8 +583,8 @@ instances.  *Unrelated carry-over*: cut-rule plan step 7 (GentzenW-test-fixture.
 3. Scope of the W2 recognizer: a general syntactical_entailment_1ary class now, or a
    narrower conditional-definition recognizer with generalization deferred.  Lean:
    narrow first.
-4. Saturation instances whose definiens is not an established statement (R3): register
-   every instance that instantiates cleanly -- a definition is only a notation, and W4's
-   lookup simply never fires for the unestablished ones -- or register only those whose
-   definiens resolves.  Lean: register all that instantiate cleanly; it is the simpler
-   rule and matches "one instance per binary infix symbol" under Resolved decisions.
+4. **Resolved 2026-11-02: register all** instances that instantiate cleanly (R3).  A
+   definition is only a notation, so an unestablished definiens is not an error; beyond
+   being the simpler rule, the registered-but-unestablished entries are a signal an
+   exploration algorithm can act on -- whether the notation is provable should be checked.
+   W4's lookup simply never fires for them.
