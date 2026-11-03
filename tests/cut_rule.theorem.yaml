@@ -39,6 +39,6 @@ theorem:
       - "6."
       - P &#9500; R
       - 
-      - &#9500;-introduction, (3)
+      - &#9500; introduction, (3) and (5)
       - 0
   result: (P &#9500; Q) , (Q &#9500; R) &#9500; (P &#9500; R)

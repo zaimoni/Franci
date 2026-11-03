@@ -11,6 +11,14 @@ table given `cellspacing="0"` so the borders join, the header's blank `<th>` and
 and theorem rows widened by `colspan`.  A file without the fifth cell renders at depth 0.
 Expected output: tests/cut_rule_fitch.html (one scope column; rows 3-5 boxed).
 
+**Introduction rationale matches the design document (ruled 2026-11-02):** `&#9500; introduction,
+(hypothesis) and (last line of the scope)`, unhyphenated, as the docs write it everywhere else;
+the generated row 6 of the cut rule reads `&#9500; introduction, (3) and (5)`.  The docs page
+adopts the generated axiom spellings (`(P &#9500; Q) , P &#9500; Q`, `( P _ Q ) , P &#9500; Q`)
+rather than the other way round, and italicizes *modus ponens* in prose only: generated
+tables cannot carry markup yet, a subproject deferred until it is known whether an fkYAML
+upgrade changes anything (it will bite once complex *i* and Euler's *e* are reached).
+
 **fkYAML is pinned at the vendored 0.4.4** (ruled 2026-11-02): 0.5.0 exists, but migrating
 is high-risk and the only consumer that needed the round trip no longer uses it.
 
@@ -73,7 +81,7 @@ The established format (SubatomicPhysicsOfMath_ArithmeticTables.html and others)
 	<tr><td>3.</td><td></td><td>P</td><td>Hypothesis</td></tr>
 	<tr><td>4.</td><td></td><td>Q</td><td>modus ponens for &#9500;; (1) and (3)</td></tr>
 	<tr><td>5.</td><td></td><td>R</td><td>modus ponens for &#9500;; (2) and (4)</td></tr>
-	<tr><td>6.</td><td>P &#9500; R</td><td></td><td>&#9500;-introduction, (3)</td></tr>
+	<tr><td>6.</td><td>P &#9500; R</td><td></td><td>&#9500; introduction, (3) and (5)</td></tr>
 	<tr><th align="center" colspan="4">cut rule for &#9500;</th></tr>
 	<tr><th align="center" colspan="4">(P &#9500; Q) , (Q &#9500; R) &#9500; (P &#9500; R)</th></tr>
 </table>
@@ -140,7 +148,7 @@ adds one to the colspan of the name and theorem rows.  The theorem file carries 
 scope information** today, so the tool cannot draw scopes from the data; the theorem
 writer must emit the nesting depth per row (a fifth cell, or a parallel `scopes:` key)
 -- a GentzenW change, so a later GentzenW commit.  Inferring depth from rationale text
-("Hypothesis" opens, "&#9500;-introduction, (n)" closes) was considered and rejected:
+("Hypothesis" opens, "&#9500; introduction, (n) and (m)" closes) was considered and rejected:
 it couples the tool to wording the defined-notations work has already changed once.
 
 For the revised cut_rule.theorem.yaml the maximum nesting depth is 1: row 6's

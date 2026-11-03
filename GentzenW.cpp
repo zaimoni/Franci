@@ -2953,8 +2953,9 @@ private:
 		std::shared_ptr<fact_database> prior;
 		const syntactical_entailment_introduction_start* const hypotheses;
 		std::pair<statement_t, size_t> inferred;
+		size_t conclusion_id = 0;	// the scope's last line, cited alongside the hypotheses
 
-		static const constexpr std::string_view str_introduction = std::string_view("&#9500;-introduction,");
+		static const constexpr std::string_view str_introduction = std::string_view("&#9500; introduction,");
 
 		// C++-side precondition: construct() has normalized the inferred tree's root through
 		// symbol_catalog::anchor_symbol_parse.  Not NDEBUG-guarded by design: this is
@@ -2964,8 +2965,8 @@ private:
 			return std::shared_ptr<const formal::lex_node>(infer.release());
 		}
 
-		syntactical_entailment_introduction(std::unique_ptr<formal::lex_node>& infer, const syntactical_entailment_introduction_start* hyp, const std::shared_ptr<fact_database>& assume)
-			: prior(assume), hypotheses(hyp), inferred(notation_ids::get().allocate(verified(infer)))
+		syntactical_entailment_introduction(std::unique_ptr<formal::lex_node>& infer, const syntactical_entailment_introduction_start* hyp, const std::shared_ptr<fact_database>& assume, size_t conclusion)
+			: prior(assume), hypotheses(hyp), inferred(notation_ids::get().allocate(verified(infer))), conclusion_id(conclusion)
 			{}
 	public:
 		syntactical_entailment_introduction() = default;
@@ -2993,15 +2994,21 @@ private:
 			stage2[0] = std::string_view("label(");
 			stage2[2] = std::string_view(")");
 
+			// design document format: &#9500; introduction, (hypothesis) and (last line of the
+			// scope); several hypotheses list as (a), (a') and (b).  The row ledger rewrites
+			// each label(id) to a row label.
 			auto ids = hypotheses->hypothesis_ids();
-			std::vector<perl::scalar> stage(ids.size() + 1);
-
-			stage[0] = str_introduction;
+			std::vector<perl::scalar> labels(ids.size());
 			ptrdiff_t i = ids.size();
 			while (0 <= --i) {
 				stage2[1] = std::to_string(ids[i]);
-				stage[i + 1] = join(stage2, "");
+				labels[i] = join(stage2, "");
 			}
+			stage2[1] = std::to_string(conclusion_id);
+
+			std::vector<perl::scalar> stage(2);
+			stage[0] = str_introduction;
+			stage[1] = join(labels, ", ") + " and " + join(stage2, "");
 
 			return std::pair(std::pair(inferred.first, join(stage, " ")), inferred.second);
 		}
@@ -3028,7 +3035,7 @@ private:
 			// catalog for the real code and offset rather than hard-coding them
 			if (!symbol_catalog::anchor_symbol_parse(*ret)) return std::nullopt;
 
-			return std::unique_ptr<syntactical_entailment_introduction>(new syntactical_entailment_introduction(ret, hypotheses, src));
+			return std::unique_ptr<syntactical_entailment_introduction>(new syntactical_entailment_introduction(ret, hypotheses, src, conclusion.second));
 		}
 	};
 

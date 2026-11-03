@@ -185,16 +185,16 @@
 <span style="border: 1px solid black; display:block; float:right">
     <ol type="I">
         <li><a href="#back-to-eden">Back to Eden</a></li>
-        <li><a href="#cut_rule">Cut rule for &#9500;</a></li>
-        <li><a href="#conjunction-elimination">Conjunction Elimination</a></li>
-        <li><a href="#conjunction-introduction">Conjunction Introduction</a></li>
+        <li><a href="#cut-rule">Cut rule for &#9500;</a></li>
+        <li><a href="#conjunction-elimination">Conjunction elimination</a></li>
+        <li><a href="#conjunction-introduction">Conjunction introduction</a></li>
     </ol>
 </span>
 <p>Our first formalization of logic and set theory, generally follows the instructions for Von Neumann-Bernays-G&ouml;del set theory.  
     That is, it is a mathematically platonist formalization.  What would a formalization that took non-formalized physical notation as given -- 
     the Wittgenstein approach -- look like?</p>
-<p>We start by requiring that a successful formalization, have no testable difference between non-formalized physical notation, 
-    and mathematically modeled notation.  That is, the Wittgenstein given is philosophically heavy.  According to our first formalization,
+<p>We start by requiring that there be no testable difference between non-formalized physical notation, 
+    and a successful formalization's mathematically modeled notation.  That is, the Wittgenstein given is philosophically heavy.  According to our first formalization,
     we are simply assuming:</p>
 <ul>
     <li>[W1] We may explicitly construct finite sequences, of finite sequences, of finite sequences of textual glyphs.</li>
@@ -202,7 +202,7 @@
     <li>[W3] Recognizing finite subsequences of textual glyphs, is a reliable process.</li>
 </ul>    
 <p>Our first formalization tells us that a finite sequence of textual glyphs is defined as a formal word, that each line 
-    of a Gentzen-format proof is a finite sequence of formal words, and the entire Gentzen-format proof is a finite sequence
+    of a Gentzen-format proof is a finite sequence of formal words, and that the entire Gentzen-format proof is a finite sequence of
     lines.</p>
 <h2 id="back-to-eden" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px">Back to Eden</h2>
 <p>We start by declaring some English phrases about formal syntax, to be undefined notations.</p>
@@ -226,56 +226,56 @@
     <tr><td align="left">is not a placeholder symbol for</td></tr>
 -->    
 </table>
-<p>The intended interpretation, is the usual formal English meaning of these phrases.  In terms of our first formalization, viewing notations 
+<p>The intended interpretation, is the usual technical English meaning of these phrases.  In terms of our first formalization, viewing notations 
     as finite sequences of formal words:</p>
 <ul>
     <li>An axiom does not contain either a symbol-placeholder symbol, or a placeholder symbol.  An axiom may contain symbols with these syntaxes.</li>
-    <li>An axiom schema does contain either at least one symbol-placeholder symbol, or at least one placeholder symbol.</li>
+    <li>An axiom schema contains at least one symbol-placeholder symbol or placeholder symbol.</li>
     <li>We take any capital letter of the English alphabet, to be a placeholder-syntax symbol (formally, 26 axioms).</li>
     <li>A placeholder symbol may be replaced, by a non-empty sequence of formal words.</li>
     <li>A symbol-placeholder symbol may be replaced, by a single formal word.</li>
 </ul>
 <table align="center">
-    <tr><th colspan="2">Axioms for syntax</th></tr>
-    <tr><td align="center" colspan="2">_ is a symbol-placeholder-syntax symbol</td></tr>
+    <tr><th colspan="3">Axioms for syntax</th></tr>
+    <tr><td align="center" colspan="3">_ is a symbol-placeholder-syntax symbol</td></tr>
     <tr><td align="right">( )</td><td align="left">&nbsp;is a balanced symbol pair</td></tr>
     <tr><td align="right">:=</td><td align="left">&nbsp;is a binary infix symbol</td></tr>
     <tr><td align="right">&#9500;</td><td align="left">&nbsp;is a binary infix symbol</td></tr>
     <tr><td align="right">&#9500;</td><td align="left">&nbsp;is a unary prefix symbol</td></tr>
     <tr><td align="right">&</td><td align="left">&nbsp;is a binary infix symbol</td></tr>
     <tr><td align="right">,</td><td align="left">&nbsp;is a binary infix symbol</td></tr>
-    <tr><th colspan="2">Axiom schemas for symbol syntax</th></tr>
+    <tr><th colspan="3">Axiom schemas for symbol syntax</th></tr>
     <tr><td align="right">_ is a binary infix symbol &#9500;&nbsp;</td><td align="left">_<sub>A</sub> is a binary infix symbol</td><td></td></tr>
     <tr><td align="right">_ is a postfix symbol &#9500;&nbsp;</td><td align="left">_<sub>A</sub> is a postfix symbol</td><td></td></tr>
     <tr><td align="right">_ is a prefix symbol &#9500;&nbsp;</td><td align="left">_<sub>A</sub> is a prefix symbol</td><td></td></tr>
     <tr><td align="right">_ is a symbol-placeholder-syntax symbol &#9500;&nbsp;</td><td align="left">_<sub>A</sub> is a symbol-placeholder-syntax symbol</td><td></td></tr>
     <tr><td align="right">_ is a placeholder-syntax symbol &#9500;&nbsp;</td><td align="left">_<sub>A</sub> is a placeholder-syntax symbol</td><td></td></tr>
     <tr><td align="right">_<sub>1</sub> _<sub>2</sub> is a balanced symbol pair &#9500;&nbsp;</td><td align="left">_<sub>1<sub>A</sub></sub> _<sub>2<sub>A</sub></sub> is a balanced symbol pair</td><td></td></tr>
-    <tr><th colspan="2">Axiom schemas with rationale W2</th></tr>
+    <tr><th colspan="3">Axiom schemas with rationale W2</th></tr>
     <tr><td align="right">(&#9500; Q) &#9500;&nbsp;</td><td align="left">Q</td><td></td></tr>
     <tr><td align="right">A &#9500;&nbsp;</td><td align="left">A</td><td>identity axiom</td></tr>
     <tr><td align="right">A, B &#9500; C :=&nbsp;</td><td align="left">A & B &#9500; C</td><td>definition of 2-ary &#9500;</td></tr>
-    <tr><td align="right">(P &#9500; Q), P &#9500;&nbsp;</td><td align="left">Q</td><td><i>modus ponens</i> for &#9500;</td></tr>
-    <tr><th colspan="2">Defining prefix notation</th></tr>
-    <tr><td align="right"> _ is a binary infix symbol &#9500;&nbsp;</td><td align="left">(modus ponens for _ := ((P _ Q), P &#9500; Q))</td><td></td></tr>
+    <tr><td align="right">(P &#9500; Q) , P &#9500;&nbsp;</td><td align="left">Q</td><td>modus ponens for &#9500;</td></tr>
+    <tr><th colspan="3">Defining prefix notation</th></tr>
+    <tr><td align="right"> _ is a binary infix symbol &#9500;&nbsp;</td><td align="left">(modus ponens for _ := ( P _ Q ) , P &#9500; Q)</td><td></td></tr>
 </table>
 <table align="right">
     <tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
     <tr><td>(a)</td><td></td><td>P</td><td></td></tr>
     <tr><td>(b)</td><td>P _ Q</td><td></td><td></td></tr>
-    <tr><td>(c)</td><td></td><td>Q</td><td><i>modus ponens</i> for _; (b) and (a)</td></tr>
+    <tr><td>(c)</td><td></td><td>Q</td><td>modus ponens for _; (b) and (a)</td></tr>
 </table>
 <table align="left">
     <tr><th></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
     <tr><td>(a)</td><td>P _ Q</td><td></td><td></td></tr>
     <tr><td>(b)</td><td></td><td>P</td><td></td></tr>
-    <tr><td>(c)</td><td></td><td>Q</td><td><i>modus ponens</i> for _; (a) and (b)</td></tr>
+    <tr><td>(c)</td><td></td><td>Q</td><td>modus ponens for _; (a) and (b)</td></tr>
 </table>
-<p style="clear:both">We also introduce Gentzen format schemata, for using 2-ary &#9500; inference rules.  <i>modus ponens</i> is an important special case.</p>
+<p style="clear:both">We also introduce Gentzen-format schemata, for using 2-ary &#9500; inference rules.  An important special case is <i>modus ponens</i>.</p>
 <table align="right">
     <tr><th></th><th>Proposition</th><th>Rationale</th></tr>
     <tr><td>(a)</td><td>B</td><td></td></tr>
-    <tr><td>(b)</td><td>A</td><td></td><td></td></tr>
+    <tr><td>(b)</td><td>A</td><td></td></tr>
     <tr><td>(c)</td><td>C</td><td>A, B &#9500; C; (b) and (a)</td></tr>
 </table>
 <table align="left">
@@ -284,7 +284,7 @@
     <tr><td>(b)</td><td>B</td><td></td></tr>
     <tr><td>(c)</td><td>C</td><td>A, B &#9500; C; (a) and (b)</td></tr>
 </table>
-<p style="clear:both">Finally, we introduce a Gentzen format schema, for syntactical entailment introduction:</p>
+<p style="clear:both">Finally, we introduce a Gentzen-format schema, for syntactical entailment introduction:</p>
 <table align="center" cellspacing="0">
     <tr><th colspan="2"></th><th>Inference Rule</th><th>Proposition</th><th>Rationale</th></tr>
     <tr><td style="border-left: 1px black solid; border-top: 1px black solid"></td><td>(a)</td><td></td><td>A</td><td>Hypothesis</td></tr>
@@ -293,7 +293,7 @@
     <tr><td></td><td>(b+1)</td><td>A &#9500; B</td><td></td><td>&#9500; introduction, (a) and (b)</td></tr>
 </table>
 
-<h2 id="cut_rule" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Cut rule for &#9500;</h2>
+<h2 id="cut-rule" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Cut rule for &#9500;</h2>
 <table align="right" style="clear: right">
         <tr><th>Axioms used</th></tr>
         <tr><td align="left">(P &#9500; Q) , P &#9500; Q</td></tr>
@@ -307,32 +307,32 @@
         <tr><td style="border-left: 1px black solid; border-top: 1px black solid"></td><td>3.</td><td></td><td>P</td><td>Hypothesis</td></tr>
         <tr><td style="border-left: 1px black solid"></td><td>4.</td><td></td><td>Q</td><td>modus ponens for &#9500;; (1) and (3)</td></tr>
         <tr><td style="border-left: 1px black solid; border-bottom: 1px black solid"></td><td>5.</td><td></td><td>R</td><td>modus ponens for &#9500;; (2) and (4)</td></tr>
-        <tr><td></td><td>6.</td><td>P &#9500; R</td><td></td><td>&#9500;-introduction, (3)</td></tr>
+        <tr><td></td><td>6.</td><td>P &#9500; R</td><td></td><td>&#9500; introduction, (3) and (5)</td></tr>
         <tr><th align="center" colspan="5">cut rule for &#9500;</th></tr>
         <tr><th align="center" colspan="5">(P &#9500; Q) , (Q &#9500; R) &#9500; (P &#9500; R)</th></tr>
 </table>
-<p>As a test, I had Franci's GentzenW driver generate this Fitch-style Gentzen format proof of the <i>cut rule for &#9500;</i>.  At this level of
-detail, we do not call out the axioms about placeholder variables and symbol-placeholder variables that are used.  We do explicitly record
-both the definition of modus ponens for binary infix symbols, and that &#9500; itself is a binary infix symbol, as that is used to format
+<p>Franci's GentzenW driver generated the Fitch-style Gentzen-format proof at right, of the <i>cut rule for &#9500;</i>, as its first test case.  At this level of
+detail, we do not call out the axioms about placeholder symbols and symbol-placeholder symbols that are used.  We do explicitly record
+both the definition of <i>modus ponens</i> for binary infix symbols, and that &#9500; itself is a binary infix symbol, since both are needed to render
 the rationales.</p>
 <p>All three of the mentioned axioms are configured in Franci's core.yaml.  As a matter of provability logic, a formal system
-for which <i>cut rule for &#9500;</i> was not provable using typical notation, would need one of the following to not be assumed:</p>
+for which the <i>cut rule for &#9500;</i> were not provable using typical notation, would have to leave at least one of the following unassumed:</p>
 <ul>
-    <li>The notational schema for using inference rules of the syntax <i>A, B &#9500; C</i>,</li>
-    <li>The &#9500; introduction notational schema, or</li>
+    <li>the Gentzen-format schema for using 2-ary &#9500; inference rules, <i>A, B &#9500; C</i>,</li>
+    <li>the Gentzen-format schema for &#9500; introduction, or</li>
     <li>one of the three mentioned axioms.</li>
 </ul>
 <p>The first two assumptions describe procedures enabled by taking physical notation as given.  The axiom</p>
 <center>&#9500; is a binary infix symbol</center>
 <p>both enables parsing the axiom</p>
 <center>(P &#9500; Q) , P &#9500; Q</center>
-<p>, and enables defining the technical English</p>
+<p>and enables defining the technical English phrase</p>
 <center>modus ponens for &#9500;</center>
-<p>with the axiom</p>
+<p>by the axiom:</p>
 <center>_ is a binary infix symbol &#9500; (modus ponens for _ := ( P _ Q ) , P &#9500; Q)</center>
 
 <h2 id="conjunction-elimination" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both; background-color:orange">Conjunction elimination</h2>
-<h2 id="conjunction-introduction" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Conjunction Introduction</h2>
+<h2 id="conjunction-introduction" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Conjunction introduction</h2>
 <table align="right">
     <tr><th></th><th>Inference Rule</th><th>Rationale</th></tr>
     <tr><td>1.</td><td>A & B &#9500; A & B</td><td>(A &#9500; A)[A & B/A]</td></tr>
