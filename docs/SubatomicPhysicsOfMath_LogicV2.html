@@ -183,11 +183,12 @@
 	</ol>
 </span>
 <span style="border: 1px solid black; display:block; float:right">
-	<ol type="I">
+    <ol type="I">
         <li><a href="#back-to-eden">Back to Eden</a></li>
+        <li><a href="#cut_rule">Cut rule for &#9500;</a></li>
         <li><a href="#conjunction-elimination">Conjunction Elimination</a></li>
         <li><a href="#conjunction-introduction">Conjunction Introduction</a></li>
-	</ol>
+    </ol>
 </span>
 <p>Our first formalization of logic and set theory, generally follows the instructions for Von Neumann-Bernays-G&ouml;del set theory.  
     That is, it is a mathematically platonist formalization.  What would a formalization that took non-formalized physical notation as given -- 
@@ -291,7 +292,46 @@
     <tr><td style="border-left: 1px black solid; border-bottom: 1px black solid"></td><td>(b)</td><td></td><td>B</td><td></td></tr>
     <tr><td></td><td>(b+1)</td><td>A &#9500; B</td><td></td><td>&#9500; introduction, (a) and (b)</td></tr>
 </table>
-<h2 id="conjunction-elimination" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Conjunction elimination</h2>
+
+<h2 id="cut_rule" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Cut rule for &#9500;</h2>
+<table align="right" style="clear: right">
+        <tr><th>Axioms used</th></tr>
+        <tr><td align="left">(P &#9500; Q) , P &#9500; Q</td></tr>
+        <tr><td align="left">&#9500; is a binary infix symbol</td></tr>
+        <tr><td align="left">_ is a binary infix symbol &#9500; (modus ponens for _ := ( P _ Q ) , P &#9500; Q)</td></tr>
+</table>
+<table align="right" style="clear: right" cellspacing="0">
+        <tr><th colspan="2"></th><th>Inference rule</th><th>Proposition</th><th>Rationale</th></tr>
+        <tr><td></td><td>1.</td><td>P &#9500; Q</td><td></td><td>Given</td></tr>
+        <tr><td></td><td>2.</td><td>Q &#9500; R</td><td></td><td>Given</td></tr>
+        <tr><td style="border-left: 1px black solid; border-top: 1px black solid"></td><td>3.</td><td></td><td>P</td><td>Hypothesis</td></tr>
+        <tr><td style="border-left: 1px black solid"></td><td>4.</td><td></td><td>Q</td><td>modus ponens for &#9500;; (1) and (3)</td></tr>
+        <tr><td style="border-left: 1px black solid; border-bottom: 1px black solid"></td><td>5.</td><td></td><td>R</td><td>modus ponens for &#9500;; (2) and (4)</td></tr>
+        <tr><td></td><td>6.</td><td>P &#9500; R</td><td></td><td>&#9500;-introduction, (3)</td></tr>
+        <tr><th align="center" colspan="5">cut rule for &#9500;</th></tr>
+        <tr><th align="center" colspan="5">(P &#9500; Q) , (Q &#9500; R) &#9500; (P &#9500; R)</th></tr>
+</table>
+<p>As a test, I had Franci's GentzenW driver generate this Fitch-style Gentzen format proof of the <i>cut rule for &#9500;</i>.  At this level of
+detail, we do not call out the axioms about placeholder variables and symbol-placeholder variables that are used.  We do explicitly record
+both the definition of modus ponens for binary infix symbols, and that &#9500; itself is a binary infix symbol, as that is used to format
+the rationales.</p>
+<p>All three of the mentioned axioms are configured in Franci's core.yaml.  As a matter of provability logic, a formal system
+for which <i>cut rule for &#9500;</i> was not provable using typical notation, would need one of the following to not be assumed:</p>
+<ul>
+    <li>The notational schema for using inference rules of the syntax <i>A, B &#9500; C</i>,</li>
+    <li>The &#9500; introduction notational schema, or</li>
+    <li>one of the three mentioned axioms.</li>
+</ul>
+<p>The first two assumptions describe procedures enabled by taking physical notation as given.  The axiom</p>
+<center>&#9500; is a binary infix symbol</center>
+<p>both enables parsing the axiom</p>
+<center>(P &#9500; Q) , P &#9500; Q</center>
+<p>, and enables defining the technical English</p>
+<center>modus ponens for &#9500;</center>
+<p>with the axiom</p>
+<center>_ is a binary infix symbol &#9500; (modus ponens for _ := ( P _ Q ) , P &#9500; Q)</center>
+
+<h2 id="conjunction-elimination" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both; background-color:orange">Conjunction elimination</h2>
 <h2 id="conjunction-introduction" align="center" style="margin-bottom: 0in; line-height: 100%; font-size: 14px; clear:both">Conjunction Introduction</h2>
 <table align="right">
     <tr><th></th><th>Inference Rule</th><th>Rationale</th></tr>
