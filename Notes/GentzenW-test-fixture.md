@@ -49,11 +49,12 @@ runnable from Visual Studio with minimal ceremony.
 * **YAML comparison**: byte comparison modulo line endings (`cmake -E compare_files
   --ignore-eol`), which is exact because fkYAML serializes deterministically: it
   alphabetizes mapping keys, serializes the proof rows in block form (not the flow form
-  sketched in planning), and writes empty cells as empty scalars.  Deserialize-and-compare
-  was the original preference but **does not work**: the vendored fkYAML cannot
-  deserialize its own output when a plain scalar contains "," (see
-  GentzenW-theorem-table.md).  If the serializer ever changes, regenerate the expected
-  file rather than loosening the comparison.
+  sketched in planning), and writes empty cells as `""` (fkYAML 0.5.0, vendored
+  2026-11-06; 0.4.2 wrote empty scalars).  Deserialize-and-compare was the original
+  preference; with 0.4.2 it did not work (its output wrote `&#9500;`-leading strings as
+  plain scalars, which YAML reads as anchors; see GentzenW-theorem-table.md), with 0.5.0 it
+  would, but byte comparison is simpler and stays.  When the serializer changes, regenerate
+  the expected file rather than loosening the comparison -- as the 0.5.0 migration did.
 
 ## Runner: CTest (ruled 2026-11-02)
 

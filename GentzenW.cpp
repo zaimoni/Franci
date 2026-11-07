@@ -13,7 +13,8 @@
 #include <tuple>
 #include <stacktrace>
 
-// https://github.com/fktn-k/fkYAML; MIT license
+// https://github.com/fktn-k/fkYAML; MIT license.  Single header, 0.5.0 since 2026-11-06
+// (0.4.2 before that: its serializer wrote &-leading strings as plain scalars, i.e. anchors).
 #include "fkYAML/node.hpp"
 
 #include "HTMLtag.hpp"

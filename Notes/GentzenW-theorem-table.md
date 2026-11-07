@@ -16,22 +16,32 @@ Expected output: tests/cut_rule_fitch.html (one scope column; rows 3-5 boxed).
 the generated row 6 of the cut rule reads `&#9500; introduction, (3) and (5)`.  The docs page
 adopts the generated axiom spellings (`(P &#9500; Q) , P &#9500; Q`, `( P _ Q ) , P &#9500; Q`)
 rather than the other way round, and italicizes *modus ponens* in prose only: generated
-tables cannot carry markup yet, a subproject deferred until it is known whether an fkYAML
-upgrade changes anything (it will bite once complex *i* and Euler's *e* are reached).
+tables cannot carry markup yet, a deferred subproject (the 0.5.0 migration below left it
+untouched; it will bite once complex *i* and Euler's *e* are reached).
 
-**fkYAML is pinned at the vendored 0.4.4** (ruled 2026-11-02): 0.5.0 exists, but migrating
-is high-risk and the only consumer that needed the round trip no longer uses it.
+**fkYAML migrated from the vendored 0.4.2 to 0.5.0 (2026-11-06).**  The 2026-11-02 pin ruling
+named 0.4.4, but the header stamp was 0.4.2.  Trialled first in a scratch copy of the tree:
+GentzenW compiles unchanged (none of the APIs 0.5.0 removed were in use), and the smoke,
+cut-rule, HTML-differential and malformed-probe runs are byte-identical.  The one visible
+change is the serializer: scalars that are not legal plain scalars are double-quoted and
+empty cells are written as `""`, so tests/cut_rule.theorem.yaml was regenerated; TheoremTable
+reads both forms and its expected HTML did not change.
 
-**Implementation deviation from this spec: no fkYAML.**  The vendored fkYAML 0.4.4's lexer
-treats the "," inside a plain scalar such as `(P &#9500; Q) , P &#9500; Q` as a
-flow-sequence separator and asserts (`m_flow_context_depth > 0`, node.hpp ~8111), so it
-cannot read back what its own serializer wrote (core.yaml avoids this only because its
-comma-bearing axioms are double-quoted).  TheoremTable therefore reads the writer's fixed
-subset directly: a `theorem:` mapping with keys in any order, block sequences, plain or
-double-quoted scalars, `- ` with nothing after for an empty cell.  About 80 lines, and
-the tool now has no dependencies at all.  Consequence for the fixture note: its
-"deserialize-and-compare" advice does not work with this fkYAML; byte comparison modulo
-line endings is what the tests do, which is exact because the serializer is deterministic.
+**Implementation deviation from this spec: no fkYAML.**  The diagnosis recorded on
+2026-11-02 -- that the lexer choked on the "," inside a plain scalar such as
+`(P &#9500; Q) , P &#9500; Q` -- was wrong; those commas always parsed.  The 0.4.2
+serializer wrote strings beginning with `&` (every cell starting with `&#9500;`) as plain
+scalars, which YAML reads as anchors: lossy on read-back (`&#9500; is a binary infix
+symbol` came back as `is a binary infix symbol`), and an assertion
+(`m_flow_context_depth > 0`, 0.4.2 node.hpp 8111) when a "," followed the anchor name, as
+in the old `&#9500;-introduction, (3)`.  0.5.0 quotes such strings and reads its own output
+losslessly (it throws parse_error on the old files instead of asserting).  TheoremTable
+nevertheless keeps its own reader of the writer's fixed subset: a `theorem:` mapping with
+keys in any order, block sequences, plain or double-quoted scalars, `- ` with nothing after
+or `- ""` for an empty cell.  About 80 lines, and the tool has no dependencies at all,
+which is worth more than the lines.  Consequence for the fixture note: byte comparison
+modulo line endings is what the tests do, exact because the serializer is deterministic;
+deserialize-and-compare would work with 0.5.0 but is not needed.
 
 ## Purpose
 
@@ -44,27 +54,31 @@ hand transcription.  It is also the natural consumer for the deferred regression
 
 ## Input: the theorem file as actually written
 
-fkYAML serializes it with alphabetized keys, block-form sequences, and empty cells as
-empty scalars (which round-trip as **null, not ""**; see the fixture note).  Shape:
+fkYAML 0.5.0 serializes it with alphabetized keys, block-form sequences, double quotes
+around any scalar that is not a legal plain scalar (a leading `&`, a `,` or `;`), and
+empty cells as `""`.  (0.4.2 wrote everything plain and empty cells as empty scalars, which
+read back as null.)  Shape, as of 2026-11-06:
 
 ```yaml
 theorem:
   axioms:
-    - (P &#9500; Q) , P &#9500; Q
-    - _ is a binary infix symbol &#9500; (modus ponens for _ := ( P _ Q ) , P &#9500; Q)
-  name: cut rule for &#9500;
+    - "(P &#9500; Q) , P &#9500; Q"
+    - "&#9500; is a binary infix symbol"
+    - "_ is a binary infix symbol &#9500; (modus ponens for _ := ( P _ Q ) , P &#9500; Q)"
+  name: "cut rule for &#9500;"
   proof:
     -
       - "1."
-      - P &#9500; Q      # inference-rule column
-      -                  # proposition column (empty)
+      - "P &#9500; Q"    # inference-rule column
+      - ""               # proposition column (empty)
       - Given            # rationale
+      - 0                # hypothesis nesting depth (Fitch modification)
     - ...
-  result: (P &#9500; Q) , (Q &#9500; R) &#9500; (P &#9500; R)
+  result: "(P &#9500; Q) , (Q &#9500; R) &#9500; (P &#9500; R)"
 ```
 
-Each proof row is exactly four cells: row label, inference-rule column, proposition
-column, rationale.  Exactly one of the two middle cells is non-empty (the writer's
+Each proof row is four cells plus the depth: row label, inference-rule column,
+proposition column, rationale.  Exactly one of the two middle cells is non-empty (the writer's
 `is_entailment_statement` classifier decides which).  Row labels inside rationales are
 already rewritten to `(n)` form by `rewrite_labels`; the tool does no label work.
 Notation is stored with HTML entities verbatim (`&#9500;`), as the docs pages are.

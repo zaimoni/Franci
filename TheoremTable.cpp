@@ -3,14 +3,16 @@
 // Specification: Notes/GentzenW-theorem-table.md.  The file format is the only contract
 // with GentzenW; nothing here depends on it, on Zaimoni.STL, or on fkYAML.
 //
-// Why not fkYAML: the vendored version's lexer treats the "," inside a plain scalar such
-// as "(P &#9500; Q) , P &#9500; Q" as a flow-sequence separator and asserts
-// (m_flow_context_depth > 0), so it cannot read back what its own serializer wrote.  The
-// writer's output is a small, fixed YAML subset, read here directly: a "theorem:" mapping
-// with keys axioms (block sequence of scalars), name, proof (block sequence of four- or
-// five-cell block sequences: the fifth cell, when present, is the hypothesis nesting depth
-// the Fitch rendering draws) and result; scalars plain or double-quoted; empty cells as
-// "- " with nothing after.  Keys may come in any order.
+// Why not fkYAML: no dependency at all is worth more than the 80 lines, and the vendored
+// 0.4.2 wrote strings beginning with "&" (every &#9500;-leading cell) as plain scalars,
+// which YAML reads as anchors -- lossy on read-back, and an assertion when a "," followed
+// the anchor name.  fkYAML 0.5.0 (vendored 2026-11-06) double-quotes such strings; this
+// reader accepts both forms.  The writer's output is a small, fixed YAML subset, read here
+// directly: a "theorem:" mapping with keys axioms (block sequence of scalars), name, proof
+// (block sequence of four- or five-cell block sequences: the fifth cell, when present, is
+// the hypothesis nesting depth the Fitch rendering draws) and result; scalars plain or
+// double-quoted; empty cells as "- " with nothing after or as "".  Keys may come in any
+// order.
 
 #include <algorithm>
 #include <array>
